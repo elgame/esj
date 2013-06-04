@@ -1,0 +1,72 @@
+/*!
+ * Miscellaneous Bootstrap y definidos por el usuario
+ *
+ * Clases CSS predefinidas que hacen una funcion espesifica
+ * utilerias para asignar a los objetos
+ */
+
+/*!
+ * ********* Bootstrap ***************
+ *.clearfix <--float: right-->  /limpia los floar de cualquier elemento/
+ *
+ *.pull-right <--float: right-->  /flota a la derecha/
+ *
+ *.pull-left <--float: left-->  /flota a la izquierda/
+ *
+ *.hide <--display: none-->  /oculta un elemento/
+ *
+ *.show <--display: block-->  /muestra un elemento/
+ *
+ *.invisible <--visibility: hidden-->  /pone invisible al elemento/
+ *
+ *.affix <--position: fixed-->  /posicion fija del elemento/
+ */
+
+/************ Usuario *************/
+/* Alinear texto */
+.tacenter{ /*centrar*/
+  text-align: center;
+}
+.taright{ /*derecha*/
+  text-align: right;
+}
+.taleft{ /*izquierda*/
+  text-align: left;
+}
+
+/*centra un contenido*/
+div.center, p.center,
+img.center, span.center{
+  margin-left: auto !important;
+  margin-right: auto !important;
+  float: none !important;
+  display: block;
+  text-align: center;
+}
+
+/*Margenes*/
+.mall{
+  margin: 10px;
+}
+.mleft{
+  margin-left: 10px;
+}
+.mright{
+  margin-right: 10px;
+}
+.mtop{
+  margin-top: 10px;
+}
+.mbottom{
+  margin-bottom: 10px;
+}
+.mquit{
+  margin-left: 0px !important;
+}
+.nomarg{
+  margin: 0 !important;
+}
+/*paddings*/
+.nopadd{
+  padding: 0 !important;
+}

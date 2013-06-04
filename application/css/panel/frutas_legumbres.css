@@ -1,0 +1,13 @@
+.only_cheques.hide{
+  display: none !important;
+}
+
+
+/** banco estado cuenta ***/
+tr.conceptos_reales td{
+	border-left: none;
+	background-color: #CEFFD1 !important;
+}
+tr.show_consr{
+	cursor: pointer;
+}

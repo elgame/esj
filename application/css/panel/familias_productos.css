@@ -1,0 +1,57 @@
+/*#prodic_familias > .linksm, #produc_productos .frmfiltros > .linksm{
+	float: right;
+	color:#1E70F9;
+	font-size: .8em;
+	margin: 0px 10px 3px 0px;
+	text-decoration: none;
+}
+#produc_productos .frmfiltros > .linksm{
+	padding-top: 8px;
+}
+#prodic_familias > .linksm:hover, #produc_productos .frmfiltros > .linksm:hover{
+	text-decoration: underline;
+}
+
+#prodic_familias .tblListados tr.fams:hover{
+	background-color: #DEEDD3;
+	cursor: pointer;
+}
+
+
+#superbox p.close{
+	display: none;
+}
+#superbox #superbox-innerbox{
+	padding: 0;
+}*/
+
+
+
+/*** Form add productos ***/
+.products_cosns fieldset{
+	font-size: .85em;
+	border:1px #ddd solid;
+}
+.btnaddpro, .btnquitpro{
+	position: relative;
+	top: -204px;
+	left: -6px;
+	color:#1E70F9;
+	font-weight: bold;
+	text-decoration: none;
+	cursor: pointer;
+}
+.btnaddpro:hover, .btnquitpro:hover{
+	text-decoration: underline;
+}
+.btnquitpro{
+	top: -150px;
+	left: -46px;
+}
+
+#tbl-pr tr.tractiva-pr, #tbl-pr tr.tractiva-pr:hover, 
+#tbl-pl tr.tractiva-pl, #tbl-pl tr.tractiva-pl:hover{
+	background-color: #DD4B39;
+}
+
+
