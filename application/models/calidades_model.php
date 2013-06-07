@@ -33,12 +33,12 @@ class calidades_model extends CI_Model {
 		if($id_area!=null)
 			$sql .= ($sql==''? 'WHERE': ' AND')." id_area = '".$id_area."'";
 
-		$query = BDUtil::pagination("
+		$str_query = "
 				SELECT id_calidad, id_area, nombre, precio_compra, status
 				FROM calidades
 				".$sql."
 				ORDER BY nombre ASC
-				", $params, true);
+				";
 		if($paginados){
 			$query = BDUtil::pagination($str_query, $params, true);
 			$res = $this->db->query($query['query']);
