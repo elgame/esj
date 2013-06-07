@@ -39,7 +39,11 @@ class clasificaciones_model extends CI_Model {
 				".$sql."
 				ORDER BY nombre ASC
 				", $params, true);
-		$res = $this->db->query($query['query']);
+		if($paginados){
+			$query = BDUtil::pagination($str_query, $params, true);
+			$res = $this->db->query($query['query']);
+		}else
+			$res = $this->db->query($str_query);
 
 		$response = array(
 				'clasificaciones'=> array(),
