@@ -182,16 +182,61 @@ class Usuarios extends MY_Controller {
 		$rules = array(
 							array('field' => 'fnombre',
 										'label' => 'Nombre',
-										'rules' => 'required|max_length[110]'),
-							array('field' => 'ftipo',
-										'label' => 'Tipo de Usuario',
-										'rules' => 'required'),
+										'rules' => 'required|max_length[90]'),
+							array('field' => 'fapellido_paterno',
+										'label' => 'Apellido paterno',
+										'rules' => 'max_length[25]'),
+							array('field' => 'fapellido_materno',
+										'label' => 'Apellido materno',
+										'rules' => 'max_length[25]'),
+
+							array('field' => 'fcalle',
+										'label' => 'Calle',
+										'rules' => 'max_length[60]'),
+							array('field' => 'fnumero',
+										'label' => 'Numero',
+										'rules' => 'max_length[7]'),
+							array('field' => 'fcolonia',
+										'label' => 'Colonia',
+										'rules' => 'max_length[60]'),
+							array('field' => 'fmunicipio',
+										'label' => 'Municipio',
+										'rules' => 'max_length[45]'),
+							array('field' => 'festado',
+										'label' => 'Estado',
+										'rules' => 'max_length[45]'),
+							array('field' => 'fcp',
+										'label' => 'Codigo postal',
+										'rules' => 'max_length[12]'),
+
 							array('field' => 'dprivilegios[]',
 										'label' => 'Privilegios',
 										'rules' => 'is_natural_no_zero'),
+
+							array('field' => 'ffecha_nacimiento',
+										'label' => 'Fecha de nacimiento',
+										'rules' => 'max_length[25]'),
+							array('field' => 'ffecha_entrada',
+										'label' => 'Fecha de entrada',
+										'rules' => 'max_length[25]'),
+							array('field' => 'ffecha_salida',
+										'label' => 'Fecha de salida',
+										'rules' => 'max_length[25]'),
+							array('field' => 'fnacionalidad',
+										'label' => 'Nacionalidad',
+										'rules' => 'max_length[20]'),
+							array('field' => 'festado_civil',
+										'label' => 'Estado civil',
+										'rules' => 'max_length[15]'),
+							array('field' => 'fsexo',
+										'label' => 'Sexo',
+										'rules' => 'max_length[1]'),
 							array('field' => 'femail',
 										'label' => 'Email',
 										'rules' => 'max_length[70]'),
+							array('field' => 'fcuenta_cpi',
+										'label' => 'Cuenta contpaqi',
+										'rules' => 'max_length[12]'),
 		);
 
 		if ($accion == 'agregar')
@@ -201,7 +246,7 @@ class Usuarios extends MY_Controller {
 												'rules' => 'required|max_length[32]');
 			$rules[] = 	array('field' => 'fusuario',
 												'label' => 'Usuario',
-												'rules' => 'required|max_length[10]|is_unique[usuarios.usuario]');
+												'rules' => 'required|max_length[30]|is_unique[usuarios.usuario]');
 		}
 		else
 		{
@@ -210,7 +255,7 @@ class Usuarios extends MY_Controller {
 												'rules' => 'max_length[32]');
 			$rules[] = 	array('field' => 'fusuario',
 												'label' => 'Usuario',
-												'rules' => 'required|max_length[10]|callback_valida_email');
+												'rules' => 'required|max_length[30]|callback_valida_email');
 		}
 
 		$this->form_validation->set_rules($rules);
@@ -219,7 +264,7 @@ class Usuarios extends MY_Controller {
 
 	public function valida_email($email)
 	{
-		if (!$this->usuarios_model->valida_email('usuarios', array('id'=>$_GET['id'], 'usuario'=>$email))) {
+		if ($this->usuarios_model->valida_email('usuarios', array('id !='=>$_GET['id'], 'usuario'=>$email))) {
 			$this->form_validation->set_message('valida_email', 'El %s no esta disponible, intenta con otro.');
 			return FALSE;
 		}

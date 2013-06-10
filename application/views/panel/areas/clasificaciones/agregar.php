@@ -38,21 +38,21 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">
                   <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11" 
                   value="<?php echo set_value('fprecio_venta'); ?>" required placeholder="4.4, 33">
                 </div>
-              </div>
+              </div> -->
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
                   <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11" 
                   value="<?php echo set_value('fcuenta_cpi'); ?>" required placeholder="123212, 332123">
                 </div>
-              </div>
+              </div> -->
 
               <input type="hidden" name="farea" id="farea" value="<?php echo $this->input->get('id'); ?>">
 

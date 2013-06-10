@@ -1,0 +1,5 @@
+
+Cambis BD:
+  ☐ tabla usuarios:
+      campo tipo, cambiar default a 'admin'
+      campo usuario, cambiar a 30 caracteres

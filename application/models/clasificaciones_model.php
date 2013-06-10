@@ -70,7 +70,7 @@ class clasificaciones_model extends CI_Model {
 			$data = array(
 						'id_area'      => $this->input->post('farea'),
 						'nombre'       => $this->input->post('fnombre'),
-						'precio_venta' => $this->input->post('fprecio_venta'),
+						// 'precio_venta' => $this->input->post('fprecio_venta'),
 						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
 						);
 		}
