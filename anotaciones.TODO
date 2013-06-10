@@ -1,0 +1,7 @@
+
+Cambis BD:
+  ☐ tabla usuarios:
+      campo tipo, cambiar default a 'admin'
+      campo usuario, cambiar a 30 caracteres
+      COMMENT ON COLUMN clasificaciones.precio_venta IS 'NO USADO';
+      COMMENT ON COLUMN clasificaciones.cuenta_cpi IS 'NO USADO, cuenta afectable del contpaqi';

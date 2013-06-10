@@ -38,13 +38,13 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">
                   <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11" 
                   value="<?php echo (isset($data['info']->precio_venta)? $data['info']->precio_venta: ''); ?>" required placeholder="4.4, 33">
                 </div>
-              </div>
+              </div> -->
 
               <div class="control-group tipo3">
                 <label class="control-label" for="farea">Area </label>
@@ -60,13 +60,13 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
                   <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11" 
                   value="<?php echo (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: ''); ?>" required placeholder="4.4, 33">
                 </div>
-              </div>
+              </div> -->
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Guardar</button>

@@ -47,9 +47,9 @@ class clasificaciones_model extends CI_Model {
 
 		$response = array(
 				'clasificaciones'=> array(),
-				'total_rows'     => $query['total_rows'],
-				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
+				'total_rows'     => (isset($query['total_rows'])? $query['total_rows']: ''),
+				'items_per_page' => (isset($params['result_items_per_page'])? $params['result_items_per_page']: ''),
+				'result_page'    => (isset($params['result_page'])? $params['result_page']: '')
 		);
 		if($res->num_rows() > 0){
 			$response['clasificaciones'] = $res->result();
@@ -70,7 +70,7 @@ class clasificaciones_model extends CI_Model {
 			$data = array(
 						'id_area'      => $this->input->post('farea'),
 						'nombre'       => $this->input->post('fnombre'),
-						'precio_venta' => $this->input->post('fprecio_venta'),
+						// 'precio_venta' => $this->input->post('fprecio_venta'),
 						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
 						);
 		}

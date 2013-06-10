@@ -3,8 +3,8 @@
                 <thead>
                   <tr>
                     <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Cuenta</th>
+                    <!-- <th>Precio</th> -->
+                    <!-- <th>Cuenta</th> -->
                     <th>Estatus</th>
                     <th>Opc</th>
                   </tr>
@@ -15,8 +15,8 @@
                 ?>
                   <tr>
                     <td><?php echo $clasificacion->nombre; ?></td>
-                    <td><?php echo $clasificacion->precio_venta; ?></td>
-                    <td><?php echo $clasificacion->cuenta_cpi; ?></td>
+                    <!-- <td><?php echo $clasificacion->precio_venta; ?></td> -->
+                    <!-- <td><?php echo $clasificacion->cuenta_cpi; ?></td> -->
                     <td>
                       <?php
                         if($clasificacion->status == 't'){

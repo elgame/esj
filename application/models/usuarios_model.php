@@ -57,25 +57,31 @@ class Usuarios_model extends privilegios_model {
 	public function setRegistro($data=NULL)
 	{
 
-		if ($data!=NULL)
+		if ($data == NULL)
 		{
 			$data = array(
-						'nombre'   => $data['nombre'],
-						'usuario'  => $data['usuario'],
-						'email'    => $data['email'],
-						'password' => $data['password'],
-						'tipo'     => $data['tipo'],
-						);
-			$data_privilegios = $data['privilegios'];
-		}
-		else
-		{
-			$data = array(
-						'nombre'   => $this->input->post('fnombre'),
-						'usuario'  => $this->input->post('fusuario'),
-						'email'    => $this->input->post('femail'),
-						'password' => $this->input->post('fpass'),
-						'tipo'     => $this->input->post('ftipo'));
+						'nombre'           => $this->input->post('fnombre'),
+						'apellido_paterno' => $this->input->post('fapellido_paterno'),
+						'apellido_materno' => $this->input->post('fapellido_paterno'),
+						'usuario'          => $this->input->post('fusuario'),
+						'password'         => $this->input->post('fpass'),
+						
+						'calle'            => $this->input->post('fcalle'),
+						'numero'           => $this->input->post('fnumero'),
+						'colonia'          => $this->input->post('fcolonia'),
+						'municipio'        => $this->input->post('fmunicipio'),
+						'estado'           => $this->input->post('festado'),
+						'cp'               => $this->input->post('fcp'),
+						
+						'fecha_nacimiento' => $this->input->post('ffecha_nacimiento'),
+						'fecha_entrada'    => $this->input->post('ffecha_entrada'),
+						'fecha_salida'     => $this->input->post('ffecha_salida'),
+						'nacionalidad'     => $this->input->post('fnacionalidad'),
+						'estado_civil'     => $this->input->post('festado_civil'),
+						'sexo'             => $this->input->post('fsexo'),
+						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
+						'email'            => $this->input->post('femail'),
+					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
@@ -100,25 +106,31 @@ class Usuarios_model extends privilegios_model {
 	public function modificar_usuario($id_usuario, $data=NULL)
 	{
 
-		if ($data!=NULL)
+		if ($data == NULL)
 		{
 			$data = array(
-						'nombre'   => $data['nombre'],
-						'usuario'  => $data['usuario'],
-						'email'    => $data['email'],
-						'password' => $data['password'],
-						'tipo'     => $data['tipo'],
-						);
-			$data_privilegios = $data['privilegios'];
-		}
-		else
-		{
-			$data = array(
-						'nombre'   => $this->input->post('fnombre'),
-						'usuario'  => $this->input->post('fusuario'),
-						'email'    => $this->input->post('femail'),
-						'password' => $this->input->post('fpass'),
-						'tipo'     => $this->input->post('ftipo'));
+						'nombre'           => $this->input->post('fnombre'),
+						'apellido_paterno' => $this->input->post('fapellido_paterno'),
+						'apellido_materno' => $this->input->post('fapellido_paterno'),
+						'usuario'          => $this->input->post('fusuario'),
+						'password'         => $this->input->post('fpass'),
+						
+						'calle'            => $this->input->post('fcalle'),
+						'numero'           => $this->input->post('fnumero'),
+						'colonia'          => $this->input->post('fcolonia'),
+						'municipio'        => $this->input->post('fmunicipio'),
+						'estado'           => $this->input->post('festado'),
+						'cp'               => $this->input->post('fcp'),
+						
+						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
+						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
+						'fecha_salida'     => ($this->input->post('ffecha_salida')!=''? $this->input->post('ffecha_salida'): NULL),
+						'nacionalidad'     => $this->input->post('fnacionalidad'),
+						'estado_civil'     => $this->input->post('festado_civil'),
+						'sexo'             => $this->input->post('fsexo'),
+						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
+						'email'            => $this->input->post('femail'),
+					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
@@ -148,8 +160,11 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = (isset($_GET['id']))?$_GET['id']:$id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status" )
-												->from("usuarios u")
+		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status, 
+						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
+						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada, 
+						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi" )
+ 												->from("usuarios u")
 												->where("id", $id_usuario)
 												->get();
 		$data['info'] = array();
@@ -179,7 +194,7 @@ class Usuarios_model extends privilegios_model {
 	 */
 	public function eliminar_usuario($id_usuario)
 	{
-		$this->db->update('usuarios', array('status' => 0), array('id' => $id_usuario));
+		$this->db->update('usuarios', array('status' => 'f'), array('id' => $id_usuario));
 		return TRUE;
 	}
 
@@ -188,7 +203,7 @@ class Usuarios_model extends privilegios_model {
 	 */
 	public function activar_usuario($id_usuario)
 	{
-		$this->db->update('usuarios', array('status' => 1), array('id' => $id_usuario));
+		$this->db->update('usuarios', array('status' => 't'), array('id' => $id_usuario));
 		return TRUE;
 	}
 
