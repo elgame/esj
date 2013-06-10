@@ -78,7 +78,7 @@ class empresas_model extends CI_Model{
 				return array(false, $upload_res[1]);
 			$path_img = APPPATH.'images/empresas/'.$upload_res[1]['file_name'];
 		}
-		
+
 		$data = array(
 			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
 			'calle'          => $this->input->post('dcalle'),
@@ -122,7 +122,7 @@ class empresas_model extends CI_Model{
 				UploadFiles::deleteFile($path_img);
 			$path_img = APPPATH.'images/empresas/'.$upload_res[1]['file_name'];
 		}
-		
+
 		$data = array(
 			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
 			'calle'          => $this->input->post('dcalle'),
@@ -156,14 +156,14 @@ class empresas_model extends CI_Model{
 
 
 	/**
-	 * Obtiene el listado de clientes para usar ajax
+	 * Obtiene el listado de empresas para usar en peticiones Ajax.
 	 */
 	public function getEmpresasAjax(){
 		$sql = '';
 		$res = $this->db->query("
-				SELECT id_empresa, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, cp, rfc
+				SELECT id_empresa, nombre_fiscal
 				FROM empresas
-				WHERE status = 'ac' AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+				WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
 				ORDER BY nombre_fiscal ASC
 				LIMIT 20");
 

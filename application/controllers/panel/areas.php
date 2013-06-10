@@ -131,10 +131,10 @@ class areas extends MY_Controller {
 			}
 
 			$params['data']                 = $this->areas_model->getAreaInfo($_GET['id']);
-			
+
 			$params['calidades']            = $this->calidades_model->getCalidades($_GET['id']);
 			$params['html_calidades']       = $this->load->view('panel/areas/calidades/admin', $params, true);
-			
+
 			$params['clasificaciones']      = $this->clasificaciones_model->getClasificaciones($_GET['id']);
 			$params['html_clasificaciones'] = $this->load->view('panel/areas/clasificaciones/admin', $params, true);
 

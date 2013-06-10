@@ -25,7 +25,8 @@
 	<![endif]-->
 
 <script type="text/javascript" charset="UTF-8">
-	var base_url = "<?php echo base_url();?>";
+  var base_url = "<?php echo base_url();?>",
+      base_url_bascula = "<?php echo $this->config->item('base_url_bascula');?>";
 </script>
 </head>
 <body>
@@ -39,11 +40,11 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</a>
-				
-				<a class="brand" href="<?php echo base_url('panel/home/'); ?>"> 
+
+				<a class="brand" href="<?php echo base_url('panel/home/'); ?>">
 					<img alt="logo" src="<?php echo base_url('application/images/logo.png'); ?>" height="54">
 					<span>
-						
+
 					</span>
 				</a>
 
@@ -61,7 +62,7 @@
 					</div>
 					<!-- user dropdown ends -->
 			<?php } ?>
-			
+
 					<div style="clear: both;"></div>
 					<div class="brand2 pull-right">
 						<?php echo $seo['titulo'];?>
