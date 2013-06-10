@@ -47,9 +47,9 @@ class calidades_model extends CI_Model {
 
 		$response = array(
 				'calidades'      => array(),
-				'total_rows'     => $query['total_rows'],
-				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
+				'total_rows'     => (isset($query['total_rows'])? $query['total_rows']: ''),
+				'items_per_page' => (isset($params['result_items_per_page'])? $params['result_items_per_page']: ''),
+				'result_page'    => (isset($params['result_page'])? $params['result_page']: '')
 		);
 		if($res->num_rows() > 0){
 			$response['calidades'] = $res->result();
