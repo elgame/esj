@@ -22,27 +22,45 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/areas/'); ?>" method="get" class="form-search">
+            <form action="<?php echo base_url('panel/bascula/'); ?>" method="get" class="form-search">
               <fieldset>
                 <legend>Filtros</legend>
 
                 <label for="fnombre">Buscar</label>
                 <input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
-                  class="input-large search-query" placeholder="Limon, Insumos" autofocus> |
+                  class="input-xlarge search-query" placeholder="Folio, Proveedor, Chofer, Camion, Placas" autofocus> |
 
-                <label for="fstatus">Estado</label>
-                <select name="fstatus" id="fstatus">
-                  <option value="t" <?php echo set_select('fstatus', 't', false, $this->input->get('fstatus')); ?>>ACTIVOS</option>
-                  <option value="f" <?php echo set_select('fstatus', 'f', false, $this->input->get('fstatus')); ?>>ELIMINADOS</option>
-                  <option value="todos" <?php echo set_select('fstatus', 'todos', false, $this->input->get('fstatus')); ?>>TODOS</option>
+                <label for="farea">Area</label>
+                <select name="farea" class="input-medium" id="farea">
+                  <option value=""></option>
+                  <?php foreach ($areas['areas'] as $area){ ?>
+                    <option value="<?php echo $area->id_area ?>"
+                      <?php echo set_select('farea', $area->id_area, false, $this->input->get('farea')) ?>><?php echo $area->nombre ?></option>
+                  <?php } ?>
                 </select>
 
-                <label for="ftipo">Tipo</label>
-                <select name="ftipo" id="ftipo">
-                  <option value="todos" <?php echo set_select('ftipo', 'todos', false, $this->input->get('ftipo')); ?>>TODOS</option>
-                  <option value="in" <?php echo set_select('ftipo', 'in', false, $this->input->get('ftipo')); ?>>INSUMOS</option>
-                  <option value="fr" <?php echo set_select('ftipo', 'fr', false, $this->input->get('ftipo')); ?>>FRUTA</option>
+                <label for="ftipob">Tipo</label>
+                <select name="ftipob" class="input-medium" id="ftipob">
+                  <option value="todos" <?php echo set_select('ftipob', 'todos', false, $this->input->get('ftipob')); ?>>TODOS</option>
+                  <option value="en" <?php echo set_select('ftipob', 'en', false, $this->input->get('ftipob')); ?>>ENTRADA</option>
+                  <option value="sa" <?php echo set_select('ftipob', 'sa', false, $this->input->get('ftipob')); ?>>SALIDA</option>
                 </select>
+
+                <label for="fstatusb">Estado</label>
+                <select name="fstatusb" class="input-medium" id="fstatusb">
+                  <option value="t" <?php echo set_select('fstatusb', 't', false, $this->input->get('fstatusb')); ?>>ACTIVOS</option>
+                  <option value="f" <?php echo set_select('fstatusb', 'f', false, $this->input->get('fstatusb')); ?>>CANCELADOS</option>
+                  <option value="todos" <?php echo set_select('fstatusb', 'todos', false, $this->input->get('fstatusb')); ?>>TODOS</option>
+                </select>
+
+                <br>
+                <br>
+
+                <label for="fstatusb">Del</label>
+                <input type="text" name="fechaini" class="input-medium" id="fechaini" value="<?php echo set_value_get('fechaini') ?>" placeholder="">
+
+                <label for="fstatusb">Al</label>
+                <input type="text" name="fechaend" class="input-medium" id="fechaend" value="<?php echo set_value_get('fechaend') ?>" placeholder="">
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
               </fieldset>
@@ -71,7 +89,7 @@
               <tbody>
             <?php foreach($basculas['basculas'] as $b){ ?>
               <tr>
-                <td><?php echo substr($b->fecha, 0, 19); ?></td>
+                <td><?php echo substr($b->fecha, 0, 16); ?></td>
                 <td>
                   <?php
                     if($b->tipo == 'en'){
@@ -96,16 +114,16 @@
                         'btn_type' => 'btn-success')
                     );
                     if ($b->status == 't') {
-                      echo $this->usuarios_model->getLinkPrivSm('bascula/eliminar/', array(
+                      echo $this->usuarios_model->getLinkPrivSm('bascula/cancelar/', array(
                           'params'   => 'id='.$b->id_bascula,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar la bascula?', 'areas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de cancelar la bascula?', 'bascula', this); return false;"))
                       );
                     }else{
                       echo $this->usuarios_model->getLinkPrivSm('bascula/activar/', array(
                           'params'   => 'id='.$b->id_bascula,
-                          'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el area?', 'areas', this); return false;"))
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar la bascula?', 'bascula', this); return false;"))
                       );
                     }
 

@@ -32,5 +32,15 @@
 
   <?php echo $template ?>
 
+  <?php if ($closeModal) { ?>
+    <script>
+    $(function(){
+      setInterval(function() {
+        window.parent.$('#supermodal').modal('hide');
+      }, 1000);
+    });
+    </script>
+  <?php } ?>
+
   </body>
 </html>
