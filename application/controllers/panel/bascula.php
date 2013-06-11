@@ -14,6 +14,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_camiones/',
     'bascula/ajax_get_calidades/',
     'bascula/ajax_get_precio_calidad/',
+    'bascula/ajax_get_kilos/',
 
     'bascula/show_view_agregar_proveedor/',
     'bascula/show_view_agregar_chofer/',
@@ -38,7 +39,8 @@ class bascula extends MY_Controller {
   public function index()
   {
     $this->carabiner->js(array(
-        array('general/msgbox.js')
+        array('general/msgbox.js'),
+        array('panel/bascula/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -47,7 +49,10 @@ class bascula extends MY_Controller {
     );
 
     $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
     $params['basculas'] = $this->bascula_model->getBasculas(true);
+    $params['areas'] = $this->areas_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -105,6 +110,8 @@ class bascula extends MY_Controller {
     $params['param_folio'] = '';
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
+    $params['e'] = false;
+
     if (isset($_GET['folio']))
     {
       $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
@@ -126,6 +133,10 @@ class bascula extends MY_Controller {
         $params['param_folio'] = '?folio='.$_GET['folio'];
         $params['idb']         = $info['info'][0]->id_bascula;
         $params['accion']      = $info['info'][0]->accion;
+
+        if (isset($_GET['e']))
+          if ($_GET['e'] === 't')
+            $params['e'] = true;
 
         $_POST['ptipo']         = $info['info'][0]->tipo;
         $_POST['parea']         = $info['info'][0]->id_area;
@@ -186,9 +197,41 @@ class bascula extends MY_Controller {
   public function modificar()
   {
     if (isset($_GET['folio'][0]))
+      redirect(base_url('panel/bascula/agregar/?folio='.$_GET['folio']).'&e=t');
+  }
+
+  /**
+   * Cancela una bascula entrada|salida
+   * @return [type] [description]
+   */
+  public function cancelar()
+  {
+    if (isset($_GET['id']))
     {
-      redirect(base_url('panel/bascula/agregar/?folio='.$_GET['folio']));
+      $this->load->model('bascula_model');
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'));
+      if($res_mdl)
+        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=8'));
     }
+    else
+      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+  }
+
+  /**
+   * Activa una bascula entrada|salida
+   * @return [type] [description]
+   */
+  public function activar()
+  {
+    if (isset($_GET['id']))
+    {
+      $this->load->model('bascula_model');
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 't'));
+      if($res_mdl)
+        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=9'));
+    }
+    else
+      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /*
@@ -235,8 +278,12 @@ class bascula extends MY_Controller {
       $res_mdl = $this->proveedores_model->addProveedor();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.String::getVarsLink(array('msg')).'&msg=4'));
+        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.String::getVarsLink(array('msg')).'&msg=4&close=1'));
     }
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -276,8 +323,12 @@ class bascula extends MY_Controller {
       $res_mdl = $this->choferes_model->addChofer();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.String::getVarsLink(array('msg')).'&msg=5&close=1'));
     }
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -317,8 +368,12 @@ class bascula extends MY_Controller {
       $res_mdl = $this->camiones_model->addCamion();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.String::getVarsLink(array('msg')).'&msg=6'));
+        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.String::getVarsLink(array('msg')).'&msg=6&close=1'));
     }
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -623,13 +678,21 @@ class bascula extends MY_Controller {
     echo json_encode($this->calidades_model->getCalidadInfo($_GET['id'], true));
   }
 
+  /**
+  * Funcion para simular la peticion ajax al otro servidor.
+  * @return void
+  */
+  public function ajax_get_kilos()
+  {
+    echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"290"}}';
+  }
 
   /*
    |------------------------------------------------------------------------
    | Mensajes.
    |------------------------------------------------------------------------
    */
-  private function showMsgs($tipo, $msg='', $title='Usuarios')
+  private function showMsgs($tipo, $msg='', $title='Bascula')
   {
     switch($tipo){
       case 1:
@@ -662,34 +725,12 @@ class bascula extends MY_Controller {
         $icono = 'success';
         break;
       case 8:
-        $txt = 'La salida se agrego correctamente.';
+        $txt = 'La bascula se cancelo correctamente.';
         $icono = 'success';
         break;
 
       case 9:
-        $txt = 'La operación se realizo correctamente.';
-        $icono = 'success';
-        break;
-      case 10:
-        $txt = 'La clasificacion se activó correctamente.';
-        $icono = 'success';
-        break;
-
-      case 11:
-        $txt = 'No existe ninguna entrada con el folio especificado.';
-        $icono = 'success';
-        break;
-      case 12:
-        $txt = 'La clasificacion se modificó correctamente.';
-        $icono = 'success';
-        break;
-
-      case 13:
-        $txt = 'La calidad se agregó correctamente.';
-        $icono = 'success';
-        break;
-      case 14:
-        $txt = 'La clasificacion se agregó correctamente.';
+        $txt = 'La bascula se activo correctamente.';
         $icono = 'success';
         break;
     }

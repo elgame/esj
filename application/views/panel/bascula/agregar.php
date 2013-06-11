@@ -1,8 +1,16 @@
     <div id="content" class="span10">
       <!-- content starts -->
+      <?php
+        $disabled = ($accion === 'f' && $e === false) ? 'disabled' : '';
 
-      <?php $disabled = $accion === 'f' ? 'disabled' : '' ?>
-
+        $readonly   = 'readonly';
+        $crumbTitle = 'Agregar';
+        if ($e === true)
+        {
+          $readonly = '';
+          $crumbTitle = 'Modificar';
+        }
+      ?>
 
       <div>
         <ul class="breadcrumb">
@@ -12,7 +20,7 @@
           <li>
             <a href="<?php echo base_url('panel/bascula/'); ?>">Bascula</a> <span class="divider">/</span>
           </li>
-          <li>Agregar</li>
+          <li><?php echo $crumbTitle ?></li>
         </ul>
       </div>
 
@@ -154,9 +162,9 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.$readonly ?>>
                       <span class="help-inline">
-                        <button type="button" class="btn btn-info" data-loading-text="Cargando..." <?php echo $disabled ?>>Cargar</button>
+                        <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?>>Cargar</button>
                       </span>
                     </div>
                   </div>
@@ -166,7 +174,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.$readonly ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?>>Cargar</button>
                       </span>
@@ -204,10 +212,7 @@
                 <div class="span2">
                   <label>Calidad</label>
                   <select class="input-medium" id="icalidad" <?php echo $disabled ?>>
-                    <option value=""></option>
-                    <option value="1">Limon verde</option>
-                    <option value="2">Limon Industrial</option>
-                    <option value="3">LimonLimon toronjae</option>
+
                   </select>
                 </div>
                 <!-- <div class="span2">
@@ -297,7 +302,7 @@
                   <div class="span4">
                     <label for="ptotal_cajas">Total cajas</label>
                     <input type="text" name="ptotal_cajas"
-                      value="<?php echo set_value('ptotal_cajas', $this->input->post('ptotal_cajas')) ?>" id="ptotal_cajas" class="input-medium vpositive" <?php echo $disabled ?>>
+                      value="<?php echo set_value('ptotal_cajas', $this->input->post('ptotal_cajas')) ?>" id="ptotal_cajas" class="input-medium vpositive" <?php echo $disabled ?> readonly>
                   </div>
 
                   <div class="span4">
@@ -309,7 +314,7 @@
                   <div class="span4">
                     <label for="ptotal">Total</label>
                     <input type="text" name="ptotal"
-                      value="<?php echo set_value('ptotal', $this->input->post('ptotal')) ?>" id="ptotal" class="input-medium vpositive" <?php echo $disabled ?>>
+                      value="<?php echo set_value('ptotal', $this->input->post('ptotal')) ?>" id="ptotal" class="input-medium vpositive" <?php echo $disabled ?> readonly>
                   </div>
                 </div>
               </div>

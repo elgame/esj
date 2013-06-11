@@ -5,9 +5,11 @@ $(function(){
         option = $this.find('option:selected').val();
     if (option !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_calidades/', {id: option}, function(data) {
-
-        console.log(data);
-
+        var optionHtml = ['<option value=""></option>'];
+        data.calidades.forEach(function(e, i) {
+          optionHtml.push('<option value="'+e.id_calidad+'">'+e.nombre+'</option>');
+        });
+        $('#icalidad').html(optionHtml.join(''));
       }, 'json');
     }
   });
@@ -105,6 +107,22 @@ $(function(){
 
   });
 
+  // Evento keypress para el input del folio.
+  $('#pfolio').on('keypress', function(e) {
+    if (e.charCode == '13') {
+      e.preventDefault();
+      $('#loadFolio').click();
+    }
+  });
+
+  // Evento keypress para los input de agregar caja.
+  $('#icajas, #iprecio').on('keypress', function(e) {
+    if (e.charCode == '13') {
+      e.preventDefault();
+      $('#addCaja').click();
+    }
+  });
+
   // Evento click boton addCaja. Agrega las cajas a la tabla.
   $('#addCaja').on('click', function(event) {
 
@@ -119,15 +137,19 @@ $(function(){
           trHtml = '',
           $tabla = $('#tableCajas');
 
+      if ( ! validaCalidad($calidad.find('option:selected').val())) {
+        return false;
+      }
+
       // Construye string con el html del tr.
       trHtml = '<tr><td>' + $caja.val() +
-                  '<input type="text" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
-                  '<input type="text" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
-                  '<input type="text" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
-                  '<input type="text" name="pkilos[]" value="" id="pkilos">' +
-                  '<input type="text" name="ppromedio[]" value="" id="ppromedio">' +
-                  '<input type="text" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
-                  '<input type="text" name="pimporte[]" value="" id="pimporte">' +
+                  '<input type="hidden" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
+                  '<input type="hidden" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
+                  '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
+                  '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
+                  '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
+                  '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
+                  '<input type="hidden" name="pimporte[]" value="" id="pimporte">' +
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
                '<td id="tdkilos"></td>' +
@@ -145,7 +167,6 @@ $(function(){
       // $promedio.val('');
       $precio.val('');
       // $importe.val('');
-
 
       calculaTotales();
     }
@@ -166,14 +187,24 @@ $(function(){
   });
 
   // Evento click boton cargar de kilos tara.
+  $('#btnKilosBruto').on('click', function(event) {
+    $inputBruto = $('#pkilos_brutos');
+    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+      $inputBruto.val(data.data.peso);
+    }, 'json');
+  });
+
+  // Evento click boton cargar de kilos tara.
   $('#btnKilosTara').on('click', function(event) {
     var $inputBruto = $('#pkilos_brutos'),
         $inputTara  = $('#pkilos_tara'),
         $inputNeto  = $('#pkilos_neto');
 
-    $inputTara.val(100);
+    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+      $inputTara.val(data.data.peso);
 
-    $inputNeto.val(parseFloat($inputBruto.val()) - parseFloat($inputTara.val()));
+      $inputNeto.val(Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val())));
+    }, 'json');
   });
 
   // POST para obtener el peso desde el servidor bascula.
@@ -182,20 +213,34 @@ $(function(){
 });
 
 var validaAddCaja = function () {
-  // || $('#ikilos').val() === '' || $('#ipromedio').val() === '' || $('#iprecio').val() === ''
+  // || $('#ikilos').val() === '' || $('#ipromedio').val() === '' || $('#iimporte').val() === ''
 
-  var knetos = parseFloat($('#pkilos_neto').val()) || 0;
+  // var knetos = parseFloat($('#pkilos_neto').val()) || 0;
 
-  if (knetos == 0) {
-    noty({"text": "Los Kilos Neto no pueden ser cero.", "layout":"topRight", "type": 'error'});
-    return false;
-  }
-
-  if ($('#icajas').val() === '' || $('#icalidad option:selected').val() === '' || $('#iimporte').val() === '') {
+  // if (knetos == 0) {
+  //   noty({"text": "Los Kilos Neto no pueden ser cero.", "layout":"topRight", "type": 'error'});
+  //   return false;
+  // }
+  // console.log($('#icalidad option:selected').val());
+  var option = $('#icalidad option:selected').val() || '';
+  if ($('#icajas').val() === '' || option === '' || $('#iprecio').val() === '') {
     noty({"text": "Alguno de los campos estan vacios.", "layout":"topRight", "type": 'error'});
     return false;
   }
   return true;
+};
+
+var validaCalidad = function (calidad) {
+  var aux = true;
+  $('input#pcalidad').each(function(e, i) {
+    if ($(this).val() == calidad) {
+      noty({"text": 'La calidad seleccionada ya fue agregada', "layout":"topRight", "type": 'error'});
+      aux = false;
+      return aux;
+    }
+  });
+
+  return aux;
 };
 
 var calculaTotales = function () {
@@ -203,7 +248,7 @@ var calculaTotales = function () {
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
 
-      kilosNeto  = parseFloat($('#pkilos_neto').val()),
+      kilosNeto  = parseFloat($('#pkilos_neto').val()) || 0,
       totalCajas = 0,
       total = 0;
 

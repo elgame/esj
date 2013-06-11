@@ -26,16 +26,35 @@ class Bascula_model extends CI_Model {
       if($params['result_page'] % $params['result_items_per_page'] == 0)
         $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
     }
+
     //Filtros para buscar
-    // if($this->input->get('fnombre') != '')
-    //   $sql = "WHERE ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+    if($this->input->get('fnombre') !== '')
+      $sql = "WHERE ( b.folio::text LIKE '%".$this->input->get('fnombre')."%' ) or
+                    ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
+                    ( lower(ch.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
+                    ( lower(ca.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
+                    ( lower(ca.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
-    // $_GET['fstatus'] = $this->input->get('fstatus')!==false? $this->input->get('fstatus'): 't';
-    // if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
-    //   $sql .= ($sql==''? 'WHERE': ' AND')." b.status='".$this->input->get('fstatus')."'";
+    if (isset($_GET['farea']))
+      if ($this->input->get('farea') !== '')
+        $sql .= (empty($sql) ? "WHERE " : " AND ") . "a.id_area = " . $this->input->get('farea');
 
-    // if($this->input->get('ftipo') != '' && $this->input->get('ftipo') != 'todos')
-    //   $sql .= ($sql==''? 'WHERE': ' AND')." tipo='".$this->input->get('ftipo')."'";
+    $_GET['fstatusb'] = $this->input->get('fstatusb')!==false ? $this->input->get('fstatusb') : 't';
+    if($this->input->get('fstatusb') != '' && $this->input->get('fstatusb') != 'todos')
+      $sql .= (empty($sql) ? 'WHERE ': ' AND ')."b.status='".$this->input->get('fstatusb')."'";
+
+    if($this->input->get('ftipob') != '' && $this->input->get('ftipob') != 'todos')
+      $sql .= (empty($sql) ? "WHERE ": " AND ") . "b.tipo='".$this->input->get('ftipob')."'";
+
+    if (isset($_GET['fechaini']))
+      if ($this->input->get('fechaini') !== '')
+        $sql .= (empty($sql) ? "WHERE ": " AND ") . "DATE(b.fecha_bruto) >= '".$this->input->get('fechaini')."'";
+
+    if (isset($_GET['fechaend']))
+      if ($this->input->get('fechaend') !== '')
+        $sql .= (empty($sql) ? "WHERE ": " AND ") . "DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
+
+      // $sql = "AND DATE(cic.fecha)>='".$_GET['fechaini']."' AND DATE(cic.fecha)<='".$_GET['fechaend']."'";
 
     $str_query =
         "SELECT b.id_bascula,
@@ -86,6 +105,8 @@ class Bascula_model extends CI_Model {
 
       if ($_POST['paccion'] == 'n')
       {
+        $_POST['pfolio'] = $this->getSiguienteFolio();
+
         $data = array(
           'id_empresa'   => $this->input->post('pid_empresa'),
           'id_area'      => $this->input->post('parea'),
@@ -170,6 +191,8 @@ class Bascula_model extends CI_Model {
       $this->db->delete('bascula_compra', array('id_bascula' => $id));
       $this->db->insert_batch('bascula_compra', $cajas);
     }
+
+    return array('passes'=>true);
   }
 
   /**
