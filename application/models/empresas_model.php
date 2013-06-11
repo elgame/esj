@@ -20,13 +20,22 @@ class empresas_model extends CI_Model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		//Filtros para buscar
-		if($this->input->get('fnombre') != '')
-			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%'";
+		if($this->input->get('fnombre') != ''){
+			$sql = " WHERE (
+				lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+				lower(calle) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+				lower(colonia) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+				lower(municipio) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+				lower(estado) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+		}
+
+		$_GET['fstatus'] = $this->input->get('fstatus')!==false? $this->input->get('fstatus'): 't';
+		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
+			$sql .= ($sql==''? 'WHERE': ' AND')." status='".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("
-				SELECT id_empresa, nombre_fiscal, rfc, telefono
+				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, status
 				FROM empresas
-				WHERE status = 'ac'
 				".$sql."
 				ORDER BY nombre_fiscal ASC
 				", $params, true);
@@ -39,8 +48,17 @@ class empresas_model extends CI_Model{
 			'result_page'    => $params['result_page']
 		);
 
-		if($res->num_rows() > 0)
+		if($res->num_rows() > 0){
 			$response['empresas'] = $res->result();
+			foreach ($response['empresas'] as $key => $value) {
+				$response['empresas'][$key]->domicilio = $value->calle.($value->no_exterior!=''? ' '.$value->no_exterior: '')
+										 .($value->no_interior!=''? $value->no_interior: '')
+										 .($value->colonia!=''? ', '.$value->colonia: '')
+										 .($value->localidad!=''? ', '.$value->localidad: '')
+										 .($value->municipio!=''? ', '.$value->municipio: '')
+										 .($value->estado!=''? ', '.$value->estado: '');
+			}
+		}
 
 		return $response;
 	}
@@ -91,7 +109,6 @@ class empresas_model extends CI_Model{
 			'cp'             => $this->input->post('dcp'),
 			'rfc'            => $this->input->post('drfc'),
 			'telefono'       => $this->input->post('dtelefono'),
-			'celular'        => $this->input->post('dcelular'),
 			'email'          => $this->input->post('demail'),
 			'pag_web'        => $this->input->post('dpag_web'),
 			'logo'           => $path_img,
@@ -135,7 +152,6 @@ class empresas_model extends CI_Model{
 			'cp'             => $this->input->post('dcp'),
 			'rfc'            => $this->input->post('drfc'),
 			'telefono'       => $this->input->post('dtelefono'),
-			'celular'        => $this->input->post('dcelular'),
 			'email'          => $this->input->post('demail'),
 			'pag_web'        => $this->input->post('dpag_web'),
 			'logo'           => $path_img,
@@ -150,7 +166,15 @@ class empresas_model extends CI_Model{
 	 * Elimina a un cliente, cambia su status a "e":eliminado
 	 */
 	public function eliminarEmpresa(){
-		$this->db->update('empresas', array('status' => 'e'), "id_empresa = '".$_GET['id']."'");
+		$this->db->update('empresas', array('status' => 'f'), "id_empresa = '".$_GET['id']."'");
+		return array(true, '');
+	}
+
+	/**
+	 * Elimina a un cliente, cambia su status a "e":eliminado
+	 */
+	public function activarEmpresa(){
+		$this->db->update('empresas', array('status' => 't'), "id_empresa = '".$_GET['id']."'");
 		return array(true, '');
 	}
 

@@ -14,7 +14,7 @@
 				</ul>
 			</div>
 
-			<form action="<?php echo base_url('panel/empresas/agregar'); ?>" method="post" class="form-horizontal" enctype="multipart/form-data">
+			<form action="<?php echo base_url('panel/empresas/agregar'); ?>" method="post" class="form-horizontal">
 				<div class="row-fluid">
 					<div class="box span12">
 						<div class="box-header well" data-original-title>
@@ -29,9 +29,9 @@
 
 									<div class="span6 mquit">
 										<div class="control-group">
-											<label class="control-label" for="dnombre_fiscal">*Nombre Fiscal:</label>
+											<label class="control-label" for="dnombre_fiscal">Nombre Fiscal:</label>
 											<div class="controls">
-												<input type="text" name="dnombre_fiscal" id="dnombre_fiscal" class="span12" value="<?php echo set_value('dnombre_fiscal'); ?>" maxlength="130" autofocus>
+												<input type="text" name="dnombre_fiscal" id="dnombre_fiscal" class="span12" value="<?php echo set_value('dnombre_fiscal'); ?>" maxlength="130" required autofocus>
 											</div>
 										</div>
 
@@ -112,13 +112,6 @@
 											<label class="control-label" for="dtelefono">Teléfono:</label>
 											<div class="controls">
 												<input type="text" name="dtelefono" id="dtelefono" class="span12" value="<?php echo set_value('dtelefono'); ?>" maxlength="15">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="dcelular">Celular:</label>
-											<div class="controls">
-												<input type="text" name="dcelular" id="dcelular" class="span12" value="<?php echo set_value('dcelular'); ?>" maxlength="20">
 											</div>
 										</div>
 

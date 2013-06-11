@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-
 class empresas extends MY_Controller {
+	
 	/**
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
@@ -9,12 +9,13 @@ class empresas extends MY_Controller {
 	private $excepcion_privilegio = array('empresas/ajax_get_empresas/');
 
 	public function _remap($method){
-		$this->load->model("empleados_model");
-		if($this->empleados_model->checkSession()){
-			$this->empleados_model->excepcion_privilegio = $this->excepcion_privilegio;
-			$this->info_empleado                         = $this->empleados_model->getInfoEmpleado($this->session->userdata('id_usuario'), true);
 
-			if($this->empleados_model->tienePrivilegioDe('', get_class($this).'/'.$method.'/')){
+		$this->load->model("usuarios_model");
+		if($this->usuarios_model->checkSession()){
+			$this->usuarios_model->excepcion_privilegio = $this->excepcion_privilegio;
+			$this->info_empleado                         = $this->usuarios_model->get_usuario_info($this->session->userdata('id_usuario'), true);
+
+			if($this->usuarios_model->tienePrivilegioDe('', get_class($this).'/'.$method.'/')){
 				$this->{$method}();
 			}else
 				redirect(base_url('panel/home?msg=1'));
@@ -147,6 +148,16 @@ class empresas extends MY_Controller {
 			$params['frm_errors'] = $this->showMsgs(1);
 	}
 
+	public function activar(){
+		if(isset($_GET['id']{0})){
+			$this->load->model('empresas_model');
+			$respons = $this->empresas_model->activarEmpresa();
+			if($respons[0])
+				redirect(base_url('panel/empresas/?msg=5'));
+		}else
+			$params['frm_errors'] = $this->showMsgs(1);
+	}
+
 	/**
 	 * Obtiene lostado de clientes para el autocomplete, ajax
 	 */
@@ -176,34 +187,31 @@ class empresas extends MY_Controller {
 						'rules'	=> 'max_length[60]'),
 				array('field'	=> 'dno_exterior',
 						'label'	=> 'No exterior',
-						'rules'	=> 'max_length[7]'),
+						'rules'	=> 'max_length[8]'),
 				array('field'	=> 'dno_interior',
 						'label'	=> 'No interior',
-						'rules'	=> 'max_length[7]'),
+						'rules'	=> 'max_length[8]'),
 				array('field'	=> 'dcolonia',
 						'label'	=> 'Colonia',
 						'rules'	=> 'max_length[60]'),
 				array('field'	=> 'dlocalidad',
 						'label'	=> 'Localidad',
-						'rules'	=> 'max_length[45]'),
+						'rules'	=> 'max_length[60]'),
 				array('field'	=> 'dmunicipio',
 						'label'	=> 'Municipio',
-						'rules'	=> 'max_length[45]'),
+						'rules'	=> 'max_length[60]'),
 				array('field'	=> 'destado',
 						'label'	=> 'Estado',
-						'rules'	=> 'max_length[45]'),
+						'rules'	=> 'max_length[60]'),
 				array('field'	=> 'dcp',
 						'label'	=> 'CP',
-						'rules'	=> 'max_length[10]'),
+						'rules'	=> 'max_length[12]'),
 				array('field'	=> 'dregimen_fiscal',
 						'label'	=> 'Régimen fiscal',
-						'rules'	=> 'required|max_length[200]'),
+						'rules'	=> 'max_length[100]'),
 				array('field'	=> 'dtelefono',
 						'label'	=> 'Teléfono',
 						'rules'	=> 'max_length[15]'),
-				array('field'	=> 'dcelular',
-						'label'	=> 'Celular',
-						'rules'	=> 'max_length[20]'),
 				array('field'	=> 'demail',
 						'label'	=> 'Email',
 						'rules'	=> 'valid_email|max_length[70]'),

@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						<a href="#">Empresas</a>
+						Empresas
 					</li>
 				</ul>
 			</div>
@@ -16,7 +16,7 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> Empresas</h2>
+						<h2><i class="icon-group"></i> Empresas</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
@@ -26,14 +26,22 @@
 						<form action="<?php echo base_url('panel/empresas'); ?>" method="get" class="form-search">
 							<div class="form-actions form-filters">
 								<label for="fnombre">Nombre</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" class="input-medium search-query" autofocus>
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+									class="input-large search-query" placeholder="Empaque sanjorge, Av carlos" autofocus> | 
 
-								<input type="submit" name="enviar" value="Enviar" class="btn">
+								<label for="fstatus">Estado</label>
+								<select name="fstatus">
+									<option value="t" <?php echo set_select('fstatus', 't', false, $this->input->get('fstatus')); ?>>ACTIVOS</option>
+									<option value="f" <?php echo set_select('fstatus', 'f', false, $this->input->get('fstatus')); ?>>ELIMINADOS</option>
+									<option value="todos" <?php echo set_select('fstatus', 'todos', false, $this->input->get('fstatus')); ?>>TODOS</option>
+								</select>
+
+								<input type="submit" name="enviar" value="Buscar" class="btn">
 							</div>
 						</form>
 
 						<?php 
-						echo $this->empleados_model->getLinkPrivSm('empresas/agregar/', array(
+						echo $this->usuarios_model->getLinkPrivSm('empresas/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
 										'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -44,27 +52,48 @@
 							  <tr>
 								  <th>Nombre</th>
 									<th>RFC</th>
-									<th>Telefono</th>
+									<th>Domicilio</th>
+									<th>Status</th>
 								  <th>Opc</th>
 							  </tr>
 						  </thead>
 						  <tbody>
-						<?php foreach($empresas['empresas'] as $empresa){?>
+						<?php foreach($empresas['empresas'] as $empresa){ ?>
 								<tr>
 									<td><?php echo $empresa->nombre_fiscal; ?></td>
 									<td><?php echo $empresa->rfc; ?></td>
-									<td><?php echo $empresa->telefono; ?></td>
+									<td><?php echo $empresa->domicilio; ?></td>
+									<td>
+										<?php
+											if($empresa->status == 't'){
+												$v_status = 'Activo';
+												$vlbl_status = 'label-success';
+											}else{
+												$v_status = 'Eliminado';
+												$vlbl_status = 'label-important';
+											}
+										?>
+										<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
+									</td>
 									<td class="center">
 											<?php 
-											echo $this->empleados_model->getLinkPrivSm('empresas/modificar/', array(
+											echo $this->usuarios_model->getLinkPrivSm('empresas/modificar/', array(
 													'params'   => 'id='.$empresa->id_empresa,
 													'btn_type' => 'btn-success')
 											);
-											echo $this->empleados_model->getLinkPrivSm('empresas/eliminar/', array(
-													'params'   => 'id='.$empresa->id_empresa,
-													'btn_type' => 'btn-danger',
-													'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar?', 'Clientes', this); return false;"))
-											);
+											if ($empresa->status == 't') {
+												echo $this->usuarios_model->getLinkPrivSm('empresas/eliminar/', array(
+														'params'   => 'id='.$empresa->id_empresa,
+														'btn_type' => 'btn-danger',
+														'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar la empresa?', 'empresas', this); return false;"))
+												);
+											}else{
+												echo $this->usuarios_model->getLinkPrivSm('empresas/activar/', array(
+														'params'   => 'id='.$empresa->id_empresa,
+														'btn_type' => 'btn-danger',
+														'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar la empresa?', 'empresas', this); return false;"))
+												);
+											}
 											
 											?>
 									</td>

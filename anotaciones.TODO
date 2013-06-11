@@ -3,5 +3,38 @@ Cambis BD:
   ☐ tabla usuarios:
       campo tipo, cambiar default a 'admin'
       campo usuario, cambiar a 30 caracteres
+  ☐ tabla bascula:
+      campo agregar "accion"
+      campo agregar "tipo"
+  ☐ tabla empresa:
+      agregar los campos nuevos
+  ☐ Privilegios
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Bascula', 0, true, 'bascula/', 'road', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar', 40, true, 'bascula/agregar/', 'plus', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 40, false, 'bascula/modificar/', 'edit', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cancelar', 40, false, 'bascula/cancelar/', 'ban-circle', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Imprimir', 40, false, 'bascula/imprimir/', 'print', false);
       COMMENT ON COLUMN clasificaciones.precio_venta IS 'NO USADO';
       COMMENT ON COLUMN clasificaciones.cuenta_cpi IS 'NO USADO, cuenta afectable del contpaqi';
+      COMMENT ON COLUMN bascula.accion IS 'en:entrada, sa:salida, f:finalisado';
+      COMMENT ON COLUMN bascula.tipo IS 'en:entrada, sa:salida';
+      COMMENT ON COLUMN bascula_fotos.tipo IS 'en:entrada; sa:salida, ch:chofer';
+
+      CREATE TABLE empresas_fiscal
+      (
+        id_fiscal serial NOT NULL,
+        id_empresa integer NOT NULL,
+        "version" character varying(5),
+        path_cer_org character varying(90),
+        path_cer character varying(90),
+        path_key character varying(90),
+        pass_key character varying(20),
+        CONSTRAINT empresas_fiscal_pkey PRIMARY KEY (id_fiscal),
+        CONSTRAINT empresas_fiscal_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE empresas_fiscal OWNER TO programa;

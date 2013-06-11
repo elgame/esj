@@ -30,10 +30,10 @@
 
 									<div class="span6 mquit">
 										<div class="control-group">
-											<label class="control-label" for="dnombre_fiscal">*Nombre Fiscal:</label>
+											<label class="control-label" for="dnombre_fiscal">Nombre Fiscal:</label>
 											<div class="controls">
 												<input type="text" name="dnombre_fiscal" id="dnombre_fiscal" class="span12" 
-													value="<?php echo (isset($info['info']->nombre_fiscal)? $info['info']->nombre_fiscal: ''); ?>" maxlength="130" autofocus>
+													value="<?php echo (isset($info['info']->nombre_fiscal)? $info['info']->nombre_fiscal: ''); ?>" maxlength="130" required autofocus>
 											</div>
 										</div>
 
@@ -125,14 +125,6 @@
 											<div class="controls">
 												<input type="text" name="dtelefono" id="dtelefono" class="span12" 
 													value="<?php echo (isset($info['info']->telefono)? $info['info']->telefono: ''); ?>" maxlength="15">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="dcelular">Celular:</label>
-											<div class="controls">
-												<input type="text" name="dcelular" id="dcelular" class="span12" 
-													value="<?php echo (isset($info['info']->celular)? $info['info']->celular: ''); ?>" maxlength="20">
 											</div>
 										</div>
 										
