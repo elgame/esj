@@ -15,7 +15,7 @@
 |
 */
 $config['base_url'] = 'http://localhost/sanjorge/';
-$config['base_url_bascula']	= 'http://localhost/sanjorge/';
+$config['base_url_bascula']	= 'http://localhost/sanjorge_bascula/';
 
 /*
 |--------------------------------------------------------------------------

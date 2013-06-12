@@ -9,6 +9,12 @@ class String{
 	 * @param unknown_type $sigini
 	 */
 	public static function formatoNumero($number, $decimales=2, $sigini='$'){
+		$number = floatval($number);
+		$num = explode('.', $number);
+		if(isset($num[1]))
+			$decimales = (strlen($num[1])<$decimales? strlen($num[1]): $decimales);
+		else
+			$decimales = 0;
 		return $sigini.number_format($number, $decimales, '.', ',');
 	}
 	/**
