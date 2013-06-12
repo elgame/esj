@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						Proveedores
+						Clientes
 					</li>
 				</ul>
 			</div>
@@ -16,18 +16,18 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> Proveedores</h2>
+						<h2><i class="icon-user"></i> Clientes</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/proveedores/'); ?>" method="get" class="form-search">
+						<form action="<?php echo base_url('panel/clientes/'); ?>" method="get" class="form-search">
 							<fieldset>
 								<legend>Filtros</legend>
 
 								<label for="fnombre">Buscar</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
 									class="input-large search-query" placeholder="GAS MENGUC SA DE CV, 5 DE MAYO" autofocus> |
 
 								<label for="fstatus">Estado</label>
@@ -37,19 +37,19 @@
 									<option value="todos" <?php echo set_select('fstatus', 'todos', false, $this->input->get('fstatus')); ?>>TODOS</option>
 								</select>
 
-								<label for="ftipo_proveedor">Tipo</label>
+								<!-- <label for="ftipo_proveedor">Tipo</label>
 								<select name="ftipo_proveedor">
 									<option value="todos" <?php echo set_select('ftipo_proveedor', 'todos', false, $this->input->get('ftipo_proveedor')); ?>>TODOS</option>
 									<option value="in" <?php echo set_select('ftipo_proveedor', 'in', false, $this->input->get('ftipo_proveedor')); ?>>INSUMOS</option>
 									<option value="fr" <?php echo set_select('ftipo_proveedor', 'fr', false, $this->input->get('ftipo_proveedor')); ?>>FRUTA</option>
-								</select>
+								</select> -->
 
 								<input type="submit" name="enviar" value="Buscar" class="btn">
 							</fieldset>
 						</form>
 
-						<?php 
-						echo $this->usuarios_model->getLinkPrivSm('proveedores/agregar/', array(
+						<?php
+						echo $this->usuarios_model->getLinkPrivSm('clientes/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
 										'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -61,32 +61,19 @@
 							  	<th>Nombre</th>
 								  <th>Direccion</th>
 									<th>Telefono</th>
-									<th>Tipo</th>
 									<th>Estatus</th>
 								  <th>Opciones</th>
 							  </tr>
 						  </thead>
 						  <tbody>
-						<?php foreach($proveedores['proveedores'] as $proveedor){ ?>
+						<?php foreach($clientes['clientes'] as $cliente){ ?>
 							<tr>
-								<td><?php echo $proveedor->nombre_fiscal; ?></td>
-								<td><?php echo $proveedor->direccion; ?></td>
-								<td><?php echo $proveedor->telefono; ?></td>
+								<td><?php echo $cliente->nombre_fiscal; ?></td>
+								<td><?php echo $cliente->direccion; ?></td>
+								<td><?php echo $cliente->telefono; ?></td>
 								<td>
 									<?php
-										if($proveedor->tipo_proveedor == 'in'){
-											$v_status = 'Insumos';
-											$vlbl_status = 'label-info';
-										}else{
-											$v_status = 'Fruta';
-											$vlbl_status = 'label-info';
-										}
-									?>
-									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
-								</td>
-								<td>
-									<?php
-										if($proveedor->status == 'ac'){
+										if($cliente->status == 'ac'){
 											$v_status = 'Activo';
 											$vlbl_status = 'label-success';
 										}else{
@@ -97,26 +84,25 @@
 									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 								</td>
 								<td class="center">
-										<?php 
-										echo $this->usuarios_model->getLinkPrivSm('proveedores/modificar/', array(
-												'params'   => 'id='.$proveedor->id_proveedor,
+										<?php
+										echo $this->usuarios_model->getLinkPrivSm('clientes/modificar/', array(
+												'params'   => 'id='.$cliente->id_cliente,
 												'btn_type' => 'btn-success')
 										);
-										if ($proveedor->status == 'ac') {
-											if($proveedor->id_proveedor != $this->session->userdata('id'))
-												echo $this->usuarios_model->getLinkPrivSm('proveedores/eliminar/', array(
-														'params'   => 'id='.$proveedor->id_proveedor,
+										if ($cliente->status == 'ac') {
+											echo $this->usuarios_model->getLinkPrivSm('clientes/eliminar/', array(
+														'params'   => 'id='.$cliente->id_cliente,
 														'btn_type' => 'btn-danger',
-														'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el proveedor?', 'proveedores', this); return false;"))
+														'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el cliente?', 'clientes', this); return false;"))
 											);
 										}else{
-											echo $this->usuarios_model->getLinkPrivSm('proveedores/activar/', array(
-													'params'   => 'id='.$proveedor->id_proveedor,
+											echo $this->usuarios_model->getLinkPrivSm('clientes/activar/', array(
+													'params'   => 'id='.$cliente->id_cliente,
 													'btn_type' => 'btn-danger',
-													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el proveedor?', 'proveedores', this); return false;"))
+													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el cliente?', 'clientes', this); return false;"))
 											);
 										}
-										
+
 										?>
 								</td>
 							</tr>
@@ -128,9 +114,9 @@
 						//Paginacion
 						$this->pagination->initialize(array(
 								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
-								'total_rows'		=> $proveedores['total_rows'],
-								'per_page'			=> $proveedores['items_per_page'],
-								'cur_page'			=> $proveedores['result_page']*$proveedores['items_per_page'],
+								'total_rows'		=> $clientes['total_rows'],
+								'per_page'			=> $clientes['items_per_page'],
+								'cur_page'			=> $clientes['result_page']*$clientes['items_per_page'],
 								'page_query_string'	=> TRUE,
 								'num_links'			=> 1,
 								'anchor_class'	=> 'pags corner-all',

@@ -31,6 +31,7 @@ class Bascula_model extends CI_Model {
     if($this->input->get('fnombre') !== '')
       $sql = "WHERE (( b.folio::text LIKE '%".$this->input->get('fnombre')."%' ) OR
                     ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
+                    ( lower(cl.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
                     ( lower(ch.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
                     ( lower(ca.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
                     ( lower(ca.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ))";
@@ -66,11 +67,13 @@ class Bascula_model extends CI_Model {
                 ch.nombre AS chofer,
                 (ca.marca || ' ' || ca.modelo) AS camion,
                 ca.placa AS placas,
-                b.fecha_bruto AS fecha
+                b.fecha_bruto AS fecha,
+                cl.nombre_fiscal AS cliente
         FROM bascula AS b
         INNER JOIN empresas AS e ON e.id_empresa = b.id_empresa
         INNER JOIN areas AS a ON a.id_area = b.id_area
-        INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        LEFT JOIN clientes AS cl ON cl.id_cliente = b.id_cliente
         INNER JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
         INNER JOIN camiones AS ca ON ca.id_camion = b.id_camion
         ".$sql."
@@ -109,7 +112,6 @@ class Bascula_model extends CI_Model {
         $data = array(
           'id_empresa'   => $this->input->post('pid_empresa'),
           'id_area'      => $this->input->post('parea'),
-          'id_proveedor' => $this->input->post('pid_proveedor'),
           'id_chofer'    => $this->input->post('pid_chofer'),
           'id_camion'    => $this->input->post('pid_camion'),
           'folio'        => $this->input->post('pfolio'),
@@ -118,6 +120,11 @@ class Bascula_model extends CI_Model {
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
         );
+
+        if ($_POST['ptipo'] === 'en')
+          $data['id_proveedor'] = $this->input->post('pid_proveedor');
+        else
+          $data['id_cliente'] = $this->input->post('pid_cliente');
 
         $this->db->insert('bascula', $data);
         $idb = $this->db->insert_id();
@@ -133,7 +140,18 @@ class Bascula_model extends CI_Model {
       {
         $data2['id_empresa']   = $this->input->post('pid_empresa');
         $data2['id_area']      = $this->input->post('parea');
-        $data2['id_proveedor'] = $this->input->post('pid_proveedor');
+
+        if ($_POST['ptipo'] === 'en')
+        {
+          $data2['id_proveedor'] = $this->input->post('pid_proveedor');
+          $data2['id_cliente']    = null;
+        }
+        else
+        {
+          $data2['id_cliente']    = $this->input->post('pid_cliente');
+          $data2['id_proveedor'] = null;
+        }
+
         $data2['id_chofer']    = $this->input->post('pid_chofer');
         $data2['id_camion']    = $this->input->post('pid_camion');
 
@@ -210,14 +228,18 @@ class Bascula_model extends CI_Model {
                 e.nombre_fiscal AS empresa,
                 a.nombre AS area,
                 p.nombre_fiscal AS proveedor,
-                p.cuenta_cpi,
+                p.cuenta_cpi AS cpi_proveedor,
                 ch.nombre AS chofer,
                 (ca.marca || ' ' || ca.modelo) AS camion,
-                ca.placa AS camion_placas")
+                ca.placa AS camion_placas,
+                cl.nombre_fiscal as cliente,
+                cl.cuenta_cpi AS cpi_cliente,
+                b.tipo")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
-      ->join('proveedores AS p', 'p.id_proveedor = b.id_proveedor', "inner")
+      ->join('proveedores AS p', 'p.id_proveedor = b.id_proveedor', "left")
+      ->join('clientes AS cl', 'cl.id_cliente = b.id_cliente', "left")
       ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "inner")
       ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "inner")
       ->where("b.id_bascula", $id)

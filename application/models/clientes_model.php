@@ -8,7 +8,7 @@ class clientes_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getProveedores($paginados = true)
+	public function getClientes($paginados = true)
 	{
 		$sql = '';
 		//paginacion
@@ -24,9 +24,9 @@ class clientes_model extends CI_Model {
 		}
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(p.calle) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(p.colonia) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+			$sql = "WHERE ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(p.calle) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(p.colonia) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(p.municipio) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(p.estado) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
@@ -34,28 +34,28 @@ class clientes_model extends CI_Model {
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
-		if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
-			$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
+		// if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
+		// 	$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
 		$query = BDUtil::pagination("
-				SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio, 
-							p.telefono, p.estado, p.tipo_proveedor, p.status
-				FROM proveedores p
+				SELECT p.id_cliente, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
+							p.telefono, p.estado, p.status
+				FROM clientes p
 				".$sql."
 				ORDER BY p.nombre_fiscal ASC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
 		$response = array(
-				'proveedores'    => array(),
+				'clientes'    => array(),
 				'total_rows'     => $query['total_rows'],
 				'items_per_page' => $params['result_items_per_page'],
 				'result_page'    => $params['result_page']
 		);
 		if($res->num_rows() > 0){
-			$response['proveedores'] = $res->result();
-			foreach ($response['proveedores'] as $key => $value) {
-				$response['proveedores'][$key]->direccion = $value->calle.($value->no_exterior!=''? ' '.$value->no_exterior: '')
+			$response['clientes'] = $res->result();
+			foreach ($response['clientes'] as $key => $value) {
+				$response['clientes'][$key]->direccion = $value->calle.($value->no_exterior!=''? ' '.$value->no_exterior: '')
 										 .($value->no_interior!=''? $value->no_interior: '')
 										 .($value->colonia!=''? ', '.$value->colonia: '')
 										 .($value->localidad!=''? ', '.$value->localidad: '')
@@ -71,7 +71,7 @@ class clientes_model extends CI_Model {
  	 * Agrega un proveedor a la BDD
  	 * @param [type] $data [description]
  	 */
-	public function addProveedor($data=NULL)
+	public function addCliente($data=NULL)
 	{
 
 		if ($data==NULL)
@@ -90,13 +90,12 @@ class clientes_model extends CI_Model {
 						'celular'        => $this->input->post('fcelular'),
 						'email'          => $this->input->post('femail'),
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-						'tipo_proveedor' => $this->input->post('ftipo_proveedor'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
 						);
 		}
 
-		$this->db->insert('proveedores', $data);
+		$this->db->insert('clientes', $data);
 		// $id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
 
 		return array('error' => FALSE);
@@ -104,11 +103,11 @@ class clientes_model extends CI_Model {
 
 	/**
 	 * Modificar la informacion de un proveedor
-	 * @param  [type] $id_proveedor [description]
+	 * @param  [type] $id_cliente [description]
 	 * @param  [type] $data       [description]
 	 * @return [type]             [description]
 	 */
-	public function updateProveedor($id_proveedor, $data=NULL)
+	public function updateCliente($id_cliente, $data=NULL)
 	{
 
 		if ($data==NULL)
@@ -127,31 +126,30 @@ class clientes_model extends CI_Model {
 						'celular'        => $this->input->post('fcelular'),
 						'email'          => $this->input->post('femail'),
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-						'tipo_proveedor' => $this->input->post('ftipo_proveedor'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
 						);
 		}
 
-		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));
+		$this->db->update('clientes', $data, array('id_cliente' => $id_cliente));
 
 		return array('error' => FALSE);
 	}
 
 	/**
 	 * Obtiene la informacion de un proveedor
-	 * @param  boolean $id_proveedor [description]
+	 * @param  boolean $id_cliente [description]
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getProveedorInfo($id_proveedor=FALSE, $basic_info=FALSE)
+	public function getClienteInfo($id_cliente=FALSE, $basic_info=FALSE)
 	{
-		$id_proveedor = (isset($_GET['id']))? $_GET['id']: $id_proveedor;
+		$id_cliente = (isset($_GET['id']))? $_GET['id']: $id_cliente;
 
-		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio, 
-														estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status" )
-												->from("proveedores")
-												->where("id_proveedor", $id_proveedor)
+		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
+														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status" )
+												->from("clientes")
+												->where("id_cliente", $id_cliente)
 												->get();
 		$data['info'] = array();
 
@@ -160,7 +158,7 @@ class clientes_model extends CI_Model {
 		$sql_res->free_result();
 
 		if ($basic_info == False) {
-			
+
 		}
 
 		return $data;
@@ -171,15 +169,14 @@ class clientes_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
 	 */
-	public function getProveedoresAjax(){
+	public function getClientesAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		if($this->input->get('type') !== false)
-			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
+
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono 
-				FROM proveedores
+				SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
+				FROM clientes
 				WHERE status = 'ac' ".$sql."
 				ORDER BY nombre_fiscal ASC
 				LIMIT 20");
@@ -188,7 +185,7 @@ class clientes_model extends CI_Model {
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
 				$response[] = array(
-						'id'    => $itm->id_proveedor,
+						'id'    => $itm->id_cliente,
 						'label' => $itm->nombre_fiscal,
 						'value' => $itm->nombre_fiscal,
 						'item'  => $itm,

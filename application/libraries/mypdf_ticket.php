@@ -100,7 +100,22 @@ class mypdf_ticket extends FPDF {
 
         $this->SetY($this->GetY() + 5);
 
-        $this->MultiCell($this->pag_size[0], 3, 'CUENTA: ' . strtoupper($data->cuenta_cpi), 0, 'L');
+        if ($data->tipo === 'en')
+        {
+          $cuentaCpi = $data->cpi_proveedor;
+          $nombreCpi = $data->proveedor;
+        }
+        else
+        {
+          $cuentaCpi = $data->cpi_cliente;
+          $nombreCpi = $data->cliente;
+        }
+
+        $this->MultiCell($this->pag_size[0], 3, 'CUENTA: ' . strtoupper($cuentaCpi), 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, strtoupper($nombreCpi), 0, 'L');
+
+
+        $this->SetY($this->GetY() + 3);
         $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');

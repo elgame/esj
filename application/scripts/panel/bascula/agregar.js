@@ -1,5 +1,20 @@
 $(function(){
 
+  $('#ptipo').on('change', function(event) {
+    var $this = $(this),
+        option = $this.find('option:selected').val();
+
+    if (option === 'en') {
+      $('#groupProveedor').css({'display': 'block'});
+      $('#groupCliente').css({'display': 'none'});
+    } else {
+      $('#groupProveedor').css({'display': 'none'});
+      $('#groupCliente').css({'display': 'block'});
+    }
+  });
+
+  recargaTipo();
+
   recargaCalidadesArea();
 
   $('#parea').on('change', function(event) {
@@ -48,6 +63,22 @@ $(function(){
     if (e.which === 8) {
      $(this).css({'background-color': '#FFD9B3'});
       $('#pid_proveedor').val('');
+    }
+  });
+
+  // Autocomplete Cliente
+  $("#pcliente").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_clientes/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#pid_cliente").val(ui.item.id);
+      $("#pcliente").val(ui.item.label);
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#pid_cliente').val('');
     }
   });
 
@@ -181,6 +212,8 @@ $(function(){
   // Evento click boton cargar de kilos tara.
   $('#btnKilosBruto').on('click', function(event) {
     $inputBruto = $('#pkilos_brutos');
+
+    // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
     $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputBruto.val(data.data.peso);
 
@@ -193,6 +226,7 @@ $(function(){
   $('#btnKilosTara').on('click', function(event) {
     var $inputTara  = $('#pkilos_tara');
 
+    // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
     $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputTara.val(data.data.peso);
 
@@ -218,6 +252,18 @@ var calculaKilosNeto = function () {
       $inputNeto  = $('#pkilos_neto');
 
   $inputNeto.val(Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)));
+};
+
+var recargaTipo = function () {
+  var option = $('#ptipo').find('option:selected').val();
+
+  if (option === 'en') {
+    $('#groupProveedor').css({'display': 'block'});
+    $('#groupCliente').css({'display': 'none'});
+  } else {
+    $('#groupProveedor').css({'display': 'none'});
+    $('#groupCliente').css({'display': 'block'});
+  }
 };
 
 var recargaCalidadesArea = function () {

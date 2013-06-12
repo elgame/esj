@@ -79,7 +79,7 @@
                   <th>Fecha</th>
                   <th>Tipo</th>
                   <th>Folio</th>
-                  <th>Proveedor</th>
+                  <th>Proveedor/Cliente</th>
                   <th>Chofer</th>
                   <th>Camión</th>
                   <th>Placas</th>
@@ -103,7 +103,12 @@
                   <span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
                 </td>
                 <td><?php echo $b->folio; ?></td>
-                <td><?php echo $b->proveedor; ?></td>
+                <td><?php
+                    if ($b->proveedor != null) {
+                      echo $b->proveedor;
+                    } else {
+                      echo $b->cliente;
+                    } ?></td>
                 <td><?php echo $b->chofer; ?></td>
                 <td><?php echo $b->camion; ?></td>
                 <td><?php echo $b->placas; ?></td>

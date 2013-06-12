@@ -34,8 +34,8 @@ class clientes extends MY_Controller {
 			'titulo' => 'Administración de Proveedores'
 		);
 
-		$this->load->model('proveedores_model');
-		$params['proveedores'] = $this->proveedores_model->getProveedores();
+		$this->load->model('clientes_model');
+		$params['clientes'] = $this->clientes_model->getClientes();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -47,7 +47,7 @@ class clientes extends MY_Controller {
 // 		    	$bufer = utf8_encode($bufer);
 // 		    	echo "INSERT INTO proveedores (
 // nombre_fiscal, rfc, curp, cuenta_cpi)
-// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."', 
+// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."',
 // '".trim(substr($bufer, 132, 51))."', '".trim(substr($bufer, 186, 31))."');\n";
 
 // 		        // echo trim(substr($búfer, 10, 101))."<br>"; //nombre
@@ -63,7 +63,7 @@ class clientes extends MY_Controller {
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/proveedores/admin', $params);
+		$this->load->view('panel/clientes/admin', $params);
 		$this->load->view('panel/footer');
 	}
 
@@ -82,21 +82,21 @@ class clientes extends MY_Controller {
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Agregar Proveedor'
+			'titulo' => 'Agregar Cliente'
 		);
 
-		$this->configAddModProveedor();
+		$this->configAddModCliente();
 		if ($this->form_validation->run() == FALSE)
 		{
 			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 		}
 		else
 		{
-			$this->load->model('proveedores_model');
-			$res_mdl = $this->proveedores_model->addProveedor();
+			$this->load->model('clientes_model');
+			$res_mdl = $this->clientes_model->addCliente();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/proveedores/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/clientes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 
@@ -105,7 +105,7 @@ class clientes extends MY_Controller {
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/proveedores/agregar', $params);
+		$this->load->view('panel/clientes/agregar', $params);
 		$this->load->view('panel/footer');
 	}
 
@@ -126,38 +126,38 @@ class clientes extends MY_Controller {
 				array('panel/usuarios/add_mod_frm.js')
 			));
 
-			$this->load->model('proveedores_model');
+			$this->load->model('clientes_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
-				'titulo' => 'Modificar proveedor'
+				'titulo' => 'Modificar cliente'
 			);
 
-			$this->configAddModProveedor('modificar');
+			$this->configAddModCliente('modificar');
 			if ($this->form_validation->run() == FALSE)
 			{
 				$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 			}
 			else
 			{
-				$res_mdl = $this->proveedores_model->updateProveedor($this->input->get('id'));
+				$res_mdl = $this->clientes_model->updateCliente($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
-			$params['data'] = $this->proveedores_model->getProveedorInfo();
+			$params['data'] = $this->clientes_model->getClienteInfo();
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 			$this->load->view('panel/header', $params);
 			$this->load->view('panel/general/menu', $params);
-			$this->load->view('panel/proveedores/modificar', $params);
+			$this->load->view('panel/clientes/modificar', $params);
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -168,13 +168,13 @@ class clientes extends MY_Controller {
 	{
 		if (isset($_GET['id']))
 		{
-			$this->load->model('proveedores_model');
-			$res_mdl = $this->proveedores_model->updateProveedor( $this->input->get('id'), array('status' => 'e') );
+			$this->load->model('clientes_model');
+			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -185,21 +185,21 @@ class clientes extends MY_Controller {
 	{
 		if (isset($_GET['id']))
 		{
-			$this->load->model('proveedores_model');
-			$res_mdl = $this->proveedores_model->updateProveedor( $this->input->get('id'), array('status' => 'ac') );
+			$this->load->model('clientes_model');
+			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
 	 * Obtiene lostado de productores para el autocomplete, ajax
 	 */
 	public function ajax_get_proveedores(){
-		$this->load->model('proveedores_model');
-		$params = $this->proveedores_model->getProveedoresAjax();
+		$this->load->model('clientes_model');
+		$params = $this->clientes_model->getClientesAjax();
 
 		echo json_encode($params);
 	}
@@ -209,7 +209,7 @@ class clientes extends MY_Controller {
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo
  	*/
-	public function configAddModProveedor($accion='agregar')
+	public function configAddModCliente($accion='agregar')
 	{
 		$this->load->library('form_validation');
 		$rules = array(
@@ -257,9 +257,6 @@ class clientes extends MY_Controller {
 			array('field' => 'femail',
 						'label' => 'Email',
 						'rules' => 'max_length[70]|valid_email'),
-			array('field' => 'ftipo_proveedor',
-						'label' => 'Tipo de proveedor',
-						'rules' => 'required|max_length[2]'),
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),
@@ -281,19 +278,19 @@ class clientes extends MY_Controller {
 				$icono = 'error';
 				break;
 			case 3:
-				$txt = 'El proveedor se agregó correctamente.';
+				$txt = 'El cliente se agregó correctamente.';
 				$icono = 'success';
 				break;
 			case 4:
-				$txt = 'El proveedor se modificó correctamente.';
+				$txt = 'El cliente se modificó correctamente.';
 				$icono = 'success';
 				break;
 			case 5:
-				$txt = 'El proveedor se eliminó correctamente.';
+				$txt = 'El cliente se eliminó correctamente.';
 				$icono = 'success';
 				break;
 			case 6:
-				$txt = 'El proveedor se activó correctamente.';
+				$txt = 'El cliente se activó correctamente.';
 				$icono = 'success';
 				break;
 		}

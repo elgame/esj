@@ -44,7 +44,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge" <?php echo $disabled ?>>
+                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled ?>>
                         <option value="en" <?php echo set_select('ptipo', 'en', false, $this->input->post('ptipo')) ?>>Entrada</option>
                         <option value="sa" <?php echo set_select('ptipo', 'sa', false, $this->input->post('ptipo')) ?>>Salida</option>
                       </select>
@@ -79,7 +79,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" id="groupProveedor">
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
@@ -88,6 +88,18 @@
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_proveedor" value="<?php echo set_value('pid_proveedor', $this->input->post('pid_proveedor')) ?>" id="pid_proveedor">
+                    </div>
+                  </div>
+
+                  <div class="control-group" id="groupCliente" style="display: none;">
+                    <label class="control-label" for="pcliente">Cliente</label>
+                    <div class="controls">
+                      <input type="text" name="pcliente"
+                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge" placeholder="Cliente" <?php echo $disabled ?>>
+                      <span class="help-inline">
+                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
+                      </span>
+                      <input type="hidden" name="pid_cliente" value="<?php echo set_value('pid_cliente', $this->input->post('pid_cliente')) ?>" id="pid_cliente">
                     </div>
                   </div>
 
@@ -189,7 +201,7 @@
                     <label class="control-label" for="pkilos_neto" style="width: 100px;">Kilos Neto</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_neto" id="pkilos_neto" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_neto', $this->input->post('pkilos_neto')) ?>" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pkilos_neto', $this->input->post('pkilos_neto')) ?>" readonly <?php echo $disabled ?>>
                     </div>
                   </div>
                 </div>
@@ -346,7 +358,6 @@
 
 <?php if (isset($ticket)) { ?>
   <script>
-  // http://localhost/sanjorge/panel/bascula/imprimir/?id=26
     var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir/?id=' . $ticket."'") ?>, '_blank');
     win.focus();
   </script>

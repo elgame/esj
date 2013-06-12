@@ -10,6 +10,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_areas/',
     'bascula/ajax_get_empresas/',
     'bascula/ajax_get_proveedores/',
+    'bascula/ajax_get_clientes/',
     'bascula/ajax_get_choferes/',
     'bascula/ajax_get_camiones/',
     'bascula/ajax_get_calidades/',
@@ -18,6 +19,7 @@ class bascula extends MY_Controller {
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
+    'bascula/show_view_agregar_cliente/',
     'bascula/show_view_agregar_chofer/',
     'bascula/show_view_agregar_camion/',
     );
@@ -120,14 +122,31 @@ class bascula extends MY_Controller {
     if (isset($_GET['folio']))
     {
       $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
-
+      // echo "<pre>";
+      //   var_dump($info);
+      // echo "</pre>";exit;
       if (count($info['info']) > 0)
       {
         $this->load->model('empresas_model');
         $empresa = $this->empresas_model->getInfoEmpresa($info['info'][0]->id_empresa, true);
 
-        $this->load->model('proveedores_model');
-        $proveedor = $this->proveedores_model->getProveedorInfo($info['info'][0]->id_proveedor, true);
+        if ($info['info'][0]->id_proveedor != null)
+        {
+          $this->load->model('proveedores_model');
+          $proveedor = $this->proveedores_model->getProveedorInfo($info['info'][0]->id_proveedor, true);
+
+          $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
+          $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+        }
+        else
+        {
+          $this->load->model('clientes_model');
+          $cliente = $this->clientes_model->getClienteInfo($info['info'][0]->id_cliente, true);
+
+          $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
+          $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+        }
+
 
         $this->load->model('choferes_model');
         $chofer = $this->choferes_model->getChoferInfo($info['info'][0]->id_chofer, true);
@@ -150,8 +169,9 @@ class bascula extends MY_Controller {
         $_POST['parea']         = $info['info'][0]->id_area;
         $_POST['pempresa']      = $empresa['info']->nombre_fiscal; // falta
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
-        $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
-        $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+
+
+
         $_POST['pchofer']       = $chofer['info']->nombre;
         $_POST['pid_chofer']    = $info['info'][0]->id_chofer;
         $_POST['pcamion']       = $camion['info']->placa;
@@ -360,6 +380,47 @@ class bascula extends MY_Controller {
     $this->load->view('panel/bascula/supermodal', $params);
   }
 
+  public function show_view_agregar_cliente()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('panel/bascula/fix_clientes.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Cliente'
+    );
+
+    $this->configAddModCliente();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->load->model('clientes_model');
+      $res_mdl = $this->clientes_model->addCliente();
+
+      if(!$res_mdl['error'])
+        redirect(base_url('panel/bascula/show_view_agregar_cliente/?'.String::getVarsLink(array('msg')).'&msg=11&close=1'));
+    }
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['template'] = $this->load->view('panel/clientes/agregar', $params, true);
+
+    $this->load->view('panel/bascula/supermodal', $params);
+  }
+
   /**
    * Muestra formulario agregar chofer.
    * @return void
@@ -482,8 +543,14 @@ class bascula extends MY_Controller {
             'rules' => ''),
       array('field' => 'pid_proveedor',
             'label' => 'Proveedor',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'pproveedor',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'pid_cliente',
+            'label' => 'Cliente',
+            'rules' => ''),
+      array('field' => 'pcliente',
             'label' => '',
             'rules' => ''),
       array('field' => 'pid_chofer',
@@ -570,6 +637,17 @@ class bascula extends MY_Controller {
       }
     }
 
+    if (isset($_POST['ptipo']))
+    {
+      if ($_POST['ptipo'] === 'en')
+        $rules[] = array('field'  => 'pid_proveedor',
+                          'label' => 'Proveedor',
+                          'rules' => 'required');
+      else
+        $rules[] = array('field' => 'pid_cliente',
+                         'label' => 'Cliente',
+                         'rules' => 'required');
+    }
 
     $this->form_validation->set_rules($rules);
   }
@@ -694,6 +772,65 @@ class bascula extends MY_Controller {
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
+  public function configAddModCliente($accion='agregar')
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'fnombre_fiscal',
+            'label' => 'Nombre fiscal',
+            'rules' => 'required|max_length[140]'),
+      array('field' => 'fcalle',
+            'label' => 'Calle',
+            'rules' => 'max_length[60]'),
+      array('field' => 'fno_exterior',
+            'label' => 'No. exterior',
+            'rules' => 'max_length[7]'),
+      array('field' => 'fno_interior',
+            'label' => 'No. interior',
+            'rules' => 'max_length[7]'),
+      array('field' => 'fcolonia',
+            'label' => 'Colonia',
+            'rules' => 'max_length[60]'),
+      array('field' => 'flocalidad',
+            'label' => 'Localidad',
+            'rules' => 'max_length[45]'),
+      array('field' => 'fmunicipio',
+            'label' => 'Municipio',
+            'rules' => 'max_length[45]'),
+      array('field' => 'festado',
+            'label' => 'Estado',
+            'rules' => 'max_length[45]'),
+
+      array('field' => 'frfc',
+            'label' => 'RFC',
+            'rules' => 'max_length[13]'),
+      array('field' => 'fcurp',
+            'label' => 'CURP',
+            'rules' => 'max_length[35]'),
+      array('field' => 'fcp',
+            'label' => 'CP',
+            'rules' => 'max_length[10]'),
+      array('field' => 'ftelefono',
+            'label' => 'Telefono',
+            'rules' => 'max_length[15]'),
+      array('field' => 'fcelular',
+            'label' => 'Celular',
+            'rules' => 'max_length[20]'),
+
+      array('field' => 'femail',
+            'label' => 'Email',
+            'rules' => 'max_length[70]|valid_email'),
+      array('field' => 'fcuenta_cpi',
+            'label' => 'Cuenta ContpaqI',
+            'rules' => 'max_length[12]'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
   public function configAddModChofer($accion='agregar')
   {
     $this->load->library('form_validation');
@@ -758,6 +895,16 @@ class bascula extends MY_Controller {
   {
     $this->load->model('proveedores_model');
     echo json_encode($this->proveedores_model->getProveedoresAjax());
+  }
+
+  /**
+    * Obtiene los proveedores por peticion Ajax.
+    * @return void
+    */
+  public function ajax_get_clientes()
+  {
+    $this->load->model('clientes_model');
+    echo json_encode($this->clientes_model->getClientesAjax());
   }
 
   /**
@@ -859,6 +1006,10 @@ class bascula extends MY_Controller {
       case 10:
         $txt = 'No existe el folio especificado.';
         $icono = 'error';
+        break;
+      case 11:
+        $txt = 'El cliente se agregó correctamente.';
+        $icono = 'success';
         break;
     }
 
