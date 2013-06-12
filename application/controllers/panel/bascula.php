@@ -102,8 +102,12 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
       $res_mdl = $this->bascula_model->addBascula();
 
+      $ticket = '';
+      if (isset($_POST['pstatus']))
+        $ticket = '&p=t';
+
       if( ! $res_mdl['error'])
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
     }
 
     $params['accion'] = 'n'; // indica que es nueva entrada
@@ -134,6 +138,9 @@ class bascula extends MY_Controller {
         $params['param_folio'] = '?folio='.$_GET['folio'];
         $params['idb']         = $info['info'][0]->id_bascula;
         $params['accion']      = $info['info'][0]->accion;
+
+        if (isset($_GET['p']))
+          $params['ticket'] = $info['info'][0]->id_bascula;
 
         if (isset($_GET['e']))
           if ($_GET['e'] === 't')

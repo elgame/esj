@@ -27,7 +27,7 @@
 
       <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right">Nueva Pesada</a>
 
-      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
         <input type="hidden" name="pidb" value="<?php echo $idb ?>">
         <div class="row-fluid"><!--Datos Bascula-->
@@ -344,6 +344,13 @@
     </div><!--/#content.span10-->
 
 
+<?php if (isset($ticket)) { ?>
+  <script>
+  // http://localhost/sanjorge/panel/bascula/imprimir/?id=26
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir/?id=' . $ticket."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
