@@ -1,3 +1,14 @@
+Detalles Bascula:
+ ☐ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id)
+ ☐ si le doy cargar con un folio que no existe, pone errores
+ ☐ cuando cargo un folio, ya no pone las calidades para agregar mas cajas
+ ☐ ponerle un boton de nueva pesada, por q cuando cargo una, le tengo que dar en agregar pesada en el menu, se van a pendejar las morras
+ ☐ en modificar pesada cuando le doy guardar se pone todo bloqueado, no hay q bloquear
+ ☐ en modificar pesada, en cuanto entras a alguna no pone las calidades para agregar cajas
+ ☐ en modificar pesada, no modifica las cosas, solo las cajas que quito o agrego; empresa, proveedor, chofer, camion, kilos bruto, tara y netos se se cambian, tampoco se recalculan los valores en la tabla de kilos y promedio para sacar el importe
+ ☐ en modificar pesada, si cargo otra pesada y esta finalizada se pone todo bloqueado
+ ☐ en el listado de pesadas, al entrar pone los cancelados, que no los ponga solo los activos
+
 
 Cambis BD:
   ☐ tabla usuarios:
@@ -19,6 +30,12 @@ Cambis BD:
       COMMENT ON COLUMN bascula.accion IS 'en:entrada, sa:salida, f:finalisado';
       COMMENT ON COLUMN bascula.tipo IS 'en:entrada, sa:salida';
       COMMENT ON COLUMN bascula_fotos.tipo IS 'en:entrada; sa:salida, ch:chofer';
+
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Empresas', 0, true, 'empresas/', 'group', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar empresa', 45, true, 'empresas/agregar/', 'plus', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 45, false, 'empresas/modificar/', 'edit', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Eliminar', 45, false, 'empresas/eliminar/', 'remove', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Activar', 45, false, 'empresas/activar/', 'ok', false);
 
       CREATE TABLE empresas_fiscal
       (
