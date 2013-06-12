@@ -2,7 +2,7 @@
 
 class mypdf_ticket extends FPDF {
     var $limiteY = 0;
-    var $titulo1 = 'CAFE DIGITAL';
+    var $titulo1 = 'EMPAQUE SAN JORGE S.A DE C.V';
 
     var $pag_size = array();
 
@@ -36,69 +36,94 @@ class mypdf_ticket extends FPDF {
     }
 
     public function datosTicket($data){
+        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
         $this->SetFont('Arial', '', 8);
-        $this->MultiCell($this->pag_size[0], 3, 'Cafeteria // Impresion Digital // Internet', 0, 'L');
-        $this->MultiCell($this->pag_size[0], 3, 'Av. Conchita 3768-A', 0, 'L');
-        $this->MultiCell($this->pag_size[0], 3, 'Loma Bonita', 0, 'L');
 
-        $this->MultiCell($this->pag_size[0], 3, 'TICKET : ' . $data[0]->id_ticket , 0, 'L');
-
-        $this->MultiCell($this->pag_size[0], 3, 'FECHA :' . date('d-m-Y H:i:s'), 0, 'L');
-
-    }
-
-    public function productosTicket($data, $data_info){
+        $this->SetWidths(array(30, 30));
+        $this->SetAligns(array('L', 'R'));
+        $this->Row(array( 'NO. BOLETA: ' . $data->folio, 'FECHA: ' . substr($data->fecha_bruto, 0, 10)), false, false, 3);
+        // $this->MultiCell($this->pag_size[0], 3, 'NO. BOLETA: ' . $data->folio. '    FECHA: ' . substr($data->fecha_bruto, 0, 10), 0, 'L');
 
         $this->SetY($this->GetY()+3);
 
-        $this->SetFont('Arial', '', 8);
-        $this->SetWidths(array(32, 31));
-        $this->SetAligns(array('L'));
-        $this->Row(array('CODIGO', 'ARTICULO'), false, false);
+        $this->SetWidths(array(15, 25, 25));
+        $this->SetAligns(array('L', 'R', 'L'));
+        $this->Row(array( 'BRUTO :', String::formatoNumero($data->kilos_bruto, 2, ''), substr($data->fecha_bruto, -11, -3)), false, false, 3);
+        // $this->MultiCell($this->pag_size[0], 3, 'BRUTO : ' . $data->kilos_bruto . '     ' . substr($data->fecha_bruto, -11, -3), 0, 'L');
 
-        $this->SetWidths(array(12, 19, 30));
+        $this->SetWidths(array(15, 25, 25));
+        $this->SetAligns(array('L', 'R', 'L'));
+        $this->Row(array( 'TARA :', String::formatoNumero($data->kilos_tara, 2, ''), substr($data->fecha_tara, -11, -3)), false, false, 3);
+        // $this->MultiCell($this->pag_size[0], 3, 'TARA    : ' . $data->kilos_tara . '   ' . substr($data->fecha_tara, -11, -3), 0, 'L');
+
+        $this->SetWidths(array(15, 25, 25));
+        $this->SetAligns(array('L', 'R', 'L'));
+        $this->Row(array( 'NETO :', String::formatoNumero($data->kilos_neto, 2, ''), ''), false, false, 3);
+        // $this->MultiCell($this->pag_size[0], 3, 'NETO    : ' . $data->kilos_neto, 0, 'L');
+    }
+
+    public function productosTicket($data, $data_info){
+        $this->SetY($this->GetY()+3);
+        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
+
+        $this->SetY($this->GetY()+2);
+
+        $this->SetFont('Arial', '', 7);
+        $this->SetWidths(array(7, 10, 12, 10, 10, 20));
         $this->SetAligns(array('L'));
-        $this->Row(array('CANT.', 'PRECIO/UN.', 'IMPORTE TOTAL'), false, false);
+        $this->Row(array('CJS', 'LIMON', 'KILOS', 'PROM', 'PCIO', 'IMPORTE'), false, false);
 
         $this->SetFont('Arial', '', 8);
         $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 3, '---------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
         if(is_array($data_info)){
             foreach ($data_info as $prod){
-              $this->SetFont('Arial', '', 8);
-              $this->SetWidths(array(32, 31));
+              $this->SetFont('Arial', '', 7);
+              $this->SetWidths(array(8, 10, 12, 10, 10, 20));
               $this->SetAligns(array('L'));
-              $this->Row(array($prod->nombre, $prod->nombre), false, false);
-
-              $this->SetWidths(array(12, 19, 30));
-              $this->SetAligns(array('L'));
-              $this->Row(array($prod->cantidad, String::formatoNumero($prod->precio_venta,2), String::formatoNumero($prod->importe,2)), false, false);
-              $this->SetY($this->GetY() + 3);
+              $this->Row(array($prod->cajas,
+                               $prod->calidad,
+                               String::formatoNumero($prod->kilos, 2, ''),
+                               $prod->promedio,
+                               String::formatoNumero($prod->precio),
+                               String::formatoNumero($prod->importe)), false, false);
             }
         }
-        $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 3, '---------------------------------------------------', 0, 'L');
 
-        $this->SetWidths(array(31, 30));
-        $this->SetAligns(array('L'));
-        $this->Row(array( 'TOTAL', String::formatoNumero($data[0]->total)), false, false, 3);
+        $this->SetFont('Arial', '', 8);
+        $this->CheckPageBreak(4);
+        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
+
+        $this->SetWidths(array(38, 20));
+        $this->SetAligns(array('R', 'R'));
+        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe)), false, false, 3);
 
         $this->SetY($this->GetY() + 5);
 
-        $this->Row(array( 'ENTREGADO', String::formatoNumero($data[0]->recibido)), false, false, 3);
-        $this->Row(array( 'CAMBIO', String::formatoNumero($data[0]->cambio)), false, false, 3);
+        $this->MultiCell($this->pag_size[0], 3, 'CUENTA: ' . strtoupper($data->cuenta_cpi), 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');
     }
 
     public function pieTicket($data){
 
-      $this->SetY($this->GetY() + 5);
+      $this->SetY($this->GetY() + 3);
 
       $this->SetFont('Arial', '', 8);
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetAligns(array('L'));
-      $this->Row(array('3634-3430' ), false, false);
+      $this->Row(array('EXPEDIDO EL:' ), false, false);
       $this->SetY($this->GetY() - 3);
-      $this->Row(array('www.cafedigital.mx' ), false, false);
+      $this->Row(array(substr($data->fecha_tara, 0, 19)), false, false);
+
+      $this->SetY($this->GetY() + 5);
+      $this->SetWidths(array($this->pag_size[0]));
+      $this->SetAligns(array('C'));
+      $this->Row(array('--------------------------------------------------'), false, false);
+
+      $this->SetY($this->GetY() - 3);
+      $this->Row(array('FIRMA'), false, false);
     }
 
     public function printTicket($data, $data_prod){

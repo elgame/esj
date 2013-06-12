@@ -89,7 +89,7 @@
               <tbody>
             <?php foreach($basculas['basculas'] as $b){ ?>
               <tr>
-                <td><?php echo substr($b->fecha, 0, 16); ?></td>
+                <td><?php echo substr($b->fecha, 0, 19); ?></td>
                 <td>
                   <?php
                     if($b->tipo == 'en'){
@@ -126,7 +126,11 @@
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar la bascula?', 'bascula', this); return false;"))
                       );
                     }
-
+                    echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
+                        'params'   => 'id='.$b->id_bascula,
+                        'btn_type' => 'btn-success',
+                        'attrs' => array('target' => '_BLANK'))
+                      );
                     ?>
                 </td>
               </tr>

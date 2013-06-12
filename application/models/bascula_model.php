@@ -29,17 +29,18 @@ class Bascula_model extends CI_Model {
 
     //Filtros para buscar
     if($this->input->get('fnombre') !== '')
-      $sql = "WHERE ( b.folio::text LIKE '%".$this->input->get('fnombre')."%' ) or
-                    ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
-                    ( lower(ch.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
-                    ( lower(ca.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) or
-                    ( lower(ca.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+      $sql = "WHERE (( b.folio::text LIKE '%".$this->input->get('fnombre')."%' ) OR
+                    ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
+                    ( lower(ch.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
+                    ( lower(ca.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) OR
+                    ( lower(ca.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ))";
 
     if (isset($_GET['farea']))
       if ($this->input->get('farea') !== '')
         $sql .= (empty($sql) ? "WHERE " : " AND ") . "a.id_area = " . $this->input->get('farea');
 
     $_GET['fstatusb'] = $this->input->get('fstatusb')!==false ? $this->input->get('fstatusb') : 't';
+
     if($this->input->get('fstatusb') != '' && $this->input->get('fstatusb') != 'todos')
       $sql .= (empty($sql) ? 'WHERE ': ' AND ')."b.status='".$this->input->get('fstatusb')."'";
 
@@ -53,8 +54,6 @@ class Bascula_model extends CI_Model {
     if (isset($_GET['fechaend']))
       if ($this->input->get('fechaend') !== '')
         $sql .= (empty($sql) ? "WHERE ": " AND ") . "DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
-
-      // $sql = "AND DATE(cic.fecha)>='".$_GET['fechaini']."' AND DATE(cic.fecha)<='".$_GET['fechaend']."'";
 
     $str_query =
         "SELECT b.id_bascula,
@@ -114,7 +113,7 @@ class Bascula_model extends CI_Model {
           'id_chofer'    => $this->input->post('pid_chofer'),
           'id_camion'    => $this->input->post('pid_camion'),
           'folio'        => $this->input->post('pfolio'),
-          'fecha_bruto'  => str_replace('T', ' ', $_POST['pfecha']),
+          'fecha_bruto'  => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
           'kilos_bruto'  => $this->input->post('pkilos_brutos'),
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
@@ -125,12 +124,12 @@ class Bascula_model extends CI_Model {
       }
 
       $data2 = array(
-        'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'], // checar
+        'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
         'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
         'obcervaciones' => $this->input->post('pobcervaciones'),
       );
 
-      if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa')
+      if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' || $_POST['paccion'] === 'f')
       {
         $data2['id_empresa']   = $this->input->post('pid_empresa');
         $data2['id_area']      = $this->input->post('parea');
@@ -138,8 +137,9 @@ class Bascula_model extends CI_Model {
         $data2['id_chofer']    = $this->input->post('pid_chofer');
         $data2['id_camion']    = $this->input->post('pid_camion');
 
-        $data2['fecha_tara']  = str_replace('T', ' ', $_POST['pfecha']);
+        $data2['fecha_tara']  = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
         $data2['kilos_tara']  = $this->input->post('pkilos_tara');
+
         $data2['kilos_neto']  = $this->input->post('pkilos_neto');
         $data2['kilos_neto2'] = $this->input->post('ppesada');
         $data2['accion']      = 'sa';
@@ -206,10 +206,22 @@ class Bascula_model extends CI_Model {
     $id = (isset($_GET['id']))? $_GET['id']: $id;
 
     $sql_res = $this->db
-      ->select("*" )
-      ->from("bascula")
-      ->where("id_bascula", $id)
-      ->or_where('folio', $folio)
+      ->select("b.*,
+                e.nombre_fiscal AS empresa,
+                a.nombre AS area,
+                p.nombre_fiscal AS proveedor,
+                p.cuenta_cpi,
+                ch.nombre AS chofer,
+                (ca.marca || ' ' || ca.modelo) AS camion,
+                ca.placa AS camion_placas")
+      ->from("bascula AS b")
+      ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
+      ->join('areas AS a', 'a.id_area = b.id_area', "inner")
+      ->join('proveedores AS p', 'p.id_proveedor = b.id_proveedor', "inner")
+      ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "inner")
+      ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "inner")
+      ->where("b.id_bascula", $id)
+      ->or_where('b.folio', $folio)
       ->get();
 
     $data['info'] = array();
@@ -256,6 +268,31 @@ class Bascula_model extends CI_Model {
     else
       return 1;
   }
+
+  /**
+   * Imprime el ticket
+   * @return pdf
+   */
+  public function imprimir_ticket($id)
+  {
+    $this->load->library('mypdf_ticket');
+
+    $data = $this->getBasculaInfo($id);
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $pdf = new mypdf_ticket();
+    $pdf->SetFont('Arial','',8);
+    $pdf->AddPage();
+
+    $pdf->printTicket($data['info'][0], $data['cajas']);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
 
 }
 

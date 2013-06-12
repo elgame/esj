@@ -1,0 +1,19 @@
+CORRECCIONES:
+  ✔ supermodal cerrarlo despues de 1 seg. @done (13-06-11 19:01)
+  ✔ validar el "enter" en el folio. @done (13-06-11 19:01)
+  ✔ validar el enter en agregar caja|calidad @done (13-06-11 19:01)
+  ✔ dejar que agregue cajas|calidades aunq el kilo neto sea 0 @done (13-06-11 19:01)
+  ✔ validar que la calidad no se ha agregado en el listado de cajas @done (13-06-11 19:01)
+  ✔ colocar las calidades al cambiar el area por ajax. @done (13-06-11 19:01)
+  ✔ poner como readonly los pesajes menos desde modificar en el listado @done (13-06-11 19:01)
+  ✔ kilos neto valor absoluto @done (13-06-11 19:01)
+  ✔ si se podra modificar desde el listado de bascula. @done (13-06-11 19:01)
+  ✔ imprimir el ticket al guardar o desde el listado @done (13-06-11 19:01)
+  ✔ listado realizar los filtros @done (13-06-11 19:01)
+  ✔ cancelar y activar en el listado @done (13-06-11 19:01)
+  ✔ validar que al guardar uno nuevo en bascula el folio sea el siguiente. @done (13-06-11 19:01)
+  ✔ hacer la peticion ajax para cargar los kilos bruto y tara. @done (13-06-11 19:01)
+
+FOTOS:
+  ☐ tipo "salida"
+  ☐  agregar en el config las url de las camaras

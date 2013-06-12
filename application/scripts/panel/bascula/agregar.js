@@ -1,5 +1,7 @@
 $(function(){
 
+  recargaCalidadesArea();
+
   $('#parea').on('change', function(event) {
     var $this = $(this),
         option = $this.find('option:selected').val();
@@ -14,23 +16,8 @@ $(function(){
     }
   });
 
-  $('#pstatus').btnToggle();
 
-   // Autocomplete Empresas
-  $("#parea").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_areas/',
-    minLength: 1,
-    selectFirst: true,
-    select: function( event, ui ) {
-      $("#pid_area").val(ui.item.id);
-      $("#parea").val(ui.item.label);
-    }
-  }).keydown(function(e){
-    if (e.which === 8) {
-      $(this).val('');
-      $('#pid_area').val('');
-    }
-  });
+  $('#pstatus').btnToggle();
 
   // Autocomplete Empresas
   $("#pempresa").autocomplete({
@@ -43,7 +30,7 @@ $(function(){
     }
   }).keydown(function(e){
     if (e.which === 8) {
-      $(this).val('');
+      $(this).css({'background-color': '#FFD9B3'});
       $('#pid_empresa').val('');
     }
   });
@@ -59,7 +46,7 @@ $(function(){
     }
   }).keydown(function(e){
     if (e.which === 8) {
-      $(this).val('');
+     $(this).css({'background-color': '#FFD9B3'});
       $('#pid_proveedor').val('');
     }
   });
@@ -75,7 +62,7 @@ $(function(){
     }
   }).keydown(function(e){
     if (e.which === 8) {
-      $(this).val('');
+      $(this).css({'background-color': '#FFD9B3'});
       $('#pid_chofer').val('');
     }
   });
@@ -91,7 +78,7 @@ $(function(){
     }
   }).keydown(function(e){
     if (e.which === 8) {
-      $(this).val('');
+      $(this).css({'background-color': '#FFD9B3'});
       $('#pid_camion').val('');
     }
   });
@@ -181,9 +168,14 @@ $(function(){
   // Evento click para el boton cargar folio.
   $('#loadFolio').on('click', function(event) {
     var $form = $('#form'),
-        $folio = $('#pfolio');
+        $folio = $('#pfolio'),
+        editar = '';
 
-    location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val();
+
+    if ($('#isEditar').length) editar = '&e=t';
+
+    // console.log(base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
+    location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
   });
 
   // Evento click boton cargar de kilos tara.
@@ -191,26 +183,57 @@ $(function(){
     $inputBruto = $('#pkilos_brutos');
     $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputBruto.val(data.data.peso);
+
+      calculaKilosNeto();
+      calculaTotales();
     }, 'json');
   });
 
   // Evento click boton cargar de kilos tara.
   $('#btnKilosTara').on('click', function(event) {
-    var $inputBruto = $('#pkilos_brutos'),
-        $inputTara  = $('#pkilos_tara'),
-        $inputNeto  = $('#pkilos_neto');
+    var $inputTara  = $('#pkilos_tara');
 
     $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputTara.val(data.data.peso);
 
-      $inputNeto.val(Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val())));
+      calculaKilosNeto();
+      calculaTotales();
     }, 'json');
   });
 
-  // POST para obtener el peso desde el servidor bascula.
-  // {"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"90"}}
+  $('#pkilos_brutos, #pkilos_tara').keyup(function(e) {
+    var key = e.which;
+
+    if ((key > 47 && key < 58) || key === 8) {
+      calculaKilosNeto();
+      calculaTotales();
+    }
+  });
 
 });
+
+var calculaKilosNeto = function () {
+  var $inputBruto = $('#pkilos_brutos'),
+      $inputTara  = $('#pkilos_tara'),
+      $inputNeto  = $('#pkilos_neto');
+
+  $inputNeto.val(Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)));
+};
+
+var recargaCalidadesArea = function () {
+  var option = $('#parea').find('option:selected').val();
+
+  if (option !== '') {
+    $.get(base_url + 'panel/bascula/ajax_get_calidades/', {id: option}, function(data) {
+        var optionHtml = ['<option value=""></option>'];
+        data.calidades.forEach(function(e, i) {
+          optionHtml.push('<option value="'+e.id_calidad+'">'+e.nombre+'</option>');
+        });
+        $('#icalidad').html(optionHtml.join(''));
+      }, 'json');
+  }
+
+};
 
 var validaAddCaja = function () {
   // || $('#ikilos').val() === '' || $('#ipromedio').val() === '' || $('#iimporte').val() === ''
@@ -281,5 +304,5 @@ var calculaTotales = function () {
   });
 
   $ptotal_cajas.val(totalCajas);
-  $ptotal.val(total);
+  $ptotal.val(total.toFixed(2));
 };

@@ -1,13 +1,13 @@
 Detalles Bascula:
- ☐ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id)
- ☐ si le doy cargar con un folio que no existe, pone errores
- ☐ cuando cargo un folio, ya no pone las calidades para agregar mas cajas
- ☐ ponerle un boton de nueva pesada, por q cuando cargo una, le tengo que dar en agregar pesada en el menu, se van a pendejar las morras
- ☐ en modificar pesada cuando le doy guardar se pone todo bloqueado, no hay q bloquear
- ☐ en modificar pesada, en cuanto entras a alguna no pone las calidades para agregar cajas
- ☐ en modificar pesada, no modifica las cosas, solo las cajas que quito o agrego; empresa, proveedor, chofer, camion, kilos bruto, tara y netos se se cambian, tampoco se recalculan los valores en la tabla de kilos y promedio para sacar el importe
- ☐ en modificar pesada, si cargo otra pesada y esta finalizada se pone todo bloqueado
- ☐ en el listado de pesadas, al entrar pone los cancelados, que no los ponga solo los activos
+ ✔ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id) @done (13-06-11 21:08)
+ ✔ si le doy cargar con un folio que no existe, pone errores @done (13-06-11 21:08)
+ ✔ cuando cargo un folio, ya no pone las calidades para agregar mas cajas @done (13-06-11 21:15)
+ ✔ ponerle un boton de nueva pesada, por q cuando cargo una, le tengo que dar en agregar pesada en el menu, se van a pendejar las morras @done (13-06-11 21:18)
+ ✔ en modificar pesada cuando le doy guardar se pone todo bloqueado, no hay q bloquear @done (13-06-11 21:27)
+ ✔ en modificar pesada, en cuanto entras a alguna no pone las calidades para agregar cajas @done (13-06-11 21:27)
+ ✔ en modificar pesada, no modifica las cosas, solo las cajas que quito o agrego; empresa, proveedor, chofer, camion, kilos bruto, tara y netos se se cambian, tampoco se recalculan los valores en la tabla de kilos y promedio para sacar el importe @done (13-06-11 22:47)
+ ✔ en modificar pesada, si cargo otra pesada y esta finalizada se pone todo bloqueado @done (13-06-11 22:18)
+ ✔ en el listado de pesadas, al entrar pone los cancelados, que no los ponga solo los activos @done (13-06-11 21:42)
 
 
 Cambis BD:

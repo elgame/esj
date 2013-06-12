@@ -9,6 +9,7 @@
         {
           $readonly = '';
           $crumbTitle = 'Modificar';
+          echo '<input type="hidden" id="isEditar" value="t" />';
         }
       ?>
 
@@ -24,7 +25,9 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/agregar'.$param_folio); ?>" method="post" class="form-horizontal" id="form">
+      <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right">Nueva Pesada</a>
+
+      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal" id="form">
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
         <input type="hidden" name="pidb" value="<?php echo $idb ?>">
         <div class="row-fluid"><!--Datos Bascula-->
@@ -70,7 +73,7 @@
                       <input type="text" name="pempresa"
                         value="<?php echo set_value('pempresa', $this->input->post('pempresa')) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" <?php echo $disabled ?>>
                       <span class="help-inline">
-                        <a href="<?php echo base_url('panel/empresas/agregar') ?>" class="btn" rel="superbox-80x500">Agregar</a>
+                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_empresa" value="<?php echo set_value('pid_empresa', $this->input->post('pid_empresa')) ?>" id="pid_empresa">
                     </div>
@@ -283,10 +286,10 @@
                                     <input type="hidden" name="pimporte[]" value="<?php echo $_POST['pimporte'][$key] ?>" id="pimporte">
                                   </td>
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
-                                  <td><?php echo $_POST['pkilos'][$key] ?></td>
-                                  <td><?php echo $_POST['ppromedio'][$key] ?></td>
+                                  <td id="tdkilos"><?php echo $_POST['pkilos'][$key] ?></td>
+                                  <td id="tdpromedio"><?php echo $_POST['ppromedio'][$key] ?></td>
                                   <td><?php echo $_POST['pprecio'][$key] ?></td>
-                                  <td><?php echo $_POST['pimporte'][$key] ?></td>
+                                  <td id="tdimporte"><?php echo $_POST['pimporte'][$key] ?></td>
                                   <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled ?>><i class="icon-trash"></i></button></td>
                                 </tr>
 

@@ -16,6 +16,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_precio_calidad/',
     'bascula/ajax_get_kilos/',
 
+    'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
     'bascula/show_view_agregar_chofer/',
     'bascula/show_view_agregar_camion/',
@@ -150,7 +151,7 @@ class bascula extends MY_Controller {
         $_POST['pid_camion']    = $info['info'][0]->id_camion;
 
         $params['next_folio'] = $info['info'][0]->folio;
-        $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 19));
+        $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
 
         $_POST['pkilos_brutos'] = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']   = $info['info'][0]->kilos_tara;
@@ -176,8 +177,9 @@ class bascula extends MY_Controller {
         $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
 
       }
-      else {
-        $_GET['msg'] = '11';
+      else
+      {
+        $_GET['msg'] = '10';
       }
 
       // echo "<pre>";
@@ -194,6 +196,10 @@ class bascula extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  /**
+   * Muestra el formulario para modificar una entrada|salida
+   * @return void
+   */
   public function modificar()
   {
     if (isset($_GET['folio'][0]))
@@ -202,7 +208,7 @@ class bascula extends MY_Controller {
 
   /**
    * Cancela una bascula entrada|salida
-   * @return [type] [description]
+   * @return void
    */
   public function cancelar()
   {
@@ -219,7 +225,7 @@ class bascula extends MY_Controller {
 
   /**
    * Activa una bascula entrada|salida
-   * @return [type] [description]
+   * @return void
    */
   public function activar()
   {
@@ -234,6 +240,16 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
 
+  /**
+   * Muestra el pdf del ticket.
+   * @return void
+   */
+  public function imprimir()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->imprimir_ticket($this->input->get('id'));
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos para mostrar los formulario en el supermodal.
@@ -246,6 +262,50 @@ class bascula extends MY_Controller {
    */
   public function show_view_agregar_empresa()
   {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('panel/clientes/frm_addmod.js'),
+      array('panel/bascula/fix_empresas.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Empresa'
+    );
+
+    $this->configAddModEmpresa();
+
+    if($this->form_validation->run() == FALSE){
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }else{
+      $this->load->model('empresas_model');
+      $respons = $this->empresas_model->addEmpresa();
+
+      if($respons[0])
+        redirect(base_url('panel/empresas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$respons[2].'&close=1'));
+      else
+        $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
+    }
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    // $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    // $this->load->view('panel/empresas/agregar', $params);
+    // $this->load->view('panel/footer');
+
+    $params['template'] = $this->load->view('panel/empresas/agregar', $params, true);
+
+    $this->load->view('panel/bascula/supermodal', $params);
   }
 
   /**
@@ -507,6 +567,61 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  /**
+   * Configura las reglas para agregar empresas
+   */
+  private function configAddModEmpresa(){
+    $this->load->library('form_validation');
+    $contacto = false;
+
+      $rules = array(
+        array('field' => 'dnombre_fiscal',
+            'label' => 'Nombre Fiscal',
+            'rules' => 'required|max_length[130]'),
+        array('field' => 'drfc',
+            'label' => 'RFC',
+            'rules' => 'max_length[13]'),
+        array('field' => 'dcalle',
+            'label' => 'Calle',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dno_exterior',
+            'label' => 'No exterior',
+            'rules' => 'max_length[8]'),
+        array('field' => 'dno_interior',
+            'label' => 'No interior',
+            'rules' => 'max_length[8]'),
+        array('field' => 'dcolonia',
+            'label' => 'Colonia',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dlocalidad',
+            'label' => 'Localidad',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dmunicipio',
+            'label' => 'Municipio',
+            'rules' => 'max_length[60]'),
+        array('field' => 'destado',
+            'label' => 'Estado',
+            'rules' => 'max_length[60]'),
+        array('field' => 'dcp',
+            'label' => 'CP',
+            'rules' => 'max_length[12]'),
+        array('field' => 'dregimen_fiscal',
+            'label' => 'Régimen fiscal',
+            'rules' => 'max_length[100]'),
+        array('field' => 'dtelefono',
+            'label' => 'Teléfono',
+            'rules' => 'max_length[15]'),
+        array('field' => 'demail',
+            'label' => 'Email',
+            'rules' => 'valid_email|max_length[70]'),
+        array('field' => 'dpag_web',
+            'label' => 'Pag Web',
+            'rules' => 'max_length[80]')
+      );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
@@ -732,6 +847,11 @@ class bascula extends MY_Controller {
       case 9:
         $txt = 'La bascula se activo correctamente.';
         $icono = 'success';
+        break;
+
+      case 10:
+        $txt = 'No existe el folio especificado.';
+        $icono = 'error';
         break;
     }
 
