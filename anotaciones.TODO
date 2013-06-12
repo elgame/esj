@@ -1,4 +1,5 @@
 Detalles Bascula:
+ ☐ Los kilos netos no los puede modificar 
  ✔ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id) @done (13-06-11 21:08)
  ✔ si le doy cargar con un folio que no existe, pone errores @done (13-06-11 21:08)
  ✔ cuando cargo un folio, ya no pone las calidades para agregar mas cajas @done (13-06-11 21:15)
@@ -17,6 +18,8 @@ Cambis BD:
   ☐ tabla bascula:
       campo agregar "accion"
       campo agregar "tipo"
+      agregar campo "id_cliente"
+      cambiar el campo "id_proveedor" a null
   ☐ tabla empresa:
       agregar los campos nuevos
   ☐ Privilegios
@@ -55,3 +58,32 @@ Cambis BD:
         OIDS=FALSE
       );
       ALTER TABLE empresas_fiscal OWNER TO programa;
+
+      CREATE TABLE clientes
+      (
+        id_cliente bigserial NOT NULL,
+        nombre_fiscal character varying(140) NOT NULL,
+        calle character varying(60),
+        no_exterior character varying(7),
+        no_interior character varying(7),
+        colonia character varying(60),
+        localidad character varying(45),
+        municipio character varying(45),
+        estado character varying(45),
+        cp character varying(10),
+        telefono character varying(15),
+        celular character varying(20),
+        email character varying(70),
+        pag_web character varying(80),
+        status character varying(15) DEFAULT 'ac'::character varying, -- Corresponde al status ac:activo o e:eliminado
+        cuenta_cpi character varying(12), -- cuenta afectable del contpaqi
+        rfc character varying(20),
+        curp character varying(35),
+        CONSTRAINT clientes_pkey PRIMARY KEY (id_cliente)
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE clientes OWNER TO programa;
+      COMMENT ON COLUMN clientes.status IS 'Corresponde al status ac:activo o e:eliminado';
+      COMMENT ON COLUMN clientes.cuenta_cpi IS 'cuenta afectable del contpaqi';
