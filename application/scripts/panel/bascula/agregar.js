@@ -181,7 +181,7 @@ $(function(){
   // Evento click boton cargar de kilos tara.
   $('#btnKilosBruto').on('click', function(event) {
     $inputBruto = $('#pkilos_brutos');
-    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.post(base_url_bascula , {}, function(data) {
       $inputBruto.val(data.data.peso);
 
       calculaKilosNeto();
@@ -193,7 +193,7 @@ $(function(){
   $('#btnKilosTara').on('click', function(event) {
     var $inputTara  = $('#pkilos_tara');
 
-    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.post(base_url_bascula , {}, function(data) {
       $inputTara.val(data.data.peso);
 
       calculaKilosNeto();

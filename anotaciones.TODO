@@ -1,5 +1,6 @@
 Detalles Bascula:
- ☐ Los kilos netos no los puede modificar 
+ ☐ Los kilos netos me deja modificarlos, que este en read only tanto en agregar como en modificar
+ ☐ En el ticket donde dice "cuenta" abajo tiene que ir el nombre del proveedor o cliente, despues de la fecha de expedicion, ponerle el tipo: Entrada, Salida
  ✔ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id) @done (13-06-11 21:08)
  ✔ si le doy cargar con un folio que no existe, pone errores @done (13-06-11 21:08)
  ✔ cuando cargo un folio, ya no pone las calidades para agregar mas cajas @done (13-06-11 21:15)
