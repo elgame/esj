@@ -148,12 +148,23 @@ class bascula extends MY_Controller {
           $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
         }
 
+        if ($info['info'][0]->id_chofer != null)
+        {
+          $this->load->model('choferes_model');
+          $chofer = $this->choferes_model->getChoferInfo($info['info'][0]->id_chofer, true);
 
-        $this->load->model('choferes_model');
-        $chofer = $this->choferes_model->getChoferInfo($info['info'][0]->id_chofer, true);
+          $_POST['pchofer']    = $chofer['info']->nombre;
+          $_POST['pid_chofer'] = $info['info'][0]->id_chofer;
+        }
 
-        $this->load->model('camiones_model');
-        $camion = $this->camiones_model->getCamionInfo($info['info'][0]->id_camion, true);
+        if ($info['info'][0]->id_camion != null)
+        {
+          $this->load->model('camiones_model');
+          $camion = $this->camiones_model->getCamionInfo($info['info'][0]->id_camion, true);
+
+          $_POST['pcamion']       = $camion['info']->placa;
+          $_POST['pid_camion']    = $info['info'][0]->id_camion;
+        }
 
         $params['param_folio'] = '?folio='.$_GET['folio'];
         $params['idb']         = $info['info'][0]->id_bascula;
@@ -168,15 +179,8 @@ class bascula extends MY_Controller {
 
         $_POST['ptipo']         = $info['info'][0]->tipo;
         $_POST['parea']         = $info['info'][0]->id_area;
-        $_POST['pempresa']      = $empresa['info']->nombre_fiscal; // falta
+        $_POST['pempresa']      = $empresa['info']->nombre_fiscal;
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
-
-
-
-        $_POST['pchofer']       = $chofer['info']->nombre;
-        $_POST['pid_chofer']    = $info['info'][0]->id_chofer;
-        $_POST['pcamion']       = $camion['info']->placa;
-        $_POST['pid_camion']    = $info['info'][0]->id_camion;
 
         $params['next_folio'] = $info['info'][0]->folio;
         $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
