@@ -154,12 +154,12 @@ $(function(){
   });
 
   // Evento keypress para los input de agregar caja.
-  $('#icajas, #iprecio').on('keypress', function(e) {
-    if (e.charCode == '13') {
-      e.preventDefault();
-      $('#addCaja').click();
-    }
-  });
+  // $('#icajas, #iprecio').on('keypress', function(e) {
+  //   if (e.charCode == '13') {
+  //     e.preventDefault();
+  //     $('#addCaja').click();
+  //   }
+  // });
 
   // Evento click boton addCaja. Agrega las cajas a la tabla.
   $('#addCaja').on('click', function(event) {
@@ -247,7 +247,7 @@ $(function(){
     var $inputTara  = $('#pkilos_tara');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
-    $.post(base_url + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputTara.val(data.data.peso);
 
       calculaKilosNeto();

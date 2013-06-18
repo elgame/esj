@@ -25,7 +25,9 @@
         </ul>
       </div>
 
+
       <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">Nueva Pesada</a>
+      <span class="label label-warning pull-right" style="margin: 5px 5px 0 0;">ALT + N</span>
 
       <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
@@ -174,7 +176,7 @@
               <div class="row-fluid">
                 <div class="span4">
                   <div class="control-group">
-                    <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos</label>
+                    <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
                         value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.$readonly ?>>
@@ -186,7 +188,7 @@
                 </div>
                 <div class="span4">
                   <div class="control-group">
-                    <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara</label>
+                    <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
                         value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.$readonly ?>>
@@ -213,7 +215,7 @@
         <div class="row-fluid" id="box-cajas"><!--cajas-->
           <div class="box span12">
             <div class="box-header well" data-original-title>
-              <h2><i class="icon-road"></i> Cajas</h2>
+              <h2><i class="icon-road"></i> Cajas <span class="label label-warning">ALT + C</span></h2>
               <div class="box-icon">
                 <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
               </div>
@@ -346,6 +348,7 @@
         </div><!--/row-fluid cajas-->
 
         <div class="form-actions">
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
           <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
