@@ -1,5 +1,25 @@
 $(function(){
 
+  $('#form').keyJump({
+    'next': 13,
+    'alt+66': function () { // alt + b
+      $('#btnKilosBruto').click();
+    },
+    'alt+84': function () { // alt + t
+      $('#btnKilosTara').click();
+    },
+    'alt+67': function () { // alt + c
+      $('#icajas').focus();
+    },
+    'alt+78': function () { // alt + n
+      var href = $('#newPesada').attr('href');
+      window.location.href = href;
+    },
+    'alt+71': function () { // alt + g
+      $('#btnGuardar').click();
+    },
+  });
+
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
         option = $this.find('option:selected').val();
@@ -134,12 +154,12 @@ $(function(){
   });
 
   // Evento keypress para los input de agregar caja.
-  $('#icajas, #iprecio').on('keypress', function(e) {
-    if (e.charCode == '13') {
-      e.preventDefault();
-      $('#addCaja').click();
-    }
-  });
+  // $('#icajas, #iprecio').on('keypress', function(e) {
+  //   if (e.charCode == '13') {
+  //     e.preventDefault();
+  //     $('#addCaja').click();
+  //   }
+  // });
 
   // Evento click boton addCaja. Agrega las cajas a la tabla.
   $('#addCaja').on('click', function(event) {
