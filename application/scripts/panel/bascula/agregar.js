@@ -158,6 +158,7 @@ $(function(){
     if (e.charCode == '13') {
       e.preventDefault();
       $('#addCaja').click();
+      $("#icajas").focus();
     }
   });
 

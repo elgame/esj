@@ -19,8 +19,9 @@ Detalles Bascula:
 Cambis BD:
   ☐ Privilegios
      *2013-06-18
-     Crear usuario en la pc de la bascula para conectarse, configurar en el servidor los datos de mysql del pc de la bascula
-     Agregar campo "predeterminado boolean NOT NULL DEFAULT false" en tabla areas
+       -Crear usuario en la pc de la bascula para conectarse, configurar en el servidor los datos de mysql del pc de la bascula
+       -Agregar campo "predeterminado boolean NOT NULL DEFAULT false" en tabla areas
+       -El campo "id_camion y id_chofer" de bascula quitarle el not null
 
      *2013-06-03
       INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Bascula', 0, true, 'bascula/', 'road', false);
