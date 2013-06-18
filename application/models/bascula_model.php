@@ -138,8 +138,8 @@ class Bascula_model extends CI_Model {
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' || $_POST['paccion'] === 'f')
       {
-        $data2['id_empresa']   = $this->input->post('pid_empresa');
-        $data2['id_area']      = $this->input->post('parea');
+        $data2['id_empresa'] = $this->input->post('pid_empresa');
+        $data2['id_area']    = $this->input->post('parea');
 
         if ($_POST['ptipo'] === 'en')
         {
@@ -152,11 +152,11 @@ class Bascula_model extends CI_Model {
           $data2['id_proveedor'] = null;
         }
 
-        $data2['id_chofer']    = $this->input->post('pid_chofer');
-        $data2['id_camion']    = $this->input->post('pid_camion');
+        $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
+        $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
 
-        $data2['fecha_tara']  = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
-        $data2['kilos_tara']  = $this->input->post('pkilos_tara');
+        $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+        $data2['kilos_tara'] = $this->input->post('pkilos_tara');
 
         $data2['kilos_neto']  = $this->input->post('pkilos_neto');
         $data2['kilos_neto2'] = $this->input->post('ppesada');
