@@ -13,17 +13,12 @@ Detalles Bascula:
 
 
 Cambis BD:
-  ☐ tabla usuarios:
-      campo tipo, cambiar default a 'admin'
-      campo usuario, cambiar a 30 caracteres
-  ☐ tabla bascula:
-      campo agregar "accion"
-      campo agregar "tipo"
-      agregar campo "id_cliente"
-      cambiar el campo "id_proveedor" a null
-  ☐ tabla empresa:
-      agregar los campos nuevos
   ☐ Privilegios
+     *2013-06-18
+     Crear usuario en la pc de la bascula para conectarse, configurar en el servidor los datos de mysql del pc de la bascula
+     Agregar campo "predeterminado boolean NOT NULL DEFAULT false" en tabla areas
+
+     *2013-06-03
       INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Bascula', 0, true, 'bascula/', 'road', false);
       INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar', 40, true, 'bascula/agregar/', 'plus', false);
       INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 40, false, 'bascula/modificar/', 'edit', false);
@@ -71,6 +66,7 @@ Cambis BD:
         localidad character varying(45),
         municipio character varying(45),
         estado character varying(45),
+        pais character varying(25),
         cp character varying(10),
         telefono character varying(15),
         celular character varying(20),
@@ -88,3 +84,5 @@ Cambis BD:
       ALTER TABLE clientes OWNER TO programa;
       COMMENT ON COLUMN clientes.status IS 'Corresponde al status ac:activo o e:eliminado';
       COMMENT ON COLUMN clientes.cuenta_cpi IS 'cuenta afectable del contpaqi';
+
+      ejecutar el archivo inserts_clientes.sql

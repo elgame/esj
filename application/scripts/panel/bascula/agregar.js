@@ -214,7 +214,7 @@ $(function(){
     $inputBruto = $('#pkilos_brutos');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
-    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.get(base_url_bascula, {}, function(data) {
       $inputBruto.val(data.data.peso);
 
       calculaKilosNeto();
@@ -227,7 +227,7 @@ $(function(){
     var $inputTara  = $('#pkilos_tara');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
-    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.get(base_url_bascula, {}, function(data) {
       $inputTara.val(data.data.peso);
 
       calculaKilosNeto();

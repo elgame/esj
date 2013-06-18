@@ -41,25 +41,34 @@ class clientes extends MY_Controller {
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 
-// 		$gestor = @fopen("Proveedores.txt", "r");
-// 		if ($gestor) {
-// 		    while (($bufer = fgets($gestor, 4096)) !== false) {
-// 		    	$bufer = utf8_encode($bufer);
-// 		    	echo "INSERT INTO proveedores (
-// nombre_fiscal, rfc, curp, cuenta_cpi)
-// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."',
-// '".trim(substr($bufer, 132, 51))."', '".trim(substr($bufer, 186, 31))."');\n";
+		/*$gestor = @fopen("Todos los Clientes.txt", "r");
+		if ($gestor) {
+		    while (($bufer = fgets($gestor, 4096)) !== false) {
+		    	$bufer = utf8_encode($bufer);
+		    	echo "INSERT INTO clientes (
+nombre_fiscal, calle, no_exterior, colonia, municipio, cp, rfc, cuenta_cpi, pais)
+VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
+'".trim(substr($bufer, 177, 7))."', '".trim(substr($bufer, 243, 62))."', 
+'".trim(substr($bufer, 432, 35))."', '".trim(substr($bufer, 663, 8))."', 
+'".trim(substr($bufer, 986, 20))."', '".trim(substr($bufer, 1470, 11))."', 
+'".trim(substr($bufer, 306, 12))."' );\n";
 
-// 		        // echo trim(substr($búfer, 10, 101))."<br>"; //nombre
-// 		        // echo trim(substr($búfer, 101, 21))."<br>"; //rfc
-// 		        // echo trim(substr($búfer, 132, 51))."<br>"; //curp
-// 		        // echo trim(substr($búfer, 186, 31))."<br>"; //cuenta contpaqi
-// 		    }
-// 		    if (!feof($gestor)) {
-// 		        echo "Error: fallo inesperado de fgets()\n";
-// 		    }
-// 		    fclose($gestor);
-// 		}
+		        // echo trim(substr($bufer, 33, 62))."<br>"; //nombre
+		        // echo trim(substr($bufer, 114, 59))."<br>"; //calle
+		        // echo trim(substr($bufer, 177, 7))."<br>"; //numero
+		        // echo trim(substr($bufer, 243, 62))."<br>"; //colonia
+		        // echo trim(substr($bufer, 432, 35))."<br>"; //municipio
+		        // echo trim(substr($bufer, 306, 12))."<br>"; //pais
+		        // echo trim(substr($bufer, 663, 8))."<br>"; //cp
+		        // echo trim(substr($bufer, 986, 20))."<br>"; //rfc
+		        // echo trim(substr($bufer, 1470, 11))."<br>"; //cuenta contpaqi
+		        // echo "--------------------------------------------------------------------------<br>";
+		    }
+		    if (!feof($gestor)) {
+		        echo "Error: fallo inesperado de fgets()\n";
+		    }
+		    fclose($gestor);
+		}*/
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
