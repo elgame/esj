@@ -74,8 +74,8 @@ class Bascula_model extends CI_Model {
         INNER JOIN areas AS a ON a.id_area = b.id_area
         LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
         LEFT JOIN clientes AS cl ON cl.id_cliente = b.id_cliente
-        INNER JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
-        INNER JOIN camiones AS ca ON ca.id_camion = b.id_camion
+        LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
+        LEFT JOIN camiones AS ca ON ca.id_camion = b.id_camion
         ".$sql."
         ORDER BY folio DESC
         ";
@@ -240,8 +240,8 @@ class Bascula_model extends CI_Model {
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
       ->join('proveedores AS p', 'p.id_proveedor = b.id_proveedor', "left")
       ->join('clientes AS cl', 'cl.id_cliente = b.id_cliente', "left")
-      ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "inner")
-      ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "inner")
+      ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "left")
+      ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "left")
       ->where("b.id_bascula", $id)
       ->or_where('b.folio', $folio)
       ->get();
