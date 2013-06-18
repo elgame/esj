@@ -1,5 +1,25 @@
 $(function(){
 
+  $('#form').keyJump({
+    'next': 13,
+    'alt+66': function () { // alt + b
+      $('#btnKilosBruto').click();
+    },
+    'alt+84': function () { // alt + t
+      $('#btnKilosTara').click();
+    },
+    'alt+67': function () { // alt + c
+      $('#icajas').focus();
+    },
+    'alt+78': function () { // alt + n
+      var href = $('#newPesada').attr('href');
+      window.location.href = href;
+    },
+    'alt+71': function () { // alt + g
+      $('#btnGuardar').click();
+    },
+  });
+
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
         option = $this.find('option:selected').val();
@@ -227,7 +247,7 @@ $(function(){
     var $inputTara  = $('#pkilos_tara');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
-    $.post(base_url_bascula + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
+    $.post(base_url + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputTara.val(data.data.peso);
 
       calculaKilosNeto();

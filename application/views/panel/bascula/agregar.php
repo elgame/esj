@@ -25,7 +25,7 @@
         </ul>
       </div>
 
-      <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right">Nueva Pesada</a>
+      <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">Nueva Pesada</a>
 
       <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
@@ -44,7 +44,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled ?>>
+                      <select name="ptipo" class="input-xlarge nokey" id="ptipo" <?php echo $disabled ?>>
                         <option value="en" <?php echo set_select('ptipo', 'en', false, $this->input->post('ptipo')) ?>>Entrada</option>
                         <option value="sa" <?php echo set_select('ptipo', 'sa', false, $this->input->post('ptipo')) ?>>Salida</option>
                       </select>
@@ -54,11 +54,11 @@
                   <div class="control-group">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
-                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?>>
+                      <select name="parea" class="input-xlarge nokey" id="parea" <?php echo $disabled ?>>
                         <option value=""></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
                           <option value="<?php echo $area->id_area ?>"
-                            <?php echo set_select('parea', $area->id_area, false, $this->input->post('parea')) ?>><?php echo $area->nombre ?></option>
+                            <?php echo set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') ) ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
                       </select>
                       <!-- <span class="help-inline">
@@ -95,7 +95,7 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente"
-                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge" placeholder="Cliente" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -133,7 +133,7 @@
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
                       <input type="text" name="pfolio" value="<?php echo $next_folio ?>"
-                        id="pfolio" class="input-medium vpos-int" style="text-align:center;">
+                        id="pfolio" class="input-medium vpos-int nokey" style="text-align:center;">
                       <span class="help-inline">
                         <button class="btn" type="button" id="loadFolio">Cargar</button>
                       </span>
@@ -144,7 +144,7 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10 nokey" <?php echo $disabled ?>>
                     </div>
                   </div>
 
@@ -152,7 +152,7 @@
                     <!-- <label class="control-label">Finalizado?</label> -->
                     <div class="controls">
                       <button type="button" class="btn btn-success span10 <?php echo $accion==='f'?'active':'' ?>" data-toggle="button"
-                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>>Finalizar Operación</button>
+                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>><?php echo $accion === 'f' ? 'Pagada' : 'Finalizar Operación'?></button>
                     </div>
                   </div>
                 </div><!--/span-->
@@ -346,7 +346,7 @@
         </div><!--/row-fluid cajas-->
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary" <?php echo $disabled ?>>Guardar</button>
+          <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>

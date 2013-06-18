@@ -80,6 +80,7 @@ class bascula extends MY_Controller {
       array('libs/jquery.numeric.js'),
       array('general/supermodal.js'),
       array('general/buttons.toggle.js'),
+      array('general/keyjump.js'),
       array('panel/bascula/agregar.js'),
     ));
 
@@ -555,13 +556,13 @@ class bascula extends MY_Controller {
             'rules' => ''),
       array('field' => 'pid_chofer',
             'label' => 'Chofer',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'pchofer',
             'label' => '',
             'rules' => ''),
       array('field' => 'pid_camion',
             'label' => 'Camión',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'pcamion',
             'label' => '',
             'rules' => ''),
@@ -644,9 +645,19 @@ class bascula extends MY_Controller {
                           'label' => 'Proveedor',
                           'rules' => 'required');
       else
+      {
         $rules[] = array('field' => 'pid_cliente',
                          'label' => 'Cliente',
                          'rules' => 'required');
+
+        $rules[] = array('field' => 'pid_chofer',
+                         'label' => 'Chofer',
+                         'rules' => 'required');
+
+        $rules[] = array('field' => 'pid_camion',
+                         'label' => 'Camión',
+                         'rules' => 'required');
+      }
     }
 
     $this->form_validation->set_rules($rules);

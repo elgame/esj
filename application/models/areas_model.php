@@ -34,7 +34,7 @@ class areas_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." tipo='".$this->input->get('ftipo')."'";
 
 		$str_query = "
-				SELECT id_area, nombre, tipo, status
+				SELECT id_area, nombre, tipo, status, predeterminado
 				FROM areas
 				".$sql."
 				ORDER BY nombre ASC
@@ -149,7 +149,7 @@ class areas_model extends CI_Model {
 		$sql_res->free_result();
 
 		if ($basic_info == False) {
-			
+
 		}
 
 		return $data;
@@ -167,7 +167,7 @@ class areas_model extends CI_Model {
 		if($this->input->get('type') !== false)
 			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono 
+				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
 				FROM proveedores
 				WHERE status = 'ac' ".$sql."
 				ORDER BY nombre_fiscal ASC
