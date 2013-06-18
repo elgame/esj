@@ -61,7 +61,7 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_empresa").val(ui.item.id);
-      $("#pempresa").val(ui.item.label);
+      $("#pempresa").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -77,7 +77,7 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_proveedor").val(ui.item.id);
-      $("#pproveedor").val(ui.item.label);
+      $("#pproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -93,7 +93,7 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_cliente").val(ui.item.id);
-      $("#pcliente").val(ui.item.label);
+      $("#pcliente").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -109,7 +109,7 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_chofer").val(ui.item.id);
-      $("#pchofer").val(ui.item.label);
+      $("#pchofer").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -125,7 +125,7 @@ $(function(){
     selectFirst: true,
     select: function( event, ui ) {
       $("#pid_camion").val(ui.item.id);
-      $("#pcamion").val(ui.item.label);
+      $("#pcamion").val(ui.item.label).css({'background-color': '#99FF99'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -134,7 +134,7 @@ $(function(){
     }
   });
 
-  $('#box-cajas').on('click', '#icalidad', function(event) {
+  $('#box-cajas').on('change', '#icalidad', function(event) {
     var calidad = $(this).find('option:selected').val();
 
     if (calidad !== '') {
@@ -154,12 +154,12 @@ $(function(){
   });
 
   // Evento keypress para los input de agregar caja.
-  // $('#icajas, #iprecio').on('keypress', function(e) {
-  //   if (e.charCode == '13') {
-  //     e.preventDefault();
-  //     $('#addCaja').click();
-  //   }
-  // });
+  $('#iprecio').on('keypress', function(e) {
+    if (e.charCode == '13') {
+      e.preventDefault();
+      $('#addCaja').click();
+    }
+  });
 
   // Evento click boton addCaja. Agrega las cajas a la tabla.
   $('#addCaja').on('click', function(event) {

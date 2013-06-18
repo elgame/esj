@@ -73,7 +73,7 @@
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
-                        value="<?php echo set_value('pempresa', $this->input->post('pempresa')) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pempresa', $this->input->post('pempresa')) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" autofocus <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
@@ -154,7 +154,7 @@
                     <!-- <label class="control-label">Finalizado?</label> -->
                     <div class="controls">
                       <button type="button" class="btn btn-success span10 <?php echo $accion==='f'?'active':'' ?>" data-toggle="button"
-                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>><?php echo $accion === 'f' ? 'Pagada' : 'Finalizar Operación'?></button>
+                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>>Pagar</button>
                     </div>
                   </div>
                 </div><!--/span-->

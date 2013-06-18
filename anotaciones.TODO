@@ -1,8 +1,8 @@
 Detalles Bascula:
- ☐ Al entrar que el foco este en Empresas
- ☐ los autocomplete no se ponen verdes cuando se selecciona uno
- ☐ Texto "finalizar operacion" cambiarlo por "Pagar"
- ☐ En las cajas el select de la calidad, creo q el evento q tiene asignado es el click, cambiarle por "change" o el que se ocupe, el chiste q cuando muevan el select con las flechas cambie el precio del seleccionado; en la casilla  de precio si preciono enter no se agrega a la lista, que se agregue
+ ✔ Al entrar que el foco este en Empresas @done (13-06-18 16:53)
+ ✔ los autocomplete no se ponen verdes cuando se selecciona uno @done (13-06-18 16:57)
+ ✔ Texto "finalizar operacion" cambiarlo por "Pagar" @done (13-06-18 16:52)
+ ✔ En las cajas el select de la calidad, creo q el evento q tiene asignado es el click, cambiarle por "change" o el que se ocupe, el chiste q cuando muevan el select con las flechas cambie el precio del seleccionado; en la casilla  de precio si preciono enter no se agrega a la lista, que se agregue @done (13-06-18 17:00)
  ✔ Los kilos netos me deja modificarlos, que este en read only tanto en agregar como en modificar @done (13-06-18 15:59)
  ✔ En el ticket donde dice "cuenta" abajo tiene que ir el nombre del proveedor o cliente, despues de la fecha de expedicion, ponerle el tipo: Entrada, Salida @done (13-06-18 15:59)
  ✔ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id) @done (13-06-11 21:08)
