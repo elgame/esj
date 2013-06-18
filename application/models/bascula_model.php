@@ -112,8 +112,8 @@ class Bascula_model extends CI_Model {
         $data = array(
           'id_empresa'   => $this->input->post('pid_empresa'),
           'id_area'      => $this->input->post('parea'),
-          'id_chofer'    => $this->input->post('pid_chofer'),
-          'id_camion'    => $this->input->post('pid_camion'),
+          'id_chofer'    => empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'],
+          'id_camion'    => empty($_POST['pid_camion']) ? null : $_POST['pid_camion'],
           'folio'        => $this->input->post('pfolio'),
           'fecha_bruto'  => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
           'kilos_bruto'  => $this->input->post('pkilos_brutos'),
