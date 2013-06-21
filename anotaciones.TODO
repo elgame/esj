@@ -1,3 +1,24 @@
+2013-06-21
+  ☐ Empresas poner una por default, agregar campo en la tabla empresa para poner por default, en bascula ponerla por default
+  ☐ En los enters tome en cuenta la fecha
+  ☐ Para kilos bruto y tara al tomar el foco que cargue el peso, si es nueva habilitar los brutos, si es modificar q habilite el tara, en la seccion modificar del listado pueden editar todo.
+  ☐ Agregar input para pedir numero de cajas, esas cajas se restan al total de kilos (2kg x caja)
+  ☐ Poner al inicio donde esta el de nueva pesada; Cancelar, imprimir (alt+p), Guardar, Nueva pesada
+  ☐ Editar el peso promedio de las cajas agregadas como en la hoja
+  ☐ Bonificaciones, pedir folio del ticket y cargar los datos en una pesada nueva, en las cajas es editable el precio, y poner por default 0, agregar campo id_bonificacion para relacionar la con el ticket padre
+  ☐ Reporte de pesadas del dia agrupadas por calidad, como las hojas
+  ☐ Modulo para pagar pesadas de forma masiva, un rango de fechas, proveedor, carga las pesadas no pagadas, podria pagar con metodo de pago, concepto, monto
+  
+  ☐ Sql
+    - Agregar campo "default bole" en tabla empresas
+    -
+    -
+    -
+
+
+
+
+
 Detalles Bascula:
  ✔ Al entrar que el foco este en Empresas @done (13-06-18 16:53)
  ✔ los autocomplete no se ponen verdes cuando se selecciona uno @done (13-06-18 16:57)
@@ -18,7 +39,7 @@ Detalles Bascula:
 
 Cambis BD:
   ☐ Privilegios
-     *2013-06-18
+     ✔ 2013-06-18 @done (13-06-19 09:47)
        -Crear usuario en la pc de la bascula para conectarse, configurar en el servidor los datos de mysql del pc de la bascula
        -Agregar campo "predeterminado boolean NOT NULL DEFAULT false" en tabla areas
        -El campo "id_camion y id_chofer" de bascula quitarle el not null

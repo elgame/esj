@@ -109,6 +109,7 @@ class bascula extends MY_Controller {
       if (isset($_POST['pstatus']))
         $ticket = '&p=t';
 
+      $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
       if( ! $res_mdl['error'])
         redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
     }

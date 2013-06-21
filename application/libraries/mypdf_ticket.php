@@ -27,7 +27,7 @@ class mypdf_ticket extends FPDF {
     public function Header() {
         if ($this->header_entrar) {
             // Título
-            $this->SetFont('Arial', 'B', 8);
+            $this->SetFont('Arial', 'B', 6);
             $this->SetXY(0, 0);
             $this->MultiCell($this->pag_size[0], 10, $this->titulo1, 0, 'C');
 
@@ -37,7 +37,7 @@ class mypdf_ticket extends FPDF {
 
     public function datosTicket($data){
         $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
-        $this->SetFont('Arial', '', 8);
+        $this->SetFont('Arial', '', 6);
 
         $this->SetWidths(array(30, 30));
         $this->SetAligns(array('L', 'R'));
