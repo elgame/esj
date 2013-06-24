@@ -68,7 +68,8 @@ class Bascula_model extends CI_Model {
                 (ca.marca || ' ' || ca.modelo) AS camion,
                 ca.placa AS placas,
                 b.fecha_bruto AS fecha,
-                cl.nombre_fiscal AS cliente
+                cl.nombre_fiscal AS cliente,
+                b.id_bonificacion
         FROM bascula AS b
         INNER JOIN empresas AS e ON e.id_empresa = b.id_empresa
         INNER JOIN areas AS a ON a.id_area = b.id_area
@@ -98,8 +99,7 @@ class Bascula_model extends CI_Model {
     return $response;
   }
 
-
-  public function addBascula($data=null)
+  public function addBascula($data=null, $bonificacion=false)
   {
     if (is_null($data))
     {
@@ -121,6 +121,15 @@ class Bascula_model extends CI_Model {
           'tipo'         => $this->input->post('ptipo'),
         );
 
+        if ($bonificacion)
+        {
+          $data['id_bonificacion'] = $_POST['pidb'];
+          $data['accion'] = 'p';
+          $data['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          $data['kilos_tara'] = $this->input->post('pkilos_tara');
+          $data['kilos_neto']  = $this->input->post('pkilos_neto');
+        }
+
         if ($_POST['ptipo'] === 'en')
           $data['id_proveedor'] = $this->input->post('pid_proveedor');
         else
@@ -136,7 +145,8 @@ class Bascula_model extends CI_Model {
         'obcervaciones' => $this->input->post('pobcervaciones'),
       );
 
-      if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' || $_POST['paccion'] === 'f')
+      if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
+          $_POST['paccion'] === 'p' || $_POST['paccion'] === 'b')
       {
         $data2['id_empresa'] = $this->input->post('pid_empresa');
         $data2['id_area']    = $this->input->post('parea');
@@ -163,7 +173,7 @@ class Bascula_model extends CI_Model {
         $data2['accion']      = 'sa';
         $data2['tipo']        = $this->input->post('ptipo');
 
-        if (isset($_POST['pstatus'])) $data2['accion'] = 'f';
+        if (isset($_POST['pstatus'])) $data2['accion'] = 'p';
       }
 
       $cajas = null;
@@ -186,7 +196,11 @@ class Bascula_model extends CI_Model {
 
       $this->updateBascula($idb, $data2, $cajas);
 
-      return array('passes'=>true, 'msg'=>'7');
+      $msg = '7';
+      if ($bonificacion)
+        $msg = '12';
+
+      return array('passes'=>true, 'msg'=>$msg, 'idb' => $idb);
     }
 
     $this->db->insert('bascula', $data);

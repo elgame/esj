@@ -1,22 +1,27 @@
 2013-06-21
-  ☐ Empresas poner una por default, agregar campo en la tabla empresa para poner por default, en bascula ponerla por default
-  ☐ En los enters tome en cuenta la fecha
-  ☐ Para kilos bruto y tara al tomar el foco que cargue el peso, si es nueva habilitar los brutos, si es modificar q habilite el tara, en la seccion modificar del listado pueden editar todo.
-  ☐ Agregar input para pedir numero de cajas, esas cajas se restan al total de kilos (2kg x caja)
-  ☐ Poner al inicio donde esta el de nueva pesada; Cancelar, imprimir (alt+p), Guardar, Nueva pesada
-  ☐ Editar el peso promedio de las cajas agregadas como en la hoja
-  ☐ Bonificaciones, pedir folio del ticket y cargar los datos en una pesada nueva, en las cajas es editable el precio, y poner por default 0, agregar campo id_bonificacion para relacionar la con el ticket padre
+  ✔ Empresas poner una por default, agregar campo en la tabla empresa para poner por default, en bascula ponerla por default @done (13-06-23 11:35)
+  ✔ En los enters tome en cuenta la fecha @done (13-06-23 11:38)
+  ✔ Para kilos bruto y tara al tomar el foco que cargue el peso, si es nueva habilitar los brutos, si es modificar q habilite el tara, en la seccion modificar del listado pueden editar todo. @done (13-06-23 12:19)
+  ✔ Agregar input para pedir numero de cajas, esas cajas se restan al total de kilos (2kg x caja) @done (13-06-23 14:21)
+  ✔ Poner al inicio donde esta el de nueva pesada; Cancelar, imprimir (alt+p), Guardar, Nueva pesada @done (13-06-23 14:03)
+  ✔ Editar el peso promedio de las cajas agregadas como en la hoja @done (13-06-23 16:22)
+  ✔ Bonificaciones, pedir folio del ticket y cargar los datos en una pesada nueva, en las cajas es editable el precio, y poner por default 0, agregar campo id_bonificacion para relacionar la con el ticket padre @done (13-06-24 14:12)
   ☐ Reporte de pesadas del dia agrupadas por calidad, como las hojas
   ☐ Modulo para pagar pesadas de forma masiva, un rango de fechas, proveedor, carga las pesadas no pagadas, podria pagar con metodo de pago, concepto, monto
-  
+
   ☐ Sql
-    - Agregar campo "default bole" en tabla empresas
-    -
+    - Agregar campo en tabla empresas:
+          predeterminado boolean NOT NULL DEFAULT false
+    -Agregar campo en trabla bascula
+          id_bonificacion bigint
     -
     -
 
-
-
+   - Nuevos Privilegios
+         nombre: Bonificacion
+         url: bascula/bonificacion/
+         ico: money
+         Padre: bascula
 
 
 Detalles Bascula:

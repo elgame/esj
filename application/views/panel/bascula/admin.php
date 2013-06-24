@@ -99,8 +99,14 @@
                       $v_status = 'Salida';
                       $vlbl_status = 'label-warning';
                     }
+
                   ?>
                   <span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
+
+                  <?php if ($b->id_bonificacion != null)
+                    echo '<br><br><span class="label label-important">Bonificación</span>'
+                  ?>
+
                 </td>
                 <td><?php echo $b->folio; ?></td>
                 <td><?php
@@ -114,10 +120,12 @@
                 <td><?php echo $b->placas; ?></td>
                 <td class="center">
                     <?php
-                    echo $this->usuarios_model->getLinkPrivSm('bascula/modificar/', array(
-                        'params'   => 'folio='.$b->folio,
-                        'btn_type' => 'btn-success')
-                    );
+                    if ($b->id_bonificacion == null)
+                      echo $this->usuarios_model->getLinkPrivSm('bascula/modificar/', array(
+                          'params'   => 'folio='.$b->folio,
+                          'btn_type' => 'btn-success')
+                      );
+
                     if ($b->status == 't') {
                       echo $this->usuarios_model->getLinkPrivSm('bascula/cancelar/', array(
                           'params'   => 'id='.$b->id_bascula,

@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url'] = 'http://192.168.1.100/sanjorge/';
+$config['base_url'] = 'http://192.168.1.100/sanjorge/'; //http://192.168.1.100/sanjorge/
 $config['base_url_bascula']	= 'http://localhost/sanjorge_bascula/';
 
 /*

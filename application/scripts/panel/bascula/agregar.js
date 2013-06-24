@@ -3,10 +3,10 @@ $(function(){
   $('#form').keyJump({
     'next': 13,
     'alt+66': function () { // alt + b
-      $('#btnKilosBruto').click();
+      $('#btnKilosBruto').trigger('click');
     },
     'alt+84': function () { // alt + t
-      $('#btnKilosTara').click();
+      $('#btnKilosTara').trigger('click');
     },
     'alt+67': function () { // alt + c
       $('#icajas').focus();
@@ -16,7 +16,11 @@ $(function(){
       window.location.href = href;
     },
     'alt+71': function () { // alt + g
-      $('#btnGuardar').click();
+      $('#btnGuardar').trigger('click');
+    },
+    'alt+80': function () { // alt + p
+      var win=window.open($('#btnPrint').attr('href'), '_blank');
+      win.focus();
     },
   });
 
@@ -149,7 +153,7 @@ $(function(){
   $('#pfolio').on('keypress', function(e) {
     if (e.charCode == '13') {
       e.preventDefault();
-      $('#loadFolio').click();
+      $('#loadFolio').trigger('click');
     }
   });
 
@@ -157,7 +161,7 @@ $(function(){
   $('#iprecio').on('keypress', function(e) {
     if (e.charCode == '13') {
       e.preventDefault();
-      $('#addCaja').click();
+      $('#addCaja').trigger('click');
       $("#icajas").focus();
     }
   });
@@ -181,18 +185,18 @@ $(function(){
       }
 
       // Construye string con el html del tr.
-      trHtml = '<tr><td>' + $caja.val() +
+      trHtml = '<tr data-kneto=""><td>' + $caja.val() +
                   '<input type="hidden" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
                   '<input type="hidden" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
                   '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
                   '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
-                  '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
+                  // '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
                   '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
                   '<input type="hidden" name="pimporte[]" value="" id="pimporte">' +
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
                '<td id="tdkilos"></td>' +
-               '<td id="tdpromedio"></td>' +
+               '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" style="width: 80px;"></td>' +
                '<td>' + $precio.val() + '</td>' +
                '<td id="tdimporte"></td>' +
                '<td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja"><i class="icon-trash"></i></button></td></tr>';
@@ -256,7 +260,8 @@ $(function(){
     }, 'json');
   });
 
-  $('#pkilos_brutos, #pkilos_tara').keyup(function(e) {
+  // Evento para asignar los keys del 0 al 9.
+  $('#pkilos_brutos, #pkilos_tara, #pcajas_prestadas').keyup(function(e) {
     var key = e.which;
 
     if ((key > 47 && key < 58) || key === 8) {
@@ -265,14 +270,56 @@ $(function(){
     }
   });
 
+  // Obtiene el pesaje de los brutos al tener el foco el input.
+  $('#pkilos_brutos').on('focus', function(event) {
+    $('#btnKilosBruto').trigger('click');
+  });
+
+  // Obtiene el pesaje de los tara al tener el foco el input.
+  $('#pkilos_tara').on('focus', function(event) {
+    $('#btnKilosTara').trigger('click');
+  });
+
+  // Evento chango para los promedio de la tabla de cajas.
+  $('#tableCajas').on('change', 'input#ppromedio', function(event) {
+    var $this = $(this),
+        $tr = $this.parent().parent(),
+        trIndex = $('#tableCajas tr').index($tr), // Obtiene el index q le corresponde de los tr
+
+        promedio = parseFloat($this.val()),
+        cajas    = parseFloat($tr.find('#pcajas').val()),
+        kilos    = (promedio * cajas).toFixed(2),
+        precio   = 0;
+
+        kilosNeto  = parseFloat($tr.attr('data-kneto')),
+
+        $kilos     = $tr.find('#pkilos'),
+        $tdkilos   = $tr.find('#tdkilos')
+        $precio    = $tr.find('#pprecio'),
+        $importe   = $tr.find('#pimporte'),
+        $tdimporte = $tr.find('#tdimporte');
+
+    event.preventDefault();
+
+    $kilos.val(kilos);
+    $tdkilos.html(kilos);
+
+    precio = (parseFloat(kilos) * parseFloat($precio.val())).toFixed(2);
+    $importe.val(precio)
+    $tdimporte.html(precio);
+
+    calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
+  });
+
 });
 
 var calculaKilosNeto = function () {
-  var $inputBruto = $('#pkilos_brutos'),
-      $inputTara  = $('#pkilos_tara'),
-      $inputNeto  = $('#pkilos_neto');
+  var $inputBruto  = $('#pkilos_brutos'),
+      $inputTara   = $('#pkilos_tara'),
+      $inputCajasP = $('#pcajas_prestadas'),
+      $inputNeto   = $('#pkilos_neto');
 
-  $inputNeto.val(Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)));
+  $inputNeto.val( Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2) );
 };
 
 var recargaTipo = function () {
@@ -333,39 +380,50 @@ var validaCalidad = function (calidad) {
   return aux;
 };
 
-var calculaTotales = function () {
+var calculaTotales = function (trIndex, kilosNeto) {
   var $ptotal_cajas = $('#ptotal_cajas')
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
 
-      kilosNeto  = parseFloat($('#pkilos_neto').val()) || 0,
+      kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
       totalCajas = 0,
-      total = 0;
+      totalCajasP = 0,
+      total      = 0,
+
+      trIndex = trIndex || 0;
 
   // Recorre todas las cajas/calidades para obtener el total de cajas.
   $('input#pcajas').each(function(e, i) {
     totalCajas += parseFloat($(this).val());
   });
 
-  $tableCajas.find('tbody tr').each(function(e, i) {
-    var $tr   = $(this),
-        cajas = parseFloat($tr.find('#pcajas').val()),
-        kilos = 0,
-        promedio = 0,
-        importe = 0,
-        precio = parseFloat($tr.find('#pprecio').val());
+  // Recorre las cajas/calidades para obtener unicamente la suma de las cajas
+  // que se editaran en caso de que el promedio cambie.
+  $('input#pcajas').slice(trIndex).each(function(e, i) {
+    totalCajasP += parseFloat($(this).val());
+  });
 
-    kilos = ((cajas * kilosNeto) / totalCajas).toFixed(2);
+  $tableCajas.find('tbody tr').slice(trIndex).each(function(e, i) {
+    var $tr      = $(this),
+        cajas    = parseFloat($tr.find('#pcajas').val()),
+        kilos    = 0,
+        promedio = 0,
+        importe  = 0,
+        precio   = parseFloat($tr.find('#pprecio').val());
+
+    kilos = ((cajas * kilosNeto) / totalCajasP).toFixed(2);
     $tr.find('#pkilos').val(kilos);
     $tr.find('#tdkilos').html(kilos);
 
     promedio = (kilos / cajas).toFixed(2);
     $tr.find('#ppromedio').val(promedio)
-    $tr.find('#tdpromedio').html(promedio)
+    // $tr.find('#tdpromedio').html(promedio)
 
     importe = (kilos * precio).toFixed(2);
     $tr.find('#pimporte').val(importe)
     $tr.find('#tdimporte').html(importe)
+
+    $tr.attr('data-kneto', kilosNeto);
 
     total +=  parseFloat(importe);
   });

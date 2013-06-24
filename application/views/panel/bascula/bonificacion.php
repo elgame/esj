@@ -1,14 +1,15 @@
     <div id="content" class="span10">
       <!-- content starts -->
       <?php
-        $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? 'disabled' : '';
+        // $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? 'disabled' : '';
+        $disabled = 'disabled';
 
         $readonly   = 'readonly';
-        $crumbTitle = 'Agregar';
+        // $crumbTitle = 'Agregar';
         if ($e === true)
         {
           $readonly = '';
-          $crumbTitle = 'Modificar';
+          // $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
         }
 
@@ -22,40 +23,16 @@
           <li>
             <a href="<?php echo base_url('panel/bascula/'); ?>">Bascula</a> <span class="divider">/</span>
           </li>
-          <li><?php echo $crumbTitle ?></li>
+          <li>Bonificación</li>
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/bonificacion?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
 
-         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
-          Nueva Pesada
-          <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span> -->
-        </a>
-        <button type="submit" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
+        <button type="submit" class="btn btn-primary pull-right" id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
         </button>
-        <?
-        if ($accion !== 'n')
-          echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
-              'params'   => 'id='.$idb,
-              'btn_type' => 'btn-success pull-right',
-              'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK', 'style' => 'margin-right: 5px;'))
-            );
-
-        if ($accion === 'p' || $accion === 'b')
-        {
-          echo $this->usuarios_model->getLinkPrivSm('bascula/bonificacion/', array(
-              'params'   => 'idb='.$idb,
-              'btn_type' => 'btn-success pull-right',
-              'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK', 'style' => 'margin-right: 5px;'))
-            );
-        }
-
-        ?>
-
-        <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn pull-right" style="margin-right: 5px;">Cancelar</a>
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
         <input type="hidden" name="pidb" value="<?php echo $idb ?>">
@@ -73,7 +50,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge nokey" id="ptipo" <?php echo $disabled ?>>
+                      <select name="ptipo" class="input-xlarge nokey" id="ptipo" <?php echo $readonly ?>>
                         <option value="en" <?php echo set_select('ptipo', 'en', false, $this->input->post('ptipo')) ?>>Entrada</option>
                         <option value="sa" <?php echo set_select('ptipo', 'sa', false, $this->input->post('ptipo')) ?>>Salida</option>
                       </select>
@@ -83,7 +60,7 @@
                   <div class="control-group">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
-                      <select name="parea" class="input-xlarge nokey" id="parea" <?php echo $disabled ?>>
+                      <select name="parea" class="input-xlarge nokey" id="parea" <?php echo $readonly ?>>
                         <option value=""></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
                           <option value="<?php echo $area->id_area ?>"
@@ -100,7 +77,7 @@
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
-                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" autofocus <?php echo $disabled ?>>
+                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" autofocus <?php echo $readonly ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
@@ -112,7 +89,7 @@
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
-                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $readonly ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -124,7 +101,7 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente"
-                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $readonly ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -136,7 +113,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" <?php echo $readonly ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-50x440">Agregar</a>
                       </span>
@@ -148,7 +125,7 @@
                     <label class="control-label" for="pcamion">Camión</label>
                     <div class="controls">
                       <input type="text" name="pcamion"
-                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled ?>>
+                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $readonly ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-50x480" id="btnSupermodal">Agregar</a>
                       </span>
@@ -173,7 +150,7 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10">
                     </div>
                   </div>
 
@@ -206,7 +183,7 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.(($accion === 'n' && $e === false) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>">
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -218,7 +195,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.((($accion === 'en' || $accion === 'sa') && $e === false) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>">
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -239,7 +216,7 @@
                     <label class="control-label" for="pkilos_neto" style="width: 100px;">Kilos Neto</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_neto" id="pkilos_neto" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_neto', $this->input->post('pkilos_neto')) ?>" readonly <?php echo $disabled ?>>
+                        value="<?php echo set_value('pkilos_neto', $this->input->post('pkilos_neto')) ?>" readonly <?php echo $readonly ?>>
                     </div>
                   </div>
                 </div>
@@ -332,16 +309,18 @@
                                     <input type="hidden" name="pcalidadtext[]" value="<?php echo $_POST['pcalidadtext'][$key] ?>" id="pcalidadtext">
                                     <input type="hidden" name="pkilos[]" value="<?php echo $_POST['pkilos'][$key] ?>" id="pkilos">
                                     <!-- <input type="hidden" name="ppromedio[]" value="<?php //echo $_POST['ppromedio'][$key] ?>" id="ppromedio"> -->
-                                    <input type="hidden" name="pprecio[]" value="<?php echo $_POST['pprecio'][$key] ?>" id="pprecio">
-                                    <input type="hidden" name="pimporte[]" value="<?php echo $_POST['pimporte'][$key] ?>" id="pimporte">
+                                    <!-- <input type="hidden" name="pprecio[]" value="<?php //echo $_POST['pprecio'][$key] ?>" id="pprecio"> -->
+                                    <input type="hidden" name="pimporte[]" value="<?php //echo $_POST['pimporte'][$key] ?>" id="pimporte">
                                   </td>
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
                                   <td id="tdkilos"><?php echo $_POST['pkilos'][$key] ?></td>
                                   <td id="tdpromedio">
-                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;">
+                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;" <?php echo $readonly ?>>
                                   </td>
-                                  <td><?php echo $_POST['pprecio'][$key] ?></td>
-                                  <td id="tdimporte"><?php echo $_POST['pimporte'][$key] ?></td>
+                                  <td>
+                                    <input type="text" name="pprecio[]" value="0" class="vpositive" id="pprecio" style="width: 80px;">
+                                  </td>
+                                  <td id="tdimporte">0</td><?php //echo $_POST['pimporte'][$key] ?>
                                   <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled ?>><i class="icon-trash"></i></button></td>
                                 </tr>
 
@@ -357,19 +336,19 @@
                   <div class="span4">
                     <label for="ptotal_cajas">Total cajas</label>
                     <input type="text" name="ptotal_cajas"
-                      value="<?php echo set_value('ptotal_cajas', $this->input->post('ptotal_cajas')) ?>" id="ptotal_cajas" class="input-medium vpositive" <?php echo $disabled ?> readonly>
+                      value="<?php echo set_value('ptotal_cajas', $this->input->post('ptotal_cajas')) ?>" id="ptotal_cajas" class="input-medium vpositive" <?php echo $readonly ?> readonly>
                   </div>
 
                   <div class="span4">
                     <label for="ppesada">Pesada</label>
                     <input type="text" name="ppesada"
-                      value="<?php echo set_value('ppesada', $this->input->post('ppesada')) ?>" id="ppesada" class="input-medium vpositive" <?php echo $disabled ?>>
+                      value="<?php echo set_value('ppesada', $this->input->post('ppesada')) ?>" id="ppesada" class="input-medium vpositive" <?php echo $readonly ?>>
                   </div>
 
                   <div class="span4">
                     <label for="ptotal">Total</label>
                     <input type="text" name="ptotal"
-                      value="<?php echo set_value('ptotal', $this->input->post('ptotal')) ?>" id="ptotal" class="input-medium vpositive" <?php echo $disabled ?> readonly>
+                      value="<?php echo set_value('ptotal', $this->input->post('ptotal')) ?>" id="ptotal" class="input-medium vpositive" <?php echo $readonly ?> readonly>
                   </div>
                 </div>
               </div>
@@ -377,7 +356,7 @@
               <div class="row-fluid">
                 <div class="span12">
                   <label class="" for="pobcervaciones">Descripción</label>
-                  <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5" <?php echo $disabled ?>><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
+                  <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5"><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
                 </div>
               </div>
 
@@ -387,7 +366,7 @@
 
         <div class="form-actions">
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
-          <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
+          <button type="submit" class="btn btn-primary" id="btnGuardar">Guardar</button>
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>

@@ -95,6 +95,12 @@ class bascula extends MY_Controller {
     $params['next_folio'] = $this->bascula_model->getSiguienteFolio();
     $params['areas']      = $this->areas_model->getAreas();
 
+    $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
+      ->from("empresas")
+      ->where("predeterminado", "t")
+      ->get()
+      ->row();
+
     $this->configAddModBascula();
     if ($this->form_validation->run() == FALSE)
     {
@@ -281,6 +287,183 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->imprimir_ticket($this->input->get('id'));
+  }
+
+  /**
+   * Visualiza el formulario para agregar una bonificacion.
+   * @return void
+   */
+  public function bonificacion()
+  {
+    if (isset($_GET['idb']))
+    {
+      $this->carabiner->css(array(
+        array('libs/jquery.uniform.css', 'screen'),
+      ));
+      $this->carabiner->js(array(
+        array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.numeric.js'),
+        array('general/supermodal.js'),
+        array('general/buttons.toggle.js'),
+        array('general/keyjump.js'),
+        array('panel/bascula/agregar.js'),
+        array('panel/bascula/bonificacion.js'),
+      ));
+
+      $this->load->model('bascula_model');
+      $this->load->model('areas_model');
+
+      $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+      $params['seo'] = array(
+        'titulo' => 'Bonificación'
+      );
+
+      $params['next_folio'] = $this->bascula_model->getSiguienteFolio();
+      $params['areas']      = $this->areas_model->getAreas();
+
+      $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
+        ->from("empresas")
+        ->where("predeterminado", "t")
+        ->get()
+        ->row();
+
+      $this->configAddModBascula();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('bascula_model');
+        $res_mdl = $this->bascula_model->addBascula(null, true);
+
+        // $ticket = '';
+        // if (isset($_POST['pstatus']))
+          $ticket = '&p=t&b='.$res_mdl['idb'];
+
+        $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
+        if( ! $res_mdl['error'])
+          redirect(base_url('panel/bascula/bonificacion/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
+      }
+
+      $params['accion'] = 'n'; // indica que es nueva entrada
+      $params['idb']    = '';
+      $params['param_folio'] = '';
+      $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+      $params['e'] = false;
+
+      // if (isset($_GET['id']))
+      // {
+        $info = $this->bascula_model->getBasculaInfo($_GET['idb']);
+
+        // echo "<pre>";
+        //   var_dump($info);
+        // echo "</pre>";
+
+        if (count($info['info']) > 0)
+        {
+          $this->load->model('empresas_model');
+          $empresa = $this->empresas_model->getInfoEmpresa($info['info'][0]->id_empresa, true);
+
+          if ($info['info'][0]->id_proveedor != null)
+          {
+            $this->load->model('proveedores_model');
+            $proveedor = $this->proveedores_model->getProveedorInfo($info['info'][0]->id_proveedor, true);
+
+            $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
+            $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+          }
+          else
+          {
+            $this->load->model('clientes_model');
+            $cliente = $this->clientes_model->getClienteInfo($info['info'][0]->id_cliente, true);
+
+            $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
+            $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+          }
+
+          if ($info['info'][0]->id_chofer != null)
+          {
+            $this->load->model('choferes_model');
+            $chofer = $this->choferes_model->getChoferInfo($info['info'][0]->id_chofer, true);
+
+            $_POST['pchofer']    = $chofer['info']->nombre;
+            $_POST['pid_chofer'] = $info['info'][0]->id_chofer;
+          }
+
+          if ($info['info'][0]->id_camion != null)
+          {
+            $this->load->model('camiones_model');
+            $camion = $this->camiones_model->getCamionInfo($info['info'][0]->id_camion, true);
+
+            $_POST['pcamion']       = $camion['info']->placa;
+            $_POST['pid_camion']    = $info['info'][0]->id_camion;
+          }
+
+          // $params['param_folio'] = '?id='.$_GET['id'];
+          $params['idb']         = $info['info'][0]->id_bascula;
+          // $params['accion']      = $info['info'][0]->accion;
+
+          if (isset($_GET['p']))
+            $params['ticket'] = $_GET['b']; //$info['info'][0]->id_bascula
+
+          if (isset($_GET['e']))
+            if ($_GET['e'] === 't')
+              $params['e'] = true;
+
+          $_POST['ptipo']         = $info['info'][0]->tipo;
+          $_POST['parea']         = $info['info'][0]->id_area;
+          $_POST['pempresa']      = $empresa['info']->nombre_fiscal;
+          $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
+
+          // $params['next_folio'] = $info['info'][0]->folio;
+          // $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
+
+          $_POST['pkilos_brutos'] = $info['info'][0]->kilos_bruto;
+          $_POST['pkilos_tara']   = $info['info'][0]->kilos_tara;
+          $_POST['pkilos_neto']   = $info['info'][0]->kilos_neto;
+
+          if ( ! isset($_POST['pcajas']) )
+          {
+            foreach ($info['cajas'] as $key => $c)
+            {
+              $_POST['pcajas'][]       = $c->cajas;
+              $_POST['pcalidad'][]     = $c->id_calidad;
+              $_POST['pcalidadtext'][] = $c->calidad;
+              $_POST['pkilos'][]       = $c->kilos;
+              $_POST['ppromedio'][]    = $c->promedio;
+              $_POST['pprecio'][]      = $c->precio;
+              $_POST['pimporte'][]     = $c->importe;
+            }
+          }
+
+          $_POST['ptotal_cajas']   = $info['info'][0]->total_cajas;
+          $_POST['ppesada']        = $info['info'][0]->kilos_neto2;
+          $_POST['ptotal']         = 0; //$info['info'][0]->importe;
+          $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
+
+        }
+        else
+        {
+          $_GET['msg'] = '10';
+        }
+
+        // echo "<pre>";
+        //   var_dump($info);
+        // echo "</pre>";exit;
+      // }
+
+      if (isset($_GET['msg']))
+        $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      $this->load->view('panel/header', $params);
+      $this->load->view('panel/general/menu', $params);
+      $this->load->view('panel/bascula/bonificacion', $params);
+      $this->load->view('panel/footer');
+    }
+    else
+      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /*
@@ -969,7 +1152,7 @@ class bascula extends MY_Controller {
   */
   public function ajax_get_kilos()
   {
-    echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"290"}}';
+    echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"1500"}}';
   }
 
   /*
@@ -1025,6 +1208,10 @@ class bascula extends MY_Controller {
         break;
       case 11:
         $txt = 'El cliente se agregó correctamente.';
+        $icono = 'success';
+        break;
+      case 12:
+        $txt = 'La bonificación se agregó correctamente.';
         $icono = 'success';
         break;
     }
