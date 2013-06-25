@@ -36,7 +36,7 @@
           Guardar
           <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
         </button>
-        <?
+        <?php
         if ($accion !== 'n')
           echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
               'params'   => 'id='.$idb,
@@ -100,7 +100,7 @@
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
-                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" autofocus <?php echo $disabled ?>>
+                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
@@ -112,7 +112,7 @@
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
-                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" autofocus <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
