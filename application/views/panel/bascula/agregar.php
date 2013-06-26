@@ -30,18 +30,19 @@
 
          <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada
-          <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span> -->
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span>
         </a>
         <button type="submit" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
           Guardar
-          <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
         </button>
         <?php
         if ($accion !== 'n')
           echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
               'params'   => 'id='.$idb,
               'btn_type' => 'btn-success pull-right',
-              'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK', 'style' => 'margin-right: 5px;'))
+              'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK', 'style' => 'margin-right: 5px;'),
+              'html' =>' <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + P</span>')
             );
 
         if ($accion === 'p' || $accion === 'b')

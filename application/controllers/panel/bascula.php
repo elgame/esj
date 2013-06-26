@@ -22,6 +22,8 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_cliente/',
     'bascula/show_view_agregar_chofer/',
     'bascula/show_view_agregar_camion/',
+
+    'bascula/rde_pdf/',
     );
 
   public function _remap($method){
@@ -192,9 +194,10 @@ class bascula extends MY_Controller {
         $params['next_folio'] = $info['info'][0]->folio;
         $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
 
-        $_POST['pkilos_brutos'] = $info['info'][0]->kilos_bruto;
-        $_POST['pkilos_tara']   = $info['info'][0]->kilos_tara;
-        $_POST['pkilos_neto']   = $info['info'][0]->kilos_neto;
+        $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
+        $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;
+        $_POST['pcajas_prestadas'] = $info['info'][0]->cajas_prestadas;
+        $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto;
 
         if ( ! isset($_POST['pcajas']) )
         {
@@ -346,7 +349,7 @@ class bascula extends MY_Controller {
           redirect(base_url('panel/bascula/bonificacion/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
       }
 
-      $params['accion'] = 'n'; // indica que es nueva entrada
+      // $params['accion'] = 'n'; // indica que es nueva entrada
       $params['idb']    = '';
       $params['param_folio'] = '';
       $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
@@ -355,11 +358,8 @@ class bascula extends MY_Controller {
 
       // if (isset($_GET['id']))
       // {
-        $info = $this->bascula_model->getBasculaInfo($_GET['idb']);
 
-        // echo "<pre>";
-        //   var_dump($info);
-        // echo "</pre>";
+        $info = $this->bascula_model->getBasculaInfo($_GET['idb']);
 
         if (count($info['info']) > 0)
         {
@@ -403,7 +403,7 @@ class bascula extends MY_Controller {
 
           // $params['param_folio'] = '?id='.$_GET['id'];
           $params['idb']         = $info['info'][0]->id_bascula;
-          // $params['accion']      = $info['info'][0]->accion;
+          $params['accion']      = isset($_GET['e']) ? $info['info'][0]->accion : 'n';
 
           if (isset($_GET['p']))
             $params['ticket'] = $_GET['b']; //$info['info'][0]->id_bascula
@@ -420,9 +420,10 @@ class bascula extends MY_Controller {
           // $params['next_folio'] = $info['info'][0]->folio;
           // $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
 
-          $_POST['pkilos_brutos'] = $info['info'][0]->kilos_bruto;
-          $_POST['pkilos_tara']   = $info['info'][0]->kilos_tara;
-          $_POST['pkilos_neto']   = $info['info'][0]->kilos_neto;
+          $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
+          $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;
+          $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto;
+          $_POST['pcajas_prestadas'] = $info['info'][0]->cajas_prestadas;
 
           if ( ! isset($_POST['pcajas']) )
           {
@@ -440,7 +441,7 @@ class bascula extends MY_Controller {
 
           $_POST['ptotal_cajas']   = $info['info'][0]->total_cajas;
           $_POST['ppesada']        = $info['info'][0]->kilos_neto2;
-          $_POST['ptotal']         = 0; //$info['info'][0]->importe;
+          $_POST['ptotal']         = isset($_GET['e']) ? $info['info'][0]->importe : 0;
           $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
 
         }
@@ -448,11 +449,6 @@ class bascula extends MY_Controller {
         {
           $_GET['msg'] = '10';
         }
-
-        // echo "<pre>";
-        //   var_dump($info);
-        // echo "</pre>";exit;
-      // }
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -465,6 +461,58 @@ class bascula extends MY_Controller {
     else
       redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
   }
+
+  /**
+   * Muestra el formulario para modificar una bonificacion
+   * @return void
+   */
+  public function modificar_bonificacion()
+  {
+    if (isset($_GET['idb']{0}))
+      redirect(base_url('panel/bascula/bonificacion/?idb='.$_GET['idb']).'&e=t');
+  }
+
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
+   *
+   * @return void
+   */
+  public function rde()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Diario de Entradas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rde', $params);
+    $this->load->view('panel/footer');
+  }
+
+ /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rde_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rde_pdf();
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -799,6 +847,11 @@ class bascula extends MY_Controller {
       array('field' => 'pimporte[]',
             'label' => '',
             'rules' => ''),
+      array('field' => 'pcajas_prestadas',
+            'label' => 'Cajas Prestadas',
+            'rules' => ''),
+
+
 
     );
 
