@@ -29,7 +29,7 @@
                   <div class="controls">
                     <input type="text" name="fproveedor"
                       value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Proveedor">
-                    <input type="text" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor">
+                    <input type="hidden" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor">
                   </div>
                 </div>
 
@@ -38,7 +38,7 @@
                   <div class="controls">
                     <input type="text" name="fempresa"
                       value="<?php echo set_value('fempresa') ?>" id="fempresa" class="span12" placeholder="Empresa">
-                    <input type="text" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa">
+                    <input type="hidden" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa">
                   </div>
                 </div>
 

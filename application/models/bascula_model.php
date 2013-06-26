@@ -462,7 +462,7 @@ class Bascula_model extends CI_Model {
 
     $pdf->AliasNbPages();
     //$pdf->AddPage();
-    $pdf->SetFont('Arial','', 8);
+    $pdf->SetFont('helvetica','', 8);
 
     $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
     $widths = array(20, 20, 20, 82, 25, 25, 25, 25, 25);
@@ -479,7 +479,7 @@ class Bascula_model extends CI_Model {
       {
         $pdf->AddPage();
 
-        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFont('helvetica','B',8);
         $pdf->SetTextColor(255,255,255);
         $pdf->SetFillColor(160,160,160);
         $pdf->SetX(6);
@@ -488,7 +488,7 @@ class Bascula_model extends CI_Model {
         $pdf->Row($header, true);
       }
 
-      $pdf->SetFont('Arial','',10);
+      $pdf->SetFont('helvetica','',10);
       $pdf->SetTextColor(0,0,0);
 
       $pdf->SetX(6);
@@ -496,7 +496,7 @@ class Bascula_model extends CI_Model {
       $pdf->SetWidths(array(267));
       $pdf->Row(array($calidad['calidad']), false);
 
-      $pdf->SetFont('Arial','',8);
+      $pdf->SetFont('helvetica','',8);
       $pdf->SetTextColor(0,0,0);
 
       $promedio = 0;
@@ -539,7 +539,7 @@ class Bascula_model extends CI_Model {
       $pdf->SetWidths(array(142, 25, 25, 25, 25, 25));
       $pdf->Row(array(
         'TOTALES',
-        $promedio/count($calidad['cajas']),
+        String::formatoNumero($kilos/$cajas, 2, ''),
         $cajas,
         $kilos,
         String::formatoNumero($precio/count($calidad['cajas'])),

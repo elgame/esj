@@ -4,6 +4,8 @@ class mypdf_ticket extends FPDF {
     var $limiteY = 0;
     var $titulo1 = 'EMPAQUE SAN JORGE S.A DE C.V';
 
+    var $font_size = 7;
+
     var $pag_size = array();
 
     private $header_entrar = true;
@@ -14,7 +16,7 @@ class mypdf_ticket extends FPDF {
 	 * @param unknown_type $unit
 	 * @param unknown_type $size
 	 */
-	function __construct($orientation='P', $unit='mm', $size=array(63, 180)){
+	function __construct($orientation='P', $unit='mm', $size=array(63, 130)){
 		parent::__construct($orientation, $unit, $size);
 		$this->limiteY = 50;
         $this->pag_size = $size;
@@ -27,24 +29,25 @@ class mypdf_ticket extends FPDF {
     public function Header() {
         if ($this->header_entrar) {
             // Título
-            $this->SetFont('Arial', 'B', 6);
-            $this->SetXY(0, 0);
-            $this->MultiCell($this->pag_size[0], 10, $this->titulo1, 0, 'C');
+            $this->SetFont('helvetica', 'B', 8);
+            $this->SetXY(0, 3);
+            $this->MultiCell($this->pag_size[0], 6, $this->titulo1, 0, 'C');
 
             $this->header_entrar = false;
         }
     }
 
     public function datosTicket($data){
-        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
-        $this->SetFont('Arial', '', 6);
+        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+        $this->SetFont('helvetica', '', $this->font_size);
 
+        $this->SetY($this->GetY()-2);
         $this->SetWidths(array(30, 30));
         $this->SetAligns(array('L', 'R'));
         $this->Row(array( 'NO. BOLETA: ' . $data->folio, 'FECHA: ' . substr($data->fecha_bruto, 0, 10)), false, false, 3);
         // $this->MultiCell($this->pag_size[0], 3, 'NO. BOLETA: ' . $data->folio. '    FECHA: ' . substr($data->fecha_bruto, 0, 10), 0, 'L');
 
-        $this->SetY($this->GetY()+3);
+        $this->SetY($this->GetY());
 
         $this->SetWidths(array(15, 25, 25));
         $this->SetAligns(array('L', 'R', 'L'));
@@ -63,24 +66,25 @@ class mypdf_ticket extends FPDF {
     }
 
     public function productosTicket($data, $data_info){
-        $this->SetY($this->GetY()+3);
-        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
+        $this->SetY($this->GetY()+1);
+        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
 
-        $this->SetY($this->GetY()+2);
+        $this->SetY($this->GetY()-1);
 
-        $this->SetFont('Arial', '', 7);
+        $this->SetFont('helvetica', '', $this->font_size);
         $this->SetWidths(array(7, 10, 12, 10, 10, 20));
         $this->SetAligns(array('L'));
-        $this->Row(array('CJS', 'LIMON', 'KILOS', 'PROM', 'PCIO', 'IMPORTE'), false, false);
+        $this->Row(array('CJS', 'LIMON', 'KILOS', 'PROM', 'PCIO', 'IMPORTE'), false, false, 5);
 
-        $this->SetFont('Arial', '', 8);
+        $this->SetFont('helvetica', '', $this->font_size);
         $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
         if(is_array($data_info)){
-            foreach ($data_info as $prod){
-              $this->SetFont('Arial', '', 7);
+              $this->SetFont('helvetica', '', $this->font_size);
               $this->SetWidths(array(8, 10, 12, 10, 10, 20));
               $this->SetAligns(array('L'));
+            foreach ($data_info as $prod){
+              $this->SetY($this->GetY()-1);
               $this->Row(array($prod->cajas,
                                $prod->calidad,
                                String::formatoNumero($prod->kilos, 2, ''),
@@ -90,15 +94,16 @@ class mypdf_ticket extends FPDF {
             }
         }
 
-        $this->SetFont('Arial', '', 8);
+        $this->SetFont('helvetica', '', $this->font_size);
         $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 3, '----------------------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
 
+        $this->SetY($this->GetY()-2);
         $this->SetWidths(array(38, 20));
         $this->SetAligns(array('R', 'R'));
         $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe)), false, false, 3);
 
-        $this->SetY($this->GetY() + 5);
+        $this->SetY($this->GetY() + 3);
 
         if ($data->tipo === 'en')
         {
@@ -112,10 +117,13 @@ class mypdf_ticket extends FPDF {
         }
 
         $this->MultiCell($this->pag_size[0], 3, 'CUENTA: ' . strtoupper($cuentaCpi), 0, 'L');
-        $this->MultiCell($this->pag_size[0], 3, strtoupper($nombreCpi), 0, 'L');
+        $this->SetY($this->GetY()-2);
+        $this->SetWidths(array($this->pag_size[0]));
+        $this->SetAligns(array('L'));
+        $this->Row(array( strtoupper($nombreCpi) ), false, false);
 
 
-        $this->SetY($this->GetY() + 3);
+        $this->SetY($this->GetY()-1);
         $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');
@@ -123,9 +131,9 @@ class mypdf_ticket extends FPDF {
 
     public function pieTicket($data){
 
-      $this->SetY($this->GetY() + 3);
+      $this->SetY($this->GetY());
 
-      $this->SetFont('Arial', '', 8);
+      $this->SetFont('helvetica', '', $this->font_size);
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetAligns(array('L'));
       $this->Row(array('EXPEDIDO EL:' ), false, false);

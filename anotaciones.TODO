@@ -20,6 +20,9 @@
         Line Number: 331
         ERROR: la sintaxis de entrada no es válida para tipo double precision: «» LINE 1: ...14','2','350.00','700','.5','35'), ('30','14','1','','800','... ^
         INSERT INTO "bascula_compra" ("cajas", "id_bascula", "id_calidad", "importe", "kilos", "precio", "promedio") VALUES ('20','14','2','350.00','700','.5','35'), ('30','14','1','','800','0','26.67')
+   ☐ Bonificaciones se guardan los kilos de la pesada anterior, que sea los que sumen en el listado
+   ☐ Reporte quedaron visibles los campos de los id autocomplete, pone muchos decimales usara la funcion formato numero
+
 
   ☐ Sql
     - Agregar campo en tabla empresas:
@@ -35,6 +38,13 @@
          url: bascula/bonificacion/
          ico: money
          Padre: bascula
+       -----------------------
+        Nombre: Reporte Diario de Entradas
+        Url accion: bascula/rde/
+        icono: print
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
 
 
 Detalles Bascula:
