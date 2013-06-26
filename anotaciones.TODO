@@ -8,6 +8,18 @@
   ✔ Bonificaciones, pedir folio del ticket y cargar los datos en una pesada nueva, en las cajas es editable el precio, y poner por default 0, agregar campo id_bonificacion para relacionar la con el ticket padre @done (13-06-24 14:12)
   ☐ Reporte de pesadas del dia agrupadas por calidad, como las hojas
   ☐ Modulo para pagar pesadas de forma masiva, un rango de fechas, proveedor, carga las pesadas no pagadas, podria pagar con metodo de pago, concepto, monto
+  ☐ Si pongo cajas prestadas no se guardan, si modifico el promedio de las familias agregadas lo hace bien pero el total pone el valor de la ultima calidad agregada tiene que ser la suma de los importes
+  ☐ Ponerles las legendas (alt+p, alt+g, alt+n, etc) dentro de los botones
+  ☐ Las cajas de texto de promedio si dan enter que salte a la siguiente caja, que no se mande el form
+  ☐ De bonificacion creo q no nos entendimos, yo decia los quilos del promedio no los kilos del bruto, tara, neto, cajas esos no q esten bloqueados
+  ☐ bonificacion poner un boton de nueva pesada que regrese a agregar pesada (alt+n), 
+  ☐ bonificacion las pones como pagadas verdad, eso que lo puedan elejir, por q alomejor no lo pagan en efectivo, sino con trasferencia o cheque y eso es con el otro modulo, y que las puedan modificar desde el listado como cualquier pesada.
+  ☐ bonificacion Te comente que cuando se ponga 0 o nada en el precio de las calidades esas no se agreguen a bascula_compra solo las que tengan un valor, deje en blanco 1 y trono, veo que intentas insertar la que no le puse nada, que no la inserte
+        Message: Illegal string offset 'server'
+        Filename: postgre/postgre_driver.php
+        Line Number: 331
+        ERROR: la sintaxis de entrada no es válida para tipo double precision: «» LINE 1: ...14','2','350.00','700','.5','35'), ('30','14','1','','800','... ^
+        INSERT INTO "bascula_compra" ("cajas", "id_bascula", "id_calidad", "importe", "kilos", "precio", "promedio") VALUES ('20','14','2','350.00','700','.5','35'), ('30','14','1','','800','0','26.67')
 
   ☐ Sql
     - Agregar campo en tabla empresas:
