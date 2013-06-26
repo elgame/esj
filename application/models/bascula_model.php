@@ -119,15 +119,16 @@ class Bascula_model extends CI_Model {
           'kilos_bruto'  => $this->input->post('pkilos_brutos'),
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
+          'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'],
         );
 
         if ($bonificacion)
         {
           $data['id_bonificacion'] = $_POST['pidb'];
-          $data['accion'] = 'p';
-          $data['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
-          $data['kilos_tara'] = $this->input->post('pkilos_tara');
-          $data['kilos_neto']  = $this->input->post('pkilos_neto');
+          $data['accion']          = isset($_POST['pstatus']) ? 'p' : 'en';
+          $data['fecha_tara']      = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          $data['kilos_tara']      = $this->input->post('pkilos_tara');
+          $data['kilos_neto']      = $this->input->post('pkilos_neto');
         }
 
         if ($_POST['ptipo'] === 'en')
@@ -173,6 +174,8 @@ class Bascula_model extends CI_Model {
         $data2['accion']      = 'sa';
         $data2['tipo']        = $this->input->post('ptipo');
 
+        $data2['cajas_prestadas'] = empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'];
+
         if (isset($_POST['pstatus'])) $data2['accion'] = 'p';
       }
 
@@ -182,15 +185,18 @@ class Bascula_model extends CI_Model {
         $cajas = array();
         foreach ($_POST['pcajas'] as $key => $caja)
         {
-          $cajas[] = array(
-            'id_bascula' => $idb,
-            'id_calidad' => $_POST['pcalidad'][$key],
-            'cajas'      => $caja,
-            'kilos'      => $_POST['pkilos'][$key],
-            'promedio'   => $_POST['ppromedio'][$key],
-            'precio'     => $_POST['pprecio'][$key],
-            'importe'    => $_POST['pimporte'][$key],
-          );
+          if ( !empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0)
+          {
+            $cajas[] = array(
+              'id_bascula' => $idb,
+              'id_calidad' => $_POST['pcalidad'][$key],
+              'cajas'      => $caja,
+              'kilos'      => $_POST['pkilos'][$key],
+              'promedio'   => $_POST['ppromedio'][$key],
+              'precio'     => $_POST['pprecio'][$key],
+              'importe'    => $_POST['pimporte'][$key],
+            );
+          }
         }
       }
 
@@ -218,7 +224,7 @@ class Bascula_model extends CI_Model {
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
 
-    if ( ! is_null($cajas))
+    if ( ! is_null($cajas) && count($cajas) > 0)
     {
       $this->db->delete('bascula_compra', array('id_bascula' => $id));
       $this->db->insert_batch('bascula_compra', $cajas);
@@ -328,6 +334,238 @@ class Bascula_model extends CI_Model {
     $pdf->AutoPrint(true);
     $pdf->Output();
   }
+
+
+  /*
+   |-------------------------------------------------------------------------
+   |  REPORTES
+   |-------------------------------------------------------------------------
+  */
+
+   public function rde_data()
+   {
+      $sql = $sql2 = '';
+
+      $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-d');
+      $sql .= $sql2 .=" AND DATE(b.fecha_bruto) = '".$_GET['fechaini']."' ";
+
+      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+      if ($this->input->get('farea') != '')
+        $sql .= $sql2 .= " AND b.id_area = " . $_GET['farea'];
+
+      if ($this->input->get('fid_proveedor') != '')
+        $sql .= $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+
+      if ($this->input->get('fid_empresa') != '')
+        $sql .= $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+
+      if ($this->input->get('fstatus') != '')
+        if ($this->input->get('fstatus') === '1')
+          $sql .= " AND b.accion = 'p'";
+        else
+          $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
+
+      $query = $this->db->query(
+        "SELECT bc.id_bascula,
+          bc.id_calidad,
+          bc.cajas,
+          bc.kilos,
+          bc.promedio,
+          bc.precio,
+          bc.importe,
+          p.nombre_fiscal AS proveedor,
+          p.cuenta_cpi,
+          b.folio,
+          b.accion AS pagado
+        FROM bascula_compra AS bc
+        INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
+        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        WHERE b.id_bonificacion is null AND
+              b.status = true AND
+              b.tipo = 'en'
+              {$sql}
+        ORDER BY (b.folio, bc.id_calidad) ASC
+        "
+      );
+
+      $this->load->model('areas_model');
+
+      // Obtiene la informacion del Area filtrada.
+      $area = $this->areas_model->getAreaInfo($_GET['farea']);
+
+      $rde = array();
+      if ($query->num_rows() > 0)
+      {
+        // echo "<pre>";
+        //   var_dump($area);
+        // echo "</pre>";exit;
+
+        foreach ($area['calidades'] as $key => $calidad)
+        {
+          $rde[$key] = array('calidad' => $calidad->nombre, 'cajas' => array());
+          foreach ($query->result() as $key2 => $caja)
+            if ($caja->id_calidad == $calidad->id_calidad)
+              $rde[$key]['cajas'][] = $caja;
+        }
+
+        foreach ($rde as $key => $calidad)
+          if (count($calidad['cajas']) === 0)
+            unset($rde[$key]);
+      }
+
+      $cancelados = $this->db->query(
+        "SELECT SUM(b.importe) as cancelado
+        FROM bascula AS b
+        WHERE b.id_bonificacion is null AND
+              b.status = false AND
+              b.tipo = 'en'
+              {$sql2}
+        ")->row()->cancelado;
+
+      return array('rde' => $rde, 'area' => $area, 'cancelados' => $cancelados);
+   }
+
+   /**
+    * Visualiza/Descarga el PDF para el Reporte Diario de Entradas.
+    *
+    * @return void
+    */
+   public function rde_pdf()
+   {
+
+    // Obtiene los datos del reporte.
+    $data = $this->rde_data();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $rde = $data['rde'];
+
+    $area = $data['area'];
+    // echo "<pre>";
+    //   var_dump($area);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['fechaini']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
+    $pdf->titulo3 = 'FECHA/HORA DEL REPORTE: ' . date('d/m/Y H:i:s');
+
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','', 8);
+
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(20, 20, 20, 82, 25, 25, 25, 25, 25);
+    $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
+                    'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
+
+    $totalPagado    = 0;
+    $totalNoPagado  = 0;
+    $totalCancelado = 0;
+
+    foreach($rde as $key => $calidad)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',10);
+      $pdf->SetTextColor(0,0,0);
+
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(267));
+      $pdf->Row(array($calidad['calidad']), false);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $promedio = 0;
+      $cajas    = 0;
+      $kilos    = 0;
+      $precio   = 0;
+      $importe  = 0;
+
+      foreach ($calidad['cajas'] as $caja)
+      {
+        $promedio += $caja->promedio;
+        $cajas    += $caja->cajas;
+        $kilos    += $caja->kilos;
+        $precio   += $caja->precio;
+        $importe  += $caja->importe;
+
+        if ($caja->pagado === 'p')
+          $totalPagado += $caja->importe;
+        else
+          $totalNoPagado += $caja->importe;
+
+        $datos = array($caja->pagado === 'p' ? 'P' : '',
+                       $caja->folio,
+                       $caja->cuenta_cpi,
+                       $caja->proveedor,
+                       $caja->promedio,
+                       $caja->cajas,
+                       $caja->kilos,
+                       String::formatoNumero($caja->precio),
+                       String::formatoNumero($caja->importe));
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(142, 25, 25, 25, 25, 25));
+      $pdf->Row(array(
+        'TOTALES',
+        $promedio/count($calidad['cajas']),
+        $cajas,
+        $kilos,
+        String::formatoNumero($precio/count($calidad['cajas'])),
+        String::formatoNumero($importe)), false);
+
+    }
+
+    // $pdf->SetX(6);
+    $pdf->SetY($pdf->getY() + 6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(66, 66, 66, 66));
+    $pdf->Row(array(
+      'PAGADO',
+      'NO PAGADO',
+      'CANCELADO',
+      'TOTAL IMPORTE'), true);
+
+    $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(66, 66, 66, 66));
+    $pdf->Row(array(
+      String::formatoNumero($totalPagado),
+      String::formatoNumero($totalNoPagado),
+      String::formatoNumero($data['cancelados']),
+      String::formatoNumero($totalImporte)), false);
+
+    $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+
+
 
 
 }

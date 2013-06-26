@@ -8,7 +8,7 @@
         // $crumbTitle = 'Agregar';
         if ($e === true)
         {
-          $readonly = '';
+          $readonly = 'readonly';
           // $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
         }
@@ -27,12 +27,19 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/bonificacion?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/bonificacion?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'b'))); ?>" method="post" class="form-horizontal" id="form">
+
+        <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
+          Nueva Pesada
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span>
+        </a>
 
         <button type="submit" class="btn btn-primary pull-right" id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
         </button>
+
+
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
         <input type="hidden" name="pidb" value="<?php echo $idb ?>">
@@ -158,7 +165,7 @@
                     <!-- <label class="control-label">Finalizado?</label> -->
                     <div class="controls">
                       <button type="button" class="btn btn-success span10 <?php echo ($accion==='p' || $accion === 'b') ? 'active' : '' ?>" data-toggle="button"
-                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>>Pagar</button>
+                        id="pstatus" data-name="pstatus" data-value="1">Pagar</button>
                     </div>
                   </div>
                 </div><!--/span-->
@@ -183,7 +190,7 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>">
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $readonly ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -195,7 +202,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>">
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $readonly ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -207,7 +214,7 @@
                     <label class="control-label" for="pcajas_prestadas" style="width: 100px;">Cajas Prestadas</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pcajas_prestadas" id="pcajas_prestadas" class="input-small vpositive"
-                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>">
+                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>" <?php echo $readonly ?>>
                     </div>
                   </div>
                 </div>
@@ -310,17 +317,17 @@
                                     <input type="hidden" name="pkilos[]" value="<?php echo $_POST['pkilos'][$key] ?>" id="pkilos">
                                     <!-- <input type="hidden" name="ppromedio[]" value="<?php //echo $_POST['ppromedio'][$key] ?>" id="ppromedio"> -->
                                     <!-- <input type="hidden" name="pprecio[]" value="<?php //echo $_POST['pprecio'][$key] ?>" id="pprecio"> -->
-                                    <input type="hidden" name="pimporte[]" value="<?php //echo $_POST['pimporte'][$key] ?>" id="pimporte">
+                                    <input type="hidden" name="pimporte[]" value="<?php echo isset($_GET['e']) ? $_POST['pimporte'][$key] : '' ?>" id="pimporte">
                                   </td>
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
                                   <td id="tdkilos"><?php echo $_POST['pkilos'][$key] ?></td>
                                   <td id="tdpromedio">
-                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;" <?php echo $readonly ?>>
+                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;">
                                   </td>
                                   <td>
-                                    <input type="text" name="pprecio[]" value="0" class="vpositive" id="pprecio" style="width: 80px;">
+                                    <input type="text" name="pprecio[]" value="<?php echo isset($_GET['e']) ? $_POST['pprecio'][$key] : 0 ?>" class="vpositive" id="pprecio" style="width: 80px;">
                                   </td>
-                                  <td id="tdimporte">0</td><?php //echo $_POST['pimporte'][$key] ?>
+                                  <td id="tdimporte"><?php echo isset($_GET['e']) ? $_POST['pimporte'][$key] : 0 ?></td><?php //echo $_POST['pimporte'][$key] ?>
                                   <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled ?>><i class="icon-trash"></i></button></td>
                                 </tr>
 

@@ -120,11 +120,18 @@
                 <td><?php echo $b->placas; ?></td>
                 <td class="center">
                     <?php
-                    if ($b->id_bonificacion == null)
+                    if ($b->id_bonificacion == null) {
+
                       echo $this->usuarios_model->getLinkPrivSm('bascula/modificar/', array(
                           'params'   => 'folio='.$b->folio,
                           'btn_type' => 'btn-success')
                       );
+                    } else {
+                      echo $this->usuarios_model->getLinkPrivSm('bascula/modificar_bonificacion/', array(
+                          'params'   => 'idb='.$b->id_bascula,
+                          'btn_type' => 'btn-success')
+                      );
+                    }
 
                     if ($b->status == 't') {
                       echo $this->usuarios_model->getLinkPrivSm('bascula/cancelar/', array(

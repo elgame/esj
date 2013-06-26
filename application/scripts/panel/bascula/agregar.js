@@ -425,7 +425,12 @@ var calculaTotales = function (trIndex, kilosNeto) {
 
     $tr.attr('data-kneto', kilosNeto);
 
-    total +=  parseFloat(importe);
+    // total +=  parseFloat(importe);
+  });
+
+  $('input#pimporte').each(function () {
+      console.log($(this).val());
+      total +=  parseFloat($(this).val());
   });
 
   $ptotal_cajas.val(totalCajas);

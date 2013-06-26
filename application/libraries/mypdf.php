@@ -2,7 +2,7 @@
 
 class MYpdf extends FPDF {
 	var $show_head = true;
-	var $titulo1 = 'FRUTAS Y LEGUMBRES DE LA ACOSTA SUR DE JALISCO S.A. DE C.V.';
+	var $titulo1 = "EMPAQUE SAN JORGE S.A. DE C.V.";
 	var $titulo2 = '';
 	var $titulo3 = '';
 
