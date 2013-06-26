@@ -472,7 +472,6 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/bonificacion/?idb='.$_GET['idb']).'&e=t');
   }
 
-
   /**
    * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
    *
@@ -513,6 +512,36 @@ class bascula extends MY_Controller {
     $this->bascula_model->rde_pdf();
   }
 
+  /**
+   * Muestra la vista para realizar movimientos de cuenta.
+   * @return void
+   */
+  public function movimientos()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/movimientos_cuenta.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Movimientos de Cuenta'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['basculas'] = $this->bascula_model->getBasculasNoPagadas(true);
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/movimientos_cuenta', $params);
+    $this->load->view('panel/footer');
+  }
 
   /*
    |------------------------------------------------------------------------

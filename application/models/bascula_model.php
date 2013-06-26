@@ -335,6 +335,11 @@ class Bascula_model extends CI_Model {
     $pdf->Output();
   }
 
+  public function getBasculasNoPagadas()
+  {
+    $query = $this->db->query();
+  }
+
 
   /*
    |-------------------------------------------------------------------------
