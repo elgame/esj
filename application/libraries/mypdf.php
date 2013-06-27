@@ -65,7 +65,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(211, 5);
     	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(194, 8);
-    	$this->Cell(16, 5, date("Y-m-d"), 0, 0, 'R');
+    	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
     	$this->Line(6, 26, 210, 26);
 
@@ -94,7 +94,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(276, 5);
     	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(259, 8);
-    	$this->Cell(16, 5, date("Y-m-d"), 0, 0, 'R');
+    	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
     	$this->Line(6, 26, 273, 26);
 
@@ -124,7 +124,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(211, 5);
     	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(194, 8);
-    	$this->Cell(16, 5, date("Y-m-d"), 0, 0, 'R');
+    	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
     	$this->Line(6, 26, 210, 26);
     }
@@ -152,7 +152,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(350, 5);
     	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(333, 8);
-    	$this->Cell(16, 5, date("Y-m-d"), 0, 0, 'R');
+    	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
     	$this->Line(6, 26, 349, 26);
     }

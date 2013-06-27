@@ -7,9 +7,9 @@
               <div class="form-actions form-filters">
 
                 <div class="control-group">
-                  <label class="control-label" for="fechaini">Dia</label>
+                  <label class="control-label" for="ffecha1">Dia</label>
                   <div class="controls">
-                    <input type="text" name="fechaini" class="span12" id="fechaini" value="<?php echo set_value($this->input->post('fechaini'), date('Y-m-d')); ?>">
+                    <input type="date" name="ffecha1" class="span12" id="ffecha1" value="<?php echo set_value($this->input->post('ffecha1'), date('Y-m-d')); ?>" autofocus>
                   </div>
                 </div>
 
@@ -25,10 +25,21 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fproveedor">Proveedor</label>
+                  <label class="control-label" for="ftipo">Tipo</label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo">
+                      <option value="en">ENTRADA</option>
+                      <option value="sa">SALIDA</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label autocomplet_en" for="fproveedor">Proveedor</label>
+                  <label class="control-label autocomplet_sa" for="fproveedor">Cliente</label>
                   <div class="controls">
                     <input type="text" name="fproveedor"
-                      value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Proveedor">
+                      value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Buscar">
                     <input type="hidden" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor">
                   </div>
                 </div>
