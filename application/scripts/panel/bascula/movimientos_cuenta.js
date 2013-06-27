@@ -31,4 +31,46 @@ $(function(){
       $('#fid_proveedor').val('');
     }
   });
+
+
+  $(function(){
+    $('#checkPesadas').on('change', function(event) {
+      var check = '';
+
+      if ($(this).is(':checked')) check = "checked";
+      else check = "";
+
+      $('input#pesadas').each(function(index) {
+        // $(this).prop('checked', check);
+        $(this).trigger('click');
+      });
+
+    });
+  });
+
+  $('input#pesadas').on('change', function(event) {
+    event.preventDefault();
+    var $this = $(this),
+        $monto = $('#pmonto');
+
+    if ($this.is(':checked')) {
+      $monto.val(parseFloat($monto.val()) + parseFloat($this.attr('data-monto')))
+    } else {
+      $monto.val(parseFloat($monto.val()) - parseFloat($this.attr('data-monto')))
+    }
+
+  });
+
+  $('#btnModalPagos').on('click', function(event) {
+    event.preventDefault();
+
+    var $monto = $('#pmonto');
+
+    if (parseFloat($monto.val()) !== 0) {
+      $('#modalPagos').modal('toggle')
+    } else {
+      noty({"text": 'Seleccione al menos una pesada para pagar!', "layout":"topRight", "type": 'error'});
+    }
+  });
+
 });

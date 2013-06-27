@@ -26,7 +26,8 @@
 
 <script type="text/javascript" charset="UTF-8">
   var base_url = "<?php echo base_url();?>",
-      base_url_bascula = "<?php echo $this->config->item('base_url_bascula');?>";
+      base_url_bascula = "<?php echo $this->config->item('base_url_bascula');?>",
+      base_url_cam_salida_snapshot = "<?php echo $this->config->item('base_url_cam_salida_snapshot') ?> ";
 </script>
 </head>
 <body>

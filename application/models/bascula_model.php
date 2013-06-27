@@ -335,9 +335,142 @@ class Bascula_model extends CI_Model {
     $pdf->Output();
   }
 
-  public function getBasculasNoPagadas()
+  public function getMovimientos()
   {
-    $query = $this->db->query();
+    $data =  array(
+      'movimientos' => array(),
+      'area'        => array(),
+      'proveedor'   => array(),
+    );
+
+    $data['totales'] = array(
+        'importe'     => 0,
+        'pesada'      => 0,
+        'total'       => 0,
+        'pagados'     => 0,
+        'kilos'       => 0,
+        'cajas'       => 0,
+        'precio_prom' => 0, // importe / kilos
+        'no_pagados'  => 0,
+      );
+
+    if (isset($_GET['fid_proveedor']))
+    {
+      $sql = '';
+
+      $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-01');
+      $_GET['fechaend'] = $this->input->get('fechaend') != '' ? $_GET['fechaend'] : date('Y-m-d');
+      if ($this->input->get('fechaini') != '' && $this->input->get('fechaend') != '')
+      $sql .= " AND DATE(b.fecha_bruto) >= '".$this->input->get('fechaini')."' AND
+                    DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
+
+      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+      if ($this->input->get('farea') != '')
+        $sql .= " AND b.id_area = " . $_GET['farea'];
+
+      if ($this->input->get('fstatusp') != '')
+        if ($this->input->get('fstatusp') === '1')
+          $sql .= " AND b.accion IN ('p', 'b')";
+        else
+          $sql .= " AND b.accion IN ('en', 'sa')";
+
+      if ($this->input->get('ftipop') != '')
+        if ($this->input->get('ftipop') === '1')
+          $sql .= " AND b.tipo = 'en'";
+        else
+          $sql .= " AND b.tipo = 'sa'";
+
+      if (isset($_GET['pe']))
+        $sql = " AND b.id_bascula IN (".$_GET['pe'].")";
+
+      $query = $this->db->query(
+        "SELECT b.id_bascula,
+               b.accion as status,
+               b.folio,
+               DATE(b.fecha_bruto) as fecha,
+               ca.nombre as calidad,
+               bc.cajas,
+               bc.promedio,
+               bc.kilos,
+               bc.precio,
+               bc.importe,
+               b.importe as importe_todas,
+               b.tipo,
+               pagos.tipo_pago,
+               pagos.concepto
+        FROM bascula_compra AS bc
+        INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
+        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+        INNER JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
+        LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
+                    FROM bascula_pagos AS bp
+                    INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
+                    ON pagos.id_bascula = b.id_bascula
+        WHERE b.id_bonificacion is null AND
+              b.status = true AND
+              b.id_proveedor = '{$_GET['fid_proveedor']}'
+              {$sql}
+        ORDER BY b.folio, bc.id_calidad ASC
+      ");
+
+      $movimientos = $query->result();
+
+      foreach ($movimientos as $key => $caja)
+      {
+        $data['totales']['importe']     += floatval($caja->importe);
+        $data['totales']['total']       += floatval($caja->importe);
+        $data['totales']['kilos']       += floatval($caja->kilos);
+        $data['totales']['cajas']       += floatval($caja->cajas);
+        // $data['precio_prom'] += floatval($caja->promedio);
+
+        if ($caja->status === 'p' || $caja->status === 'b')
+          $data['totales']['pagados'] += floatval($caja->importe);
+        else
+          $data['totales']['no_pagados'] += floatval($caja->importe);
+      }
+
+
+      $this->load->model('areas_model');
+      $this->load->model('proveedores_model');
+
+      // Obtiene la informacion del Area filtrada.
+      $data['area'] = $this->areas_model->getAreaInfo($_GET['farea']);
+
+      // Obtiene la informacion del proveedor filtrado.
+      $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
+
+      $data['movimientos'] = $movimientos;
+    }
+
+    return $data;
+  }
+
+  public function pago_basculas()
+  {
+    $bascula_pagos = array(
+      'tipo_pago' => $this->input->post('ptipo_pago'),
+      'monto'     => $this->input->post('pmonto'),
+      'concepto'  => $this->input->post('pconcepto'),
+    );
+
+    $this->db->insert('bascula_pagos', $bascula_pagos);
+    $id_bascula_pagos = $this->db->insert_id();
+
+    $pesadas = array();
+    $pesadas_update = array();
+    foreach ($_POST['ppagos'] as $pesada)
+    {
+      $this->db->update('bascula', array('accion' => 'b'), array('id_bascula' => $pesada));
+
+      $pesadas[] = array(
+        'id_pago' => $id_bascula_pagos,
+        'id_bascula' => $pesada
+      );
+    }
+
+    $this->db->insert_batch('bascula_pagos_basculas', $pesadas);
+
+    return array('passess' => true);
   }
 
 
@@ -437,7 +570,6 @@ class Bascula_model extends CI_Model {
     */
    public function rde_pdf()
    {
-
     // Obtiene los datos del reporte.
     $data = $this->rde_data();
 
@@ -570,7 +702,127 @@ class Bascula_model extends CI_Model {
     $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
 
+  /**
+    * Visualiza/Descarga el PDF para el Reporte Diario de Entradas.
+    *
+    * @return void
+    */
+   public function rmc_pdf()
+   {
+    // Obtiene los datos del reporte.
+    $data = $this->getMovimientos();
 
+    // echo "<pre>";
+    //   var_dump($data['totales']);
+    // echo "</pre>";exit;
+
+    $rmc = $data['movimientos'];
+
+    $area = $data['area'];
+
+    $proveedor = $data['proveedor'];
+    // echo "<pre>";
+    //   var_dump($proveedor);
+    // echo "</pre>";exit;
+
+    $fechaini = new DateTime($_GET['fechaini']);
+    $fechaend = new DateTime($_GET['fechaend']);
+
+
+    $tipo = "ENTRADAS/SALIDAS";
+    if ($this->input->get('ftipop') != '')
+      if ($this->input->get('ftipop') === '1')
+        $tipo = "ENTRADAS";
+      else
+        $tipo = "SALIDAS";
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf->titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
+    $pdf->titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") \n FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
+
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(5, 15, 20, 35, 20, 20, 25, 20, 25, 25, 28, 30);
+    $header = array('',   'BOLETA', 'FECHA','CALIDAD',
+                    'CAJAS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO');
+
+    $lastFolio = 0;
+    foreach($rmc as $key => $caja)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('helvetica','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $datos = array(($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : '',
+                     ($caja->id_bascula != $lastFolio) ? $caja->folio : '',
+                     ($caja->id_bascula != $lastFolio) ? $caja->fecha : '',
+                     $caja->calidad,
+                     $caja->cajas,
+                     $caja->promedio,
+                     $caja->kilos,
+                     String::formatoNumero($caja->precio),
+                     String::formatoNumero($caja->importe),
+                     ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas) : '',
+                     ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
+                     ($caja->id_bascula != $lastFolio) ? $caja->concepto: '');
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+
+      $lastFolio = $caja->id_bascula;
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row(array('', '', '', '',
+      $data['totales']['cajas'],
+      String::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, ''),
+      $data['totales']['kilos'],
+      $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 3, '') : 0,
+      String::formatoNumero($data['totales']['importe']),
+      String::formatoNumero($data['totales']['total']),
+      '',''
+    ), true);
+
+    $pdf->SetX(6);
+    $pdf->SetY($pdf->getY() + 6);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(66, 66, 66));
+    $pdf->Row(array(
+      'PAGADO',
+      'NO PAGADO',
+      'TOTAL IMPORTE',), true);
+
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(66, 66, 66));
+    $pdf->Row(array(
+      String::formatoNumero($data['totales']['pagados']),
+      String::formatoNumero($data['totales']['no_pagados']),
+      String::formatoNumero($data['totales']['total'])
+    ), false);
+
+    $pdf->Output('REPORTE_MOVIMIENTOS_CUENTA.pdf', 'I');
+  }
 
 
 }

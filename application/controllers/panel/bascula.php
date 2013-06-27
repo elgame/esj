@@ -24,6 +24,9 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_camion/',
 
     'bascula/rde_pdf/',
+    'bascula/rmc_pdf/',
+
+    'bascula/imprimir_pagadas/'
     );
 
   public function _remap($method){
@@ -513,11 +516,25 @@ class bascula extends MY_Controller {
   }
 
   /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rmc_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rmc_pdf();
+  }
+
+  /**
    * Muestra la vista para realizar movimientos de cuenta.
    * @return void
    */
   public function movimientos()
   {
+    if (isset($_GET['fid_proveedor']))
+      if ($_GET['fid_proveedor'] == '')
+        redirect(base_url('panel/bascula/movimientos/?msg=13'));
+
     $this->carabiner->js(array(
       // array('general/msgbox.js'),
       array('panel/bascula/movimientos_cuenta.js'),
@@ -531,16 +548,45 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->load->model('areas_model');
 
-    $params['basculas'] = $this->bascula_model->getBasculasNoPagadas(true);
+    $params['movimientos'] = $this->bascula_model->getMovimientos();
     $params['areas'] = $this->areas_model->getAreas();
+
+    // echo "<pre>";
+    //   var_dump($params['movimientos']);
+    // echo "</pre>";exit;
+
+    if (isset($_GET['p']) && isset($_GET['pe']))
+    {
+      $params['p'] = true;
+      $params['pe'] = $_GET['pe'];
+    }
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
-    $this->load->view('panel/general/menu', $params);
+    // $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/bascula/movimientos_cuenta', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function pago_basculas()
+  {
+    $this->load->model('bascula_model');
+
+    $res_mdl = $this->bascula_model->pago_basculas();
+
+    if ($res_mdl['passess'])
+    {
+      $pesadas = '&pe='.implode(',', $_POST['ppagos']);
+      redirect(base_url('panel/bascula/movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
+    }
+  }
+
+  public function imprimir_pagadas()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rmc_pdf();
   }
 
   /*
@@ -1294,6 +1340,14 @@ class bascula extends MY_Controller {
         break;
       case 12:
         $txt = 'La bonificación se agregó correctamente.';
+        $icono = 'success';
+        break;
+      case 13:
+        $txt = 'Especifique un Proveedor!';
+        $icono = 'error';
+        break;
+      case 14:
+        $txt = 'El pago se realizo correctamente!';
         $icono = 'success';
         break;
     }
