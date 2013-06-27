@@ -31,7 +31,44 @@
           id_bonificacion bigint
     -Agregar campo en tabla bascula
           cajas_prestadas integer
-    -
+    -TABLAS PARA LOS PAGOS DE LAS PESADAS
+          -- DROP TABLE bascula_pagos;
+
+            CREATE TABLE bascula_pagos
+            (
+              id_pago bigserial NOT NULL,
+              tipo_pago character varying(20) NOT NULL,
+              monto double precision NOT NULL,
+              concepto character varying(254),
+              status boolean NOT NULL DEFAULT true,
+              CONSTRAINT bascula_pagos_pkey PRIMARY KEY (id_pago)
+            )
+            WITH (
+              OIDS=FALSE
+            );
+            ALTER TABLE bascula_pagos
+            OWNER TO programa;
+
+
+          CREATE TABLE bascula_pagos_basculas
+          (
+            id_pago bigint NOT NULL,
+            id_bascula bigint NOT NULL,
+            CONSTRAINT bascula_pagos_basculas_pkey PRIMARY KEY (id_pago, id_bascula),
+            CONSTRAINT bascula_pagos_basculas_id_bascula_fkey FOREIGN KEY (id_bascula)
+                REFERENCES bascula (id_bascula) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            CONSTRAINT bascula_pagos_basculas_id_pago_fkey FOREIGN KEY (id_pago)
+                REFERENCES bascula_pagos (id_pago) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE
+          )
+          WITH (
+            OIDS=FALSE
+          );
+          ALTER TABLE bascula_pagos_basculas
+            OWNER TO programa;
+
+	-
 
    - Nuevos Privilegios
          nombre: Bonificacion
@@ -52,6 +89,28 @@
         Mostrar menu: si
         Target blank: si
         Padre: bascula
+	   ----------------------- 26-06-2013
+       Nombre: Modificar
+        Url accion: bascula/modificar_bonificacion/
+        icono: edit
+        Mostrar menu: no
+        Target blank: no
+        ---------------------- 26-06-2013
+        Nombre: Movimientos de Cuenta
+        Url accion: bascula/movimientos/
+        icono: exchange
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
+        ---------------------- 26-06-2013
+        Nombre: Pagos Pesadas
+        Url accion: bascula/pago_basculas/
+        icono: usd
+        Mostrar menu: no
+        Target blank: no
+        Padre: bascula
+
+
 
 
 Detalles Bascula:

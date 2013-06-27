@@ -185,6 +185,14 @@
                         id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>>Pagar</button>
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <!-- <label class="control-label">Finalizado?</label> -->
+                    <div class="controls">
+                      <!-- <button type="button" class="btn btn-info span10" id="pfotos">Fotos</button> -->
+                      <!-- <a href="#modalFotos" role="button" class="btn btn-info span10" data-toggle="modal">Fotos</a> -->
+                    </div>
+                  </div>
                 </div><!--/span-->
               </div><!--/row-fluid-->
 
@@ -396,6 +404,61 @@
 
           <!-- content ends -->
     </div><!--/#content.span10-->
+
+
+<!-- Modal -->
+<!-- <div id="modalFotos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalFotosLabel" aria-hidden="true" style="width: 760px;left: 44%;">
+
+  <div class="modal-body">
+
+    <fieldset class="span4">
+      <legend style="margin-bottom: 3px;">Camara Salida</legend>
+      <div class="row-fluid">
+        <div class="span12">
+          <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgsalida"><i class="icon-camera"></i></button>
+        </div>
+        <div class="span12">
+          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+        </div>
+        <div class="span12" id="snapshot"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="span4">
+      <legend style="margin-bottom: 3px;">Camara Entrada</legend>
+      <div class="row-fluid">
+        <div class="span12">
+          <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgentrada"><i class="icon-camera"></i></button>
+        </div>
+        <div class="span12">
+          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+        </div>
+        <div class="span12" id="snapshot"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="span4">
+      <legend style="margin-bottom: 3px;">Camara Entrada 2</legend>
+      <div class="row-fluid">
+        <div class="span12">
+          <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgentrada2"><i class="icon-camera"></i></button>
+        </div>
+        <div class="span12">
+          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+        </div>
+        <div class="span12" id="snapshot"></div>
+      </div>
+    </fieldset>
+
+
+    <canvas id="myCanvas"/>
+
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <button class="btn btn-primary">Save changes</button>
+  </div>
+</div> -->
 
 
 <?php if (isset($ticket)) { ?>

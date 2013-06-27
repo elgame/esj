@@ -1,5 +1,21 @@
 $(function(){
 
+  // $('button#btnCamera').on('click', function(event) {
+  //   event.preventDefault();
+
+  //   var $this   = $(this),
+  //       $parent = $this.parent().parent(),
+  //       $form   = $('#form'),
+  //       img = '<img src="'+base_url_cam_salida_snapshot+'" width="320" id="imgSnapshot">';
+
+  //   $parent.find('#snapshot').html(img);
+
+  //   if ($('#'+$this.attr('data-name')).length == 0)
+  //     $form.append('<input type="text" value="'+getSnapshot($parent)+'" name="'+$this.attr('data-name')+'" id="'+$this.attr('data-name')+'">');
+  //   else
+  //     $('#'+$this.attr('data-name')).val(getSnapshot($parent));
+  // });
+
   $('#form').keyJump({
     'next': 13,
     'alt+66': function () { // alt + b
@@ -312,6 +328,32 @@ $(function(){
   });
 
 });
+
+var getSnapshot = function ($parent) {
+  // var c = document.getElementById("myCanvas");
+  // var ctx = c.getContext("2d");
+  // var img = $parent.find('#imgSnapshot');
+  // var img = document.getElementById("imgSnapshot");
+  // ctx.drawImage(img[0], 10, 10);
+  // alert(c.toDataURL());
+  // return c.toDataURL();
+
+  var c = document.getElementById('myCanvas');
+  var ctx = c.getContext('2d');
+  var img = new Image;
+  // img.src = URL.createObjectURL(e.target.files[0]);
+  img.src = base_url_cam_salida_snapshot;
+
+  console.log(img);
+
+  // img.onload = function() {
+  //     ctx.drawImage(img, 0, 0);
+
+  //     console.log(ctx);
+
+  //     alert(c.toJSON());
+  // }
+};
 
 var calculaKilosNeto = function () {
   var $inputBruto  = $('#pkilos_brutos'),
