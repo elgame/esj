@@ -20,8 +20,8 @@
         Line Number: 331
         ERROR: la sintaxis de entrada no es válida para tipo double precision: «» LINE 1: ...14','2','350.00','700','.5','35'), ('30','14','1','','800','... ^
         INSERT INTO "bascula_compra" ("cajas", "id_bascula", "id_calidad", "importe", "kilos", "precio", "promedio") VALUES ('20','14','2','350.00','700','.5','35'), ('30','14','1','','800','0','26.67')
-   ☐ Bonificaciones se guardan los kilos de la pesada anterior, que sea los que sumen en el listado
-   ☐ Reporte quedaron visibles los campos de los id autocomplete, pone muchos decimales usara la funcion formato numero
+   ✔ Bonificaciones se guardan los kilos de la pesada anterior, que sea los que sumen en el listado @done (13-06-26 09:45)
+   ✔ Reporte quedaron visibles los campos de los id autocomplete, pone muchos decimales usara la funcion formato numero @done (13-06-26 09:45)
 
 
   ☐ Sql
@@ -68,6 +68,17 @@
           ALTER TABLE bascula_pagos_basculas
             OWNER TO postgres;
 
+	-
+    CREATE OR REPLACE VIEW rpt_acumulados_productos AS 
+     SELECT b.id_bascula, b.fecha_tara, b.kilos_neto, b.total_cajas, bc.precio, bc.precio * b.total_cajas AS importe, p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi, b.accion AS pagado
+       FROM bascula b
+       JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
+               FROM bascula_compra
+              GROUP BY bascula_compra.id_bascula) bc ON b.id_bascula = bc.id_bascula
+       LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor
+      WHERE b.status = true;
+    ALTER TABLE rpt_acumulados_productos OWNER TO programa;
+
    - Nuevos Privilegios
          nombre: Bonificacion
          url: bascula/bonificacion/
@@ -80,7 +91,14 @@
         Mostrar menu: si
         Target blank: si
         Padre: bascula
-        ----------------------- 26-06-2013
+       -----------------------
+        Nombre: Reporte Acumulados de Productos
+        Url accion: bascula/r_acumulados/
+        icono: print
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
+	   ----------------------- 26-06-2013
        Nombre: Modificar
         Url accion: bascula/modificar_bonificacion/
         icono: edit

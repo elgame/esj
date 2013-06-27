@@ -185,7 +185,7 @@ class Bascula_model extends CI_Model {
         $cajas = array();
         foreach ($_POST['pcajas'] as $key => $caja)
         {
-          if ( !empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0)
+          if ( (!empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0) || $bonificacion==false)
           {
             $cajas[] = array(
               'id_bascula' => $idb,
@@ -484,15 +484,19 @@ class Bascula_model extends CI_Model {
    {
       $sql = $sql2 = '';
 
-      $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-d');
-      $sql .= $sql2 .=" AND DATE(b.fecha_bruto) = '".$_GET['fechaini']."' ";
+      $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+      $sql .= $sql2 .=" AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
 
       $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
       if ($this->input->get('farea') != '')
         $sql .= $sql2 .= " AND b.id_area = " . $_GET['farea'];
 
-      if ($this->input->get('fid_proveedor') != '')
-        $sql .= $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      if ($this->input->get('fid_proveedor') != ''){
+        if($this->input->get('ftipo') == 'sa')
+          $sql .= $sql2 .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+        else
+          $sql .= $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      }
 
       if ($this->input->get('fid_empresa') != '')
         $sql .= $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
@@ -503,6 +507,18 @@ class Bascula_model extends CI_Model {
         else
           $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
 
+      //Filtros del tipo de pesadas
+      if ($this->input->get('ftipo') != '')
+        $sql .= " AND b.tipo = '{$_GET['ftipo']}'";
+      $campos = "p.nombre_fiscal AS proveedor, p.cuenta_cpi, ";
+      $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+      $tipo_rpt = "Entrada";
+      if($this->input->get('ftipo') == 'sa') {
+        $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
+        $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+        $tipo_rpt = "Salida";
+      }
+
       $query = $this->db->query(
         "SELECT bc.id_bascula,
           bc.id_calidad,
@@ -511,16 +527,13 @@ class Bascula_model extends CI_Model {
           bc.promedio,
           bc.precio,
           bc.importe,
-          p.nombre_fiscal AS proveedor,
-          p.cuenta_cpi,
+          {$campos}
           b.folio,
           b.accion AS pagado
         FROM bascula_compra AS bc
         INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
-        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
-        WHERE b.id_bonificacion is null AND
-              b.status = true AND
-              b.tipo = 'en'
+        {$table_ms}
+        WHERE b.status = true
               {$sql}
         ORDER BY (b.folio, bc.id_calidad) ASC
         "
@@ -560,7 +573,7 @@ class Bascula_model extends CI_Model {
               {$sql2}
         ")->row()->cancelado;
 
-      return array('rde' => $rde, 'area' => $area, 'cancelados' => $cancelados);
+      return array('rde' => $rde, 'area' => $area, 'cancelados' => $cancelados, 'tipo' => $tipo_rpt);
    }
 
    /**
@@ -570,6 +583,7 @@ class Bascula_model extends CI_Model {
     */
    public function rde_pdf()
    {
+
     // Obtiene los datos del reporte.
     $data = $this->rde_data();
 
@@ -577,35 +591,250 @@ class Bascula_model extends CI_Model {
     //   var_dump($data);
     // echo "</pre>";exit;
 
-    $rde = $data['rde'];
+      $rde = $data['rde'];
+
+      $area = $data['area'];
+      // echo "<pre>";
+      //   var_dump($area);
+      // echo "</pre>";exit;
+
+      $fecha = new DateTime($_GET['ffecha1']);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
+      $pdf->titulo3 = $this->input->get('fproveedor').' | '.$data['tipo'].' | '.$this->input->get('fempresa');
+
+      $pdf->AliasNbPages();
+      //$pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+      $widths = array(20, 20, 20, 82, 25, 25, 25, 25, 25);
+      $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
+                      'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
+
+      $totalPagado    = 0;
+      $totalNoPagado  = 0;
+      $totalCancelado = 0;
+
+      foreach($rde as $key => $calidad)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('helvetica','',10);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(267));
+        $pdf->Row(array($calidad['calidad']), false);
+
+        $pdf->SetFont('helvetica','',8);
+        $pdf->SetTextColor(0,0,0);
+
+        $promedio = 0;
+        $cajas    = 0;
+        $kilos    = 0;
+        $precio   = 0;
+        $importe  = 0;
+
+        foreach ($calidad['cajas'] as $caja)
+        {
+          $promedio += $caja->promedio;
+          $cajas    += $caja->cajas;
+          $kilos    += $caja->kilos;
+          $precio   += $caja->precio;
+          $importe  += $caja->importe;
+
+          if ($caja->pagado === 'p')
+            $totalPagado += $caja->importe;
+          else
+            $totalNoPagado += $caja->importe;
+
+          $datos = array($caja->pagado === 'p' ? 'P' : '',
+                         $caja->folio,
+                         $caja->cuenta_cpi,
+                         $caja->proveedor,
+                         $caja->promedio,
+                         $caja->cajas,
+                         $caja->kilos,
+                         String::formatoNumero($caja->precio),
+                         String::formatoNumero($caja->importe));
+
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false);
+        }
+
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
+        $pdf->SetWidths(array(142, 25, 25, 25, 25, 25));
+        $pdf->Row(array(
+          'TOTALES',
+          String::formatoNumero($kilos/$cajas, 2, ''),
+          $cajas,
+          $kilos,
+          String::formatoNumero($precio/count($calidad['cajas'])),
+          String::formatoNumero($importe)), false);
+
+      }
+
+      // $pdf->SetX(6);
+      $pdf->SetY($pdf->getY() + 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(66, 66, 66, 66));
+      $pdf->Row(array(
+        'PAGADO',
+        'NO PAGADO',
+        'CANCELADO',
+        'TOTAL IMPORTE'), true);
+
+      $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+
+      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(66, 66, 66, 66));
+      $pdf->Row(array(
+        String::formatoNumero($totalPagado),
+        String::formatoNumero($totalNoPagado),
+        String::formatoNumero($data['cancelados']),
+        String::formatoNumero($totalImporte)), false);
+
+      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+
+  /**
+   * REPORTE DE ACUMULADOS DE PRODUCTOS
+   * @return [type] [description]
+   */
+  public function r_acumulados_data()
+   {
+      $response = array('data' => array(), 'tipo' => 'Entrada');
+      $sql = $sql2 = '';
+
+      if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+        $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+        $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+      }
+      if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+        $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $sql .= " AND Date(b.fecha_tara) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      }
+
+      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+      if ($this->input->get('farea') != '')
+        $sql .= " AND b.id_area = " . $_GET['farea'];
+
+      if ($this->input->get('fid_empresa') != '')
+        $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+
+      //Filtros del tipo de pesadas
+      if ($this->input->get('ftipo') != '')
+        $sql .= " AND b.tipo = '{$_GET['ftipo']}'";
+      $order_by = "p.nombre_fiscal";
+      $group_by = "p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi";
+      $campo_id = "p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi";
+      $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+      if($this->input->get('ftipo') == 'sa') {
+        $order_by = "c.nombre_fiscal";
+        $group_by = "c.id_cliente, c.nombre_fiscal, c.cuenta_cpi";
+        $campo_id = "c.id_cliente, c.nombre_fiscal AS proveedor, c.cuenta_cpi";
+        $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+        $response['tipo'] = "Salida";
+      }
+
+      $response['status'] = 'Todos';
+      if ($this->input->get('fstatus') != ''){
+        if ($this->input->get('fstatus') === '1'){
+          $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
+          $response['status'] = 'Pagados';
+        }else{
+          $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
+          $response['status'] = 'No Pagados';
+        }
+      }
+
+      $query = $this->db->query(
+        "SELECT Sum(b.kilos_neto) AS kilos,
+            Sum(b.total_cajas) AS cajas,
+            Sum(b.importe) AS importe,
+            (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
+            {$campo_id}
+         FROM bascula b
+         JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
+                 FROM bascula_compra
+                GROUP BY bascula_compra.id_bascula) bc ON b.id_bascula = bc.id_bascula
+         {$table_ms}
+        WHERE b.status = true
+           {$sql}
+        GROUP BY {$group_by}
+        ORDER BY {$order_by} ASC
+        "
+      );
+      if($query->num_rows() > 0)
+        $response['data'] = $query->result();
+
+      //Pagadas y pendientes de pago
+      $result = $this->db->query("SELECT
+         ( SELECT Sum(b.importe) FROM bascula b WHERE b.status = true AND accion IN('p', 'b') {$sql} ) AS pagadas,
+         ( SELECT Sum(b.importe) FROM bascula b WHERE b.status = true AND accion IN('en', 'sa') {$sql} ) AS pendientes");
+      $response['pagados_yno'] = $result->row();
+
+      // Obtiene la informacion del Area filtrada.
+      $this->load->model('areas_model');
+      $response['area'] = $this->areas_model->getAreaInfo($_GET['farea']);
+
+      return $response;
+   }
+
+   /**
+    * Visualiza/Descarga el PDF para el Reporte Diario de Entradas.
+    *
+    * @return void
+    */
+   public function r_acumulados_pdf()
+   {
+
+    // Obtiene los datos del reporte.
+    $data = $this->r_acumulados_data();
 
     $area = $data['area'];
-    // echo "<pre>";
-    //   var_dump($area);
-    // echo "</pre>";exit;
 
-    $fecha = new DateTime($_GET['fechaini']);
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('L', 'mm', 'Letter');
-    $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
-    $pdf->titulo3 = 'FECHA/HORA DEL REPORTE: ' . date('d/m/Y H:i:s');
+    $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
+    $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
 
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-    $widths = array(20, 20, 20, 82, 25, 25, 25, 25, 25);
-    $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
-                    'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
+    $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
+    $widths = array(20, 105, 35, 32, 30, 45);
+    $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
 
-    $totalPagado    = 0;
-    $totalNoPagado  = 0;
-    $totalCancelado = 0;
+    $total_kilos   = 0;
+    $total_cajas   = 0;
+    $total_importe = 0;
 
-    foreach($rde as $key => $calidad)
+    foreach($data['data'] as $key => $proveedor)
     {
       if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
       {
@@ -620,86 +849,60 @@ class Bascula_model extends CI_Model {
         $pdf->Row($header, true);
       }
 
-      $pdf->SetFont('helvetica','',10);
-      $pdf->SetTextColor(0,0,0);
-
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(267));
-      $pdf->Row(array($calidad['calidad']), false);
-
       $pdf->SetFont('helvetica','',8);
       $pdf->SetTextColor(0,0,0);
 
-      $promedio = 0;
-      $cajas    = 0;
-      $kilos    = 0;
-      $precio   = 0;
-      $importe  = 0;
-
-      foreach ($calidad['cajas'] as $caja)
-      {
-        $promedio += $caja->promedio;
-        $cajas    += $caja->cajas;
-        $kilos    += $caja->kilos;
-        $precio   += $caja->precio;
-        $importe  += $caja->importe;
-
-        if ($caja->pagado === 'p')
-          $totalPagado += $caja->importe;
-        else
-          $totalNoPagado += $caja->importe;
-
-        $datos = array($caja->pagado === 'p' ? 'P' : '',
-                       $caja->folio,
-                       $caja->cuenta_cpi,
-                       $caja->proveedor,
-                       $caja->promedio,
-                       $caja->cajas,
-                       $caja->kilos,
-                       String::formatoNumero($caja->precio),
-                       String::formatoNumero($caja->importe));
-
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($datos, false);
-      }
-
       $pdf->SetX(6);
-      $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(142, 25, 25, 25, 25, 25));
-      $pdf->Row(array(
-        'TOTALES',
-        String::formatoNumero($kilos/$cajas, 2, ''),
-        $cajas,
-        $kilos,
-        String::formatoNumero($precio/count($calidad['cajas'])),
-        String::formatoNumero($importe)), false);
-
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $proveedor->cuenta_cpi,
+            $proveedor->proveedor,
+            String::formatoNumero($proveedor->kilos, 2, ''),
+            String::formatoNumero($proveedor->cajas, 2, ''),
+            String::formatoNumero($proveedor->precio),
+            String::formatoNumero($proveedor->importe)
+          ), false);
+      $total_cajas   += $proveedor->cajas;
+      $total_kilos   += $proveedor->kilos;
+      $total_importe += $proveedor->importe;
     }
 
-    // $pdf->SetX(6);
-    $pdf->SetY($pdf->getY() + 6);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(66, 66, 66, 66));
-    $pdf->Row(array(
-      'PAGADO',
-      'NO PAGADO',
-      'CANCELADO',
-      'TOTAL IMPORTE'), true);
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('helvetica','B',9);
+    $pdf->SetTextColor(255,255,255);
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+      $pdf->Row(array(
+          '',
+          '',
+          String::formatoNumero($total_kilos, 2, ''),
+          String::formatoNumero($total_cajas, 2, ''),
+          String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1)),
+          String::formatoNumero($total_importe)
+        ), true);
 
-    $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+    //Total de pagadas no pagadas
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetTextColor(0 ,0 ,0 );
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(30, 45));
+    $pdf->Row(array('Pagados', String::formatoNumero($data['pagados_yno']->pagadas)), false);
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetX(6);
+    $pdf->Row(array('No Pagados', String::formatoNumero($data['pagados_yno']->pendientes)), false);
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetX(6);
+    $pdf->Row(array('Total', String::formatoNumero( ($data['pagados_yno']->pendientes+$data['pagados_yno']->pagadas) )), false);
 
-    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(66, 66, 66, 66));
-    $pdf->Row(array(
-      String::formatoNumero($totalPagado),
-      String::formatoNumero($totalNoPagado),
-      String::formatoNumero($data['cancelados']),
-      String::formatoNumero($totalImporte)), false);
 
-    $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+    $pdf->Output('REPORTE_ACUMULADOS_PROD_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
 
   /**

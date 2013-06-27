@@ -24,7 +24,8 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_camion/',
 
     'bascula/rde_pdf/',
-    'bascula/rmc_pdf/',
+    'bascula/r_acumulados_pdf/',
+	  'bascula/rmc_pdf/',
 
     'bascula/imprimir_pagadas/'
     );
@@ -475,6 +476,7 @@ class bascula extends MY_Controller {
       redirect(base_url('panel/bascula/bonificacion/?idb='.$_GET['idb']).'&e=t');
   }
 
+
   /**
    * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
    *
@@ -587,6 +589,46 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rmc_pdf();
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE ACUMULADOS DE PRODUCTOS"
+   *
+   * @return void
+   */
+  public function r_acumulados()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de Acumulados de Productos'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/r_acumulados', $params);
+    $this->load->view('panel/footer');
+  }
+
+ /**
+   * Procesa los datos para mostrar el reporte r_acumulados en pdf
+   * @return void
+   */
+  public function r_acumulados_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->r_acumulados_pdf();
   }
 
   /*
