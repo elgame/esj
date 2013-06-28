@@ -487,7 +487,8 @@ class Bascula_model extends CI_Model {
       $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
       $sql .= $sql2 .=" AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
 
-      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+      $this->load->model('areas_model');
+      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
       if ($this->input->get('farea') != '')
         $sql .= $sql2 .= " AND b.id_area = " . $_GET['farea'];
 
@@ -734,7 +735,8 @@ class Bascula_model extends CI_Model {
         $sql .= " AND Date(b.fecha_tara) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
       }
 
-      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : '1';
+      $this->load->model('areas_model');
+      $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
       if ($this->input->get('farea') != '')
         $sql .= " AND b.id_area = " . $_GET['farea'];
 

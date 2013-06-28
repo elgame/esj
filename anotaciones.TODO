@@ -47,7 +47,7 @@
               OIDS=FALSE
             );
             ALTER TABLE bascula_pagos
-            OWNER TO postgres;
+            OWNER TO programa;
 
 
           CREATE TABLE bascula_pagos_basculas
@@ -66,18 +66,9 @@
             OIDS=FALSE
           );
           ALTER TABLE bascula_pagos_basculas
-            OWNER TO postgres;
+            OWNER TO programa;
 
 	-
-    CREATE OR REPLACE VIEW rpt_acumulados_productos AS 
-     SELECT b.id_bascula, b.fecha_tara, b.kilos_neto, b.total_cajas, bc.precio, bc.precio * b.total_cajas AS importe, p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi, b.accion AS pagado
-       FROM bascula b
-       JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
-               FROM bascula_compra
-              GROUP BY bascula_compra.id_bascula) bc ON b.id_bascula = bc.id_bascula
-       LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor
-      WHERE b.status = true;
-    ALTER TABLE rpt_acumulados_productos OWNER TO programa;
 
    - Nuevos Privilegios
          nombre: Bonificacion
