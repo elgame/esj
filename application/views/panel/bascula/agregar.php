@@ -32,7 +32,7 @@
           Nueva Pesada
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
         </a>
-        <button type="button" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
+        <button type="submit" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
         </button>
@@ -58,8 +58,8 @@
 
         <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn pull-right" style="margin-right: 5px;">Cancelar</a>
 
-        <input type="hidden" name="paccion" value="<?php echo $accion ?>">
-        <input type="hidden" name="pidb" value="<?php echo $idb ?>">
+        <input type="hidden" name="paccion" value="<?php echo $accion ?>" id="paccion">
+        <input type="hidden" name="pidb" value="<?php echo $idb ?>" id="pidb">
 
         <?php if(isset($_GET['f'])) { ?>
           <input type="hidden" value="pfolio" id="kjfocus">
@@ -401,7 +401,7 @@
 
         <div class="form-actions">
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
-          <button type="button" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
+          <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>

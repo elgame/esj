@@ -43,8 +43,18 @@ $(function(){
       $('#btnGuardar').trigger('click');
     },
     'alt+80': function () { // alt + p
-      var win=window.open($('#btnPrint').attr('href'), '_blank');
-      win.focus();
+      // var win=window.open($('#btnPrint').attr('href'), '_blank');
+      // win.focus();
+
+      var $form = $('#form');
+
+      if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+        $form.attr('action', $form.attr('action') + '&p=t');
+        $form.submit();
+      } else {
+        var win=window.open($('#btnPrint').attr('href'), '_blank');
+        win.focus();
+      }
     },
   });
 
@@ -352,28 +362,25 @@ $(function(){
 
     var $form = $('#form');
 
-    $form.attr('action', $form.attr('action') + '&p=t');
-
-    if ($('input#pstatus').is(':checked')) {
-      var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-      {
-        $form.submit();
-      });
-    } else {
+    if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      $form.attr('action', $form.attr('action') + '&p=t');
       $form.submit();
+    } else {
+      var win=window.open($('#btnPrint').attr('href'), '_blank');
+      win.focus();
     }
   });
 
-  $('button#btnGuardar').on('click' , function(event) {
-    if ($('input#pstatus').is(':checked')) {
-      var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-      {
-        $('#form').submit();
-      });
-    } else {
-      $('#form').submit();
-    }
-  });
+  // $('button#btnGuardar').on('click' , function(event) {
+  //   if ($('input#pstatus').is(':checked')) {
+  //     var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+  //     {
+  //       $('#form').submit();
+  //     });
+  //   } else {
+  //     $('#form').submit();
+  //   }
+  // });
 
   // $('#form').submit(function ($t) {
 
@@ -391,6 +398,23 @@ $(function(){
     //   return true;
     // }
   // });
+
+  $('#pstatus').on('click', function(event) {
+
+    var $this = $(this);
+
+    if ($this.hasClass('active') === false) {
+
+      msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+      {
+        $('#form').submit();
+      }, function () {
+        $('#pstatus').trigger('click');
+      });
+
+    }
+
+  });
 
 });
 
