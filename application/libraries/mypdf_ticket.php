@@ -89,8 +89,8 @@ class mypdf_ticket extends FPDF {
                                $prod->calidad,
                                String::formatoNumero($prod->kilos, 2, ''),
                                $prod->promedio,
-                               String::formatoNumero($prod->precio),
-                               String::formatoNumero($prod->importe)), false, false);
+                               String::formatoNumero($prod->precio, 2, ''),
+                               String::formatoNumero($prod->importe, 2, '')), false, false);
             }
         }
 
@@ -101,7 +101,7 @@ class mypdf_ticket extends FPDF {
         $this->SetY($this->GetY()-2);
         $this->SetWidths(array(38, 20));
         $this->SetAligns(array('R', 'R'));
-        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe)), false, false, 3);
+        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe, 2, '')), false, false, 3);
 
         $this->SetY($this->GetY() + 3);
 

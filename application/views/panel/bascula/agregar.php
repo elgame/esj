@@ -26,13 +26,13 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
 
          <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada
-          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span>
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
         </a>
-        <button type="submit" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
+        <button type="button" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
         </button>
@@ -50,7 +50,7 @@
           echo $this->usuarios_model->getLinkPrivSm('bascula/bonificacion/', array(
               'params'   => 'idb='.$idb,
               'btn_type' => 'btn-success pull-right',
-              'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK', 'style' => 'margin-right: 5px;'))
+              'attrs' => array('target' => '_BLANK', 'style' => 'margin-right: 5px;'))
             );
         }
 
@@ -60,6 +60,11 @@
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>">
         <input type="hidden" name="pidb" value="<?php echo $idb ?>">
+
+        <?php if(isset($_GET['f'])) { ?>
+          <input type="hidden" value="pfolio" id="kjfocus">
+        <?php } ?>
+
         <div class="row-fluid"><!--Datos Bascula-->
           <div class="box span12">
             <div class="box-header well" data-original-title>
@@ -74,7 +79,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge nokey" id="ptipo" <?php echo $disabled ?>>
+                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled ?> autofocus>
                         <option value="en" <?php echo set_select('ptipo', 'en', false, $this->input->post('ptipo')) ?>>Entrada</option>
                         <option value="sa" <?php echo set_select('ptipo', 'sa', false, $this->input->post('ptipo')) ?>>Salida</option>
                       </select>
@@ -84,7 +89,7 @@
                   <div class="control-group">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
-                      <select name="parea" class="input-xlarge nokey" id="parea" <?php echo $disabled ?>>
+                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?> data-next="pfolio">
                         <option value=""></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
                           <option value="<?php echo $area->id_area ?>"
@@ -113,7 +118,7 @@
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
-                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge next" placeholder="Proveedor" autofocus <?php echo $disabled ?>>
+                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -125,7 +130,7 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente"
-                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey next" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -134,26 +139,26 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="pchofer">Chofer</label>
-                    <div class="controls">
-                      <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge next" placeholder="Chofer" <?php echo $disabled ?>>
-                      <span class="help-inline">
-                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-50x440">Agregar</a>
-                      </span>
-                      <input type="hidden" name="pid_chofer" value="<?php echo set_value('pid_chofer', $this->input->post('pid_chofer')) ?>" id="pid_chofer">
-                    </div>
-                  </div>
-
-                  <div class="control-group">
                     <label class="control-label" for="pcamion">Camión</label>
                     <div class="controls">
                       <input type="text" name="pcamion"
-                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge next" placeholder="Placas" <?php echo  $disabled ?>>
+                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-50x480" id="btnSupermodal">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_camion" value="<?php echo set_value('pid_camion', $this->input->post('pid_camion')) ?>" id="pid_camion" value="">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="pchofer">Chofer</label>
+                    <div class="controls">
+                      <input type="text" name="pchofer"
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pkilos_brutos|pkilos_tara" <?php echo $disabled ?>>
+                      <span class="help-inline">
+                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-50x440">Agregar</a>
+                      </span>
+                      <input type="hidden" name="pid_chofer" value="<?php echo set_value('pid_chofer', $this->input->post('pid_chofer')) ?>" id="pid_chofer">
                     </div>
                   </div>
                 </div><!--/span-->
@@ -163,7 +168,7 @@
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
                       <input type="text" name="pfolio" value="<?php echo $next_folio ?>"
-                        id="pfolio" class="input-medium vpos-int nokey" style="text-align:center;">
+                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha">
                       <span class="help-inline">
                         <button class="btn" type="button" id="loadFolio">Cargar</button>
                       </span>
@@ -174,7 +179,7 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10 next" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled ?> data-next="pproveedor|pcliente">
                     </div>
                   </div>
 
@@ -372,7 +377,7 @@
                   <div class="span4">
                     <label for="ppesada">Pesada</label>
                     <input type="text" name="ppesada"
-                      value="<?php echo set_value('ppesada', $this->input->post('ppesada')) ?>" id="ppesada" class="input-medium vpositive" <?php echo $disabled ?>>
+                      value="<?php echo set_value('ppesada', $this->input->post('ppesada')) ?>" id="ppesada" class="input-medium vpositive nokey" <?php echo $disabled ?>>
                   </div>
 
                   <div class="span4">
@@ -395,8 +400,8 @@
         </div><!--/row-fluid cajas-->
 
         <div class="form-actions">
-          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
-          <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
+          <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
+          <button type="button" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>

@@ -6,6 +6,10 @@
 
     settings = $.extend({}, $.fn.keyJump.settings ,options);
 
+    if (settings.startFocus !== '') {
+      $('#' + settings.startFocus).focus();
+    }
+
     var $wrapper = $(this),
         hiddens = [],
         fields = $wrapper
@@ -29,13 +33,30 @@
       $($e).on('keypress', function(event) {
 
         if (event.which == settings.next) {
-          var $next = $(fields[i+1]);
+          var $this = $(this),
+              $next = $(fields[i+1]);
 
           if (settings.next == 13) event.preventDefault();
 
-          if ($next.attr('data-next')) $('#'+$next.attr('data-next')).focus();
+          if ($this.attr('data-next')) {
 
-          if ($next.is(':visible')) $next.focus();
+            var options = $this.attr('data-next').split('|');
+
+            if (options.length > 1) {
+              options.every(function (e) {
+                var $this = $('#'+e);
+                if ( $this.is(':visible') && $this.prop('readonly') !== true) {
+                  $this.focus();
+                  return false;
+                } else {
+                  return true;
+                }
+              });
+            }
+            else $('#'+$this.attr('data-next')).focus();
+          }
+
+          else if ($next.is(':visible')) $next.focus();
 
           else  $('[data-replace="'+$next.attr('id')+'"]').focus();
 
@@ -88,7 +109,8 @@
   };
 
   $.fn.keyJump.settings = {
-    'next': 13
+    'next': 13,
+    'startFocus': ''
   };
 
   $.fn.keyJump.setElem  = function ($elem) {

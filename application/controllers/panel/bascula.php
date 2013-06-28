@@ -82,6 +82,7 @@ class bascula extends MY_Controller {
       array('libs/jquery.uniform.css', 'screen'),
     ));
     $this->carabiner->js(array(
+      array('general/msgbox.js'),
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
       array('general/supermodal.js'),
@@ -118,18 +119,21 @@ class bascula extends MY_Controller {
       $res_mdl = $this->bascula_model->addBascula();
 
       $ticket = '';
-      if (isset($_POST['pstatus']))
+      // if (isset($_POST['pstatus']))
+      //   $ticket = '&p=t';
+
+      if (isset($_GET['p']))
         $ticket = '&p=t';
 
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
       if( ! $res_mdl['error'])
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
+        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$ticket));
     }
 
-    $params['accion'] = 'n'; // indica que es nueva entrada
-    $params['idb']    = '';
+    $params['accion']      = 'n'; // indica que es nueva entrada
+    $params['idb']         = '';
     $params['param_folio'] = '';
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha']       = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     $params['e'] = false;
 

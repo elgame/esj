@@ -1,6 +1,11 @@
-var ppro_cont = 0;
+var ppro_cont   = 0,
+    actualFolio = 0,
+    autoFocus   = '';
 
 $(function(){
+
+  actualFolio = $('#pfolio').val();
+  autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
   // $('button#btnCamera').on('click', function(event) {
   //   event.preventDefault();
@@ -20,6 +25,7 @@ $(function(){
 
   $('#form').keyJump({
     'next': 13,
+    'startFocus': autoFocus,
     'alt+66': function () { // alt + b
       $('#btnKilosBruto').trigger('click');
     },
@@ -29,7 +35,7 @@ $(function(){
     'alt+67': function () { // alt + c
       $('#icajas').focus();
     },
-    'alt+78': function () { // alt + n
+    '27': function () { // alt + n 78
       var href = $('#newPesada').attr('href');
       window.location.href = href;
     },
@@ -169,7 +175,8 @@ $(function(){
 
   // Evento keypress para el input del folio.
   $('#pfolio').on('keypress', function(e) {
-    if (e.charCode == '13') {
+    var $this = $(this);
+    if (e.charCode == '13' && (actualFolio != $this.val())) {
       e.preventDefault();
       $('#loadFolio').trigger('click');
     }
@@ -245,13 +252,15 @@ $(function(){
   $('#loadFolio').on('click', function(event) {
     var $form = $('#form'),
         $folio = $('#pfolio'),
-        editar = '';
-
+        editar = '',
+        focus = '';
 
     if ($('#isEditar').length) editar = '&e=t';
 
+    if (actualFolio != $('#pfolio').val()) focus = '&f=t';
+
     // console.log(base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
-    location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
+    location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar + focus;
   });
 
   // Evento click boton cargar de kilos tara.
@@ -284,7 +293,7 @@ $(function(){
   $('#pkilos_brutos, #pkilos_tara, #pcajas_prestadas').keyup(function(e) {
     var key = e.which;
 
-    if ((key > 47 && key < 58) || key === 8) {
+    if ((key > 47 && key < 58) || (key > 96 && key < 105) || key === 8) {
       calculaKilosNeto();
       calculaTotales();
     }
@@ -293,7 +302,14 @@ $(function(){
   // Obtiene el pesaje de los brutos al tener el foco el input.
   $('#pkilos_brutos').on('focus', function(event) {
     $('#btnKilosBruto').trigger('click');
-  });
+  }).on('focusout', function(event) {
+    var $this = $(this);
+
+    if ($this.val() !== '' && $this.val() !== 0 ) {
+      $('#form').submit();
+    }
+
+  });;
 
   // Obtiene el pesaje de los tara al tener el foco el input.
   $('#pkilos_tara').on('focus', function(event) {
@@ -330,6 +346,51 @@ $(function(){
 
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
   });
+
+  $('#btnPrint').on('click', function(event) {
+    event.preventDefault();
+
+    var $form = $('#form');
+
+    $form.attr('action', $form.attr('action') + '&p=t');
+
+    if ($('input#pstatus').is(':checked')) {
+      var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+      {
+        $form.submit();
+      });
+    } else {
+      $form.submit();
+    }
+  });
+
+  $('button#btnGuardar').on('click' , function(event) {
+    if ($('input#pstatus').is(':checked')) {
+      var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+      {
+        $('#form').submit();
+      });
+    } else {
+      $('#form').submit();
+    }
+  });
+
+  // $('#form').submit(function ($t) {
+
+  //   console.log($t);
+
+  //   return false;
+
+    // if ($('input#pstatus').is(':checked')) {
+    //   var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+    //   {
+    //     $this.submit();
+    //   });
+    //   return false;
+    // } else {
+    //   return true;
+    // }
+  // });
 
 });
 
