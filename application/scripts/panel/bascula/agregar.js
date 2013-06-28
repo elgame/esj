@@ -1,3 +1,5 @@
+var ppro_cont = 0;
+
 $(function(){
 
   // $('button#btnCamera').on('click', function(event) {
@@ -212,13 +214,15 @@ $(function(){
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
                '<td id="tdkilos"></td>' +
-               '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" style="width: 80px;"></td>' +
+               '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" class="ppro'+(ppro_cont)+'" style="width: 80px;" data-next="ppro'+(++ppro_cont)+'"></td>' +
                '<td>' + $precio.val() + '</td>' +
                '<td id="tdimporte"></td>' +
                '<td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja"><i class="icon-trash"></i></button></td></tr>';
 
       // Agrega el html al body de la tabla.
       $(trHtml).appendTo($tabla.find('tbody'));
+
+      $.fn.keyJump.setElem($('.ppro'+(ppro_cont-1)));
 
       $caja.val('');
       $calidad.val('');
@@ -471,7 +475,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   });
 
   $('input#pimporte').each(function () {
-      console.log($(this).val());
+      // console.log($(this).val());
       total +=  parseFloat($(this).val());
   });
 
