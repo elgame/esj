@@ -1,11 +1,12 @@
 2013-06-28
- ☐ El orden de los saltos con el enter Tipo->Area->folio->Fecha->Proveedor/Cliente->Camion->Chofer->K. Bruto/Tara->Cajas prestadas->Cajas y saltar en las input de las cajas agregadas
- ☐ Usar Esc para nueva pesada
- ☐ Quitar todos los signos de peso en el ticket al imprimir
- ☐ Agregarle soperte para el teclado numerico del bloqnum
- ☐ Al picarle al boton de guardar que mande un modal de si quiere pagar la boleta si le da q si que se guarde la boleta directamente y que no mande a imprimir cuando se pague
- ☐ Guardar la boleta en cuento se capture peso bruto
- ☐ Guardar la boleta cuando se mande a imprimir
+ ✔ El orden de los saltos con el enter Tipo->Area->folio->Fecha->Proveedor/Cliente->Camion->Chofer->K. Bruto/Tara->Cajas prestadas->Cajas y saltar en las input de las cajas agregadas @done (13-06-28 14:20)
+ ✔ Usar Esc para nueva pesada @done (13-06-28 14:20)
+ ✔ Quitar todos los signos de peso en el ticket al imprimir @done (13-06-28 14:20)
+ ✔ Agregarle soperte para el teclado numerico del bloqnum @done (13-06-28 14:20)
+ ✔ Al picarle al boton de guardar que mande un modal de si quiere pagar la boleta si le da q si que se guarde la boleta directamente y que no mande a imprimir cuando se pague @done (13-06-28 14:20)
+ ✔ Guardar la boleta en cuento se capture peso bruto @done (13-06-28 14:20)
+ ✔ Guardar la boleta cuando se mande a imprimir @done (13-06-28 14:20)
+ ✔ Que cargue otra boleta cuando le den enter sobre el folio siempre y cuando sea diferente a la actual, si no cambia que no cargue nada. @done (13-06-28 14:22)
 
 2013-06-21
   ✔ Empresas poner una por default, agregar campo en la tabla empresa para poner por default, en bascula ponerla por default @done (13-06-23 11:35)
