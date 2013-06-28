@@ -1,5 +1,5 @@
 var msb = {
-	confirm: function(msg, title, obj, callback){
+	confirm: function(msg, title, obj, callback, callback2){
 		$("body").append('<div class="modal hide fade" id="myModal">'+
 			'	<div class="modal-header">'+
 			'		<button type="button" class="close" data-dismiss="modal">×</button>'+
@@ -9,7 +9,7 @@ var msb = {
 			'		<p>'+msg+'</p>'+
 			'	</div>'+
 			'	<div class="modal-footer">'+
-			'		<a href="#" class="btn" data-dismiss="modal">No</a>'+
+			'		<a href="#" class="btn btncancel" data-dismiss="modal">No</a>'+
 			'		<a href="#" class="btn btn-primary">Si</a>'+
 			'	</div>'+
 			'</div>');
@@ -24,6 +24,10 @@ var msb = {
 				window.location = obj.href;
 
 			$('#myModal').modal("hide");
+		});
+		$('#myModal .btncancel').on('click', function(){
+			if($.isFunction(callback2))
+				callback2.call(this, obj);
 		});
 		return false;
 	},
