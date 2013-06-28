@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url'] = 'http://192.168.1.100/sanjorge/'; //http://192.168.1.100/sanjorge/
+$config['base_url'] = 'http://localhost/sanjorge/'; //http://192.168.1.100/sanjorge/
 $config['base_url_bascula'] = 'http://localhost/sanjorge_bascula/';
 
 $config['base_url_cam_salida_stream']  = 'http://192.168.1.107:8053/videostream.cgi?user=admin&pwd=&resolution=32&rate=0';

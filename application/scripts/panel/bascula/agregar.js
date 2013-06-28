@@ -293,7 +293,7 @@ $(function(){
   $('#pkilos_brutos, #pkilos_tara, #pcajas_prestadas').keyup(function(e) {
     var key = e.which;
 
-    if ((key > 47 && key < 58) || (key > 96 && key < 105) || key === 8) {
+    if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaKilosNeto();
       calculaTotales();
     }
