@@ -4,9 +4,7 @@
 
   $.fn.keyJump = function (options) {
 
-    settings = $.extend({
-      'next': 13
-    }, options);
+    settings = $.extend({}, $.fn.keyJump.settings ,options);
 
     var $wrapper = $(this),
         hiddens = [],
@@ -35,6 +33,8 @@
 
           if (settings.next == 13) event.preventDefault();
 
+          if ($next.attr('data-next')) $('#'+$next.attr('data-next')).focus();
+
           if ($next.is(':visible')) $next.focus();
 
           else  $('[data-replace="'+$next.attr('id')+'"]').focus();
@@ -49,12 +49,17 @@
 
           if (settings.next == 13) event.preventDefault();
 
-          fields.forEach(function ($e, i) {
-            if ($h.attr('data-replace') === $($e).attr('id')) {
-              $(fields[i+1]).focus();
-              return false;
-            }
-          });
+          if ($h.attr('data-next')) {
+            $('#'+$h.attr('data-next')).focus();
+          }
+          else {
+            fields.forEach(function ($e, i) {
+              if ($h.attr('data-replace') === $($e).attr('id')) {
+                $(fields[i+1]).focus();
+                return false;
+              }
+            });
+          }
         }
       });
     });
@@ -80,7 +85,33 @@
           }
         }
     };
-
   };
+
+  $.fn.keyJump.settings = {
+    'next': 13
+  };
+
+  $.fn.keyJump.setElem  = function ($elem) {
+    $($elem).on('keypress', function(event) {
+
+      if (event.which == settings.next) {
+
+        if (settings.next == 13) event.preventDefault();
+
+        if ($elem.attr('data-next')) {
+
+          if ($('#'+$elem.attr('data-next')).length !== 0)
+            $('#'+$elem.attr('data-next')).focus();
+
+          else if ($('.'+$elem.attr('data-next')).length !== 0)
+            $('.'+$elem.attr('data-next')).focus()
+
+        }
+
+      }
+
+    });
+  };
+
 
 })(jQuery);

@@ -101,7 +101,7 @@
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
-                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge" placeholder="Empresa" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge next" placeholder="Empresa" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
@@ -113,7 +113,7 @@
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
-                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" autofocus <?php echo $disabled ?>>
+                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge next" placeholder="Proveedor" autofocus <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -125,7 +125,7 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente"
-                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey next" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -137,7 +137,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge next" placeholder="Chofer" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-50x440">Agregar</a>
                       </span>
@@ -149,7 +149,7 @@
                     <label class="control-label" for="pcamion">Camión</label>
                     <div class="controls">
                       <input type="text" name="pcamion"
-                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled ?>>
+                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge next" placeholder="Placas" <?php echo  $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-50x480" id="btnSupermodal">Agregar</a>
                       </span>
@@ -174,7 +174,7 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10 next" <?php echo $disabled ?>>
                     </div>
                   </div>
 
