@@ -471,7 +471,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   });
 
   $('input#pimporte').each(function () {
-      console.log($(this).val());
+      // console.log($(this).val());
       total +=  parseFloat($(this).val());
   });
 

@@ -58,6 +58,17 @@ class areas_model extends CI_Model {
 		return $response;
 	}
 
+	public function getAreaDefault(){
+		$result = $this->db->query("SELECT id_area
+		                           FROM areas
+		                           WHERE status = 't' AND predeterminado = 't'");
+		if($result->num_rows() > 0){
+			$result = $result->row();
+			return $result->id_area;
+		}else
+			return 2;
+	}
+
  	/**
  	 * Agrega un area mas calidades y clasificaciones a la BDD
  	 * @param [type] $data [description]
