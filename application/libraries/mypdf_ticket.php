@@ -4,7 +4,7 @@ class mypdf_ticket extends FPDF {
     var $limiteY = 0;
     var $titulo1 = 'EMPAQUE SAN JORGE S.A DE C.V';
 
-    var $font_size = 7;
+    var $font_size = 8;
 
     var $pag_size = array();
 
@@ -67,21 +67,21 @@ class mypdf_ticket extends FPDF {
 
     public function productosTicket($data, $data_info){
         $this->SetY($this->GetY()+1);
-        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 
         $this->SetY($this->GetY()-1);
 
-        $this->SetFont('helvetica', '', $this->font_size);
+        $this->SetFont('helvetica', '', $this->font_size-1);
         $this->SetWidths(array(7, 10, 12, 10, 10, 20));
         $this->SetAligns(array('L'));
         $this->Row(array('CJS', 'LIMON', 'KILOS', 'PROM', 'PCIO', 'IMPORTE'), false, false, 5);
 
         $this->SetFont('helvetica', '', $this->font_size);
         $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
         if(is_array($data_info)){
               $this->SetFont('helvetica', '', $this->font_size);
-              $this->SetWidths(array(8, 10, 12, 10, 10, 20));
+              $this->SetWidths(array(8, 12, 12, 10, 10, 18));
               $this->SetAligns(array('L'));
             foreach ($data_info as $prod){
               $this->SetY($this->GetY()-1);
@@ -96,7 +96,7 @@ class mypdf_ticket extends FPDF {
 
         $this->SetFont('helvetica', '', $this->font_size);
         $this->CheckPageBreak(4);
-        $this->MultiCell($this->pag_size[0], 2, '------------------------------------------------------------------------', 0, 'L');
+        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 
         $this->SetY($this->GetY()-2);
         $this->SetWidths(array(38, 20));

@@ -504,7 +504,7 @@ class Bascula_model extends CI_Model {
 
       if ($this->input->get('fstatus') != '')
         if ($this->input->get('fstatus') === '1')
-          $sql .= " AND b.accion = 'p'";
+          $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
         else
           $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
 
@@ -603,7 +603,7 @@ class Bascula_model extends CI_Model {
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf = new MYpdf('P', 'mm', 'Letter');
       $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
       $pdf->titulo3 = $this->input->get('fproveedor').' | '.$data['tipo'].' | '.$this->input->get('fempresa');
 
@@ -611,8 +611,8 @@ class Bascula_model extends CI_Model {
       //$pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-      $widths = array(20, 20, 20, 82, 25, 25, 25, 25, 25);
+      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
+      $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
       $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
                       'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
 
@@ -626,24 +626,26 @@ class Bascula_model extends CI_Model {
         {
           $pdf->AddPage();
 
-          $pdf->SetFont('helvetica','B',8);
-          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFont('helvetica','B', 7);
+          $pdf->SetTextColor(0,0,0);
           $pdf->SetFillColor(160,160,160);
+          $pdf->SetY($pdf->GetY()-2);
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
+          $pdf->Row($header, false);
         }
 
-        $pdf->SetFont('helvetica','',10);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0,0,0);
 
+        $pdf->SetY($pdf->GetY()-1);
         $pdf->SetX(6);
         $pdf->SetAligns(array('L'));
-        $pdf->SetWidths(array(267));
-        $pdf->Row(array($calidad['calidad']), false);
+        $pdf->SetWidths(array(206));
+        $pdf->Row(array($calidad['calidad']), false, false);
 
-        $pdf->SetFont('helvetica','',8);
+        $pdf->SetFont('helvetica','',7);
         $pdf->SetTextColor(0,0,0);
 
         $promedio = 0;
@@ -654,60 +656,86 @@ class Bascula_model extends CI_Model {
 
         foreach ($calidad['cajas'] as $caja)
         {
+          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+          {
+            $pdf->AddPage();
+
+            $pdf->SetFont('helvetica','B', 7);
+            $pdf->SetTextColor(0,0,0);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetY($pdf->GetY()-2);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, false);
+          }
+
           $promedio += $caja->promedio;
           $cajas    += $caja->cajas;
           $kilos    += $caja->kilos;
           $precio   += $caja->precio;
           $importe  += $caja->importe;
 
-          if ($caja->pagado === 'p')
+          if ($caja->pagado === 'p' || $caja->pagado === 'b')
             $totalPagado += $caja->importe;
           else
             $totalNoPagado += $caja->importe;
 
-          $datos = array($caja->pagado === 'p' ? 'P' : '',
+          $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
                          $caja->folio,
                          $caja->cuenta_cpi,
-                         $caja->proveedor,
+                         substr($caja->proveedor, 0, 35),
                          $caja->promedio,
                          $caja->cajas,
                          $caja->kilos,
                          String::formatoNumero($caja->precio),
                          String::formatoNumero($caja->importe));
 
+          $pdf->SetY($pdf->GetY()-2);
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
-          $pdf->Row($datos, false);
+          $pdf->Row($datos, false, false);
         }
 
+        $pdf->SetY($pdf->GetY()-1);
         $pdf->SetX(6);
         $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
-        $pdf->SetWidths(array(142, 25, 25, 25, 25, 25));
+        $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
         $pdf->Row(array(
           'TOTALES',
           String::formatoNumero($kilos/$cajas, 2, ''),
           $cajas,
           $kilos,
           String::formatoNumero($precio/count($calidad['cajas'])),
-          String::formatoNumero($importe)), false);
+          String::formatoNumero($importe)), false, false);
 
       }
 
+      if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+      }
+
+      $pdf->SetFont('helvetica','B', 7);
       // $pdf->SetX(6);
       $pdf->SetY($pdf->getY() + 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(66, 66, 66, 66));
+      $pdf->SetWidths(array(50, 50, 50, 50));
       $pdf->Row(array(
         'PAGADO',
         'NO PAGADO',
         'CANCELADO',
-        'TOTAL IMPORTE'), true);
+        'TOTAL IMPORTE'), false);
 
       $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
 
+      if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+      }
       $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(66, 66, 66, 66));
+      $pdf->SetWidths(array(50, 50, 50, 50));
       $pdf->Row(array(
         String::formatoNumero($totalPagado),
         String::formatoNumero($totalNoPagado),
@@ -820,7 +848,7 @@ class Bascula_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
     $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
 
@@ -829,7 +857,7 @@ class Bascula_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
 
     $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
-    $widths = array(20, 105, 35, 32, 30, 45);
+    $widths = array(20, 75, 30, 25, 20, 35);
     $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
 
     $total_kilos   = 0;
@@ -843,28 +871,30 @@ class Bascula_model extends CI_Model {
         $pdf->AddPage();
 
         $pdf->SetFont('helvetica','B',8);
-        $pdf->SetTextColor(255,255,255);
+        $pdf->SetTextColor(0,0,0);
         $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()-2);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($header, false, false);
       }
 
-      $pdf->SetFont('helvetica','',8);
+      $pdf->SetFont('helvetica','', 8);
       $pdf->SetTextColor(0,0,0);
 
+      $pdf->SetY($pdf->GetY()-2);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
         $pdf->Row(array(
             $proveedor->cuenta_cpi,
-            $proveedor->proveedor,
+            substr($proveedor->proveedor, 0, 42),
             String::formatoNumero($proveedor->kilos, 2, ''),
             String::formatoNumero($proveedor->cajas, 2, ''),
             String::formatoNumero($proveedor->precio),
             String::formatoNumero($proveedor->importe)
-          ), false);
+          ), false, false);
       $total_cajas   += $proveedor->cajas;
       $total_kilos   += $proveedor->kilos;
       $total_importe += $proveedor->importe;
@@ -872,8 +902,8 @@ class Bascula_model extends CI_Model {
 
     if($pdf->GetY() >= $pdf->limiteY)
       $pdf->AddPage();
-    $pdf->SetFont('helvetica','B',9);
-    $pdf->SetTextColor(255,255,255);
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetTextColor(0 ,0 ,0 );
     $pdf->SetX(6);
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
@@ -884,7 +914,7 @@ class Bascula_model extends CI_Model {
           String::formatoNumero($total_cajas, 2, ''),
           String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1)),
           String::formatoNumero($total_importe)
-        ), true);
+        ), false, false);
 
     //Total de pagadas no pagadas
     if($pdf->GetY() >= $pdf->limiteY)
@@ -964,12 +994,13 @@ class Bascula_model extends CI_Model {
         $pdf->AddPage();
 
         $pdf->SetFont('helvetica','B',8);
-        $pdf->SetTextColor(255,255,255);
+        $pdf->SetTextColor(0,0,0);
         $pdf->SetFillColor(160,160,160);
+        $pdf->SetY($pdf->GetY()-1);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
+        $pdf->Row($header, false);
       }
 
       $pdf->SetFont('helvetica','',8);
@@ -988,14 +1019,18 @@ class Bascula_model extends CI_Model {
                      ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
                      ($caja->id_bascula != $lastFolio) ? $caja->concepto: '');
 
+      $pdf->SetY($pdf->GetY()-1);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-      $pdf->Row($datos, false);
+      $pdf->Row($datos, false, false);
 
       $lastFolio = $caja->id_bascula;
     }
 
+    if($pdf->GetY()+8 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('helvetica','B',8);
     $pdf->SetX(6);
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
@@ -1007,17 +1042,22 @@ class Bascula_model extends CI_Model {
       String::formatoNumero($data['totales']['importe']),
       String::formatoNumero($data['totales']['total']),
       '',''
-    ), true);
+    ), false, false);
 
+    if($pdf->GetY()+20 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetY($pdf->GetY() + 6);
     $pdf->SetX(6);
-    $pdf->SetY($pdf->getY() + 6);
     $pdf->SetAligns(array('C', 'C', 'C'));
     $pdf->SetWidths(array(66, 66, 66));
     $pdf->Row(array(
       'PAGADO',
       'NO PAGADO',
-      'TOTAL IMPORTE',), true);
+      'TOTAL IMPORTE',), false);
 
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'C', 'C'));
     $pdf->SetWidths(array(66, 66, 66));
     $pdf->Row(array(

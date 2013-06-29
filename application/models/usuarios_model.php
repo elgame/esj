@@ -75,13 +75,14 @@ class Usuarios_model extends privilegios_model {
 						
 						'fecha_nacimiento' => $this->input->post('ffecha_nacimiento'),
 						'fecha_entrada'    => $this->input->post('ffecha_entrada'),
-						'fecha_salida'     => $this->input->post('ffecha_salida'),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
 						'estado_civil'     => $this->input->post('festado_civil'),
 						'sexo'             => $this->input->post('fsexo'),
 						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
 						'email'            => $this->input->post('femail'),
 					);
+			if($this->input->post('ffecha_salida') != '')
+				$data['fecha_salida']    = $this->input->post('ffecha_salida');
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
