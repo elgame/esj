@@ -27,7 +27,9 @@ class bascula extends MY_Controller {
     'bascula/r_acumulados_pdf/',
 	  'bascula/rmc_pdf/',
 
-    'bascula/imprimir_pagadas/'
+    'bascula/imprimir_pagadas/',
+
+    'bascula/snapshot/',
     );
 
   public function _remap($method){
@@ -478,6 +480,12 @@ class bascula extends MY_Controller {
   {
     if (isset($_GET['idb']{0}))
       redirect(base_url('panel/bascula/bonificacion/?idb='.$_GET['idb']).'&e=t');
+  }
+
+  public function snapshot(){
+    $base64 = UploadFiles::fileToBase64( $this->config->item('base_url_cam_salida_snapshot'), 'jpg');
+    UploadFiles::base64SaveImg($base64, 'calando');
+    echo $base64;
   }
 
 

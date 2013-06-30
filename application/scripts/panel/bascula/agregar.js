@@ -7,21 +7,25 @@ $(function(){
   actualFolio = $('#pfolio').val();
   autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
-  // $('button#btnCamera').on('click', function(event) {
-  //   event.preventDefault();
+  //Fotos
+  $('button#btnCamera').on('click', function(event) {
+    event.preventDefault();
 
-  //   var $this   = $(this),
-  //       $parent = $this.parent().parent(),
-  //       $form   = $('#form'),
-  //       img = '<img src="'+base_url_cam_salida_snapshot+'" width="320" id="imgSnapshot">';
+    var $this   = $(this),
+        $parent = $this.parent().parent(),
+        $form   = $('#form'),
+        img = '';
 
-  //   $parent.find('#snapshot').html(img);
+    $.get(base_url+'panel/bascula/snapshot/', function(resp){
+      img = '<img src="'+resp+'" width="320" id="imgSnapshot">';
+      $parent.find('#snapshot').html(img);
 
-  //   if ($('#'+$this.attr('data-name')).length == 0)
-  //     $form.append('<input type="text" value="'+getSnapshot($parent)+'" name="'+$this.attr('data-name')+'" id="'+$this.attr('data-name')+'">');
-  //   else
-  //     $('#'+$this.attr('data-name')).val(getSnapshot($parent));
-  // });
+      if ($('#'+$this.attr('data-name')).length == 0)
+        $form.append('<input type="text" value="'+resp+'" name="'+$this.attr('data-name')+'" id="'+$this.attr('data-name')+'">');
+      else
+        $('#'+$this.attr('data-name')).val(resp);
+    });
+  });
 
   $('#form').keyJump({
     'next': 13,

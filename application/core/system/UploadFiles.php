@@ -98,5 +98,46 @@ class UploadFiles{
 		return $base64;
 	}
 
+	public static function base64SaveImg($base64, $name_file, $type='jpg'){
+		$base64 = str_replace('data:image/' . $type . ';base64,', '', $base64);
+		$img = imagecreatefromstring(base64_decode($base64));
+		if($img != false)
+		{
+			$path = self::validaDir(date("Y"), APPPATH.'/bascula/');
+			$path = self::validaDir(date("F"), $path);
+			imagejpeg($img, $path.$name_file.'.'.$type);
+			imagedestroy($img);
+		}
+	}
+
+
+
+	/**
+	 * Valida si el directorio espesificado existe o si no lo crea.
+	 */
+	public static function validaDir($dir, $path)
+	{
+		if(!file_exists($path.$dir."/")){
+			self::crearFolder($path, $dir."/");
+		}
+		return $path.$dir."/";
+	}
+
+/**
+	 * Crea un folder en el servidor.
+	 * @param $path_directorio: string. ruta donde se creara el directorio.
+	 * @param $nombre_directorio: string. nombre del folder a crear.
+	 */
+	public static function crearFolder($path_directorio, $nombre_directorio)
+	{
+		if($nombre_directorio != "" && file_exists($path_directorio)){
+			if(!file_exists($path_directorio.$nombre_directorio))
+				return mkdir($path_directorio.$nombre_directorio, 0777);
+			else
+				return true;
+		}else
+			return false;
+	}
+
 }
 ?>
