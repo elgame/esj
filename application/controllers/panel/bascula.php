@@ -299,7 +299,10 @@ class bascula extends MY_Controller {
   public function imprimir()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->imprimir_ticket($this->input->get('id'));
+    if($this->input->get('p') == 'true')
+      $this->bascula_model->imprimir_ticket($this->input->get('id'));
+    else
+      $this->load->view('panel/bascula/print_ticket');
   }
 
   /**
