@@ -30,6 +30,9 @@ class bascula extends MY_Controller {
     'bascula/imprimir_pagadas/',
 
     'bascula/snapshot/',
+
+    'bascula/ajax_get_next_folio/',
+    'bascula/ajax_load_folio/'
     );
 
   public function _remap($method){
@@ -91,6 +94,7 @@ class bascula extends MY_Controller {
       array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('panel/bascula/agregar.js'),
+      array('panel/bascula/bonificacion.js'),
     ));
 
     $this->load->model('bascula_model');
@@ -101,7 +105,7 @@ class bascula extends MY_Controller {
       'titulo' => 'Agregar Bascula'
     );
 
-    $params['next_folio'] = $this->bascula_model->getSiguienteFolio();
+    $params['next_folio'] = $this->bascula_model->getSiguienteFolio('en');
     $params['areas']      = $this->areas_model->getAreas();
 
     $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
@@ -139,9 +143,13 @@ class bascula extends MY_Controller {
 
     $params['e'] = false;
 
-    if (isset($_GET['folio']))
+    if (isset($_GET['folio']) || isset($_GET['idb']))
     {
-      $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
+      if (isset($_GET['folio']))
+        $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
+
+      if (isset($_GET['idb']))
+        $info = $this->bascula_model->getBasculaInfo($_GET['idb'], 0);
       // echo "<pre>";
       //   var_dump($info);
       // echo "</pre>";exit;
@@ -185,7 +193,7 @@ class bascula extends MY_Controller {
           $_POST['pid_camion']    = $info['info'][0]->id_camion;
         }
 
-        $params['param_folio'] = '?folio='.$_GET['folio'];
+        $params['param_folio'] = '?idb=' . $info['info'][0]->id_bascula; //$_GET['folio'];
         $params['idb']         = $info['info'][0]->id_bascula;
         $params['accion']      = $info['info'][0]->accion;
 
@@ -254,8 +262,14 @@ class bascula extends MY_Controller {
    */
   public function modificar()
   {
-    if (isset($_GET['folio'][0]))
-      redirect(base_url('panel/bascula/agregar/?folio='.$_GET['folio']).'&e=t');
+    if (isset($_GET['folio']{0}) || isset($_GET['idb']{0}))
+    {
+      if (isset($_GET['folio']{0}))
+        redirect(base_url('panel/bascula/agregar/?folio='.$_GET['folio']).'&e=t');
+
+      if (isset($_GET['idb']{0}))
+        redirect(base_url('panel/bascula/agregar/?idb='.$_GET['idb']).'&e=t');
+    }
   }
 
   /**
@@ -334,7 +348,7 @@ class bascula extends MY_Controller {
         'titulo' => 'Bonificación'
       );
 
-      $params['next_folio'] = $this->bascula_model->getSiguienteFolio();
+      // $params['next_folio'] = $this->bascula_model->getSiguienteFolio();
       $params['areas']      = $this->areas_model->getAreas();
 
       $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
@@ -430,6 +444,7 @@ class bascula extends MY_Controller {
           $_POST['pempresa']      = $empresa['info']->nombre_fiscal;
           $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
 
+          $params['next_folio'] = $this->bascula_model->getSiguienteFolio($info['info'][0]->tipo, $info['info'][0]->id_area);
           // $params['next_folio'] = $info['info'][0]->folio;
           // $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
 
@@ -1036,15 +1051,18 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
-  public function chkfolio($folio){
-    $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula 
-      WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}' 
-      AND id_area = {$this->input->post('parea')}")->row();
-    if($result->num > 0){
-      $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
-      return false;
-    }else
-      return true;
+    public function chkfolio($folio){
+    if ( ! isset($_GET['idb']) && ! isset($_GET['e']))
+    {
+      $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
+        WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}'
+        AND id_area = {$this->input->post('parea')}")->row();
+      if($result->num > 0){
+        $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
+        return false;
+      }else
+        return true;
+    }
   }
 
   /**
@@ -1349,6 +1367,18 @@ class bascula extends MY_Controller {
   public function ajax_get_kilos()
   {
     echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"1500"}}';
+  }
+
+  public function ajax_get_next_folio()
+  {
+    $this->load->model('bascula_model');
+    echo $this->bascula_model->getSiguienteFolio($_GET['tipo'], $_GET['area']);
+  }
+
+  public function ajax_load_folio()
+  {
+    $this->load->model('bascula_model');
+    echo $this->bascula_model->getIdfolio($_GET['folio'], $_GET['tipo'], $_GET['area']);
   }
 
   /*

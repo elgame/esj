@@ -1,12 +1,12 @@
 $(function(){
-  $('input#pprecio').on('change', function(event) {
+  $(document).on('change', 'input#pprecio', function(event) {
     event.preventDefault();
 
     var $this = $(this)
         $trParent = $this.parent().parent(),
         $kilos = $trParent.find('#pkilos'),
 
-        $precio = $trParent.find('pprecio'),
+        $precio = $trParent.find('#pprecio'),
         $importe = $trParent.find('#pimporte'),
         $tdimpote = $trParent.find('#tdimporte'),
 

@@ -1,11 +1,12 @@
 2013-07-02
   ✔ Al calcular los kilos que no ponga decimales que se trunken @done (13-07-02 12:37)
-  ☐ Poner un boton de tara para que cargue los kilos de tara (como si fuera el alt+t), en la parte de arriba, que salga solo cuando se captura el tara
-  ☐ folios de las boletas que puedan dejar libres que no siempre sea el consecutivo pero si validar que no se repitan
-  ☐ poner el boton de imprimir en la parte de abajo tambien
-  ☐ en el input de cajas prestadas si se pone . y se da guardar marca error
-  ☐ Por cada area manejan un folio diferente y si es entrada o salida tambien (preguntar)
-  ☐ Poder modificar el precio directamente en la tabla de cajas agregadas
+  ✔ Poner un boton de tara para que cargue los kilos de tara (como si fuera el alt+t), en la parte de arriba, que salga solo cuando se captura el tara @done (13-07-02 17:50)
+  ✔ Al modificar desde el listado que los kilos brutos y kilos tara no tengan los eventos de obtener los kilos y que en kilos brutos al perder el foco no se envie el formulario @done (13-07-02 17:57)
+  ✔ folios de las boletas que puedan dejar libres que no siempre sea el consecutivo pero si validar que no se repitan -- @done (13-07-02 16:39)
+  ✔ poner el boton de imprimir en la parte de abajo tambien @done (13-07-02 17:59)
+  ✔ en el input de cajas prestadas si se pone . y se da guardar marca error @done (13-07-02 18:00)
+  ✔ Por cada area manejan un folio diferente y si es entrada o salida tambien (preguntar) -- @done (13-07-02 17:38)
+  ✔ Poder modificar el precio directamente en la tabla de cajas agregadas @done (13-07-02 18:39)
   ☐ que no deje agregar choferes si el nombre es igual
   ✔ cambiar el logo @done (13-07-02 09:21)
   ☐ Rastreabilidad, poner boton que salga un modal y pida No de lote y un check que indique si el chofer es el nombre del productor () va a modificar la boleta pero solo esos campos nuevos (me dices para explicarte mejor)

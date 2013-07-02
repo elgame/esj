@@ -28,7 +28,11 @@
 
       <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
 
-         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
+        <?php if ($accion === 'en') { ?>
+          <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando...">Cargar Kilos Tara</button>
+        <?php } ?>
+
+        <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
         </a>
@@ -167,7 +171,7 @@
                   <div class="control-group">
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
-                      <input type="text" name="pfolio" value="<?php echo $next_folio ?>"
+                      <input type="text" name="pfolio" value="<?php echo set_value('pfolio', $next_folio) ?>"
                         id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha">
                       <span class="help-inline">
                         <button class="btn" type="button" id="loadFolio">Cargar</button>
@@ -243,7 +247,7 @@
                   <div class="control-group">
                     <label class="control-label" for="pcajas_prestadas" style="width: 100px;">Cajas Prestadas</label>
                     <div class="controls" style="margin-left: 115px;">
-                      <input type="text" name="pcajas_prestadas" id="pcajas_prestadas" class="input-small vpositive"
+                      <input type="text" name="pcajas_prestadas" id="pcajas_prestadas" class="input-small vpos-int"
                         value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>">
                     </div>
                   </div>
@@ -346,7 +350,7 @@
                                     <input type="hidden" name="pcalidadtext[]" value="<?php echo $_POST['pcalidadtext'][$key] ?>" id="pcalidadtext">
                                     <input type="hidden" name="pkilos[]" value="<?php echo $_POST['pkilos'][$key] ?>" id="pkilos">
                                     <!-- <input type="hidden" name="ppromedio[]" value="<?php //echo $_POST['ppromedio'][$key] ?>" id="ppromedio"> -->
-                                    <input type="hidden" name="pprecio[]" value="<?php echo $_POST['pprecio'][$key] ?>" id="pprecio">
+                                    <!-- <input type="hidden" name="pprecio[]" value="<?php //echo $_POST['pprecio'][$key] ?>" id="pprecio"> -->
                                     <input type="hidden" name="pimporte[]" value="<?php echo $_POST['pimporte'][$key] ?>" id="pimporte">
                                   </td>
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
@@ -354,7 +358,10 @@
                                   <td id="tdpromedio">
                                     <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;">
                                   </td>
-                                  <td><?php echo $_POST['pprecio'][$key] ?></td>
+                                  <td>
+                                    <?php //echo $_POST['pprecio'][$key] ?>
+                                    <input type="text" name="pprecio[]" value="<?php echo $_POST['pprecio'][$key] ?>" class="vpositive" id="pprecio" style="width: 80px;">
+                                  </td>
                                   <td id="tdimporte"><?php echo $_POST['pimporte'][$key] ?></td>
                                   <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled ?>><i class="icon-trash"></i></button></td>
                                 </tr>
@@ -402,6 +409,17 @@
         <div class="form-actions">
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
           <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
+
+          <?php
+              if ($accion !== 'n')
+                echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
+                    'params'   => 'id='.$idb,
+                    'btn_type' => 'btn-success',
+                    'attrs' => array('id' => 'btnPrint', 'target' => '_BLANK'),
+                    'html' =>' <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + P</span>')
+                  );
+            ?>
+
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>

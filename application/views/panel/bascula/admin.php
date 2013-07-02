@@ -103,6 +103,8 @@
                   ?>
                   <span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 
+                  <span class="label"><?php echo $b->area; ?></span>
+
                   <?php if ($b->id_bonificacion != null)
                     echo '<br><br><span class="label label-important">Bonificación</span>'
                   ?>
@@ -123,7 +125,7 @@
                     if ($b->id_bonificacion == null) {
 
                       echo $this->usuarios_model->getLinkPrivSm('bascula/modificar/', array(
-                          'params'   => 'folio='.$b->folio,
+                          'params'   => 'idb='.$b->id_bascula,
                           'btn_type' => 'btn-success')
                       );
                     } else {

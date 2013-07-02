@@ -78,7 +78,7 @@ class Bascula_model extends CI_Model {
         LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
         LEFT JOIN camiones AS ca ON ca.id_camion = b.id_camion
         ".$sql."
-        ORDER BY folio DESC
+        ORDER BY fecha DESC
         ";
     if($paginados){
       $query = BDUtil::pagination($str_query, $params, true);
@@ -107,7 +107,7 @@ class Bascula_model extends CI_Model {
 
       if ($_POST['paccion'] == 'n')
       {
-        $_POST['pfolio'] = $this->getSiguienteFolio();
+        // $_POST['pfolio'] = $this->getSiguienteFolio();
 
         $data = array(
           'id_empresa'   => $this->input->post('pid_empresa'),
@@ -292,16 +292,40 @@ class Bascula_model extends CI_Model {
     return $data;
   }
 
+  // /**
+  //  * Obtiene el folio siguiente.
+  //  * @return int
+  //  */
+  // public function getSiguienteFolio()
+  // {
+  //   $lastFolio = $this->db->select('folio')
+  //     ->from('bascula')
+  //     ->order_by('id_bascula', 'DESC')
+  //     ->limit(1)
+  //     ->get();
+
+  //   if ($lastFolio->num_rows() > 0)
+  //     return intval($lastFolio->row()->folio) + 1;
+  //   else
+  //     return 1;
+  // }
 
   /**
-   * Obtiene el folio siguiente.
+   * Obtiene el folio siguiente segun el tipo (entrada o salida) y el area.
    * @return int
    */
-  public function getSiguienteFolio()
+  public function getSiguienteFolio($tipo = 'en', $id_area = null)
   {
+
+    $id_area = $id_area ? $id_area : $this->db->select('id_area')
+      ->from('areas')
+      ->where('predeterminado', 't')->get()->row()->id_area;
+
     $lastFolio = $this->db->select('folio')
       ->from('bascula')
       ->order_by('id_bascula', 'DESC')
+      ->where('tipo', $tipo)
+      ->where('id_area', $id_area)
       ->limit(1)
       ->get();
 
@@ -309,6 +333,18 @@ class Bascula_model extends CI_Model {
       return intval($lastFolio->row()->folio) + 1;
     else
       return 1;
+  }
+
+  public function getIdfolio($folio, $tipo, $id_area)
+  {
+    $sql = $this->db->select("id_bascula")
+      ->from("bascula")
+      ->where("folio", $folio)
+      ->where("tipo", $tipo)
+      ->where("id_area", $id_area)
+      ->get();
+
+    return $sql->num_rows() > 0 ? $sql->row()->id_bascula : 0;
   }
 
   /**
@@ -406,7 +442,7 @@ class Bascula_model extends CI_Model {
                     FROM bascula_pagos AS bp
                     INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
                     ON pagos.id_bascula = b.id_bascula
-        WHERE 
+        WHERE
               b.status = true AND
               b.id_proveedor = '{$_GET['fid_proveedor']}'
               {$sql}

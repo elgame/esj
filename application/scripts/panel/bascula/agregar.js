@@ -27,6 +27,22 @@ $(function(){
   //   });
   // });
 
+  $('#ptipo, #parea').on('change', function(event) {
+    var $tipo = $('#ptipo'),
+        $area = $('#parea'),
+        getData = {
+          'tipo': $tipo.find('option:selected').val(),
+          'area': $area.find('option:selected').val(),
+        };
+
+    if (getData.area !== '') {
+      $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
+        $('#pfolio').val(data)
+      });
+    }
+  });
+
+
   $('#form').keyJump({
     'next': 13,
     'startFocus': autoFocus,
@@ -230,13 +246,13 @@ $(function(){
                   '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
                   '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
                   // '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
-                  '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
+                  // '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
                   '<input type="hidden" name="pimporte[]" value="" id="pimporte">' +
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
                '<td id="tdkilos"></td>' +
                '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" class="ppro'+(ppro_cont)+'" style="width: 80px;" data-next="ppro'+(++ppro_cont)+'"></td>' +
-               '<td>' + $precio.val() + '</td>' +
+               '<td><input type="text" name="pprecio[]" value="'+$precio.val()+'" class="vpositive" id="pprecio" style="width: 80px;"></td>' +
                '<td id="tdimporte"></td>' +
                '<td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja"><i class="icon-trash"></i></button></td></tr>';
 
@@ -267,14 +283,42 @@ $(function(){
     var $form = $('#form'),
         $folio = $('#pfolio'),
         editar = '',
-        focus = '';
+        focus = '',
 
-    if ($('#isEditar').length) editar = '&e=t';
+        $tipo = $('#ptipo'),
+        $area = $('#parea'),
+        getData = {
+          'folio' : $folio.val(),
+          'tipo': $tipo.find('option:selected').val(),
+          'area': $area.find('option:selected').val(),
+        };
 
-    if (actualFolio != $('#pfolio').val()) focus = '&f=t';
+    if (getData.area !== '') {
+      $.get(base_url + 'panel/bascula/ajax_load_folio/', getData, function(data) {
 
-    // console.log(base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
-    location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar + focus;
+        console.log(data);
+
+        if (data != 0) {
+
+        if ($('#isEditar').length) editar = '&e=t';
+
+        if (actualFolio != $('#pfolio').val()) focus = '&f=t';
+
+        // // console.log(base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar;
+        // location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar + focus;
+
+        location.href = base_url + 'panel/bascula/agregar?idb=' + data + editar + focus;
+
+        } else {
+          noty({"text": 'El folio no existe para el tipo y area especificado!', "layout":"topRight", "type": 'error'});
+
+          $('#pfolio').focus();
+        }
+
+      });
+    }
+
+
   });
 
   // Evento click boton cargar de kilos tara.
@@ -282,6 +326,7 @@ $(function(){
     $inputBruto = $('#pkilos_brutos');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
+    // base_url + 'panel/bascula/ajax_get_kilos/'
     $.get(base_url_bascula, {}, function(data) {
       $inputBruto.val(data.data.peso);
 
@@ -295,6 +340,7 @@ $(function(){
     var $inputTara  = $('#pkilos_tara');
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
+    // base_url + 'panel/bascula/ajax_get_kilos/'
     $.get(base_url_bascula, {}, function(data) {
       $inputTara.val(data.data.peso);
 
@@ -314,21 +360,26 @@ $(function(){
   });
 
   // Obtiene el pesaje de los brutos al tener el foco el input.
-  $('#pkilos_brutos').on('focus', function(event) {
-    $('#btnKilosBruto').trigger('click');
-  }).on('focusout', function(event) {
-    var $this = $(this);
 
-    if ($this.val() !== '' && $this.val() !== 0 ) {
-      $('#form').submit();
-    }
+  if ($('#isEditar').length !== 1) {
+    $('#pkilos_brutos').on('focus', function(event) {
+      $('#btnKilosBruto').trigger('click');
+    }).on('focusout', function(event) {
+      var $this = $(this);
 
-  });;
+      if ($this.val() !== '' && $this.val() !== 0 ) {
+        $('#form').submit();
+      }
+
+    });
+  }
 
   // Obtiene el pesaje de los tara al tener el foco el input.
-  $('#pkilos_tara').on('focus', function(event) {
-    $('#btnKilosTara').trigger('click');
-  });
+  if ($('#isEditar').length !== 1) {
+    $('#pkilos_tara').on('focus', function(event) {
+      $('#btnKilosTara').trigger('click');
+    });
+  }
 
   // Evento chango para los promedio de la tabla de cajas.
   $('#tableCajas').on('change', 'input#ppromedio', function(event) {
