@@ -45,7 +45,7 @@
               'html' =>' <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + P</span>')
             );
 
-        if ($accion === 'p' || $accion === 'b')
+        if ($accion === 'p' || $accion === 'b' || $accion === 'sa')
         {
           echo $this->usuarios_model->getLinkPrivSm('bascula/bonificacion/', array(
               'params'   => 'idb='.$idb,
@@ -195,7 +195,7 @@
                     <!-- <label class="control-label">Finalizado?</label> -->
                     <div class="controls">
                       <!-- <button type="button" class="btn btn-info span10" id="pfotos">Fotos</button> -->
-                      <a href="#modalFotos" role="button" class="btn btn-info span10" data-toggle="modal">Fotos</a>
+                      <!-- <a href="#modalFotos" role="button" class="btn btn-info span10" data-toggle="modal">Fotos</a> -->
                     </div>
                   </div>
                 </div><!--/span-->
@@ -412,7 +412,7 @@
 
 
 <!-- Modal -->
-<div id="modalFotos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalFotosLabel" aria-hidden="true" style="width: 760px;left: 44%;">
+<!-- <div id="modalFotos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalFotosLabel" aria-hidden="true" style="width: 760px;left: 44%;">
 
   <div class="modal-body">
 
@@ -463,7 +463,7 @@
     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
     <button class="btn btn-primary">Save changes</button>
   </div>
-</div>
+</div> -->
 
 
 <?php if (isset($ticket)) { ?>

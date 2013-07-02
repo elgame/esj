@@ -1,3 +1,17 @@
+2013-07-02
+  ☐ Al calcular los kilos que no ponga decimales que se trunken
+  ☐ Poner un boton de tara para que cargue los kilos de tara (como si fuera el alt+t), en la parte de arriba, que salga solo cuando se captura el tara
+  ☐ folios de las boletas que puedan dejar libres que no siempre sea el consecutivo pero si validar que no se repitan
+  ☐ poner el boton de imprimir en la parte de abajo tambien
+  ☐ en el input de cajas prestadas si se pone . y se da guardar marca error
+  ☐ Poder modificar el precio directamente en la tabla de cajas agregadas
+  ☐ que no deje agregar choferes si el nombre es igual
+  ✔ cambiar el logo @done (13-07-02 09:21)
+  ☐ Rastreabilidad, poner boton que salga un modal y pida No de lote y un check que indique si el chofer es el nombre del productor () va a modificar la boleta pero solo esos campos nuevos (me dices para explicarte mejor)
+  ☐ Rastreabilidad, reporte como el xls que hace rosy
+  ☐ Rastreabilidad, reporte como el del ingeniero
+
+
 2013-06-28
  ✔ El orden de los saltos con el enter Tipo->Area->folio->Fecha->Proveedor/Cliente->Camion->Chofer->K. Bruto/Tara->Cajas prestadas->Cajas y saltar en las input de las cajas agregadas @done (13-06-28 14:20)
  ✔ Usar Esc para nueva pesada @done (13-06-28 14:20)

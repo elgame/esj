@@ -406,7 +406,7 @@ class Bascula_model extends CI_Model {
                     FROM bascula_pagos AS bp
                     INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
                     ON pagos.id_bascula = b.id_bascula
-        WHERE b.id_bonificacion is null AND
+        WHERE 
               b.status = true AND
               b.id_proveedor = '{$_GET['fid_proveedor']}'
               {$sql}

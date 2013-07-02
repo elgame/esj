@@ -7,25 +7,25 @@ $(function(){
   actualFolio = $('#pfolio').val();
   autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
-  //Fotos
-  $('button#btnCamera').on('click', function(event) {
-    event.preventDefault();
+  // //Fotos
+  // $('button#btnCamera').on('click', function(event) {
+  //   event.preventDefault();
 
-    var $this   = $(this),
-        $parent = $this.parent().parent(),
-        $form   = $('#form'),
-        img = '';
+  //   var $this   = $(this),
+  //       $parent = $this.parent().parent(),
+  //       $form   = $('#form'),
+  //       img = '';
 
-    $.get(base_url+'panel/bascula/snapshot/', function(resp){
-      img = '<img src="'+resp+'" width="320" id="imgSnapshot">';
-      $parent.find('#snapshot').html(img);
+  //   $.get(base_url+'panel/bascula/snapshot/', function(resp){
+  //     img = '<img src="'+resp+'" width="320" id="imgSnapshot">';
+  //     $parent.find('#snapshot').html(img);
 
-      if ($('#'+$this.attr('data-name')).length == 0)
-        $form.append('<input type="text" value="'+resp+'" name="'+$this.attr('data-name')+'" id="'+$this.attr('data-name')+'">');
-      else
-        $('#'+$this.attr('data-name')).val(resp);
-    });
-  });
+  //     if ($('#'+$this.attr('data-name')).length == 0)
+  //       $form.append('<input type="text" value="'+resp+'" name="'+$this.attr('data-name')+'" id="'+$this.attr('data-name')+'">');
+  //     else
+  //       $('#'+$this.attr('data-name')).val(resp);
+  //   });
+  // });
 
   $('#form').keyJump({
     'next': 13,
@@ -179,11 +179,11 @@ $(function(){
   $('#box-cajas').on('change', '#icalidad', function(event) {
     var calidad = $(this).find('option:selected').val();
 
-    if (calidad !== '') {
-      $.get(base_url + 'panel/bascula/ajax_get_precio_calidad/', {id: calidad}, function(data) {
-        $('#iprecio').val(data.info.precio_compra);
-      }, 'json');
-    }
+    // if (calidad !== '') {
+    //   $.get(base_url + 'panel/bascula/ajax_get_precio_calidad/', {id: calidad}, function(data) {
+    //     $('#iprecio').val(data.info.precio_compra);
+    //   }, 'json');
+    // }
 
   });
 
