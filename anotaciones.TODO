@@ -4,12 +4,18 @@
   ☐ folios de las boletas que puedan dejar libres que no siempre sea el consecutivo pero si validar que no se repitan
   ☐ poner el boton de imprimir en la parte de abajo tambien
   ☐ en el input de cajas prestadas si se pone . y se da guardar marca error
+  ☐ Por cada area manejan un folio diferente y si es entrada o salida tambien (preguntar)
   ☐ Poder modificar el precio directamente en la tabla de cajas agregadas
   ☐ que no deje agregar choferes si el nombre es igual
   ✔ cambiar el logo @done (13-07-02 09:21)
   ☐ Rastreabilidad, poner boton que salga un modal y pida No de lote y un check que indique si el chofer es el nombre del productor () va a modificar la boleta pero solo esos campos nuevos (me dices para explicarte mejor)
   ☐ Rastreabilidad, reporte como el xls que hace rosy
   ☐ Rastreabilidad, reporte como el del ingeniero
+
+  ☐ SQL
+    Agregar campos en tabla bascula
+    no_lote integer, -- numero de lote para rastreabilidad
+    chofer_es_productor boolean NOT NULL DEFAULT false, -- Rastreabilidad; si es true el chofer es el nombre de productor, si es false es nombre de chofer
 
 
 2013-06-28
