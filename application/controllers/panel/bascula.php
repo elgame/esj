@@ -896,7 +896,7 @@ class bascula extends MY_Controller {
             'rules' => 'required'),
       array('field' => 'pfolio',
             'label' => 'Folio',
-            'rules' => 'required|is_natural_no_zero'),
+            'rules' => 'required|is_natural_no_zero|callback_chkfolio'),
       array('field' => 'pfecha',
             'label' => 'Fecha',
             'rules' => 'required'),
@@ -1034,6 +1034,17 @@ class bascula extends MY_Controller {
     }
 
     $this->form_validation->set_rules($rules);
+  }
+
+  public function chkfolio($folio){
+    $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula 
+      WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}' 
+      AND id_area = {$this->input->post('parea')}")->row();
+    if($result->num > 0){
+      $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
+      return false;
+    }else
+      return true;
   }
 
   /**
