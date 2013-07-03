@@ -323,9 +323,9 @@ class Bascula_model extends CI_Model {
 
     $lastFolio = $this->db->select('folio')
       ->from('bascula')
-      ->order_by('id_bascula', 'DESC')
       ->where('tipo', $tipo)
       ->where('id_area', $id_area)
+      ->order_by('folio', 'DESC')
       ->limit(1)
       ->get();
 
