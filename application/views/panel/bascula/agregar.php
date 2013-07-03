@@ -29,7 +29,7 @@
       <form action="<?php echo base_url('panel/bascula/agregar?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'f'))); ?>" method="post" class="form-horizontal" id="form">
 
         <?php if ($accion === 'en') { ?>
-          <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando...">Cargar Kilos Tara</button>
+          <button type="button" class="btn btn-info" id="btnSetFocoKilosTara">Cargar Kilos Tara</button>
         <?php } ?>
 
         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">

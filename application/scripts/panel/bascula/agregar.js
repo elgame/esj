@@ -412,7 +412,7 @@ $(function(){
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
   });
 
-  $('#btnPrint').on('click', function(event) {
+  $('a#btnPrint').on('click', function(event) {
     event.preventDefault();
 
     var $form = $('#form');
@@ -468,6 +468,12 @@ $(function(){
       });
 
     }
+
+  });
+
+  $('#btnSetFocoKilosTara').on('click', function(event) {
+
+    $('#pkilos_tara').focus();
 
   });
 
