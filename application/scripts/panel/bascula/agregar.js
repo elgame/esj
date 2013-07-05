@@ -38,6 +38,8 @@ $(function(){
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
         $('#pfolio').val(data)
+
+        actualFolio = data;
       });
     }
   });

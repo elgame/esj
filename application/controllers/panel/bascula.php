@@ -210,7 +210,10 @@ class bascula extends MY_Controller {
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
 
         $params['next_folio'] = $info['info'][0]->folio;
-        $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
+        if($info['info'][0]->fecha_tara != '')
+          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
+        else
+          $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i:s"), 0, 16));
 
         $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;

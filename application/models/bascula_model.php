@@ -166,7 +166,13 @@ class Bascula_model extends CI_Model {
         $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
         $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
 
-        $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+        $info_boleta = $this->getBasculaInfo($idb);
+        if($info_boleta['info'][0]->fecha_tara != '' && substr($info_boleta['info'][0]->fecha_tara, 0, 16) != str_replace('T', ' ', $_POST['pfecha']) ){
+          $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+        }else
+          $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+
         $data2['kilos_tara'] = $this->input->post('pkilos_tara');
 
         $data2['kilos_neto']  = $this->input->post('pkilos_neto');
