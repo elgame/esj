@@ -49,6 +49,7 @@ class mypdf_ticket extends FPDF {
 
         $this->SetY($this->GetY());
 
+        $this->SetFont('helvetica', '', $this->font_size+1);
         $this->SetWidths(array(15, 25, 25));
         $this->SetAligns(array('L', 'R', 'L'));
         $this->Row(array( 'BRUTO :', String::formatoNumero($data->kilos_bruto, 2, ''), substr($data->fecha_bruto, -11, -3)), false, false, 3);
@@ -98,11 +99,13 @@ class mypdf_ticket extends FPDF {
         $this->CheckPageBreak(4);
         $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 
+        $this->SetFont('helvetica', '', $this->font_size+1);
         $this->SetY($this->GetY()-2);
-        $this->SetWidths(array(38, 20));
+        $this->SetWidths(array(30, 28));
         $this->SetAligns(array('R', 'R'));
         $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe, 2, '')), false, false, 3);
 
+        $this->SetFont('helvetica', '', $this->font_size);
         $this->SetY($this->GetY() + 3);
 
         if ($data->tipo === 'en')
@@ -133,13 +136,14 @@ class mypdf_ticket extends FPDF {
 
       $this->SetY($this->GetY());
 
-      $this->SetFont('helvetica', '', $this->font_size);
+      $this->SetFont('helvetica', '', $this->font_size+1);
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetAligns(array('L'));
       $this->Row(array('EXPEDIDO EL:' ), false, false);
       $this->SetY($this->GetY() - 3);
       $this->Row(array(substr($data->fecha_tara, 0, 19)), false, false);
 
+      $this->SetFont('helvetica', '', $this->font_size);
       $this->SetY($this->GetY() + 5);
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetAligns(array('C'));
@@ -296,7 +300,7 @@ class mypdf_ticket extends FPDF {
     function AutoPrint($dialog=false){
         //Open the print dialog or start printing immediately on the standard printer
         $param=($dialog ? 'true' : 'false');
-        $script="print($param);";
+        $script="print({$param});";
         $this->IncludeJS($script);
     }
 

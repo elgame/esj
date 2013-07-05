@@ -188,13 +188,14 @@ class Bascula_model extends CI_Model {
           if ( (!empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0) || $bonificacion==false)
           {
             $cajas[] = array(
-              'id_bascula' => $idb,
-              'id_calidad' => $_POST['pcalidad'][$key],
-              'cajas'      => $caja,
-              'kilos'      => $_POST['pkilos'][$key],
-              'promedio'   => $_POST['ppromedio'][$key],
-              'precio'     => $_POST['pprecio'][$key],
-              'importe'    => $_POST['pimporte'][$key],
+              'id_bascula'   => $idb,
+              'id_calidad'   => $_POST['pcalidad'][$key],
+              'cajas'        => $caja,
+              'kilos'        => $_POST['pkilos'][$key],
+              'promedio'     => $_POST['ppromedio'][$key],
+              'precio'       => $_POST['pprecio'][$key],
+              'importe'      => $_POST['pimporte'][$key],
+              'num_registro' => $key,
             );
           }
         }
@@ -282,6 +283,7 @@ class Bascula_model extends CI_Model {
           ->from("bascula_compra AS bc")
           ->join("calidades AS c", "c.id_calidad = bc.id_calidad", "inner")
           ->where("id_bascula", $data['info'][0]->id_bascula)
+          ->order_by('num_registro', 'ASC')
           ->get();
 
         if ($sql_res->num_rows() > 0)
@@ -662,7 +664,7 @@ class Bascula_model extends CI_Model {
         {
           $pdf->AddPage();
 
-          $pdf->SetFont('helvetica','B', 7);
+          $pdf->SetFont('helvetica','B', 8);
           $pdf->SetTextColor(0,0,0);
           $pdf->SetFillColor(160,160,160);
           $pdf->SetY($pdf->GetY()-2);
@@ -681,7 +683,7 @@ class Bascula_model extends CI_Model {
         $pdf->SetWidths(array(206));
         $pdf->Row(array($calidad['calidad']), false, false);
 
-        $pdf->SetFont('helvetica','',7);
+        $pdf->SetFont('helvetica','',8);
         $pdf->SetTextColor(0,0,0);
 
         $promedio = 0;
@@ -696,7 +698,7 @@ class Bascula_model extends CI_Model {
           {
             $pdf->AddPage();
 
-            $pdf->SetFont('helvetica','B', 7);
+            $pdf->SetFont('helvetica','B', 8);
             $pdf->SetTextColor(0,0,0);
             $pdf->SetFillColor(160,160,160);
             $pdf->SetY($pdf->GetY()-2);
@@ -753,7 +755,7 @@ class Bascula_model extends CI_Model {
         $pdf->AddPage();
       }
 
-      $pdf->SetFont('helvetica','B', 7);
+      $pdf->SetFont('helvetica','B', 8);
       // $pdf->SetX(6);
       $pdf->SetY($pdf->getY() + 6);
       $pdf->SetAligns(array('C', 'C', 'C', 'C'));

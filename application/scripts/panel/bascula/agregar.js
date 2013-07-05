@@ -235,9 +235,9 @@ $(function(){
           trHtml = '',
           $tabla = $('#tableCajas');
 
-      if ( ! validaCalidad($calidad.find('option:selected').val())) {
-        return false;
-      }
+      // if ( ! validaCalidad($calidad.find('option:selected').val())) {
+      //   return false;
+      // }
 
       // Construye string con el html del tr.
       trHtml = '<tr data-kneto=""><td>' + $caja.val() +
