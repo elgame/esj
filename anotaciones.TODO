@@ -1,7 +1,7 @@
 3013-07-04
-  ☐ Checar lo de las horas de entrada y salida en los tickets y modificar la fecha
+  ✔ Checar lo de las horas de entrada y salida en los tickets y modificar la fecha @done (13-07-08 10:01)
   ✔ Fuente del ticket un poco mas grande la parte de arriba @done (13-07-05 08:49)
-  ☐ Que no salga el mensaje de que el folio no existe cuando sea una pesada diferente a la de fruta (que este como la de fruta)
+  ✔ Que no salga el mensaje de que el folio no existe cuando sea una pesada diferente a la de fruta (que este como la de fruta) @done (13-07-08 10:01)
   ✔ En el ticket las cajas que salgan en el orden como se agregaron ordenarlas por el num_registro @done (13-07-05 08:49)
   ✔ Poder agregar varias calidades del mismo tipo en un ticket para ponerle diferente precio a las cajas @done (13-07-05 08:49)
   ☐ SQL

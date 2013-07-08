@@ -32,6 +32,10 @@
           <button type="button" class="btn btn-info" id="btnSetFocoKilosTara">Cargar Kilos Tara</button>
         <?php } ?>
 
+        <?php if ($accion !== 'n' && $accion !== 'en' && isset($_POST['pcajas'])) { ?>
+          <a href="<?php echo base_url('panel/bascula/show_view_agregar_lote/?idb='.$_GET['idb']) ?>" class="btn btn-warning" rel="superbox-40x480">Agregar Lote</a>
+        <?php } ?>
+
         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>

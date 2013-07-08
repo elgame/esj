@@ -23,6 +23,8 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_chofer/',
     'bascula/show_view_agregar_camion/',
 
+    'bascula/show_view_agregar_lote/',
+
     'bascula/rde_pdf/',
     'bascula/r_acumulados_pdf/',
 	  'bascula/rmc_pdf/',
@@ -898,6 +900,63 @@ class bascula extends MY_Controller {
     $this->load->view('panel/bascula/supermodal', $params);
   }
 
+  /**
+   * Muestra formulario agregar camion.
+   * @return void
+   */
+  public function show_view_agregar_lote()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      // array('panel/bascula/fix_camiones.js'),
+    ));
+
+    $this->load->model('bascula_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar camion'
+    );
+
+    $this->configAddLote();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->load->model('bascula_model');
+      $res_mdl = $this->bascula_model->updateBascula($_GET['idb'], array(
+        'no_lote' => $this->input->post('pno_lote'),
+        'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
+      ));
+
+      if($res_mdl['passes'])
+        redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
+    }
+
+    $data = $this->bascula_model->getBasculaInfo($_GET['idb']);
+
+    $params['no_lote']     = $data['info'][0]->no_lote;
+    $params['chofer_prod'] = $data['info'][0]->chofer_es_productor;
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['template'] = $this->load->view('panel/bascula/agregar_lote', $params, true);
+
+    $this->load->view('panel/bascula/supermodal', $params);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos con validaciones de formulario.
@@ -1277,6 +1336,21 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configAddLote()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'pno_lote',
+            'label' => 'No. Lote',
+            'rules' => 'required|integer'),
+      array('field' => 'pchofer_es_productor',
+            'label' => 'Chofer es productor',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos para peticiones Ajax.
@@ -1449,6 +1523,10 @@ class bascula extends MY_Controller {
         break;
       case 14:
         $txt = 'El pago se realizo correctamente!';
+        $icono = 'success';
+        break;
+      case 15:
+        $txt = 'El lote se agrego correctamente!';
         $icono = 'success';
         break;
     }
