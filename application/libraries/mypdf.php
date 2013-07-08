@@ -8,7 +8,8 @@ class MYpdf extends FPDF {
 
 	var $hheader = '';
 
-	var $limiteY = 0;
+    var $limiteY     = 0;
+    var $noShowPages = true;
 
 	/**
 	 * P:Carta Vertical, L:Carta Horizontal, lP:Legal vertical, lL:Legal Horizontal
@@ -63,7 +64,8 @@ class MYpdf extends FPDF {
 
     	$this->SetFont('Arial','I',8);
     	$this->SetXY(211, 5);
-    	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
+        if($this->noShowPages)
+    	   $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(194, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
@@ -92,7 +94,8 @@ class MYpdf extends FPDF {
 
     	$this->SetFont('Arial','I',8);
     	$this->SetXY(276, 5);
-    	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
+        if($this->noShowPages)
+    	   $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(259, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
@@ -122,7 +125,8 @@ class MYpdf extends FPDF {
 
     	$this->SetFont('Arial','I',8);
     	$this->SetXY(211, 5);
-    	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
+        if($this->noShowPages)
+    	   $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(194, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
@@ -150,7 +154,8 @@ class MYpdf extends FPDF {
 
     	$this->SetFont('Arial','I',8);
     	$this->SetXY(350, 5);
-    	$this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
+        if($this->noShowPages)
+    	   $this->Cell(3, 5, $this->PageNo().'/{nb}', 0, 0, 'R');
     	$this->SetXY(333, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
@@ -208,8 +213,8 @@ class MYpdf extends FPDF {
     	for($i=0;$i<count($data);$i++)
     		$nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
     		$h=$this->FontSize*$nb+3;
-    		if($header)
-    			$h += 2;
+    		// if($header)
+    		// 	$h += 2;
     		$this->CheckPageBreak($h);
     		for($i=0;$i<count($data);$i++){
 	    		$w=$this->widths[$i];
@@ -223,7 +228,7 @@ class MYpdf extends FPDF {
 	    			$this->Rect($x,$y,$w,$h);
 
 	    		if($header)
-	    			$this->SetXY($x,$y+3);
+	    			$this->SetXY($x,$y+2);
 	    		else
 	    			$this->SetXY($x,$y+2);
 

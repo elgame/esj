@@ -441,7 +441,8 @@ class Bascula_model extends CI_Model {
                b.importe as importe_todas,
                b.tipo,
                pagos.tipo_pago,
-               pagos.concepto
+               pagos.concepto,
+               b.id_bonificacion
         FROM bascula_compra AS bc
         INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
         LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
@@ -1017,20 +1018,22 @@ class Bascula_model extends CI_Model {
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
     $pdf->titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") \n FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
 
+    $pdf->noShowPages = false;
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-    $widths = array(5, 15, 20, 35, 20, 20, 25, 20, 25, 25, 28, 30);
+    $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 28, 30, 12);
     $header = array('',   'BOLETA', 'FECHA','CALIDAD',
-                    'CAJAS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO');
+                    'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
 
     $lastFolio = 0;
+    $total_bonificaciones = 0;
     foreach($rmc as $key => $caja)
     {
       if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
@@ -1053,15 +1056,17 @@ class Bascula_model extends CI_Model {
       $datos = array(($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : '',
                      ($caja->id_bascula != $lastFolio) ? $caja->folio : '',
                      ($caja->id_bascula != $lastFolio) ? $caja->fecha : '',
-                     $caja->calidad,
+                     substr($caja->calidad, 0, 9),
                      $caja->cajas,
                      $caja->promedio,
-                     $caja->kilos,
-                     String::formatoNumero($caja->precio),
-                     String::formatoNumero($caja->importe),
-                     ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas) : '',
+                     String::formatoNumero($caja->kilos, 2, ''),
+                     String::formatoNumero($caja->precio, 2, ''),
+                     String::formatoNumero($caja->importe, 2, ''),
+                     ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '') : '',
                      ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
-                     ($caja->id_bascula != $lastFolio) ? $caja->concepto: '');
+                     ($caja->id_bascula != $lastFolio) ? $caja->concepto: '',
+                     ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''),
+                    );
 
       $pdf->SetY($pdf->GetY()-1);
       $pdf->SetX(6);
@@ -1070,6 +1075,9 @@ class Bascula_model extends CI_Model {
       $pdf->Row($datos, false, false);
 
       $lastFolio = $caja->id_bascula;
+
+      if(is_numeric($caja->id_bonificacion))
+        $total_bonificaciones += $caja->importe;
     }
 
     if($pdf->GetY()+8 >= $pdf->limiteY)
@@ -1109,6 +1117,13 @@ class Bascula_model extends CI_Model {
       String::formatoNumero($data['totales']['no_pagados']),
       String::formatoNumero($data['totales']['total'])
     ), false);
+
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(80));
+    $pdf->Row(array(
+      'Bonificado: '.String::formatoNumero($total_bonificaciones),
+    ), false, false);
 
     $pdf->Output('REPORTE_MOVIMIENTOS_CUENTA.pdf', 'I');
   }
