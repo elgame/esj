@@ -175,7 +175,7 @@ class rastreabilidad extends MY_Controller {
    public function ajax_get_clasificaciones()
    {
     $this->load->model('clasificaciones_model');
-    echo json_encode($this->clasificaciones_model->getClasificacionesAjax());
+    echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
    }
 
    public function ajax_save_clasifi()

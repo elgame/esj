@@ -6,7 +6,10 @@ class areas extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('areas/ajax_get_calidades/');
+	private $excepcion_privilegio = array(
+			'areas/ajax_get_calidades/',
+			'areas/ajax_get_clasificaciones/'
+		);
 
 	public function _remap($method){
 
@@ -520,6 +523,16 @@ class areas extends MY_Controller {
 		}
 		else
 			redirect(base_url('panel/areas/?msg=1'));
+	}
+
+	/**
+	 * Obtiene lostado de productores para el autocomplete, ajax
+	 */
+	public function ajax_get_clasificaciones(){
+		$this->load->model('clasificaciones_model');
+		$params = $this->clasificaciones_model->ajaxClasificaciones();
+
+		echo json_encode($params);
 	}
 
 

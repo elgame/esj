@@ -22,7 +22,7 @@
                 <div class="control-group">
                   <label class="control-label" for="farea">Area</label>
                   <div class="controls">
-                    <select name="farea" id="farea" class="span12" data-next="fcalidad">
+                    <select name="farea" id="farea" class="span12" data-next="btn_submit">
                       <?php foreach ($areas['areas'] as $area) { 
                         if($area->predeterminado == 't')
                           $areadefa = $area->id_area;

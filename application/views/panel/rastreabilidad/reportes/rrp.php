@@ -33,7 +33,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fcalidad">Calidad</label>
                   <div class="controls">
-                    <select name="fcalidad" id="fcalidad" class="span12" data-next="ftipo">
+                    <select name="fcalidad" id="fcalidad" class="span12" data-next="btn_submit">
                       <?php 
                       $calidad_1 = '';
                       foreach ($calidades['calidades'] as $key => $calidad) { 
