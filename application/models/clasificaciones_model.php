@@ -133,30 +133,29 @@ class clasificaciones_model extends CI_Model {
 	}
 
 	/**
-	 * Obtiene el listado de proveedores para usar ajax
+	 * Obtiene el listado de clasificaciones para usar ajax
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
-	 * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
+	 * @param type. clasificaciones de una area
 	 */
-	public function getProveedoresAjax(){
+	public function ajaxClasificaciones(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		if($this->input->get('type') !== false)
-			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
-		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono 
-				FROM proveedores
-				WHERE status = 'ac' ".$sql."
-				ORDER BY nombre_fiscal ASC
+			$sql .= " AND id_area = {$this->input->get('type')}";
+		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status 
+				FROM clasificaciones
+				WHERE status = true {$sql}
+				ORDER BY nombre ASC
 				LIMIT 20");
 
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
 				$response[] = array(
-						'id'    => $itm->id_proveedor,
-						'label' => $itm->nombre_fiscal,
-						'value' => $itm->nombre_fiscal,
+						'id'    => $itm->id_clasificacion,
+						'label' => $itm->nombre,
+						'value' => $itm->nombre,
 						'item'  => $itm,
 				);
 			}

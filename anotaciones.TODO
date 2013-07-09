@@ -13,6 +13,25 @@
     "Rastreabilidad del producto";61;TRUE;"rastreabilidad/rrp/";"print";TRUE
     "Reporte Entrada de Fruta";61;TRUE;"rastreabilidad/ref/";"print";FALSE
 
+
+    CREATE OR REPLACE VIEW rastria_cajas_libres AS 
+     SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.rendimiento, COALESCE(rpr.cajas, 0::bigint) AS cajas, rrc.rendimiento - COALESCE(rpr.cajas, 0::bigint) AS libres
+       FROM rastria_rendimiento_clasif rrc
+       LEFT JOIN ( SELECT rastria_pallets_rendimiento.id_rendimiento, rastria_pallets_rendimiento.id_clasificacion, sum(rastria_pallets_rendimiento.cajas) AS cajas
+               FROM rastria_pallets_rendimiento
+              GROUP BY rastria_pallets_rendimiento.id_rendimiento, rastria_pallets_rendimiento.id_clasificacion) rpr ON rrc.id_rendimiento = rpr.id_rendimiento AND rrc.id_clasificacion = rpr.id_clasificacion
+      WHERE (rrc.rendimiento - COALESCE(rpr.cajas, 0::bigint)) > 0;
+    ALTER TABLE rastria_cajas_libres OWNER TO programa;
+
+    CREATE OR REPLACE VIEW rastria_pallets_lista AS 
+     SELECT rp.id_pallet, rp.id_clasificacion, rp.folio, date(rp.fecha) AS fecha, rp.no_cajas, rp.status, c.nombre, COALESCE(sum(rpr.cajas), 0::bigint) AS cajas, rp.no_cajas - COALESCE(sum(rpr.cajas), 0::bigint) AS cajas_faltantes
+       FROM rastria_pallets rp
+       LEFT JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet
+       JOIN clasificaciones c ON c.id_clasificacion = rp.id_clasificacion
+      GROUP BY rp.id_pallet, rp.id_clasificacion, rp.folio, rp.fecha, rp.no_cajas, rp.status, c.nombre
+      ORDER BY rp.folio;
+    ALTER TABLE rastria_pallets_lista OWNER TO programa;
+
 3013-07-04
   ✔ Checar lo de las horas de entrada y salida en los tickets y modificar la fecha @done (13-07-05 18:13)
   ✔ Fuente del ticket un poco mas grande la parte de arriba @done (13-07-05 18:13)
@@ -84,7 +103,7 @@
         id_pallet bigint NOT NULL,
         id_rendimiento bigint NOT NULL,
         id_clasificacion integer NOT NULL,
-        fecha timestamp with time zone NOT NULL,
+        fecha timestamp with time zone NOT NULL DEFAULT now(),
         cajas integer NOT NULL DEFAULT 0,
         CONSTRAINT rastria_pallets_rendimiento_pkey PRIMARY KEY (id_pallet, id_rendimiento, id_clasificacion),
         CONSTRAINT rastria_pallets_rendimiento_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
