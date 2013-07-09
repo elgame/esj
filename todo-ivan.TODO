@@ -1,3 +1,21 @@
+RASTREABILIDAD:
+
+       Rendimiento por Lote:
+              ✔ Al guardar una clasificacion que se agregue un nuevo renglon en la tabla para seguir agregando. @done (13-07-09 16:35)
+              ✔ Validar que no exista otra clasificacion para el mismo lote. @done (13-07-09 17:05)
+              ✔ Cargar las clasificaciones de un lote si tiene. @done (13-07-09 17:23)
+              ✔ Que el autocomplete funcione para los inputs que se agregan con js. @done (13-07-09 16:35)
+              ☐ Al modificar los campos de una clasificacion que ya esta en la bdd actualizar sus datos y los de de la misma clasificacion de los lotes siguientes.
+              ☐ Eliminar una clasificacion de la tabla y que se elimine de la bdd, tambien eliminar de la tabla donde se regitran las calidades de de los pallets.
+              ☐ Ponerle el funcionamiento con los enter y que el input en linea2 al dar enter en el de click al boton "Guardar".
+              ☐ Imprimir. 1/4 de hoja
+              ✔ Siguiente lote. @done (13-07-09 18:16)
+
+               ☐ Cuando sea el lote 1 y al seleccionar una clasificacion cargar los existentes con ajax.
+
+
+              ☐  Checar que al seleccionar una clasificacion que ya existe limpiar el input.
+
 CORRECCIONES:
   ✔ supermodal cerrarlo despues de 1 seg. @done (13-06-11 19:01)
   ✔ validar el "enter" en el folio. @done (13-06-11 19:01)

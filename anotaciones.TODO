@@ -12,6 +12,7 @@
     "Rastreabilidad";0;TRUE;"rastreabilidad/";"bullseye";FALSE
     "Rastreabilidad del producto";61;TRUE;"rastreabilidad/rrp/";"print";TRUE
     "Reporte Entrada de Fruta";61;TRUE;"rastreabilidad/ref/";"print";FALSE
+    "Rendimiento por lote";57;TRUE;"rastreabilidad/rendimiento_lote/";"bar-chart";FALSE
 
 3013-07-04
   ✔ Checar lo de las horas de entrada y salida en los tickets y modificar la fecha @done (13-07-05 18:13)
