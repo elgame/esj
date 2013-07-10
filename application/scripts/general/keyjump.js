@@ -115,7 +115,6 @@
 
   $.fn.keyJump.setElem  = function ($elem) {
     $($elem).on('keypress', function(event) {
-
       if (event.which == settings.next) {
 
         if (settings.next == 13) event.preventDefault();

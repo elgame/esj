@@ -24,6 +24,171 @@ class rastreabilidad_model extends CI_Model {
     return array('passess' => true);
   }
 
+  /**
+   * Edita una clasificacion de un lote y todas aquellas clasificaciones iguales
+   * de los lotes siguientes.
+   *
+   * @return array
+   */
+  public function editClasificacion()
+  {
+    $data = array(
+      'existente'        => $_POST['existente'],
+      'linea1'           => $_POST['linea1'],
+      'linea2'           => $_POST['linea2'],
+      'total'            => $_POST['total'],
+      'rendimiento'      => $_POST['rendimiento'],
+    );
+
+    // Actualiza los datos de la clasificacion
+    $this->db->update('rastria_rendimiento_clasif',$data, array(
+      'id_rendimiento'   => $_POST['id_rendimiento'],
+      'id_clasificacion' => $_POST['id_clasificacion'])
+    );
+
+    // Elimina la clasificacion de los pallets
+    $this->db->delete('rastria_pallets_rendimiento', array(
+      'id_rendimiento'   => $_POST['id_rendimiento'],
+      'id_clasificacion' => $_POST['id_clasificacion']
+    ));
+
+    // Obtiene la fecha y el lote de la clasificacion que se modifico.
+    $res = $this->db->select("DATE(fecha) AS fecha, lote")
+      ->from("rastria_rendimiento")
+      ->where("id_rendimiento", $_POST['id_rendimiento'])
+      ->get()->row();
+
+    // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
+    $sql = $this->db->query(
+      "SELECT id_rendimiento, lote
+        FROM rastria_rendimiento
+        WHERE fecha = '{$res->fecha}' AND lote > {$res->lote}
+        ORDER BY lote ASC
+      ");
+
+    // Si existen lotes siguientes
+    if ($sql->num_rows() > 0)
+      $this->updateMasivoClasifi($sql->result(), $data['total']);
+
+    return array('passess' => true);
+  }
+
+  /**
+   * Elimina una clasificacion de la BDD.
+   *
+   * @return array
+   */
+  public function delClasificacion()
+  {
+    // Obtiene la fecha y el lote de la clasificacion que se elimino.
+    $res = $this->db->select("DATE(fecha) AS fecha, lote")
+      ->from("rastria_rendimiento")
+      ->where("id_rendimiento", $_POST['id_rendimiento'])
+      ->get()->row();
+
+    // Se elimina la clasificacion
+    $tables = array('rastria_rendimiento_clasif', 'rastria_pallets_rendimiento');
+    $this->db->where(array(
+      'id_rendimiento'   => $_POST['id_rendimiento'],
+      'id_clasificacion' => $_POST['id_clasificacion'])
+    );
+    $this->db->delete($tables);
+
+    // Obtiene los lotes anteriores al lote de la clasificacion que se elimino
+    $sql = $this->db->query(
+      "SELECT id_rendimiento, lote
+        FROM rastria_rendimiento
+        WHERE fecha = '{$res->fecha}' AND lote < {$res->lote}
+        ORDER BY lote DESC
+      ");
+
+    $existente = 0;
+
+    // Si existen lotes anteriores
+    if ($sql->num_rows() > 0)
+    {
+      // Recorre los lotes para ver si tienen una clasificacion como la que se
+      // elimino y si tienen entonces toma los datos de esa clasificacion como base
+      // para recalcular los demas lotes.
+      foreach ($sql->result() as $key => $lote)
+      {
+        $sql2 = $this->db->query(
+          "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
+                  total, rendimiento
+            FROM rastria_rendimiento_clasif
+            WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento}
+        ");
+
+        if ($sql2->num_rows() > 0)
+        {
+          $lote_iden = $sql2->result();
+
+          $existente = $lote_iden[0]->total;
+
+          break;
+        }
+      }
+    }
+
+    // Obtiene los lotes siguientes apartir del lote de la clasificacion
+    // que se elimino.
+    $sql3 = $this->db->query(
+      "SELECT id_rendimiento, lote
+        FROM rastria_rendimiento
+        WHERE fecha = '{$res->fecha}' AND lote > {$res->lote}
+        ORDER BY lote ASC
+      ");
+
+    if ($sql3->num_rows() > 0)
+      $this->updateMasivoClasifi($sql3->result(), $existente);
+
+    return array('passess' => true);
+  }
+
+  public function updateMasivoClasifi($lotes, $existente)
+  {
+    $existente = $existente;
+
+    // Recorre los lotes para ver si tiene clasificaciones como las que se
+    // modifico y si tienen entonces recalculan sus datos.
+    foreach ($lotes as $key => $lote)
+    {
+      $sql2 = $this->db->query(
+        "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
+                total, rendimiento
+        FROM rastria_rendimiento_clasif
+        WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento}
+      ");
+
+      if ($sql2->num_rows() > 0)
+      {
+        $clasifi = $sql2->result();
+
+        // Actualiza los datos de la clasificacion.
+        $this->db->update('rastria_rendimiento_clasif',
+          array(
+            'existente' => $existente,
+            'total'     => floatval($existente) + floatval($clasifi[0]->linea1) + floatval($clasifi[0]->linea2)
+          ),
+          array(
+            'id_rendimiento'   => $clasifi[0]->id_rendimiento,
+            'id_clasificacion' => $clasifi[0]->id_clasificacion
+          )
+        );
+
+        // Elimina la clasificacion de la tabla de los pallets.
+        $this->db->delete('rastria_pallets_rendimiento', array(
+            'id_rendimiento'   => $clasifi[0]->id_rendimiento,
+            'id_clasificacion' => $clasifi[0]->id_clasificacion
+        ));
+
+        $existente = floatval($existente) + floatval($clasifi[0]->linea1) + floatval($clasifi[0]->linea2);
+      }
+
+      $sql2->free_result();
+    }
+  }
+
   public function createLote($fecha, $lote)
   {
     $this->db->insert('rastria_rendimiento', array(
@@ -92,13 +257,31 @@ class rastreabilidad_model extends CI_Model {
     return $data;
   }
 
-  public function getPrevClasificacion($id_rendimiento, $id_clasificacion)
+  /**
+   * Obtiene los existentes de una clasificacion
+   *
+   * @param  string $id_rendimiento
+   * @param  string $id_clasificacion
+   * @return array
+   */
+  public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote)
   {
-    $sql = $this->db->select('total')
-      ->from('rastria_rendimiento_clasif')
-      ->where('id_rendimiento', $id_rendimiento)
-      ->where('id_clasificacion', $id_clasificacion)
-      ->get();
+
+    if (intval($lote) === 1)
+    {
+      $sql = $this->db->select('SUM(libres) AS existentes')
+        ->from('rastria_cajas_libres')
+        ->where('id_clasificacion', $id_clasificacion)
+        ->get();
+    }
+    else
+    {
+      $sql = $this->db->select('total AS existentes')
+        ->from('rastria_rendimiento_clasif')
+        ->where('id_rendimiento', $id_rendimiento)
+        ->where('id_clasificacion', $id_clasificacion)
+        ->get();
+    }
 
     return $sql->row();
   }

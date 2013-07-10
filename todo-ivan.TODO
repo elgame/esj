@@ -5,13 +5,13 @@ RASTREABILIDAD:
               ✔ Validar que no exista otra clasificacion para el mismo lote. @done (13-07-09 17:05)
               ✔ Cargar las clasificaciones de un lote si tiene. @done (13-07-09 17:23)
               ✔ Que el autocomplete funcione para los inputs que se agregan con js. @done (13-07-09 16:35)
-              ☐ Al modificar los campos de una clasificacion que ya esta en la bdd actualizar sus datos y los de de la misma clasificacion de los lotes siguientes.
-              ☐ Eliminar una clasificacion de la tabla y que se elimine de la bdd, tambien eliminar de la tabla donde se regitran las calidades de de los pallets.
-              ☐ Ponerle el funcionamiento con los enter y que el input en linea2 al dar enter en el de click al boton "Guardar".
+              ✔ Al modificar los campos de una clasificacion que ya esta en la bdd actualizar sus datos y los de de la misma clasificacion de los lotes siguientes. @done (13-07-09 20:22)
+              ✔ Eliminar una clasificacion de la tabla y que se elimine de la bdd, tambien eliminar de la tabla donde se regitran las calidades de de los pallets. @done (13-07-09 22:37)
+              ✔ Ponerle el funcionamiento con los enter y que el input en linea2 al dar enter en el de click al boton "Guardar". @done (13-07-10 10:48)
               ☐ Imprimir. 1/4 de hoja
               ✔ Siguiente lote. @done (13-07-09 18:16)
 
-               ☐ Cuando sea el lote 1 y al seleccionar una clasificacion cargar los existentes con ajax.
+               ✔ Cuando sea el lote 1 y al seleccionar una clasificacion cargar los existentes con ajax. @done (13-07-09 20:22)
 
 
               ☐  Checar que al seleccionar una clasificacion que ya existe limpiar el input.

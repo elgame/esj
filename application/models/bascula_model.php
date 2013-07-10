@@ -115,12 +115,23 @@ class Bascula_model extends CI_Model {
           'id_chofer'    => empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'],
           'id_camion'    => empty($_POST['pid_camion']) ? null : $_POST['pid_camion'],
           'folio'        => $this->input->post('pfolio'),
-          'fecha_bruto'  => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
-          'kilos_bruto'  => $this->input->post('pkilos_brutos'),
+          // 'fecha_bruto'  => str_replace('T', ' ', $_POST['pfecha'].':'.date('s')),
+          // 'kilos_bruto'  => $this->input->post('pkilos_brutos'),
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
           'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'],
         );
+
+        if ($this->input->post('ptipo') === 'en')
+        {
+          $data['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          $data['kilos_bruto'] = $this->input->post('pkilos_brutos');
+        }
+        else
+        {
+          $data['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          $data['kilos_tara'] = $this->input->post('pkilos_tara');
+        }
 
         if ($bonificacion)
         {
@@ -173,6 +184,7 @@ class Bascula_model extends CI_Model {
         }else
           $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
 
+        $data2['kilos_bruto'] = $this->input->post('pkilos_brutos');
         $data2['kilos_tara'] = $this->input->post('pkilos_tara');
 
         $data2['kilos_neto']  = $this->input->post('pkilos_neto');

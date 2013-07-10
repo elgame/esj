@@ -1,6 +1,6 @@
     <div id="content" class="span10">
       <!-- content starts -->
-      <input type="text" value="<?php echo $lote_actual ?>" id="loteActual">
+      <input type="hidden" value="<?php echo $lote_actual ?>" id="loteActual">
       <div>
         <ul class="breadcrumb">
           <li>
@@ -21,7 +21,7 @@
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
-          <div class="box-content">
+          <div class="box-content" id="box-content">
             <div class="row-fluid">
 
               <form action="<?php echo base_url('panel/rastreabilidad/rendimiento_lote?'.String::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
@@ -40,7 +40,7 @@
                       <tr>
                         <td>
                           <input type="text" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span6"
-                            style="margin: -7px auto 0 auto; text-align: center;" maxlength="10">
+                            style="margin: -7px auto 0 auto; text-align: center;" maxlength="10" autofocus>
                         </td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $semana ?></span></td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $dia_semana ?></span></td>
@@ -84,10 +84,10 @@
                 <tbody>
 
                   <?php foreach ($clasificaciones['clasificaciones'] as $key => $c) { ?>
-                    <tr>
+                    <tr id="<?php echo $c->id_clasificacion ?>">
                       <td>
                         <input type="text" id="fclasificacion" value="<?php echo $c->clasificacion ?>" class="span12">
-                        <input type="text" id="fidclasificacion" value="<?php echo $c->id_clasificacion ?>" class="span12">
+                        <input type="hidden" id="fidclasificacion" value="<?php echo $c->id_clasificacion ?>" class="span12">
                       </td>
                       <td>
                         <input type="text" id="fexistente" value="<?php echo $c->existente ?>" class="span12 vpositive">
@@ -100,11 +100,11 @@
                       </td>
                       <td>
                         <span id="ftotal-span"><?php echo $c->total ?></span>
-                        <input type="text" id="ftotal" value="<?php echo $c->total ?>" class="span12 vpositive">
+                        <input type="hidden" id="ftotal" value="<?php echo $c->total ?>" class="span12 vpositive">
                       </td>
                       <td>
                         <span id="frd-span"><?php echo $c->rendimiento ?></span>
-                        <input type="text" id="frd" value="<?php echo $c->rendimiento ?>" class="span12 vpositive">
+                        <input type="hidden" id="frd" value="<?php echo $c->rendimiento ?>" class="span12 vpositive">
                       </td>
                       <td>
                         <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
@@ -116,7 +116,7 @@
                   <tr>
                     <td>
                       <input type="text" id="fclasificacion" value="" class="span12">
-                      <input type="text" id="fidclasificacion" value="" class="span12">
+                      <input type="hidden" id="fidclasificacion" value="" class="span12">
                     </td>
                     <td>
                       <input type="text" id="fexistente" value="0" class="span12 vpositive">
@@ -129,11 +129,11 @@
                     </td>
                     <td>
                       <span id="ftotal-span">0</span>
-                      <input type="text" id="ftotal" value="0" class="span12 vpositive">
+                      <input type="hidden" id="ftotal" value="0" class="span12 vpositive">
                     </td>
                     <td>
                       <span id="frd-span">0</span>
-                      <input type="text" id="frd" value="0" class="span12 vpositive">
+                      <input type="hidden" id="frd" value="0" class="span12 vpositive">
                     </td>
                     <td>
                       <button type="button" class="btn btn-success btn-small" id="btnAddClasif">Guardar</button>
