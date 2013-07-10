@@ -698,69 +698,39 @@ class rastreabilidad_model extends CI_Model {
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('P', 'mm', array(110, 140));
-
+      $pdf = new MYpdf('P', 'mm', array(105, 140));
       $pdf->show_head = false;
 
-      $pdf->Image(APPPATH.'/images/logo.png', 6, 5, 20);
-      $pdf->SetFont('Arial','',5);
-
-      $pdf->titulo2 = "RENDIMIENTO POR LOTE";
-      $pdf->titulo3 = "{$fecha->format('d/m/Y')} - ";
-
       $pdf->AliasNbPages();
-      //$pdf->AddPage();
+      $pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('C', 'C', 'L', 'L', 'R', 'R');
-      $widths = array(12, 20, 68, 70, 15, 20);
-      $header = array('CLASIF.', 'EXIST.', 'LINEA 1', 'LINEA 2', 'TOTAL', 'RD');
+      $pdf->SetXY(25, 3);
+      $pdf->Image(APPPATH.'images/logo.png');
 
-      // foreach($data['data'] as $key => $boleta)
-      // {
-      //   if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
-      //   {
-      //     $pdf->AddPage();
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(92));
+      $pdf->SetFillColor(200,200,200);
+      $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $data['info']->lote), true);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(17, 15, 15, 15, 15, 15));
+      $pdf->Row(array('CLASIF.', 'EXIST.', 'LINEA 1', 'LINEA 2', 'TOTAL', 'RD'), true);
 
-      //     $pdf->SetFont('helvetica','B',8);
-      //     $pdf->SetTextColor(0,0,0);
-      //     $pdf->SetFillColor(200,200,200);
-      //     // $pdf->SetY($pdf->GetY()-2);
-      //     $pdf->SetX(6);
-      //     $pdf->SetAligns($aligns);
-      //     $pdf->SetWidths($widths);
-      //     $pdf->Row($header, true);
-      //   }
-
-      //   $pdf->SetFont('helvetica','', 8);
-      //   $pdf->SetTextColor(0,0,0);
-
-      //   // $pdf->SetY($pdf->GetY()-2);
-      //   $pdf->SetX(6);
-      //   $pdf->SetAligns($aligns);
-      //   $pdf->SetWidths($widths);
-      //     $pdf->Row(array(
-      //         ($num_lote != $boleta->no_lote? $boleta->no_lote: ''),
-      //         $boleta->folio,
-      //         $boleta->nombre_fiscal,
-      //         $boleta->nombre,
-      //         String::formatoNumero($boleta->cajas, 2, ''),
-      //         String::formatoNumero($boleta->kilos, 2, ''),
-      //       ), false);
-
-      //   if($num_lote != $boleta->no_lote){
-      //     $num_lote = $boleta->no_lote;
-      //   }
-
-      //   if(array_key_exists($boleta->id_calidad, $total_cajas)){
-      //     $total_cajas[$boleta->id_calidad]['cajas'] += $boleta->cajas;
-      //     $total_cajas[$boleta->id_calidad]['kilos'] += $boleta->kilos;
-      //   }else{
-      //     $total_cajas[$boleta->id_calidad] = array('cajas' => $boleta->cajas, 'kilos' => $boleta->kilos, 'nombre' => $boleta->nombre);
-      //   }
-      // }
-
-      $pdf->Output('rendimiento_lore'.$fecha->format('d/m/Y').'.pdf', 'I');
+      foreach ($data['clasificaciones'] as $key => $clasifi) {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $clasifi->clasificacion,
+          $clasifi->existente,
+          $clasifi->linea1,
+          $clasifi->linea2,
+          $clasifi->total,
+          $clasifi->rendimiento,
+        ), false);
+      }
+      $pdf->Output('rendimiento_lote_'.$fecha->format('d/m/Y').'.pdf', 'I');
    }
 
 }
