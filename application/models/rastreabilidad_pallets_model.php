@@ -58,7 +58,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return $response;
 	}
 
-	public function getInfoPallet($id_pallet, $basic_info=FALSE){
+	public function getInfoPallet($id_pallet, $basic_info=FALSE, $cajas_libres=true){
 		$result = $this->db->query("SELECT * FROM rastria_pallets_lista WHERE id_pallet = {$id_pallet}");
 		$response['info'] = array();
 		if($result->num_rows() > 0)
@@ -74,8 +74,10 @@ class rastreabilidad_pallets_model extends privilegios_model {
 					WHERE id_pallet = {$id_pallet}");
 				$response['rendimientos'] = $result->result();
 
-				$rendimientos_libres = $this->getRendimientoLibre($response['info']->id_clasificacion);
-				$response['rend_libres'] = $rendimientos_libres['rendimientos'];
+				if($cajas_libres){
+					$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
+					$response['rend_libres'] = $rendimientos_libres['rendimientos'];
+				}
 			}
 		}
 		return $response;
@@ -192,7 +194,180 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			$this->db->insert_batch('rastria_pallets_rendimiento', $data);
 
 		return true;
-	} 	
+	}
+
+	public function pallet_pdf($id_pallet){
+		// Obtiene los datos del reporte.
+    $data = $this->getInfoPallet($id_pallet, false, false);
+
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', array(105, 140));
+      $pdf->show_head = false;
+
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $pdf->SetXY(25, 3);
+      $pdf->Image(APPPATH.'images/logo.png');
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(46, 46));
+      $pdf->Row(array('DESTINO:', "No CLASIF: {$data['info']->nombre}"), false);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C'));
+      $pdf->Row(array('LOTE', 'CAJAS'), false);
+
+      foreach ($data['rendimientos'] as $key => $value) {
+      	$fecha = strtotime($value->fecha);
+      	$pdf->SetX(6);
+	      $pdf->Row(array(date("Ww").' '.$value->lote, $value->cajas), false);
+      }
+      $pdf->SetX(6);
+	    $pdf->Row(array('No. TARIMA', $data['info']->no_cajas), false);
+
+	    $pdf->SetX(6);
+	    $pdf->SetAligns(array('L'));
+	    $pdf->SetWidths(array(66));
+	    $pdf->Row(array('FECHA: '.$data['info']->fecha), false, false);
+
+      // $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
+      // $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
+      // $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
+      //                 'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
+
+      // $totalPagado    = 0;
+      // $totalNoPagado  = 0;
+      // $totalCancelado = 0;
+
+      // foreach($rde as $key => $calidad)
+      // {
+      //   if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      //   {
+      //     $pdf->AddPage();
+
+      //     $pdf->SetFont('helvetica','B', 8);
+      //     $pdf->SetTextColor(0,0,0);
+      //     $pdf->SetFillColor(160,160,160);
+      //     $pdf->SetY($pdf->GetY()-2);
+      //     $pdf->SetX(6);
+      //     $pdf->SetAligns($aligns);
+      //     $pdf->SetWidths($widths);
+      //     $pdf->Row($header, false);
+      //   }
+
+      //   $pdf->SetFont('helvetica','', 9);
+      //   $pdf->SetTextColor(0,0,0);
+
+      //   $pdf->SetY($pdf->GetY()-1);
+      //   $pdf->SetX(6);
+      //   $pdf->SetAligns(array('L'));
+      //   $pdf->SetWidths(array(206));
+      //   $pdf->Row(array($calidad['calidad']), false, false);
+
+      //   $pdf->SetFont('helvetica','',8);
+      //   $pdf->SetTextColor(0,0,0);
+
+      //   $promedio = 0;
+      //   $cajas    = 0;
+      //   $kilos    = 0;
+      //   $precio   = 0;
+      //   $importe  = 0;
+
+      //   foreach ($calidad['cajas'] as $caja)
+      //   {
+      //     if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      //     {
+      //       $pdf->AddPage();
+
+      //       $pdf->SetFont('helvetica','B', 8);
+      //       $pdf->SetTextColor(0,0,0);
+      //       $pdf->SetFillColor(160,160,160);
+      //       $pdf->SetY($pdf->GetY()-2);
+      //       $pdf->SetX(6);
+      //       $pdf->SetAligns($aligns);
+      //       $pdf->SetWidths($widths);
+      //       $pdf->Row($header, false);
+      //     }
+
+      //     $promedio += $caja->promedio;
+      //     $cajas    += $caja->cajas;
+      //     $kilos    += $caja->kilos;
+      //     $precio   += $caja->precio;
+      //     $importe  += $caja->importe;
+
+      //     if ($caja->pagado === 'p' || $caja->pagado === 'b')
+      //       $totalPagado += $caja->importe;
+      //     else
+      //       $totalNoPagado += $caja->importe;
+
+      //     $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
+      //                    $caja->folio,
+      //                    $caja->cuenta_cpi,
+      //                    substr($caja->proveedor, 0, 35),
+      //                    $caja->promedio,
+      //                    $caja->cajas,
+      //                    $caja->kilos,
+      //                    String::formatoNumero($caja->precio),
+      //                    String::formatoNumero($caja->importe));
+
+      //     $pdf->SetY($pdf->GetY()-2);
+      //     $pdf->SetX(6);
+      //     $pdf->SetAligns($aligns);
+      //     $pdf->SetWidths($widths);
+      //     $pdf->Row($datos, false, false);
+      //   }
+
+      //   $pdf->SetY($pdf->GetY()-1);
+      //   $pdf->SetX(6);
+      //   $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
+      //   $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
+      //   $pdf->Row(array(
+      //     'TOTALES',
+      //     String::formatoNumero($kilos/$cajas, 2, ''),
+      //     $cajas,
+      //     $kilos,
+      //     String::formatoNumero($precio/count($calidad['cajas'])),
+      //     String::formatoNumero($importe)), false, false);
+
+      // }
+
+      // if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      // {
+      //   $pdf->AddPage();
+      // }
+
+      // $pdf->SetFont('helvetica','B', 8);
+      // // $pdf->SetX(6);
+      // $pdf->SetY($pdf->getY() + 6);
+      // $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      // $pdf->SetWidths(array(50, 50, 50, 50));
+      // $pdf->Row(array(
+      //   'PAGADO',
+      //   'NO PAGADO',
+      //   'CANCELADO',
+      //   'TOTAL IMPORTE'), false);
+
+      // $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+
+      // if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      // {
+      //   $pdf->AddPage();
+      // }
+      // $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      // $pdf->SetWidths(array(50, 50, 50, 50));
+      // $pdf->Row(array(
+      //   String::formatoNumero($totalPagado),
+      //   String::formatoNumero($totalNoPagado),
+      //   String::formatoNumero($data['cancelados']),
+      //   String::formatoNumero($totalImporte)), false);
+
+      $pdf->Output('REPORTE_DIARIO.pdf', 'I');
+	}
 
 
 

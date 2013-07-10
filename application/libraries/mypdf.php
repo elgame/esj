@@ -20,7 +20,8 @@ class MYpdf extends FPDF {
 	function __construct($orientation='P', $unit='mm', $size='Letter'){
 		parent::__construct($orientation, $unit, $size);
 
-		$this->hheader = 'header'.$size.$orientation;
+        if(!is_array($size))
+		  $this->hheader = 'header'.$size.$orientation;
 
 	}
 

@@ -45,11 +45,11 @@
 						</form>
 
 						<?php 
-						echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/agregar/', array(
-										'params'   => '',
-										'btn_type' => 'btn-success pull-right',
-										'attrs' => array('style' => 'margin-bottom: 10px;') )
-								);
+							echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/agregar/', array(
+											'params'   => '',
+											'btn_type' => 'btn-success pull-right',
+											'attrs' => array('style' => 'margin-bottom: 10px;') )
+									);
 						 ?>
 						<table class="table table-striped table-bordered bootstrap-datatable">
 						  <thead>
@@ -90,6 +90,11 @@
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/modificar/', array(
 												'params'   => 'id='.$pallet->id_pallet,
 												'btn_type' => 'btn-success')
+										);
+										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/imprimir/', array(
+												'params'   => 'id='.$pallet->id_pallet,
+												'btn_type' => 'btn-info', 
+												'attrs' => array('target' => '_BLANCK') )
 										);
 										
 										?>

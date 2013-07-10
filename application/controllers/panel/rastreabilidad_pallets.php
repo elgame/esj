@@ -8,7 +8,7 @@ class rastreabilidad_pallets extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'rastreabilidad_pallets/ajax_get_rendimientos/',
-    'rastreabilidad_pallets/ref_pdf/',
+    'rastreabilidad_pallets/dd/',
     );
 
   public function _remap($method){
@@ -145,6 +145,16 @@ class rastreabilidad_pallets extends MY_Controller {
       $this->load->view('panel/footer');
     }else
       redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function imprimir()
+  {
+    $this->load->model('rastreabilidad_pallets_model');
+    $this->rastreabilidad_pallets_model->pallet_pdf($this->input->get('id'));
   }
 
   /**
