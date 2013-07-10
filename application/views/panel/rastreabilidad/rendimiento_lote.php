@@ -39,7 +39,7 @@
                     <tbody>
                       <tr>
                         <td>
-                          <input type="text" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span6"
+                          <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span6"
                             style="margin: -7px auto 0 auto; text-align: center;" maxlength="10" autofocus>
                         </td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $semana ?></span></td>
@@ -57,14 +57,21 @@
                   </table>
                 </div>
 
-                <div class="span2"></div>
                 <div class="span2">
+
                   <?php if ($ant_lote >= 1) { ?>
-                    <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha); ?>">Anterior Lote</a>
+                    <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha); ?>">Anterior Lote</a>
                   <?php } ?>
-                  <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha); ?>">Siguiente Lote</a>
+
                 </div>
-                <div class="span2"></div>
+                <div class="span2">
+                  <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha); ?>">Siguiente Lote</a>
+                </div>
+                <div class="span2">
+                  <?php if (count($clasificaciones['clasificaciones']) > 0) { ?>
+                    <a class="btn btn-danger" href="<?php echo base_url('panel/rastreabilidad/rpl_pdf/?glote='.$_GET['glote']); ?>" target="_BLANK">Imprimir</a>
+                  <?php } ?>
+                </div>
 
               </form>
 
@@ -100,7 +107,7 @@
                       </td>
                       <td>
                         <span id="ftotal-span"><?php echo $c->total ?></span>
-                        <input type="hidden" id="ftotal" value="<?php echo $c->total ?>" class="span12 vpositive">
+                        <input type="hidden" id="ftotal" value="<?php echo $c->total ?>" class="span12 vpositive" data-valor="<?php echo $c->total ?>">
                       </td>
                       <td>
                         <span id="frd-span"><?php echo $c->rendimiento ?></span>

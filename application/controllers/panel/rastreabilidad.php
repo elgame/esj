@@ -16,9 +16,10 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_get_prev_clasifi/',
     'rastreabilidad/ajax_del_clasifi/',
 
-    'rastreabilidad/siguiente_lote/',
+    'rastreabilidad/rpl_pdf/',
 
-    );
+    'rastreabilidad/siguiente_lote/',
+  );
 
   public function _remap($method){
 
@@ -167,6 +168,16 @@ class rastreabilidad extends MY_Controller {
       // Redirecciona con el nuevo lote.
       redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$id_rendimiento));
     }
+  }
+
+  public function rpl_pdf()
+  {
+    if (isset($_GET['glote']{0}))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rpl_pdf($_GET['glote']);
+    }
+    else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.String::getVarsLink(array('msg'))));
   }
 
   /*

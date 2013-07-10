@@ -18,8 +18,21 @@ class rastreabilidad_model extends CI_Model {
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
     );
-
     $this->db->insert('rastria_rendimiento_clasif', $data);
+
+    $info = $this->getLoteInfo($_POST['id_rendimiento']);
+
+    // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
+    $sql = $this->db->query(
+      "SELECT id_rendimiento, lote
+        FROM rastria_rendimiento
+        WHERE fecha = '{$info['info']->fecha}' AND lote > {$info['info']->lote}
+        ORDER BY lote ASC
+      ");
+
+    // Si existen lotes siguientes
+    if ($sql->num_rows() > 0)
+      $this->updateMasivoClasifi($sql->result(), $data['total']);
 
     return array('passess' => true);
   }
@@ -221,7 +234,7 @@ class rastreabilidad_model extends CI_Model {
 
   public function getLoteInfo($id_rendimiento, $full_info = true)
   {
-    $sql = $this->db->select("id_rendimiento, lote, fecha, status")
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $id_rendimiento)
       ->get();
@@ -267,20 +280,54 @@ class rastreabilidad_model extends CI_Model {
   public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote)
   {
 
+    $info = $this->getLoteInfo($id_rendimiento, false);
+
     if (intval($lote) === 1)
     {
       $sql = $this->db->select('SUM(libres) AS existentes')
-        ->from('rastria_cajas_libres')
-        ->where('id_clasificacion', $id_clasificacion)
+        ->from('rastria_cajas_libres AS rcl')
+        ->join('rastria_rendimiento AS rd','rd.id_rendimiento = rcl.id_rendimiento', 'join')
+        ->where('rcl.id_clasificacion', $id_clasificacion)
+        ->where('DATE(rd.fecha) <', $info['info']->fecha)
         ->get();
     }
     else
     {
-      $sql = $this->db->select('total AS existentes')
-        ->from('rastria_rendimiento_clasif')
-        ->where('id_rendimiento', $id_rendimiento)
-        ->where('id_clasificacion', $id_clasificacion)
-        ->get();
+      // Obtiene los lotes anteriores.
+      $sql2 = $this->db->query(
+        "SELECT id_rendimiento, lote
+          FROM rastria_rendimiento
+          WHERE fecha = '{$info['info']->fecha}' AND lote < {$info['info']->lote}
+          ORDER BY lote DESC
+        ");
+
+      // Si existen lotes anteriores
+      if ($sql2->num_rows() > 0)
+      {
+        foreach ($sql2->result() as $key => $lotee)
+        {
+          $sql = $this->db->query(
+            "SELECT total AS existentes
+              FROM rastria_rendimiento_clasif
+              WHERE id_clasificacion = {$id_clasificacion} AND id_rendimiento = {$lotee->id_rendimiento}
+          ");
+
+          if ($sql->num_rows() > 0)
+            break;
+        }
+      }
+      else
+      {
+        $sql->free_result();
+
+        $sql = $this->db->select('SUM(libres) AS existentes')
+          ->from('rastria_cajas_libres AS rcl')
+          ->join('rastria_rendimiento AS rd','rd.id_rendimiento = rcl.id_rendimiento', 'join')
+          ->where('rcl.id_clasificacion', $id_clasificacion)
+          ->where('DATE(rd.fecha) <', $info['info']->fecha)
+          ->get();
+      }
+
     }
 
     return $sql->row();
@@ -628,6 +675,105 @@ class rastreabilidad_model extends CI_Model {
       $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
    }
 
+   /**
+    * Visualiza/Descarga el PDF para el Reporte Rendimiento por Lote
+    *
+    * @return void
+    */
+   public function rpl_pdf($id_rendimiento)
+   {
+      // Obtiene los datos del reporte.
+      $data = $this->getLoteInfo($id_rendimiento);
+
+      $fecha = new DateTime($data['info'][0]->fecha);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = "RENDIMIENTO POR LOTE";
+      $pdf->titulo3 = "{$fecha->format('d/m/Y')}";
+
+      $pdf->AliasNbPages();
+      //$pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'L', 'L', 'R', 'R');
+      $widths = array(12, 20, 68, 70, 15, 20);
+      $header = array('CLASIF.', 'EXIST.', 'LINEA 1', 'LINEA 2', 'TOTAL', 'RD.');
+
+      $total_kilos = 0;
+      $total_cajas = array();
+      $num_lote    = -1;
+
+      foreach($data['data'] as $key => $boleta)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(200,200,200);
+          // $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+          $pdf->Row(array(
+              ($num_lote != $boleta->no_lote? $boleta->no_lote: ''),
+              $boleta->folio,
+              $boleta->nombre_fiscal,
+              $boleta->nombre,
+              String::formatoNumero($boleta->cajas, 2, ''),
+              String::formatoNumero($boleta->kilos, 2, ''),
+            ), false);
+
+        if($num_lote != $boleta->no_lote){
+          $num_lote = $boleta->no_lote;
+        }
+
+        if(array_key_exists($boleta->id_calidad, $total_cajas)){
+          $total_cajas[$boleta->id_calidad]['cajas'] += $boleta->cajas;
+          $total_cajas[$boleta->id_calidad]['kilos'] += $boleta->kilos;
+        }else{
+          $total_cajas[$boleta->id_calidad] = array('cajas' => $boleta->cajas, 'kilos' => $boleta->kilos, 'nombre' => $boleta->nombre);
+        }
+      }
+
+      //total general
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetTextColor(0 ,0 ,0 );
+      $pdf->SetAligns(array('L', 'R', 'R'));
+      $pdf->SetWidths(array(40, 20, 20));
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+          'CALIDAD', 'CAJAS', 'KILOS',
+        ), false, false);
+      foreach ($total_cajas as $key => $value) {
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetX(6);
+        $pdf->Row(array(
+            $value['nombre'],
+            String::formatoNumero($value['cajas'], 2, ''),
+            String::formatoNumero($value['kilos'], 2, ''),
+          ), false, false);
+      }
+
+
+      $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
+   }
 
 }
 
