@@ -11,7 +11,6 @@
           $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
         }
-
       ?>
 
       <div>
@@ -228,7 +227,7 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.(($accion === 'n' && $e === false) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.((($accion === 'n' && $e === false) || ($this->input->post('ptipo') === 'sa')) ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -240,7 +239,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.((($accion === 'en' || $accion === 'sa') && $e === false) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.(((($accion === 'en' || $accion === 'sa') && $e === false) || ($this->input->post('ptipo') === 'en')) ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>

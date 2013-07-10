@@ -1068,9 +1068,19 @@ class bascula extends MY_Controller {
     {
       if ($_POST['paccion'] == 'n')
       {
-        $rules[] = array('field' => 'pkilos_brutos',
-                         'label' => 'Kilos Brutos',
-                         'rules' => 'required');
+
+        if ($_POST['ptipo'] == 'en')
+        {
+          $rules[] = array('field' => 'pkilos_brutos',
+                           'label' => 'Kilos Brutos',
+                           'rules' => 'required');
+        }
+        else
+        {
+          $rules[] = array('field' => 'pkilos_tara',
+                           'label' => 'Kilos tara',
+                           'rules' => 'required');
+        }
       }
       else if ($_POST['paccion'] == 'en' || $_POST['paccion'] == 'sa')
       {
