@@ -334,7 +334,7 @@ $(function(){
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
     // base_url + 'panel/bascula/ajax_get_kilos/'
-    $.get(base_url_bascula, {}, function(data) {
+    $.get(base_url + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputBruto.val(data.data.peso);
 
       calculaKilosNeto();
@@ -348,7 +348,7 @@ $(function(){
 
     // AQUI CAMBIAR LA URL A DONDE HARA LA PETICION DE LA BASCULA
     // base_url + 'panel/bascula/ajax_get_kilos/'
-    $.get(base_url_bascula, {}, function(data) {
+    $.get(base_url + 'panel/bascula/ajax_get_kilos/', {}, function(data) {
       $inputTara.val(data.data.peso);
 
       calculaKilosNeto();
@@ -383,9 +383,13 @@ $(function(){
 
   // Obtiene el pesaje de los tara al tener el foco el input.
   if ($('#isEditar').length !== 1) {
-    $('#pkilos_tara').on('focus', function(event) {
-      $('#btnKilosTara').trigger('click');
-    });
+
+    if (($('#paccion').val() === 'n' && $('#ptipo option:selected').val() === 'sa') ||
+        ($('#ptipo option:selected').val() === 'en'))
+
+        $('#pkilos_tara').on('focus', function(event) {
+          $('#btnKilosTara').trigger('click');
+        });
   }
 
   // Evento chango para los promedio de la tabla de cajas.
