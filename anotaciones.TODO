@@ -12,6 +12,9 @@
     "Rastreabilidad";0;TRUE;"rastreabilidad/";"bullseye";FALSE
     "Rastreabilidad del producto";61;TRUE;"rastreabilidad/rrp/";"print";TRUE
     "Reporte Entrada de Fruta";61;TRUE;"rastreabilidad/ref/";"print";FALSE
+    "Pallets";61;TRUE;"rastreabilidad_pallets/";"th-large";FALSE
+    "Agregar Pallets";64;TRUE;"rastreabilidad_pallets/agregar/";"plus";FALSE
+    "Modificar";64;FALSE;"rastreabilidad_pallets/modificar/";"edit";FALSE
 
 
     CREATE OR REPLACE VIEW rastria_cajas_libres AS 

@@ -44,7 +44,7 @@
 									<div class="span4">
 									  <label class="span4" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo set_value('fcajas'); ?>" 
-											maxlength="25" placeholder="Numero de cajas" required data-next="btn_submit">
+											maxlength="25" placeholder="Numero de cajas" required data-next="dddd">
 									</div>
 								</div>
 								<div class="clearfix"></div>
@@ -52,53 +52,24 @@
 								<table class="table table-striped table-bordered bootstrap-datatable">
 								  <thead>
 									  <tr>
-									  	<th>Folio</th>
 									  	<th>Fecha</th>
-										  <th>Clasificacion</th>
-											<th>Cajas</th>
-											<th>Cajas agregs</th>
-											<th>Cajas Falt</th>
-											<th>Estatus</th>
+										  <th>Lote</th>
+											<th>Cajas libres</th>
 										  <th>Opciones</th>
 									  </tr>
 								  </thead>
-								  <tbody>
-								<?php foreach($pallets['pallets'] as $pallet){ ?>
-									<tr>
-										<td><?php echo $pallet->folio; ?></td>
-										<td><?php echo $pallet->fecha; ?></td>
-										<td><?php echo $pallet->nombre; ?></td>
-										<td><?php echo $pallet->no_cajas; ?></td>
-										<td><?php echo $pallet->cajas; ?></td>
-										<td><?php echo ($pallet->no_cajas-$pallet->cajas); ?></td>
-										<td>
-											<?php
-												if(($pallet->no_cajas-$pallet->cajas) == 0){
-													$v_status = 'Completo';
-													$vlbl_status = 'label-success';
-												}else{
-													$v_status = 'Pendiente';
-													$vlbl_status = 'label-warning';
-												}
-											?>
-											<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
-										</td>
-										<td class="center">
-												<?php 
-												echo $this->usuarios_model->getLinkPrivSm('usuarios/modificar/', array(
-														'params'   => 'id='.$pallet->id_pallet,
-														'btn_type' => 'btn-success')
-												);
-												
-												?>
-										</td>
-									</tr>
-							<?php }?>
+								  <tbody id="tblrendimientos">
 								  </tbody>
+								  <tfoot>
+								  	<tr>
+								  		<td colspan="3" style="text-align: right;">Cajas seleccionadas</td>
+								  		<td id="total_cajas_sel" style="font-weight: bold;">0</td>
+								  	</tr>
+								  </tfoot>
 							  </table>
 
 								<div class="form-actions">
-								  <button type="submit" id="btn_submit" class="btn btn-primary">Guardar</button>
+								  <button type="submit" id="dddd" class="btn btn-primary">Guardar</button>
 								  <a href="<?php echo base_url('panel/rastreabilidad_pallets/'); ?>" class="btn">Cancelar</a>
 								</div>
 						  </fieldset>
