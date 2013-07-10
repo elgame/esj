@@ -7,7 +7,7 @@ class rastreabilidad_pallets extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'rastreabilidad_pallets/rrp_pdf/',
+    'rastreabilidad_pallets/ajax_get_rendimientos/',
     'rastreabilidad_pallets/ref_pdf/',
     );
 
@@ -95,7 +95,67 @@ class rastreabilidad_pallets extends MY_Controller {
     $this->load->view('panel/rastreabilidad/pallets/agregar', $params);
     $this->load->view('panel/footer');
   }
-  
+
+  /**
+   * Muestra el Formulario para agregar un pallet
+   * @return [type] [description]
+   */
+  public function modificar()
+  {
+    if (isset($_GET['id']))
+    {
+      $this->carabiner->css(array(
+        array('libs/jquery.uniform.css', 'screen'),
+        array('panel/general_sanjorge.css', 'screen'),
+      ));
+      $this->carabiner->js(array(
+        array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.numeric.js'),
+        array('general/keyjump.js'),
+        array('panel/rastreabilidad/pallets_agregar.js'),
+      ));
+
+      $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+      $params['seo'] = array(
+        'titulo' => 'Agregar Pallet'
+      );
+
+      $this->load->model('rastreabilidad_pallets_model');
+
+      $this->configAddModPallet();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $res_mdl = $this->rastreabilidad_pallets_model->updatePallet($_GET['id']);
+        
+        redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=5'));
+      }
+
+      $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
+
+      if (isset($_GET['msg']))
+        $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      $this->load->view('panel/header', $params);
+      $this->load->view('panel/general/menu', $params);
+      $this->load->view('panel/rastreabilidad/pallets/modificar', $params);
+      $this->load->view('panel/footer');
+    }else
+      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
+  }
+
+  /**
+   * Obtiene la lista de rendimientos de una clasificacion, ajax
+   */
+  public function ajax_get_rendimientos(){
+    $this->load->model('rastreabilidad_pallets_model');
+    $params = $this->rastreabilidad_pallets_model->getRendimientoLibre($this->input->get('id'));
+
+    echo json_encode($params);
+  }
 
 
   /*
@@ -111,7 +171,7 @@ class rastreabilidad_pallets extends MY_Controller {
     $rules = array(
       array('field' => 'ffolio',
             'label' => 'Folio',
-            'rules' => 'required|is_natural_no_zero|is_unique[rastria_pallets.folio]'),
+            'rules' => 'required|is_natural_no_zero|callback_chkfolio'),
       array('field' => 'fid_clasificacion',
             'label' => 'Clasificacion',
             'rules' => 'required|is_natural_no_zero'),
@@ -122,24 +182,23 @@ class rastreabilidad_pallets extends MY_Controller {
       array('field' => 'fclasificacion',
             'label' => 'Clasificacion',
             'rules' => ''),
+      array('field' => 'rendimientos[]',
+            'label' => 'Lista de cajas',
+            'rules' => ''),
     );
 
 
     $this->form_validation->set_rules($rules);
   }
 
-    public function chkfolio($folio){
-    if ( ! isset($_GET['idb']) && ! isset($_GET['e']))
-    {
-      $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
-        WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}'
-        AND id_area = {$this->input->post('parea')}")->row();
-      if($result->num > 0){
-        $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
-        return false;
-      }else
-        return true;
-    }
+  public function chkfolio($folio){
+    $result = $this->db->query("SELECT Count(id_pallet) AS num FROM rastria_pallets
+      WHERE folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
+    if($result->num > 0){
+      $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
+      return false;
+    }else
+      return true;
   }
 
 
@@ -168,7 +227,7 @@ class rastreabilidad_pallets extends MY_Controller {
         $icono = 'error';
         break;
       case 5:
-        $txt = 'El chofer se agregó correctamente.';
+        $txt = 'El pallet se modifico correctamente.';
         $icono = 'success';
         break;
       case 6:

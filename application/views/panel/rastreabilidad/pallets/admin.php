@@ -30,6 +30,9 @@
 								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
 									class="input-large search-query" placeholder="Limon verde, 212" autofocus> |
 
+								<label for="ffecha">Buscar</label>
+								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> | 
+
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">
 									<option value="todos" <?php echo set_select('fstatus', 'todos', false, $this->input->get('fstatus')); ?>>TODOS</option>
@@ -84,7 +87,7 @@
 								</td>
 								<td class="center">
 										<?php 
-										echo $this->usuarios_model->getLinkPrivSm('usuarios/modificar/', array(
+										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/modificar/', array(
 												'params'   => 'id='.$pallet->id_pallet,
 												'btn_type' => 'btn-success')
 										);
