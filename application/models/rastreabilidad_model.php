@@ -7,6 +7,101 @@ class rastreabilidad_model extends CI_Model {
     parent::__construct();
   }
 
+  public function saveClasificacion()
+  {
+    $data = array(
+      'id_rendimiento'   => $_POST['id_rendimiento'],
+      'id_clasificacion' => $_POST['id_clasificacion'],
+      'existente'        => $_POST['existente'],
+      'linea1'           => $_POST['linea1'],
+      'linea2'           => $_POST['linea2'],
+      'total'            => $_POST['total'],
+      'rendimiento'      => $_POST['rendimiento'],
+    );
+
+    $this->db->insert('rastria_rendimiento_clasif', $data);
+
+    return array('passess' => true);
+  }
+
+  public function createLote($fecha, $lote)
+  {
+    $this->db->insert('rastria_rendimiento', array(
+      'lote'  => $lote,
+      'fecha' => $fecha,
+    ));
+
+    $id = $this->db->insert_id();
+
+    return $id;
+  }
+
+  public function getLotesByFecha($fecha)
+  {
+    $sql = $this->db->query(
+      "SELECT id_rendimiento, lote, fecha, status
+      FROM rastria_rendimiento
+      WHERE
+        DATE(fecha) = '{$fecha}' AND
+        status = true
+      ORDER BY lote ASC
+      ");
+
+    $lotes = array();
+    if ($sql->num_rows() > 0)
+      $lotes = $sql->result();
+
+    return $lotes;
+  }
+
+  public function getLoteInfo($id_rendimiento, $full_info = true)
+  {
+    $sql = $this->db->select("id_rendimiento, lote, fecha, status")
+      ->from("rastria_rendimiento")
+      ->where("id_rendimiento", $id_rendimiento)
+      ->get();
+
+    $data = array(
+      "info" => array(),
+      "clasificaciones" => array(),
+    );
+
+    if ($sql->num_rows > 0)
+    {
+      $data['info'] = $sql->row();
+
+      if ($full_info)
+      {
+        $sql->free_result();
+
+        $sql = $this->db->query(
+          "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.linea1, rrc.linea2,
+                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion
+          FROM rastria_rendimiento_clasif AS rrc
+          INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
+          WHERE
+            id_rendimiento = {$id_rendimiento}
+          ORDER BY id_rendimiento ASC
+          ");
+
+        if ($sql->num_rows() > 0)
+          $data['clasificaciones'] = $sql->result();
+      }
+    }
+
+    return $data;
+  }
+
+  public function getPrevClasificacion($id_rendimiento, $id_clasificacion)
+  {
+    $sql = $this->db->select('total')
+      ->from('rastria_rendimiento_clasif')
+      ->where('id_rendimiento', $id_rendimiento)
+      ->where('id_clasificacion', $id_clasificacion)
+      ->get();
+
+    return $sql->row();
+  }
 
   /*
    |-------------------------------------------------------------------------
@@ -41,14 +136,14 @@ class rastreabilidad_model extends CI_Model {
         $sql .= " AND bc.id_calidad = 0";
 
       $query = $this->db->query(
-        "SELECT b.id_bascula, 
-                b.folio, 
-                b.no_lote, 
-                b.fecha_tara, 
-                b.chofer_es_productor, 
-                p.nombre_fiscal, 
-                c.nombre, 
-                Sum(bc.cajas) AS cajas, 
+        "SELECT b.id_bascula,
+                b.folio,
+                b.no_lote,
+                b.fecha_tara,
+                b.chofer_es_productor,
+                p.nombre_fiscal,
+                c.nombre,
+                Sum(bc.cajas) AS cajas,
                 Sum(bc.kilos) AS kilos
         FROM bascula AS b
           INNER JOIN bascula_compra AS bc ON bc.id_bascula = b.id_bascula
@@ -214,18 +309,18 @@ class rastreabilidad_model extends CI_Model {
         $sql .= " AND b.id_area = 0";
 
       $query = $this->db->query(
-        "SELECT b.id_bascula, 
+        "SELECT b.id_bascula,
           bc.id_calidad,
           c.nombre,
-          b.folio, 
-          b.no_lote, 
-          b.fecha_tara, 
+          b.folio,
+          b.no_lote,
+          b.fecha_tara,
           p.nombre_fiscal,
           Sum(bc.cajas) AS cajas,
           Sum(bc.kilos) AS kilos
         FROM bascula AS b
           INNER JOIN bascula_compra as bc ON bc.id_bascula = b.id_bascula
-          INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor 
+          INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
           INNER JOIN calidades AS c ON bc.id_calidad = c.id_calidad
         WHERE b.status = true AND b.tipo = 'en' AND b.accion IN('sa', 'p', 'b')
           {$sql}
@@ -340,7 +435,7 @@ class rastreabilidad_model extends CI_Model {
 
         $pdf->SetX(6);
         $pdf->Row(array(
-            $value['nombre'], 
+            $value['nombre'],
             String::formatoNumero($value['cajas'], 2, ''),
             String::formatoNumero($value['kilos'], 2, ''),
           ), false, false);

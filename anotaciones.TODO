@@ -15,6 +15,7 @@
     "Pallets";61;TRUE;"rastreabilidad_pallets/";"th-large";FALSE
     "Agregar Pallets";64;TRUE;"rastreabilidad_pallets/agregar/";"plus";FALSE
     "Modificar";64;FALSE;"rastreabilidad_pallets/modificar/";"edit";FALSE
+    "Rendimiento por lote";57;TRUE;"rastreabilidad/rendimiento_lote/";"bar-chart";FALSE
 
 
     CREATE OR REPLACE VIEW rastria_cajas_libres AS 
