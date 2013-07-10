@@ -16,6 +16,13 @@ RASTREABILIDAD:
 
               ☐  Checar que al seleccionar una clasificacion que ya existe limpiar el input.
 
+
+              ✔ Cuando obtenga de la vista obtener de los dias anteriores no tomar en cuenta ese dia. @done (13-07-10 15:40)
+              ✔ Cuando se seleccione una clasificacion ver si ai lotes anteriores con esa clasificacion y si no ahi cargar las cajas libres de la vista de la fecha anterior. @done (13-07-10 16:00)
+              ✔ al agregar una clasificacion que recalcule de los lotes siguientes. @done (13-07-10 16:07)
+              ☐ si ya esta guardada la clasificacion y su valor cambio que se modifique si no que solamente brinque de caja.
+
+
 CORRECCIONES:
   ✔ supermodal cerrarlo despues de 1 seg. @done (13-06-11 19:01)
   ✔ validar el "enter" en el folio. @done (13-06-11 19:01)

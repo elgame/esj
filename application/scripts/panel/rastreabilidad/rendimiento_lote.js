@@ -62,21 +62,20 @@
           $tr =  $this.parent().parent();
 
       if (event.which === 13)
-        $tr.find('#btnAddClasif').trigger('click');
-
+      {
+        if ($tr.attr('id') === undefined)
+          $tr.find('#btnAddClasif').trigger('click');
+        else if ($tr.attr('id') !== undefined && ($tr.find('#ftotal').val() != $tr.find('#ftotal').attr('data-valor')))
+          $tr.find('#btnAddClasif').trigger('click');
+        else
+          $tr.next().find('#fclasificacion').focus()
+      }
     });
 
   });
 
   var initDate = function () {
-    $('#gfecha').datepicker({
-      dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
-      //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha
-      changeMonth: true, //permite modificar los meses (true o false)
-      changeYear: true, //permite modificar los años (true o false)
-      //yearRange: (fecha_hoy.getFullYear()-70)+':'+fecha_hoy.getFullYear(),
-      numberOfMonths: 1, //muestra mas de un mes en el calendario, depende del numero
-    }).on('change', function(event) {
+    $('#gfecha').on('change', function(event) {
       var $form = $('#form'),
           $selectLote = $('#glote');
 
@@ -128,9 +127,10 @@
             // Llama la funcion ajax para verificar si el lote anterior
             // tiene una clasificacion como la que se esta agregando, pasando
             // el id_rendimiento y la id_clasificacion.
-            ajaxGetExistente($prevLote.val(), ui.item.id, $tr);
+            // ajaxGetExistente($prevLote.val(), ui.item.id, $tr);
+            ajaxGetExistente($lote.find('option:selected').val(), ui.item.id, $tr);
           } else {
-            ajaxGetExistente(0, ui.item.id, $tr);
+            ajaxGetExistente($lote.find('option:selected').val(), ui.item.id, $tr);
           }
         } else {
           $tr.find("#fidclasificacion").val("");
@@ -141,8 +141,10 @@
       }
     }).keydown(function(e){
       if (e.which === 8) {
-       $(this).css({'background-color': '#FFD9B3'});
-        $tr.find('#fidclasificacion').val('');
+        $(this).css({'background-color': '#FFD9B3'});
+        // $tr.find('#fidclasificacion').val('');
+
+        $(this).parent().parent().find('#fidclasificacion').val('');
       }
     });
   };
@@ -179,9 +181,10 @@
                 // Llama la funcion ajax para verificar si el lote anterior
                 // tiene una clasificacion como la que se esta agregando, pasando
                 // el id_rendimiento y la id_clasificacion.
-                ajaxGetExistente($prevLote.val(), ui.item.id, $tr);
+                // ajaxGetExistente($prevLote.val(), ui.item.id, $tr);
+                ajaxGetExistente($lote.find('option:selected').val(), ui.item.id, $tr);
               } else {
-                ajaxGetExistente(0, ui.item.id, $tr);
+                ajaxGetExistente($lote.find('option:selected').val(), ui.item.id, $tr);
               }
             } else {
               $tr.find("#fidclasificacion").val("");
@@ -194,7 +197,8 @@
           var $tr = $(this).parent().parent(); // tr padre
           if (e.which === 8) {
             $(this).css({'background-color': '#FFD9B3'});
-            $tr.find('#fidclasificacion').val('');
+            // $tr.find('#fidclasificacion').val('');
+            $(this).parent().parent().find('#fidclasificacion').val('');
           }
         });
     });
@@ -228,6 +232,8 @@
 
         $tr.attr('id', $tr.find('#fidclasificacion').val());
 
+        $tr.find('#ftotal').attr('data-valor', postData.total);
+
         addNewTr();
       });
     } else {
@@ -255,6 +261,8 @@
 
         $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
 
+        $tr.find('#ftotal').attr('data-valor', postData.total);
+
         $tr.next().find('#fclasificacion').focus()
       });
       // console.log($tr.next().find('#fclasificacion').focus());
@@ -271,20 +279,11 @@
     function($tr, $obj)
     {
       // si
-
       postData.id_rendimiento   = $('#glote').find('option:selected').val();
       postData.id_clasificacion = $tr.find('#fidclasificacion').val();
-
-      console.log(postData.id_rendimiento + ' ' + postData.id_clasificacion);
-
       $.post(base_url + 'panel/rastreabilidad/ajax_del_clasifi/', postData, function(data) {
-
         noty({"text": 'La clasificacion se eliminó correctamente!', "layout":"topRight", "type": 'success'});
-
-        console.log(data);
-
       });
-
       $tr.remove();
     },
     function()
@@ -319,7 +318,7 @@
     trHtml =  '<tr>' +
                 '<td>' +
                   '<input type="text" id="fclasificacion" value="" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<input type="text" id="fidclasificacion" value="" class="span12">' +
+                  '<input type="hidden" id="fidclasificacion" value="" class="span12">' +
                 '</td>' +
                 '<td>' +
                   '<input type="text" id="fexistente" value="0" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -346,13 +345,10 @@
 
     $(trHtml).appendTo($tabla.find('tbody'));
 
-    for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
+    for (i = indexJump, max = jumpIndex; i <= max; i += 1)
       $.fn.keyJump.setElem($('.jump'+i));
-      console.log('.jump'+i);
-    }
 
     $('.jump'+indexJump).focus();
-
   };
 
   var calculaTotalesClasifi = function ($tr) {
