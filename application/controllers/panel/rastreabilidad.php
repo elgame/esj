@@ -12,7 +12,9 @@ class rastreabilidad extends MY_Controller {
 
     'rastreabilidad/ajax_get_clasificaciones/',
     'rastreabilidad/ajax_save_clasifi/',
+    'rastreabilidad/ajax_edit_clasifi/',
     'rastreabilidad/ajax_get_prev_clasifi/',
+    'rastreabilidad/ajax_del_clasifi/',
 
     'rastreabilidad/siguiente_lote/',
 
@@ -68,6 +70,7 @@ class rastreabilidad extends MY_Controller {
   {
     $this->carabiner->js(array(
         array('general/msgbox.js'),
+        array('general/keyjump.js'),
         array('libs/jquery.numeric.js'),
         array('panel/rastreabilidad/rendimiento_lote.js'),
     ));
@@ -172,29 +175,35 @@ class rastreabilidad extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-   public function ajax_get_clasificaciones()
-   {
+  public function ajax_get_clasificaciones()
+  {
     $this->load->model('clasificaciones_model');
     echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
-   }
+  }
 
-   public function ajax_save_clasifi()
-   {
+  public function ajax_save_clasifi()
+  {
+  $this->load->model('rastreabilidad_model');
+  echo json_encode($this->rastreabilidad_model->saveClasificacion());
+  }
+
+  public function ajax_edit_clasifi()
+  {
     $this->load->model('rastreabilidad_model');
-    echo json_encode($this->rastreabilidad_model->saveClasificacion());
-   }
+    echo json_encode($this->rastreabilidad_model->editClasificacion());
+  }
 
-   public function ajax_get_prev_clasifi()
-   {
+  public function ajax_del_clasifi()
+  {
     $this->load->model('rastreabilidad_model');
+    echo json_encode($this->rastreabilidad_model->delClasificacion());
+  }
 
-    // if (intval($_GET['loteActual']) === 1)
-
-    // else
-      echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], $_GET['id_clasificacion']));
-
-
-   }
+  public function ajax_get_prev_clasifi()
+  {
+    $this->load->model('rastreabilidad_model');
+    echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], $_GET['id_clasificacion'], $_GET['loteActual']));
+  }
 
 
    /*
