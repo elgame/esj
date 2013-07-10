@@ -1453,7 +1453,7 @@ class bascula extends MY_Controller {
   */
   public function ajax_get_kilos()
   {
-    echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"1500"}}';
+    echo '{"msg":true,"data":{"id":"dRmVAfDOq","fecha":"2013-06-04 15:09:04","peso":"500"}}';
   }
 
   public function ajax_get_next_folio()
