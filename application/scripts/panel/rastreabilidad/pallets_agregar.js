@@ -10,42 +10,29 @@ $(function(){
 });
 
 var addpallets = (function($){
-  var objr = {}, tbody, total_cajas_sel, fcajas;
+  var objr = {}, tbody, tbodysel, total_cajas_sel, fcajas,
+  fid_clasificacion, fclasificacion;
 
   function init(){
     asignaAutocomplets();
-    listaRendimientos();
+    formPallet();
 
-    tbody = $("#tblrendimientos");
-    total_cajas_sel = $("#total_cajas_sel");
-    fcajas = $("#fcajas");
+    tbody             = $("#tblrendimientos");
+    tbodysel          = $("#tblrendimientossel");
+    total_cajas_sel   = $("#total_cajas_sel");
+    fcajas            = $("#fcajas");
+    fid_clasificacion = $("#fid_clasificacion");
+    fclasificacion    = $("#fclasificacion");
   }
 
-  function listaRendimientos(){
-    $(document).on('click', '.rendimientos', function(){
-      if($.isNumeric(fcajas.val())){
-        if($(this).is(":checked")){
-          if( parseInt(total_cajas_sel.text()) >= parseInt(fcajas.val()) ){
-            noty({"text":"Ya se acompleto el Pallet con las cajas seleccionadas.", "layout":"topRight", "type":"error"});
-            return false;
-          }
-        }
-        calculaCajasSel();
-      }else{
-        fcajas.focus();
-        noty({"text":"Ingresa las cajas del Pallet.", "layout":"topRight", "type":"error"});
+  function formPallet(){
+     $('#form-search').on('submit', function(){
+      if(parseInt(fcajas.val()) < parseInt(total_cajas_sel.text())){
+        noty({"text": "Las cajas seleccionadas son mayor a las cajas del pallet.", "layout":"topRight", "type":"error"});
         return false;
       }
-    });
+     });
   }
-  function calculaCajasSel(){
-    var num_cajas = 0;
-    $("input[type=checkbox]:checked", tbody).each(function(){
-      num_cajas += parseInt($(this).attr("data-libres"));
-    });
-    total_cajas_sel.text(num_cajas);
-  }
-
 
   function asignaAutocomplets(){
     // Autocomplete clasificaciones
@@ -54,17 +41,59 @@ var addpallets = (function($){
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
-        $("#fid_clasificacion").val(ui.item.id);
-        $("#fclasificacion").val(ui.item.label).css({'background-color': '#99FF99'});
+        fid_clasificacion.val(ui.item.id);
+        fclasificacion.val(ui.item.label).css({'background-color': '#99FF99'});
 
         getRendimientosLibres(ui.item.id);
       }
     }).keydown(function(e){
       if (e.which === 8) {
         $(this).css({'background-color': '#FFD9B3'});
-        $('#fid_clasificacion').val('');
+        fid_clasificacion.val('');
       }
     });
+
+    //Asigna evento para los checks de los rendimientos
+    $(document).on("click", ".cajasdisponibles", addCajaSel);
+    //Remove una caja seleccionada
+    $(document).on("click", ".remove_cajassel", quitCajaSel);
+    //Recalcula el total de cajas al editarce
+    $(document).on("change", ".cajasel", calculaCajasSel);
+  }
+
+  function addCajaSel(){
+    var vthis = $(this), idrow = "#row_rend"+vthis.attr("data-id"), html;
+
+    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
+    if(row_rendsel.length == 0){
+      html = '<tr id="row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'">'+
+          '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
+          '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
+          '<td class="clsif">'+fclasificacion.val()+'</td>'+
+          '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+$(idrow+" .libres").text()+'" min="1" max="'+$(idrow+" .libres").text()+'"></td>'+
+          '<td><input type="hidden" class="span5" name="idrendimientos[]" value="'+vthis.attr("data-id")+'">'+
+          '   <input type="hidden" class="span5" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
+          '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'"><i class="icon-remove"></i></buttom></td>'+
+        '</tr>';
+      tbodysel.append(html);
+      row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
+    }else{
+      $(".cajasel", row_rendsel).val($(idrow+" .libres").text());
+    }
+    $("input.cajasel", row_rendsel).focus();
+    calculaCajasSel();
+  }
+  function quitCajaSel(){
+    var vthis = $(this);
+    $("#row_rendsel"+vthis.attr("data-idrow")).remove();
+    calculaCajasSel();
+  }
+  function calculaCajasSel(){
+    var num_cajas = 0;
+    $(".cajasel", tbodysel).each(function(){
+      num_cajas += parseInt($(this).val());
+    });
+    total_cajas_sel.text(num_cajas);
   }
 
   function getRendimientosLibres($clasificacion){
@@ -73,11 +102,11 @@ var addpallets = (function($){
       if (resp.rendimientos.length > 0) {
         for (var i = 0; i < resp.rendimientos.length; i++) {
           html += '<tr id="row_rend'+resp.rendimientos[i].id_rendimiento+'">'+
-            '<td>'+resp.rendimientos[i].fecha+'</td>'+
-            '<td>'+resp.rendimientos[i].lote+'</td>'+
-            '<td>'+resp.rendimientos[i].libres+'</td>'+
-            '<td><input type="checkbox" name="rendimientos[]" value="'+resp.rendimientos[i].id_rendimiento+'|'+resp.rendimientos[i].libres+'"'+ 
-            '  class="rendimientos" data-libres="'+resp.rendimientos[i].libres+'"></td>'+
+            '<td class="fecha">'+resp.rendimientos[i].fecha+'</td>'+
+            '<td class="lote">'+resp.rendimientos[i].lote+'</td>'+
+            '<td class="libres">'+resp.rendimientos[i].libres+'</td>'+
+            '<td><buttom class="btn rendimientos cajasdisponibles"'+ 
+            '  data-id="'+resp.rendimientos[i].id_rendimiento+'" data-libres="'+resp.rendimientos[i].libres+'"><i class="icon-angle-right"></i></buttom></td>'+
           '</tr>';
         };
         tbody.html(html);

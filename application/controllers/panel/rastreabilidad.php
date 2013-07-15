@@ -243,10 +243,14 @@ class rastreabilidad extends MY_Controller {
     $this->load->model('calidades_model');
 
     $params['areas']     = $this->areas_model->getAreas(false);
-    $result = array_filter($params['areas']['areas'], function($itm){
-        return ($itm->predeterminado == 't'? true: false);
-    });
-    $params['calidades'] = $this->calidades_model->getCalidades($result[0]->id_area, false);
+    $itm_select = '';
+    foreach ($params['areas']['areas'] as $key => $itm) {
+      if($itm->predeterminado == 't'){
+        $itm_select = $itm;
+        break;
+      }
+    }
+    $params['calidades'] = $this->calidades_model->getCalidades($itm_select->id_area, false);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

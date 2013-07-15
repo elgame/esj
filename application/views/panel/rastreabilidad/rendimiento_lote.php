@@ -39,7 +39,7 @@
                     <tbody>
                       <tr>
                         <td>
-                          <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span6"
+                          <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span8"
                             style="margin: -7px auto 0 auto; text-align: center;" maxlength="10" autofocus>
                         </td>
                         <td style="text-align: center;"><span class="label label-important" style="font-size: 1.4em;"><?php echo $semana ?></span></td>
