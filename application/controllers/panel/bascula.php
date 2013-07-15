@@ -34,7 +34,9 @@ class bascula extends MY_Controller {
     'bascula/snapshot/',
 
     'bascula/ajax_get_next_folio/',
-    'bascula/ajax_load_folio/'
+    'bascula/ajax_load_folio/',
+
+    'bascula/imprimir2/'
     );
 
   public function _remap($method){
@@ -322,6 +324,13 @@ class bascula extends MY_Controller {
       $this->bascula_model->imprimir_ticket($this->input->get('id'));
     else
       $this->load->view('panel/bascula/print_ticket');
+  }
+  public function imprimir2()
+  {
+    $this->load->model('bascula_model');
+
+    $params['data'] = $data = $this->bascula_model->getBasculaInfo($this->input->get('id'));
+    $this->load->view('panel/bascula/print_ticket2', $params);
   }
 
   /**

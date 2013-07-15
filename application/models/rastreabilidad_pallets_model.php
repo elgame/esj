@@ -34,13 +34,12 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." rp.status = '".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("SELECT 
-					rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, c.nombre, Coalesce(Sum(rpr.cajas), 0) AS cajas
+					rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas
 				FROM rastria_pallets AS rp 
 					LEFT JOIN rastria_pallets_rendimiento AS rpr ON rp.id_pallet = rpr.id_pallet
-					INNER JOIN clasificaciones AS c ON c.id_clasificacion = rp.id_clasificacion 
 				{$sql}
-				GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas, c.nombre
-				ORDER BY folio ASC
+				GROUP BY rp.id_pallet, rp.folio, rp.fecha, rp.no_cajas
+				ORDER BY folio DESC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
@@ -68,16 +67,17 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 			if(!$basic_info)
 			{
-				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, rr.lote, Date(rr.fecha) AS fecha, rpr.cajas
+				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, Date(rr.fecha) AS fecha, rpr.cajas
 					FROM rastria_pallets_rendimiento AS rpr 
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
+						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
 					WHERE id_pallet = {$id_pallet}");
 				$response['rendimientos'] = $result->result();
 
-				if($cajas_libres){
-					$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
-					$response['rend_libres'] = $rendimientos_libres['rendimientos'];
-				}
+				// if($cajas_libres){
+				// 	$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
+				// 	$response['rend_libres'] = $rendimientos_libres['rendimientos'];
+				// }
 			}
 		}
 		return $response;
@@ -121,7 +121,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
  		if ($data==NULL)
 		{
 			$data = array(
-						'id_clasificacion' => $this->input->post('fid_clasificacion'),
+						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
 						'folio'            => $this->input->post('ffolio'),
 						'no_cajas'         => $this->input->post('fcajas'),
 						);
@@ -149,7 +149,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
  		if ($data==NULL)
 		{
 			$data = array(
-						'id_clasificacion' => $this->input->post('fid_clasificacion'),
+						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
 						'folio'            => $this->input->post('ffolio'),
 						'no_cajas'         => $this->input->post('fcajas'),
 						);
@@ -166,26 +166,16 @@ class rastreabilidad_pallets_model extends privilegios_model {
 	public function addPalletRendimientos($id_pallet, $data=NULL){
 		if ($data==NULL)
 		{
-			$cajas_faltantes = $this->input->post('fcajas');
-
 			if(is_array($this->input->post('rendimientos')))
 			{
-				foreach ($this->input->post('rendimientos') as $key => $value) 
+				foreach ($this->input->post('rendimientos') as $key => $cajas) 
 				{
-					$value = explode('|', $value);
-					$cajas_agregar = ($value[1]>=$cajas_faltantes? $cajas_faltantes: $value[1]);
-
-					if(isset($data[$value[0]])){
-						$data[$value[0]]['cajas'] += $cajas_agregar;
-					}else{
-						$data[$value[0]] = array(
-							'id_pallet'        => $id_pallet,
-							'id_rendimiento'   => $value[0],
-							'id_clasificacion' => $this->input->post('fid_clasificacion'),
-							'cajas'            => $cajas_agregar,
-							);
-					}
-					$cajas_faltantes -= $cajas_agregar;
+					$data[] = array(
+						'id_pallet'        => $id_pallet,
+						'id_rendimiento'   => $_POST['idrendimientos'][$key],
+						'id_clasificacion' => $_POST['idclasificacion'][$key],
+						'cajas'            => $cajas,
+						);
 				}
 			}
 		}
@@ -213,11 +203,18 @@ class rastreabilidad_pallets_model extends privilegios_model {
       $pdf->SetXY(25, 3);
       $pdf->Image(APPPATH.'images/logo.png');
 
+      $clasificaciones = array();
+      foreach ($data['rendimientos'] as $key => $value) {
+      	if(!isset($clasificaciones[$value->id_clasificacion]))
+      		$clasificaciones[$value->id_clasificacion] = $value->nombre;
+      }
+      $clsf_show = (count($clasificaciones) > 1? true: false);
+      
       $pdf->SetTextColor(0,0,0);
       $pdf->SetX(6);
       $pdf->SetAligns(array('L'));
       $pdf->SetWidths(array(46, 46));
-      $pdf->Row(array('DESTINO:', "No CLASIF: {$data['info']->nombre}"), false);
+      $pdf->Row(array('DESTINO:', "No CLASIF: ".implode(', ', $clasificaciones)), false);
       $pdf->SetX(6);
       $pdf->SetAligns(array('C', 'C'));
       $pdf->Row(array('LOTE', 'CAJAS'), false);
@@ -225,7 +222,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
       foreach ($data['rendimientos'] as $key => $value) {
       	$fecha = strtotime($value->fecha);
       	$pdf->SetX(6);
-	      $pdf->Row(array(date("Ww").' '.$value->lote, $value->cajas), false);
+	      $pdf->Row(array(date("Ww", $fecha).' '.$value->lote, $value->cajas.($clsf_show? ' '.$value->nombre: '')), false);
       }
       $pdf->SetX(6);
 	    $pdf->Row(array('No. TARIMA', $data['info']->no_cajas), false);
@@ -234,137 +231,6 @@ class rastreabilidad_pallets_model extends privilegios_model {
 	    $pdf->SetAligns(array('L'));
 	    $pdf->SetWidths(array(66));
 	    $pdf->Row(array('FECHA: '.$data['info']->fecha), false, false);
-
-      // $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
-      // $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
-      // $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
-      //                 'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
-
-      // $totalPagado    = 0;
-      // $totalNoPagado  = 0;
-      // $totalCancelado = 0;
-
-      // foreach($rde as $key => $calidad)
-      // {
-      //   if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
-      //   {
-      //     $pdf->AddPage();
-
-      //     $pdf->SetFont('helvetica','B', 8);
-      //     $pdf->SetTextColor(0,0,0);
-      //     $pdf->SetFillColor(160,160,160);
-      //     $pdf->SetY($pdf->GetY()-2);
-      //     $pdf->SetX(6);
-      //     $pdf->SetAligns($aligns);
-      //     $pdf->SetWidths($widths);
-      //     $pdf->Row($header, false);
-      //   }
-
-      //   $pdf->SetFont('helvetica','', 9);
-      //   $pdf->SetTextColor(0,0,0);
-
-      //   $pdf->SetY($pdf->GetY()-1);
-      //   $pdf->SetX(6);
-      //   $pdf->SetAligns(array('L'));
-      //   $pdf->SetWidths(array(206));
-      //   $pdf->Row(array($calidad['calidad']), false, false);
-
-      //   $pdf->SetFont('helvetica','',8);
-      //   $pdf->SetTextColor(0,0,0);
-
-      //   $promedio = 0;
-      //   $cajas    = 0;
-      //   $kilos    = 0;
-      //   $precio   = 0;
-      //   $importe  = 0;
-
-      //   foreach ($calidad['cajas'] as $caja)
-      //   {
-      //     if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-      //     {
-      //       $pdf->AddPage();
-
-      //       $pdf->SetFont('helvetica','B', 8);
-      //       $pdf->SetTextColor(0,0,0);
-      //       $pdf->SetFillColor(160,160,160);
-      //       $pdf->SetY($pdf->GetY()-2);
-      //       $pdf->SetX(6);
-      //       $pdf->SetAligns($aligns);
-      //       $pdf->SetWidths($widths);
-      //       $pdf->Row($header, false);
-      //     }
-
-      //     $promedio += $caja->promedio;
-      //     $cajas    += $caja->cajas;
-      //     $kilos    += $caja->kilos;
-      //     $precio   += $caja->precio;
-      //     $importe  += $caja->importe;
-
-      //     if ($caja->pagado === 'p' || $caja->pagado === 'b')
-      //       $totalPagado += $caja->importe;
-      //     else
-      //       $totalNoPagado += $caja->importe;
-
-      //     $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
-      //                    $caja->folio,
-      //                    $caja->cuenta_cpi,
-      //                    substr($caja->proveedor, 0, 35),
-      //                    $caja->promedio,
-      //                    $caja->cajas,
-      //                    $caja->kilos,
-      //                    String::formatoNumero($caja->precio),
-      //                    String::formatoNumero($caja->importe));
-
-      //     $pdf->SetY($pdf->GetY()-2);
-      //     $pdf->SetX(6);
-      //     $pdf->SetAligns($aligns);
-      //     $pdf->SetWidths($widths);
-      //     $pdf->Row($datos, false, false);
-      //   }
-
-      //   $pdf->SetY($pdf->GetY()-1);
-      //   $pdf->SetX(6);
-      //   $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
-      //   $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
-      //   $pdf->Row(array(
-      //     'TOTALES',
-      //     String::formatoNumero($kilos/$cajas, 2, ''),
-      //     $cajas,
-      //     $kilos,
-      //     String::formatoNumero($precio/count($calidad['cajas'])),
-      //     String::formatoNumero($importe)), false, false);
-
-      // }
-
-      // if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-      // {
-      //   $pdf->AddPage();
-      // }
-
-      // $pdf->SetFont('helvetica','B', 8);
-      // // $pdf->SetX(6);
-      // $pdf->SetY($pdf->getY() + 6);
-      // $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      // $pdf->SetWidths(array(50, 50, 50, 50));
-      // $pdf->Row(array(
-      //   'PAGADO',
-      //   'NO PAGADO',
-      //   'CANCELADO',
-      //   'TOTAL IMPORTE'), false);
-
-      // $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
-
-      // if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-      // {
-      //   $pdf->AddPage();
-      // }
-      // $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-      // $pdf->SetWidths(array(50, 50, 50, 50));
-      // $pdf->Row(array(
-      //   String::formatoNumero($totalPagado),
-      //   String::formatoNumero($totalNoPagado),
-      //   String::formatoNumero($data['cancelados']),
-      //   String::formatoNumero($totalImporte)), false);
 
       $pdf->Output('REPORTE_DIARIO.pdf', 'I');
 	}

@@ -69,7 +69,7 @@
 							<tr>
 								<td><?php echo $pallet->folio; ?></td>
 								<td><?php echo $pallet->fecha; ?></td>
-								<td><?php echo $pallet->nombre; ?></td>
+								<td><?php echo ''; ?></td>
 								<td><?php echo $pallet->no_cajas; ?></td>
 								<td><?php echo $pallet->cajas; ?></td>
 								<td><?php echo ($pallet->no_cajas-$pallet->cajas); ?></td>

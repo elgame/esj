@@ -184,7 +184,7 @@ class rastreabilidad_pallets extends MY_Controller {
             'rules' => 'required|is_natural_no_zero|callback_chkfolio'),
       array('field' => 'fid_clasificacion',
             'label' => 'Clasificacion',
-            'rules' => 'required|is_natural_no_zero'),
+            'rules' => ''),
       array('field' => 'fcajas',
             'label' => 'Cajas',
             'rules' => 'required|is_natural_no_zero'),
@@ -194,7 +194,13 @@ class rastreabilidad_pallets extends MY_Controller {
             'rules' => ''),
       array('field' => 'rendimientos[]',
             'label' => 'Lista de cajas',
-            'rules' => ''),
+            'rules' => 'is_natural_no_zero'),
+      array('field' => 'idrendimientos[]',
+            'label' => 'Caja disponible',
+            'rules' => 'is_natural_no_zero'),
+      array('field' => 'idclasificacion[]',
+            'label' => 'Clasificacion',
+            'rules' => 'is_natural_no_zero'),
     );
 
 
