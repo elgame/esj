@@ -1,3 +1,11 @@
+ CHOFERES:
+     ☐ Agregar los campos faltantes.
+          - telefono, ID(nextel), No. Licencia, No. IFE, licencia_rul, ife_url
+
+CAMIONES:
+     ☐ Agregar los campos faltantes.
+          - Color
+
 RASTREABILIDAD:
 
        Rendimiento por Lote:
@@ -8,13 +16,13 @@ RASTREABILIDAD:
               ✔ Al modificar los campos de una clasificacion que ya esta en la bdd actualizar sus datos y los de de la misma clasificacion de los lotes siguientes. @done (13-07-09 20:22)
               ✔ Eliminar una clasificacion de la tabla y que se elimine de la bdd, tambien eliminar de la tabla donde se regitran las calidades de de los pallets. @done (13-07-09 22:37)
               ✔ Ponerle el funcionamiento con los enter y que el input en linea2 al dar enter en el de click al boton "Guardar". @done (13-07-10 10:48)
-              ☐ Imprimir. 1/4 de hoja
+              ✔ Imprimir. 1/4 de hoja @done (13-07-15 12:13)
               ✔ Siguiente lote. @done (13-07-09 18:16)
 
                ✔ Cuando sea el lote 1 y al seleccionar una clasificacion cargar los existentes con ajax. @done (13-07-09 20:22)
 
 
-              ☐  Checar que al seleccionar una clasificacion que ya existe limpiar el input.
+              ✔  Checar que al seleccionar una clasificacion que ya existe limpiar el input. @done (13-07-15 12:13)
 
 
               ✔ Cuando obtenga de la vista obtener de los dias anteriores no tomar en cuenta ese dia. @done (13-07-10 15:40)
