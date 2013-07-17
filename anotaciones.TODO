@@ -1,3 +1,20 @@
+CHOFERES:
+     ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
+
+          SQL:
+            telefono character varying(15),
+            id_nextel character varying(20),
+            no_licencia character varying(50),
+            no_ife character varying(30),
+            url_licencia character varying(150),
+            url_ife character varying(150),
+
+CAMIONES:
+     ✔ Agregar los campos faltantes. @done (13-07-15 18:06)
+
+          SQL:
+            color character varying(15),
+
 2013-07-12
   ☐ SQL
      INSERT INTO clasificaciones(id_area, nombre) VALUES
@@ -7,8 +24,8 @@
   ✔ Rastreabilidad, poner boton que salga un modal y pida No de lote y un check que indique si el chofer es el nombre del productor () va a modificar la boleta pero solo esos campos nuevos (me dices para explicarte mejor) @done (13-07-08 11:25)
   ✔ Rastreabilidad, reporte como el xls que hace rosy @done (13-07-06 14:17)
   ✔ Rastreabilidad, reporte como el del ingeniero @done (13-07-07 11:41)
-  ☐ Rastreabilidad, rendimiento por lote, Es registrar cuantos cajas salen por lote de las clasificaciones, se crea un cosiecutivo de lotes por dia
-  ☐ Rastreabilidad, Armado de pallets, crear pallet de una clasificacion, agregarle las cajas disponibles de esa clasificacion hasta juntar el numero de cajas indicadas, cuandos se agregan cajas en rendimiento por lote agregar esas cajas a los pallets abiertos (que aun no acompleten sus cajas)
+  ✔ Rastreabilidad, rendimiento por lote, Es registrar cuantos cajas salen por lote de las clasificaciones, se crea un cosiecutivo de lotes por dia @done (13-07-15 18:07)
+  ✔ Rastreabilidad, Armado de pallets, crear pallet de una clasificacion, agregarle las cajas disponibles de esa clasificacion hasta juntar el numero de cajas indicadas, cuandos se agregan cajas en rendimiento por lote agregar esas cajas a los pallets abiertos (que aun no acompleten sus cajas) @done (13-07-15 18:07)
   ☐ Ir viendo lo de la bitacora de operaciones
   ☐ Lo de los choferes en salidas de carros para imprimir la constancia
 
@@ -23,7 +40,7 @@
     "Rendimiento por lote";57;TRUE;"rastreabilidad/rendimiento_lote/";"bar-chart";FALSE
 
 
-    CREATE OR REPLACE VIEW rastria_cajas_libres AS 
+    CREATE OR REPLACE VIEW rastria_cajas_libres AS
      SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.rendimiento, COALESCE(rpr.cajas, 0::bigint) AS cajas, rrc.rendimiento - COALESCE(rpr.cajas, 0::bigint) AS libres
        FROM rastria_rendimiento_clasif rrc
        LEFT JOIN ( SELECT rastria_pallets_rendimiento.id_rendimiento, rastria_pallets_rendimiento.id_clasificacion, sum(rastria_pallets_rendimiento.cajas) AS cajas
@@ -32,7 +49,7 @@
       WHERE (rrc.rendimiento - COALESCE(rpr.cajas, 0::bigint)) > 0;
     ALTER TABLE rastria_cajas_libres OWNER TO programa;
 
-    CREATE OR REPLACE VIEW rastria_pallets_lista AS 
+    CREATE OR REPLACE VIEW rastria_pallets_lista AS
      SELECT rp.id_pallet, rp.id_clasificacion, rp.folio, date(rp.fecha) AS fecha, rp.no_cajas, rp.status, c.nombre, COALESCE(sum(rpr.cajas), 0::bigint) AS cajas, rp.no_cajas - COALESCE(sum(rpr.cajas), 0::bigint) AS cajas_faltantes
        FROM rastria_pallets rp
        LEFT JOIN rastria_pallets_rendimiento rpr ON rp.id_pallet = rpr.id_pallet

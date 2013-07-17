@@ -26,14 +26,14 @@
             <form action="<?php echo base_url('panel/camiones/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal">
               <fieldset>
                 <legend></legend>
-                <?php 
+                <?php
                   $data = $data['info'];
                 ?>
 
                 <div class="control-group">
                   <label class="control-label" for="fplacas">Placas </label>
                   <div class="controls">
-                    <input type="text" name="fplacas" id="fplacas" class="span6" maxlength="15" 
+                    <input type="text" name="fplacas" id="fplacas" class="span6" maxlength="15"
                     value="<?php echo isset($data->placa)?$data->placa:''; ?>" required autofocus placeholder="JHS2312, MJF332J">
                   </div>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fmodelo">Modelo </label>
                   <div class="controls">
-                    <input type="text" name="fmodelo" id="fmodelo" class="span6" value="<?php echo isset($data->modelo)?$data->modelo:''; ?>" 
+                    <input type="text" name="fmodelo" id="fmodelo" class="span6" value="<?php echo isset($data->modelo)?$data->modelo:''; ?>"
                       maxlength="15" placeholder="1990, 2000">
                   </div>
                 </div>
@@ -49,8 +49,16 @@
                 <div class="control-group">
                   <label class="control-label" for="fmarca">Marca </label>
                   <div class="controls">
-                    <input type="text" name="fmarca" id="fmarca" class="span6" value="<?php echo isset($data->marca)?$data->marca:''; ?>" 
+                    <input type="text" name="fmarca" id="fmarca" class="span6" value="<?php echo isset($data->marca)?$data->marca:''; ?>"
                       maxlength="15" placeholder="Chevrolet, Toyota">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fcolor">Color </label>
+                  <div class="controls">
+                    <input type="text" name="fcolor" id="fcolor" class="span6" value="<?php echo isset($data->color)?$data->color:''; ?>"
+                      maxlength="15" placeholder="Amarillo, Azul, Negro">
                   </div>
                 </div>
 

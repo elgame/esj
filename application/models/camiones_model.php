@@ -24,8 +24,8 @@ class camiones_model extends CI_Model {
 		}
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(p.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(p.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+			$sql = "WHERE ( lower(p.placa) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(p.modelo) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(p.marca) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
 		$_GET['fstatus'] = ($this->input->get('fstatus') !== false? $this->input->get('fstatus'): 't');
@@ -65,7 +65,8 @@ class camiones_model extends CI_Model {
 			$data = array(
 						'placa'  => $this->input->post('fplacas'),
 						'modelo' => $this->input->post('fmodelo'),
-						'marca'  => $this->input->post('fmarca'),
+            'marca'  => $this->input->post('fmarca'),
+						'color'  => $this->input->post('fcolor'),
 						);
 		}
 
@@ -90,6 +91,7 @@ class camiones_model extends CI_Model {
 						'placa'  => $this->input->post('fplacas'),
 						'modelo' => $this->input->post('fmodelo'),
 						'marca'  => $this->input->post('fmarca'),
+            'color'  => $this->input->post('fcolor'),
 						);
 		}
 
@@ -108,7 +110,7 @@ class camiones_model extends CI_Model {
 	{
 		$id_camion = (isset($_GET['id']))? $_GET['id']: $id_camion;
 
-		$sql_res = $this->db->select("id_camion, placa, modelo, marca, status" )
+		$sql_res = $this->db->select("id_camion, placa, modelo, marca, status, color" )
 												->from("camiones")
 												->where("id_camion", $id_camion)
 												->get();
@@ -119,7 +121,7 @@ class camiones_model extends CI_Model {
 		$sql_res->free_result();
 
 		if ($basic_info == False) {
-			
+
 		}
 
 		return $data;
@@ -132,12 +134,12 @@ class camiones_model extends CI_Model {
 	public function getCamionesAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND ( lower(placa) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR 
-								lower(modelo) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR 
+			$sql = " AND ( lower(placa) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+								lower(modelo) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
 								lower(marca) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
 
 		$res = $this->db->query("
-				SELECT id_camion, placa, modelo, marca, status 
+				SELECT id_camion, placa, modelo, marca, status
 				FROM camiones
 				WHERE status = 't' ".$sql."
 				ORDER BY placa ASC

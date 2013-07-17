@@ -194,12 +194,25 @@ class choferes extends MY_Controller {
 		$rules = array(
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
-						'rules' => 'required|max_length[120]'),
+						'rules' => 'required|max_length[120]|callback_chckNombre'),
 		);
 
 		$this->form_validation->set_rules($rules);
 	}
 
+
+  public function chckNombre($nombre)
+  {
+    $result = $this->db->query("SELECT COUNT(nombre) as total
+      FROM choferes
+      WHERE lower(nombre) = '".mb_strtolower($nombre)."'")->row();
+
+    if($result->total > 0){
+        $this->form_validation->set_message('chckNombre', 'El nombre del chofer ya existe.');
+      return false;
+    }else
+      return true;
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{

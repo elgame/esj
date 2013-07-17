@@ -23,18 +23,64 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/choferes/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/choferes/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal" enctype="multipart/form-data">
               <fieldset>
                 <legend></legend>
-                <?php 
+                <?php
                   $data = $data['info'];
                 ?>
 
                 <div class="control-group">
                   <label class="control-label" for="fnombre">Nombre </label>
                   <div class="controls">
-                    <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="120" 
+                    <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="120"
                     value="<?php echo isset($data->nombre)?$data->nombre:''; ?>" required autofocus placeholder="Jair Macias, Pedro Castañeda">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="ftelefono">Teléfono</label>
+                  <div class="controls">
+                    <input type="text" name="ftelefono" id="ftelefono" class="span6"
+                    value="<?php echo isset($data->telefono)?$data->telefono:''; ?>" maxlength="15" placeholder="312 309 1234">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fid_nextel">ID Nextel</label>
+                  <div class="controls">
+                    <input type="text" name="fid_nextel" id="fid_nextel" class="span6"
+                    value="<?php echo isset($data->id_nextel)?$data->id_nextel:''; ?>" maxlength="20" placeholder="55*97*103954">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fno_licencia">No. Licencia</label>
+                  <div class="controls">
+                    <input type="text" name="fno_licencia" id="fno_licencia" class="span6"
+                    value="<?php echo isset($data->no_licencia)?$data->no_licencia:''; ?>" maxlength="50" placeholder="123457890">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fno_ife">No. IFE</label>
+                  <div class="controls">
+                    <input type="text" name="fno_ife" id="fno_ife" class="span6"
+                    value="<?php echo isset($data->no_ife)?$data->no_ife:''; ?>" maxlength="30" placeholder="ASDF1234GHA">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="flicencia_doc">Licencia Documento</label>
+                  <div class="controls">
+                    <input type="file" name="flicencia_doc" />
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fife_docu">IFE Documento</label>
+                  <div class="controls">
+                    <input type="file" name="fife_docu" />
                   </div>
                 </div>
 

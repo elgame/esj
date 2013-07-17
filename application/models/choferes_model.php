@@ -57,13 +57,56 @@ class choferes_model extends CI_Model {
  	 */
 	public function addChofer($data=NULL)
 	{
+    $this->load->library('my_upload');
 
 		if ($data==NULL)
 		{
 			$data = array(
-						'nombre'  => $this->input->post('fnombre'),
-						);
+        'nombre'      => $this->input->post('fnombre'),
+        'telefono'    => $this->input->post('ftelefono'),
+        'id_nextel'   => $this->input->post('fid_nextel'),
+        'no_licencia' => $this->input->post('fno_licencia'),
+        'no_ife'      => $this->input->post('fno_ife'),
+      );
 		}
+
+    if ($_FILES['flicencia_doc']['tmp_name'] !== '')
+    {
+      $path_lic = 'documentos/CHOFERES/LICENCIAS';
+
+      $config_upload = array(
+        'upload_path'     => APPPATH.$path_lic,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE
+      );
+
+      $this->my_upload->initialize($config_upload);
+      $data_doc = $this->my_upload->do_upload('flicencia_doc');
+
+      $path = explode('application/', $data_doc['full_path']);
+
+      $data['url_licencia'] = APPPATH.$path[1];
+    }
+
+    if ($_FILES['fife_docu']['tmp_name'] !== '')
+    {
+      $path_ife = 'documentos/CHOFERES/IFEs';
+
+      $config_upload = array(
+        'upload_path'     => APPPATH.$path_ife,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE
+      );
+
+      $this->my_upload->initialize($config_upload);
+      $data_doc = $this->my_upload->do_upload('fife_docu');
+
+      $path = explode('application/', $data_doc['full_path']);
+
+      $data['url_ife'] = APPPATH.$path[1];
+    }
 
 		$this->db->insert('choferes', $data);
 		// $id_chofer = $this->db->insert_id('proveedores', 'id_chofer');
@@ -82,9 +125,60 @@ class choferes_model extends CI_Model {
 
 		if ($data==NULL)
 		{
+      $this->load->library('my_upload');
+
+      $chofer = $this->getChoferInfo($id_chofer);
+
 			$data = array(
-						'nombre'  => $this->input->post('fnombre'),
-						);
+        'nombre'      => $this->input->post('fnombre'),
+        'telefono'    => $this->input->post('ftelefono'),
+        'id_nextel'   => $this->input->post('fid_nextel'),
+        'no_licencia' => $this->input->post('fno_licencia'),
+        'no_ife'      => $this->input->post('fno_ife'),
+      );
+
+      if ($_FILES['flicencia_doc']['tmp_name'] !== '')
+      {
+        $path_lic = 'documentos/CHOFERES/LICENCIAS';
+
+        $config_upload = array(
+          'upload_path'     => APPPATH.$path_lic,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('flicencia_doc');
+
+        $path = explode('application/', $data_doc['full_path']);
+
+        $data['url_licencia'] = APPPATH.$path[1];
+
+        UploadFiles::deleteFile(base_url($chofer['info']->url_licencia));
+      }
+
+      if ($_FILES['fife_docu']['tmp_name'] !== '')
+      {
+        $path_ife = 'documentos/CHOFERES/IFEs';
+
+        $config_upload = array(
+          'upload_path'     => APPPATH.$path_ife,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('fife_docu');
+
+        $path = explode('application/', $data_doc['full_path']);
+
+        $data['url_ife'] = APPPATH.$path[1];
+
+        UploadFiles::deleteFile(base_url($chofer['info']->url_ife));
+      }
+
 		}
 
 		$this->db->update('choferes', $data, array('id_chofer' => $id_chofer));
@@ -102,10 +196,12 @@ class choferes_model extends CI_Model {
 	{
 		$id_chofer = (isset($_GET['id']))? $_GET['id']: $id_chofer;
 
-		$sql_res = $this->db->select("id_chofer, nombre, status" )
-												->from("choferes")
-												->where("id_chofer", $id_chofer)
-												->get();
+		$sql_res = $this->db
+      ->select("id_chofer, nombre, status, telefono, id_nextel, no_licencia,
+                no_ife, url_licencia, url_ife")
+  		->from("choferes")
+  		->where("id_chofer", $id_chofer)
+  		->get();
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
@@ -113,7 +209,7 @@ class choferes_model extends CI_Model {
 		$sql_res->free_result();
 
 		if ($basic_info == False) {
-			
+
 		}
 
 		return $data;
@@ -129,7 +225,7 @@ class choferes_model extends CI_Model {
 			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
 
 		$res = $this->db->query("
-				SELECT id_chofer, nombre, status 
+				SELECT id_chofer, nombre, status
 				FROM choferes
 				WHERE status = 't' ".$sql."
 				ORDER BY nombre ASC

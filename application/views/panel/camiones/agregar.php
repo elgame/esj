@@ -30,7 +30,7 @@
 								<div class="control-group">
 								  <label class="control-label" for="fplacas">Placas </label>
 								  <div class="controls">
-										<input type="text" name="fplacas" id="fplacas" class="span6" maxlength="15" 
+										<input type="text" name="fplacas" id="fplacas" class="span6" maxlength="15"
 										value="<?php echo set_value('fplacas'); ?>" required autofocus placeholder="JHS2312, MJF332J">
 								  </div>
 								</div>
@@ -38,7 +38,7 @@
 								<div class="control-group">
 								  <label class="control-label" for="fmodelo">Modelo </label>
 								  <div class="controls">
-										<input type="text" name="fmodelo" id="fmodelo" class="span6" value="<?php echo set_value('fmodelo'); ?>" 
+										<input type="text" name="fmodelo" id="fmodelo" class="span6" value="<?php echo set_value('fmodelo'); ?>"
 											maxlength="15" placeholder="1990, 2000">
 								  </div>
 								</div>
@@ -46,10 +46,18 @@
 								<div class="control-group">
 								  <label class="control-label" for="fmarca">Marca </label>
 								  <div class="controls">
-										<input type="text" name="fmarca" id="fmarca" class="span6" value="<?php echo set_value('fmarca'); ?>" 
+										<input type="text" name="fmarca" id="fmarca" class="span6" value="<?php echo set_value('fmarca'); ?>"
 											maxlength="15" placeholder="Chevrolet, Toyota">
 								  </div>
 								</div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fcolor">Color </label>
+                  <div class="controls">
+                    <input type="text" name="fcolor" id="fcolor" class="span6" value="<?php echo set_value('fcolor'); ?>"
+                      maxlength="15" placeholder="Amarillo, Azul, Negro">
+                  </div>
+                </div>
 
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>

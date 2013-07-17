@@ -1,9 +1,16 @@
+ FACTURACION:
+
+     ☐ Como el de diatomeas el diseño, cambiando la parte del listado de productos/description con las cajas adentro
+     ☐ Los productos son las clasificaciones o agregar descripciones.
+     ☐ validar al agregar la factura que el certificado no halla caducado y que los folios esten vigentes (2 años apartir de la fecha de aprobacion)
+     ☐ quitar el descuento.
+
  CHOFERES:
-     ☐ Agregar los campos faltantes.
+     ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
           - telefono, ID(nextel), No. Licencia, No. IFE, licencia_rul, ife_url
 
 CAMIONES:
-     ☐ Agregar los campos faltantes.
+     ✔ Agregar los campos faltantes. @done (13-07-15 18:06)
           - Color
 
 RASTREABILIDAD:

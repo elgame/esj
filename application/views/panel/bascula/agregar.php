@@ -151,7 +151,7 @@
                       <input type="text" name="pcamion"
                         value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled ?>>
                       <span class="help-inline">
-                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-50x480" id="btnSupermodal">Agregar</a>
+                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-30x540" id="btnSupermodal">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_camion" value="<?php echo set_value('pid_camion', $this->input->post('pid_camion')) ?>" id="pid_camion" value="">
                     </div>
@@ -163,7 +163,7 @@
                       <input type="text" name="pchofer"
                         value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pkilos_brutos|pkilos_tara" <?php echo $disabled ?>>
                       <span class="help-inline">
-                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-50x440">Agregar</a>
+                        <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-40x600">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_chofer" value="<?php echo set_value('pid_chofer', $this->input->post('pid_chofer')) ?>" id="pid_chofer">
                     </div>
