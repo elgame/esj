@@ -47,12 +47,23 @@
           url_form character varying(80),
           url_print character varying(80),
           status boolean NOT NULL DEFAULT true,
+          orden integer NOT NULL, -- indica la prioridad (orden) de los documentos como se tienen que ir haciendo
           CONSTRAINT rastria_documentos_pkey PRIMARY KEY (id_documento)
         )
         WITH (
           OIDS=FALSE
         );
         ALTER TABLE rastria_documentos OWNER TO programa;
+        COMMENT ON COLUMN rastria_documentos.orden IS 'indica la prioridad (orden) de los documentos como se tienen que ir haciendo';
+
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('MANIFIESTO DEL CHOFER', NULL, NULL, true, 1);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('CHOFER FOTO FIRMA MANIFIESTO', NULL, NULL, true, 2);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('ACOMODO DEL EMBARQUE', NULL, NULL, true, 3);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('CHOFER COPIA DEL IFE', NULL, NULL, true, 4);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('CHOFER COPIA LICENCIA', NULL, NULL, true, 5);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('SEGURO CAMION', NULL, NULL, true, 6);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('CERTIFICADO DE TLC', NULL, NULL, true, 7);
+        INSERT INTO rastria_documentos (nombre, url_form, url_print, status, orden) VALUES ('MANIFIESTO DEL CAMION', NULL, NULL, true, 8);
 
         CREATE TABLE facturacion_series_folios
         (
@@ -60,12 +71,13 @@
           id_empresa integer NOT NULL,
           serie character varying(30),
           no_aprobacion bigint NOT NULL,
-          ano_aprobacion character varying(12) NOT NULL,
           folio_inicio bigint NOT NULL,
           folio_fin bigint NOT NULL,
           leyenda text,
           leyenda1 text,
           leyenda2 text,
+          es_nota_credito boolean NOT NULL DEFAULT false, -- indica si los folios son notas de credito
+          ano_aprobacion date NOT NULL,
           CONSTRAINT facturacion_series_folios_pkey PRIMARY KEY (id_serie_folio),
           CONSTRAINT facturacion_series_folios_id_empresa_fkey FOREIGN KEY (id_empresa)
               REFERENCES empresas (id_empresa) MATCH SIMPLE
@@ -75,6 +87,7 @@
           OIDS=FALSE
         );
         ALTER TABLE facturacion_series_folios OWNER TO programa;
+        COMMENT ON COLUMN facturacion_series_folios.es_nota_credito IS 'indica si los folios son notas de credito';
 
         CREATE TABLE facturacion
         (
@@ -159,6 +172,7 @@
           importe double precision NOT NULL,
           iva real NOT NULL DEFAULT 0,
           unidad character varying(15) DEFAULT 'No aplica'::character varying,
+          retencion_iva real NOT NULL DEFAULT 0,
           CONSTRAINT facturacion_productos_pkey PRIMARY KEY (id_factura, num_row),
           CONSTRAINT facturacion_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
               REFERENCES clasificaciones (id_clasificacion) MATCH SIMPLE
@@ -171,6 +185,64 @@
           OIDS=FALSE
         );
         ALTER TABLE facturacion_productos OWNER TO programa;
+
+        CREATE TABLE facturacion_documentos
+        (
+          id_factura bigint NOT NULL,
+          id_documento integer NOT NULL,
+          data text,
+          status boolean NOT NULL DEFAULT false,
+          CONSTRAINT facturacion_documentos_pkey PRIMARY KEY (id_factura, id_documento),
+          CONSTRAINT facturacion_documentos_id_documento_fkey FOREIGN KEY (id_documento)
+              REFERENCES rastria_documentos (id_documento) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT facturacion_documentos_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_documentos OWNER TO programa;
+
+        CREATE TABLE facturacion_doc_embarque
+        (
+          id_embarque bigserial NOT NULL,
+          id_documento integer NOT NULL,
+          id_factura bigint NOT NULL,
+          fecha_carga timestamp with time zone,
+          fecha_embarque timestamp with time zone,
+          ctrl_embarque character varying(15),
+          CONSTRAINT facturacion_doc_embarque_pkey PRIMARY KEY (id_embarque),
+          CONSTRAINT facturacion_doc_embarque_id_documento_fkey FOREIGN KEY (id_documento)
+              REFERENCES rastria_documentos (id_documento) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT facturacion_doc_embarque_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_doc_embarque OWNER TO programa;
+
+        CREATE TABLE facturacion_doc_embarque_pallets
+        (
+          id_embarque bigint NOT NULL,
+          no_posicion integer NOT NULL DEFAULT 0,
+          id_pallet bigint,
+          marca character varying(50),
+          descripcion character varying(80), -- para cuando la posicion del trailer quede sin nada o ponga otra fruta (coco, platano, etc)
+          CONSTRAINT facturacion_doc_embarque_pallets_pkey PRIMARY KEY (id_embarque, no_posicion),
+          CONSTRAINT facturacion_doc_embarque_pallets_id_pallet_fkey FOREIGN KEY (id_pallet)
+              REFERENCES rastria_pallets (id_pallet) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_doc_embarque_pallets OWNER TO programa;
+        COMMENT ON COLUMN facturacion_doc_embarque_pallets.descripcion IS 'para cuando la posicion del trailer quede sin nada o ponga otra fruta (coco, platano, etc)';
 
         CREATE TABLE clientes_documentos
         (

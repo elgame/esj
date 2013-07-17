@@ -217,7 +217,14 @@ class empresas extends MY_Controller {
 						'rules'	=> 'valid_email|max_length[70]'),
 				array('field'	=> 'dpag_web',
 						'label'	=> 'Pag Web',
-						'rules'	=> 'max_length[80]')
+						'rules'	=> 'max_length[80]'),
+
+				array('field'	=> 'dpass',
+						'label'	=> 'Clave',
+						'rules'	=> 'max_length[20]'),
+				array('field'	=> 'dcfdi_version',
+						'label'	=> 'Version CFDI',
+						'rules'	=> 'max_length[6]'),
 			);
 
 		$this->form_validation->set_rules($rules);

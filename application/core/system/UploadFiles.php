@@ -17,9 +17,9 @@ class UploadFiles{
 				$config['encrypt_name'] = true;
 				$ci->load->library('upload', $config);
 				if(!$ci->upload->do_upload('dlogo')){
-					$data = array(false, $ci->upload->display_errors());
+					$data = array(false, $ci->upload->libupload->display_errors());
 				}else{
-					$data = array(true, $ci->upload->data());
+					$data = array(true, $ci->upload->libupload->data());
 					$config = array();
 					$config['image_library'] = 'gd2';
 					$config['source_image']	= $data[1]['full_path'];
@@ -32,6 +32,27 @@ class UploadFiles{
 					$ci->image_lib->resize();
 				}
 				return $data;
+			}
+			return false;
+		}
+
+		return 'ok';
+	}
+
+	/**
+	 * Sube un archivo tal cual
+	 */
+	public static function uploadFile($file, $path='CFDI/certificados/'){
+		$ci =& get_instance();
+		if(isset($_FILES[$file])){
+			if($_FILES[$file]['name']!=''){
+				$config['upload_path'] = APPPATH.$path;
+				
+				if ($_FILES[$file]["error"] == UPLOAD_ERR_OK) {
+					$tmp_name = $_FILES[$file]["tmp_name"];
+	        move_uploaded_file($tmp_name, $config['upload_path'].$_FILES[$file]["name"]);
+	        return $_FILES[$file]["name"];
+      	}
 			}
 			return false;
 		}

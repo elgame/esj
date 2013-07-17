@@ -64,7 +64,7 @@ class My_upload {
   var $new_image_path = '';
 
   private $CI; 				// Instancia de Codeigniter
-  private $libupload;        // Instancia de Codeigniter
+  public $libupload;        // Instancia de Codeigniter
 
   /**
    * Constructor

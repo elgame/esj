@@ -151,6 +151,43 @@
 											</div>
 										</div>
 
+										<div class="control-group">
+											<label class="control-label" for="dcer_org">Certificado .CER:</label>
+											<div class="controls">
+												<input type="file" name="dcer_org" id="dcer_org" class="span12">
+											</div>
+										</div>
+
+										<!-- <div class="control-group">
+											<label class="control-label" for="dcer">Certificado .PEM:</label>
+											<div class="controls">
+												<input type="file" name="dcer" id="dcer" class="span12">
+											</div>
+										</div> -->
+
+										<div class="control-group">
+											<label class="control-label" for="dkey_path">Llave .PEM:</label>
+											<div class="controls">
+												<input type="file" name="dkey_path" id="dkey_path" class="span12">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dpass">Clave:</label>
+											<div class="controls">
+												<input type="text" name="dpass" id="dpass" class="span12" 
+													value="<?php echo (isset($info['info']->pass)? $info['info']->pass: ''); ?>" maxlength="20">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dcfdi_version">Version CFDI:</label>
+											<div class="controls">
+												<input type="text" name="dcfdi_version" id="dcfdi_version" class="span12" 
+													value="<?php echo (isset($info['info']->cfdi_version)? $info['info']->cfdi_version: ''); ?>" maxlength="6">
+											</div>
+										</div>
+
 		              </div> <!--/span-->
 
 							  </fieldset>
