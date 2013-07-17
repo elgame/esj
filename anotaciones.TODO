@@ -85,6 +85,7 @@
           plazo_credito integer NOT NULL DEFAULT 0,
           observaciones text NOT NULL DEFAULT ''::text,
           status character varying(2) NOT NULL DEFAULT 'pa'::character varying, -- Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada
+          id_nc bigint, -- es el id de la factura que esta ligada la nota de credito
           CONSTRAINT facturacion_pkey PRIMARY KEY (id_factura),
           CONSTRAINT facturacion_id_cliente_fkey FOREIGN KEY (id_cliente)
               REFERENCES clientes (id_cliente) MATCH SIMPLE
@@ -103,6 +104,7 @@
         COMMENT ON COLUMN facturacion.metodo_pago_digitos IS 'Los ultimos 4 digitos del cheque, tarjeta o cuenta en metodo de pago';
         COMMENT ON COLUMN facturacion.condicion_pago IS 'Corresponde a si el documento es a cr:credito o co:contado';
         COMMENT ON COLUMN facturacion.status IS 'Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada';
+        COMMENT ON COLUMN facturacion.id_nc IS 'es el id de la factura que esta ligada la nota de credito';
 
         CREATE TABLE facturacion_cliente
         (
@@ -127,6 +129,47 @@
           OIDS=FALSE
         );
         ALTER TABLE facturacion_cliente OWNER TO programa;
+
+        CREATE TABLE facturacion_productos
+        (
+          id_factura bigint NOT NULL,
+          id_clasificacion integer,
+          num_row integer NOT NULL DEFAULT 0,
+          cantidad real NOT NULL DEFAULT 0,
+          descripcion text,
+          precio_unitario double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL,
+          iva real NOT NULL DEFAULT 0,
+          unidad character varying(15) DEFAULT 'No aplica'::character varying,
+          CONSTRAINT facturacion_productos_pkey PRIMARY KEY (id_factura, num_row),
+          CONSTRAINT facturacion_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+              REFERENCES clasificaciones (id_clasificacion) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT facturacion_productos_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_productos OWNER TO programa;
+
+        CREATE TABLE clientes_documentos
+        (
+          id_cliente bigint NOT NULL,
+          id_documento integer NOT NULL,
+          CONSTRAINT clientes_documentos_pkey PRIMARY KEY (id_cliente, id_documento),
+          CONSTRAINT clientes_documentos_id_cliente_fkey FOREIGN KEY (id_cliente)
+              REFERENCES clientes (id_cliente) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT clientes_documentos_id_documento_fkey FOREIGN KEY (id_documento)
+              REFERENCES rastria_documentos (id_documento) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE clientes_documentos OWNER TO programa;
 
      INSERT INTO clasificaciones(id_area, nombre) 
          VALUES 
