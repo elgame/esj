@@ -1,31 +1,205 @@
-CHOFERES:
-     ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
+2013-07-17
+      CHOFERES:
+           ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
 
-          SQL:
-            telefono character varying(15),
-            id_nextel character varying(20),
-            no_licencia character varying(50),
-            no_ife character varying(30),
-            url_licencia character varying(150),
-            url_ife character varying(150),
+                SQL:
+                  telefono character varying(15),
+                  id_nextel character varying(20),
+                  no_licencia character varying(50),
+                  no_ife character varying(30),
+                  url_licencia character varying(150),
+                  url_ife character varying(150),
 
-CAMIONES:
-     ✔ Agregar los campos faltantes. @done (13-07-15 18:06)
+      CAMIONES:
+           ✔ Agregar los campos faltantes. @done (13-07-15 18:06)
 
-          SQL:
-            color character varying(15),
+                SQL:
+                  color character varying(15),
 
 2013-07-12
   ☐ SQL
-     INSERT INTO clasificaciones(id_area, nombre) VALUES
-          (1, 'LIMON VERDE S/EXTRA (CAJA DE MADERA)'), (1, 'LIMON VERDE S/EXTRA (CAJA DE CARTON)'), (1, 'LIMON VERDE S/EXTRA (CAJA DE PLASTICO)'), (1, 'LIMON VERDE S/EXTRA (ARPILLA)'), (1, 'LIMON VERDE EXTRA (CAJA DE MADERA)'), (1, 'LIMON VERDE EXTRA (CAJA DE CARTON)'), (1, 'LIMON VERDE EXTRA (CAJA DE PLASTICO)'), (1, 'LIMON VERDE EXTRA (ARPILLA)'), (1, 'LIMON VERDE PREMIUM (CAJA DE MADERA)'), (1, 'LIMON VERDE PREMIUM (CAJA DE CARTON)'), (1, 'LIMON VERDE PREMIUM (CAJA DE PLASTICO)'), (1, 'LIMON VERDE PREMIUM (ARPILLA)'), (1, 'LIMON VERDE MIXTO (CAJA DE MADERA)'), (1, 'LIMON VERDE MIXTO (CAJA DE PLASTICO)'), (1, 'LIMON VERDE 300 (PLASTICO)'), (1, 'LIMON VERDE 300 (ARPILLA)'), (1, 'LIMON VERDE MIXTO (ARPILLA)'), (1, 'LIMON VERDE SE(CAJA MADERA 24K)'), (1, 'LIMON VERDE 4 Y 5 (CAJA MADERA 24K)'), (1, 'LIMON VERDE 400 (MADERA )'), (1, 'LIMON VERDE 400 ( PLASTICO)'), (1, 'LIMON VERDE No. 5 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 5 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 5 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 5 (ARPILLA)'), (1, 'LIMON VERDE No. 4 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 4 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 4 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 4 (ARPILLA)'), (1, 'LIMON VERDE No. 3 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 3 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 3 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 3 (ARPILLA)'), (1, 'LIMON VERDE No. 2  (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 2  (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 2  (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 2  (ARPILLA)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE MADERA)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE CARTON)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE PLASTICO)'), (1, 'LIMON VERDE ECONOMICO  (ARPILLA)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 2,3 (ARPILLA)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 3,4 (ARPILLA)'), (1, 'LIMON VERDE No. 4,5 (CAJA DE MADERA)'), (1, 'LIMON VERDE 400 ( ARPILLA )'), (1, 'LIMON VERDE No. 4,5 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 4,5 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 4,5 (ARPILLA)'), (1, 'LIMON VERDE BOLICON (ARPILLA)'), (1, 'LIMON VERDE CANICA ( ARPILLA )'), (1, 'LIMON VERDE 600 ( MADERA )'), (1, 'LIMON VERDE 600 ( PLASTICO)'), (1, 'LIMON VERDE ESPECIAL (CAJA DE MADERA)'), (1, 'LIMON VERDE 350 ( PLASTICO )'), (1, 'LIMON VERDE ESPECIAL (CAJA DE CARTON)'), (1, 'LIMON VERDE ESPECIAL (CAJA DE PLASTICO)'), (1, 'LIMON VERDE ESPECIAL (ARPILLA)'), (1, 'LIMON ALIMONADO 4 Y 5 (ARPILLA)'), (1, 'LIMON VERDE 500 ( MADERA )'), (1, 'LIMON ALIMONADO 400 (CAJA DE MADERA )'), (1, 'LIMON ALIMONADO 400 ( CAJA DE PLASTICO )'), (1, 'LIMON VERDE 350 ( MADERA )'), (1, 'LIMON ALIMONADO VERDE ECONOMICO ( ARPILLA )'), (1, 'LIMON VERDE 350 ( ARPILLA )'), (1, 'LIMON VERDE 300 ( MADERA )'), (1, 'ALIMONADO CLARO ECONOMICO ( ARPILLA )'), (1, 'LIMON VERDE No.600 ARPILLITA(PLASTICO_)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO MIXTO (ARPILLA)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO PREMIUM (ARPILLA)'), (1, 'LIMON ALIMONADO CLARO (ARPILLA)'), (1, 'LIMON ALIMONADO VERDE (ARPILLA)'), (1, 'LIMON ALIMONADO VERDE ( CAJA DE MADERA )'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 5 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 4 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 3 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 2 (ARPILLA)'), (1, 'LIMON ALIMONADO ESPECIAL (MADERA))'), (1, 'LIMON ALIMONADO ECON.(ARPILLA)'), (1, 'LIMON ALIMONADO ECONOMICO NO. 2 (ARPILLA)'), (1, 'LIMON VERDE ECON No. 3 ( ARPILLA )'), (1, 'LIMON VERDE ECON. No. 4  ( ARPILLA )'), (1, 'LIMON VERDE ECON. No. 5 ( ARPILLA )'), (1, 'LIMON ALIMONADO VERDE ( PLASTICO )'), (1, 'LIMON VERDE 500 (ARPILLA)'), (1, 'LIMON AMARILLO (ARPILLA)'), (1, 'LIMON AMARILLO No. 5 (ARPILLA)'), (1, 'LIMON AMARILLO MIXTO (ARPILLA)'), (1, 'LIMON AMARILLO ECONOMICO (ARPILLA)'), (1, 'LIMON AMARILLO ECON.(ARPILLA)'), (1, 'LIMON AMARILLO VERDE (ARPILLA )'), (1, 'LIMON AMARILLO CLARO ( ARPILLA )'), (1, 'LIMON VERDE 600 (ARPILLA)'), (1, 'LIMON COLIMA PLASTICO'), (1, 'LIMON ARPILLA'), (1, 'KGS. LIMON VERDE NO. 2'), (1, 'KGS. DE LIMON INDUSTRIAL'), (1, 'KGS. DE LIMON AMARILLO INDUSTRIAL'), (1, 'BONIFICACION LIMON INDUSTRIAL (KGS)'), (1, 'KGS. DE LIMON DE SUELO'), (1, 'LIMON VERDE #3 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE #2 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE 500(PLASTICO)'), (1, 'LIMON VERDE 700 (PLASTICO)'), (1, 'KGS.LIMON VERDE 500(PLASTICO)'), (1, 'KGS LIMON VERDE 400(PLASTICO)'), (1, 'KGS LIMON VERDE 400(PLASTICO)'), (1, 'LIMON VERDE MIXTO 300 (MADERA)'), (1, 'LIMON VERDE 700(ARPILLA)'), (1, 'LIMON AMARILLO (PLASTICO)'), (1, 'LIMON VERDE 550 (PLASTICO)'), (1, 'LIMON VERDE N0. 550 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE 550 ARPILLA');
+      -Agregar los campos en empresas
+        cer_org character varying(90),
+        cer character varying(90),
+        key_path character varying(90),
+        pass character varying(20),
+        cfdi_version character varying(6) NOT NULL DEFAULT 3.2,
+        cer_caduca date,
+
+        CREATE TABLE lineas_transporte
+        (
+          id_linea serial NOT NULL,
+          nombre character varying(100) NOT NULL,
+          telefonos character varying(70),
+          id character varying(30),
+          status boolean NOT NULL DEFAULT true,
+          CONSTRAINT lineas_transporte_pkey PRIMARY KEY (id_linea)
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE lineas_transporte OWNER TO programa;
+
+        CREATE TABLE rastria_documentos
+        (
+          id_documento serial NOT NULL,
+          nombre character varying(100) NOT NULL,
+          url_form character varying(80),
+          url_print character varying(80),
+          status boolean NOT NULL DEFAULT true,
+          CONSTRAINT rastria_documentos_pkey PRIMARY KEY (id_documento)
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE rastria_documentos OWNER TO programa;
+
+        CREATE TABLE facturacion_series_folios
+        (
+          id_serie_folio serial NOT NULL,
+          id_empresa integer NOT NULL,
+          serie character varying(30),
+          no_aprobacion bigint NOT NULL,
+          ano_aprobacion character varying(12) NOT NULL,
+          folio_inicio bigint NOT NULL,
+          folio_fin bigint NOT NULL,
+          leyenda text,
+          leyenda1 text,
+          leyenda2 text,
+          CONSTRAINT facturacion_series_folios_pkey PRIMARY KEY (id_serie_folio),
+          CONSTRAINT facturacion_series_folios_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_series_folios OWNER TO programa;
+
+        CREATE TABLE facturacion
+        (
+          id_factura bigserial NOT NULL,
+          id_cliente bigint NOT NULL,
+          id_empresa integer NOT NULL,
+          "version" character varying(6) NOT NULL,
+          serie character varying(30) NOT NULL,
+          folio bigint NOT NULL,
+          fecha timestamp with time zone NOT NULL DEFAULT now(),
+          subtotal double precision NOT NULL DEFAULT 0,
+          importe_iva double precision NOT NULL DEFAULT 0,
+          total double precision NOT NULL DEFAULT 0,
+          total_letra character varying(250) NOT NULL,
+          no_aprobacion bigint NOT NULL,
+          ano_aprobacion character varying(4) NOT NULL,
+          tipo_comprobante character varying(10) NOT NULL DEFAULT 'ingreso'::character varying, -- egreso o ingreso
+          forma_pago character varying(80) NOT NULL DEFAULT 'Pago en una sola exhibición'::character varying, -- Pago en una sola exhibición, Parcialidad 1 de X
+          metodo_pago character varying(40) NOT NULL DEFAULT 'efectivo'::character varying, -- cheque, tarjeta de crédito o debito, depósito en cuenta
+          metodo_pago_digitos character varying(20) NOT NULL DEFAULT 'No identificado'::character varying, -- Los ultimos 4 digitos del cheque, tarjeta o cuenta en metodo de pago
+          no_certificado character varying(100) NOT NULL,
+          cadena_original text NOT NULL,
+          sello character varying(250) NOT NULL,
+          certificado text NOT NULL,
+          condicion_pago character varying(2) NOT NULL DEFAULT 'co'::character varying, -- Corresponde a si el documento es a cr:credito o co:contado
+          plazo_credito integer NOT NULL DEFAULT 0,
+          observaciones text NOT NULL DEFAULT ''::text,
+          status character varying(2) NOT NULL DEFAULT 'pa'::character varying, -- Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada
+          id_nc bigint, -- es el id de la factura que esta ligada la nota de credito
+          CONSTRAINT facturacion_pkey PRIMARY KEY (id_factura),
+          CONSTRAINT facturacion_id_cliente_fkey FOREIGN KEY (id_cliente)
+              REFERENCES clientes (id_cliente) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT facturacion_id_empresa_fkey FOREIGN KEY (id_empresa)
+              REFERENCES empresas (id_empresa) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion OWNER TO programa;
+        COMMENT ON COLUMN facturacion.tipo_comprobante IS 'egreso o ingreso';
+        COMMENT ON COLUMN facturacion.forma_pago IS 'Pago en una sola exhibición, Parcialidad 1 de X';
+        COMMENT ON COLUMN facturacion.metodo_pago IS 'cheque, tarjeta de crédito o debito, depósito en cuenta';
+        COMMENT ON COLUMN facturacion.metodo_pago_digitos IS 'Los ultimos 4 digitos del cheque, tarjeta o cuenta en metodo de pago';
+        COMMENT ON COLUMN facturacion.condicion_pago IS 'Corresponde a si el documento es a cr:credito o co:contado';
+        COMMENT ON COLUMN facturacion.status IS 'Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada';
+        COMMENT ON COLUMN facturacion.id_nc IS 'es el id de la factura que esta ligada la nota de credito';
+
+        CREATE TABLE facturacion_cliente
+        (
+          id_factura bigint NOT NULL,
+          nombre character varying(130),
+          rfc character varying(13),
+          calle character varying(60),
+          no_exterior character varying(7),
+          no_interior character varying(7),
+          colonia character varying(60),
+          localidad character varying(45),
+          municipio character varying(45),
+          estado character varying(45),
+          cp character varying(10),
+          pais character varying(60),
+          CONSTRAINT facturacion_cliente_pkey PRIMARY KEY (id_factura),
+          CONSTRAINT facturacion_cliente_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE NO ACTION ON DELETE NO ACTION
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_cliente OWNER TO programa;
+
+        CREATE TABLE facturacion_productos
+        (
+          id_factura bigint NOT NULL,
+          id_clasificacion integer,
+          num_row integer NOT NULL DEFAULT 0,
+          cantidad real NOT NULL DEFAULT 0,
+          descripcion text,
+          precio_unitario double precision NOT NULL DEFAULT 0,
+          importe double precision NOT NULL,
+          iva real NOT NULL DEFAULT 0,
+          unidad character varying(15) DEFAULT 'No aplica'::character varying,
+          CONSTRAINT facturacion_productos_pkey PRIMARY KEY (id_factura, num_row),
+          CONSTRAINT facturacion_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+              REFERENCES clasificaciones (id_clasificacion) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT facturacion_productos_id_factura_fkey FOREIGN KEY (id_factura)
+              REFERENCES facturacion (id_factura) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE facturacion_productos OWNER TO programa;
+
+        CREATE TABLE clientes_documentos
+        (
+          id_cliente bigint NOT NULL,
+          id_documento integer NOT NULL,
+          CONSTRAINT clientes_documentos_pkey PRIMARY KEY (id_cliente, id_documento),
+          CONSTRAINT clientes_documentos_id_cliente_fkey FOREIGN KEY (id_cliente)
+              REFERENCES clientes (id_cliente) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT clientes_documentos_id_documento_fkey FOREIGN KEY (id_documento)
+              REFERENCES rastria_documentos (id_documento) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (
+          OIDS=FALSE
+        );
+        ALTER TABLE clientes_documentos OWNER TO programa;
+
+     INSERT INTO clasificaciones(id_area, nombre)
+         VALUES
+           (1, 'LIMON VERDE S/EXTRA (CAJA DE MADERA)'), (1, 'LIMON VERDE S/EXTRA (CAJA DE CARTON)'), (1, 'LIMON VERDE S/EXTRA (CAJA DE PLASTICO)'), (1, 'LIMON VERDE S/EXTRA (ARPILLA)'), (1, 'LIMON VERDE EXTRA (CAJA DE MADERA)'), (1, 'LIMON VERDE EXTRA (CAJA DE CARTON)'), (1, 'LIMON VERDE EXTRA (CAJA DE PLASTICO)'), (1, 'LIMON VERDE EXTRA (ARPILLA)'), (1, 'LIMON VERDE PREMIUM (CAJA DE MADERA)'), (1, 'LIMON VERDE PREMIUM (CAJA DE CARTON)'), (1, 'LIMON VERDE PREMIUM (CAJA DE PLASTICO)'), (1, 'LIMON VERDE PREMIUM (ARPILLA)'), (1, 'LIMON VERDE MIXTO (CAJA DE MADERA)'), (1, 'LIMON VERDE MIXTO (CAJA DE PLASTICO)'), (1, 'LIMON VERDE 300 (PLASTICO)'), (1, 'LIMON VERDE 300 (ARPILLA)'), (1, 'LIMON VERDE MIXTO (ARPILLA)'), (1, 'LIMON VERDE SE(CAJA MADERA 24K)'), (1, 'LIMON VERDE 4 Y 5 (CAJA MADERA 24K)'), (1, 'LIMON VERDE 400 (MADERA )'), (1, 'LIMON VERDE 400 ( PLASTICO)'), (1, 'LIMON VERDE No. 5 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 5 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 5 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 5 (ARPILLA)'), (1, 'LIMON VERDE No. 4 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 4 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 4 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 4 (ARPILLA)'), (1, 'LIMON VERDE No. 3 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 3 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 3 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 3 (ARPILLA)'), (1, 'LIMON VERDE No. 2  (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 2  (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 2  (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 2  (ARPILLA)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE MADERA)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE CARTON)'), (1, 'LIMON VERDE ECONOMICO  (CAJA DE PLASTICO)'), (1, 'LIMON VERDE ECONOMICO  (ARPILLA)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 2,3 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 2,3 (ARPILLA)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE MADERA)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 3,4 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 3,4 (ARPILLA)'), (1, 'LIMON VERDE No. 4,5 (CAJA DE MADERA)'), (1, 'LIMON VERDE 400 ( ARPILLA )'), (1, 'LIMON VERDE No. 4,5 (CAJA DE CARTON)'), (1, 'LIMON VERDE No. 4,5 (CAJA DE PLASTICO)'), (1, 'LIMON VERDE No. 4,5 (ARPILLA)'), (1, 'LIMON VERDE BOLICON (ARPILLA)'), (1, 'LIMON VERDE CANICA ( ARPILLA )'), (1, 'LIMON VERDE 600 ( MADERA )'), (1, 'LIMON VERDE 600 ( PLASTICO)'), (1, 'LIMON VERDE ESPECIAL (CAJA DE MADERA)'), (1, 'LIMON VERDE 350 ( PLASTICO )'), (1, 'LIMON VERDE ESPECIAL (CAJA DE CARTON)'), (1, 'LIMON VERDE ESPECIAL (CAJA DE PLASTICO)'), (1, 'LIMON VERDE ESPECIAL (ARPILLA)'), (1, 'LIMON ALIMONADO 4 Y 5 (ARPILLA)'), (1, 'LIMON VERDE 500 ( MADERA )'), (1, 'LIMON ALIMONADO 400 (CAJA DE MADERA )'), (1, 'LIMON ALIMONADO 400 ( CAJA DE PLASTICO )'), (1, 'LIMON VERDE 350 ( MADERA )'), (1, 'LIMON ALIMONADO VERDE ECONOMICO ( ARPILLA )'), (1, 'LIMON VERDE 350 ( ARPILLA )'), (1, 'LIMON VERDE 300 ( MADERA )'), (1, 'ALIMONADO CLARO ECONOMICO ( ARPILLA )'), (1, 'LIMON VERDE No.600 ARPILLITA(PLASTICO_)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO MIXTO (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO MIXTO (ARPILLA)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO PREMIUM (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO PREMIUM (ARPILLA)'), (1, 'LIMON ALIMONADO CLARO (ARPILLA)'), (1, 'LIMON ALIMONADO VERDE (ARPILLA)'), (1, 'LIMON ALIMONADO VERDE ( CAJA DE MADERA )'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 5 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 5 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 4 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 4 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 3 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 3 (ARPILLA)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE MADERA)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE CARTON)'), (1, 'LIMON ALIMONADO No. 2 (CAJA DE PLASTICO)'), (1, 'LIMON ALIMONADO No. 2 (ARPILLA)'), (1, 'LIMON ALIMONADO ESPECIAL (MADERA))'), (1, 'LIMON ALIMONADO ECON.(ARPILLA)'), (1, 'LIMON ALIMONADO ECONOMICO NO. 2 (ARPILLA)'), (1, 'LIMON VERDE ECON No. 3 ( ARPILLA )'), (1, 'LIMON VERDE ECON. No. 4  ( ARPILLA )'), (1, 'LIMON VERDE ECON. No. 5 ( ARPILLA )'), (1, 'LIMON ALIMONADO VERDE ( PLASTICO )'), (1, 'LIMON VERDE 500 (ARPILLA)'), (1, 'LIMON AMARILLO (ARPILLA)'), (1, 'LIMON AMARILLO No. 5 (ARPILLA)'), (1, 'LIMON AMARILLO MIXTO (ARPILLA)'), (1, 'LIMON AMARILLO ECONOMICO (ARPILLA)'), (1, 'LIMON AMARILLO ECON.(ARPILLA)'), (1, 'LIMON AMARILLO VERDE (ARPILLA )'), (1, 'LIMON AMARILLO CLARO ( ARPILLA )'), (1, 'LIMON VERDE 600 (ARPILLA)'), (1, 'LIMON COLIMA PLASTICO'), (1, 'LIMON ARPILLA'), (1, 'KGS. LIMON VERDE NO. 2'), (1, 'KGS. DE LIMON INDUSTRIAL'), (1, 'KGS. DE LIMON AMARILLO INDUSTRIAL'), (1, 'BONIFICACION LIMON INDUSTRIAL (KGS)'), (1, 'KGS. DE LIMON DE SUELO'), (1, 'LIMON VERDE #3 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE #2 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE 500(PLASTICO)'), (1, 'LIMON VERDE 700 (PLASTICO)'), (1, 'KGS.LIMON VERDE 500(PLASTICO)'), (1, 'KGS LIMON VERDE 400(PLASTICO)'), (1, 'KGS LIMON VERDE 400(PLASTICO)'), (1, 'LIMON VERDE MIXTO 300 (MADERA)'), (1, 'LIMON VERDE 700(ARPILLA)'), (1, 'LIMON AMARILLO (PLASTICO)'), (1, 'LIMON VERDE 550 (PLASTICO)'), (1, 'LIMON VERDE N0. 550 ARPILLITA (PLASTICO)'), (1, 'LIMON VERDE 550 ARPILLA');
+
 
 2013-07-08
   ✔ Rastreabilidad, poner boton que salga un modal y pida No de lote y un check que indique si el chofer es el nombre del productor () va a modificar la boleta pero solo esos campos nuevos (me dices para explicarte mejor) @done (13-07-08 11:25)
   ✔ Rastreabilidad, reporte como el xls que hace rosy @done (13-07-06 14:17)
   ✔ Rastreabilidad, reporte como el del ingeniero @done (13-07-07 11:41)
-  ✔ Rastreabilidad, rendimiento por lote, Es registrar cuantos cajas salen por lote de las clasificaciones, se crea un cosiecutivo de lotes por dia @done (13-07-15 18:07)
-  ✔ Rastreabilidad, Armado de pallets, crear pallet de una clasificacion, agregarle las cajas disponibles de esa clasificacion hasta juntar el numero de cajas indicadas, cuandos se agregan cajas en rendimiento por lote agregar esas cajas a los pallets abiertos (que aun no acompleten sus cajas) @done (13-07-15 18:07)
+  ✔ Rastreabilidad, rendimiento por lote, Es registrar cuantos cajas salen por lote de las clasificaciones, se crea un cosiecutivo de lotes por dia @done (13-07-15 18:38)
+  ✔ Rastreabilidad, Armado de pallets, crear pallet de una clasificacion, agregarle las cajas disponibles de esa clasificacion hasta juntar el numero de cajas indicadas, cuandos se agregan cajas en rendimiento por lote agregar esas cajas a los pallets abiertos (que aun no acompleten sus cajas) @done (13-07-15 18:38)
   ☐ Ir viendo lo de la bitacora de operaciones
   ☐ Lo de los choferes en salidas de carros para imprimir la constancia
 
