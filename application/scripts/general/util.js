@@ -1,4 +1,15 @@
 var util = {
+
+  // Trunca a 2 decimales
+  trunc2Dec: function (num) {
+    return Math.floor(num * 100) / 100;
+  },
+
+  // Redondea a 2 decimales
+  round2Dec: function (val) {
+    return Math.round(val * 100) / 100;
+  },
+
 	//dar dormato a un numero estilo moneda
 	darFormatoNum: function(moneda, prefix, conSigno){
 		var precio = '' + parseFloat(moneda),
@@ -9,7 +20,7 @@ var util = {
 		aux = '';
 		prefix = prefix==undefined? '$': prefix;
 		conSigno = (conSigno==false)?false:true;
-		
+
 		if(precio.indexOf('.')!=-1){
 			posini = precio.indexOf('.')-1;
 			entero = false;
@@ -17,7 +28,7 @@ var util = {
 			posini = (precio.length)-1;
 			entero = true;
 		}
-		
+
 		for(i=posini; i>=0; i-=1){
 			cont +=1;
 			aux = strPrecio;
@@ -28,7 +39,7 @@ var util = {
 				strPrecio = ',' + aux;
 			}
 		}
-		
+
 		if(entero==true)
 			strPrecio += '.00';
 		else{
@@ -47,38 +58,38 @@ var util = {
 		//Función modulo, regresa el residuo de una división
 		mod: function(dividendo , divisor){
 			/*resDiv = dividendo / divisor ;
-			parteEnt = Math.floor(resDiv); // Obtiene la parte Entera de resDiv 
+			parteEnt = Math.floor(resDiv); // Obtiene la parte Entera de resDiv
 			parteFrac = resDiv - parteEnt ; // Obtiene la parte Fraccionaria de la división
 			modulo = Math.round(parteFrac * divisor);  // Regresa la parte fraccionaria * la división (modulo)*/
-			modulo = parseInt(dividendo % divisor); 
-			return modulo; 
+			modulo = parseInt(dividendo % divisor);
+			return modulo;
 		},
 		// Función ObtenerParteEntDiv, regresa la parte entera de una división
-		ObtenerParteEntDiv: function(dividendo , divisor){ 
-			resDiv = dividendo / divisor ;  
-			parteEntDiv = Math.floor(resDiv); 
-			return parteEntDiv; 
+		ObtenerParteEntDiv: function(dividendo , divisor){
+			resDiv = dividendo / divisor ;
+			parteEntDiv = Math.floor(resDiv);
+			return parteEntDiv;
 		},
 		//regresa la parte Fraccionaria de una cantidad
 		fraction_part: function(dividendo , divisor){
 			resDiv = dividendo / divisor ;
 			f_part = Math.floor(resDiv);
-			return f_part; 
+			return f_part;
 		},
 		string_literal_conversion: function(number){
-			centenas = this.ObtenerParteEntDiv(number, 100); 
-			
+			centenas = this.ObtenerParteEntDiv(number, 100);
+
 			number = this.mod(number, 100);
-			
-			decenas = this.ObtenerParteEntDiv(number, 10); 
-			number = this.mod(number, 10); 
-			
-			unidades = this.ObtenerParteEntDiv(number, 1); 
-			number = this.mod(number, 1);  
+
+			decenas = this.ObtenerParteEntDiv(number, 10);
+			number = this.mod(number, 10);
+
+			unidades = this.ObtenerParteEntDiv(number, 1);
+			number = this.mod(number, 1);
 			string_hundreds="";
 			string_tens="";
 			string_units="";
-			
+
 			//Combierte la parte CIENTOS
 			switch(centenas){
 				case 1: string_hundreds = "ciento "; break;
@@ -91,7 +102,7 @@ var util = {
 				case 8: string_hundreds = "ochocientos "; break;
 				case 9: string_hundreds = "novecientos "; break;
 			}
-			
+
 			//combierte la parte DECENAS
 			switch(decenas){
 				case 1:
@@ -116,9 +127,9 @@ var util = {
 				case 8: string_tens = "ochenta"; break;
 				case 9: string_tens = "noventa"; break;
 			}
-			
+
 			//combierte la parte de UNIDADES
-			if (decenas == 1){ 
+			if (decenas == 1){
 				string_units="";
 			}else{
 				switch(unidades){
@@ -133,21 +144,21 @@ var util = {
 					case 9: string_units = "nueve"; break;
 				}
 			}
-			
+
 			//Ajustes de algunas fraces
-			if (centenas == 1 && decenas == 0 && unidades == 0){ 
-				string_hundreds = "cien " ; 
-			} 
+			if (centenas == 1 && decenas == 0 && unidades == 0){
+				string_hundreds = "cien " ;
+			}
 			if (decenas == 1 && unidades ==0){
-				string_tens = "diez " ; 
-			} 
+				string_tens = "diez " ;
+			}
 			if (decenas == 2 && unidades ==0){
-				string_tens = "veinte " ; 
+				string_tens = "veinte " ;
 			}
 			if (decenas >=3 && unidades >=1){
-				string_tens = string_tens+" y "; 
+				string_tens = string_tens+" y ";
 			}
-			
+
 			final_string = string_hundreds+string_tens+string_units;
 			return final_string ;
 		},
@@ -164,44 +175,44 @@ var util = {
 			if (number == 0 || number == ""){
 				centenas_final_string=" cero ";
 			}else{
-				millions  = this.ObtenerParteEntDiv(number, 1000000); 
-				number = this.mod(number, 1000000); 
-			
-				if (millions != 0){ 
-					if (millions == 1){ 
+				millions  = this.ObtenerParteEntDiv(number, 1000000);
+				number = this.mod(number, 1000000);
+
+				if (millions != 0){
+					if (millions == 1){
 						descriptor= " millon ";
-					}else{ 
-						descriptor = " millones "; 
+					}else{
+						descriptor = " millones ";
 					}
 				}else{
 					descriptor = " ";
 				}
-				millions_final_string = this.string_literal_conversion(millions)+descriptor; 
-			
-			
-				thousands = this.ObtenerParteEntDiv(number, 1000); 
-				number = this.mod(number, 1000); 
+				millions_final_string = this.string_literal_conversion(millions)+descriptor;
+
+
+				thousands = this.ObtenerParteEntDiv(number, 1000);
+				number = this.mod(number, 1000);
 				//print "Th:".thousands;
-				if (thousands != 1){ 
-					thousands_final_string = this.string_literal_conversion(thousands) + " mil "; 
+				if (thousands != 1){
+					thousands_final_string = this.string_literal_conversion(thousands) + " mil ";
 				}
 				if(thousands == 1){
-					thousands_final_string = " mil "; 
+					thousands_final_string = " mil ";
 				}
 				if (thousands < 1){
-					thousands_final_string = " "; 
+					thousands_final_string = " ";
 				}
-				
+
 				centenas = number;
 				centenas_final_string = this.string_literal_conversion(centenas);
-			
+
 			}
 			/* Concatena los millones, miles y cientos*/
-			cad = millions_final_string+thousands_final_string+centenas_final_string; 
-			
+			cad = millions_final_string+thousands_final_string+centenas_final_string;
+
 			/* Convierte la cadena a Mayúsculas*/
 			cad = cad.toUpperCase();
-			
+
 			if (centavos.length>2){
 				if(centavos.substring(2,3)>= 5){
 					centavos = centavos.substring(0,1)+(parseInt(centavos.substring(1,2))+1).toString();
@@ -215,8 +226,8 @@ var util = {
 				centavos += "0";
 			}
 			centavos += "/100";
-			
-			
+
+
 			/* Asigna el tipo de moneda, para 1 = PESO, para distinto de 1 = PESOS*/
 			if (number == 1){
 				moneda = " PESO ";

@@ -1,9 +1,20 @@
  FACTURACION:
 
-     ☐ Como el de diatomeas el diseño, cambiando la parte del listado de productos/description con las cajas adentro
-     ☐ Los productos son las clasificaciones o agregar descripciones.
+     ✔ Como el de diatomeas el diseño, cambiando la parte del listado de productos/descripcion con las cajas adentro @done (13-07-17 18:06)
+     ✔ Los productos son las clasificaciones o agregar descripciones. @done (13-07-17 18:06)
      ☐ validar al agregar la factura que el certificado no halla caducado y que los folios esten vigentes (2 años apartir de la fecha de aprobacion)
-     ☐ quitar el descuento.
+     ✔ quitar el descuento. @done (13-07-17 18:06)
+     ✔ Series y Folios, quitar imagen. @done (13-07-17 11:06)
+
+     ✔ Agregarle el campo plazo de credito en clientes, @done (13-07-17 19:45)
+         dias_credito integer NOT NULL DEFAULT 0,
+     ☐  Agregar el campo de rentencion en la bdd
+
+     ☐ Formulario
+         ☐ Plazo de credito, que cargue el del cliente y se pueda editar.
+         ☐ version (oculto), que cargue el de la empresa seleccionada
+         ☐ tipo comprobante, ingreso o egreso (select)
+         ☐
 
  CHOFERES:
      ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
