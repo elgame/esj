@@ -154,6 +154,27 @@
 	              </div> <!--/span-->
 
 	              <div class="clearfix"></div>
+								
+	              <fieldset>
+	              	<legend>Documentos del cliente</legend>
+							<?php
+							$ul1 = $ul2 = '';
+							foreach ($documentos['documentos'] as $key => $value) {
+								if($key % 2 == 0)
+									$ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
+								else
+									$ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
+							}
+							?>
+									<ul class="span6">
+										<?php echo $ul1; ?>
+									</ul>
+									<ul class="span6" style="margin-left: 0px;">
+										<?php echo $ul2; ?>
+									</ul>
+	              </fieldset>
 
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>

@@ -669,6 +669,7 @@ class Bascula_model extends CI_Model {
       $pdf->SetFont('helvetica','', 8);
 
       $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
+      $aligns1 = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'R', 'R');
       $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
       $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
                       'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
@@ -742,30 +743,30 @@ class Bascula_model extends CI_Model {
                          $caja->folio,
                          $caja->cuenta_cpi,
                          substr($caja->proveedor, 0, 35),
-                         $caja->promedio,
+                         String::formatoNumero($caja->promedio, 2, '$', false),
                          $caja->cajas,
                          $caja->kilos,
-                         String::formatoNumero($caja->precio),
-                         String::formatoNumero($caja->importe));
+                         String::formatoNumero($caja->precio, 2, '$', false),
+                         String::formatoNumero($caja->importe, 2, '$', false));
 
           $pdf->SetY($pdf->GetY()-2);
           $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
+          $pdf->SetAligns($aligns1);
           $pdf->SetWidths($widths);
           $pdf->Row($datos, false, false);
         }
 
         $pdf->SetY($pdf->GetY()-1);
         $pdf->SetX(6);
-        $pdf->SetAligns(array('R', 'C', 'C', 'C', 'C', 'C'));
+        $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
         $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
         $pdf->Row(array(
           'TOTALES',
-          String::formatoNumero($kilos/$cajas, 2, ''),
+          String::formatoNumero($kilos/$cajas, 2, '', false),
           $cajas,
           $kilos,
-          String::formatoNumero($precio/count($calidad['cajas'])),
-          String::formatoNumero($importe)), false, false);
+          String::formatoNumero($precio/count($calidad['cajas']), 2, '$', false),
+          String::formatoNumero($importe, 2, '$', false)), false, false);
 
       }
 

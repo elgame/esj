@@ -96,7 +96,8 @@ class clientes_model extends CI_Model {
 		}
 
 		$this->db->insert('clientes', $data);
-		// $id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
+		$id_cliente = $this->db->insert_id('clientes', 'id_cliente');
+		$this->addDocumentos($id_cliente);
 
 		return array('error' => FALSE);
 	}
@@ -133,7 +134,31 @@ class clientes_model extends CI_Model {
 
 		$this->db->update('clientes', $data, array('id_cliente' => $id_cliente));
 
+		$this->db->delete('clientes_documentos', array('id_cliente' => $id_cliente));
+		$this->addDocumentos($id_cliente);
+
 		return array('error' => FALSE);
+	}
+
+	public function addDocumentos($id_cliente, $data=null){
+		$data = array();
+
+		if ($data==NULL)
+		{
+			if(is_array($this->input->post('documentos')))
+			{
+				foreach ($this->input->post('documentos') as $key => $docu) 
+				{
+					$data[] = array(
+							'id_cliente'   => $id_cliente,
+							'id_documento' => $docu
+							);
+				}
+			}
+		}
+
+		if(count($data) > 0)
+			$this->db->insert_batch('clientes_documentos', $data);
 	}
 
 	/**
@@ -157,8 +182,14 @@ class clientes_model extends CI_Model {
 			$data['info']	= $sql_res->row();
 		$sql_res->free_result();
 
+		$data['docus'] = array();
 		if ($basic_info == False) {
-
+			$sql_res = $this->db->select("id_cliente, id_documento" )
+													->from("clientes_documentos")
+													->where("id_cliente", $id_cliente)
+													->get();
+			$data['docus'] = $sql_res->result();
+			$sql_res->free_result();
 		}
 
 		return $data;

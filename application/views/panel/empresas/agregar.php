@@ -14,7 +14,7 @@
 				</ul>
 			</div>
 
-			<form action="<?php echo base_url('panel/empresas/agregar'); ?>" method="post" class="form-horizontal">
+			<form action="<?php echo base_url('panel/empresas/agregar'); ?>" method="post" class="form-horizontal" enctype="multipart/form-data">
 				<div class="row-fluid">
 					<div class="box span12">
 						<div class="box-header well" data-original-title>
@@ -133,6 +133,43 @@
 											<label class="control-label" for="dlogo">Logo:</label>
 											<div class="controls">
 												<input type="file" name="dlogo" id="dlogo" class="span12">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dcer_org">Certificado .CER:</label>
+											<div class="controls">
+												<input type="file" name="dcer_org" id="dcer_org" class="span12">
+											</div>
+										</div>
+
+										<!-- <div class="control-group">
+											<label class="control-label" for="dcer">Certificado .PEM:</label>
+											<div class="controls">
+												<input type="file" name="dcer" id="dcer" class="span12">
+											</div>
+										</div> -->
+
+										<div class="control-group">
+											<label class="control-label" for="dkey_path">Llave .PEM:</label>
+											<div class="controls">
+												<input type="file" name="dkey_path" id="dkey_path" class="span12">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dpass">Clave:</label>
+											<div class="controls">
+												<input type="text" name="dpass" id="dpass" class="span12" 
+													value="<?php echo set_value('dpass'); ?>" maxlength="20">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dcfdi_version">Version CFDI:</label>
+											<div class="controls">
+												<input type="text" name="dcfdi_version" id="dcfdi_version" class="span12" 
+													value="<?php echo set_value('dcfdi_version'); ?>" maxlength="6">
 											</div>
 										</div>
 

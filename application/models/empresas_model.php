@@ -97,6 +97,31 @@ class empresas_model extends CI_Model{
 			$path_img = APPPATH.'images/empresas/'.$upload_res[1]['file_name'];
 		}
 
+		//certificado
+		$dcer_org   = '';
+		$dcer       = '';
+		$cer_caduca = '';
+		$upload_res = UploadFiles::uploadFile('dcer_org');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			$dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
+			//se genera el archivo cer.pem
+			$certificateCAcerContent = file_get_contents($dcer_org);
+			$certificateCApemContent =  '-----BEGIN CERTIFICATE-----'.PHP_EOL
+			.chunk_split(base64_encode($certificateCAcerContent), 64, PHP_EOL)
+			.'-----END CERTIFICATE-----'.PHP_EOL;
+			$dcer = $dcer_org.'.pem';
+			file_put_contents($dcer, $certificateCApemContent);
+			//se obtiene la fecha que caduca el certificado
+			$this->load->library('cfdi');
+			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
+		}
+		//llave
+		$dkey_path = '';
+		$upload_res = UploadFiles::uploadFile('dkey_path');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			$dkey_path = APPPATH.'CFDI/certificados/'.$upload_res;
+		}
+
 		$data = array(
 			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
 			'calle'          => $this->input->post('dcalle'),
@@ -112,7 +137,13 @@ class empresas_model extends CI_Model{
 			'email'          => $this->input->post('demail'),
 			'pag_web'        => $this->input->post('dpag_web'),
 			'logo'           => $path_img,
-			'regimen_fiscal' => $this->input->post('dregimen_fiscal')
+			'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
+			'cer_org'        => $dcer_org,
+			'cer'            => $dcer,
+			'key_path'       => $dkey_path,
+			'pass'           => $this->input->post('dpass'),
+			'cfdi_version'   => $this->input->post('dcfdi_version'),
+			'cer_caduca'     => $cer_caduca,
 		);
 		$this->db->insert('empresas', $data);
 
@@ -140,6 +171,37 @@ class empresas_model extends CI_Model{
 			$path_img = APPPATH.'images/empresas/'.$upload_res[1]['file_name'];
 		}
 
+		//certificado
+		$dcer_org   = (isset($info['info']->cer_org)? $info['info']->cer_org: '');
+		$dcer       = (isset($info['info']->cer)? $info['info']->cer: '');
+		$cer_caduca = (isset($info['info']->cer_caduca)? $info['info']->cer_caduca: '');
+		$upload_res = UploadFiles::uploadFile('dcer_org');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			if($dcer_org != '' && strpos($dcer_org, $upload_res) === false){
+				UploadFiles::deleteFile($dcer_org);
+				UploadFiles::deleteFile($dcer);
+			}
+			$dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
+			//se genera el archivo cer.pem
+			$certificateCAcerContent = file_get_contents($dcer_org);
+			$certificateCApemContent =  '-----BEGIN CERTIFICATE-----'.PHP_EOL
+			.chunk_split(base64_encode($certificateCAcerContent), 64, PHP_EOL)
+			.'-----END CERTIFICATE-----'.PHP_EOL;
+			$dcer = $dcer_org.'.pem';
+			file_put_contents($dcer, $certificateCApemContent);
+			//se obtiene la fecha que caduca el certificado
+			$this->load->library('cfdi');
+			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
+		}
+		//llave
+		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
+		$upload_res = UploadFiles::uploadFile('dkey_path');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			if($dkey_path != '' && strpos($dkey_path, $upload_res) === false)
+				UploadFiles::deleteFile($dkey_path);
+			$dkey_path = APPPATH.'CFDI/certificados/'.$upload_res;
+		}
+
 		$data = array(
 			'nombre_fiscal'  => $this->input->post('dnombre_fiscal'),
 			'calle'          => $this->input->post('dcalle'),
@@ -155,7 +217,13 @@ class empresas_model extends CI_Model{
 			'email'          => $this->input->post('demail'),
 			'pag_web'        => $this->input->post('dpag_web'),
 			'logo'           => $path_img,
-			'regimen_fiscal' => $this->input->post('dregimen_fiscal')
+			'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
+			'cer_org'        => $dcer_org,
+			'cer'            => $dcer,
+			'key_path'       => $dkey_path,
+			'pass'           => $this->input->post('dpass'),
+			'cfdi_version'   => $this->input->post('dcfdi_version'),
+			'cer_caduca'     => $cer_caduca,
 		);
 		$this->db->update('empresas', $data, "id_empresa = '".$_GET['id']."'");
 

@@ -108,6 +108,8 @@ VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
 				redirect(base_url('panel/clientes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
 
+		$this->load->model('documentos_model');
+		$params['documentos'] = $this->documentos_model->getDocumentos();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -155,7 +157,10 @@ VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
 					redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
-			$params['data'] = $this->clientes_model->getClienteInfo();
+			$params['cliente'] = $this->clientes_model->getClienteInfo();
+
+			$this->load->model('documentos_model');
+			$params['documentos'] = $this->documentos_model->getDocumentos();
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -269,6 +274,10 @@ VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),
+
+			array('field' => 'documentos[]',
+						'label' => 'Documentos del cliente',
+						'rules' => 'is_natural_no_zero'),
 		);
 
 		$this->form_validation->set_rules($rules);
