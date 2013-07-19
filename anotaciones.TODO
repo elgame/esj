@@ -17,7 +17,7 @@
                   color character varying(15),
 
 2013-07-12
-  ☐ SQL
+  ✔ SQL @done (13-07-19 13:31)
       -Agregar los campos en empresas
         cer_org character varying(90),
         cer character varying(90),
@@ -25,6 +25,9 @@
         pass character varying(20),
         cfdi_version character varying(6) NOT NULL DEFAULT 3.2,
         cer_caduca date,
+
+        -Agregar los campos en clientes
+        dias_credito integer NOT NULL DEFAULT 0,
 
         CREATE TABLE lineas_transporte
         (

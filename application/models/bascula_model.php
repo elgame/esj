@@ -743,7 +743,7 @@ class Bascula_model extends CI_Model {
                          $caja->folio,
                          $caja->cuenta_cpi,
                          substr($caja->proveedor, 0, 35),
-                         String::formatoNumero($caja->promedio, 2, '$', false),
+                         String::formatoNumero($caja->promedio, 2, '', false),
                          $caja->cajas,
                          $caja->kilos,
                          String::formatoNumero($caja->precio, 2, '$', false),

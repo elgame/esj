@@ -92,6 +92,7 @@ class clientes_model extends CI_Model {
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'dias_credito'   => $this->input->post('fdias_credito'),
 						);
 		}
 
@@ -129,6 +130,7 @@ class clientes_model extends CI_Model {
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'dias_credito'   => $this->input->post('fdias_credito'),
 						);
 		}
 
@@ -172,7 +174,7 @@ class clientes_model extends CI_Model {
 		$id_cliente = (isset($_GET['id']))? $_GET['id']: $id_cliente;
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status" )
+														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();

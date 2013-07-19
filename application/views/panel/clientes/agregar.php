@@ -151,6 +151,14 @@
 									  </div>
 									</div>
 
+									<div class="control-group">
+									  <label class="control-label" for="fdias_credito">Dias de credito </label>
+									  <div class="controls">
+											<input type="text" name="fdias_credito" id="fdias_credito" class="span12" value="<?php echo set_value('fdias_credito'); ?>"
+												maxlength="12" placeholder="0, 15, 30">
+									  </div>
+									</div>
+
 	              </div> <!--/span-->
 
 	              <div class="clearfix"></div>
