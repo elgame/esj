@@ -36,7 +36,8 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_next_folio/',
     'bascula/ajax_load_folio/',
 
-    'bascula/imprimir2/'
+    'bascula/imprimir2/',
+    'bascula/rmc_pdf2/',
     );
 
   public function _remap($method){
@@ -569,6 +570,13 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rmc_pdf();
+  }
+  public function rmc_pdf2()
+  {
+    $this->load->model('bascula_model');
+
+    $params['data'] = $this->bascula_model->getMovimientos();
+    $this->load->view('panel/bascula/reportes/rmc', $params);
   }
 
   /**

@@ -38,6 +38,7 @@ class home extends MY_Controller {
 		// $this->load->model('cajas_model');
 		// $params['inventario'] = $this->cajas_model->get_inventario('15', 'total_debe DESC')['inventario'];
 		
+
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/general/home', $params);

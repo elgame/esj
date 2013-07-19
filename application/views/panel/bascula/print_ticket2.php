@@ -20,6 +20,7 @@
 
 		body{
 			font-size: 9pt;
+			margin-left: 3pt;
 		}
 		h2{
 			font-size: 10pt;
@@ -40,6 +41,7 @@
 		.br_top{ border-top: 1px #000 solid; }
 
 		.font7{ font-size: 7pt;}
+		.font7_5{ font-size: 7.5pt;}
 		.font8{ font-size: 8pt;}
 		.font9{ font-size: 9pt;}
 
@@ -53,6 +55,14 @@
 			/*border: 1px red solid;*/
 		}
 	</style>
+	<script type="text/javascript">
+		window.onload=function(){
+			window.print();
+			window.close();
+			// window.onfocus=function(){window.close();}
+		};
+		// window.print();
+	</script>
 </head>
 <body>
 	<?php 
@@ -67,7 +77,7 @@
 				<td>
 					<table class="br_top">
 						<tr>
-							<td class="td50">NO. BOLETA: <?php echo $data['info'][0]->folio; ?></td>
+							<td class="td50 font8">NO. BOLETA: <?php echo $data['info'][0]->folio; ?></td>
 							<td class="td50">FECHA: <?php echo substr($data['info'][0]->fecha_bruto, 0, 10); ?></td>
 						</tr>
 					</table>
@@ -78,7 +88,7 @@
 				<td>
 					<table>
 						<tr>
-							<td class="td30">BRUTO :</td>
+							<td class="td30 font8">BRUTO :</td>
 							<td class="td40"><?php echo String::formatoNumero($data['info'][0]->kilos_bruto, 2, ''); ?></td>
 							<td class="td30"><?php echo substr($data['info'][0]->fecha_bruto, -11, -3); ?></td>
 						</tr>
@@ -89,7 +99,7 @@
 				<td>
 					<table>
 						<tr>
-							<td class="td30">TARA :</td>
+							<td class="td30 font8">TARA :</td>
 							<td class="td40"><?php echo String::formatoNumero($data['info'][0]->kilos_tara, 2, ''); ?></td>
 							<td class="td30"><?php echo substr($data['info'][0]->fecha_tara, -11, -3); ?></td>
 						</tr>
@@ -110,7 +120,7 @@
 
 			<tr>
 				<td>
-					<table class="font7">
+					<table class="font8">
 						<tr class="br_bottom">
 							<td>CJS</td>
 							<td>LIMON</td>
