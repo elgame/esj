@@ -1,20 +1,23 @@
  FACTURACION:
 
+     ☐ Checar con el gama si estan bien los parametros de la cadena original y ver lo del sello que no lo genera.
+
+     ✔ Que cargue la empresa por default. @done (13-07-18 10:19)
      ✔ Como el de diatomeas el diseño, cambiando la parte del listado de productos/descripcion con las cajas adentro @done (13-07-17 18:06)
      ✔ Los productos son las clasificaciones o agregar descripciones. @done (13-07-17 18:06)
-     ☐ validar al agregar la factura que el certificado no halla caducado y que los folios esten vigentes (2 años apartir de la fecha de aprobacion)
+     ✔ validar al agregar la factura que el certificado no halla caducado y que los folios esten vigentes (2 años apartir de la fecha de aprobacion) @done (13-07-18 10:19)
      ✔ quitar el descuento. @done (13-07-17 18:06)
      ✔ Series y Folios, quitar imagen. @done (13-07-17 11:06)
 
      ✔ Agregarle el campo plazo de credito en clientes, @done (13-07-17 19:45)
          dias_credito integer NOT NULL DEFAULT 0,
-     ☐  Agregar el campo de rentencion en la bdd
+     ✔  Agregar el campo de rentencion en la bdd @done (13-07-18 10:22)
+             retencion_iva double precision NOT NULL DEFAULT 0
 
      ☐ Formulario
-         ☐ Plazo de credito, que cargue el del cliente y se pueda editar.
-         ☐ version (oculto), que cargue el de la empresa seleccionada
-         ☐ tipo comprobante, ingreso o egreso (select)
-         ☐
+         ✔ Plazo de credito, que cargue el del cliente y se pueda editar. @done (13-07-18 10:33)
+         ✔ version (oculto), que cargue el de la empresa seleccionada @done (13-07-18 10:33)
+         ✔ tipo comprobante, ingreso o egreso (select) @done (13-07-18 17:39)
 
  CHOFERES:
      ✔ Agregar los campos faltantes. @done (13-07-15 17:52)

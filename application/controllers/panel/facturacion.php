@@ -12,12 +12,13 @@ class facturacion extends MY_Controller {
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
 
-    'facturacion/ajax_get_clasificaciones/'
+    'facturacion/ajax_get_clasificaciones/',
+    'facturacion/ajax_get_empresas_fac/'
   );
 
 
-  public function _remap($method){
-
+  public function _remap($method)
+  {
     $this->load->model("usuarios_model");
     if($this->usuarios_model->checkSession()){
       $this->usuarios_model->excepcion_privilegio = $this->excepcion_privilegio;
@@ -58,8 +59,16 @@ class facturacion extends MY_Controller {
 
   /**
    * Agrega una factura a la bd
+   *
+   * @return void
    */
-  public function agregar(){
+  public function agregar()
+  {
+    // echo "<pre>";
+    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', "\tHola\tMundo\t\t\t    \rCruel\r"), " "), " "), "Hola\tMundo\t\t\t    \rCruel\n");
+    // echo "</pre>";
+    // exit;
+
     $this->carabiner->js(array(
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
@@ -75,22 +84,43 @@ class facturacion extends MY_Controller {
     if(isset($_GET['ordent']{0}))
       $this->asignaOrdenTrabajo($_GET['ordent']);
 
-    $this->configAddModFactura();
+    $this->load->library('cfdi');
     $this->load->model('facturacion_model');
 
-    if($this->form_validation->run() == FALSE){
+    $this->configAddModFactura();
+    if($this->form_validation->run() == FALSE)
+    {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-    }else{
+    }
+    else
+    {
       $respons = $this->facturacion_model->addFactura();
+
       if($respons[0])
         redirect(base_url('panel/facturacion/agregar/?msg=4&id='.$respons[2]));
     }
 
     $params['series'] = $this->facturacion_model->getSeriesFolios(100);
-    $params['fecha']  = date("Y-m-d");
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     if (isset($_GET['id']))
+    {
       $params['id'] = $_GET['id'];
+    }
+    else
+    {
+      // Obtiene los datos de la empresa predeterminada.
+      $params['empresa_default'] = $this->db
+        ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, ef.version, e.cer_org")
+        ->from("empresas AS e")
+        ->join("empresas_fiscal AS ef", "ef.id_empresa = e.id_empresa", "join")
+        ->where("e.predeterminado", "t")
+        ->get()
+        ->row();
+
+      // Obtiene el numero de certificado de la empresa predeterminada.
+      $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
+    }
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -126,129 +156,142 @@ class facturacion extends MY_Controller {
   /**
    * Configura los metodos de agregar y modificar
    */
-  private function configAddModFactura(){
+  private function configAddModFactura()
+  {
     $this->load->library('form_validation');
     $rules = array(
 
         array('field'   => 'did_empresa',
-            'label'   => 'Empresa',
-            'rules'   => 'required|max_length[25]'),
+              'label'   => 'Empresa',
+              'rules'   => 'required|max_length[25]'),
         array('field'   => 'did_cliente',
-            'label'   => 'Cliente',
-            'rules'   => 'required|max_length[25]'),
+              'label'   => 'Cliente',
+              'rules'   => 'required|max_length[25]'),
         array('field'   => 'dserie',
-            'label'   => 'Serie',
-            'rules'   => 'max_length[25]'),
+              'label'   => 'Serie',
+              'rules'   => 'max_length[25]'),
         array('field'   => 'dfolio',
-            'label'   => 'Folio',
-            'rules'   => 'required|numeric|callback_seriefolio_check'),
+              'label'   => 'Folio',
+              'rules'   => 'required|numeric|callback_seriefolio_check'),
         array('field'   => 'dno_aprobacion',
-            'label'   => 'Numero de aprobacion',
-            'rules'   => 'required|numeric'),
+              'label'   => 'Numero de aprobacion',
+              'rules'   => 'required|numeric'),
         array('field'   => 'dano_aprobacion',
-            'label'   => 'Fecha de aprobacion',
-            'rules'   => 'required|max_length[10]|callback_isValidDate'),
-        // array('field'   => 'dimg_cbb',
-        //     'label'   => 'Imagen CBB',
-        //     'rules'   => 'required|max_length[60]'),
+              'label'   => 'Fecha de aprobacion',
+              'rules'   => 'required|max_length[10]|callback_isValidDate'),
+
         array('field'   => 'dfecha',
-            'label'   => 'Fecha',
-            'rules'   => 'required|max_length[10]|callback_isValidDate'),
+              'label'   => 'Fecha',
+              'rules'   => 'required|max_length[25]'), //|callback_isValidDate
 
         array('field'   => 'total_importe',
-            'label'   => 'SubTotal1',
-            'rules'   => 'required|numeric'),
+              'label'   => 'SubTotal1',
+              'rules'   => 'required|numeric'),
         array('field'   => 'total_subtotal',
-            'label'   => 'SubTotal',
-            'rules'   => 'required|numeric'),
+              'label'   => 'SubTotal',
+              'rules'   => 'required|numeric'),
 
         array('field'   => 'total_descuento',
-            'label'   => 'Descuento',
-            'rules'   => 'required|numeric'),
+              'label'   => 'Descuento',
+              'rules'   => 'required|numeric'),
         array('field'   => 'total_iva',
-            'label'   => 'IVA',
-            'rules'   => 'required|numeric'),
+              'label'   => 'IVA',
+              'rules'   => 'required|numeric'),
         array('field'   => 'total_retiva',
-            'label'   => 'Retencion IVA',
-            'rules'   => 'required|numeric'),
+              'label'   => 'Retencion IVA',
+              'rules'   => 'required|numeric'),
         array('field'   => 'total_totfac',
-            'label'   => 'Total',
-            'rules'   => 'required|numeric|callback_val_total'),
+              'label'   => 'Total',
+              'rules'   => 'required|numeric|callback_val_total'),
         array('field'   => 'dforma_pago',
-            'label'   => 'Forma de pago',
-            'rules'   => 'required|max_length[80]'),
+              'label'   => 'Forma de pago',
+              'rules'   => 'required|max_length[80]'),
         array('field'   => 'dmetodo_pago',
-            'label'   => 'Metodo de pago',
-            'rules'   => 'required|max_length[40]'),
+              'label'   => 'Metodo de pago',
+              'rules'   => 'required|max_length[40]'),
         array('field'   => 'dmetodo_pago_digitos',
-            'label'   => 'Ultimos 4 digitos',
-            'rules'   => 'max_length[20]'),
+              'label'   => 'Ultimos 4 digitos',
+              'rules'   => 'max_length[20]'),
         array('field'   => 'dcondicion_pago',
-            'label'   => 'Condición de pago',
-            'rules'   => 'required|max_length[2]'),
-        // array('field'   => 'dplazo_credito',
-        //     'label'   => 'Plazo de crédito',
-        //     'rules'   => 'required|numeric'),
+              'label'   => 'Condición de pago',
+              'rules'   => 'required|max_length[2]'),
+
+        array('field'   => 'dplazo_credito',
+            'label'   => 'Plazo de crédito',
+            'rules'   => 'numeric'),
 
         array('field'   => 'dempresa',
-            'label'   => 'Empresa',
-            'rules'   => ''),
+              'label'   => 'Empresa',
+              'rules'   => ''),
         array('field'   => 'dcliente',
-            'label'   => 'Cliente',
-            'rules'   => ''),
+              'label'   => 'Cliente',
+              'rules'   => ''),
         array('field'   => 'dcliente_rfc',
-            'label'   => 'Cliente',
-            'rules'   => ''),
+              'label'   => 'Cliente',
+              'rules'   => ''),
         array('field'   => 'dcliente_domici',
-            'label'   => 'Cliente',
-            'rules'   => ''),
+              'label'   => 'Cliente',
+              'rules'   => ''),
         array('field'   => 'dcliente_ciudad',
-            'label'   => 'Cliente',
-            'rules'   => ''),
+              'label'   => 'Cliente',
+              'rules'   => ''),
         array('field'   => 'dttotal_letra',
-            'label'   => 'letra',
-            'rules'   => ''),
+              'label'   => 'letra',
+              'rules'   => ''),
         array('field'   => 'dreten_iva',
-            'label'   => 'Retecion IVA',
-            'rules'   => ''),
+              'label'   => 'Retecion IVA',
+              'rules'   => ''),
 
         array('field'   => 'prod_did_prod[]',
-            'label'   => 'prod_did_prod',
-            'rules'   => ''),
+              'label'   => 'prod_did_prod',
+              'rules'   => ''),
         array('field'   => 'prod_dcantidad[]',
-            'label'   => 'prod_dcantidad',
-            'rules'   => ''),
+              'label'   => 'prod_dcantidad',
+              'rules'   => ''),
         array('field'   => 'prod_ddescripcion[]',
-            'label'   => 'prod_ddescripcion',
-            'rules'   => ''),
+              'label'   => 'prod_ddescripcion',
+              'rules'   => ''),
         array('field'   => 'prod_ddescuento[]',
-            'label'   => 'prod_ddescuento',
-            'rules'   => ''),
+              'label'   => 'prod_ddescuento',
+              'rules'   => ''),
         array('field'   => 'prod_ddescuento_porcent[]',
-            'label'   => 'prod_ddescuento_porcent',
-            'rules'   => ''),
+              'label'   => 'prod_ddescuento_porcent',
+              'rules'   => ''),
         array('field'   => 'prod_dpreciou[]',
-            'label'   => 'prod_dpreciou',
-            'rules'   => ''),
+              'label'   => 'prod_dpreciou',
+              'rules'   => ''),
         array('field'   => 'prod_importe[]',
-            'label'   => 'prod_importe',
-            'rules'   => ''),
+              'label'   => 'prod_importe',
+              'rules'   => ''),
         array('field'   => 'prod_diva_total[]',
-            'label'   => 'prod_diva_total',
-            'rules'   => ''),
+              'label'   => 'prod_diva_total',
+              'rules'   => ''),
         array('field'   => 'prod_dreten_iva_total[]',
-            'label'   => 'prod_dreten_iva_total',
-            'rules'   => ''),
+              'label'   => 'prod_dreten_iva_total',
+              'rules'   => ''),
         array('field'   => 'prod_dreten_iva_porcent[]',
-            'label'   => 'prod_dreten_iva_porcent',
-            'rules'   => ''),
+              'label'   => 'prod_dreten_iva_porcent',
+              'rules'   => ''),
         array('field'   => 'prod_diva_porcent[]',
-            'label'   => 'prod_diva_porcent',
-            'rules'   => ''),
+              'label'   => 'prod_diva_porcent',
+              'rules'   => ''),
         array('field'   => 'prod_dmedida[]',
-            'label'   => 'prod_dmedida',
-            'rules'   => ''),
+              'label'   => 'prod_dmedida',
+              'rules'   => ''),
 
+        array('field'   => 'dversion',
+              'label'   => '',
+              'rules'   => ''),
+        array('field'   => 'dcer_caduca',
+              'label'   => 'Empresa',
+              'rules'   => 'callback_chk_cer_caduca'),
+
+        array('field'   => 'dno_certificado',
+              'label'   => 'No. Certificado',
+              'rules'   => 'required'),
+        array('field'   => 'dtipo_comprobante',
+              'label'   => 'Tipo comproante',
+              'rules'   => 'required'),
     );
     $this->form_validation->set_rules($rules);
   }
@@ -532,6 +575,19 @@ class facturacion extends MY_Controller {
   }
 
 
+  public function chk_cer_caduca($date)
+  {
+    $hoy = date('Y-m-d');
+
+    if (strtotime($hoy) > strtotime($date))
+    {
+      $this->form_validation->set_message('chk_cer_caduca', 'El certificado de la empresa caducó, actualize la información de la misma.');
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Verifica que la serie y folio enviados del form no esten asignados a una
    * factura y tambien que esten vigentes.
@@ -588,13 +644,19 @@ class facturacion extends MY_Controller {
     return true;
   }
 
-  /**
-   *          SERIES Y FOLIOS
-   * ************************************************
-   *
-   * Permite administrar los series y folios para la facturacion
+   /*
+   |-------------------------------------------------------------------------
+   |  SERIES Y FOLIOS
+   |-------------------------------------------------------------------------
    */
-  public function series_folios(){
+
+  /**
+   * Permite administrar los series y folios para la facturacion
+   *
+   * @return void
+   */
+  public function series_folios()
+  {
     // $this->carabiner->css(array(
     //     array('general/forms.css','screen'),
     //     array('general/tables.css','screen')
@@ -691,7 +753,8 @@ class facturacion extends MY_Controller {
   /**
    * obtiene el folio siguiente de la serie seleccionada
    */
-  public function get_folio(){
+  public function get_folio()
+  {
     if(isset($_GET['serie']) && isset($_GET['ide']))
     {
       $this->load->model('facturacion_model');
@@ -706,7 +769,8 @@ class facturacion extends MY_Controller {
   /**
    * obtiene el folio siguiente de la serie seleccionada
    */
-  public function get_series(){
+  public function get_series()
+  {
     if(isset($_GET['ide']))
     {
       $this->load->model('facturacion_model');
@@ -717,7 +781,6 @@ class facturacion extends MY_Controller {
       echo json_encode($param);
     }
   }
-
 
   private function configAddSerieFolio($tipo='add')
   {
@@ -828,6 +891,16 @@ class facturacion extends MY_Controller {
       echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
    }
 
+  /**
+    * Obtiene listado de empresas por ajax
+    */
+  public function ajax_get_empresas_fac(){
+    $this->load->model('facturacion_model');
+    $params = $this->facturacion_model->getFacEmpresasAjax();
+
+    echo json_encode($params);
+  }
+
   /*
    |-------------------------------------------------------------------------
    |  REPORTES
@@ -882,6 +955,12 @@ class facturacion extends MY_Controller {
     $this->load->model('facturacion_model');
     $this->facturacion_model->rvp_pdf();
   }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  MESAJES ALERTAS
+   |-------------------------------------------------------------------------
+   */
 
   /**
    * Muestra mensajes cuando se realiza alguna accion

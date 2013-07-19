@@ -31,9 +31,11 @@
               <div class="control-group">
                 <label class="control-label" for="dempresa">Empresa</label>
                 <div class="controls">
-                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa'); ?>" size="73" autofocus>
-                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa'); ?>">
-                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion'); ?>">
+                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
+                  <input type="text" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa); ?>">
+                  <input type="text" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->version); ?>">
+                  <input type="text" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $empresa_default->cer_caduca); ?>">
+                  <input type="text" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $no_certificado); ?>">
                 </div>
               </div>
 
@@ -55,7 +57,7 @@
                 <div class="controls">
                   <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo set_value('dfolio', (isset($folio)? $folio[0]: '')); ?>" size="15" readonly>
 
-                  <input type="hidden" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
+                  <input type="text" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
                   <!-- <input type="hidden" name="dimg_cbb" id="dimg_cbb" value="<?php echo set_value('dimg_cbb'); ?>"> -->
                 </div>
               </div>
@@ -94,7 +96,7 @@
               <div class="control-group">
                 <label class="control-label" for="dfecha">Fecha</label>
                 <div class="controls">
-                  <input type="date" name="dfecha" class="span9" id="dfecha" value="<?php echo set_value('dfecha', $fecha); ?>" size="25">
+                  <input type="datetime-local" name="dfecha" class="span9" id="dfecha" value="<?php echo set_value('dfecha', $fecha); ?>" size="25">
                 </div>
               </div>
 
@@ -106,12 +108,29 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="dno_aprobacion">Tipo comprobante</label>
+                <div class="controls">
+                  <select name="dtipo_comprobante" class="span9" id="dtipo_comprobante">
+                    <option value="ingreso" <?php echo set_select('dtipo_comprobante', 'ingreso'); ?>>Ingreso</option>
+                    <option value="egreso" <?php echo set_select('dtipo_comprobante', 'egreso'); ?>>Egreso</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="dforma_pago">Forma de pago</label>
                 <div class="controls">
                   <select name="dforma_pago" class="span9" id="dforma_pago">
                     <option value="Pago en una sola exhibición" <?php echo set_select('dforma_pago', 'Pago en una sola exhibición'); ?>>Pago en una sola exhibición</option>
                     <option value="Pago en parcialidades" <?php echo set_select('dforma_pago', 'Pago en parcialidades'); ?>>Pago en parcialidades</option>
                   </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dforma_pago">Parcialidades</label>
+                <div class="controls">
+                  <input type="text" name="dforma_pago_parcialidad" class="span9" id="dforma_pago_parcialidad" value="<?php echo set_value('dforma_pago_parcialidad', 'Parcialidad 1 de X'); ?>">
                 </div>
               </div>
 
@@ -142,6 +161,13 @@
                     <option value="co" <?php echo set_select('dcondicion_pago', 'co'); ?>>Contado</option>
                     <option value="cr" <?php echo set_select('dcondicion_pago', 'cr'); ?>>Credito</option>
                   </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dcondicion_pago">Plazo de crédito</label>
+                <div class="controls">
+                  <input type="number" name="dplazo_credito" class="span9 vinteger" id="dplazo_credito" value="<?php echo set_value('dplazo_credito', 0); ?>">
                 </div>
               </div>
 

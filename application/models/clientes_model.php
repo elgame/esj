@@ -147,7 +147,7 @@ class clientes_model extends CI_Model {
 		{
 			if(is_array($this->input->post('documentos')))
 			{
-				foreach ($this->input->post('documentos') as $key => $docu) 
+				foreach ($this->input->post('documentos') as $key => $docu)
 				{
 					$data[] = array(
 							'id_cliente'   => $id_cliente,
@@ -172,7 +172,7 @@ class clientes_model extends CI_Model {
 		$id_cliente = (isset($_GET['id']))? $_GET['id']: $id_cliente;
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status" )
+														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();
@@ -206,7 +206,7 @@ class clientes_model extends CI_Model {
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
 		$res = $this->db->query("
-				SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
+				SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito
 				FROM clientes
 				WHERE status = 'ac' ".$sql."
 				ORDER BY nombre_fiscal ASC

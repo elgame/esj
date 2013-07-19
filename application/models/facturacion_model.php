@@ -5,14 +5,19 @@ class facturacion_model extends privilegios_model{
 		parent::__construct();
 	}
 
-
+  /*
+   |-------------------------------------------------------------------------
+   |  FACTURACION
+   |-------------------------------------------------------------------------
+   */
 
 	/**
-	 * 					FACTURACION
-	 * **********************************************
 	 * Obtiene el listado de facturas
+   *
+   * @return
 	 */
-	public function getFacturas($perpage = '40', $sql2=''){
+	public function getFacturas($perpage = '40', $sql2='')
+  {
 		$sql = '';
 		//paginacion
 		$params = array(
@@ -103,7 +108,8 @@ class facturacion_model extends privilegios_model{
 	/**
 	 * Obtiene el folio de acuerdo a la serie seleccionada
 	 */
-	public function getFolioSerie($serie, $empresa){
+	public function getFolioSerie($serie, $empresa)
+  {
 		$res = $this->db->select('folio')->
                       from('facturacion')->
                       where("serie = '".$serie."' AND id_empresa = ".$empresa)->
@@ -136,7 +142,8 @@ class facturacion_model extends privilegios_model{
   /**
    * Obtiene el folio de acuerdo a la serie seleccionada
    */
-  public function get_series_empresa($ide){
+  public function get_series_empresa($ide)
+  {
     $query = $this->db->select('id_serie_folio, id_empresa, serie, leyenda')->
                       from('facturacion_series_folios')->
                       where("id_empresa = ".$ide."")->
@@ -153,84 +160,217 @@ class facturacion_model extends privilegios_model{
     return array($res, $msg);
   }
 
+  /**
+   * Inicializa los datos que serviran para generar la cadena original
+   *
+   * @return array
+   */
+  private function datosCadenaOriginal()
+  {
+    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+
+    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+    // pago son las parcialidades "Parcialidad 1 de X".
+    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    // Si el metodo de pago no es en "efectivo" entonces obtiene los digitos.
+    $noCtaPago = '';
+    if($_POST['dmetodo_pago'] !== 'efectivo')
+    {
+      if($_POST['dmetodo_pago_digitos'] !== '' || $_POST['dmetodo_pago_digitos'] === 'No identificado')
+      {
+        $noCtaPago =  $this->input->post('dmetodo_pago_digitos');
+      }
+    }
+
+    // Obtiene los datos del receptor.
+    $cliente = $this->clientes_model->getClienteInfo($_POST['did_cliente'], true);
+
+    // Array con los datos necesarios para generar la cadena original.
+    $data = array(
+      'id_empresa'        => $this->input->post('did_empresa'),
+      'version'           => $this->input->post('dversion'),
+      'serie'             => $this->input->post('dserie'),
+      'folio'             => $this->input->post('dfolio'),
+      'fecha'             => $this->input->post('dfecha').date(':s'),
+      'noAprobacion'      => $this->input->post('dno_aprobacion'),
+      'anoAprobacion'     => $anoAprobacion[0],
+      'tipoDeComprobante' => $this->input->post('dtipo_comprobante'),
+      'formaDePago'       => $formaPago, //$this->input->post('dforma_pago'),
+      'condicionesDePago' => $this->input->post('dcondicion_pago'),
+      'subTotal'          => $this->input->post('total_subtotal'), //total_importe
+      'total'             => $this->input->post('total_totfac'),
+      'metodoDePago'      => $this->input->post('dmetodo_pago'),
+      'NumCtaPago'        => $noCtaPago,
+
+      'rfc'               => $cliente['info']->rfc,
+      'nombre'            => $cliente['info']->nombre_fiscal,
+      'calle'             => $cliente['info']->calle,
+      'noExterior'        => $cliente['info']->no_exterior,
+      'noInterior'        => $cliente['info']->no_interior,
+      'colonia'           => $cliente['info']->colonia,
+      'localidad'         => $cliente['info']->localidad,
+      'municipio'         => $cliente['info']->municipio,
+      'estado'            => $cliente['info']->estado,
+      'pais'              => 'MEXICO',
+      'codigoPostal'      => $cliente['info']->cp,
+
+      'concepto'          => array(),
+
+      'retencion'         => array(),
+      'totalImpuestosRetenidos' => 0,
+
+      'traslado'          => array(),
+      'totalImpuestosTrasladados' => 0
+    );
+
+    return $data;
+  }
+
 	/**
 	 * Agrega una factura a la bd
 	 */
-	public function addFactura(){
-		$status = ($this->input->post('dcondicion_pago')=='co'? 'pa': 'p');
+	public function addFactura()
+  {
+    $this->load->library('cfdi');
+    $this->load->model('clientes_model');
 
-		$data = array(
+    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+
+    // Si el metodo de pago no es en "efectivo" entonces obtiene los digitos.
+    $noCtaPago = '';
+    if($_POST['dmetodo_pago'] !== 'efectivo')
+    {
+      if($_POST['dmetodo_pago_digitos'] !== '' || $_POST['dmetodo_pago_digitos'] === 'No identificado')
+      {
+        $noCtaPago =  $this->input->post('dmetodo_pago_digitos');
+      }
+    }
+
+    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+    // pago son las parcialidades "Parcialidad 1 de X".
+    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
-      'id_usuario'          => $this->session->userdata('id_usuario'),
       'id_empresa'          => $this->input->post('did_empresa'),
-      // 'version'             => '3.2',
+      'version'             => $this->input->post('dversion'),
       'serie'               => $this->input->post('dserie'),
       'folio'               => $this->input->post('dfolio'),
-      'fecha'               => $this->input->post('dfecha'),
-
-      'subtotal'            => $this->input->post('total_importe'),
+      'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
+      'subtotal'            => $this->input->post('total_subtotal'),
       'importe_iva'         => $this->input->post('total_iva'),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
-      // 'retencion_iva'       => $this->input->post('total_retiva'),
-
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
-      'ano_aprobacion'      => $this->input->post('dano_aprobacion'),
-
-      // 'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-
-      'forma_pago'          => $this->input->post('dforma_pago'),
+      'ano_aprobacion'      => $anoAprobacion[0],
+      'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
+      'forma_pago'          => $formaPago,
       'metodo_pago'         => $this->input->post('dmetodo_pago'),
-      'metodo_pago_digitos' => $this->input->post('dmetodo_pago_digitos'),
-
-      // 'no_certificado' => $this->input->post('dmetodo_pago_digitos'),
-      // 'cadena_original' => $this->input->post('dmetodo_pago_digitos'),
-      // 'sello' => $this->input->post('dmetodo_pago_digitos'),
-      // 'certificado' => $this->input->post('dmetodo_pago_digitos'),
-
+      'metodo_pago_digitos' => $noCtaPago,
+      'no_certificado'      => $this->input->post('dno_certificado'),
+      'cadena_original'     => '',
+      'sello'               => '',
+      'certificado'         => '',
       'condicion_pago'      => $this->input->post('dcondicion_pago'),
-      // 'plazo_credito'       => $this->input->post('dplazo_credito'),
+      'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
+      'observaciones'       => '',
+      'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+      'retencion_iva'       => $this->input->post('total_retiva'),
+    );
 
-      'status'              => $status
-		);
+    $this->db->insert('facturacion', $datosFactura);
+    $idFactura = $this->db->insert_id();
 
-    // 'domicilio'           => $this->input->post('dcliente_domici'),
-    // 'ciudad'              => $this->input->post('dcliente_ciudad'),
+    // Obtiene los datos para la cadena original
+    $datosCadOrig = $this->datosCadenaOriginal();
 
-		$this->db->insert('facturas', $data);
-    $id_factura = $this->db->insert_id();
 
-    // $data_productos = array();
-    // foreach ($_POST['prod_did_prod'] as $k => $v)
-    // {
-    //   if ($_POST['prod_dreten_iva_porcent'][$k] === '0.04')
-    //     $porc_reten = 4;
-    //   elseif ($_POST['prod_dreten_iva_porcent'][$k] === '0.6666')
-    //     $porc_reten = 66.66;
-    //   elseif ($_POST['prod_dreten_iva_porcent'][$k] === '1')
-    //     $porc_reten = 100;
-    //   else
-    //     $porc_reten = 0;
+    $dataCliente = array(
+      'id_factura'  => $idFactura,
+      'nombre'      => $datosCadOrig['nombre'],
+      'rfc'         => $datosCadOrig['rfc'],
+      'calle'       => $datosCadOrig['calle'],
+      'no_exterior' => $datosCadOrig['noExterior'],
+      'no_interior' => $datosCadOrig['noInterior'],
+      'colonia'     => $datosCadOrig['colonia'],
+      'localidad'   => $datosCadOrig['localidad'],
+      'municipio'   => $datosCadOrig['municipio'],
+      'estado'      => $datosCadOrig['estado'],
+      'cp'          => $datosCadOrig['codigoPostal'],
+      'pais'        => $datosCadOrig['pais'],
+    );
+    $this->db->insert('facturacion_cliente', $dataCliente);
 
-    //   $importe_iva = (floatval($_POST['prod_dpreciou'][$k]) * floatval($_POST['prod_diva_porcent'])) / 100;
-    //   $descuento   = (floatval($_POST['prod_importe'][$k]) * floatval($_POST['prod_ddescuento_porcent'][$k])) / 100;
+    // Productos e Impuestos
+    $productosCadOri    = array(); // Productos para la CadOriginal
+    $productosFactura   = array(); // Productos para la Factura
+    $impuestosRetencion = array(); // Retencion
+    $impuestosTraslados = array(); // Traslados
 
-    //   $data_productos[] = array(
-    //                             'id_factura'      => $id_factura,
-    //                             'id_producto'     => (empty($v)) ? NULL : $v ,
-    //                             'descripcion'     => $_POST['prod_ddescripcion'][$k],
-    //                             'taza_iva'        => $_POST['prod_diva_porcent'][$k],
-    //                             'cantidad'        => $_POST['prod_dcantidad'][$k],
-    //                             'precio_unitario' => floatval($_POST['prod_dpreciou'][$k]),
-    //                             'importe'         => floatval($_POST['prod_importe'][$k]),
-    //                             'importe_iva'     => floatval($_POST['prod_diva_total'][$k]),
-    //                             'total'           => (floatval($_POST['prod_importe'][$k]) - $descuento) + (floatval($_POST['prod_diva_total'][$k]) - floatval($_POST['prod_dreten_iva_total'][$k])),
-    //                             'descuento'       => $_POST['prod_ddescuento_porcent'][$k],
-    //                             'retencion'       => $porc_reten,
-    //                             'unidad'          => $_POST['prod_dmedida'][$k],
-    //                           );
-    // }
-    // $this->db->insert_batch('facturas_productos', $data_productos);
+    foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+    {
+      if ($_POST['prod_importe'][$key] != 0)
+      {
+        $productosCadOri[] = array(
+          'cantidad'      => $_POST['prod_dcantidad'][$key],
+          'unidad'        => $_POST['prod_dmedida'][$key],
+          'descripcion'   => $descripcion,
+          'valorUnitario' => $_POST['prod_dpreciou'][$key],
+          'importe'       => $_POST['prod_importe'][$key],
+        );
+
+        // if ($_POST['prod_dreten_iva_porcent'][$key] != 0)
+        // {
+        $impuestosRetencion[] = array(
+          'impuesto' => 'IVA',
+          'importe' => $_POST['prod_dreten_iva_total'][$key],
+        );
+        // }
+
+        $impuestosTraslados[] = array(
+          'Impuesto' => 'IVA',
+          'tasa'     => $_POST['prod_diva_porcent'][$key],
+          'importe'  => $_POST['prod_diva_total'][$key],
+        );
+
+        $productosFactura[] = array(
+          'id_factura'       => $idFactura,
+          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          'num_row'          => intval($key),
+          'cantidad'         => $_POST['prod_dcantidad'][$key],
+          'descripcion'      => $descripcion,
+          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
+          'importe'          => $_POST['prod_importe'][$key],
+          'iva'              => $_POST['prod_diva_total'][$key],
+          'unidad'           => $_POST['prod_dmedida'][$key],
+          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+        );
+      }
+    }
+
+    $datosCadOrig['concepto']  = $productosCadOri;
+    $datosCadOrig['retencion'] = $impuestosRetencion;
+    $datosCadOrig['traslado']  = $impuestosTraslados;
+    $datosCadOrig['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
+    $datosCadOrig['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+
+    // Genera la cadena original y el sello
+    $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
+    $sello          = $this->cfdi->obtenSello($cadenaOriginal);
+
+    $updateFactura = array(
+      'cadena_original' => $cadenaOriginal,
+      'sello'           => $sello,
+      // 'certificado'     => ,
+    );
+    $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
+
+    $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+    echo "<pre>";
+      var_dump($datosFactura, $cadenaOriginal, $sello, $productosFactura);
+    echo "</pre>";exit;
 
 		return array(true, $status, $id_factura);
 	}
@@ -252,33 +392,6 @@ class facturacion_model extends privilegios_model{
     return array(true, '');
   }
 
-  /**
-   * Obtiene el listado de clientes para usar ajax
-   */
-  public function ajax_get_empresas(){
-    $sql = '';
-    $res = $this->db->query("
-      SELECT id_empresa, nombre_fiscal
-      FROM empresas
-      WHERE status = 'ac' AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-      ORDER BY nombre_fiscal ASC
-      LIMIT 20");
-
-    $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
-        $response[] = array(
-            'id' => $itm->id_empresa,
-            'label' => $itm->nombre_fiscal,
-            'value' => $itm->nombre_fiscal,
-            'item' => $itm,
-        );
-      }
-    }
-
-    return $response;
-  }
-
 	/**
 	 * Actualiza los digitos del metodo de pago de una factura
 	 */
@@ -287,13 +400,20 @@ class facturacion_model extends privilegios_model{
 		return array(true, '');
 	}
 
+  /*
+   |-------------------------------------------------------------------------
+   |  ABONOS
+   |-------------------------------------------------------------------------
+   */
 
 	/**
 	 * Agrega abono a una factura
+   *
 	 * @param unknown_type $id_factura
 	 * @param unknown_type $concepto
 	 */
-	public function addAbono($id_factura=null, $concepto=null, $registr_bancos=true){
+	public function addAbono($id_factura=null, $concepto=null, $registr_bancos=true)
+  {
 		$id_factura = $id_factura==null? $this->input->get('id'): $id_factura;
 		$concepto = $concepto==null? $this->input->post('dconcepto'): $concepto;
 
@@ -337,7 +457,8 @@ class facturacion_model extends privilegios_model{
 	 * @param unknown_type $id_abono
 	 * @param unknown_type $id_factura
 	 */
-	public function deleteAbono($id_abono, $id_factura){
+	public function deleteAbono($id_abono, $id_factura)
+  {
 		$this->db->delete('facturas_abonos', "id_abono = '".$id_abono."'");
 
 		$data = $this->obtenTotalAbonosC($id_factura);
@@ -350,7 +471,8 @@ class facturacion_model extends privilegios_model{
 		return array(true, '');
 	}
 
-	private function obtenTotalAbonosC($id){
+	private function obtenTotalAbonosC($id)
+  {
 		$data = $this->db->query("
 				SELECT
 						c.total,
@@ -366,16 +488,19 @@ class facturacion_model extends privilegios_model{
 		return $data->row();
 	}
 
-
-
+  /*
+   |-------------------------------------------------------------------------
+   |  SERIES Y FOLIOS
+   |-------------------------------------------------------------------------
+   */
 
 	/**
-	 * 					SERIES Y FOLIOS
-	 * ***************************************************
 	 * Obtiene el listado de series y folios para administrarlos
+   *
+   * @return array
 	 */
-	public function getSeriesFolios($per_pag='30'){
-
+	public function getSeriesFolios($per_pag='30')
+  {
 		//paginacion
 		$params = array(
 				'result_items_per_page' => $per_pag,
@@ -385,8 +510,8 @@ class facturacion_model extends privilegios_model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		$sql = '';
-// 		if($this->input->get('fserie')!='')
-// 			$this->db->where('serie',$this->input->get('fserie'));
+		// if($this->input->get('fserie')!='')
+		// 	$this->db->where('serie',$this->input->get('fserie'));
 
 		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
@@ -412,9 +537,11 @@ class facturacion_model extends privilegios_model{
 
 	/**
 	 * Obtiene la informacion de una serie/folio
-	 * @param unknown_type $id_serie_folio
+   *
+	 * @param array
 	 */
-	public function getInfoSerieFolio($id_serie_folio = ''){
+	public function getInfoSerieFolio($id_serie_folio = '')
+  {
 		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
 
 		$res = $this->db->select('fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
@@ -427,6 +554,8 @@ class facturacion_model extends privilegios_model{
 
 	/**
 	 * Agrega una serie/folio a la base de datos
+   *
+   * @return array
 	 */
 	public function addSerieFolio()
   {
@@ -454,10 +583,13 @@ class facturacion_model extends privilegios_model{
 	}
 
 	/**
-	 * Modifica la informacion de un serie/folio
-	 * @param unknown_type $id_serie_folio
+	 * Modifica la informacion de un serie/folio.
+	 *
+   * @param string $id_serie_folio
+   * @return array
 	 */
-	public function editSerieFolio($id_serie_folio=''){
+	public function editSerieFolio($id_serie_folio = '')
+  {
 		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
 
 		// $path_img = '';
@@ -500,7 +632,14 @@ class facturacion_model extends privilegios_model{
 		return array('passes' => true);
 	}
 
-	public function exist($table, $sql, $return_res=false){
+  /*
+   |-------------------------------------------------------------------------
+   |  HELPERS
+   |-------------------------------------------------------------------------
+   */
+
+	public function exist($table, $sql, $return_res=false)
+  {
 		$res = $this->db->get_where($table, $sql);
 		if($res->num_rows() > 0){
 			if($return_res)
@@ -509,6 +648,52 @@ class facturacion_model extends privilegios_model{
 		}
 		return FALSE;
 	}
+
+  /*
+   |-------------------------------------------------------------------------
+   |  AJAX
+   |-------------------------------------------------------------------------
+   */
+
+  /**
+   * Obtiene el listado de empresas para usar en peticiones Ajax.
+   */
+  public function getFacEmpresasAjax(){
+    $sql = '';
+    $res = $this->db->query("
+        SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, ef.version, e.cer_org
+        FROM empresas AS e
+        INNER JOIN empresas_fiscal AS ef ON ef.id_empresa = e.id_empresa
+        WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
+        ORDER BY nombre_fiscal ASC
+        LIMIT 20");
+
+    $this->load->library('cfdi');
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+
+        if ($itm->cer_org !== '')
+          $itm->no_certificado = $this->cfdi->obtenNoCertificado($itm->cer_org);
+
+        $response[] = array(
+            'id' => $itm->id_empresa,
+            'label' => $itm->nombre_fiscal,
+            'value' => $itm->nombre_fiscal,
+            'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  REPORTES
+   |-------------------------------------------------------------------------
+   */
 
   public function getRVP()
   {
@@ -536,12 +721,6 @@ class facturacion_model extends privilegios_model{
     return $query->result();
 
   }
-
-
-   /****************************************
-   *           REPORTES                   *
-   ****************************************/
-
 
    public function rvc_pdf()
    {
@@ -611,7 +790,7 @@ class facturacion_model extends privilegios_model{
   }
 
   public function rvp_pdf()
-   {
+  {
       $data = $this->getRVP();
 
       $this->load->library('mypdf');

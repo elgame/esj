@@ -2,14 +2,14 @@ $(function(){
 
   $('#form').keyJump();
 
-  $("#dfecha").datepicker({
-       dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
-       //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha
-       changeMonth: true, //permite modificar los meses (true o false)
-       changeYear: true, //permite modificar los años (true o false)
-       //yearRange: (fecha_hoy.getFullYear()-70)+':'+fecha_hoy.getFullYear(),
-       numberOfMonths: 1 //muestra mas de un mes en el calendario, depende del numero
-     });
+  // $("#dfecha").datepicker({
+  //      dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
+  //      //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha
+  //      changeMonth: true, //permite modificar los meses (true o false)
+  //      changeYear: true, //permite modificar los años (true o false)
+  //      //yearRange: (fecha_hoy.getFullYear()-70)+':'+fecha_hoy.getFullYear(),
+  //      numberOfMonths: 1 //muestra mas de un mes en el calendario, depende del numero
+  //    });
 
   $("#dcliente").autocomplete({
       source: base_url+'panel/clientes/ajax_get_proveedores/',
@@ -19,6 +19,8 @@ $(function(){
         $("#did_cliente").val(ui.item.id);
         createInfoCliente(ui.item.item);
         $("#dcliente").css("background-color", "#B0FFB0");
+
+        $('#dplazo_credito').val(ui.item.item.dias_credito);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -31,12 +33,17 @@ $(function(){
   });
 
   $("#dempresa").autocomplete({
-      source: base_url+'panel/empresas/ajax_get_empresas',
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
         $("#did_empresa").val(ui.item.id);
         $("#dempresa").css("background-color", "#B0FFB0");
+
+        $('#dversion').val(ui.item.item.version);
+        $('#dcer_caduca').val(ui.item.item.cer_caduca);
+
+        $('#dno_certificado').val(ui.item.item.no_certificado);
 
         loadSerieFolio(ui.item.id);
       }
@@ -47,6 +54,10 @@ $(function(){
         $('#dserie').html('');
         $("#dfolio").val("");
         $("#dno_aprobacion").val("");
+
+        $('#dversion').val('');
+        $('#dcer_caduca').val('');
+        $('#dno_certificado').val('');
       }
   });
 
@@ -288,7 +299,7 @@ function loadSerieFolio (ide) {
           if(res.msg === 'ok') {
             var html_option = '<option value=""></option>';
             for (var i in res.data){
-              html_option += '<option value="'+res.data[i].serie+'">'+res.data[i].serie+' - '+res.data[i].leyenda+'</option>';
+              html_option += '<option value="'+res.data[i].serie+'">'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
             }
             objselect.html(html_option);
 
