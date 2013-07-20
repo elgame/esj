@@ -33,7 +33,7 @@
                 <div class="controls">
                   <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
                   <input type="text" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa); ?>">
-                  <input type="text" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->version); ?>">
+                  <input type="text" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->cfdi_version); ?>">
                   <input type="text" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $empresa_default->cer_caduca); ?>">
                   <input type="text" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $no_certificado); ?>">
                 </div>

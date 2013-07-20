@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Facturación
+            Notas remisión
           </li>
         </ul>
       </div>
@@ -16,13 +16,13 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Facturas</h2>
+            <h2><i class="icon-file"></i> Notas de remisión</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/ventas/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
                 <input type="text" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
@@ -54,7 +54,7 @@
             </form>
 
             <?php
-            echo $this->empleados_model->getLinkPrivSm('facturacion/agregar/', array(
+            echo $this->usuarios_model->getLinkPrivSm('ventas/agregar/', array(
                     'params'   => '',
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -64,7 +64,7 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Serie-Folio</th>
+                  <th>Folio</th>
                   <th>Cliente</th>
                   <th>Empresa</th>
                   <th>Forma de Pago</th>
@@ -76,33 +76,35 @@
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
                   <td><?php echo $fact->fecha; ?></td>
-                  <td><?php echo $fact->serie.' - '.$fact->folio; ?></td>
+                  <td><?php echo $fact->folio; ?></td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><?php echo $fact->condicion_pago==='cr' ? 'Credito' : 'Contado'; ?></td>
-                  <td><?php echo ($fact->status === 'p') ? 'Pendiente' : (($fact->status === 'pa') ? 'Pagada' : 'Cancelada'); ?></td>
+                  <td><span class="label label-info"><?php echo $fact->condicion_pago==='cr' ? 'Credito' : 'Contado'; ?></span></td>
+                  <td><?php $sstado = ($fact->status === 'p') ? array('Pendiente', '') : (($fact->status === 'pa') ? array('Pagada', 'success') : array('Cancelada', 'important') ); ?>
+                    <span class="label label-<?php echo $sstado[1] ?>"><?php echo $sstado[0] ?></span>
+                  </td>
                   <td class="center">
                     <?php
                       if ($fact->status === 'p')
                       {
-                        echo $this->empleados_model->getLinkPrivSm('facturacion/pagar/', array(
-                          'params'   => 'id='.$fact->id_factura,
+                        echo $this->usuarios_model->getLinkPrivSm('ventas/pagar/', array(
+                          'params'   => 'id='.$fact->id_venta,
                           'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la factura?', 'Facturas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota?', 'Facturas', this); return false;"))
                         );
                       }
 
                       if ($fact->status !== 'ca')
                       {
-                        echo $this->empleados_model->getLinkPrivSm('facturacion/cancelar/', array(
-                          'params'   => 'id='.$fact->id_factura,
+                        echo $this->usuarios_model->getLinkPrivSm('ventas/cancelar/', array(
+                          'params'   => 'id='.$fact->id_venta,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?', 'Facturas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la nota?', 'Facturas', this); return false;"))
                         );
                       }
 
-                      echo $this->empleados_model->getLinkPrivSm('facturacion/imprimir/', array(
-                          'params'   => 'id='.$fact->id_factura,
+                      echo $this->usuarios_model->getLinkPrivSm('ventas/imprimir/', array(
+                          'params'   => 'id='.$fact->id_venta,
                           'btn_type' => 'btn-info',
                           'attrs' => array('target' => "_blank"))
                       );

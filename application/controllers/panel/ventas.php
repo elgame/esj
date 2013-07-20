@@ -1,13 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class facturacion extends MY_Controller {
+class ventas extends MY_Controller {
   /**
    * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'facturacion/get_folio/',
-    'facturacion/get_series/',
+    'ventas/get_folio/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -36,56 +35,45 @@ class facturacion extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/facturacion/admin.js'),
+      array('panel/ventas_remision/admin.js'),
     ));
 
     $this->load->library('pagination');
-    $this->load->model('facturacion_model');
+    $this->load->model('ventas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Facturas');
+    $params['seo']        = array('titulo' => 'Ventas de remisión');
 
-    $params['datos_s'] = $this->facturacion_model->getFacturas();
+    $params['datos_s'] = $this->ventas_model->getVentas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header',$params);
     $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/facturacion/admin',$params);
+    $this->load->view('panel/ventas_remision/admin',$params);
     $this->load->view('panel/footer',$params);
   }
 
   /**
-   * Agrega una factura a la bd
+   * Agrega una nota de remision a la bd
    *
    * @return void
    */
   public function agregar()
   {
-    // echo "<pre>";
-    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', "\tHola\tMundo\t\t\t    \rCruel\r"), " "), " "), "Hola\tMundo\t\t\t    \rCruel\n");
-    // echo "</pre>";
-    // exit;
-
     $this->carabiner->js(array(
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
-        array('panel/facturacion/frm_addmod.js'),
+        array('panel/ventas_remision/frm_addmod.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
-    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
-    $params['seo']            = array('titulo' => 'Agregar factura');
+    $params['seo']            = array('titulo' => 'Agregar Nota remisión');
     $params['pagar_ordent']   = false;
 
-    if(isset($_GET['ordent']{0}))
-      $this->asignaOrdenTrabajo($_GET['ordent']);
-
-    $this->load->library('cfdi');
-    $this->load->model('facturacion_model');
+    $this->load->model('ventas_model');
 
     $this->configAddModFactura();
     if($this->form_validation->run() == FALSE)
@@ -94,39 +82,33 @@ class facturacion extends MY_Controller {
     }
     else
     {
-      $respons = $this->facturacion_model->addFactura();
+      $respons = $this->ventas_model->addNotaVenta();
 
       if($respons[0])
-        redirect(base_url('panel/facturacion/agregar/?msg=4&id='.$respons[2]));
+        redirect(base_url('panel/ventas/agregar/?msg=4&id='.$respons[2]));
     }
 
-    $params['series'] = $this->facturacion_model->getSeriesFolios(100);
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     if (isset($_GET['id']))
     {
       $params['id'] = $_GET['id'];
     }
-    else
-    {
-      // Obtiene los datos de la empresa predeterminada.
-      $params['empresa_default'] = $this->db
-        ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-        ->from("empresas AS e")
-        ->where("e.predeterminado", "t")
-        ->get()
-        ->row();
-
-      // Obtiene el numero de certificado de la empresa predeterminada.
-      $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
-    }
+    
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->db
+      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+      ->from("empresas AS e")
+      ->where("e.predeterminado", "t")
+      ->get()
+      ->row();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/facturacion/agregar', $params);
+    $this->load->view('panel/ventas_remision/agregar', $params);
     $this->load->view('panel/footer');
   }
 
@@ -134,10 +116,10 @@ class facturacion extends MY_Controller {
   {
     if (isset($_GET['id']{0}))
     {
-      $this->load->model('facturacion_model');
-      $this->facturacion_model->pagaFactura();
+      $this->load->model('ventas_model');
+      $this->ventas_model->pagaNotaRemison($_GET['id']);
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=9'));
+      redirect(base_url('panel/ventas/?'.String::getVarsLink(array('msg','id')).'&msg=9'));
     }
   }
 
@@ -145,10 +127,10 @@ class facturacion extends MY_Controller {
   {
     if (isset($_GET['id']{0}))
     {
-      $this->load->model('facturacion_model');
-      $this->facturacion_model->cancelaFactura();
+      $this->load->model('ventas_model');
+      $this->ventas_model->cancelaNotaRemison($_GET['id']);
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=5'));
+      redirect(base_url('panel/ventas/?'.String::getVarsLink(array('msg','id')).'&msg=5'));
     }
   }
 
@@ -162,62 +144,37 @@ class facturacion extends MY_Controller {
 
         array('field'   => 'did_empresa',
               'label'   => 'Empresa',
-              'rules'   => 'required|max_length[25]'),
+              'rules'   => 'required|numeric'),
         array('field'   => 'did_cliente',
               'label'   => 'Cliente',
-              'rules'   => 'required|max_length[25]'),
-        array('field'   => 'dserie',
-              'label'   => 'Serie',
-              'rules'   => 'max_length[25]'),
+              'rules'   => 'required|numeric'),
         array('field'   => 'dfolio',
               'label'   => 'Folio',
               'rules'   => 'required|numeric|callback_seriefolio_check'),
-        array('field'   => 'dno_aprobacion',
-              'label'   => 'Numero de aprobacion',
-              'rules'   => 'required|numeric'),
-        array('field'   => 'dano_aprobacion',
-              'label'   => 'Fecha de aprobacion',
-              'rules'   => 'required|max_length[10]|callback_isValidDate'),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
               'rules'   => 'required|max_length[25]'), //|callback_isValidDate
 
         array('field'   => 'total_importe',
-              'label'   => 'SubTotal1',
-              'rules'   => 'required|numeric'),
-        array('field'   => 'total_subtotal',
               'label'   => 'SubTotal',
-              'rules'   => 'required|numeric'),
-
-        array('field'   => 'total_descuento',
-              'label'   => 'Descuento',
-              'rules'   => 'required|numeric'),
-        array('field'   => 'total_iva',
-              'label'   => 'IVA',
-              'rules'   => 'required|numeric'),
-        array('field'   => 'total_retiva',
-              'label'   => 'Retencion IVA',
               'rules'   => 'required|numeric'),
         array('field'   => 'total_totfac',
               'label'   => 'Total',
               'rules'   => 'required|numeric|callback_val_total'),
+
         array('field'   => 'dforma_pago',
               'label'   => 'Forma de pago',
               'rules'   => 'required|max_length[80]'),
         array('field'   => 'dmetodo_pago',
               'label'   => 'Metodo de pago',
               'rules'   => 'required|max_length[40]'),
-        array('field'   => 'dmetodo_pago_digitos',
-              'label'   => 'Ultimos 4 digitos',
-              'rules'   => 'max_length[20]'),
         array('field'   => 'dcondicion_pago',
               'label'   => 'Condición de pago',
               'rules'   => 'required|max_length[2]'),
-
         array('field'   => 'dplazo_credito',
-            'label'   => 'Plazo de crédito',
-            'rules'   => 'numeric'),
+              'label'   => 'Plazo de crédito',
+              'rules'   => 'numeric'),
 
         array('field'   => 'dempresa',
               'label'   => 'Empresa',
@@ -250,49 +207,49 @@ class facturacion extends MY_Controller {
         array('field'   => 'prod_ddescripcion[]',
               'label'   => 'prod_ddescripcion',
               'rules'   => ''),
-        array('field'   => 'prod_ddescuento[]',
-              'label'   => 'prod_ddescuento',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescuento_porcent[]',
-              'label'   => 'prod_ddescuento_porcent',
-              'rules'   => ''),
         array('field'   => 'prod_dpreciou[]',
               'label'   => 'prod_dpreciou',
               'rules'   => ''),
         array('field'   => 'prod_importe[]',
               'label'   => 'prod_importe',
               'rules'   => ''),
-        array('field'   => 'prod_diva_total[]',
-              'label'   => 'prod_diva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_total[]',
-              'label'   => 'prod_dreten_iva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_porcent[]',
-              'label'   => 'prod_dreten_iva_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_diva_porcent[]',
-              'label'   => 'prod_diva_porcent',
-              'rules'   => ''),
         array('field'   => 'prod_dmedida[]',
               'label'   => 'prod_dmedida',
               'rules'   => ''),
-
-        array('field'   => 'dversion',
-              'label'   => '',
-              'rules'   => ''),
-        array('field'   => 'dcer_caduca',
-              'label'   => 'Empresa',
-              'rules'   => 'callback_chk_cer_caduca'),
-
-        array('field'   => 'dno_certificado',
-              'label'   => 'No. Certificado',
-              'rules'   => 'required'),
-        array('field'   => 'dtipo_comprobante',
-              'label'   => 'Tipo comproante',
-              'rules'   => 'required'),
     );
     $this->form_validation->set_rules($rules);
+  }
+
+  /**
+   * Verifica que la serie y folio enviados del form no esten asignados a una
+   * factura y tambien que esten vigentes.
+   *
+   * @param string $str
+   * @return boolean
+   */
+  public function seriefolio_check($str){
+    if($str != ''){
+      $sql = $ms = '';
+
+      $res = $this->db->select('Count(id_venta) AS num')
+        ->from('facturacion_ventas_remision')
+        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa'))
+        ->get();
+      $data = $res->row();
+      if($data->num > 0){
+        $this->form_validation->set_message('seriefolio_check', 'El folio ya esta utilizado por otra Nota.');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public function val_total($str){
+    if($str <= 0){
+      $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
+      return false;
+    }
+    return true;
   }
 
   public function imprimir()
@@ -574,206 +531,17 @@ class facturacion extends MY_Controller {
   }
 
 
-  public function chk_cer_caduca($date)
-  {
-    $hoy = date('Y-m-d');
 
-    if (strtotime($hoy) > strtotime($date))
-    {
-      $this->form_validation->set_message('chk_cer_caduca', 'El certificado de la empresa caducó, actualize la información de la misma.');
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Verifica que la serie y folio enviados del form no esten asignados a una
-   * factura y tambien que esten vigentes.
-   *
-   * @param string $str
-   * @return boolean
-   */
-  public function seriefolio_check($str){
-    if($str != ''){
-      $sql = $ms = '';
-
-      $res = $this->db->select('Count(id_factura) AS num')
-        ->from('facturacion')
-        ->where("serie = '".$this->input->post('dserie')."' AND folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa'))
-        ->get();
-      $data = $res->row();
-      if($data->num > 0){
-        $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya esta utilizado por otra Factura.');
-        return false;
-      } else {
-        $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
-
-        $hoy = date('Y-m-d');
-        // $hoy = '2015-07-19';
-
-        if (strtotime($hoy) > strtotime($anoLimite))
-        {
-          $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya caducaron, no pueden ser utilizados.');
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Form_validation: Valida su una fecha esta en formato correcto
-   */
-  public function isValidDate($str){
-    if($str != ''){
-      if(String::isValidDate($str) == false){
-        $this->form_validation->set_message('isValidDate', 'El campo %s no es una fecha valida');
-        return false;
-      }
-    }
-    return true;
-  }
-
-  public function val_total($str){
-    if($str <= 0){
-      $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
-      return false;
-    }
-    return true;
-  }
-
-   /*
-   |-------------------------------------------------------------------------
-   |  SERIES Y FOLIOS
-   |-------------------------------------------------------------------------
-   */
-
-  /**
-   * Permite administrar los series y folios para la facturacion
-   *
-   * @return void
-   */
-  public function series_folios()
-  {
-    // $this->carabiner->css(array(
-    //     array('general/forms.css','screen'),
-    //     array('general/tables.css','screen')
-    // ));
-
-    $this->load->library('pagination');
-    $this->load->model('facturacion_model');
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Administrar Series y Folios');
-
-    $params['datos_s'] = $this->facturacion_model->getSeriesFolios();
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/facturacion/series_folios/admin',$params);
-    $this->load->view('panel/footer',$params);
-  }
-
-  public function agregar_serie_folio()
-  {
-    $this->carabiner->js(array(
-        array('panel/facturacion/series_folios/frm_addmod.js')
-    ));
-
-    $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']  = array('titulo' => 'Agregar Series y Folios');
-
-    $this->load->model('facturacion_model');
-
-    $this->configAddSerieFolio();
-    if($this->form_validation->run() == FALSE)
-    {
-      $params['frm_errors'] = $this->showMsgs(2,preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-    }
-    else
-    {
-      $model_resp = $this->facturacion_model->addSerieFolio();
-
-      if($model_resp['passes'])
-        redirect(base_url('panel/facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=6'));
-    }
-
-    if(isset($_GET['msg']{0}))
-        $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-    $this->load->view('panel/header',$params);
-    $this->load->view('panel/general/menu',$params);
-    $this->load->view('panel/facturacion/series_folios/agregar',$params);
-    $this->load->view('panel/footer',$params);
-  }
-
-  public function modificar_serie_folio()
-  {
-    if(isset($_GET['id']{0})){
-      $this->carabiner->js(array(
-          array('panel/facturacion/series_folios/frm_addmod.js')
-      ));
-
-      $this->load->model('facturacion_model');
-      $this->configAddSerieFolio('edit');
-
-      if($this->form_validation->run() == FALSE)
-      {
-        $params['frm_errors'] = $this->showMsgs(2,preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-      }
-      else
-      {
-        $model_resp = $this->facturacion_model->editSerieFolio($_GET['id']);
-
-        if($model_resp['passes'])
-          $params['frm_errors'] = $this->showMsgs(7);
-      }
-
-      $params['info_empleado']  = $this->info_empleado['info'];
-      $params['opcmenu_active']   = 'Ventas'; //activa la opcion del menu
-      $params['seo']['titulo']  = 'Modificar Serie y Folio';
-
-      $params['serie_info'] = $this->facturacion_model->getInfoSerieFolio($_GET['id']);
-
-      if(isset($_GET['msg']{0}))
-          $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-        $this->load->view('panel/header',$params);
-        $this->load->view('panel/general/menu',$params);
-        $this->load->view('panel/facturacion/series_folios/modificar',$params);
-        $this->load->view('panel/footer',$params);
-    }
-    else
-      redirect(base_url('panel/facturacion/index_serie_folios/').String::getVarsLink(array('msg')).'&msg=1');
-  }
 
   /**
    * obtiene el folio siguiente de la serie seleccionada
    */
   public function get_folio()
   {
-    if(isset($_GET['serie']) && isset($_GET['ide']))
-    {
-      $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->getFolioSerie($_GET['serie'], $_GET['ide']);
-
-      $param =  $this->showMsgs(2, $res[1]);
-      $param['data'] = $res[0];
-      echo json_encode($param);
-    }
-  }
-
-  /**
-   * obtiene el folio siguiente de la serie seleccionada
-   */
-  public function get_series()
-  {
     if(isset($_GET['ide']))
     {
-      $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->get_series_empresa($_GET['ide']);
+      $this->load->model('ventas_model');
+      $res = $this->ventas_model->getFolio($_GET['ide']);
 
       $param =  $this->showMsgs(2, $res[1]);
       $param['data'] = $res[0];
@@ -781,96 +549,6 @@ class facturacion extends MY_Controller {
     }
   }
 
-  private function configAddSerieFolio($tipo='add')
-  {
-    $this->load->library('form_validation');
-
-    $rules = array(
-            array('field' => 'fid_empresa',
-                'label' => 'Empresa',
-                'rules' => 'required|numeric'),
-            array('field' => 'fempresa',
-                'label' => 'Empresa',
-                'rules' => 'min_length[1]'),
-
-            array('field' => 'fno_aprobacion',
-                'label' => 'No Aprobación',
-                'rules' => 'required|numeric'),
-            array('field' => 'ffolio_inicio',
-                'label' => 'Folio Inicio',
-                'rules' => 'required|is_natural'),
-            array('field' => 'ffolio_fin',
-                'label' => 'Folio Fin',
-                'rules' => 'required|is_natural'),
-            array('field' => 'fano_aprobacion',
-                'label' => 'Fecha Aprobación',
-                'rules' => 'required|max_length[10]|callback_isValidDate'),
-            array('field' => 'fleyenda',
-                'label' => 'Leyenda',
-                'rules' => ''),
-            array('field' => 'fleyenda1',
-                'label' => 'Leyenda 1',
-                'rules' => ''),
-            array('field' => 'fleyenda2',
-                'label' => 'Leyenda 2',
-                'rules' => '')
-        );
-
-    if($tipo=='add')
-    {
-      // if(isset($_FILES['durl_img']))
-      //   if($_FILES['durl_img']['name']!='')
-      //     $_POST['durl_img'] = 'ok';
-
-      $rules[] = array('field' => 'fserie',
-                       'label' => 'Serie',
-                       'rules' => 'max_lenght[30]|callback_isValidSerie[add]');
-      // $rules[] = array('field'  => 'durl_img',
-      //     'label' => 'Imagen',
-      //     'rules' => 'required');
-    }
-
-    if($tipo=='edit'){
-      $rules[] = array('field'  => 'fserie',
-                        'label' => 'Serie',
-                        'rules' => 'max_lenght[30]|callback_isValidSerie[edit]');
-    }
-
-    $this->form_validation->set_rules($rules);
-  }
-
-  /**
-   * Form_validation: Valida si la Serie ya existe
-   */
-  public function isValidSerie($str, $tipo)
-  {
-    $str = $str=='' ? '' : $str;
-
-    if ($str != '')
-    {
-      if($tipo=='add'){
-        if($this->facturacion_model->exist('facturacion_series_folios',
-            array('serie' => mb_strtoupper($str), 'id_empresa' => $this->input->post('fid_empresa')) )){
-          $this->form_validation->set_message('isValidSerie', 'El campo %s ya existe');
-          return false;
-        }
-        return true;
-      }
-      else{
-        $row = $this->facturacion_model->exist('facturacion_series_folios',
-          array('serie' => mb_strtoupper($str), 'id_empresa' => $this->input->post('fid_empresa')), true);
-
-        if($row!=FALSE){
-          if($row->id_serie_folio == $_GET['id'])
-            return true;
-          else{
-            $this->form_validation->set_message('isValidSerie', 'El campo %s ya existe');
-            return false;
-          }
-        }return true;
-      }
-    }
-  }
 
   /*
    |-------------------------------------------------------------------------
@@ -878,27 +556,6 @@ class facturacion extends MY_Controller {
    |-------------------------------------------------------------------------
    */
 
-   /**
-    * Obtiene las clasificaciones por ajax.
-    *
-    * @return JSON
-    */
-   public function ajax_get_clasificaciones()
-   {
-      $this->load->model('clasificaciones_model');
-
-      echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
-   }
-
-  /**
-    * Obtiene listado de empresas por ajax
-    */
-  public function ajax_get_empresas_fac(){
-    $this->load->model('facturacion_model');
-    $params = $this->facturacion_model->getFacEmpresasAjax();
-
-    echo json_encode($params);
-  }
 
   /*
    |-------------------------------------------------------------------------
@@ -978,23 +635,15 @@ class facturacion extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La Factura se modifico correctamente.';
+        $txt = 'La Nota de remisión se modifico correctamente.';
         $icono = 'success';
         break;
       case 4:
-        $txt = 'La Factura se agrego correctamente.';
+        $txt = 'La Nota de remisión se agrego correctamente.';
         $icono = 'success';
         break;
       case 5:
-        $txt = 'La Factura se cancelo correctamente.';
-        $icono = 'success';
-        break;
-      case 6:
-        $txt = 'La Serie y Folio se agregaron correctamente.';
-        $icono = 'success';
-        break;
-      case 7:
-        $txt = 'La Serie y Folio se modifico correctamente.';
+        $txt = 'La Nota de remisión se cancelo correctamente.';
         $icono = 'success';
         break;
       case 8:
@@ -1002,7 +651,7 @@ class facturacion extends MY_Controller {
         $icono = 'success';
         break;
       case 9:
-        $txt = 'La Factura se pagó correctamente.';
+        $txt = 'La Nota de remisión se pagó correctamente.';
         $icono = 'success';
         break;
     }
