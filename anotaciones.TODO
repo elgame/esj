@@ -1,5 +1,17 @@
 2013-07-20
   ☐ SQL:
+    Privilegios:
+      "Ventas remisión";69;TRUE;"ventas/";"list-alt";FALSE
+      "Agregar remisión";74;TRUE;"ventas/agregar/";"plus";FALSE
+      "Cancelar";74;FALSE;"ventas/cancelar/";"remove";FALSE
+      "Pagar";74;FALSE;"ventas/pagar/";"money";FALSE
+      "Imprimir";74;FALSE;"ventas/imprimir/";"print";FALSE
+      "Lineas transporte";69;TRUE;"lineas_transporte/";"truck";FALSE
+      "Agregar linea";79;TRUE;"lineas_transporte/agregar/";"plus";FALSE
+      "Modificar";79;FALSE;"lineas_transporte/modificar/";"edit";FALSE
+      "Eliminar";79;FALSE;"lineas_transporte/eliminar/";"remove";FALSE
+      "Activar";79;FALSE;"lineas_transporte/activar/";"ok";FALSE
+      
     CREATE TABLE facturacion_ventas_remision
     (
       id_venta bigserial NOT NULL,
