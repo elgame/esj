@@ -16,6 +16,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_calidades/',
     'bascula/ajax_get_precio_calidad/',
     'bascula/ajax_get_kilos/',
+    'bascula/ajax_load_ticket_docu/',
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
@@ -1496,6 +1497,16 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     echo $this->bascula_model->getIdfolio($_GET['folio'], $_GET['tipo'], $_GET['area']);
+  }
+
+  /**
+    * Obtiene listado de empresas por ajax
+    */
+  public function ajax_load_ticket_docu(){
+    $this->load->model('facturacion_model');
+    $params = $this->facturacion_model->get();
+
+    echo json_encode($params);
   }
 
   /*

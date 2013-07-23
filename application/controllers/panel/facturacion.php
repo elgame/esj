@@ -13,7 +13,7 @@ class facturacion extends MY_Controller {
     'facturacion/rvp_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
-    'facturacion/ajax_get_empresas_fac/'
+    'facturacion/ajax_get_empresas_fac/',
   );
 
 
@@ -93,8 +93,8 @@ class facturacion extends MY_Controller {
     {
       $respons = $this->facturacion_model->addFactura();
 
-      if($respons[0])
-        redirect(base_url('panel/facturacion/agregar/?msg=4&id='.$respons[1]));
+      if($respons['passes'])
+        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
     }
 
     $params['series'] = $this->facturacion_model->getSeriesFolios(100);
@@ -127,6 +127,11 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  /**
+   * Paga una factura.
+   *
+   * @return void
+   */
   public function pagar()
   {
     if (isset($_GET['id']{0}))
@@ -138,6 +143,11 @@ class facturacion extends MY_Controller {
     }
   }
 
+  /**
+   * Cancela una factura.
+   *
+   * @return void
+   */
   public function cancelar()
   {
     if (isset($_GET['id']{0}))
@@ -151,6 +161,8 @@ class facturacion extends MY_Controller {
 
   /**
    * Configura los metodos de agregar y modificar
+   *
+   * @return void
    */
   private function configAddModFactura()
   {
@@ -594,7 +606,8 @@ class facturacion extends MY_Controller {
    * @param string $str
    * @return boolean
    */
-  public function seriefolio_check($str){
+  public function seriefolio_check($str)
+  {
     if($str != ''){
       $sql = $ms = '';
 
@@ -625,7 +638,8 @@ class facturacion extends MY_Controller {
   /**
    * Form_validation: Valida su una fecha esta en formato correcto
    */
-  public function isValidDate($str){
+  public function isValidDate($str)
+  {
     if($str != ''){
       if(String::isValidDate($str) == false){
         $this->form_validation->set_message('isValidDate', 'El campo %s no es una fecha valida');
@@ -635,7 +649,8 @@ class facturacion extends MY_Controller {
     return true;
   }
 
-  public function val_total($str){
+  public function val_total($str)
+  {
     if($str <= 0){
       $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
       return false;

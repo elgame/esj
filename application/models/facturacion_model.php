@@ -72,30 +72,40 @@ class facturacion_model extends privilegios_model{
 	/**
 	 * Obtiene la informacion de una factura
 	 */
-	public function getInfoFactura($id, $info_basic=false)
+	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db->select("*")->
-                      from('facturas')->
-                      where("id_factura = '".$id."'")->get();
+                      from('facturacion')->
+                      where("id_factura = {$idFactura}")->get();
 
     if($res->num_rows() > 0)
     {
 			$response['info'] = $res->row();
-			$response['info']->fecha = substr($response['info']->fecha, 0, 10);
+      $response['info']->fechaT = str_replace(' ', 'T', substr($response['info']->fecha, 0, 16));
+      $response['info']->fecha = substr($response['info']->fecha, 0, 10);
+
 			$res->free_result();
-			if($info_basic)
+
+      if($info_basic)
 				return $response;
 
+      // Carga la info de la empresa.
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
+      $response['info']->empresa = $empresa['info'];
+
+      // Carga la info del cliente.
 			$this->load->model('clientes_model');
-			$prov = $this->clientes_model->getInfoCliente($response['info']->id_cliente, true);
+			$prov = $this->clientes_model->getClienteInfo($response['info']->id_cliente);
 			$response['info']->cliente = $prov['info'];
 
-      $res = $this->db->select('fp.id_fac_prod, fp.id_factura, fp.id_producto, fp.descripcion, fp.taza_iva, fp.cantidad, fp.precio_unitario,
-                                fp.importe, fp.importe_iva, fp.total, fp.descuento, fp.retencion, pu.abreviatura as unidad, fp.unidad as unidad2')->
-                        from('facturas_productos as fp')->
-                        join('productos as p', 'p.id_producto = fp.id_producto', 'left')->
-                        join('productos_unidades as pu', 'pu.id_unidad = p.id_unidad', 'left')->
-                        where('id_factura = '.$id)->get();
+      $res = $this->db
+        ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva')
+        ->from('facturacion_productos as fp')
+        ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
+        ->where('id_factura = ' . $idFactura)
+        ->get();
 
       $response['productos'] = $res->result();
 
@@ -274,7 +284,8 @@ class facturacion_model extends privilegios_model{
     $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
 
     // Inserta los documentos del cliente con un status false.
-    $this->db->insert_batch('facturacion_documentos', $docsCliente);
+    if ($docsCliente)
+      $this->db->insert_batch('facturacion_documentos', $docsCliente);
 
     // Obtiene los datos para la cadena original
     $datosCadOrig = $this->datosCadenaOriginal();
@@ -445,7 +456,7 @@ class facturacion_model extends privilegios_model{
     //   var_dump($datosXML);
     // echo "</pre>";exit;
 
-		return array('passes' => true, $idFactura);
+		return array('passes' => true, 'id_factura' => $idFactura);
 	}
 
 	/**
@@ -486,7 +497,7 @@ class facturacion_model extends privilegios_model{
    * @param  string
    * @return mixed array|boolean
    */
-  private function getClienteDocs ($idCliente, $idFactura = null)
+  public function getClienteDocs($idCliente, $idFactura = null)
   {
     $query = $this->db->query(
       "SELECT id_documento
