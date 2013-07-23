@@ -563,6 +563,7 @@ class bascula extends MY_Controller {
     $this->bascula_model->rde_pdf();
   }
 
+
   /**
    * Procesa los datos para mostrar el reporte rcr en pdf
    * @return void

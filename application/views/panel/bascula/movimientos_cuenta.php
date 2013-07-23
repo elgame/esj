@@ -32,10 +32,21 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fproveedor">Proveedor</label>
+                  <label class="control-label" for="ftipop">Tipo</label>
+                  <div class="controls">
+                    <select name="ftipop" id="ftipop">
+                      <option value="en" <?php echo set_select('ftipop', 'en', false, $this->input->get('ftipop')) ?>>ENTRADAS</option>
+                      <option value="sa" <?php echo set_select('ftipop', 'sa', false, $this->input->get('ftipop')) ?>>SALIDAS</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label autocomplet_en" for="fproveedor">Proveedor</label>
+                  <label class="control-label autocomplet_sa" for="fproveedor" style="display: none;">Cliente</label>
                   <div class="controls">
                     <input type="text" name="fproveedor"
-                      value="<?php echo set_value_get('fproveedor', $this->input->get('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Proveedor">
+                      value="<?php echo set_value_get('fproveedor', $this->input->get('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Nombre">
                     <input type="hidden" name="fid_proveedor" value="<?php echo set_value_get('fid_proveedor', $this->input->get('fid_proveedor')) ?>" id="fid_proveedor">
                   </div>
                 </div>
@@ -56,17 +67,6 @@
                       <option value="" <?php echo set_select('fstatusp', '', false, $this->input->get('fstatusp')) ?>>TODOS</option>
                       <option value="1" <?php echo set_select('fstatusp', '1', false, $this->input->get('fstatusp')) ?>>PAGADOS</option>
                       <option value="2" <?php echo set_select('fstatusp', '2', false, $this->input->get('fstatusp')) ?>>NO PAGADOS</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label" for="ftipop">Tipo</label>
-                  <div class="controls">
-                    <select name="ftipop">
-                      <option value="" <?php echo set_select('ftipop', '', false, $this->input->get('ftipop')) ?>>TODOS</option>
-                      <option value="1" <?php echo set_select('ftipop', '1', false, $this->input->get('ftipop')) ?>>ENTRADAS</option>
-                      <option value="2" <?php echo set_select('ftipop', '2', false, $this->input->get('ftipop')) ?>>SALIDAS</option>
                     </select>
                   </div>
                 </div>
