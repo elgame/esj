@@ -11,7 +11,7 @@
       "Modificar";79;FALSE;"lineas_transporte/modificar/";"edit";FALSE
       "Eliminar";79;FALSE;"lineas_transporte/eliminar/";"remove";FALSE
       "Activar";79;FALSE;"lineas_transporte/activar/";"ok";FALSE
-      
+
     CREATE TABLE facturacion_ventas_remision
     (
       id_venta bigserial NOT NULL,
@@ -98,6 +98,9 @@ Privilegios Facturacion:
     "Series y Folios";70;TRUE;"facturacion/series_folios/";"list-alt";FALSE
     "Modificar";72;FALSE;"facturacion/modificar_serie_folio/";"edit";FALSE
 
+    "Pagar";70;FALSE;"facturacion/pagar/";"credit-card";FALSE
+    "Cancelar";70;FALSE;"facturacion/cancelar/";"ban-circle";FALSE
+    "Imprimir";70;FALSE;"facturacion/imprimir/";"print";FALSE
 
 2013-07-17
       CHOFERES:
