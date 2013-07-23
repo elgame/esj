@@ -17,21 +17,15 @@ $(function(){
     numberOfMonths: 1, //muestra mas de un mes en el calendario, depende del numero
   });
 
-  $("#fproveedor").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_proveedores/',
-    minLength: 1,
-    selectFirst: true,
-    select: function( event, ui ) {
-      $("#fid_proveedor").val(ui.item.id);
-      $("#fproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
-    }
-  }).keydown(function(e){
-    if (e.which === 8) {
-     $(this).css({'background-color': '#FFD9B3'});
-      $('#fid_proveedor').val('');
-    }
-  });
+  // Autocomplete Proveedor
+  setAutocomplet($("#ftipop").val(), 1);
+  changeTipo($("#ftipop").val());
 
+  $("#ftipop").on("change", function(){
+    changeTipo($(this).val());
+
+    setAutocomplet($(this).val());
+  });
 
   $(function(){
     $('#checkPesadas').on('change', function(event) {
@@ -74,3 +68,47 @@ $(function(){
   });
 
 });
+
+function changeTipo(tipo){
+  $(".autocomplet_en").hide();
+    $(".autocomplet_sa").hide();
+
+    $(".autocomplet_"+tipo).show();
+}
+function setAutocomplet(tipo, first){
+  if(first != 1){
+    $("#fproveedor").autocomplete("destroy").val("");
+    $("#fid_proveedor").val("");
+  }
+  if (tipo == "en") {
+    $("#fproveedor").autocomplete({
+      source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#fid_proveedor").val(ui.item.id);
+        $("#fproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+       $(this).css({'background-color': '#FFD9B3'});
+        $('#fid_proveedor').val('');
+      }
+    });
+  }else if(tipo == "sa"){
+    $("#fproveedor").autocomplete({
+      source: base_url + 'panel/bascula/ajax_get_clientes/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#fid_proveedor").val(ui.item.id);
+        $("#fproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+       $(this).css({'background-color': '#FFD9B3'});
+        $('#fid_proveedor').val('');
+      }
+    });
+  }
+}

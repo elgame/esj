@@ -424,17 +424,35 @@ class Bascula_model extends CI_Model {
       if ($this->input->get('farea') != '')
         $sql .= " AND b.id_area = " . $_GET['farea'];
 
+      if ($this->input->get('fid_proveedor') != ''){
+        if($this->input->get('ftipop') == 'sa'){
+          $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+        }else{
+          $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+        }
+      }
+
       if ($this->input->get('fstatusp') != '')
         if ($this->input->get('fstatusp') === '1')
           $sql .= " AND b.accion IN ('p', 'b')";
         else
           $sql .= " AND b.accion IN ('en', 'sa')";
 
+      //Filtros del tipo de pesadas
       if ($this->input->get('ftipop') != '')
-        if ($this->input->get('ftipop') === '1')
-          $sql .= " AND b.tipo = 'en'";
-        else
-          $sql .= " AND b.tipo = 'sa'";
+        $sql .= " AND b.tipo = '{$_GET['ftipop']}'";
+      $table_ms = 'LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor';
+      $tipo_rpt = "Entrada";
+      if($this->input->get('ftipop') == 'sa') {
+        $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+        $tipo_rpt = "Salida";
+      }
+
+      // if ($this->input->get('ftipop') != '')
+      //   if ($this->input->get('ftipop') === '1')
+      //     $sql .= " AND b.tipo = 'en'";
+      //   else
+      //     $sql .= " AND b.tipo = 'sa'";
 
       if (isset($_GET['pe']))
         $sql = " AND b.id_bascula IN (".$_GET['pe'].")";
@@ -447,7 +465,7 @@ class Bascula_model extends CI_Model {
                ca.nombre as calidad,
                bc.cajas,
                bc.promedio,
-               bc.kilos,
+               Coalesce(bc.kilos, b.kilos_neto) AS kilos,
                bc.precio,
                bc.importe,
                b.importe as importe_todas,
@@ -455,17 +473,16 @@ class Bascula_model extends CI_Model {
                pagos.tipo_pago,
                pagos.concepto,
                b.id_bonificacion
-        FROM bascula_compra AS bc
-        INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
-        LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
-        INNER JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
-        LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
+        FROM bascula AS b
+          LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
+          {$table_ms}
+          LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
+          LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
                     FROM bascula_pagos AS bp
                     INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
                     ON pagos.id_bascula = b.id_bascula
         WHERE
-              b.status = true AND
-              b.id_proveedor = '{$_GET['fid_proveedor']}'
+              b.status = true 
               {$sql}
         ORDER BY b.folio, bc.id_calidad ASC
       ");
@@ -489,12 +506,16 @@ class Bascula_model extends CI_Model {
 
       $this->load->model('areas_model');
       $this->load->model('proveedores_model');
+      $this->load->model('clientes_model');
 
       // Obtiene la informacion del Area filtrada.
       $data['area'] = $this->areas_model->getAreaInfo($_GET['farea']);
 
       // Obtiene la informacion del proveedor filtrado.
-      $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
+      if($this->input->get('ftipop') == 'sa') {
+        $data['proveedor'] = $this->clientes_model->getClienteInfo($_GET['fid_proveedor']);
+      }else
+        $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
 
       $data['movimientos'] = $movimientos;
     }
@@ -542,23 +563,30 @@ class Bascula_model extends CI_Model {
       $sql = $sql2 = '';
 
       $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
-      $sql .= $sql2 .=" AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
+      $sql .= " AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
+      $sql2 .= " AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
 
       $this->load->model('areas_model');
       $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
-      if ($this->input->get('farea') != '')
-        $sql .= $sql2 .= " AND b.id_area = " . $_GET['farea'];
-
-      if ($this->input->get('fid_proveedor') != ''){
-        if($this->input->get('ftipo') == 'sa')
-          $sql .= $sql2 .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
-        else
-          $sql .= $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      if ($this->input->get('farea') != ''){
+        $sql .= " AND b.id_area = " . $_GET['farea'];
+        $sql2 .= " AND b.id_area = " . $_GET['farea'];
       }
 
-      if ($this->input->get('fid_empresa') != '')
-        $sql .= $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+      if ($this->input->get('fid_proveedor') != ''){
+        if($this->input->get('ftipo') == 'sa'){
+          $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+          $sql2 .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+        }else{
+          $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+          $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+        }
+      }
 
+      if ($this->input->get('fid_empresa') != ''){
+        $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+        $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+      }
       if ($this->input->get('fstatus') != '')
         if ($this->input->get('fstatus') === '1')
           $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
@@ -896,103 +924,103 @@ class Bascula_model extends CI_Model {
    public function r_acumulados_pdf()
    {
 
-    // Obtiene los datos del reporte.
-    $data = $this->r_acumulados_data();
+      // Obtiene los datos del reporte.
+      $data = $this->r_acumulados_data();
 
-    $area = $data['area'];
+      $area = $data['area'];
 
-    $fecha = new DateTime($_GET['ffecha1']);
-    $fecha2 = new DateTime($_GET['ffecha2']);
+      $fecha = new DateTime($_GET['ffecha1']);
+      $fecha2 = new DateTime($_GET['ffecha2']);
 
-    $this->load->library('mypdf');
-    // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
-    $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
-    $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
+      $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
 
-    $pdf->AliasNbPages();
-    //$pdf->AddPage();
-    $pdf->SetFont('helvetica','', 8);
+      $pdf->AliasNbPages();
+      //$pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
-    $widths = array(20, 75, 30, 25, 20, 35);
-    $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
+      $aligns = array('L', 'L', 'R', 'R', 'R', 'R');
+      $widths = array(20, 75, 30, 25, 20, 35);
+      $header = array('CUENTA', 'NOMBRE', 'KILOS','CAJAS', 'P.P.', 'TOTAL');
 
-    $total_kilos   = 0;
-    $total_cajas   = 0;
-    $total_importe = 0;
+      $total_kilos   = 0;
+      $total_cajas   = 0;
+      $total_importe = 0;
 
-    foreach($data['data'] as $key => $proveedor)
-    {
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      foreach($data['data'] as $key => $proveedor)
       {
-        $pdf->AddPage();
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          $pdf->AddPage();
 
-        $pdf->SetFont('helvetica','B',8);
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, false, false);
+        }
+
+        $pdf->SetFont('helvetica','', 8);
         $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(160,160,160);
+
         $pdf->SetY($pdf->GetY()-2);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, false, false);
+          $pdf->Row(array(
+              $proveedor->cuenta_cpi,
+              substr($proveedor->proveedor, 0, 42),
+              String::formatoNumero($proveedor->kilos, 2, ''),
+              String::formatoNumero($proveedor->cajas, 2, ''),
+              String::formatoNumero($proveedor->precio),
+              String::formatoNumero($proveedor->importe)
+            ), false, false);
+        $total_cajas   += $proveedor->cajas;
+        $total_kilos   += $proveedor->kilos;
+        $total_importe += $proveedor->importe;
       }
 
-      $pdf->SetFont('helvetica','', 8);
-      $pdf->SetTextColor(0,0,0);
-
-      $pdf->SetY($pdf->GetY()-2);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetTextColor(0 ,0 ,0 );
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
         $pdf->Row(array(
-            $proveedor->cuenta_cpi,
-            substr($proveedor->proveedor, 0, 42),
-            String::formatoNumero($proveedor->kilos, 2, ''),
-            String::formatoNumero($proveedor->cajas, 2, ''),
-            String::formatoNumero($proveedor->precio),
-            String::formatoNumero($proveedor->importe)
+            '',
+            '',
+            String::formatoNumero($total_kilos, 2, ''),
+            String::formatoNumero($total_cajas, 2, ''),
+            String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1)),
+            String::formatoNumero($total_importe)
           ), false, false);
-      $total_cajas   += $proveedor->cajas;
-      $total_kilos   += $proveedor->kilos;
-      $total_importe += $proveedor->importe;
-    }
 
-    if($pdf->GetY() >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetFont('helvetica','B',8);
-    $pdf->SetTextColor(0 ,0 ,0 );
-    $pdf->SetX(6);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
-      $pdf->Row(array(
-          '',
-          '',
-          String::formatoNumero($total_kilos, 2, ''),
-          String::formatoNumero($total_cajas, 2, ''),
-          String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1)),
-          String::formatoNumero($total_importe)
-        ), false, false);
-
-    //Total de pagadas no pagadas
-    if($pdf->GetY() >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetTextColor(0 ,0 ,0 );
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'R'));
-    $pdf->SetWidths(array(30, 45));
-    $pdf->Row(array('Pagados', String::formatoNumero($data['pagados_yno']->pagadas)), false);
-    if($pdf->GetY() >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetX(6);
-    $pdf->Row(array('No Pagados', String::formatoNumero($data['pagados_yno']->pendientes)), false);
-    if($pdf->GetY() >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetX(6);
-    $pdf->Row(array('Total', String::formatoNumero( ($data['pagados_yno']->pendientes+$data['pagados_yno']->pagadas) )), false);
+      //Total de pagadas no pagadas
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetTextColor(0 ,0 ,0 );
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(30, 45));
+      $pdf->Row(array('Pagados', String::formatoNumero($data['pagados_yno']->pagadas)), false);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(6);
+      $pdf->Row(array('No Pagados', String::formatoNumero($data['pagados_yno']->pendientes)), false);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(6);
+      $pdf->Row(array('Total', String::formatoNumero( ($data['pagados_yno']->pendientes+$data['pagados_yno']->pagadas) )), false);
 
 
-    $pdf->Output('REPORTE_ACUMULADOS_PROD_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+      $pdf->Output('REPORTE_ACUMULADOS_PROD_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
 
   /**
@@ -1002,143 +1030,144 @@ class Bascula_model extends CI_Model {
     */
    public function rmc_pdf()
    {
-    // Obtiene los datos del reporte.
-    $data = $this->getMovimientos();
+      // Obtiene los datos del reporte.
+      $data = $this->getMovimientos();
 
-    // echo "<pre>";
-    //   var_dump($data['totales']);
-    // echo "</pre>";exit;
+      // echo "<pre>";
+      //   var_dump($data['totales']);
+      // echo "</pre>";exit;
 
-    $rmc = $data['movimientos'];
+      $rmc = $data['movimientos'];
 
-    $area = $data['area'];
+      $area = $data['area'];
 
-    $proveedor = $data['proveedor'];
-    // echo "<pre>";
-    //   var_dump($proveedor);
-    // echo "</pre>";exit;
+      $proveedor = $data['proveedor'];
+      // echo "<pre>";
+      //   var_dump($proveedor);
+      // echo "</pre>";exit;
 
-    $fechaini = new DateTime($_GET['fechaini']);
-    $fechaend = new DateTime($_GET['fechaend']);
+      $fechaini = new DateTime($_GET['fechaini']);
+      $fechaend = new DateTime($_GET['fechaend']);
 
 
-    $tipo = "ENTRADAS/SALIDAS";
-    if ($this->input->get('ftipop') != '')
-      if ($this->input->get('ftipop') === '1')
-        $tipo = "ENTRADAS";
-      else
-        $tipo = "SALIDAS";
+      $tipo = "ENTRADAS/SALIDAS";
+      if ($this->input->get('ftipop') != '')
+        if ($this->input->get('ftipop') === '1')
+          $tipo = "ENTRADAS";
+        else
+          $tipo = "SALIDAS";
 
-    $this->load->library('mypdf');
-    // Creación del objeto de la clase heredada
-    $pdf = new MYpdf('P', 'mm', 'Letter');
-    $pdf->titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
-    $pdf->titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") \n FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
+      $pdf->titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") \n FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
 
-    $pdf->noShowPages = false;
-    $pdf->AliasNbPages();
-    //$pdf->AddPage();
-    $pdf->SetFont('helvetica','', 8);
+      $pdf->noShowPages = false;
+      $pdf->AliasNbPages();
+      //$pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
 
-    $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
-    $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 28, 30, 12);
-    $header = array('',   'BOLETA', 'FECHA','CALIDAD',
-                    'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
+      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C');
+      $widths = array(5, 14, 17, 18, 10, 11, 12, 13, 17, 17, 28, 30, 12);
+      $header = array('',   'BOLETA', 'FECHA','CALIDAD',
+                      'CAJS', 'PROM', 'KILOS', 'PRECIO','IMPORTE', 'TOTAL', 'TIPO PAGO', 'CONCEPTO', 'BONIF');
 
-    $lastFolio = 0;
-    $total_bonificaciones = 0;
-    foreach($rmc as $key => $caja)
-    {
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      $lastFolio = 0;
+      $total_bonificaciones = 0;
+      foreach($rmc as $key => $caja)
       {
-        $pdf->AddPage();
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          $pdf->AddPage();
 
-        $pdf->SetFont('helvetica','B',8);
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetY($pdf->GetY()-1);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, false);
+        }
+
+        $pdf->SetFont('helvetica','',8);
         $pdf->SetTextColor(0,0,0);
-        $pdf->SetFillColor(160,160,160);
+
+        $datos = array(($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : '',
+                       ($caja->id_bascula != $lastFolio) ? $caja->folio : '',
+                       ($caja->id_bascula != $lastFolio) ? $caja->fecha : '',
+                       substr($caja->calidad, 0, 9),
+                       $caja->cajas,
+                       $caja->promedio,
+                       String::formatoNumero($caja->kilos, 2, ''),
+                       String::formatoNumero($caja->precio, 2, ''),
+                       String::formatoNumero($caja->importe, 2, ''),
+                       ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '') : '',
+                       ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
+                       ($caja->id_bascula != $lastFolio) ? $caja->concepto: '',
+                       ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''),
+                      );
+
         $pdf->SetY($pdf->GetY()-1);
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row($header, false);
+        $pdf->Row($datos, false, false);
+
+        $lastFolio = $caja->id_bascula;
+
+        if(is_numeric($caja->id_bonificacion))
+          $total_bonificaciones += $caja->importe;
       }
 
-      $pdf->SetFont('helvetica','',8);
-      $pdf->SetTextColor(0,0,0);
-
-      $datos = array(($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : '',
-                     ($caja->id_bascula != $lastFolio) ? $caja->folio : '',
-                     ($caja->id_bascula != $lastFolio) ? $caja->fecha : '',
-                     substr($caja->calidad, 0, 9),
-                     $caja->cajas,
-                     $caja->promedio,
-                     String::formatoNumero($caja->kilos, 2, ''),
-                     String::formatoNumero($caja->precio, 2, ''),
-                     String::formatoNumero($caja->importe, 2, ''),
-                     ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '') : '',
-                     ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : '',
-                     ($caja->id_bascula != $lastFolio) ? $caja->concepto: '',
-                     ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''),
-                    );
-
-      $pdf->SetY($pdf->GetY()-1);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetFont('helvetica','B',8);
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-      $pdf->Row($datos, false, false);
+      $prom_total = floatval($data['totales']['kilos'])/(floatval($data['totales']['cajas'])>0? floatval($data['totales']['cajas']): 1);
+      $pdf->Row(array('', '', '', '',
+        $data['totales']['cajas'],
+        String::formatoNumero($prom_total, 2, ''),
+        $data['totales']['kilos'],
+        $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 3, '') : 0,
+        String::formatoNumero($data['totales']['importe']),
+        String::formatoNumero($data['totales']['total']),
+        '',''
+      ), false, false);
 
-      $lastFolio = $caja->id_bascula;
+      if($pdf->GetY()+20 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetY($pdf->GetY() + 6);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C'));
+      $pdf->SetWidths(array(66, 66, 66));
+      $pdf->Row(array(
+        'PAGADO',
+        'NO PAGADO',
+        'TOTAL IMPORTE',), false);
 
-      if(is_numeric($caja->id_bonificacion))
-        $total_bonificaciones += $caja->importe;
-    }
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('C', 'C', 'C'));
+      $pdf->SetWidths(array(66, 66, 66));
+      $pdf->Row(array(
+        String::formatoNumero($data['totales']['pagados']),
+        String::formatoNumero($data['totales']['no_pagados']),
+        String::formatoNumero($data['totales']['total'])
+      ), false);
 
-    if($pdf->GetY()+8 >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetFont('helvetica','B',8);
-    $pdf->SetX(6);
-    $pdf->SetAligns($aligns);
-    $pdf->SetWidths($widths);
-    $pdf->Row(array('', '', '', '',
-      $data['totales']['cajas'],
-      String::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, ''),
-      $data['totales']['kilos'],
-      $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 3, '') : 0,
-      String::formatoNumero($data['totales']['importe']),
-      String::formatoNumero($data['totales']['total']),
-      '',''
-    ), false, false);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(80));
+      $pdf->Row(array(
+        'Bonificado: '.String::formatoNumero($total_bonificaciones),
+      ), false, false);
 
-    if($pdf->GetY()+20 >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetY($pdf->GetY() + 6);
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('C', 'C', 'C'));
-    $pdf->SetWidths(array(66, 66, 66));
-    $pdf->Row(array(
-      'PAGADO',
-      'NO PAGADO',
-      'TOTAL IMPORTE',), false);
-
-    if($pdf->GetY() >= $pdf->limiteY)
-      $pdf->AddPage();
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('C', 'C', 'C'));
-    $pdf->SetWidths(array(66, 66, 66));
-    $pdf->Row(array(
-      String::formatoNumero($data['totales']['pagados']),
-      String::formatoNumero($data['totales']['no_pagados']),
-      String::formatoNumero($data['totales']['total'])
-    ), false);
-
-    $pdf->SetX(6);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(80));
-    $pdf->Row(array(
-      'Bonificado: '.String::formatoNumero($total_bonificaciones),
-    ), false, false);
-
-    $pdf->Output('REPORTE_MOVIMIENTOS_CUENTA.pdf', 'I');
+      $pdf->Output('REPORTE_MOVIMIENTOS_CUENTA.pdf', 'I');
   }
 
 

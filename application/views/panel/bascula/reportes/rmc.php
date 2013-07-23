@@ -143,7 +143,7 @@
 							<td></td>
 							<td></td>
 							<td class="txt_right"><?php echo $data['totales']['cajas']; ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false); ?></td>
+							<td class="txt_right"><?php echo $data['totales']['cajas'] != 0 ? String::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false) : 0; ?></td>
 							<td class="txt_right"><?php echo $data['totales']['kilos']; ?></td>
 							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
 							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
