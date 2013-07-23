@@ -1,3 +1,95 @@
+2013-07-20
+  ☐ SQL:
+    Privilegios:
+      "Ventas remisión";69;TRUE;"ventas/";"list-alt";FALSE
+      "Agregar remisión";74;TRUE;"ventas/agregar/";"plus";FALSE
+      "Cancelar";74;FALSE;"ventas/cancelar/";"remove";FALSE
+      "Pagar";74;FALSE;"ventas/pagar/";"money";FALSE
+      "Imprimir";74;FALSE;"ventas/imprimir/";"print";FALSE
+      "Lineas transporte";69;TRUE;"lineas_transporte/";"truck";FALSE
+      "Agregar linea";79;TRUE;"lineas_transporte/agregar/";"plus";FALSE
+      "Modificar";79;FALSE;"lineas_transporte/modificar/";"edit";FALSE
+      "Eliminar";79;FALSE;"lineas_transporte/eliminar/";"remove";FALSE
+      "Activar";79;FALSE;"lineas_transporte/activar/";"ok";FALSE
+      
+    CREATE TABLE facturacion_ventas_remision
+    (
+      id_venta bigserial NOT NULL,
+      id_cliente bigint NOT NULL,
+      id_empresa integer NOT NULL,
+      folio bigint NOT NULL,
+      fecha timestamp with time zone NOT NULL DEFAULT now(),
+      subtotal double precision NOT NULL DEFAULT 0,
+      importe_iva double precision NOT NULL DEFAULT 0,
+      total double precision NOT NULL DEFAULT 0,
+      total_letra character varying(250) NOT NULL,
+      forma_pago character varying(80) NOT NULL DEFAULT 'Pago en una sola exhibición'::character varying,
+      condicion_pago character varying(2) NOT NULL DEFAULT 'co'::character varying,
+      plazo_credito integer NOT NULL DEFAULT 0,
+      observaciones text NOT NULL DEFAULT ''::text,
+      status character varying(2) NOT NULL DEFAULT 'pa'::character varying,
+      metodo_pago character varying(40) NOT NULL DEFAULT 'efectivo'::character varying, -- cheque, tarjeta de crédito o debito, depósito en cuenta
+      CONSTRAINT facturacion_ventas_remision_pkey PRIMARY KEY (id_venta),
+      CONSTRAINT facturacion_ventas_remision_id_cliente_fkey FOREIGN KEY (id_cliente)
+          REFERENCES clientes (id_cliente) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT facturacion_ventas_remision_id_empresa_fkey FOREIGN KEY (id_empresa)
+          REFERENCES empresas (id_empresa) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE facturacion_ventas_remision OWNER TO programa;
+    COMMENT ON COLUMN facturacion_ventas_remision.metodo_pago IS 'cheque, tarjeta de crédito o debito, depósito en cuenta';
+
+    CREATE TABLE facturacion_ventas_remision_cliente
+    (
+      id_venta bigint NOT NULL,
+      nombre character varying(130),
+      rfc character varying(13),
+      calle character varying(60),
+      no_exterior character varying(7),
+      no_interior character varying(7),
+      colonia character varying(60),
+      localidad character varying(45),
+      municipio character varying(45),
+      estado character varying(45),
+      cp character varying(10),
+      pais character varying(60),
+      CONSTRAINT facturacion_ventas_remision_productos_pkey PRIMARY KEY (id_venta),
+      CONSTRAINT facturacion_ventas_remision_productos_id_venta_fkey FOREIGN KEY (id_venta)
+          REFERENCES facturacion_ventas_remision (id_venta) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE facturacion_ventas_remision_cliente OWNER TO programa;
+
+    CREATE TABLE facturacion_ventas_remision_productos
+    (
+      id_venta bigint NOT NULL,
+      id_clasificacion integer,
+      num_row integer NOT NULL DEFAULT 0,
+      cantidad real NOT NULL DEFAULT 0,
+      descripcion text,
+      precio_unitario double precision NOT NULL DEFAULT 0,
+      importe double precision NOT NULL,
+      unidad character varying(15) DEFAULT 'No aplica'::character varying,
+      CONSTRAINT facturacion_ventas_remision_productos_pkey1 PRIMARY KEY (id_venta, num_row),
+      CONSTRAINT facturacion_ventas_remision_productos_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+          REFERENCES clasificaciones (id_clasificacion) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT facturacion_ventas_remision_productos_id_venta_fkey1 FOREIGN KEY (id_venta)
+          REFERENCES facturacion_ventas_remision (id_venta) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE facturacion_ventas_remision_productos OWNER TO programa;
+
 2013-07-19
 Privilegios Facturacion:
     "Ventas";0;TRUE;"ventas/";"dollar";FALSE
