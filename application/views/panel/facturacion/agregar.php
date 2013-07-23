@@ -32,10 +32,10 @@
                 <label class="control-label" for="dempresa">Empresa</label>
                 <div class="controls">
                   <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
-                  <input type="text" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa); ?>">
-                  <input type="text" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->version); ?>">
-                  <input type="text" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $empresa_default->cer_caduca); ?>">
-                  <input type="text" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $no_certificado); ?>">
+                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa); ?>">
+                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->cfdi_version); ?>">
+                  <input type="hidden" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $empresa_default->cer_caduca); ?>">
+                  <input type="hidden" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $no_certificado); ?>">
                 </div>
               </div>
 
@@ -57,8 +57,8 @@
                 <div class="controls">
                   <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo set_value('dfolio', (isset($folio)? $folio[0]: '')); ?>" size="15" readonly>
 
-                  <input type="text" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
-                  <!-- <input type="hidden" name="dimg_cbb" id="dimg_cbb" value="<?php echo set_value('dimg_cbb'); ?>"> -->
+                  <input type="hidden" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
+                  <!-- <input type="hidden" name="dimg_cbb" id="dimg_cbb" value="<?php //echo set_value('dimg_cbb'); ?>"> -->
                 </div>
               </div>
 
@@ -88,6 +88,13 @@
                 <label class="control-label" for="dcliente_ciudad">Ciudad</label>
                 <div class="controls">
                   <input type="text" name="dcliente_ciudad" class="span9" id="dcliente_ciudad" value="<?php echo set_value('dcliente_ciudad'); ?>" size="25">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dobservaciones">Observaciones</label>
+                <div class="controls">
+                  <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones'); ?></textarea>
                 </div>
               </div>
             </div>
@@ -204,8 +211,8 @@
 
                               <tr>
                                 <td>
-                                  <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion"><?php echo $_POST['prod_ddescripcion'][$k]?>
-                                  <input type="text" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
+                                  <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
+                                  <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                 </td>
                                 <td>
                                   <input type="text" name="prod_dmedida[]" class="span12" value="<?php echo $_POST['prod_dmedida'][$k]?>" id="prod_dmedida">
@@ -223,8 +230,8 @@
                                       <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : '' ?>>16%</option>
                                     </select></div>
 
-                                    <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]?>" id="prod_diva_total">
-                                    <input type="text" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]?>" id="prod_diva_porcent">
+                                    <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]?>" id="prod_diva_total">
+                                    <input type="hidden" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]?>" id="prod_diva_porcent">
                                 </td>
                                 <td>
                                   <select name="dreten_iva" id="dreten_iva" class="span12 prod">
@@ -234,8 +241,8 @@
                                     <option value="1" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 1 ? 'selected' : '' ?>>100 %</option>
                                   </select>
 
-                                  <input type="text" name="prod_dreten_iva_total[]" value="<?php echo $_POST['prod_dreten_iva_total'][$k] ?>" id="prod_dreten_iva_total" class="span12">
-                                  <input type="text" name="prod_dreten_iva_porcent[]" value="<?php echo $_POST['prod_dreten_iva_porcent'][$k] ?>" id="prod_dreten_iva_porcent" class="span12">
+                                  <input type="hidden" name="prod_dreten_iva_total[]" value="<?php echo $_POST['prod_dreten_iva_total'][$k] ?>" id="prod_dreten_iva_total" class="span12">
+                                  <input type="hidden" name="prod_dreten_iva_porcent[]" value="<?php echo $_POST['prod_dreten_iva_porcent'][$k] ?>" id="prod_dreten_iva_porcent" class="span12">
                                 </td>
                                  <td>
                                   <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $_POST['prod_importe'][$k]?>" id="prod_importe">
@@ -248,7 +255,7 @@
                   <tr>
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
-                      <input type="text" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                      <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                     </td>
                     <td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"></td>
                     <td>
@@ -264,8 +271,8 @@
                           <option value="16">16%</option>
                         </select>
 
-                        <input type="text" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">
-                        <input type="text" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
+                        <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">
+                        <input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
                     </td>
                     <td>
                       <select name="dreten_iva" id="dreten_iva" class="span12 prod">
@@ -275,8 +282,8 @@
                         <option value="1">100 %</option>
                       </select>
 
-                      <input type="text" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">
-                      <input type="text" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">
+                      <input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">
+                      <input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">
                     </td>
                     <td>
                       <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">

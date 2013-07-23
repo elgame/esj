@@ -1,3 +1,12 @@
+2013-07-19
+Privilegios Facturacion:
+    "Ventas";0;TRUE;"ventas/";"dollar";FALSE
+    "Facturar";69;TRUE;"facturacion/agregar/";"file-text-alt";FALSE
+    "Agregar Series y Folios";72;TRUE;"facturacion/agregar_serie_folio/";"plus";FALSE
+    "Series y Folios";70;TRUE;"facturacion/series_folios/";"list-alt";FALSE
+    "Modificar";72;FALSE;"facturacion/modificar_serie_folio/";"edit";FALSE
+
+
 2013-07-17
       CHOFERES:
            ✔ Agregar los campos faltantes. @done (13-07-15 17:52)
