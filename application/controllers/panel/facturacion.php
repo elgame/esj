@@ -44,9 +44,11 @@ class facturacion extends MY_Controller {
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Facturas');
+    $params['seo'] = array('titulo' => 'Facturas');
 
     $params['datos_s'] = $this->facturacion_model->getFacturas();
+
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -64,11 +66,6 @@ class facturacion extends MY_Controller {
    */
   public function agregar()
   {
-    // echo "<pre>";
-    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', "\tHola\tMundo\t\t\t    \rCruel\r"), " "), " "), "Hola\tMundo\t\t\t    \rCruel\n");
-    // echo "</pre>";
-    // exit;
-
     $this->carabiner->js(array(
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
@@ -97,7 +94,7 @@ class facturacion extends MY_Controller {
       $respons = $this->facturacion_model->addFactura();
 
       if($respons[0])
-        redirect(base_url('panel/facturacion/agregar/?msg=4&id='.$respons[2]));
+        redirect(base_url('panel/facturacion/agregar/?msg=4&id='.$respons[1]));
     }
 
     $params['series'] = $this->facturacion_model->getSeriesFolios(100);
@@ -291,6 +288,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'dtipo_comprobante',
               'label'   => 'Tipo comproante',
               'rules'   => 'required'),
+        array('field'   => 'dobservaciones',
+              'label'   => 'Observaciones',
+              'rules'   => ''),
     );
     $this->form_validation->set_rules($rules);
   }
@@ -650,7 +650,7 @@ class facturacion extends MY_Controller {
    */
 
   /**
-   * Permite administrar los series y folios para la facturacion
+   * Permite administrar los series y folios para la facturacion.
    *
    * @return void
    */
@@ -773,7 +773,7 @@ class facturacion extends MY_Controller {
     if(isset($_GET['ide']))
     {
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->get_series_empresa($_GET['ide']);
+      $res = $this->facturacion_model->getSeriesEmpresa($_GET['ide']);
 
       $param =  $this->showMsgs(2, $res[1]);
       $param['data'] = $res[0];

@@ -1,82 +1,115 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class cfdi{
-	private $path_certificado_org = '';
-	private $path_certificado = '';
-	private $path_key = '';
-	private $pass_key = 'Piloto01';//CHONITA09
+  private $path_certificado_org = '';
+  private $path_certificado     = '';
+  private $path_key             = '';
+  private $pass_key             = 'Piloto01';//CHONITA09
 
 	public $version = '3.2';
 
-	private $rfc = 'NEDR620710H76';
-	private $razon_social = 'ROBERTO NEVAREZ DOMINGUEZ';
-	private $regimen_fiscal = 'Actividad empresarial, régimen general de ley'; //'Actividad empresarial y profesional, Régimen de honorarios';
-	private $calle = 'Pista Aérea';
-	private $no_exterior = 'S/N';
-	private $no_interior = '';
-	private $colonia = 'Ranchito';
-	private $localidad = 'Ranchito';
-	private $municipio = 'Michoacán';
-	private $estado = 'Michoacán';
-	private $pais = 'México';
-	private $cp = '60800';
+  private $rfc            = 'NEDR620710H76';
+  private $razon_social   = 'ROBERTO NEVAREZ DOMINGUEZ';
+  private $regimen_fiscal = 'Actividad empresarial, régimen general de ley'; //'Actividad empresarial y profesional, Régimen de honorarios';
+  private $calle          = 'Pista Aérea';
+  private $no_exterior    = 'S/N';
+  private $no_interior    = '';
+  private $colonia        = 'Ranchito';
+  private $localidad      = 'Ranchito';
+  private $municipio      = 'Michoacán';
+  private $estado         = 'Michoacán';
+  private $pais           = 'México';
+  private $cp             = '60800';
 
 	public $default_id_empresa = 3; //informacion fiscal guardada en la bd
 
-	public function __construct(){
+	/**
+   * Inicializa las rutas del certificado, certificado.pem y key.pem
+   *
+   * @return void
+   */
+  public function __construct()
+  {
 		$this->path_certificado_org = APPPATH.'CFDI/certificados/nedr620710h76_1302281329s.cer';
 		$this->path_certificado = APPPATH.'CFDI/certificados/nedr620710h76_1302281329s.cer.pem';
 		$this->path_key = APPPATH.'CFDI/certificados/nedr620710h76_1012091114s_p.key.pem';
 	}
 
-	public function obtenNoCertificado($path_certificado_org=null){
-		$path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
-		$datos_cer = file_get_contents($path_certificado_org);
-		$num_certificado = substr($datos_cer, 15, 20);
+  /**
+   * Obtiene el numero de certificado de la empresa.
+   *
+   * @param  string $path_certificado_org
+   * @return string
+   */
+	public function obtenNoCertificado($path_certificado_org = null)
+  {
+    $path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
+    $datos_cer            = file_get_contents($path_certificado_org);
+    $num_certificado      = substr($datos_cer, 15, 20);
+
 		return $num_certificado;
 	}
-	public function obtenFechaCertificado($path_certificado_org=null){
-		$path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
-		$datos_cer = file_get_contents($path_certificado_org);
-		$fecha_certificado = substr($datos_cer, (strpos($datos_cer, "Z")+3), 6);
-		$fecha_certificado = '20'.substr($fecha_certificado, 0, 2).'-'.substr($fecha_certificado, 2, 2).'-'.substr($fecha_certificado, 4, 2);
-		return $fecha_certificado;
+
+  /**
+   * Obtiene la fecha del certificado.
+   *
+   * @param  string $path_certificado_org
+   * @return string
+   */
+	public function obtenFechaCertificado($path_certificado_org=null)
+  {
+    $path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
+    $datos_cer            = file_get_contents($path_certificado_org);
+    $fecha_certificado    = substr($datos_cer, (strpos($datos_cer, "Z")+3), 6);
+    $fecha_certificado    = '20'.substr($fecha_certificado, 0, 2).'-'.substr($fecha_certificado, 2, 2).'-'.substr($fecha_certificado, 4, 2);
+
+    return $fecha_certificado;
 	}
 
-	public function obtenSello($cadena_original){
+  /**
+   * Obtiene el Sello.
+   *
+   * @param  string $cadena_original
+   * @return string
+   */
+	public function obtenSello($cadena_original)
+  {
 		$pkeyid = openssl_pkey_get_private(file_get_contents($this->path_key), $this->pass_key);
+
 		openssl_sign($cadena_original, $crypttext, $pkeyid, OPENSSL_ALGO_SHA1);
 		openssl_free_key($pkeyid);
+
 		$sello = base64_encode($crypttext);
+
 		return $sello;
 	}
 
-	// public function obtenCadenaOriginal($data){
-	// 	$id_empresa = isset($data['id_empresa'])? $data['id_empresa']: $this->default_id_empresa;
-	// 	$this->cargaDatosFiscales($id_empresa);
+  /**
+   * Lee el contenido del certificado .pem y obtiene el contenido que se encuentra
+   * entre los lineas -----BEGIN CERTIFICATE----- y -----END CERTIFICATE-----
+   *
+   * @param  string $path
+   * @return string
+   */
+  public function obtenCertificado($path)
+  {
+    // Lee el contenido del .cer.pem
+    $content = file_get_contents($path);
 
-	// 	$data['cno_interior']= (isset($data['cno_interior'])) ? (($data['cno_interior']!='') ? '|'.$data['cno_interior']: '') : ''; // Numero Interior
-	// 	$data['no_cuenta_pago']	= (isset($data['no_cuenta_pago'])) ? (($data['no_cuenta_pago']!='') ? '|'.$data['no_cuenta_pago']: '|No identificado') : '|No identificado'; // Ultimos 4 digitos
+    $cerpem = explode('-----BEGIN CERTIFICATE-----', $content);
 
-	// 	$cadena = '||'.$this->version.'|'.$data['serie'].'|'.$data['folio'].'|'.$data['fecha_xml'].'|'.$data['no_aprobacion'].'|'.$data['ano_aprobacion'].'|'.$data['tipo_comprobante'].'|'.$data['forma_pago'].'|'.$data['subtotal'].'|0|'.$data['total'].'|'.$data['metodo_pago'].'|'.$this->localidad.', '.$this->estado.$data['no_cuenta_pago'].'|'.$data['moneda'].'|'.$this->rfc.'|'.$this->razon_social.'|'.$this->calle.'|'.$this->no_exterior.'|'.$this->colonia.'|'.$this->localidad.'|'.$this->municipio.'|'.$this->estado.'|'.$this->pais.'|'.$this->cp.'|'.$this->calle.'|'.$this->no_exterior.'|'.$this->colonia.'|'.$this->localidad.'|'.$this->municipio.'|'.$this->estado.'|'.$this->pais.'|'.$this->cp.'|'.$this->regimen_fiscal.'|'.$data['crfc'].'|'.$data['cnombre'].'|'.$data['ccalle'].'|'.$data['cno_exterior'].$data['cno_interior'].'|'.$data['ccolonia'].'|'.$data['clocalidad'].'|'.$data['cmunicipio'].'|'.$data['cestado'].'|'.$data['cpais'].'|'.$data['ccp'].'|';
+    $cerpem = explode('-----END CERTIFICATE-----', $cerpem[1]);
 
-	// 	if(count($data["productos"])>0)
-	// 		foreach($data["productos"] as $key => $p){
-	// 			$cadena .= $p['cantidad'].'|'.$p['unidad'].'|'.$p['descripcion'].'|'.$p['precio_unit'].'|'.$p['importe'].'|';
-	// 	  }
+    // Retorna la cadena del certificado sin espacios.
+    return str_replace("\n", "", $cerpem[0]);
+  }
 
-	// 	if(isset($data["total_isr"]))
-	// 		$cadena .= 'ISR|'.$data['total_isr'].'|'.$data['total_isr'].'|';
-
-	// 	if(count($data["ivas"])>0)
-	// 		foreach($data["ivas"] as $key => $iva)
-	// 			$cadena .= 'IVA|'.$iva['tasa_iva'].'|'.$iva['importe_iva'].'|';
-
-	// 	$cadena .= $data['iva_total'].'||';
-	// 	$cadena = preg_replace('/ +/', ' ', $cadena);
-	// 	return $cadena;
-	// }
-
+  /**
+   * Genera la Cadena Original.
+   *
+   * @param  array $data
+   * @return array
+   */
   public function obtenCadenaOriginal($data)
   {
     // Obtiene el ID de la empresa que emite la factura, si no llega
@@ -109,9 +142,7 @@ class cfdi{
     $datos['comprobante']['total']                = $data['total'];
     $datos['comprobante']['metodoDePago']         = $data['metodoDePago'];
     $datos['comprobante']['LugarExpedición']      = $this->municipio.', '.$this->estado;
-
-    // if (isset($data['NumCtaPago']) && $data['NumCtaPago'] !== '')
-    $datos['comprobante']['NumCtaPago'] = $data['NumCtaPago'];
+    $datos['comprobante']['NumCtaPago']           = $data['NumCtaPago'];
 
     // $datos['comprobante']['FolioFiscalOrig']      = $data['FolioFiscalOrig'];
     // $datos['comprobante']['SerieFolioFiscalOrig'] = $data['SerieFolioFiscalOrig'];
@@ -123,34 +154,66 @@ class cfdi{
     $datos['emisor']['nombre'] = $this->nombre_fiscal;
 
     // ----------> Nodo domicilioFiscal
-    $datos['domicilioFiscal']['calle']        = $this->calle;
-    $datos['domicilioFiscal']['noExterior']   = $this->no_exterior;
+
+    if ($this->calle !== null && $this->calle !== '')
+      $datos['domicilioFiscal']['calle'] = $this->calle;
+
+    if ($this->no_exterior !== null && $this->no_exterior !== '')
+      $datos['domicilioFiscal']['noExterior'] = $this->no_exterior;
 
     if ($this->no_interior !== null && $this->no_interior !== '')
       $datos['domicilioFiscal']['noInterior'] = $this->no_interior;
 
-    $datos['domicilioFiscal']['colonia']      = $this->colonia;
-    $datos['domicilioFiscal']['localidad']    = $this->localidad;
+    if ($this->colonia !== null && $this->colonia !== '')
+      $datos['domicilioFiscal']['colonia'] = $this->colonia;
+
+    if ($this->localidad !== null && $this->localidad !== '')
+      $datos['domicilioFiscal']['localidad'] = $this->localidad;
+
     // $datos['domicilioFiscal']['referencia']
-    $datos['domicilioFiscal']['municipio']    = $this->municipio;
-    $datos['domicilioFiscal']['estado']       = $this->estado;
-    $datos['domicilioFiscal']['pais']         = $this->pais;
-    $datos['domicilioFiscal']['codigoPostal'] = $this->cp;
+
+    if ($this->municipio !== null && $this->municipio !== '')
+      $datos['domicilioFiscal']['municipio'] = $this->municipio;
+
+    if ($this->estado !== null && $this->estado !== '')
+      $datos['domicilioFiscal']['estado'] = $this->estado;
+
+    if ($this->pais !== null && $this->pais !== '')
+      $datos['domicilioFiscal']['pais'] = $this->pais;
+
+    if ($this->cp !== null && $this->cp !== '')
+      $datos['domicilioFiscal']['codigoPostal'] = $this->cp;
 
     // ----------> Nodo expedidoEn
-    $datos['expedidoEn']['calle']        = $this->calle;
-    $datos['expedidoEn']['noExterior']   = $this->no_exterior;
+
+    if ($this->calle !== null && $this->calle !== '')
+      $datos['expedidoEn']['calle'] = $this->calle;
+
+    if ($this->no_exterior !== null && $this->no_exterior !== '')
+      $datos['expedidoEn']['noExterior'] = $this->no_exterior;
 
     if ($this->no_interior !== null && $this->no_interior !== '')
       $datos['expedidoEn']['noInterior'] = $this->no_interior;
 
-    $datos['expedidoEn']['colonia']      = $this->colonia;
-    $datos['expedidoEn']['localidad']    = $this->localidad;
+    if ($this->colonia !== null && $this->colonia !== '')
+      $datos['expedidoEn']['colonia'] = $this->colonia;
+
+    if ($this->localidad !== null && $this->localidad !== '')
+      $datos['expedidoEn']['localidad'] = $this->localidad;
+
     // ----------> $datos['expedidoEn']['referencia']
-    $datos['expedidoEn']['municipio']    = $this->municipio;
-    $datos['expedidoEn']['estado']       = $this->estado;
-    $datos['expedidoEn']['pais']         = $this->pais;
-    $datos['expedidoEn']['codigoPostal'] = $this->cp;
+
+    if ($this->municipio !== null && $this->municipio !== '')
+      $datos['expedidoEn']['municipio'] = $this->municipio;
+
+    if ($this->estado !== null && $this->estado !== '')
+      $datos['expedidoEn']['estado'] = $this->estado;
+
+    if ($this->pais !== null && $this->pais !== '')
+      $datos['expedidoEn']['pais'] = $this->pais;
+
+    if ($this->cp !== null && $this->cp !== '')
+      $datos['expedidoEn']['codigoPostal'] = $this->cp;
 
     // ----------> Nodo regimenFiscal
     $datos['regimenFiscal']['regimen'] = $this->regimen_fiscal;
@@ -160,19 +223,35 @@ class cfdi{
     $datos['receptor']['nombre'] = $data['nombre'];
 
     // ----------> Nodo domicilio
-    $datos['domicilio']['calle']        = $data['calle'];
-    $datos['domicilio']['noExterior']   = $data['noExterior'];
+
+    if ($data['calle'] !== null && $data['calle'] !== '')
+      $datos['domicilio']['calle'] = $data['calle'];
+
+    if ($data['noExterior'] !== null && $data['noExterior'] !== '')
+      $datos['domicilio']['noExterior'] = $data['noExterior'];
 
     if ($data['noInterior'] !== null && $data['noInterior'] !== '')
       $datos['domicilio']['noInterior'] = $data['noInterior'];
 
-    $datos['domicilio']['colonia']      = $data['colonia'];
-    $datos['domicilio']['localidad']    = $data['localidad'];
+    if ($data['colonia'] !== null && $data['colonia'] !== '')
+      $datos['domicilio']['colonia'] = $data['colonia'];
+
+    if ($data['localidad'] !== null && $data['localidad'] !== '')
+      $datos['domicilio']['localidad'] = $data['localidad'];
+
     // $datos['domicilio']['referencia']   = $data['referencia'];
-    $datos['domicilio']['municipio']    = $data['municipio'];
-    $datos['domicilio']['estado']       = $data['estado'];
-    $datos['domicilio']['pais']         = $data['pais'];
-    $datos['domicilio']['codigoPostal'] = $data['codigoPostal'];
+
+    if ($data['municipio'] !== null && $data['municipio'] !== '')
+      $datos['domicilio']['municipio'] = $data['municipio'];
+
+    if ($data['estado'] !== null && $data['estado'] !== '')
+      $datos['domicilio']['estado'] = $data['estado'];
+
+    if ($data['pais'] !== null && $data['pais'] !== '')
+      $datos['domicilio']['pais'] = $data['pais'];
+
+    if ($data['codigoPostal'] !== null && $data['codigoPostal'] !== '')
+      $datos['domicilio']['codigoPostal'] = $data['codigoPostal'];
 
     // ----------> Nodo concepto
     // cantidad
@@ -197,8 +276,6 @@ class cfdi{
     // impuesto
     // importe
     // totalImpuestosRetenidos
-    // if (isset($data['totalImpuestosRetenidos']) && $data['totalImpuestosRetenidos'] != 0)
-    // {
     $datos['retencion'] = array();
     foreach ($data['retencion'] as $key => $retencion)
     {
@@ -207,16 +284,11 @@ class cfdi{
     }
     $datos['retencion'][] = $data['totalImpuestosRetenidos'];
 
-    // $retencion = '|'.implode('|', $datos['retencion']);
-    // }
-
     // ----------> Nodo traslado
     // Impuesto
     // tasa
     // importe
     // totalImpuestosTrasladados
-    // if (isset($data['totalImpuestosTrasladados']) && $data['totalImpuestosTrasladados'] != 0)
-    // {
     $datos['traslado'] = array();
     foreach ($data['traslado'] as $key => $traslado)
     {
@@ -225,41 +297,47 @@ class cfdi{
       $datos['traslado'][] = $traslado['importe'];
     }
     $datos['traslado'][] = $data['totalImpuestosTrasladados'];
-    // }
 
     $mergeDatos = array_merge(
-      $datos['comprobante'],
-      $datos['emisor'],
-      $datos['domicilioFiscal'],
-      $datos['expedidoEn'],
-      $datos['regimenFiscal'],
-      $datos['receptor'],
-      $datos['domicilio'],
-      $datos['concepto'],
-      $datos['retencion'],
-      $datos['traslado']
+      array_values($datos['comprobante']),
+      array_values($datos['emisor']),
+      array_values($datos['domicilioFiscal']),
+      array_values($datos['expedidoEn']),
+      array_values($datos['regimenFiscal']),
+      array_values($datos['receptor']),
+      array_values($datos['domicilio']),
+      array_values($datos['concepto']),
+      array_values($datos['retencion']),
+      array_values($datos['traslado'])
     );
 
-    return ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||')));
+    return array(
+      'cadenaOriginal' => ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))),
+      'datos' => $datos
+    );
   }
 
+  /**
+   * Carga los datos fiscales de la empresa que emitira la factura.
+   *
+   * @param  string|int $id_empresa
+   * @return void
+   */
 	public function cargaDatosFiscales($id_empresa)
   {
 		$CI =& get_instance();
 		$data = $CI->db->query(
-      "SELECT e.*, ef.id_fiscal, ef.version, ef.path_cer_org, ef.path_cer,
-              ef.path_key, ef.pass_key
+      "SELECT e.*
        FROM empresas AS e
-       INNER JOIN empresas_fiscal AS ef ON ef.id_empresa = e.id_empresa
        WHERE e.id_empresa = " . $id_empresa
-    )->row(); //nv_fiscal
+    )->row();
 
-		$this->path_certificado_org = $data->cer_org; //APPPATH.'CFDI/certificados/'.
-		$this->path_certificado     = $data->cer; // APPPATH.'CFDI/certificados/'.
-		$this->path_key             = $data->key_path; // APPPATH.'CFDI/certificados/'.
+		$this->path_certificado_org = $data->cer_org;
+		$this->path_certificado     = $data->cer;
+		$this->path_key             = $data->key_path;
 		$this->pass_key             = $data->pass;
 
-    $this->version        = $data->version;
+    $this->version        = $data->cfdi_version;
     $this->rfc            = $data->rfc;
     $this->nombre_fiscal  = $data->nombre_fiscal; // razon_social
     $this->regimen_fiscal = $data->regimen_fiscal;
@@ -274,35 +352,48 @@ class cfdi{
     $this->cp             = $data->cp;
 	}
 
-	public function generaArchivos($data){
-		$this->cargaDatosFiscales($data['id_nv_fiscal']);
+	public function generaArchivos($data)
+  {
+		$this->cargaDatosFiscales($data['id_empresa']);
 
-		$vers = str_replace('.', '_', $this->version);
+		// $vers = str_replace('.', '_', $this->version);
 		$this->guardarXML($data);
-		$this->generarUnPDF($data);
+		// $this->generarUnPDF($data);
 	}
 
 	public function actualizarArchivos($data){
-		$this->cargaDatosFiscales($data['id_nv_fiscal']);
+		$this->cargaDatosFiscales($data['id_empresa']);
 
 		$vers = str_replace('.', '_', $this->version);
 		$this->guardarXML($data,true);
 		$this->generarUnPDF($data,array('F'),true);
 	}
-	/********** REPORTE MENSUAL ************/
-	public function descargaReporte($anio, $mes){
-		if($this->existeReporte($anio, $mes)){
+
+  /*
+   |-------------------------------------------------------------------------
+   | REPORTE MENSUAL
+   |-------------------------------------------------------------------------
+   */
+
+  public function descargaReporte($anio, $mes)
+  {
+		if($this->existeReporte($anio, $mes))
+    {
 			$path = APPPATH.'media/cfd/reportesMensuales/'.$anio.'/1'.$this->rfc.$mes.$anio.'.txt';
 			header('Content-type: text/plain');
 			header('Content-Disposition: attachment; filename="1'.$this->rfc.$mes.$anio.'.txt"');
 			readfile($path);
 		}
 	}
-	public function existeReporte($anio, $mes){;
+
+	public function existeReporte($anio, $mes)
+  {
 		$path = APPPATH.'media/cfd/reportesMensuales/'.$anio.'/1'.$this->rfc.$mes.$anio.'.txt';
 		return file_exists($path);
 	}
-	public function generaReporte($anio, $mes, $reporte, $ex_nombre=''){
+
+	public function generaReporte($anio, $mes, $reporte, $ex_nombre='')
+  {
 		$path = APPPATH.'media/cfd/reportesMensuales/';
 		if(!file_exists($path.$anio.'/'))
 			$this->crearFolder($path, $anio."/");
@@ -315,8 +406,16 @@ class cfdi{
 		return array('tipo' => 0, 'mensaje' => 'El reporte se genero correctamente.');;
 	}
 
-	private function mesToString($mes){
-		switch(floatval($mes)){
+  /**
+   * Regresa el MES que corresponde en texto.
+   *
+   * @param  int $mes
+   * @return string
+   */
+	private function mesToString($mes)
+  {
+		switch(floatval($mes))
+    {
 			case 1: return 'ENERO'; break;
 			case 2: return 'FEBRERO'; break;
 			case 3: return 'MARZO'; break;
@@ -332,7 +431,14 @@ class cfdi{
 		}
 	}
 
-	public function acomodarFolio($folio){
+  /**
+   * Acomoda el folio.
+   *
+   * @param  string $folio
+   * @return string
+   */
+	public function acomodarFolio($folio)
+  {
 		$folio .= '';
 		for($i=strlen($folio); $i<8; ++$i){
 			$folio = '0'.$folio;
@@ -340,13 +446,23 @@ class cfdi{
 		return $folio;
 	}
 
-	public function ajustaTexto($cadena, $caracteres){
-		$res = '';
-		$len = strlen($cadena);
-		$cont = 0;
-		while($cont<$len){
-			$res .= substr($cadena, $cont, $caracteres)."<br>";
-			$cont += $caracteres;
+  /**
+   * Ajusta el texto.
+   *
+   * @param  string $cadena
+   * @param  string $caracteres
+   * @return string
+   */
+	public function ajustaTexto($cadena, $caracteres)
+  {
+    $res  = '';
+    $len  = strlen($cadena);
+    $cont = 0;
+
+		while($cont<$len)
+    {
+      $res  .= substr($cadena, $cont, $caracteres)."<br>";
+      $cont += $caracteres;
 		}
 
 		return $res;
@@ -354,194 +470,270 @@ class cfdi{
 
 	/**
 	 * Valida si el directorio espesificado existe o si no lo crea.
+   *
+   * @param string $tipo
+   * @param string $path
+   * @return string
 	 */
-	private function validaDir($tipo, $path){
-		$path = APPPATH.'media/cfd/'.$path;
-		if($tipo=='anio'){
-			$directorio = date("Y");
-		}else{
-			$directorio = $this->mesToString(date("n"));
-		}
-		if(!file_exists($path.$directorio."/")){
+	private function validaDir($tipo, $path)
+  {
+		$path = APPPATH.'media/cfdi/'.$path;
+
+		if($tipo === 'anio')
+      $directorio = date("Y");
+    else
+      $directorio = $this->mesToString(date("n"));
+
+		if( ! file_exists($path.$directorio."/"))
 			$this->crearFolder($path, $directorio."/");
-		}
+
 		return $directorio;
 	}
 
 	/**
 	 * Crea un folder en el servidor.
+   *
 	 * @param $path_directorio: string. ruta donde se creara el directorio.
 	 * @param $nombre_directorio: string. nombre del folder a crear.
+   * @return mixed array|boolean
 	 */
-	private function crearFolder($path_directorio, $nombre_directorio){
-		if($nombre_directorio != "" && file_exists($path_directorio)){
-			if(!file_exists($path_directorio.$nombre_directorio))
+	private function crearFolder($path_directorio, $nombre_directorio)
+  {
+		if($nombre_directorio != "" && file_exists($path_directorio))
+    {
+			if( ! file_exists($path_directorio.$nombre_directorio))
 				return mkdir($path_directorio.$nombre_directorio, 0777);
 			else
 				return true;
-		}else
+		}
+    else
 			return false;
 	}
 
-	private function obtenFechaMes($fecha){
+	private function obtenFechaMes($fecha)
+  {
 		$fecha = explode('-', $fecha);
 		return array($fecha[0],$fecha[1]);
 	}
 
+  /*
+   |-------------------------------------------------------------------------
+   | FUNCIONES PARA GENERAR Y GUARDAR|DESCARGAR EL XML.
+   |-------------------------------------------------------------------------
+   */
 
+  /**
+   * Guarda el XML en capertas especificas AÑO/MES
+   *
+   * @param  array  $data
+   * @param  boolean $update
+   * @return void
+   */
+	private function guardarXML($data, $update = false)
+  {
+    $vers = str_replace('.', '_', $this->version);
+    $xml  = $this->{'generarXML'.$vers}($data);
 
-	/**
-	 * FUNCIONES DE LS DISTINTAS VERSIONES DE CFD PARA LOS XML
-	 */
-	private function guardarXML($data,$update=false){
-		$vers = str_replace('.', '_', $this->version);
-		$xml = $this->{'generarXML'.$vers}($data);
-		if(!$update){
+    if( ! $update)
+    {
 			$dir_anio = $this->validaDir('anio', 'facturasXML/');
 			$dir_mes = $this->validaDir('mes', 'facturasXML/'.$dir_anio.'/');
 		}
-		else{
-			$fecha = $this->obtenFechaMes($data['fecha_xml']);
-			$dir_anio = $fecha[0];
-			$dir_mes = $this->mesToString($fecha[1]);
+		else
+    {
+      $fecha    = $this->obtenFechaMes($data['comprobante']['fecha']);
+      $dir_anio = $fecha[0];
+      $dir_mes  = $this->mesToString($fecha[1]);
 
-			if(!file_exists(APPPATH.'/media/cfd/facturasXML/'.$dir_anio.'/')){
-				$this->crearFolder(APPPATH.'/media/cfd/facturasXML/', $dir_anio.'/');
-			}
-			if(!file_exists(APPPATH.'/media/cfd/facturasXML/'.$dir_anio.'/'.$dir_mes.'/')){
-				$this->crearFolder(APPPATH.'/media/cfd/facturasXML/'.$dir_anio.'/', $dir_mes.'/');
-			}
+			if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'))
+        $this->crearFolder(APPPATH.'media/cfdi/facturasXML/', $dir_anio.'/');
+
+			if( ! file_exists(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'))
+				$this->crearFolder(APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/', $dir_mes.'/');
 		}
-		$path_guardar = APPPATH.'/media/cfd/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'.
-				$this->rfc.'-'.$data['serie'].'-'.$this->acomodarFolio($data['folio']).'.xml';
+
+		$path_guardar = APPPATH.'media/cfdi/facturasXML/'.$dir_anio.'/'.$dir_mes.'/'.
+			$this->rfc.'-'.$data['comprobante']['serie'].'-'.$this->acomodarFolio($data['comprobante']['folio']).'.xml';
+
 		$fp = fopen($path_guardar, 'w');
 		fwrite($fp, $xml);
 		fclose($fp);
 	}
 
-	public function descargarXML($data){
-		$this->cargaDatosFiscales($data['id_nv_fiscal']);
+  /**
+   * Descarga el XML.
+   *
+   * @param  array $data
+   * @return void
+   */
+	public function descargarXML($data)
+  {
+		$this->cargaDatosFiscales($data['id_empresa']);
 
-		$vers = str_replace('.', '_', $this->version);
-		$xml = $this->{'generarXML'.$vers}($data);
+    $vers = str_replace('.', '_', $this->version);
+    $xml  = $this->{'generarXML'.$vers}($data);
+
 		header('Content-type: content-type: text/xml');
-		header('Content-Disposition: attachment; filename="'.$this->rfc.'-'.$data['serie'].'-'.$this->acomodarFolio($data['folio']).'.xml"');
-		echo $xml;
+		header('Content-Disposition: attachment; filename="'.$this->rfc.'-'.$data['comprobante']['serie'].'-'.$this->acomodarFolio($data['comprobante']['folio']).'.xml"');
+
+    echo $xml;
 	}
 
-	public function generarXML2_2($data=array()){
+  /**
+   * Genera el contentido del XML con la informacion de facturacion.
+   *
+   * @param  array  $data
+   * @return string
+   */
+	public function generarXML3_2($data = array())
+  {
 		$xml = '';
-		$xml .= '<?xml version="1.0" encoding="utf-8"?>';
-		$xml .= '<Comprobante xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sat.gob.mx/cfd/2" xsi:schemaLocation="http://www.sat.gob.mx/cfd/2 http://www.sat.gob.mx/sitio_internet/cfd/2/cfdv22.xsd" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬version="'.$data['version'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬serie="'.$data['serie'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬folio="'.$data['folio'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬fecha="'.$data['fecha_xml'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬noAprobacion="'.$data['no_aprobacion'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬anoAprobacion="'.$data['ano_aprobacion'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬tipoDeComprobante="'.$data['tipo_comprobante'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬formaDePago="'.$data['forma_pago'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬metodoDePago="'.$data['metodo_pago'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬LugarExpedicion="'.$this->localidad.', '.$this->estado.'" ';
-		if($data['no_cuenta_pago']!=='')
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬NumCtaPago="'.$data['no_cuenta_pago'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬subTotal="'.$data['subtotal'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬descuento="'.$data['descuento'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.$data['total'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬sello="'.$data['sello'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬noCertificado="'.$data['no_certificado'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬Moneda="'.$data['moneda'].'"';
+		$xml .= '<?xml version="1.0" encoding="UTF-8"?> ';
+		$xml .= '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬version="'.$this->replaceSpecialChars($data['comprobante']['version']).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬serie="'.$data['comprobante']['serie'].'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬folio="'.$data['comprobante']['folio'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬fecha="'.$data['comprobante']['fecha'].'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬sello="'.$data['comprobante']['sello'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬formaDePago="'.$data['comprobante']['formaDePago'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬noCertificado="'.$data['comprobante']['noCertificado'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬certificado="'.$data['comprobante']['certificado'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬condicionesDePago="'.$data['comprobante']['condicionesDePago'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬subTotal="'.$data['comprobante']['subTotal'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.$data['comprobante']['total'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬tipoDeComprobante="'.$data['comprobante']['tipoDeComprobante'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬metodoDePago="'.$data['comprobante']['metodoDePago'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬LugarExpedicion="'.$this->municipio.', '.$this->estado.'" ';
+    if($data['comprobante']['NumCtaPago'] !== '')
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬NumCtaPago="'.$data['comprobante']['NumCtaPago'].'" ';
 		$xml .= '>';
 
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<Emisor rfc="'.$this->rfc.'" nombre="'.$this->razon_social.'">';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<DomicilioFiscal ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$this->calle.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$this->no_exterior.'" ';
-		if($this->no_interior!=='')
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$this->no_interior.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$this->colonia.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$this->localidad.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$this->municipio.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$this->estado.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$this->pais.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$this->cp.'"';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Emisor rfc="'.$this->replaceSpecialChars($this->rfc).'" nombre="'.$this->replaceSpecialChars($this->nombre_fiscal).'">';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:DomicilioFiscal ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$this->replaceSpecialChars($this->calle).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$this->replaceSpecialChars($this->no_exterior).'" ';
+		if($this->no_interior !== '')
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$this->replaceSpecialChars($this->no_interior).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$this->replaceSpecialChars($this->colonia).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$this->replaceSpecialChars($this->localidad).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$this->replaceSpecialChars($this->municipio).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$this->replaceSpecialChars($this->estado).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$this->replaceSpecialChars($this->pais).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$this->replaceSpecialChars($this->cp).'"';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
 
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<ExpedidoEn ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$this->calle.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$this->no_exterior.'" ';
-		if($this->no_interior!=='')
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$this->no_interior.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$this->colonia.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$this->localidad.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$this->municipio.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$this->estado.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$this->pais.'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$this->cp.'"';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:ExpedidoEn ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$this->replaceSpecialChars($this->calle).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$this->replaceSpecialChars($this->no_exterior).'" ';
+		if($this->no_interior !== '')
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$this->replaceSpecialChars($this->no_interior).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$this->replaceSpecialChars($this->colonia).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$this->replaceSpecialChars($this->localidad).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$this->replaceSpecialChars($this->municipio).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$this->replaceSpecialChars($this->estado).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$this->replaceSpecialChars($this->pais).'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$this->replaceSpecialChars($this->cp).'"';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<RegimenFiscal ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Regimen="'.$this->regimen_fiscal.'" ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:RegimenFiscal ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬Regimen="'.$this->replaceSpecialChars($this->regimen_fiscal).'" ';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</Emisor>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Emisor>';
 
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<Receptor rfc="'.$data['crfc'].'" nombre="'.$data['cnombre'].'">';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Domicilio ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$data['ccalle'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$data['cno_exterior'].'" ';
-		if($data['cno_interior']!=='')
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$data['cno_interior'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$data['ccolonia'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$data['clocalidad'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$data['cmunicipio'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$data['cestado'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$data['cpais'].'" ';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$data['ccp'].'"';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Receptor rfc="'.$data['receptor']['rfc'].'" nombre="'.$this->replaceSpecialChars($data['receptor']['nombre']).'">';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Domicilio ';
+    if (isset($data['domicilio']['calle']) && $data['domicilio']['calle'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬calle="'.$this->replaceSpecialChars($data['domicilio']['calle']).'" ';
+    if (isset($data['domicilio']['noExterior']) && $data['domicilio']['noExterior'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noExterior="'.$this->replaceSpecialChars($data['domicilio']['noExterior']).'" ';
+		if(isset($data['domicilio']['noInterior']) && $data['domicilio']['noInterior'] !== '')
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noInterior="'.$this->replaceSpecialChars($data['domicilio']['noInterior']).'" ';
+    if(isset($data['domicilio']['colonia']) && $data['domicilio']['colonia'] !== '')
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬colonia="'.$this->replaceSpecialChars($data['domicilio']['colonia']).'" ';
+    if(isset($data['domicilio']['localidad']) && $data['domicilio']['localidad'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬localidad="'.$this->replaceSpecialChars($data['domicilio']['localidad']).'" ';
+    if(isset($data['domicilio']['municipio']) && $data['domicilio']['municipio'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬municipio="'.$this->replaceSpecialChars($data['domicilio']['municipio']).'" ';
+    if(isset($data['domicilio']['estado']) && $data['domicilio']['estado'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬estado="'.$this->replaceSpecialChars($data['domicilio']['estado']).'" ';
+    if(isset($data['domicilio']['pais']) && $data['domicilio']['pais'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬pais="'.$this->replaceSpecialChars($data['domicilio']['pais']).'" ';
+    if(isset($data['domicilio']['codigoPostal']) && $data['domicilio']['codigoPostal'] !== '')
+		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬codigoPostal="'.$this->replaceSpecialChars($data['domicilio']['codigoPostal']).'"';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</Receptor>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Receptor>';
 
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<Conceptos>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Conceptos>';
 
-		foreach($data['productos'] as $itm){
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Concepto ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$itm['cantidad'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$itm['unidad'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬valorUnitario="'.(float)$itm['precio_unit'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$itm['descripcion'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$itm['importe'].'"';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
+		foreach($data['concepto'] as $concepto){
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬valorUnitario="'.(float)$concepto['valorUnitario'].'" ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$concepto['importe'].'"';
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬>';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Concepto>';
 		}
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</Conceptos>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Conceptos>';
 
-		$attr_isr = '';
-		if(isset($data['total_isr']))
-			$attr_isr = ' totalImpuestosRetenidos="'.(float)$data['total_isr'].'"';
+		$totalImpuestosRetenidos = '';
+		if(isset($data['totalImpuestosRetenidos']))
+			$totalImpuestosRetenidos = 'totalImpuestosRetenidos="'.(float)$data['totalImpuestosRetenidos'].'"';
 
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<Impuestos totalImpuestosTrasladados="'.(float)$data['iva_total'].'"'.$attr_isr.'>';
-		if(isset($data['total_isr'])){
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Retenciones>';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Retencion ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬impuesto="ISR" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$data['total_isr'].'"';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</Retenciones>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Impuestos '.$totalImpuestosRetenidos.' totalImpuestosTrasladados="'.(float)$data['totalImpuestosTrasladados'].'">';
+		if(isset($data['totalImpuestosRetenidos'])){
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Retenciones>';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Retencion ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬impuesto="'.$data['retencion']['impuesto'].'" ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$data['retencion']['importe'].'"';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Retenciones>';
 		}
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Traslados>';
-		foreach($data['ivas'] as $itm){
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<Traslado ';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Traslados>';
+		foreach($data['traslado'] as $traslado){
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Traslado ';
 			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬impuesto="IVA" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬tasa="'.(float)$itm['tasa_iva'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$itm['importe_iva'].'"';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬tasa="'.(float)$traslado['tasa'].'" ';
+			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$traslado['importe'].'"';
 			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬/>';
 		}
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</Traslados>';
-		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</Impuestos>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Traslados>';
+		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Impuestos>';
 
-		$xml .= '</Comprobante>';
+		$xml .= '</cfdi:Comprobante>';
 
 		$xml = str_replace('¬','',$xml);
+
 		return $xml;
 	}
 
+  /**
+   * Reemplaza los siguientes caracteres especiales segun anexo 20:
+   *
+   *   En el caso del & se deberá usar la secuencia &amp;
+   *   En el caso del “ se deberá usar la secuencia &quot;
+   *   En el caso del < se deberá usar la secuencia &lt;
+   *   En el caso del > se deberá usar la secuencia &gt;
+   *   En el caso del ‘ se deberá usar la secuencia &apos;
+   *
+   * @param  string $texto
+   * @return string
+   */
+  private function replaceSpecialChars($texto)
+  {
+    $texto = preg_replace(array('/”/', '/’/'), array('"', '\''), $texto);
+    return preg_replace('/&#0*39;/', '&apos;', htmlspecialchars($texto, ENT_QUOTES));
+
+    // $caracteres = array('/&/', '/</', '/>/', '/”/', '/"/', '/\'/', '/’/');
+    // $reemplazo  =  array('&amp;', '&lt;', '&gt;', '&quot;', '&quot;', '&apos;', '&apos;');
+    // return preg_replace($caracteres, $reemplazo, $texto);
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   | FUNCIONES PARA GENERAR PDF's
+   |-------------------------------------------------------------------------
+   */
 
 	/**
 	 * FUNCIONES DE LS DISTINTAS VERSIONES DE CFD PARA LOS PDF
@@ -573,11 +765,11 @@ class cfdi{
 				$dir_anio = $fecha[0];
 				$dir_mes = $this->mesToString($fecha[1]);
 
-				if(!file_exists(APPPATH.'/media/cfd/facturasPDF/'.$dir_anio.'/')){
-					$this->crearFolder(APPPATH.'/media/cfd/facturasPDF/', $dir_anio.'/');
+				if(!file_exists(APPPATH.'media/cfd/facturasPDF/'.$dir_anio.'/')){
+					$this->crearFolder(APPPATH.'media/cfd/facturasPDF/', $dir_anio.'/');
 				}
-				if(!file_exists(APPPATH.'/media/cfd/facturasPDF/'.$dir_anio.'/'.$dir_mes.'/')){
-					$this->crearFolder(APPPATH.'/media/cfd/facturasPDF/'.$dir_anio.'/', $dir_mes.'/');
+				if(!file_exists(APPPATH.'media/cfd/facturasPDF/'.$dir_anio.'/'.$dir_mes.'/')){
+					$this->crearFolder(APPPATH.'media/cfd/facturasPDF/'.$dir_anio.'/', $dir_mes.'/');
 				}
 			}
 

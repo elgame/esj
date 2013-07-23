@@ -11,7 +11,7 @@
       "Modificar";79;FALSE;"lineas_transporte/modificar/";"edit";FALSE
       "Eliminar";79;FALSE;"lineas_transporte/eliminar/";"remove";FALSE
       "Activar";79;FALSE;"lineas_transporte/activar/";"ok";FALSE
-      
+
     CREATE TABLE facturacion_ventas_remision
     (
       id_venta bigserial NOT NULL,
@@ -90,6 +90,17 @@
     );
     ALTER TABLE facturacion_ventas_remision_productos OWNER TO programa;
 
+2013-07-19
+Privilegios Facturacion:
+    "Ventas";0;TRUE;"ventas/";"dollar";FALSE
+    "Facturar";69;TRUE;"facturacion/agregar/";"file-text-alt";FALSE
+    "Agregar Series y Folios";72;TRUE;"facturacion/agregar_serie_folio/";"plus";FALSE
+    "Series y Folios";70;TRUE;"facturacion/series_folios/";"list-alt";FALSE
+    "Modificar";72;FALSE;"facturacion/modificar_serie_folio/";"edit";FALSE
+
+    "Pagar";70;FALSE;"facturacion/pagar/";"credit-card";FALSE
+    "Cancelar";70;FALSE;"facturacion/cancelar/";"ban-circle";FALSE
+    "Imprimir";70;FALSE;"facturacion/imprimir/";"print";FALSE
 
 2013-07-17
       CHOFERES:
@@ -506,3 +517,223 @@
     Agregar campos en tabla bascula
     no_lote integer, -- numero de lote para rastreabilidad
     chofer_es_productor boolean NOT NULL DEFAULT false, -- Rastreabilidad; si es true el chofer es el nombre de productor, si es false es nombre de chofer
+
+
+2013-06-28
+ ✔ El orden de los saltos con el enter Tipo->Area->folio->Fecha->Proveedor/Cliente->Camion->Chofer->K. Bruto/Tara->Cajas prestadas->Cajas y saltar en las input de las cajas agregadas @done (13-06-28 14:20)
+ ✔ Usar Esc para nueva pesada @done (13-06-28 14:20)
+ ✔ Quitar todos los signos de peso en el ticket al imprimir @done (13-06-28 14:20)
+ ✔ Agregarle soperte para el teclado numerico del bloqnum @done (13-06-28 14:20)
+ ✔ Al picarle al boton de guardar que mande un modal de si quiere pagar la boleta si le da q si que se guarde la boleta directamente y que no mande a imprimir cuando se pague @done (13-06-28 14:20)
+ ✔ Guardar la boleta en cuento se capture peso bruto @done (13-06-28 14:20)
+ ✔ Guardar la boleta cuando se mande a imprimir @done (13-06-28 14:20)
+ ✔ Que cargue otra boleta cuando le den enter sobre el folio siempre y cuando sea diferente a la actual, si no cambia que no cargue nada. @done (13-06-28 14:22)
+
+2013-06-21
+  ✔ Empresas poner una por default, agregar campo en la tabla empresa para poner por default, en bascula ponerla por default @done (13-06-23 11:35)
+  ✔ En los enters tome en cuenta la fecha @done (13-06-23 11:38)
+  ✔ Para kilos bruto y tara al tomar el foco que cargue el peso, si es nueva habilitar los brutos, si es modificar q habilite el tara, en la seccion modificar del listado pueden editar todo. @done (13-06-23 12:19)
+  ✔ Agregar input para pedir numero de cajas, esas cajas se restan al total de kilos (2kg x caja) @done (13-06-23 14:21)
+  ✔ Poner al inicio donde esta el de nueva pesada; Cancelar, imprimir (alt+p), Guardar, Nueva pesada @done (13-06-23 14:03)
+  ✔ Editar el peso promedio de las cajas agregadas como en la hoja @done (13-06-23 16:22)
+  ✔ Bonificaciones, pedir folio del ticket y cargar los datos en una pesada nueva, en las cajas es editable el precio, y poner por default 0, agregar campo id_bonificacion para relacionar la con el ticket padre @done (13-06-24 14:12)
+  ✔ Reporte de pesadas del dia agrupadas por calidad, como las hojas @done (13-06-25 20:35)
+  ☐ Modulo para pagar pesadas de forma masiva, un rango de fechas, proveedor, carga las pesadas no pagadas, podria pagar con metodo de pago, concepto, monto
+  ✔ Si pongo cajas prestadas no se guardan, si modifico el promedio de las familias agregadas lo hace bien pero el total pone el valor de la ultima calidad agregada tiene que ser la suma de los importes @done (13-06-25 20:35)
+  ✔ Ponerles las legendas (alt+p, alt+g, alt+n, etc) dentro de los botones @done (13-06-25 20:35)
+  ☐ Las cajas de texto de promedio si dan enter que salte a la siguiente caja, que no se mande el form
+  ✔ De bonificacion creo q no nos entendimos, yo decia los quilos del promedio no los kilos del bruto, tara, neto, cajas esos no q esten bloqueados @done (13-06-25 20:35)
+  ✔ bonificacion poner un boton de nueva pesada que regrese a agregar pesada (alt+n), @done (13-06-25 20:35)
+  ✔ bonificacion las pones como pagadas verdad, eso que lo puedan elejir, por q alomejor no lo pagan en efectivo, sino con trasferencia o cheque y eso es con el otro modulo, y que las puedan modificar desde el listado como cualquier pesada. @done (13-06-25 20:35)
+  ✔ bonificacion Te comente que cuando se ponga 0 o nada en el precio de las calidades esas no se agreguen a bascula_compra solo las que tengan un valor, deje en blanco 1 y trono, veo que intentas insertar la que no le puse nada, que no la inserte @done (13-06-25 20:35)
+        Message: Illegal string offset 'server'
+        Filename: postgre/postgre_driver.php
+        Line Number: 331
+        ERROR: la sintaxis de entrada no es válida para tipo double precision: «» LINE 1: ...14','2','350.00','700','.5','35'), ('30','14','1','','800','... ^
+        INSERT INTO "bascula_compra" ("cajas", "id_bascula", "id_calidad", "importe", "kilos", "precio", "promedio") VALUES ('20','14','2','350.00','700','.5','35'), ('30','14','1','','800','0','26.67')
+   ✔ Bonificaciones se guardan los kilos de la pesada anterior, que sea los que sumen en el listado @done (13-06-26 09:45)
+   ✔ Reporte quedaron visibles los campos de los id autocomplete, pone muchos decimales usara la funcion formato numero @done (13-06-26 09:45)
+
+
+  ☐ Sql
+    - Agregar campo en tabla empresas:
+          predeterminado boolean NOT NULL DEFAULT false
+    -Agregar campo en trabla bascula
+          id_bonificacion bigint
+    -Agregar campo en tabla bascula
+          cajas_prestadas integer
+    -TABLAS PARA LOS PAGOS DE LAS PESADAS
+          -- DROP TABLE bascula_pagos;
+
+            CREATE TABLE bascula_pagos
+            (
+              id_pago bigserial NOT NULL,
+              tipo_pago character varying(20) NOT NULL,
+              monto double precision NOT NULL,
+              concepto character varying(254),
+              status boolean NOT NULL DEFAULT true,
+              CONSTRAINT bascula_pagos_pkey PRIMARY KEY (id_pago)
+            )
+            WITH (
+              OIDS=FALSE
+            );
+            ALTER TABLE bascula_pagos
+            OWNER TO programa;
+
+
+          CREATE TABLE bascula_pagos_basculas
+          (
+            id_pago bigint NOT NULL,
+            id_bascula bigint NOT NULL,
+            CONSTRAINT bascula_pagos_basculas_pkey PRIMARY KEY (id_pago, id_bascula),
+            CONSTRAINT bascula_pagos_basculas_id_bascula_fkey FOREIGN KEY (id_bascula)
+                REFERENCES bascula (id_bascula) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            CONSTRAINT bascula_pagos_basculas_id_pago_fkey FOREIGN KEY (id_pago)
+                REFERENCES bascula_pagos (id_pago) MATCH SIMPLE
+                ON UPDATE CASCADE ON DELETE CASCADE
+          )
+          WITH (
+            OIDS=FALSE
+          );
+          ALTER TABLE bascula_pagos_basculas
+            OWNER TO programa;
+
+	-
+
+   - Nuevos Privilegios
+         nombre: Bonificacion
+         url: bascula/bonificacion/
+         ico: money
+         Padre: bascula
+       -----------------------
+        Nombre: Reporte Diario de Entradas
+        Url accion: bascula/rde/
+        icono: print
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
+       -----------------------
+        Nombre: Reporte Acumulados de Productos
+        Url accion: bascula/r_acumulados/
+        icono: print
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
+	   ----------------------- 26-06-2013
+       Nombre: Modificar
+        Url accion: bascula/modificar_bonificacion/
+        icono: edit
+        Mostrar menu: no
+        Target blank: no
+        ---------------------- 26-06-2013
+        Nombre: Movimientos de Cuenta
+        Url accion: bascula/movimientos/
+        icono: exchange
+        Mostrar menu: si
+        Target blank: si
+        Padre: bascula
+        ---------------------- 26-06-2013
+        Nombre: Pagos Pesadas
+        Url accion: bascula/pago_basculas/
+        icono: usd
+        Mostrar menu: no
+        Target blank: no
+        Padre: bascula
+
+
+
+
+Detalles Bascula:
+ ✔ Al entrar que el foco este en Empresas @done (13-06-18 16:53)
+ ✔ los autocomplete no se ponen verdes cuando se selecciona uno @done (13-06-18 16:57)
+ ✔ Texto "finalizar operacion" cambiarlo por "Pagar" @done (13-06-18 16:52)
+ ✔ En las cajas el select de la calidad, creo q el evento q tiene asignado es el click, cambiarle por "change" o el que se ocupe, el chiste q cuando muevan el select con las flechas cambie el precio del seleccionado; en la casilla  de precio si preciono enter no se agrega a la lista, que se agregue @done (13-06-18 17:00)
+ ✔ Los kilos netos me deja modificarlos, que este en read only tanto en agregar como en modificar @done (13-06-18 15:59)
+ ✔ En el ticket donde dice "cuenta" abajo tiene que ir el nombre del proveedor o cliente, despues de la fecha de expedicion, ponerle el tipo: Entrada, Salida @done (13-06-18 15:59)
+ ✔ autocomplets que sean como bichi que cambien de color y si borran no se limpie toda la caja (pero que si borre el id) @done (13-06-11 21:08)
+ ✔ si le doy cargar con un folio que no existe, pone errores @done (13-06-11 21:08)
+ ✔ cuando cargo un folio, ya no pone las calidades para agregar mas cajas @done (13-06-11 21:15)
+ ✔ ponerle un boton de nueva pesada, por q cuando cargo una, le tengo que dar en agregar pesada en el menu, se van a pendejar las morras @done (13-06-11 21:18)
+ ✔ en modificar pesada cuando le doy guardar se pone todo bloqueado, no hay q bloquear @done (13-06-11 21:27)
+ ✔ en modificar pesada, en cuanto entras a alguna no pone las calidades para agregar cajas @done (13-06-11 21:27)
+ ✔ en modificar pesada, no modifica las cosas, solo las cajas que quito o agrego; empresa, proveedor, chofer, camion, kilos bruto, tara y netos se se cambian, tampoco se recalculan los valores en la tabla de kilos y promedio para sacar el importe @done (13-06-11 22:47)
+ ✔ en modificar pesada, si cargo otra pesada y esta finalizada se pone todo bloqueado @done (13-06-11 22:18)
+ ✔ en el listado de pesadas, al entrar pone los cancelados, que no los ponga solo los activos @done (13-06-11 21:42)
+
+
+Cambis BD:
+  ☐ Privilegios
+     ✔ 2013-06-18 @done (13-06-19 09:47)
+       -Crear usuario en la pc de la bascula para conectarse, configurar en el servidor los datos de mysql del pc de la bascula
+       -Agregar campo "predeterminado boolean NOT NULL DEFAULT false" en tabla areas
+       -El campo "id_camion y id_chofer" de bascula quitarle el not null
+
+     *2013-06-03
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Bascula', 0, true, 'bascula/', 'road', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar', 40, true, 'bascula/agregar/', 'plus', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 40, false, 'bascula/modificar/', 'edit', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cancelar', 40, false, 'bascula/cancelar/', 'ban-circle', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Imprimir', 40, false, 'bascula/imprimir/', 'print', false);
+      COMMENT ON COLUMN clasificaciones.precio_venta IS 'NO USADO';
+      COMMENT ON COLUMN clasificaciones.cuenta_cpi IS 'NO USADO, cuenta afectable del contpaqi';
+      COMMENT ON COLUMN bascula.accion IS 'en:entrada, sa:salida, f:finalisado';
+      COMMENT ON COLUMN bascula.tipo IS 'en:entrada, sa:salida';
+      COMMENT ON COLUMN bascula_fotos.tipo IS 'en:entrada; sa:salida, ch:chofer';
+
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Empresas', 0, true, 'empresas/', 'group', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar empresa', 45, true, 'empresas/agregar/', 'plus', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 45, false, 'empresas/modificar/', 'edit', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Eliminar', 45, false, 'empresas/eliminar/', 'remove', false);
+      INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Activar', 45, false, 'empresas/activar/', 'ok', false);
+
+      CREATE TABLE empresas_fiscal
+      (
+        id_fiscal serial NOT NULL,
+        id_empresa integer NOT NULL,
+        "version" character varying(5),
+        path_cer_org character varying(90),
+        path_cer character varying(90),
+        path_key character varying(90),
+        pass_key character varying(20),
+        CONSTRAINT empresas_fiscal_pkey PRIMARY KEY (id_fiscal),
+        CONSTRAINT empresas_fiscal_id_empresa_fkey FOREIGN KEY (id_empresa)
+            REFERENCES empresas (id_empresa) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE empresas_fiscal OWNER TO programa;
+
+      CREATE TABLE clientes
+      (
+        id_cliente bigserial NOT NULL,
+        nombre_fiscal character varying(140) NOT NULL,
+        calle character varying(60),
+        no_exterior character varying(7),
+        no_interior character varying(7),
+        colonia character varying(60),
+        localidad character varying(45),
+        municipio character varying(45),
+        estado character varying(45),
+        pais character varying(25),
+        cp character varying(10),
+        telefono character varying(15),
+        celular character varying(20),
+        email character varying(70),
+        pag_web character varying(80),
+        status character varying(15) DEFAULT 'ac'::character varying, -- Corresponde al status ac:activo o e:eliminado
+        cuenta_cpi character varying(12), -- cuenta afectable del contpaqi
+        rfc character varying(20),
+        curp character varying(35),
+        CONSTRAINT clientes_pkey PRIMARY KEY (id_cliente)
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE clientes OWNER TO programa;
+      COMMENT ON COLUMN clientes.status IS 'Corresponde al status ac:activo o e:eliminado';
+      COMMENT ON COLUMN clientes.cuenta_cpi IS 'cuenta afectable del contpaqi';
+
+      ejecutar el archivo inserts_clientes.sql

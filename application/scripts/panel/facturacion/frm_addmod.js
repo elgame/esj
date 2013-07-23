@@ -2,15 +2,6 @@ $(function(){
 
   $('#form').keyJump();
 
-  // $("#dfecha").datepicker({
-  //      dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
-  //      //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha
-  //      changeMonth: true, //permite modificar los meses (true o false)
-  //      changeYear: true, //permite modificar los años (true o false)
-  //      //yearRange: (fecha_hoy.getFullYear()-70)+':'+fecha_hoy.getFullYear(),
-  //      numberOfMonths: 1 //muestra mas de un mes en el calendario, depende del numero
-  //    });
-
   $("#dcliente").autocomplete({
       source: base_url+'panel/clientes/ajax_get_proveedores/',
       minLength: 1,
@@ -40,7 +31,7 @@ $(function(){
         $("#did_empresa").val(ui.item.id);
         $("#dempresa").css("background-color", "#B0FFB0");
 
-        $('#dversion').val(ui.item.item.version);
+        $('#dversion').val(ui.item.item.cfdi_version);
         $('#dcer_caduca').val(ui.item.item.cer_caduca);
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
@@ -199,7 +190,7 @@ function addProducto() {
   trHtml = '<tr>' +
               '<td>' +
                 '<input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                '<input type="text" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">' +
+                '<input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">' +
               '</td>' +
               '<td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>' +
               '<td>' +
@@ -214,8 +205,8 @@ function addProducto() {
                     '<option value="11">11%</option>' +
                     '<option value="16">16%</option>' +
                   '</select>' +
-                  '<input type="text" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
-                  '<input type="text" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
+                  '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
+                  '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
               '</td>' +
               '<td>' +
                 '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -224,8 +215,8 @@ function addProducto() {
                   '<option value="0.6666">2 Terceras</option>' +
                   '<option value="1">100 %</option>' +
                 '</select>' +
-                '<input type="text" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
-                '<input type="text" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
+                '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
+                '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
               '</td>' +
               '<td>' +
                 '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +

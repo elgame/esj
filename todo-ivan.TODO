@@ -1,6 +1,34 @@
- FACTURACION:
+DOCUMENTOS:
 
-     ☐ Checar con el gama si estan bien los parametros de la cadena original y ver lo del sello que no lo genera.
+    ☐ Manifiesto de chofer
+          ☐ El importe es de la factura guardada
+          ☐ Autocomplete de lineas
+          ☐ Al poner el ticket de pesada cargar los datos del chofer y del camion
+          ☐ la fecha del dia
+
+     ☐ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload.
+     ☐ Embarque.
+          ☐ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json.
+          ☐ utilizar el drag&drop
+          ☐ Que aparezca el listado de pallets que esten disponibles. Hacer la vista.
+          ☐ En vez de calibre en la tabla que aparezcan las clasificaciones del pallet seleccionado.
+          ☐ Desasignar pallets, removerlos por si se equivocaron.
+          ☐ Que pueda haber descripciones si no seleccinan(arrastran) un pallets.
+          ☐ seleccionar la fecha de carga y empaque.
+          ☐ El campo ctrl de embarque que sea el Id del embarque.
+          ☐ Que cargue el destino(ciudad) y nombre del cliente que se asigno en la factura.
+          ☐ temperatura aqgregar el campo en la tabla
+
+
+
+FACTURACION:
+      ✔ Al agregar la factura que se inserten los documentos del cliente seleccionado. @done (13-07-22 23:07)
+
+
+     ✔ Certificado en el XML quitar el begin y end. @done (13-07-22 20:19)
+
+     ✔ Checar con el gama si estan bien los parametros de la cadena original y ver lo del sello que no lo genera. @done (13-07-19 20:26)
+     ✔ acomodar el autocomplete de empresas que no ponga las empresas desactivas y aquellas que no tengan la informacion necesaria para  faturar @done (13-07-19 20:26)
 
      ✔ Que cargue la empresa por default. @done (13-07-18 10:19)
      ✔ Como el de diatomeas el diseño, cambiando la parte del listado de productos/descripcion con las cajas adentro @done (13-07-17 18:06)
@@ -14,7 +42,7 @@
      ✔  Agregar el campo de rentencion en la bdd @done (13-07-18 10:22)
              retencion_iva double precision NOT NULL DEFAULT 0
 
-     ☐ Formulario
+     ✔ Formulario @done (13-07-22 12:00)
          ✔ Plazo de credito, que cargue el del cliente y se pueda editar. @done (13-07-18 10:33)
          ✔ version (oculto), que cargue el de la empresa seleccionada @done (13-07-18 10:33)
          ✔ tipo comprobante, ingreso o egreso (select) @done (13-07-18 17:39)
