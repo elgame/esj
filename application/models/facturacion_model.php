@@ -278,7 +278,7 @@ class facturacion_model extends privilegios_model{
     );
     // Inserta los datos de la factura y obtiene el Id.
     $this->db->insert('facturacion', $datosFactura);
-    $idFactura = $this->db->insert_id();
+    $idFactura = $this->db->insert_id('facturacion', 'id_factura');
 
     // Obtiene los documentos que el cliente tiene asignados.
     $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
@@ -403,7 +403,7 @@ class facturacion_model extends privilegios_model{
     // Genera la cadena original y el sello.
     $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
     $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-
+    
     // Obtiene el contentido del certificado.
     $certificado = $this->cfdi->obtenCertificado($this->db
       ->select('cer')

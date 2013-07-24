@@ -152,7 +152,7 @@ class Ventas_model extends privilegios_model{
     );
 
     $this->db->insert('facturacion_ventas_remision', $datosFactura);
-    $id_venta = $this->db->insert_id();
+    $id_venta = $this->db->insert_id('facturacion_ventas_remision', 'id_venta');
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
