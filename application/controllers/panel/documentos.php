@@ -13,7 +13,14 @@ class documentos extends MY_Controller {
     'facturacion/rvp_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
-    'facturacion/ajax_get_empresas_fac/'
+    'facturacion/ajax_get_empresas_fac/',
+
+    'documentos/ajax_get_ticket_info/',
+    'documentos/ajax_update_doc/',
+    'documentos/ajax_get_snapshot/',
+    'documentos/ajax_save_snaptshot/',
+
+    'documentos/imprime_manifiesto_chofer/',
   );
 
 
@@ -66,6 +73,10 @@ class documentos extends MY_Controller {
    */
   public function agregar()
   {
+    // $fun = preg_replace('/\s/', '', ucwords(strtolower('MANIFIESTO DEL CHOFER')));
+    // echo $fun;
+    // exit;
+
     if (isset($_GET['id']{0}) && $_GET['id'] !== '')
     {
       $this->carabiner->js(array(
@@ -112,9 +123,15 @@ class documentos extends MY_Controller {
    * @param  boolean $idFactura
    * @return string
    */
-  public function generaDocsView($idFactura=false)
+  public function generaDocsView($idFactura = false)
   {
     $this->load->model('documentos_model');
+    $this->load->model('areas_model');
+
+    if ( ! isset($this->facturacion_model))
+    {
+      $this->load->model('facturacion_model');
+    }
 
     $idFactura = $idFactura ? $idFactura : $_GET['id'];
 
@@ -124,9 +141,121 @@ class documentos extends MY_Controller {
     // Obtiene los documentos del cliente.
     $params['documentos'] = $this->documentos_model->getClienteDocs($idFactura);
 
+    // Obtiene los documentos de las areas.
+    $params['areas'] = $this->areas_model->getAreas();
+
     // Construye la vista del listado de documentos.
     return $this->load->view('panel/documentos/agregar_listado', $params, true);
   }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  AJAX
+   |-------------------------------------------------------------------------
+   */
+
+  /**
+   * Obtiene la informacion del Chofer y Camion del ticket de Pesada.
+   *
+   * @return void
+   */
+  public function ajax_get_ticket_info()
+  {
+    $this->load->model('documentos_model');
+
+    $data = $this->documentos_model->getChoferCamionInfo($_GET['ida'], $_GET['idt'], $_GET['idf']);
+
+    echo json_encode($data);
+  }
+
+  /**
+   * Actualiza la informacion de un documento.
+   *
+   * @return void
+   */
+  public function ajax_update_doc()
+  {
+    $this->load->model('documentos_model');
+
+    $resp = $this->documentos_model->ajaxUpdateDocumento($_POST['factura_id'], $_POST['documento_id']);
+
+    if ($resp['passes'])
+    {
+      $resp['htmlDocs'] = $this->generaDocsView($_POST['factura_id']);
+    }
+
+    echo json_encode($resp);
+  }
+
+  /**
+   * Obtiene el base64 de la captura.
+   *
+   * @return void
+   */
+  public function ajax_get_snapshot(){
+    $base64 = UploadFiles::fileToBase64($this->config->item('base_url_cam_salida_snapshot'), 'jpg');
+
+    echo json_encode(array('base64' => $base64));
+  }
+
+  /**
+   * Guarda el snapshot.
+   *
+   * @return [type] [description]
+   */
+  public function ajax_save_snaptshot()
+  {
+
+    // echo "<pre>";
+    //   var_dump($_POST);
+    // echo "</pre>";exit;
+
+    $this->load->model('facturacion_model');
+    $this->load->model('documentos_model');
+
+    $idFactura = $_POST['factura_id'];
+
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+    $filename = 'CHOFER FOTO FIRMA MANIFIESTO';
+
+    $base64 = str_replace('[removed]', 'data:image/jpg;base64,', $_POST['base64']);
+    unset($_POST['base64']);
+
+    // Guarda el snapshot en disco.
+    UploadFiles::base64SaveImg($base64, $filename, 'jpg', $path);
+
+    $_POST['url'] = $path.$filename.'.jpg';
+
+    $this->ajax_update_doc();
+  }
+
+
+  /*
+   |-------------------------------------------------------------------------
+   |  METODO PARA IMPRIMIR
+   |-------------------------------------------------------------------------
+   */
+
+   /**
+    * Imprime el Documeto Manifiesto Chofer.
+    *
+    * @return void
+    */
+    public function imprime_manifiesto_chofer()
+    {
+      if (isset($_GET['idf']{0}) && isset($_GET['idd']{0}))
+      {
+        $this->load->model('documentos_model');
+        $this->documentos_model->generaDoc($_GET['idf'], $_GET['idd']);
+      }
+      else redirect(base_url('panel/facturacion/?msg=1'));
+   }
+
 
   /*
    |-------------------------------------------------------------------------

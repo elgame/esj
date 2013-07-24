@@ -1,12 +1,17 @@
 DOCUMENTOS:
 
-    ☐ Manifiesto de chofer
-          ☐ El importe es de la factura guardada
-          ☐ Autocomplete de lineas
-          ☐ Al poner el ticket de pesada cargar los datos del chofer y del camion
-          ☐ la fecha del dia
+    ✔ Directorio donde guardar los documentos. @done (13-07-24 12:10)
+          documentos/{$cliente}/año/mes/folio_{$folio}/
 
-     ☐ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload.
+    ✔ Manifiesto de chofer @done (13-07-24 17:52)
+          ✔ El importe es de la factura guardada @done (13-07-23 23:47)
+          ✔ Autocomplete de lineas @done (13-07-23 23:47)
+          ✔ Al poner el ticket de pesada cargar los datos del chofer y del camion @done (13-07-23 23:47)
+          ✔ la fecha del dia @done (13-07-23 23:47)
+          ✔ al cargar el chofer verificar si ya tiene la ife y licencia, si la tiene copearlas a un directorio @done (13-07-24 12:10)
+          ✔ si no tiene licencia y/o ife poner un msg, si las tiene y vuelve a cargar otras las reemplazaria en el directorio donde se guardan. @done (13-07-24 14:04)
+
+     ✔ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload. @done (13-07-24 17:52)
      ☐ Embarque.
           ☐ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json.
           ☐ utilizar el drag&drop

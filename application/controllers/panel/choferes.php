@@ -194,8 +194,17 @@ class choferes extends MY_Controller {
 		$rules = array(
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
-						'rules' => 'required|max_length[120]|callback_chckNombre'),
+						'rules' => 'required|max_length[120]'),
 		);
+
+    if ($accion === 'agregar')
+    {
+      $rules = array(
+        array('field' => 'fnombre',
+              'label' => 'Nombre',
+              'rules' => 'required|max_length[120]|callback_chckNombre'),
+      );
+    }
 
 		$this->form_validation->set_rules($rules);
 	}

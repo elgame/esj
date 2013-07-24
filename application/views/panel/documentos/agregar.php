@@ -25,7 +25,11 @@
         <div class="row-fluid">
           <div class="span12">
 
-              <?php echo $documentos ?>
+              <input type="hidden" id="facturaId" value="<?php echo $_GET['id'] ?>">
+
+              <div id="listadoDocs">
+                <?php echo $documentos ?>
+              </div>
 
             </div>
           </div>

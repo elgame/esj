@@ -5,24 +5,44 @@
       $htmlContent = '';
 
       $params['dataFactura'] = $factura;
+      $params['dataAreas'] = $areas;
       $params['dataDocumento'] = array();
 
-      foreach ($documentos as $key => $doc) {
-        $active = $key === 0 ? 'active' : '';
+      if ($documentos)
+      {
+        foreach ($documentos as $key => $doc)
+        {
+          $active = '';
+          if ( $key === 0)
+          {
+            $active = 'active';
 
-        $label = '<span style="float: right;margin-left: 3px;" class="label label-'.($doc->status === 't' ? 'success' : 'important').'">'.($doc->status === 't' ? 'Si' : 'No').'</span>';
+            echo '<input type="hidden" id="documentoId" value="'.$doc->id_documento.'">';
+          }
 
-        $htmlLi .= '<li class="'.$active.'"><a href="#doc'.$doc->id_documento.'" data-toggle="tab">'.$label.'<p>'.$doc->nombre.'</p></a></li>';
+          $label = '<span style="float: right;margin-left: 3px;" class="label label-'.($doc->status === 't' ? 'success' : 'important').'"><i class="icon-li icon-'.($doc->status === 't' ? 'ok-sign' : 'remove-sign').'"></i></span>';
 
-        if ($doc->data !== '')
-          $params['dataDocumento'] = array();
+          $htmlLi .= '<li class="'.$active.'" data-doc="'.$doc->id_documento.'"><a href="#doc'.$doc->id_documento.'" data-toggle="tab">'.$label.'<p>'.$doc->nombre.'</p></a></li>';
 
-        $formContent = $this->load->view($doc->url_form, $params, true);
+          if ($doc->data !== '')
+            $params['dataDocumento'] = json_decode($doc->data);
 
-        $htmlContent .= '<div class="tab-pane '.$active.'" id="doc'.$doc->id_documento.'">'.$formContent.'</div>';
-      } ?>
+          $priv = str_replace('panel/', '', $doc->url_form).'/';
+          if ($this->usuarios_model->tienePrivilegioDe('', $priv, false))
+            $formContent = $this->load->view($doc->url_form, $params, true);
+          else
+            $formContent = '<div class="alert alert-error center"><strong>No cuenta con los permisos para editar este documento.</strong></div>';
 
-  <ul class="nav nav-tabs" style="margin-right:20px !important; margin-left: 0px !important;">
+          $htmlContent .= '<div class="tab-pane '.$active.'" id="doc'.$doc->id_documento.'">'.$formContent.'</div>';
+        }
+      }
+      else
+        echo '<div class="alert alert-info center">
+                <strong>El cliente no cuenta con documentos asignados.</strong>
+              </div>';
+      ?>
+
+  <ul class="nav nav-tabs" id="nav-tabs" style="margin-right:20px !important; margin-left: 0px !important;">
 
     <?php echo $htmlLi; ?>
 

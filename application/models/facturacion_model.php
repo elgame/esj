@@ -283,12 +283,17 @@ class facturacion_model extends privilegios_model{
     // Obtiene los documentos que el cliente tiene asignados.
     $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
 
-    // Inserta los documentos del cliente con un status false.
-    if ($docsCliente)
-      $this->db->insert_batch('facturacion_documentos', $docsCliente);
-
     // Obtiene los datos para la cadena original
     $datosCadOrig = $this->datosCadenaOriginal();
+
+    // Inserta los documentos del cliente con un status false.
+    if ($docsCliente)
+    {
+      $this->db->insert_batch('facturacion_documentos', $docsCliente);
+
+      $this->load->model('documentos_model');
+      $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['folio']);
+    }
 
     $dataCliente = array(
       'id_factura'  => $idFactura,
