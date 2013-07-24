@@ -74,9 +74,8 @@ class cfdi{
    */
 	public function obtenSello($cadena_original)
   {
-		$pkeyid = openssl_pkey_get_private(file_get_contents($this->path_key), $this->pass_key);
-
-		openssl_sign($cadena_original, $crypttext, $pkeyid, OPENSSL_ALGO_SHA1);
+    $pkeyid = openssl_pkey_get_private(file_get_contents($this->path_key), $this->pass_key);
+    openssl_sign($cadena_original, $crypttext, $pkeyid, OPENSSL_ALGO_SHA1);
 		openssl_free_key($pkeyid);
 
 		$sello = base64_encode($crypttext);
@@ -94,7 +93,8 @@ class cfdi{
   public function obtenCertificado($path)
   {
     // Lee el contenido del .cer.pem
-    $content = file_get_contents($path);
+    $datacer = file_get_contents($path);
+    openssl_x509_export($datacer, $content);
 
     $cerpem = explode('-----BEGIN CERTIFICATE-----', $content);
 
