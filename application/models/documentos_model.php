@@ -29,7 +29,7 @@ class documentos_model extends CI_Model {
 	}
 
   /**
-    *
+    * Actualiza un documento en la bdd.
     *
     * @param  Array  $data
     * @param  string $idDocumento
@@ -54,6 +54,10 @@ class documentos_model extends CI_Model {
     return true;
   }
 
+  public function finalizar_docs($idFactura)
+  {
+    $this->db->update('facturacion', array('docs_finalizados' => 't'), array('id_factura' => $idFactura));
+  }
 
   /**
    * Obtiene los documentos que se asignaron a la factura cuando se agrego.
@@ -170,6 +174,144 @@ class documentos_model extends CI_Model {
 
     return false;
   }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  EMBARQUE
+   |-------------------------------------------------------------------------
+   */
+
+  /**
+   * Guarda la informacion del embarque y genera el documento PDF.
+   *
+   * @return array
+   */
+  public function storeEmbarque()
+  {
+
+    // Si el POST embId (id del embarque) es diferente de nada entonces elimina
+    // todo de ese embarque para insertar uno nuevo.
+    if ($_POST['embId'] != '')
+    {
+      $this->db->delete('facturacion_doc_embarque', array(
+        'id_embarque' => $_POST['embId']));
+
+      $this->db->delete('facturacion_doc_embarque_pallets', array(
+        'id_embarque' => $_POST['embId']));
+    }
+
+    $data = array(
+      'id_documento'   => $this->input->post('embIdDoc'),
+      'id_factura'     => $this->input->post('embIdFac'),
+      'fecha_carga'    => $this->input->post('pfecha_carga'),
+      'fecha_embarque' => $this->input->post('pfecha_empaque'),
+      'ctrl_embarque'  => $this->input->post('pctrl_embarque'),
+    );
+
+    $this->db->insert('facturacion_doc_embarque', $data);
+    $idEmbarque = $this->db->insert_id();
+
+    $pallets = array();
+
+    $otros = isset($_POST['potro']) ? $_POST['potro'] : array();
+
+    foreach ($_POST['pno_posicion'] as $key => $track)
+    {
+      if (in_array($track, $otros) || $_POST['pid_pallet'][$key] !== '')
+      {
+        $pallets[] = array(
+          'id_embarque' => $idEmbarque,
+          'no_posicion' => $track,
+          'id_pallet'   => $_POST['pid_pallet'][$key] !== '' ? $_POST['pid_pallet'][$key] : null ,
+          'marca'       => $_POST['pid_pallet'][$key] !== '' ? $_POST['pmarca'][$key] : null,
+          'descripcion' => $_POST['pid_pallet'][$key] === '' ? $_POST['pmarca'][$key] : null,
+          'temperatura' => $_POST['pid_pallet'][$key] !== '' ? $_POST['ptemperatura'][$key] : null,
+        );
+      }
+    }
+
+    if (count($pallets) !== 0)
+      $this->db->insert_batch('facturacion_doc_embarque_pallets', $pallets);
+
+    $dataJson = array(
+      'fecha'        => $this->input->post('pfecha'),
+      'inicio'       => $this->input->post('pinicio'),
+      'termino'      => $this->input->post('ptermino'),
+      'elaboro'      => $this->input->post('pelaboro'),
+      'destino'      => $this->input->post('pdestino'),
+      'destinatario' => $this->input->post('pdestinatario'),
+    );
+    $this->updateDocumento($dataJson, $data['id_factura'], $data['id_documento']);
+
+    $this->load->model('facturacion_model');
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($data['id_factura']);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+    // Genera el documento de embarque.
+    $this->generaDoc($data['id_factura'], $data['id_documento'], $path);
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Obtiene la informacion de un embarque incluyendo pallets.
+   *
+   * @param  string $idFactura
+   * @param  string $idDocumento
+   * @return array
+   */
+  public function getEmbarqueData($idFactura, $idDocumento)
+  {
+    $sql = $this->db->query(
+      "SELECT id_embarque,
+              id_factura,
+              DATE(fecha_carga) AS fecha_carga,
+              DATE(fecha_embarque) AS fecha_embarque,
+              ctrl_embarque
+       FROM facturacion_doc_embarque
+       WHERE id_factura = {$idFactura} AND
+             id_documento = {$idDocumento}"
+    );
+
+    $data = array();
+    if ($sql->num_rows() > 0)
+    {
+      $data['info'] = $sql->result();
+
+      $sql->free_result();
+
+      $sql = $this->db->query(
+        "SELECT fep.no_posicion,
+                fep.id_pallet,
+                fep.marca,
+                fep.descripcion,
+                fep.temperatura,
+                rp.no_cajas AS cajas,
+                string_agg(clasi.nombre::text, ', '::text) AS clasificaciones
+         FROM facturacion_doc_embarque_pallets fep
+         LEFT JOIN rastria_pallets rp ON rp.id_pallet = fep.id_pallet
+         LEFT JOIN (
+            SELECT rpr.id_pallet, cl.nombre
+            FROM rastria_pallets_rendimiento rpr
+            INNER JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+            GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+            ORDER BY rpr.id_pallet
+         ) AS clasi ON clasi.id_pallet = fep.id_pallet
+         WHERE id_embarque = {$data['info'][0]->id_embarque}
+         GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas
+         ORDER BY fep.no_posicion ASC"
+      );
+
+      if ($sql->num_rows() > 0)
+        $data['pallets'] = $sql->result();
+    }
+
+    return $data;
+  }
+
 
   /*
    |-------------------------------------------------------------------------
@@ -565,14 +707,198 @@ class documentos_model extends CI_Model {
     $pdf->SetXY(80, 230);
     $pdf->Cell(70, 6, strtoupper($data->chofer), 0, 0, 'C', 1);
 
+    $fecha = explode('-', $data->fecha);
+
+
     $pdf->SetXY(80, 247);
     $pdf->SetFont('Arial','',11);
-    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $data->fecha, 0, 0, 'C', 1);
+    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(String::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
 
     $chofer = strtoupper(str_replace(" ", "_", $data->chofer));
     $fecha = str_replace(" ", "_", $data->fecha);
 
     return array('pdf' => $pdf, 'texto' => 'MANIFIESTO_CHOFER_'.$chofer.'_'.$fecha.'.pdf');
+  }
+
+  public function pdfAcomodoDelEmbarque($idFactura, $idDocumento)
+  {
+    $data = $this->getEmbarqueData($idFactura, $idDocumento);
+
+    $result = $this->db
+      ->select("data")
+      ->from("facturacion_documentos")
+      ->where('id_factura', $idFactura)
+      ->where('id_documento', $idDocumento)
+      ->get()->row()->data;
+
+    $jsonData = json_decode($result);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $pdf->SetXY(7, 3);
+    $pdf->Image(APPPATH.'images/logo.png');
+
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFont('Arial','',7);
+
+    $pdf->SetXY(60, 3);
+    $pdf->Cell(80, 4, 'KM.8 CARRETERA TECOMAN PLAYA AZUL  C.P. 28935', 0, 0, 'L');
+
+    $pdf->SetXY(60, 8);
+    $pdf->Cell(80, 4, 'TECOMAN, COLIMA R.F.C. ESJ 970527 63A', 0, 0, 'L');
+
+    $pdf->SetXY(60, 13);
+    $pdf->Cell(80, 4, 'TELS 313 324 4420  FAX : 313 324 5402  CEL : 313 113 0317', 0, 0, 'L');
+
+    $pdf->SetXY(60, 18);
+    $pdf->Cell(80, 4, 'NEXTEL: 313 120 05 81   I.D: 62*15*32723', 0, 0, 'L');
+
+    $pdf->SetXY(167, 3);
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetFillColor(34, 34, 34);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->Cell(40, 6, 'CTRL. DE EMBARQUE', 1, 0, 'C', 1);
+
+    $pdf->SetXY(167, 16);
+    $pdf->Cell(40, 6, 'FECHA', 1, 0, 'C', 1);
+
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetXY(167, 8);
+    $pdf->Cell(40, 6, $data['info'][0]->ctrl_embarque, 1, 0, 'C', 1);
+
+    $pdf->SetXY(167, 22);
+    $pdf->Cell(40, 6, $jsonData->fecha, 1, 0, 'C', 1);
+
+    $pdf->SetXY(7, 33);
+    $pdf->SetFillColor(34, 34, 34);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->Cell(200, 6, 'DATOS DEL EMBARQUE', 1, 0, 'C', 1);
+
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(7, 43);
+    $pdf->Cell(40, 6, 'TRACK', 1, 0, 'C', 1);
+
+    $pdf->SetXY(7, 53);
+    $pdf->Cell(40, 6, 'PALLET Nos.', 0, 0, 'C', 1);
+
+    $pdf->SetFont('Arial','',9);
+    // TRACK
+    for ($i=1; $i < 24 ; $i = $i + 2)
+    {
+      $y = $pdf->GetY();
+
+      $pdf->SetXY(7, $y + 6);
+      $pdf->Cell(20, 6, $i, 1, 0, 'L', 1);
+
+      $pdf->SetXY(27, $y + 6);
+      $pdf->Cell(20, 6, $i+1, 1, 0, 'L', 1);
+
+      $txtTrack1 = 'Vacio';
+      $txtTrack2 = 'Vacio';
+
+      foreach ($data['pallets'] as $key => $pallet)
+      {
+        if ($pallet->no_posicion == $i)
+        {
+          if ($pallet->id_pallet != null)
+            $txtTrack1 = $pallet->cajas;
+          else
+            $txtTrack1 = $pallet->descripcion;
+        }
+
+        if ($pallet->no_posicion == $i+1)
+        {
+          if ($pallet->id_pallet != null)
+            $txtTrack2 = $pallet->cajas;
+          else
+            $txtTrack2 = $pallet->descripcion;
+        }
+
+        if ($txtTrack1 !== 'Vacio' && $txtTrack2 !== 'Vacio')
+         break;
+      }
+
+      $pdf->SetXY(7, $y + 12);
+      $pdf->Cell(20, 6, $txtTrack1, 1, 0, 'C', 1);
+
+      $pdf->SetXY(27, $y + 12);
+      $pdf->Cell(20, 6, $txtTrack2, 1, 0, 'C', 1);
+    }
+
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetXY(50, 52);
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(10, 30, 72, 15, 30));
+    $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CAJAS', 'TEMPERATURA'), true);
+
+    $pdf->SetFont('Arial','',9);
+    for ($i = 1; $i < 25 ; $i++)
+    {
+      $marca         = '';
+      $clasificacion = '';
+      $cajas         = '';
+      $temperatura   = '';
+
+        foreach ($data['pallets'] as $key => $pallet)
+        {
+          if ($pallet->no_posicion == $i)
+          {
+            $marca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
+            $clasificacion = $pallet->clasificaciones;
+            $cajas         = $pallet->cajas;
+            $temperatura   = $pallet->temperatura;
+            break;
+          }
+        }
+
+      $pdf->SetX(50);
+        $pdf->Row(array(
+          $i,
+          $marca,
+          $clasificacion,
+          $cajas,
+          $temperatura,
+        ), false);
+    }
+
+    $pdf->SetFont('Arial','B',8);
+    $y = $pdf->GetY();
+
+    $pdf->SetXY(50, $y + 6);
+    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . $data['info'][0]->fecha_carga, 0, 0, 'L', 1);
+
+    $pdf->SetXY(50, $y + 13);
+    $pdf->Cell(50, 6, 'INICIO: ' . $jsonData->inicio, 0, 0, 'L', 1);
+
+    $pdf->SetXY(105, $y + 13);
+    $pdf->Cell(50, 6, 'TERMINO: ' . $jsonData->termino, 0, 0, 'L', 1);
+
+    $pdf->SetXY(50, $y + 20);
+    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . $data['info'][0]->fecha_embarque, 0, 0, 'L', 1);
+
+    $pdf->SetXY(50, $y + 27);
+    $pdf->Cell(105, 6, 'ELABORO: ' . strtoupper($jsonData->elaboro), 0, 0, 'L', 1);
+
+    $pdf->SetXY(50, $y + 34);
+    $pdf->Cell(105, 6, 'DESTINO: ' . strtoupper($jsonData->destino), 0, 0, 'L', 1);
+
+    $pdf->SetXY(50, $y + 41);
+    $pdf->Cell(157, 6, 'DESTINATARIO: ' . strtoupper($jsonData->destinatario), 0, 0, 'L', 1);
+
+    return array('pdf' => $pdf, 'texto' => 'DATOS_EMBARQUE.pdf');
   }
 
 }

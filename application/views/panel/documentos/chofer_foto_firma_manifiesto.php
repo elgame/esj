@@ -1,3 +1,5 @@
+<h3 style="text-align: center;">CHOFER FOTO FIRMA DEL MANIFIESTO</h3><br>
+
 <div class="row-fluid">
 
   <div class="span12">
@@ -26,7 +28,17 @@
       <legend style="margin-bottom: 3px;">Accion</legend>
       <div class="row-fluid">
         <div class="well span12">
-          <button type="button" class="btn btn-success btn-large span12" id="btnSnapshotSave">Guardar</button>
+          <?php if ($finalizados === 'f'){ ?>
+            <div class="row-fluid">
+              <button type="button" class="btn btn-success btn-large span12" id="btnSnapshotSave">Guardar</button>
+            </div>
+          <?php } ?>
+          <?php if (isset($dataDocumento->url)) {?>
+            <br>
+            <div class="row-fluid">
+              <a class="btn btn-success btn-large span12" href="<?php echo str_replace('\\', '', base_url($dataDocumento->url)) ?>" target="_BLANK">Ver</a>
+            </div>
+          <?php } ?>
         </div>
       </div>
     </fieldset><!--/span4 -->

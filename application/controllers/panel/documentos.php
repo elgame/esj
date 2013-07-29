@@ -19,10 +19,13 @@ class documentos extends MY_Controller {
     'documentos/ajax_update_doc/',
     'documentos/ajax_get_snapshot/',
     'documentos/ajax_save_snaptshot/',
+    'documentos/ajax_check_ctrl/',
 
     'documentos/imprime_manifiesto_chofer/',
-  );
+    'documentos/imprime_embarque/',
 
+    'documentos/acomodo_embarque/',
+  );
 
   public function _remap($method)
   {
@@ -73,14 +76,11 @@ class documentos extends MY_Controller {
    */
   public function agregar()
   {
-    // $fun = preg_replace('/\s/', '', ucwords(strtolower('MANIFIESTO DEL CHOFER')));
-    // echo $fun;
-    // exit;
-
     if (isset($_GET['id']{0}) && $_GET['id'] !== '')
     {
       $this->carabiner->js(array(
           array('libs/jquery.numeric.js'),
+          array('libs/jquery.dataTables.min.js'),
           array('general/keyjump.js'),
           array('general/util.js'),
           array('panel/documentos/agregar.js'),
@@ -92,6 +92,7 @@ class documentos extends MY_Controller {
       $params['pagar_ordent']   = false;
 
       $this->load->model('facturacion_model');
+      $this->load->model('documentos_model');
 
       // Obtiene la informacion de la factura.
       $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['id']);
@@ -99,12 +100,36 @@ class documentos extends MY_Controller {
       // Carga la vista de la factura con sus datos.
       $params['facturaView'] = $this->load->view('panel/facturacion/ver', $params, true);
 
-      // Obtiene la vista de los documentos del cliente.
-      $params['documentos'] = $this->generaDocsView($params['factura']['info']->id_factura);
+      $is_finalizados = $this->db
+        ->select('docs_finalizados')
+        ->from('facturacion')
+        ->where('id_factura', $_GET['id'])
+        ->get()->row()->docs_finalizados;
+
+      if ($is_finalizados === 'f')
+      {
+        // Obtiene los documentos del cliente.
+        $docsCliente = $this->documentos_model->getClienteDocs($_GET['id']);
+
+        $total = 0;
+        foreach ($docsCliente as $doc)
+        {
+          if ($doc->status === 't')
+            $total++;
+        }
+
+        if (count($docsCliente) === $total)
+          $params['finalizar'] = true;
+      }
+      else
+        $params['finalizados'] = true;
 
       // echo "<pre>";
       //   var_dump($params['factura']);
       // echo "</pre>";exit;
+
+      // Obtiene la vista de los documentos del cliente.
+      $params['documentos'] = $this->generaDocsView($params['factura']['info']->id_factura);
 
       if(isset($_GET['msg']{0}))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -144,9 +169,56 @@ class documentos extends MY_Controller {
     // Obtiene los documentos de las areas.
     $params['areas'] = $this->areas_model->getAreas();
 
+    $params['is_finalizados'] = $this->db
+      ->select('docs_finalizados')
+      ->from('facturacion')
+      ->where('id_factura', $_GET['id'])
+      ->get()->row()->docs_finalizados;
+
+    // Obtiene los documentos de las areas.
+    $params['pallets'] = $this->db
+      ->select('*')
+      ->from("embarque_pallets_libres")
+      ->get()
+      ->result();
+
+    // echo "<pre>";
+    //   var_dump($params['pallets']);
+    // echo "</pre>";exit;
+
     // Construye la vista del listado de documentos.
     return $this->load->view('panel/documentos/agregar_listado', $params, true);
   }
+
+  public function finalizar_docs()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->finalizar_docs($_GET['id']);
+
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id']));
+    }
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  EMBARQUE
+   |-------------------------------------------------------------------------
+   */
+
+    public function acomodo_embarque($value='')
+    {
+      if (isset($_GET['id']{0}))
+      {
+        $this->load->model('documentos_model');
+        $res = $this->documentos_model->storeEmbarque();
+
+        if ($res['passes'])
+          redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      }
+      else redirect(base_url('panel/facturacion/?msg=1'));
+    }
 
   /*
    |-------------------------------------------------------------------------
@@ -234,6 +306,27 @@ class documentos extends MY_Controller {
     $this->ajax_update_doc();
   }
 
+  public function ajax_check_ctrl()
+  {
+    $query = $this->db
+      ->select('id_factura, id_documento, id_embarque')
+      ->from('facturacion_doc_embarque')
+      ->where('ctrl_embarque', $_POST['no_ctrl'])
+      ->get();
+
+    if ($query->num_rows() > 0)
+    {
+
+      $res = $query->result();
+
+      if ($res[0]->id_factura == $_POST['id_fac'] && $res[0]->id_documento == $_POST['id_doc'])
+        echo 0;
+      else
+        echo 1;
+    }
+    else
+      echo 0;
+  }
 
   /*
    |-------------------------------------------------------------------------
@@ -256,6 +349,20 @@ class documentos extends MY_Controller {
       else redirect(base_url('panel/facturacion/?msg=1'));
    }
 
+   /**
+    * Imprime el Documeto Manifiesto Chofer.
+    *
+    * @return void
+    */
+    public function imprime_embarque()
+    {
+      if (isset($_GET['idf']{0}) && isset($_GET['idd']{0}))
+      {
+        $this->load->model('documentos_model');
+        $this->documentos_model->generaDoc($_GET['idf'], $_GET['idd']);
+      }
+      else redirect(base_url('panel/facturacion/?msg=1'));
+   }
 
   /*
    |-------------------------------------------------------------------------
@@ -281,6 +388,10 @@ class documentos extends MY_Controller {
         break;
       case 3:
         $txt = 'La Factura se agrego correctamente.';
+        $icono = 'success';
+        break;
+      case 4:
+        $txt = 'El documento se actualizó correctamente!';
         $icono = 'success';
         break;
     }

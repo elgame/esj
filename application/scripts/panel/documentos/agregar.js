@@ -5,6 +5,7 @@
 })(function ($, window) {
 
   $(function(){
+    config();
 
     autocompleteLineasT();
     autocompleteLineasTLive();
@@ -19,7 +20,61 @@
     // Chofer Foto Firma Manifiesto
     doc_cffm.btnSnapshot();
     doc_cffm.btnSnapshotSave();
+
+    // Acomodo de Embarque
+    doc_acoemb.init();
+
+
+    dataTable();
   });
+
+  var config = function () {
+    var $menu_dat = $('#menu_dat');
+
+    // Si el menu principal esta desplegado lo oculta.
+    if ($menu_dat.find('i').attr('class') === 'icon-arrow-left') {
+      $menu_dat.click();
+    }
+
+    // Tooltip para los tabs de listado de documentos.
+    $('a#docsTab').tooltip({
+      'placement': 'right'
+    });
+  };
+
+  var dataTable = function () {
+    $('.datatable').dataTable({
+      // "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span12'i><'span12 center'p>>",
+      // "sDom": "<'row-fluid'<'span6'f><'span6'p>r>t<'row-fluid'<'span12'i><'span12 center'p>>",
+      "sDom": "<'span6'f><'span6'p>",
+
+      // "sPaginationType": "bootstrap",
+      "bFilter": true,
+      "bPaginate": true,
+      "bLengthChange": false,
+      "iDisplayLength": 20,
+      "bFilter": true,
+      // "bSort": false,
+      // "bInfo": false,
+      "bAutoWidth": false,
+      "oLanguage": {
+        "sLengthMenu": "_MENU_ registros por página",
+        "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "sSearch": "Buscar:",
+        "sInfoFiltered": " - filtrando desde _MAX_ registros",
+        "sZeroRecords": "No se encontraron registros",
+        "sInfoEmpty": "Mostrando _END_ de _TOTAL_ ",
+        "oPaginate": {
+          "sFirst": "Primera",
+          "sPrevious": "Anterior ",
+          "sNext": " Siguiente",
+          "sLast": "Ultima"
+        }
+       }
+    });
+
+    $('.dataTables_filter').find('input').addClass('span12');
+  };
 
   // Autocomplete lines transportistas.
   var autocompleteLineasT = function () {
@@ -283,6 +338,176 @@
     };
 
   })(window.jQuery, window);
+
+
+  // Funciones para el documento acomodo embarque.
+  var doc_acoemb = (function ($, window) {
+
+    function init () {
+      draggable();
+      droppable();
+      otrosCheckbox();
+      otrosAdd();
+      sendForm();
+    }
+
+    function draggable () {
+      $("div#draggable").draggable({
+        scroll: true,
+        revert : function(event, ui) {
+          // on older version of jQuery use "draggable"
+          // $(this).data("draggable")
+          $(this).data("uiDraggable").originalPosition = {
+              top : 0,
+              left : 0
+          };
+          // return boolean
+          return !event;
+          // that evaluate like this:
+          // return event !== false ? false : true;
+        }
+      });
+    }
+
+    function droppable () {
+      $("div#droppable").droppable({
+        hoverClass: "ui-state-active",
+        // tolerance: "pointer",
+        drop: function( event, ui ) {
+          // console.log(this);
+          // console.log(ui.draggable[0]);
+
+          var $droppable = $(this),
+              $draggable = $(ui.draggable[0]),
+              $tableDatosEmbarque = $('#tableDatosEmbarque'),
+
+              $tableDETr,
+
+              noPosicion,
+              idPallet        = '',
+              clasificaciones = '',
+              cajas           = 0;
+
+          $draggable.parent().parent().find('td').css('background-color', '#F4AF67');
+
+          noPosicion = $droppable.attr('data-no-posicion');
+
+          $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
+
+          idPallet        = $draggable.attr('data-id-pallet');
+          clasificaciones = $draggable.attr('data-clasificaciones');
+          cajas           = $draggable.attr('data-cajas');
+
+          $tableDETr.find('#pid_pallet').val(idPallet);
+          $tableDETr.find('#pclasificacion').val(clasificaciones);
+          $tableDETr.find('#pcajas').val(cajas);
+
+
+          $droppable.find('p').html(cajas).css('color', 'red');
+          $droppable.attr("data-drag", $draggable.attr('data-id-pallet'));
+        },
+        out: function( event, ui ) {
+          // console.log(this);
+          // console.log(ui);
+
+          var $droppable = $(this),
+              $draggable = $(ui.draggable[0]),
+              $tableDatosEmbarque = $('#tableDatosEmbarque'),
+              $tableDETr,
+
+              noPosicion;
+
+          // Si el draggable que sale es el que esta sobre el droppable entra.
+          if ($draggable.attr('data-id-pallet') == $droppable.attr('data-drag')) {
+            $droppable.find('p').html('Vacio').css('color', 'black');
+            $draggable.parent().parent().find('td').css('background-color', 'white');
+
+            noPosicion = $droppable.attr('data-no-posicion');
+
+            $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
+
+            $tableDETr.find('#pid_pallet').val('');
+            $tableDETr.find('#pclasificacion').val('');
+            $tableDETr.find('#pcajas').val('');
+
+            $droppable.attr("data-drag", '');
+          }
+        }
+      });
+    }
+
+    function otrosAdd () {
+      $('input#pmarca').on('keyup', function(e) {
+        var key   = e.which,
+            $this = $(this),
+            $tr   = $this.parent().parent(),
+
+            pos;
+
+        if ($tr.find('#potro').is(':checked')) {
+          pos = $tr.find('#pno_posicion').val();
+
+          $track = $('div.track'+pos);
+
+          $track.find('p').html($this.val());
+        }
+
+      });
+    }
+
+    function otrosCheckbox () {
+      $('input#potro').on('change', function(event) {
+        event.preventDefault();
+
+        var $this = $(this),
+            $tr   = $this.parent().parent();
+
+        if ($this.is(':checked')){
+          if ($tr.find('#pid_pallet').val() === '') {
+            $tr.find('#pmarca').val('').focus();
+          } else {
+            $this.prop('checked', '');
+          }
+        } else {
+          $tr.find('#pmarca').val('SAN JORGE');
+
+          pos = $tr.find('#pno_posicion').val();
+
+          $track = $('div.track'+pos);
+          $track.find('p').html('Vacio');
+        }
+      });
+    }
+
+    function sendForm () {
+      $('#sendEmbarque').on('click', function(event) {
+        event.preventDefault();
+
+        var $embIdFac = $('#embIdFac'),
+            $embIdDoc = $('#embIdDoc'),
+            $ctrl     = $('#pctrl_embarque'),
+
+            $formEmbarque = $('#formEmbarque');
+
+        $.post(base_url + 'panel/documentos/ajax_check_ctrl/', {id_fac: $embIdFac.val(), id_doc: $embIdDoc.val(), no_ctrl: $ctrl.val()}, function(data) {
+
+          if (data == '1') {
+            noty({"text": 'El Ctrl Embarque ya esta siendo usado.', "layout":"topRight", "type": 'error'});
+          }
+          else {
+            $formEmbarque.submit();
+          }
+
+        });
+
+      });
+    }
+    return {
+      'init': init
+    };
+
+  })(window.jQuery, window);
+
 
 
 });

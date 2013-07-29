@@ -44,7 +44,8 @@
       <div class="control-group">
         <label class="control-label" for="dfecha">Fecha</label>
         <div class="controls">
-          <input type="text" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', isset($dataDocumento->fecha) ? $dataDocumento->fecha : ''); ?>">
+          <!-- <input type="text" name="dfecha" class="span6" id="dfecha" value="<?php //echo set_value('dfecha', isset($dataDocumento->fecha) ? $dataDocumento->fecha : ''); ?>"> -->
+          <input type="date" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', isset($dataDocumento->fecha) ? str_replace('', '', $dataDocumento->fecha) : str_replace(' ', 'T', date("Y-m-d"))); ?>">
         </div>
       </div><!--/control-group -->
 
@@ -233,7 +234,9 @@
         <div class="controls">
           <div class="well span6">
             <div class="row-fluid">
+              <?php if ($finalizados === 'f'){ ?>
               <button type="button" class="btn btn-success btn-large span12" id="btnSave">Guardar</button>
+              <?php } ?>
             </div>
 
             <?php if (count($dataDocumento) > 0) { ?>

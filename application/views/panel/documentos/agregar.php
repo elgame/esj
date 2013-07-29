@@ -12,6 +12,11 @@
     </ul>
   </div>
 
+  <?php if (isset($finalizar)){
+          if ($this->usuarios_model->tienePrivilegioDe('', 'documentos/finalizar_docs/', false)){ ?>
+              <a class="btn btn-danger pull-right span2" href="<?php echo base_url('panel/documentos/finalizar_docs/?id='.$_GET['id']) ?>">Finalizar</a>
+  <?php }} ?>
+
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
@@ -48,11 +53,6 @@
   if($frm_errors['msg'] != ''){
 ?>
 <script type="text/javascript" charset="UTF-8">
-
-  <?php if($frm_errors['ico'] === 'success') {
-    echo 'window.open("'.base_url('panel/facturacion/imprimir/?id='.$id).'")';
-  }?>
-
   $(document).ready(function(){
     noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
   });
