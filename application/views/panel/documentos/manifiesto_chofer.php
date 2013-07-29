@@ -242,7 +242,7 @@
             <?php if (count($dataDocumento) > 0) { ?>
               <br>
               <div class="row-fluid">
-                <button type="button" class="btn btn-success btn-large span12" id="btnPrint">Imprimir</button>
+                <a href="<?php echo base_url($doc->url_print.'?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span12" target="_BLANK">Imprimir</a>
               </div>
             <?php } ?>
 

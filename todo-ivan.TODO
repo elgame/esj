@@ -1,10 +1,16 @@
 DOCUMENTOS:
 
-    ☐ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron.
+      TABLA RASTRIA_DOCUMENTOS
+      "1";"MANIFIESTO DEL CHOFER";"panel/documentos/manifiesto_chofer";"panel/documentos/imprime_manifiesto_chofer";TRUE;1
+      "5";"CHOFER FOTO FIRMA MANIFIESTO";"panel/documentos/chofer_foto_firma_manifiesto";"";TRUE;2
+      "2";"ACOMODO DEL EMBARQUE";"panel/documentos/acomodo_embarque";"panel/documentos/imprime_embarque";TRUE;3
+
+    ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
+        SQL:
+          TABLA facturacion -> docs_finalizados boolean NOT NULL DEFAULT false
+
     ✔ Que al entrar el menu principal se oculte. @done (13-07-26 16:24)
     ✔ Que el menu de documento no lleve el texto solo el icono y al pasar el mouse se muestre el tooltop con el nombre del documento. @done (13-07-26 16:24)
-
-
     ✔ Directorio donde guardar los documentos. @done (13-07-24 12:10)
           documentos/{$cliente}/año/mes/folio_{$folio}/
 
@@ -18,30 +24,31 @@ DOCUMENTOS:
 
      ✔ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload. @done (13-07-24 17:52)
 
-     ☐ Embarque.
+     ✔ Embarque. @done (13-07-29 10:06)
           ✔ Que aparezca el listado de pallets que esten disponibles. Hacer la vista. @done (13-07-26 16:45)
                 (Cambio: que no se repita las clasificaciones de los pallets)
-               -- View: embarque_pallets_libres
+                SQL:
+                     -- View: embarque_pallets_libres
 
-                -- DROP VIEW embarque_pallets_libres;
+                      -- DROP VIEW embarque_pallets_libres;
 
-                CREATE OR REPLACE VIEW embarque_pallets_libres AS
-                 SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
-                   FROM rastria_pallets rp
-                   LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
-                   JOIN ( SELECT rpr.id_pallet, cl.nombre
-                      FROM rastria_pallets_rendimiento rpr
-                   JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
-                  GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
-                  ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
-                  WHERE fdp.id_embarque IS NULL
-                  GROUP BY rp.id_pallet, rp.no_cajas
-                  ORDER BY rp.id_pallet DESC;
+                      CREATE OR REPLACE VIEW embarque_pallets_libres AS
+                       SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
+                         FROM rastria_pallets rp
+                         LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
+                         JOIN ( SELECT rpr.id_pallet, cl.nombre
+                            FROM rastria_pallets_rendimiento rpr
+                         JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+                        GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+                        ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
+                        WHERE fdp.id_embarque IS NULL
+                        GROUP BY rp.id_pallet, rp.no_cajas
+                        ORDER BY rp.id_pallet DESC;
 
-                ALTER TABLE embarque_pallets_libres
-                  OWNER TO programa;
-                COMMENT ON VIEW embarque_pallets_libres
-                  IS 'Muestra los pallets que no han sido colocados en embarque.';
+                      ALTER TABLE embarque_pallets_libres
+                        OWNER TO programa;
+                      COMMENT ON VIEW embarque_pallets_libres
+                        IS 'Muestra los pallets que no han sido colocados en embarque.';
 
           ✔ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json. @done (13-07-26 12:33)
           ✔ utilizar el drag&drop @done (13-07-26 12:33)
@@ -52,7 +59,8 @@ DOCUMENTOS:
           ✔ El campo ctrl de embarque que sea el Id del embarque. @done (13-07-26 12:34)
           ✔ Que cargue el destino(ciudad) y nombre del cliente que se asigno en la factura. @done (13-07-26 12:34)
           ✔ temperatura aqgregar el campo en la tabla @done (13-07-26 12:33)
-               temperatura character varying(10),
+               SQL:
+                 TABLA facturacion_doc_embarque_pallets -> temperatura character varying(10),
 
           ✔ En el listado de pallets libres poner un filtrado por clasificacion y por folio del pallet. @done (13-07-29 08:21)
 

@@ -102,10 +102,10 @@
                 if (count($dataDocumento) > 0) {
                 $span = '6';
               ?>
-                <a href="<?php echo base_url('panel/documentos/imprime_embarque/?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span6" target="_BLANK">Imprimir</a>
+                <a href="<?php echo base_url($doc->url_print.'?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span6" target="_BLANK">Imprimir</a>
             <?php } ?>
 
-            <?php if ($finalizados === 'f'){ ?>
+            <?php if ($finalizados === 'f') { ?>
               <button type="button" class="btn btn-success btn-large span<?php echo $span ?>" id="sendEmbarque">Guardar</button>
             <?php } ?>
 

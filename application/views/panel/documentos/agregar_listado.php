@@ -14,6 +14,8 @@
       {
         foreach ($documentos as $key => $doc)
         {
+          $params['doc'] = $doc;
+
           $active = '';
           if ( $key === 0)
           {

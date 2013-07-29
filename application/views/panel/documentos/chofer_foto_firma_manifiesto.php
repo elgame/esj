@@ -33,7 +33,7 @@
               <button type="button" class="btn btn-success btn-large span12" id="btnSnapshotSave">Guardar</button>
             </div>
           <?php } ?>
-          <?php if (isset($dataDocumento->url)) {?>
+          <?php if (isset($dataDocumento->url)) { ?>
             <br>
             <div class="row-fluid">
               <a class="btn btn-success btn-large span12" href="<?php echo str_replace('\\', '', base_url($dataDocumento->url)) ?>" target="_BLANK">Ver</a>

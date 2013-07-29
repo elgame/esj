@@ -15,7 +15,6 @@
     // Manifiesto Chofer
     doc_mc.loadTicket();
     doc_mc.btnSave();
-    doc_mc.btnImprimir();
 
     // Chofer Foto Firma Manifiesto
     doc_cffm.btnSnapshot();
@@ -259,21 +258,9 @@
       });
     }
 
-    function btnImprimir () {
-      $('#listadoDocs').on('click', '#btnPrint', function(event) {
-        var factura_id   = $('#facturaId').val(),
-            documento_id = $('#documentoId').val();
-
-        var win = window.open(base_url + 'panel/documentos/imprime_manifiesto_chofer?idf=' + factura_id + '&idd=' + documento_id, '_blank');
-        win.focus();
-
-      });
-    }
-
     return {
       'loadTicket': loadTicket,
-      'btnSave': btnSave,
-      'btnImprimir': btnImprimir,
+      'btnSave': btnSave
     }
 
   })(window.jQuery, window);
