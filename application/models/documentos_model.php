@@ -1570,7 +1570,7 @@ class documentos_model extends CI_Model {
     $pdf->AddPage();
     // $pdf->SetFont('helvetica','', 8);
 
-    $pdf->SetXY(45, 3);
+    $pdf->SetXY(60, 3);
     $pdf->Image(APPPATH.'images/logo_mayer_martinez.jpg');
 
     // LADO IZQUIERDO
@@ -1578,7 +1578,7 @@ class documentos_model extends CI_Model {
     $pdf->SetTextColor(0,0,0);
     $pdf->SetFont('Arial','B',7);
 
-    $pdf->SetXY(10, 32);
+    $pdf->SetXY(10, 22);
     $pdf->Cell(100, 4, "Remitente: " . strtoupper($jsonData->remitente), 0, 0, 'L');
 
     $pdf->SetXY(10, $pdf->GetY() + 4);
@@ -1606,7 +1606,7 @@ class documentos_model extends CI_Model {
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Arial', 'B', 9);
 
-    $pdf->SetXY(10, 45);
+    $pdf->SetXY(10, 35);
     $pdf->Cell(95, 4, "TOMATES", 1, 0, 'C', 1);
 
     $pdf->SetXY(10, $pdf->GetY() + 4);
@@ -1733,7 +1733,7 @@ class documentos_model extends CI_Model {
 
     // LADO DERECHO
 
-    $pdf->SetXY(110, 45);
+    $pdf->SetXY(110, 35);
     $pdf->SetFillColor(184, 78, 78);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Arial', 'B', 9);
@@ -1883,11 +1883,12 @@ class documentos_model extends CI_Model {
     $pdf->SetX(110);
     $pdf->Row(array('Thompson', ''), false);
 
-    $pdf->SetFont('Arial', '', 10);
+    $pdf->SetFont('Arial', 'B', 10);
 
-    $pdf->SetXY(10, 223);
+    $pdf->SetXY(10, 215);
     $pdf->Cell(95, 4, "Datos Adicionales al Transportista", 0, 0, 'C', 1);
 
+    $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(10, $pdf->GetY() + 4);
     $pdf->Cell(95, 4, "Nombre o Razon Social: " . $jsonData->linea_transporte , 0, 0, 'L', 1);
 
@@ -1900,7 +1901,7 @@ class documentos_model extends CI_Model {
     $pdf->SetXY(10, $pdf->GetY() + 4);
     $pdf->Cell(95, 4, "CURP: " . $jsonData->curp , 0, 0, 'L', 1);
 
-    $pdf->SetXY(115, 227);
+    $pdf->SetXY(115, 216);
     $pdf->Image(APPPATH.'images/logo_mayer_martinez_pie.jpg');
 
     return array('pdf' => $pdf, 'texto' => 'MANIFIESTO DE CAMION.pdf');

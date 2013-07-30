@@ -1,3 +1,9 @@
+Notas de Credito:
+      ☐ En el listado de facturas poner la opcion "nota de credito".
+      ☐ tipo comprobante es egreso.
+      ☐ cargar las series y folios tipo nota de credito
+      ☐ cargar la informacion de la factura y seria editable: "series y folio", "forma de pago" a "plazo credito".
+
 DOCUMENTOS:
 
       TABLA RASTRIA_DOCUMENTOS
@@ -91,8 +97,18 @@ DOCUMENTOS:
 
      ✔ Manifiesto de Camion @done (13-07-30 10:13)
 FACTURACION:
+       ☐ Envio de un email del pdf de la factura y de los documentos del cliente (si tiene).
+
+       ☐ TIMBRADO
+               ☐ Agregar los campos xml, status_timbrado y uuid en la tabla "facturacion".
+               ☐ Al guardar la factura que se haga el intento de timbrado del xml usando los webservices.
+               ☐ Si el timbrado se realiza correctamente entonces se tiene que reemplazar el archivo XML por el que regresa el webservice y tambien guardarlo en el campo "xml" de la tabla "facturacion", tambien guardar el "uuid". Cambiar el status de timbrado de la factura.
+               ☐ Si el timbrado queda pendiente, entonces en el listado de facturas colocar un boton para que se pueda estar comprobando si el timbrado se ha realizado y si se realiza correctamente entonces realizar el proceso anterior.
+               ☐ Si es error por estructura de xml, eliminar de la bdd el registro de la factura agregada, el archivo xml, y mandar un mensaje que verifique los datos fiscales de la empresa y/o cliente.
 
       ☐ En el listado de series y folios que cargue todas.
+      ☐ tipo de comprobante para facturas es ingreso.
+      ☐ cargar las series y folio que no son nota de credito.
 
       ✔ Al agregar la factura que se inserten los documentos del cliente seleccionado. @done (13-07-22 23:07)
 

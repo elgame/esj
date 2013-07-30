@@ -132,9 +132,11 @@
         <div class="controls">
           <div class="well span6">
 
+            <?php if (count($dataDocumento) > 0) { ?>
             <div class="row-fluid">
               <a href="<?php echo base_url($doc->url_print.'?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span12" target="_BLANK">Imprimir</a>
             </div>
+            <?php } ?>
 
             <?php if ($finalizados === 'f') { ?>
               <br>

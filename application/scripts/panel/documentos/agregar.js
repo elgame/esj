@@ -146,7 +146,7 @@
           if ($ticket.val() != '' || $ticket.val() != 0) {
             $.get(base_url + 'panel/documentos/ajax_get_ticket_info/', {idt: $ticket.val(), ida: $area.find('option:selected').val(), idf: $factura.val()}, function(data) {
 
-              console.log(data);
+              // console.log(data);
 
               if (data !== false) {
 
@@ -275,7 +275,7 @@
         event.preventDefault();
 
         $.get( base_url + 'panel/documentos/ajax_get_snapshot/', {}, function(data) {
-          console.log(data);
+          // console.log(data);
 
           $('#imgCapture').attr('src', data.base64);
           $('#inputImgCapture').val(data.base64);

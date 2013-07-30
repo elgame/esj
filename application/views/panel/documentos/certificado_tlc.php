@@ -107,16 +107,17 @@
         <div class="controls">
           <div class="well span6">
 
-            <?php
-                $span = '12';
-                if (count($dataDocumento) > 0) {
-                $span = '6';
-              ?>
-                <a href="<?php echo base_url($doc->url_print.'?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span6" target="_BLANK">Imprimir</a>
+            <?php if (count($dataDocumento) > 0) { ?>
+                <div class="row-fluid">
+                  <a href="<?php echo base_url($doc->url_print.'?idf='.$dataFactura['info']->id_factura.'&idd='.$idDocumento); ?>" class="btn btn-success btn-large span12" target="_BLANK">Imprimir</a>
+                </div>
             <?php } ?>
 
             <?php if ($finalizados === 'f') { ?>
-              <button type="submit" class="btn btn-success btn-large span<?php echo $span ?>">Guardar</button>
+              <br>
+              <div class="row-fluid">
+                <button type="submit" class="btn btn-success btn-large span12">Guardar</button>
+              </div>
             <?php } ?>
 
           </div>
