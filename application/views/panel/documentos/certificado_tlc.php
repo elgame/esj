@@ -1,4 +1,4 @@
-<form class="form-horizontal" action="<?php echo base_url('panel/documentos/certificado_tlc/?id='.$_GET['id']) ?>" method="POST" id="formEmbarque">
+<form class="form-horizontal" action="<?php echo base_url('panel/documentos/certificado_tlc/?id='.$_GET['id']) ?>" method="POST" id="formTlc">
 
   <h3 style="text-align: center;">CERTIFICADO DE TLC</h3><br>
 
@@ -22,7 +22,7 @@
         <div class="controls">
           <input type="text" name="dempresa" class="span6" id="dempresa" value="<?php echo set_value('dempresa', isset($dataDocumento->empresa) ? $dataDocumento->empresa : $empresa_default->nombre_fiscal); ?>" autofocus>
 
-          <input type="text" name="dempresa_id" class="span6" id="dempresa_id" value="<?php echo set_value('dempresa_id', isset($dataDocumento->empresa_id) ? $dataDocumento->empresa_id : $empresa_default->id_empresa) ?>">
+          <input type="hidden" name="dempresa_id" class="span6" id="dempresa_id" value="<?php echo set_value('dempresa_id', isset($dataDocumento->empresa_id) ? $dataDocumento->empresa_id : $empresa_default->id_empresa) ?>">
         </div>
       </div><!--/control-group -->
 
@@ -64,7 +64,7 @@
         <div class="controls">
           <input type="text" name="dcliente_tlc" class="span6" id="dcliente_tlc" value="<?php echo set_value('dcliente_tlc', isset($dataDocumento->cliente) ? $dataDocumento->cliente : $dataFactura['info']->cliente->nombre_fiscal); ?>">
 
-          <input type="text" name="dcliente_id_tlc" class="span6" id="dcliente_id_tlc" value="<?php echo set_value('dcliente_id_tlc', isset($dataDocumento->cliente_id) ? $dataDocumento->cliente_id : $dataFactura['info']->cliente->id_cliente) ?>">
+          <input type="hidden" name="dcliente_id_tlc" class="span6" id="dcliente_id_tlc" value="<?php echo set_value('dcliente_id_tlc', isset($dataDocumento->cliente_id) ? $dataDocumento->cliente_id : $dataFactura['info']->cliente->id_cliente) ?>">
         </div>
       </div><!--/control-group -->
 

@@ -1,4 +1,4 @@
-<form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar'); ?>" method="POST" id="form">
+<form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar'); ?>" method="POST" id="formManifiestoChofer">
 
   <h3 style="text-align: center;">MANIFIESTO CHOFER</h3><br>
 

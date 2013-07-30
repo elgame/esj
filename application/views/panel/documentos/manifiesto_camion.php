@@ -1,4 +1,4 @@
-<form class="form-horizontal" action="<?php echo base_url('panel/documentos/manifiesto_camion/?id='.$_GET['id']) ?>" method="POST" id="formEmbarque">
+<form class="form-horizontal" action="<?php echo base_url('panel/documentos/manifiesto_camion/?id='.$_GET['id']) ?>" method="POST" id="formManifiestoCamion">
 
   <h3 style="text-align: center;">MANIFIESTO DEL CAMIÓN</h3><br>
 

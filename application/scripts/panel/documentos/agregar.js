@@ -7,6 +7,11 @@
   $(function(){
     config();
 
+    $('#formManifiestoChofer').keyJump();
+    // $('#formEmbarque').keyJump();
+    // $('#formTlc').keyJump();
+    // $('#formManifiestoCamion').keyJump();
+
     autocompleteLineasT();
     autocompleteLineasTLive();
 
