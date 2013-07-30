@@ -138,7 +138,6 @@ class home extends MY_Controller {
 			var_dump(base64_decode($value));
 		}
 */
-
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/general/home', $params);

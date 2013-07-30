@@ -23,6 +23,8 @@ class documentos extends MY_Controller {
 
     'documentos/imprime_manifiesto_chofer/',
     'documentos/imprime_embarque/',
+    'documentos/imprime_certificado_tlc/',
+    'documentos/imprime_manifiesto_camion/',
 
     'documentos/acomodo_embarque/',
   );
@@ -172,7 +174,7 @@ class documentos extends MY_Controller {
     $params['is_finalizados'] = $this->db
       ->select('docs_finalizados')
       ->from('facturacion')
-      ->where('id_factura', $_GET['id'])
+      ->where('id_factura', $idFactura)
       ->get()->row()->docs_finalizados;
 
     // Obtiene los documentos de las areas.
@@ -185,6 +187,14 @@ class documentos extends MY_Controller {
     // echo "<pre>";
     //   var_dump($params['pallets']);
     // echo "</pre>";exit;
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->db
+      ->select("id_empresa, nombre_fiscal, rfc, calle, no_exterior, colonia, localidad, municipio, estado")
+      ->from("empresas AS e")
+      ->where("e.predeterminado", "t")
+      ->get()
+      ->row();
 
     // Construye la vista del listado de documentos.
     return $this->load->view('panel/documentos/agregar_listado', $params, true);
@@ -202,23 +212,115 @@ class documentos extends MY_Controller {
   }
 
   /*
+  |-------------------------------------------------------------------------
+  |  CHOFER COPIA DEL IFE
+  |-------------------------------------------------------------------------
+  */
+
+  public function chofer_copia_ife()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->saveChoferCopiaIfe($_POST['embIdFac'], $_POST['embIdDoc']);
+
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  CHOFER COPIA LICENCIA
+   |-------------------------------------------------------------------------
+   */
+
+   public function chofer_copia_licencia()
+   {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->saveChoferCopiaLicencia($_POST['embIdFac'], $_POST['embIdDoc']);
+
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+   }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  CHOFER COPIA LICENCIA
+   |-------------------------------------------------------------------------
+   */
+
+  public function seguro_camion()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->saveSeguroCamion($_POST['embIdFac'], $_POST['embIdDoc']);
+
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
    |-------------------------------------------------------------------------
    |  EMBARQUE
    |-------------------------------------------------------------------------
    */
 
-    public function acomodo_embarque($value='')
+  public function acomodo_embarque()
+  {
+    if (isset($_GET['id']{0}))
     {
-      if (isset($_GET['id']{0}))
-      {
-        $this->load->model('documentos_model');
-        $res = $this->documentos_model->storeEmbarque();
+      $this->load->model('documentos_model');
+      $res = $this->documentos_model->storeEmbarque();
 
-        if ($res['passes'])
-          redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
-      }
-      else redirect(base_url('panel/facturacion/?msg=1'));
+      if ($res['passes'])
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
     }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  CERTIFICADO TLC
+   |-------------------------------------------------------------------------
+   */
+
+  public function certificado_tlc()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $res = $this->documentos_model->storeCertificadoTlc($_POST['embIdFac'], $_POST['embIdDoc']);
+
+      if ($res['passes'])
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  MANIFIESTO CAMION
+   |-------------------------------------------------------------------------
+   */
+
+  public function manifiesto_camion()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('documentos_model');
+      $res = $this->documentos_model->storeManifiestoCamion($_POST['embIdFac'], $_POST['embIdDoc']);
+
+      if ($res['passes'])
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
 
   /*
    |-------------------------------------------------------------------------
@@ -253,6 +355,8 @@ class documentos extends MY_Controller {
 
     if ($resp['passes'])
     {
+      $_GET['id'] = $_POST['factura_id'];
+
       $resp['htmlDocs'] = $this->generaDocsView($_POST['factura_id']);
     }
 
@@ -330,12 +434,12 @@ class documentos extends MY_Controller {
 
   /*
    |-------------------------------------------------------------------------
-   |  METODO PARA IMPRIMIR
+   |  METODOS PARA IMPRIMIR
    |-------------------------------------------------------------------------
    */
 
    /**
-    * Imprime el Documeto Manifiesto Chofer.
+    * Imprime el Documento Manifiesto Chofer.
     *
     * @return void
     */
@@ -350,7 +454,7 @@ class documentos extends MY_Controller {
    }
 
    /**
-    * Imprime el Documeto Manifiesto Chofer.
+    * Imprime el Documento Manifiesto Chofer.
     *
     * @return void
     */
@@ -363,6 +467,36 @@ class documentos extends MY_Controller {
       }
       else redirect(base_url('panel/facturacion/?msg=1'));
    }
+
+ /**
+  * Imprime el Documento Certificado TLC.
+  *
+  * @return void
+  */
+  public function imprime_certificado_tlc()
+  {
+    if (isset($_GET['idf']{0}) && isset($_GET['idd']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->generaDoc($_GET['idf'], $_GET['idd']);
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /**
+  * Imprime el Documento Manifiesto Camion.
+  *
+  * @return void
+  */
+  public function imprime_manifiesto_camion()
+  {
+    if (isset($_GET['idf']{0}) && isset($_GET['idd']{0}))
+    {
+      $this->load->model('documentos_model');
+      $this->documentos_model->generaDoc($_GET['idf'], $_GET['idd']);
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
 
   /*
    |-------------------------------------------------------------------------

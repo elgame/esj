@@ -1,18 +1,34 @@
 DOCUMENTOS:
 
       TABLA RASTRIA_DOCUMENTOS
-      "1";"MANIFIESTO DEL CHOFER";"panel/documentos/manifiesto_chofer";"panel/documentos/imprime_manifiesto_chofer";TRUE;1
-      "5";"CHOFER FOTO FIRMA MANIFIESTO";"panel/documentos/chofer_foto_firma_manifiesto";"";TRUE;2
-      "2";"ACOMODO DEL EMBARQUE";"panel/documentos/acomodo_embarque";"panel/documentos/imprime_embarque";TRUE;3
+      "1";"MANIFIESTO DEL CHOFER";"panel/documentos/manifiesto_chofer";"panel/documentos/imprime_manifiesto_chofer"
+      "2";"ACOMODO DEL EMBARQUE";"panel/documentos/acomodo_embarque";"panel/documentos/imprime_embarque"
+      "3";"CHOFER COPIA DEL IFE";"panel/documentos/chofer_copia_ife";""
+      "4";"CHOFER COPIA LICENCIA";"panel/documentos/chofer_copia_licencia";""
+      "5";"CHOFER FOTO FIRMA MANIFIESTO";"panel/documentos/chofer_foto_firma_manifiesto";""
+      "6";"SEGURO CAMION";"panel/documentos/seguro_camion";""
+      "7";"CERTIFICADO DE TLC";"panel/documentos/certificado_tlc";"panel/documentos/imprime_certificado_tlc"
+      "8";"MANIFIESTO DEL CAMION";"panel/documentos/manifiesto_camion";"panel/documentos/imprime_manifiesto_camion"
 
-    ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
-        SQL:
-          TABLA facturacion -> docs_finalizados boolean NOT NULL DEFAULT false
+      PRIVILEGIOS:
+       "Doc Manifiesto Chofer";70;FALSE;"documentos/manifiesto_chofer/";"copy";FALSE
+        "Doc Chofer Foto Firma Manifiesto";70;FALSE;"documentos/chofer_foto_firma_manifiesto/";"copy";FALSE
+        "Doc Acomodo Embarque";70;FALSE;"documentos/acomodo_embarque/";"copy";FALSE
+        "Finalizar Documentos";70;FALSE;"documentos/finalizar_docs/";"copy";FALSE
+        "Doc Chofer Copia del IFE";70;FALSE;"documentos/chofer_copia_ife/";"copy";FALSE
+        "Doc Chofer Copia Licencia";70;FALSE;"documentos/chofer_copia_licencia/";"copy";FALSE
+        "Doc Seguro Camion";70;FALSE;"documentos/seguro_camion/";"copy";FALSE
+        "Doc Certificado de TLC";70;FALSE;"documentos/certificado_tlc/";"copy";FALSE
+        "Doc Manifiesto Camion";70;FALSE;"documentos/manifiesto_camion/";"copy";FALSE
 
-    ✔ Que al entrar el menu principal se oculte. @done (13-07-26 16:24)
-    ✔ Que el menu de documento no lleve el texto solo el icono y al pasar el mouse se muestre el tooltop con el nombre del documento. @done (13-07-26 16:24)
-    ✔ Directorio donde guardar los documentos. @done (13-07-24 12:10)
-          documentos/{$cliente}/año/mes/folio_{$folio}/
+        ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
+          SQL:
+            TABLA facturacion -> docs_finalizados boolean NOT NULL DEFAULT false
+
+        ✔ Que al entrar el menu principal se oculte. @done (13-07-26 16:24)
+        ✔ Que el menu de documento no lleve el texto solo el icono y al pasar el mouse se muestre el tooltop con el nombre del documento. @done (13-07-26 16:24)
+        ✔ Directorio donde guardar los documentos. @done (13-07-24 12:10)
+              documentos/{$cliente}/año/mes/folio_{$folio}/
 
     ✔ Manifiesto de chofer @done (13-07-24 17:52)
           ✔ El importe es de la factura guardada @done (13-07-23 23:47)
@@ -64,16 +80,16 @@ DOCUMENTOS:
 
           ✔ En el listado de pallets libres poner un filtrado por clasificacion y por folio del pallet. @done (13-07-29 08:21)
 
-     ☐ copia ife chofer - subir
-     ☐ copia licencia chofer - subir
-     ☐ seguro camion - subir
+     ✔ copia ife chofer - subir @done (13-07-30 10:12)
+     ✔ copia licencia chofer - subir @done (13-07-30 10:12)
+     ✔ seguro camion - subir @done (13-07-30 10:12)
 
-     ☐ TLC
-           ☐ autocomplete de la empresa que cargue direccion
-           ☐ autocomplete del cliente
-           ☐ fechas
+     ✔ TLC @done (13-07-30 10:12)
+           ✔ autocomplete de la empresa que cargue direccion @done (13-07-30 10:13)
+           ✔ autocomplete del cliente @done (13-07-30 10:13)
+           ✔ fechas @done (13-07-30 10:13)
 
-     ☐ Manifiesto de Camion
+     ✔ Manifiesto de Camion @done (13-07-30 10:13)
 FACTURACION:
 
       ☐ En el listado de series y folios que cargue todas.

@@ -312,6 +312,275 @@ class documentos_model extends CI_Model {
     return $data;
   }
 
+  /*
+   |-------------------------------------------------------------------------
+   |  CERTIFICADO TLC
+   |-------------------------------------------------------------------------
+   */
+
+  /**
+  * Guarda la informacion del Certificado y el PDF.
+  *
+  * @return array
+  */
+  public function storeCertificadoTlc($idFactura, $idDocumento)
+  {
+    $dataJson = array(
+      'empresa'               => $this->input->post('dempresa'),
+      'dempresa_id'           => $this->input->post('empresa_id'),
+      'domicilio'             => $this->input->post('ddomicilio'),
+      'registro_fiscal'       => $this->input->post('dregistroFiscal'),
+      'fecha1'                => $this->input->post('dfecha1'),
+      'fecha2'                => $this->input->post('dfecha2'),
+      'cliente'               => $this->input->post('dcliente_tlc'),
+      'cliente_id'            => $this->input->post('dcliente_id_tlc'),
+      'cliente_domicilio'     => $this->input->post('dcliente_domicilio'),
+      'cliente_no_reg_fiscal' => $this->input->post('dcliente_no_reg_fiscal_tlc'),
+      'telefono'              => $this->input->post('dtelefono'),
+      'fax'                   => $this->input->post('dfax'),
+    );
+
+    $this->updateDocumento($dataJson, $idFactura, $idDocumento);
+
+    $this->load->model('facturacion_model');
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+    // Genera el documento de embarque.
+    $this->generaDoc($idFactura, $idDocumento, $path);
+
+    return array('passes' => true);
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  MANIFIESTO DEL CAMION
+   |-------------------------------------------------------------------------
+   */
+
+  /**
+   * Almacena la informacion.
+   *
+   * @param  string $idFactura
+   * @param  string $idDocumento
+   * @return array
+   */
+  public function storeManifiestoCamion($idFactura, $idDocumento)
+  {
+    $dataJson = array(
+      'remitente'        => $this->input->post('dremitente'),
+      'consignatorio'    => $this->input->post('dconsignatorio'),
+      'fecha_embarque'   => $this->input->post('dfecha_embarque'),
+      'camion_placas'    => $this->input->post('dmc_camion_placas'),
+      'caja_no'          => $this->input->post('dmc_caja_no'),
+      'linea_transporte' => $this->input->post('dmc_linea_transporte'),
+      'razon_social'     => $this->input->post('dmc_razon_social'),
+      'domicilio_fiscal' => $this->input->post('dmc_domicilio_fiscal'),
+      'rfc'              => $this->input->post('dmc_rfc'),
+      'curp'             => $this->input->post('dmc_curp'),
+    );
+
+    $this->updateDocumento($dataJson, $idFactura, $idDocumento);
+
+    $this->load->model('facturacion_model');
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+    // Genera el documento de embarque.
+    $this->generaDoc($idFactura, $idDocumento, $path);
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Obtiene los pallets del embarque pero por clasificaciones.
+   *
+   * @param  string $idEmbarque
+   * @return array
+   */
+  public function getEmbarqueClasifi($idEmbarque)
+  {
+    $query = $this->db->query(
+      "SELECT rpr.id_clasificacion, SUM(rpr.cajas) AS cajas, cl.nombre AS clasificacion
+        FROM facturacion_doc_embarque_pallets fep
+        INNER JOIN rastria_pallets_rendimiento rpr ON rpr.id_pallet = fep.id_pallet
+        INNER JOIN clasificaciones cl ON cl.id_clasificacion = rpr.id_clasificacion
+        WHERE fep.id_embarque = {$idEmbarque}
+        GROUP BY rpr.id_clasificacion, cl.nombre"
+    );
+
+    $data = array();
+    if ($query->num_rows() > 0)
+      $data['clasificaciones'] = $query->result();
+
+    return $data;
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  CHOFER COPIA IFE
+   |-------------------------------------------------------------------------
+   */
+  public function saveChoferCopiaIfe($idFactura, $idDocumento)
+  {
+    if ($_FILES['pife_file']['tmp_name'] !== '')
+    {
+      $this->load->library('my_upload');
+
+      $this->load->model('facturacion_model');
+      // Obtiene la informacion de la factura.
+      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+      // Obtiene la ruta donde se guardan los documentos del cliente.
+      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+      $dataJson = $this->db
+        ->select('data')
+        ->from('facturacion_documentos')
+        ->where('id_factura', $idFactura)
+        ->where('id_documento', $idDocumento)
+        ->get()->row()->data;
+
+      if ($dataJson !== '')
+      {
+        $dataJson = json_decode($dataJson);
+        unlink(str_replace('\\', '', $dataJson->url));
+      }
+
+      $config_upload = array(
+        'upload_path'     => $path, //APPPATH.$path_lic
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => 'CHOFER COPIA DEL IFE',
+        'remove_spaces'   => false,
+      );
+
+      $this->my_upload->initialize($config_upload);
+      $data_doc = $this->my_upload->do_upload('pife_file');
+
+      $path = explode('application/', $data_doc['full_path']);
+
+      $dataJson = array(
+        'url' => APPPATH.$path[1]
+      );
+
+      $this->updateDocumento($dataJson, $idFactura, $idDocumento);
+    }
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  CHOFER COPIA LICENCIA
+   |-------------------------------------------------------------------------
+   */
+  public function saveChoferCopiaLicencia($idFactura, $idDocumento)
+  {
+    if ($_FILES['plicencia_file']['tmp_name'] !== '')
+    {
+      $this->load->library('my_upload');
+
+      $this->load->model('facturacion_model');
+      // Obtiene la informacion de la factura.
+      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+      // Obtiene la ruta donde se guardan los documentos del cliente.
+      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+      $dataJson = $this->db
+        ->select('data')
+        ->from('facturacion_documentos')
+        ->where('id_factura', $idFactura)
+        ->where('id_documento', $idDocumento)
+        ->get()->row()->data;
+
+      if ($dataJson !== '')
+      {
+        $dataJson = json_decode($dataJson);
+        unlink(str_replace('\\', '', $dataJson->url));
+      }
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => 'CHOFER COPIA LICENCIA',
+        'remove_spaces'   => false,
+      );
+
+      $this->my_upload->initialize($config_upload);
+      $data_doc = $this->my_upload->do_upload('plicencia_file');
+
+      $path = explode('application/', $data_doc['full_path']);
+
+      $dataJson = array(
+        'url' => APPPATH.$path[1]
+      );
+
+      $this->updateDocumento($dataJson, $idFactura, $idDocumento);
+    }
+  }
+
+  /*
+   |-------------------------------------------------------------------------
+   |  SEGURO CAMION
+   |-------------------------------------------------------------------------
+   */
+  public function saveSeguroCamion($idFactura, $idDocumento)
+  {
+    if ($_FILES['fseguro_camion']['tmp_name'] !== '')
+    {
+      $this->load->library('my_upload');
+
+      $this->load->model('facturacion_model');
+      // Obtiene la informacion de la factura.
+      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+      // Obtiene la ruta donde se guardan los documentos del cliente.
+      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+
+      $dataJson = $this->db
+        ->select('data')
+        ->from('facturacion_documentos')
+        ->where('id_factura', $idFactura)
+        ->where('id_documento', $idDocumento)
+        ->get()->row()->data;
+
+      if ($dataJson !== '')
+      {
+        $dataJson = json_decode($dataJson);
+        unlink(str_replace('\\', '', $dataJson->url));
+      }
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => 'SEGURO CAMION',
+        'remove_spaces'   => false,
+      );
+
+      $this->my_upload->initialize($config_upload);
+      $data_doc = $this->my_upload->do_upload('fseguro_camion');
+
+      $path = explode('application/', $data_doc['full_path']);
+
+      $dataJson = array(
+        'url' => APPPATH.$path[1]
+      );
+
+      $this->updateDocumento($dataJson, $idFactura, $idDocumento);
+    }
+  }
+
 
   /*
    |-------------------------------------------------------------------------
@@ -479,7 +748,7 @@ class documentos_model extends CI_Model {
    * @param  string $idDocumento
    * @return array
    */
-  private function getManifiestoChoferData($idFactura, $idDocumento)
+  public function getJsonDataDocus($idFactura, $idDocumento)
   {
     $sql = $this->db
     ->select('data')
@@ -496,7 +765,7 @@ class documentos_model extends CI_Model {
   }
 
   /**
-   * Visualiza el PDF del Manifiesto Chofer.
+   * Contruye el PDF del Manifiesto Chofer.
    *
    * @param  string $idFactura
    * @param  string $idDocumento
@@ -504,7 +773,7 @@ class documentos_model extends CI_Model {
    */
   public function pdfManifiestoDelChofer($idFactura, $idDocumento)
   {
-    $data = $this->getManifiestoChoferData($idFactura, $idDocumento);
+    $data = $this->getJsonDataDocus($idFactura, $idDocumento);
 
     // echo "<pre>";
     //   var_dump($data);
@@ -709,7 +978,6 @@ class documentos_model extends CI_Model {
 
     $fecha = explode('-', $data->fecha);
 
-
     $pdf->SetXY(80, 247);
     $pdf->SetFont('Arial','',11);
     $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(String::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
@@ -720,18 +988,27 @@ class documentos_model extends CI_Model {
     return array('pdf' => $pdf, 'texto' => 'MANIFIESTO_CHOFER_'.$chofer.'_'.$fecha.'.pdf');
   }
 
+  /**
+   * Contruye el PDF del Manifiesto Chofer.
+   *
+   * @param  string $idFactura
+   * @param  string $idDocumento
+   * @return void
+   */
   public function pdfAcomodoDelEmbarque($idFactura, $idDocumento)
   {
     $data = $this->getEmbarqueData($idFactura, $idDocumento);
 
-    $result = $this->db
-      ->select("data")
-      ->from("facturacion_documentos")
-      ->where('id_factura', $idFactura)
-      ->where('id_documento', $idDocumento)
-      ->get()->row()->data;
+    // $result = $this->db
+    //   ->select("data")
+    //   ->from("facturacion_documentos")
+    //   ->where('id_factura', $idFactura)
+    //   ->where('id_documento', $idDocumento)
+    //   ->get()->row()->data;
 
-    $jsonData = json_decode($result);
+    // $jsonData = json_decode($result);
+
+    $jsonData = $this->getJsonDataDocus($idFactura, $idDocumento);
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -901,6 +1178,733 @@ class documentos_model extends CI_Model {
     return array('pdf' => $pdf, 'texto' => 'DATOS_EMBARQUE.pdf');
   }
 
+  /**
+   * Contruye el PDF Certificado TLC.
+   *
+   * @param  string $idFactura
+   * @param  string $idDocumento
+   * @return void
+   */
+  public function pdfCertificadoDeTlc($idFactura, $idDocumento)
+  {
+    $jsonData = $this->getJsonDataDocus($idFactura, $idDocumento);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    // $pdf->SetXY(7, 3);
+    // $pdf->Image(APPPATH.'images/logo.png');
+
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFont('Arial','B',12);
+
+    $pdf->SetXY(10, 5);
+    $pdf->MultiCell(200, 4, "TRATADO DE LIBRE COMERCIO DE AMERICA DEL NORTE \n CERTIFICADO DE ORIGEN \n (Instrucciones al Reverso)", 0, 'C', 0);
+
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(10, 20);
+    $pdf->Cell(200, 6, 'Llenar a máquina o con letra de molde. Este documento no será válido si presenta alguna raspadura, tachadura o enmendadura', 0, 0, 'L');
+
+    // ---------------------
+
+    $pdf->SetXY(10, 28);
+    $pdf->Cell(90, 30, '', 1, 0, 'L');
+
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(11, 29);
+    $pdf->Cell(80, 4, '1. Nombre y Domicilio del Exportador', 0, 0, 'L');
+
+    $pdf->SetFont('Arial','',9);
+    $pdf->SetXY(11, 33);
+    $pdf->MultiCell(88, 4, $jsonData->empresa, 0, 'L', 0);
+
+    $pdf->SetXY(11, $pdf->GetY() + 1);
+    $pdf->MultiCell(88, 4, $jsonData->domicilio, 0, 'L', 0);
+
+    $pdf->SetXY(11, 53);
+    $pdf->Cell(88, 4, 'Número de Registro Fiscal:' . $jsonData->registro_fiscal,0, 0, 'L');
+
+    //  --------------------
+
+    $pdf->SetXY(100, 28);
+    $pdf->Cell(110, 30, '', 1, 0, 'L');
+
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(101, 29);
+    $pdf->Cell(80, 4, '2. Período que cubre:', 0, 0, 'L');
+
+    $fechaDe = explode('-', $jsonData->fecha1);
+    $fechaDeDia = $fechaDe[2];
+    $fechaDeMes = $fechaDe[1];
+    $fechaDeAno = $fechaDe[0];
+
+    $pdf->SetXY(101, 45);
+    $pdf->Cell(5, 4, 'De:', 0, 0, 'C');
+
+    $pdf->SetXY(110, 41);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(110, 45);
+    $pdf->Cell(5, 4, $fechaDeDia[0], 1, 0, 'C');
+
+    $pdf->SetXY(115, 41);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(115, 45);
+    $pdf->Cell(5, 4, $fechaDeDia[1], 1, 0, 'C');
+
+    $pdf->SetXY(120, 41);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(120, 45);
+    $pdf->Cell(5, 4, $fechaDeMes[0], 1, 0, 'C');
+
+    $pdf->SetXY(125, 41);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(125, 45);
+    $pdf->Cell(5, 4, $fechaDeMes[1], 1, 0, 'C');
+
+    $pdf->SetXY(130, 41);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(130, 45);
+    $pdf->Cell(5, 4, $fechaDeAno[2], 1, 0, 'C');
+
+    $pdf->SetXY(135, 41);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(135, 45);
+    $pdf->Cell(5, 4, $fechaDeAno[3], 1, 0, 'C');
+
+    //  --------------------
+
+    $fechaA = explode('-', $jsonData->fecha2);
+    $fechaADia = $fechaA[2];
+    $fechaAMes = $fechaA[1];
+    $fechaAAno = $fechaA[0];
+
+    $pdf->SetXY(145, 45);
+    $pdf->Cell(5, 4, 'A:', 0, 0, 'C');
+
+    $pdf->SetXY(155, 41);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(155, 45);
+    $pdf->Cell(5, 4, $fechaADia[0], 1, 0, 'C');
+
+    $pdf->SetXY(160, 41);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(160, 45);
+    $pdf->Cell(5, 4, $fechaADia[1], 1, 0, 'C');
+
+    $pdf->SetXY(165, 41);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(165, 45);
+    $pdf->Cell(5, 4, $fechaAMes[0], 1, 0, 'C');
+
+    $pdf->SetXY(170, 41);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(170, 45);
+    $pdf->Cell(5, 4, $fechaAMes[1], 1, 0, 'C');
+
+    $pdf->SetXY(175, 41);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(175, 45);
+    $pdf->Cell(5, 4, $fechaAAno[2], 1, 0, 'C');
+
+    $pdf->SetXY(180, 41);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(180, 45);
+    $pdf->Cell(5, 4, $fechaAAno[3], 1, 0, 'C');
+
+    //  --------------------
+
+    $pdf->SetXY(10, 58);
+    $pdf->Cell(90, 30, '', 1, 0, 'L');
+
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(11, 59);
+    $pdf->Cell(80, 4, '3. Nombre y Domicilio del Productor:', 0, 0, 'L');
+
+    $pdf->SetFont('Arial','',9);
+    $pdf->SetXY(11, 63);
+    $pdf->MultiCell(88, 4, $jsonData->empresa, 0, 'L', 0);
+
+    $pdf->SetXY(11, $pdf->GetY() + 1);
+    $pdf->MultiCell(88, 4, $jsonData->domicilio, 0, 'L', 0);
+
+    $pdf->SetXY(11, 83);
+    $pdf->Cell(88, 4, 'Número de Registro Fiscal:' . $jsonData->registro_fiscal,0, 0, 'L');
+
+    //  --------------------
+
+    $pdf->SetXY(100, 58);
+    $pdf->Cell(110, 30, '', 1, 0, 'L');
+
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(101, 59);
+    $pdf->Cell(80, 4, '4. Nombre y Domicilio del Importador:', 0, 0, 'L');
+
+    $pdf->SetFont('Arial','',9);
+    $pdf->SetXY(101, 63);
+    $pdf->Cell(105, 4, $jsonData->cliente, 0, 0, 'L');
+
+    $pdf->SetXY(101, 68);
+    $pdf->MultiCell(105, 4, $jsonData->cliente_domicilio, 0, 'L', 0);
+
+    $pdf->SetXY(101, 83);
+    $pdf->Cell(105, 4, 'Número de Registro Fiscal:' . $jsonData->cliente_no_reg_fiscal, 0, 0, 'L');
+
+    //  --------------------
+
+    $pdf->SetXY(10, 88);
+    $pdf->Cell(90, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(10, 90);
+    $pdf->Cell(90, 4, '5. Descripción del (los) bien(es): LIMON MEXICANO', 0, 0, 'L');
+
+    //  --------------------
+
+    $pdf->SetXY(100, 88);
+    $pdf->Cell(22, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(100, 88);
+    $pdf->MultiCell(22, 4, '6. Clasificación Arancelaria', 0, 'L', 0);
+
+    $pdf->SetXY(122, 88);
+    $pdf->Cell(22, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(122, 88);
+    $pdf->MultiCell(22, 4, '7. Criterio para trato preferencial', 0, 'L', 0);
+
+    $pdf->SetXY(144, 88);
+    $pdf->Cell(22, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(144, 88);
+    $pdf->MultiCell(22, 4, '8. Productor', 0, 'L', 0);
+
+    $pdf->SetXY(166, 88);
+    $pdf->Cell(22, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(166, 88);
+    $pdf->MultiCell(22, 4, '9. Costo Neto', 0, 'L', 0);
+
+    $pdf->SetXY(188, 88);
+    $pdf->Cell(22, 15, '', 1, 0, 'L');
+
+    $pdf->SetXY(188, 88);
+    $pdf->MultiCell(22, 4, '10. País de Origen', 0, 'L', 0);
+
+    // -------------------
+
+    $pdf->SetXY(10, 103);
+    $pdf->Cell(90, 50, '', 1, 0, 'L');
+
+    $pdf->SetXY(10, 103);
+    $pdf->Cell(90, 4, '0', 0, 0, 'L');
+
+    // -------------------
+
+    $pdf->SetXY(100, 103);
+    $pdf->Cell(22, 50, '', 1, 0, 'C');
+
+    $pdf->SetXY(100, 103);
+    $pdf->MultiCell(22, 4, '0805.50', 0, 'C', 0);
+
+    $pdf->SetXY(122, 103);
+    $pdf->Cell(22, 50, '', 1, 0, 'C');
+
+    $pdf->SetXY(122, 103);
+    $pdf->MultiCell(22, 4, 'A', 0, 'C', 0);
+
+    $pdf->SetXY(144, 103);
+    $pdf->Cell(22, 50, '', 1, 0, 'C');
+
+    $pdf->SetXY(144, 103);
+    $pdf->MultiCell(22, 4, 'YES', 0, 'C', 0);
+
+    $pdf->SetXY(166, 103);
+    $pdf->Cell(22, 50, '', 1, 0, 'C');
+
+    $pdf->SetXY(166, 103);
+    $pdf->MultiCell(22, 4, '-0-', 0, 'C', 0);
+
+    $pdf->SetXY(188, 103);
+    $pdf->Cell(22, 50, '', 1, 0, 'C');
+
+    $pdf->SetXY(188, 103);
+    $pdf->MultiCell(22, 4, 'MEXICO', 0, 'C', 0);
+
+    // --------------------------
+
+    $pdf->SetXY(10, 153);
+    $pdf->Cell(200, 42, '', 1, 0, 'L');
+
+    $txt = "11. Declaro bajo protesta de decir verdad que:
+      La información contenida en este documento es verdadera y exacta, y me hago responsable de comprobar lo aquí declarado. Estoy consciente que seré responsable por cualquier declaración falsa u omisión hecha o relacionada con el presente documento.
+      Me comprometo a conservar y presentar, en caso de ser requerido, los documentos necesarios que respalden el contenido del presente certificado, así como a notificar por escrito a todas las personas a quienes haya entregado el presente certificado, de cualquier cambio que pudiera afectar la exactitud o validez del mismo.
+      Los bienes son originarios y cumplen con los requisitos que les son aplicables conforme al Tratado de Libre Comercio de América del Norte, y no han sido objeto de procesamiento ulterior o de cualquier otra operación fuera de los territorios de las Partes, salvo en los casos permitidos en el artículo 411 o en el Anexo 401:
+      Este certificado se compone de 1 hojas, incluyendo todos sus anexos.";
+
+    $pdf->SetXY(11, 154);
+    $pdf->MultiCell(199, 4, $txt, 0, 'L', 0);
+
+    // --------------------------
+
+    $pdf->SetXY(10, 195);
+    $pdf->Cell(90, 20, '', 1, 0, 'L');
+
+    // $pdf->SetFont('Arial','',7);
+    $pdf->SetXY(10, 195);
+    $pdf->Cell(90, 4, 'Firma Autorizada:', 0, 0, 'L');
+
+    $pdf->SetXY(100, 195);
+    $pdf->Cell(110, 20, '', 1, 0, 'L');
+
+    $pdf->SetXY(100, 195);
+    $pdf->MultiCell(110, 4, 'Empresa: ' . strtoupper($jsonData->empresa), 0, 'L', 0);
+
+    // --------------------------
+
+    $pdf->SetXY(10, 215);
+    $pdf->Cell(90, 20, '', 1, 0, 'L');
+
+    $pdf->SetXY(10, 215);
+    $pdf->Cell(90, 4, 'Nombre: RAUL  JORGE  GOMEZ TERRONES', 0, 0, 'L');
+
+    $pdf->SetXY(100, 215);
+    $pdf->Cell(110, 20, '', 1, 0, 'L');
+
+    $pdf->SetXY(100, 215);
+    $pdf->Cell(110, 4, 'Cargo:   REPRESENTANTE  LEGAL', 0, 0, 'L');
+
+    // --------------------------
+
+    $pdf->SetXY(10, 235);
+    $pdf->Cell(90, 20, '', 1, 0, 'L');
+
+    $pdf->SetXY(10, 240);
+    $pdf->Cell(15, 4, 'Fecha:', 0, 0, 'C');
+
+    $pdf->SetXY(25, 240);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(25, 244);
+    $pdf->Cell(5, 4, $fechaDeDia[0], 1, 0, 'C');
+
+    $pdf->SetXY(30, 240);
+    $pdf->Cell(5, 4, 'D', 0, 0, 'C');
+
+    $pdf->SetXY(30, 244);
+    $pdf->Cell(5, 4, $fechaDeDia[1], 1, 0, 'C');
+
+    $pdf->SetXY(35, 240);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(35, 244);
+    $pdf->Cell(5, 4, $fechaDeMes[0], 1, 0, 'C');
+
+    $pdf->SetXY(40, 240);
+    $pdf->Cell(5, 4, 'M', 0, 0, 'C');
+
+    $pdf->SetXY(40, 244);
+    $pdf->Cell(5, 4, $fechaDeMes[1], 1, 0, 'C');
+
+    $pdf->SetXY(45, 240);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(45, 244);
+    $pdf->Cell(5, 4, $fechaDeAno[2], 1, 0, 'C');
+
+    $pdf->SetXY(50, 240);
+    $pdf->Cell(5, 4, 'A', 0, 0, 'C');
+
+    $pdf->SetXY(50, 244);
+    $pdf->Cell(5, 4, $fechaDeAno[3], 1, 0, 'C');
+
+    // ------------------------------
+
+    $pdf->SetXY(100, 235);
+    $pdf->Cell(110, 20, '', 1, 0, 'L');
+
+    $pdf->SetXY(105, 243);
+    $pdf->Cell(50, 4, 'Teléfono: ' . $jsonData->telefono, 0, 0, 'L');
+
+    $pdf->SetXY(155, 243);
+    $pdf->Cell(50, 4, 'Fax: ' . $jsonData->fax, 0, 0, 'L');
+
+    return array('pdf' => $pdf, 'texto' => 'CERTIFICADO DE TLC.pdf');
+  }
+
+  /**
+   * Contruye el PDF Certificado TLC.
+   *
+   * @param  string $idFactura
+   * @param  string $idDocumento
+   * @return void
+   */
+  public function pdfManifiestoDelCamion($idFactura, $idDocumento)
+  {
+    $jsonData = $this->getJsonDataDocus($idFactura, $idDocumento);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+    // $pdf->SetFont('helvetica','', 8);
+
+    $pdf->SetXY(45, 3);
+    $pdf->Image(APPPATH.'images/logo_mayer_martinez.jpg');
+
+    // LADO IZQUIERDO
+
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetFont('Arial','B',7);
+
+    $pdf->SetXY(10, 32);
+    $pdf->Cell(100, 4, "Remitente: " . strtoupper($jsonData->remitente), 0, 0, 'L');
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->MultiCell(100, 4, "Consignatorio: " . strtoupper($jsonData->consignatorio), 0, 'L', 0);
+
+    $fecha = explode('-', $jsonData->fecha_embarque);
+
+    $pdf->SetXY(10, $pdf->GetY());
+    $pdf->Cell(100, 4, "Fecha de Embarque: " . $fecha[2] .' DE ' . strtoupper(String::mes($fecha[1])) . ' DEL ' . $fecha[0], 0, 0, 'L');
+
+    // -------------------------
+
+    $pdf->SetXY(110, $pdf->GetY() - 8);
+    $pdf->Cell(100, 4, "Camion Placas No: " . $jsonData->camion_placas, 0, 0, 'L');
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->Cell(100, 4, "Caja No: " . $jsonData->caja_no, 0, 0, 'L');
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->Cell(100, 4, "Linea de Transporte: " . $jsonData->linea_transporte, 0, 0, 'L');
+
+    // ------------------------
+
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+
+    $pdf->SetXY(10, 45);
+    $pdf->Cell(95, 4, "TOMATES", 1, 0, 'C', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(40, 20, 20, 15));
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Row(array('', 'Flats', '3 Tandas', 'Cartons'), true);
+
+    $tomates = array('Max/Large 44A', 'Ex. Lg./45A', 'Ex. Large 55A', 'Large/Ex. Lg. 56A',
+      '', 'Madium/Large', 'Medium/Small', 'Sm./Ex. Sm.', 'Ex./Sm.', 'Tomatillo', 'TOTAL:');
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFont('Arial', '', 7);
+    foreach ($tomates as $t)
+    {
+      $pdf->SetX(10);
+      $pdf->Row(array(
+        $t,
+        '',
+        '',
+        '',
+      ), false);
+    }
+
+    $pdf->SetX(10);
+    $pdf->Cell(95, 6, "TOMATE CHERRY                         TOMATE ROMA", 1, 0, 'C', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 6);
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "PEPINOS", 1, 0, 'C', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pepinos = array(
+      array('Super select', 'Total jabas'),
+      array('Super', 'Select'),
+      array('Large', 'Sups/small'),
+      array('Cartons 24s', '30s'),
+    );
+
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(48, 47));
+    $pdf->SetFont('Arial', '', 7);
+    foreach ($pepinos as $p)
+    {
+      $pdf->SetX(10);
+      $pdf->Row(array(
+        $p[0],
+        $p[1],
+      ), false);
+    }
+
+    $pdf->SetXY(10, $pdf->GetY());
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "BERENJENA", 1, 0, 'C', 1);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->Cell(35, 6, "16s", 1, 0, 'L', 1);
+
+    $pdf->SetX(45);
+    $pdf->Cell(35, 6, "24s", 1, 0, 'L', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 6);
+    $pdf->Cell(35, 6, "18s", 1, 0, 'L', 1);
+
+    $pdf->SetX(45);
+    $pdf->Cell(35, 6, "32s", 1, 0, 'L', 1);
+
+    $pdf->SetXY(80, $pdf->GetY() - 6);
+    $pdf->Cell(25, 12, "Jabas", 1, 0, 'C', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 12);
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "MELON", 1, 0, 'C', 1);
+
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->Cell(60, 6, "Cantaloupe", 1, 0, 'L', 1);
+
+    $pdf->SetX(70);
+    $pdf->Cell(35, 6, "Honey Dew", 1, 0, 'L', 1);
+
+    $melones = array(
+      array('18s', '9s', '8s'),
+      array('23s', '12s', '9s'),
+      array('27s', '15s', '10s'),
+      array('36s', '18s', ''),
+      array('45s', '23s', '8s'),
+      array('56s', '30s', '9s'),
+      array('64s', '36s', '10s'),
+      array('72s', '42s', ''),
+      array('JABAS', 'CTNS.', 'TOTAL'),
+    );
+
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(32, 28, 35));
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetY($pdf->GetY() + 6);
+    foreach ($melones as $m)
+    {
+      $pdf->SetX(10);
+      $pdf->Row(array(
+        $m[0],
+        $m[1],
+        $m[2],
+      ), false);
+    }
+
+    // LADO DERECHO
+
+    $pdf->SetXY(110, 45);
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "CHILES", 1, 0, 'C', 1);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->Cell(60, 6, "Bells", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(60, 6, "X-Large", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(60, 6, "Large", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(60, 6, "Md.", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(60, 6, "Sm.", 1, 0, 'L', 1);
+
+    $pdf->SetXY(170, $pdf->GetY() - 24);
+    $pdf->Cell(35, 30, "TOTAL JABAS", 1, 0, 'C', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 30);
+    $pdf->Cell(95, 6, "TOTAL:", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(95, 6, "Anaheim", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(95, 6, "Caribe", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(95, 6, "Fresno", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(95, 6, "Jalapeño", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->Cell(95, 6, "Pimiento", 1, 0, 'L', 1);
+
+    $pdf->SetXY(110, $pdf->GetY() + 6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(25, 25, 25, 20));
+    $pdf->Row(array('', 'Jabas', 'Cajas', 'Canastos'), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Ejote K/L', '', '', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Ejote Val.', '', '', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Ejote Bush', '', '', ''), false);
+
+    $pdf->SetXY(110, $pdf->GetY());
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "CALABAZAS", 1, 0, 'C', 1);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(25, 15, 15, 15));
+    $pdf->Row(array('', 'X-Fancy', 'Fancy', 'Large'), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Italiana', '', '', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Summer', '', '', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Amarilla', '', '', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Calabaza China', '', '', ''), false);
+
+    $pdf->SetXY(180, $pdf->GetY() - 27);
+    $pdf->Cell(25, 27, "TOTAL CAJAS", 1, 0, 'C', 1);
+
+    // Obtenemos las clasificaciones de los pallets que se seleccionaron
+    // para el cliente.
+
+    $idEmbarque = $this->db
+      ->select('id_embarque')
+      ->from('facturacion_doc_embarque')
+      ->where('id_documento', 2)
+      ->where('id_factura', $idFactura)
+      ->get()->row()->id_embarque;
+
+    $clasificaciones = $this->getEmbarqueClasifi($idEmbarque);
+
+    $pdf->SetXY(110, $pdf->GetY() + 27);
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "LIMONES", 1, 0, 'C', 1);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(32, 32, 31));
+    $pdf->Row(array('', 'Cajas', ''), false);
+
+    foreach ($clasificaciones['clasificaciones'] as $clas)
+    {
+      $pdf->SetX(110);
+      $pdf->Row(array($clas->clasificacion, $clas->cajas, ''), false);
+    }
+
+    $pdf->SetXY(110, $pdf->GetY());
+    $pdf->SetFillColor(184, 78, 78);
+    $pdf->SetTextColor(255, 255, 255);
+    $pdf->SetFont('Arial', 'B', 9);
+    $pdf->Cell(95, 4, "UVAS", 1, 0, 'C', 1);
+
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->SetXY(110, $pdf->GetY() + 4);
+    $pdf->SetAligns(array('C', 'C'));
+    $pdf->SetWidths(array(40, 55));
+    $pdf->Row(array('', 'Cajas'), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Perlette', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Flame', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Cardinal', ''), false);
+
+    $pdf->SetX(110);
+    $pdf->Row(array('Thompson', ''), false);
+
+    $pdf->SetFont('Arial', '', 10);
+
+    $pdf->SetXY(10, 223);
+    $pdf->Cell(95, 4, "Datos Adicionales al Transportista", 0, 0, 'C', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->Cell(95, 4, "Nombre o Razon Social: " . $jsonData->linea_transporte , 0, 0, 'L', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->MultiCell(95, 4, "Domicilio Fiscal: " . $jsonData->domicilio_fiscal , 0, 'L', 0);
+
+    $pdf->SetXY(10, $pdf->GetY());
+    $pdf->Cell(95, 4, "RFC: " . $jsonData->rfc , 0, 0, 'L', 1);
+
+    $pdf->SetXY(10, $pdf->GetY() + 4);
+    $pdf->Cell(95, 4, "CURP: " . $jsonData->curp , 0, 0, 'L', 1);
+
+    $pdf->SetXY(115, 227);
+    $pdf->Image(APPPATH.'images/logo_mayer_martinez_pie.jpg');
+
+    return array('pdf' => $pdf, 'texto' => 'MANIFIESTO DE CAMION.pdf');
+  }
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

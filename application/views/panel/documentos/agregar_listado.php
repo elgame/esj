@@ -9,6 +9,7 @@
       $params['dataPallets']   = $pallets; // Pallets disponibles
       $params['dataDocumento'] = array();
       $params['finalizados']   = $is_finalizados;
+      $params['empresa_default'] = $empresa_default;
 
       if ($documentos)
       {
@@ -34,8 +35,17 @@
             $params['idDocumento']   = $doc->id_documento;
           }
 
-          if ($doc->nombre === 'ACOMODO DEL EMBARQUE')
+          if ($doc->nombre === 'ACOMODO DEL EMBARQUE' || $doc->nombre === 'MANIFIESTO DEL CAMION')
             $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, $doc->id_documento);
+
+          // Si el documento es el MANIFIESTO DEL CAMION entonces obtiene los datos de embarque y del manifiesto chofer.
+          if ($doc->nombre === 'MANIFIESTO DEL CAMION')
+          {
+            $params['dataManChofer'] = $this->documentos_model->getJsonDataDocus($factura['info']->id_factura, 1);
+            $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, 2);
+
+            $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
+          }
 
           $priv = str_replace('panel/', '', $doc->url_form).'/';
           if ($this->usuarios_model->tienePrivilegioDe('', $priv, false))

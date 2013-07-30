@@ -23,6 +23,8 @@
     // Acomodo de Embarque
     doc_acoemb.init();
 
+    // CERTIFICADO DE TLC
+    doc_tlc.init();
 
     dataTable();
   });
@@ -495,6 +497,85 @@
 
   })(window.jQuery, window);
 
+  var doc_tlc = (function ($) {
 
+    function init () {
+      autoCompleteEmpresas();
+      autoCompleteCliente();
+    }
+
+    function autoCompleteEmpresas () {
+      $("#dempresa").autocomplete({
+        source: base_url+'panel/empresas/ajax_get_empresas/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+
+          var domicilio;
+
+          $("#dempresa_id").val(ui.item.id);
+          $("#dempresa").css("background-color", "#B0FFB0");
+          $("#dregistroFiscal").val(ui.item.item.rfc);
+
+          domicilio = buildDomicilio(ui.item.item);
+          $('#ddomicilio').val(domicilio);
+        }
+      }).on("keydown", function(event){
+          if(event.which == 8 || event == 46){
+            $("#dempresa_id").val("");
+            $("#dempresa").css("background-color", "#FFD9B3");
+            $("#dregistroFiscal").val("");
+            $('#ddomicilio').val("");
+          }
+      });
+    }
+
+    function autoCompleteCliente () {
+      $("#dcliente_tlc").autocomplete({
+        source: base_url+'panel/clientes/ajax_get_proveedores/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+
+          var domicilio;
+
+          $("#dcliente_id_tlc").val(ui.item.id);
+          $("#dcliente_tlc").css("background-color", "#B0FFB0");
+          $("#dcliente_no_reg_fiscal_tlc").val(ui.item.item.rfc);
+
+          domicilio = buildDomicilio(ui.item.item);
+          $('#dcliente_domicilio').val(domicilio);
+        }
+      }).on("keydown", function(event){
+          if(event.which == 8 || event == 46){
+            $("#dcliente_id_tlc").val("");
+            $("#dcliente_tlc").css("background-color", "#FFD9B3");
+            $("#dcliente_no_reg_fiscal_tlc").val("");
+            $('#dcliente_domicilio').val("");
+          }
+      });
+    }
+
+    return {
+      'init': init
+    };
+
+  })(jQuery);
+
+
+  function buildDomicilio (data) {
+    var domicilio = [];
+
+    if (data.hasOwnProperty('calle') && data.calle !== '') domicilio.push(data.calle);
+    if (data.hasOwnProperty('no_exterior') && data.no_exterior !== '') domicilio.push(data.no_exterior);
+    if (data.hasOwnProperty('no_interior') && data.no_interior !== '') domicilio.push(data.no_interior);
+    if (data.hasOwnProperty('colonia') && data.colonia !== '') domicilio.push(data.colonia);
+    if (data.hasOwnProperty('localidad') && data.localidad !== '') domicilio.push(data.localidad);
+    if (data.hasOwnProperty('municipio') && data.municipio !== '') domicilio.push(data.municipio);
+    if (data.hasOwnProperty('estado') && data.estado !== '') domicilio.push(data.estado);
+    if (data.hasOwnProperty('pais') && data.pais !== '') domicilio.push(data.pais);
+
+    return domicilio.join(' ', domicilio);
+  }
 
 });

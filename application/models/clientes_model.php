@@ -175,7 +175,7 @@ class clientes_model extends CI_Model {
 		$id_cliente = $id_cliente? $id_cliente: $_GET['id'];
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito" )
+														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito, pais" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();
