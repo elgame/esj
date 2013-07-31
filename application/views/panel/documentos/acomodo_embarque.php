@@ -11,7 +11,7 @@
       <div class="control-group">
         <label class="control-label" for="pctrl_embarque">Ctrl. Embarque</label>
         <div class="controls">
-          <input type="text" name="pctrl_embarque" class="span12" id="pctrl_embarque" value="<?php echo set_value('pctrl_embarque', isset($dataEmbarque['info'][0]->ctrl_embarque) ? $dataEmbarque['info'][0]->ctrl_embarque : $dataFactura['info']->id_factura); ?>">
+          <input type="text" name="pctrl_embarque" class="span12" id="pctrl_embarque" value="<?php echo set_value('pctrl_embarque', isset($dataEmbarque['info'][0]->ctrl_embarque) ? $dataEmbarque['info'][0]->ctrl_embarque : $dataFactura['info']->id_factura); ?>" autofocus>
         </div>
       </div><!--/control-group -->
     </div>

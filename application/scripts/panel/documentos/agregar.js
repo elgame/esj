@@ -8,9 +8,6 @@
     config();
 
     $('#formManifiestoChofer').keyJump();
-    // $('#formEmbarque').keyJump();
-    // $('#formTlc').keyJump();
-    // $('#formManifiestoCamion').keyJump();
 
     autocompleteLineasT();
     autocompleteLineasTLive();
@@ -45,6 +42,31 @@
     // Tooltip para los tabs de listado de documentos.
     $('a#docsTab').tooltip({
       'placement': 'right'
+    });
+
+    $('ul#nav-tabs').on('click', 'li', function(event) {
+      event.preventDefault();
+
+      var $this = $(this),
+          $a = $this.find('a');
+
+      if ($this.attr('data-doc') === '2') {
+        setTimeout(function () {
+          $('#formEmbarque').keyJump();
+        }, 500);
+      }
+
+      if ($this.attr('data-doc') === '7') {
+        setTimeout(function () {
+          $('#formTlc').keyJump();
+        }, 500);
+      }
+
+      if ($this.attr('data-doc') === '8') {
+        setTimeout(function () {
+          $('#formManifiestoCamion').keyJump();
+        }, 500);
+      }
     });
   };
 
