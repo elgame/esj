@@ -1,8 +1,8 @@
 Notas de Credito:
-      ☐ En el listado de facturas poner la opcion "nota de credito".
-      ☐ tipo comprobante es egreso.
-      ☐ cargar las series y folios tipo nota de credito
-      ☐ cargar la informacion de la factura y seria editable: "series y folio", "forma de pago" a "plazo credito".
+      ✔ En el listado de facturas poner la opcion "nota de credito". @done (13-07-30 21:06)
+      ✔ tipo comprobante es egreso. @done (13-07-30 21:06)
+      ✔ cargar las series y folios tipo nota de credito @done (13-07-30 21:06)
+      ✔ cargar la informacion de la factura y seria editable: "series y folio", "forma de pago" a "plazo credito". @done (13-07-30 21:06)
 
 DOCUMENTOS:
 
@@ -106,9 +106,10 @@ FACTURACION:
                ☐ Si el timbrado queda pendiente, entonces en el listado de facturas colocar un boton para que se pueda estar comprobando si el timbrado se ha realizado y si se realiza correctamente entonces realizar el proceso anterior.
                ☐ Si es error por estructura de xml, eliminar de la bdd el registro de la factura agregada, el archivo xml, y mandar un mensaje que verifique los datos fiscales de la empresa y/o cliente.
 
-      ☐ En el listado de series y folios que cargue todas.
-      ☐ tipo de comprobante para facturas es ingreso.
-      ☐ cargar las series y folio que no son nota de credito.
+      ✔ En el listado de series y folios que cargue todas. @done (13-07-30 17:02)
+      ✔ tipo de comprobante para facturas es ingreso. @done (13-07-30 17:36)
+      ✔ cargar las series y folio que no son nota de credito. @done (13-07-30 17:36)
+      ✔ Si no tiene folio entonces no agregarlo a la cadena original y xml. @done (13-07-30 17:41)
 
       ✔ Al agregar la factura que se inserten los documentos del cliente seleccionado. @done (13-07-22 23:07)
 

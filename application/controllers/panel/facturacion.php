@@ -14,8 +14,8 @@ class facturacion extends MY_Controller {
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
+    'facturacion/ajax_get_clientes/',
   );
-
 
   public function _remap($method)
   {
@@ -772,7 +772,7 @@ class facturacion extends MY_Controller {
     if(isset($_GET['serie']) && isset($_GET['ide']))
     {
       $this->load->model('facturacion_model');
-      $res = $this->facturacion_model->getFolioSerie($_GET['serie'], $_GET['ide']);
+      $res = $this->facturacion_model->getFolioSerie($_GET['serie'], $_GET['ide'], "es_nota_credito = 'f'");
 
       $param =  $this->showMsgs(2, $res[1]);
       $param['data'] = $res[0];
@@ -828,7 +828,10 @@ class facturacion extends MY_Controller {
                 'rules' => ''),
             array('field' => 'fleyenda2',
                 'label' => 'Leyenda 2',
-                'rules' => '')
+                'rules' => ''),
+            array('field' => 'fnota_credito',
+                'label' => 'Nota de Credito',
+                'rules' => ''),
         );
 
     if($tipo=='add')
@@ -915,6 +918,16 @@ class facturacion extends MY_Controller {
     echo json_encode($params);
   }
 
+  /**
+    * Obtiene listado de los clientes que tienen RFC por ajax.
+    */
+  public function ajax_get_clientes(){
+    $this->load->model('clientes_model');
+    $params = $this->clientes_model->getClientesAjax(" AND rfc != ''");
+
+    echo json_encode($params);
+  }
+
   /*
    |-------------------------------------------------------------------------
    |  REPORTES
@@ -935,7 +948,6 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/facturacion/rvc',$params);
     $this->load->view('panel/footer',$params);
   }
-
 
   public function rvc_pdf()
   {

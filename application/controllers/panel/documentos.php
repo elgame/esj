@@ -126,10 +126,6 @@ class documentos extends MY_Controller {
       else
         $params['finalizados'] = true;
 
-      // echo "<pre>";
-      //   var_dump($params['factura']);
-      // echo "</pre>";exit;
-
       // Obtiene la vista de los documentos del cliente.
       $params['documentos'] = $this->generaDocsView($params['factura']['info']->id_factura);
 

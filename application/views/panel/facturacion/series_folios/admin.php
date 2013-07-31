@@ -36,7 +36,7 @@
             </form>
 
             <?php
-            echo $this->usuarios_model->getLinkPrivSm('panel/facturacion/agregar_serie_folio/', array(
+            echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar_serie_folio/', array(
                     'params'   => '',
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )

@@ -203,17 +203,22 @@ class clientes_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
 	 */
-	public function getClientesAjax(){
+	public function getClientesAjax($sqlX = null){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
-		$res = $this->db->query("
-				SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito
-				FROM clientes
-				WHERE status = 'ac' ".$sql."
-				ORDER BY nombre_fiscal ASC
-				LIMIT 20");
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
+
+		$res = $this->db->query(
+      "SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito
+  			FROM clientes
+  			WHERE status = 'ac'
+        {$sql}
+  			ORDER BY nombre_fiscal ASC
+  			LIMIT 20"
+    );
 
 		$response = array();
 		if($res->num_rows() > 0){

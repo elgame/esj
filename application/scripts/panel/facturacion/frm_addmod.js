@@ -3,7 +3,7 @@ $(function(){
   $('#form').keyJump();
 
   $("#dcliente").autocomplete({
-      source: base_url+'panel/clientes/ajax_get_proveedores/',
+      source: base_url+'panel/facturacion/ajax_get_clientes/',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -24,7 +24,7 @@ $(function(){
   });
 
   $("#dempresa").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_empresas_fac',
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -103,7 +103,7 @@ $(function(){
   //     return e.keyCode != 13;
   // });
 
-  // Asigna evento enter cuando dan click al input de importe.
+  // Asigna evento enter cuando dan enter al input de importe.
   $('#table_prod').on('keypress', 'input#prod_importe', function(event) {
     event.preventDefault();
 
@@ -311,8 +311,6 @@ function loadSerieFolio (ide) {
  */
 function createInfoCliente(item){
   var info = '', info2 = '';
-
-  console.log(item);
 
   info += item.calle!=''? item.calle: '';
   info += item.no_exterior!=''? ' #'+item.no_exterior: '';

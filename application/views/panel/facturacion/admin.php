@@ -76,7 +76,14 @@
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
                   <td><?php echo $fact->fecha; ?></td>
-                  <td><span class="label"><?php echo $fact->serie.' - '.$fact->folio; ?></span></td>
+                  <td>
+                    <span class="label"><?php echo $fact->serie.' - '.$fact->folio; ?></span>
+
+                    <?php if ($fact->id_nc !== null){ ?>
+                      <br><span class="label label-warning">Nota de Crédito</span>
+                    <?php } ?>
+
+                  </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
@@ -119,6 +126,14 @@
                           'btn_type' => 'btn-info',
                           'attrs' => array('target' => "_blank"))
                       );
+
+                      if ($fact->id_nc === null) {
+                        echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
+                            'params'   => 'id='.$fact->id_factura,
+                            'btn_type' => 'btn-info',
+                            'attrs' => array('target' => "_blank"))
+                        );
+                      }
                     ?>
                   </td>
                 </tr>

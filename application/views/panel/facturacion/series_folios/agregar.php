@@ -35,6 +35,13 @@
             </div>
 
             <div class="control-group">
+              <label for="fnota_credito" class="control-label">Nota de Credito</label>
+              <div class="controls">
+                <input type="checkbox" name="fnota_credito" id="fnota_credito" value="1" <?php echo set_checkbox('fnota_credito', '1') ?>>
+              </div>
+            </div>
+
+            <div class="control-group">
               <label for="fserie" class="control-label">Serie</label>
               <div class="controls">
                 <input type="text" name="fserie" id="fserie" value="<?php echo set_value('fserie') ?>" size="30" maxlength="30" placeholder="Serie">
