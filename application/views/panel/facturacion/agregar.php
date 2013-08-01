@@ -119,7 +119,7 @@
                 <div class="controls">
                   <select name="dtipo_comprobante" class="span9" id="dtipo_comprobante">
                     <option value="ingreso" <?php echo set_select('dtipo_comprobante', 'ingreso'); ?>>Ingreso</option>
-                    <option value="egreso" <?php echo set_select('dtipo_comprobante', 'egreso'); ?>>Egreso</option>
+                    <!-- <option value="egreso" <?php //echo set_select('dtipo_comprobante', 'egreso'); ?>>Egreso</option> -->
                   </select>
                 </div>
               </div>

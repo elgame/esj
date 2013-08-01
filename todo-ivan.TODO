@@ -1,29 +1,117 @@
+Notas de Credito:
+      ✔ En el listado de facturas poner la opcion "nota de credito". @done (13-07-30 21:06)
+      ✔ tipo comprobante es egreso. @done (13-07-30 21:06)
+      ✔ cargar las series y folios tipo nota de credito @done (13-07-30 21:06)
+      ✔ cargar la informacion de la factura y seria editable: "series y folio", "forma de pago" a "plazo credito". @done (13-07-30 21:06)
+
 DOCUMENTOS:
 
-    ☐ Manifiesto de chofer
-          ☐ El importe es de la factura guardada
-          ☐ Autocomplete de lineas
-          ☐ Al poner el ticket de pesada cargar los datos del chofer y del camion
-          ☐ la fecha del dia
+      TABLA RASTRIA_DOCUMENTOS
+      "1";"MANIFIESTO DEL CHOFER";"panel/documentos/manifiesto_chofer";"panel/documentos/imprime_manifiesto_chofer"
+      "2";"ACOMODO DEL EMBARQUE";"panel/documentos/acomodo_embarque";"panel/documentos/imprime_embarque"
+      "3";"CHOFER COPIA DEL IFE";"panel/documentos/chofer_copia_ife";""
+      "4";"CHOFER COPIA LICENCIA";"panel/documentos/chofer_copia_licencia";""
+      "5";"CHOFER FOTO FIRMA MANIFIESTO";"panel/documentos/chofer_foto_firma_manifiesto";""
+      "6";"SEGURO CAMION";"panel/documentos/seguro_camion";""
+      "7";"CERTIFICADO DE TLC";"panel/documentos/certificado_tlc";"panel/documentos/imprime_certificado_tlc"
+      "8";"MANIFIESTO DEL CAMION";"panel/documentos/manifiesto_camion";"panel/documentos/imprime_manifiesto_camion"
 
-     ☐ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload.
-     ☐ Embarque.
-          ☐ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json.
-          ☐ utilizar el drag&drop
-          ☐ Que aparezca el listado de pallets que esten disponibles. Hacer la vista.
-          ☐ En vez de calibre en la tabla que aparezcan las clasificaciones del pallet seleccionado.
-          ☐ Desasignar pallets, removerlos por si se equivocaron.
-          ☐ Que pueda haber descripciones si no seleccinan(arrastran) un pallets.
-          ☐ seleccionar la fecha de carga y empaque.
-          ☐ El campo ctrl de embarque que sea el Id del embarque.
-          ☐ Que cargue el destino(ciudad) y nombre del cliente que se asigno en la factura.
-          ☐ temperatura aqgregar el campo en la tabla
+      PRIVILEGIOS:
+       "Doc Manifiesto Chofer";70;FALSE;"documentos/manifiesto_chofer/";"copy";FALSE
+        "Doc Chofer Foto Firma Manifiesto";70;FALSE;"documentos/chofer_foto_firma_manifiesto/";"copy";FALSE
+        "Doc Acomodo Embarque";70;FALSE;"documentos/acomodo_embarque/";"copy";FALSE
+        "Finalizar Documentos";70;FALSE;"documentos/finalizar_docs/";"copy";FALSE
+        "Doc Chofer Copia del IFE";70;FALSE;"documentos/chofer_copia_ife/";"copy";FALSE
+        "Doc Chofer Copia Licencia";70;FALSE;"documentos/chofer_copia_licencia/";"copy";FALSE
+        "Doc Seguro Camion";70;FALSE;"documentos/seguro_camion/";"copy";FALSE
+        "Doc Certificado de TLC";70;FALSE;"documentos/certificado_tlc/";"copy";FALSE
+        "Doc Manifiesto Camion";70;FALSE;"documentos/manifiesto_camion/";"copy";FALSE
 
+        ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
+          SQL:
+            TABLA facturacion -> docs_finalizados boolean NOT NULL DEFAULT false
 
+        ✔ Que al entrar el menu principal se oculte. @done (13-07-26 16:24)
+        ✔ Que el menu de documento no lleve el texto solo el icono y al pasar el mouse se muestre el tooltop con el nombre del documento. @done (13-07-26 16:24)
+        ✔ Directorio donde guardar los documentos. @done (13-07-24 12:10)
+              documentos/{$cliente}/año/mes/folio_{$folio}/
 
+    ✔ Manifiesto de chofer @done (13-07-24 17:52)
+          ✔ El importe es de la factura guardada @done (13-07-23 23:47)
+          ✔ Autocomplete de lineas @done (13-07-23 23:47)
+          ✔ Al poner el ticket de pesada cargar los datos del chofer y del camion @done (13-07-23 23:47)
+          ✔ la fecha del dia poner un time. @done (13-07-27 11:18)
+          ✔ al cargar el chofer verificar si ya tiene la ife y licencia, si la tiene copearlas a un directorio @done (13-07-24 12:10)
+          ✔ si no tiene licencia y/o ife poner un msg, si las tiene y vuelve a cargar otras las reemplazaria en el directorio donde se guardan. @done (13-07-24 14:04)
+
+     ✔ Foto. usar un input oculto para enviar el base64. usar las funciones que estan en Upload. @done (13-07-24 17:52)
+
+     ✔ Embarque. @done (13-07-29 10:06)
+          ✔ Que aparezca el listado de pallets que esten disponibles. Hacer la vista. @done (13-07-26 16:45)
+                (Cambio: que no se repita las clasificaciones de los pallets)
+                SQL:
+                     -- View: embarque_pallets_libres
+
+                      -- DROP VIEW embarque_pallets_libres;
+
+                      CREATE OR REPLACE VIEW embarque_pallets_libres AS
+                       SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
+                         FROM rastria_pallets rp
+                         LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
+                         JOIN ( SELECT rpr.id_pallet, cl.nombre
+                            FROM rastria_pallets_rendimiento rpr
+                         JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+                        GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+                        ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
+                        WHERE fdp.id_embarque IS NULL
+                        GROUP BY rp.id_pallet, rp.no_cajas
+                        ORDER BY rp.id_pallet DESC;
+
+                      ALTER TABLE embarque_pallets_libres
+                        OWNER TO programa;
+                      COMMENT ON VIEW embarque_pallets_libres
+                        IS 'Muestra los pallets que no han sido colocados en embarque.';
+
+          ✔ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json. @done (13-07-26 12:33)
+          ✔ utilizar el drag&drop @done (13-07-26 12:33)
+          ✔ En vez de "calibre" en la tabla que aparezcan las clasificaciones del pallet seleccionado. @done (13-07-26 12:33)
+          ✔ Desasignar pallets, removerlos por si se equivocaron. @done (13-07-27 11:18)
+          ✔ Que pueda haber descripciones si no seleccinan(arrastran) un pallets. @done (13-07-26 12:34)
+          ✔ seleccionar la fecha de carga y empaque. @done (13-07-26 12:34)
+          ✔ El campo ctrl de embarque que sea el Id del embarque. @done (13-07-26 12:34)
+          ✔ Que cargue el destino(ciudad) y nombre del cliente que se asigno en la factura. @done (13-07-26 12:34)
+          ✔ temperatura aqgregar el campo en la tabla @done (13-07-26 12:33)
+               SQL:
+                 TABLA facturacion_doc_embarque_pallets -> temperatura character varying(10),
+
+          ✔ En el listado de pallets libres poner un filtrado por clasificacion y por folio del pallet. @done (13-07-29 08:21)
+
+     ✔ copia ife chofer - subir @done (13-07-30 10:12)
+     ✔ copia licencia chofer - subir @done (13-07-30 10:12)
+     ✔ seguro camion - subir @done (13-07-30 10:12)
+
+     ✔ TLC @done (13-07-30 10:12)
+           ✔ autocomplete de la empresa que cargue direccion @done (13-07-30 10:13)
+           ✔ autocomplete del cliente @done (13-07-30 10:13)
+           ✔ fechas @done (13-07-30 10:13)
+
+     ✔ Manifiesto de Camion @done (13-07-30 10:13)
 FACTURACION:
-      ✔ Al agregar la factura que se inserten los documentos del cliente seleccionado. @done (13-07-22 23:07)
+       ☐ Envio de un email del pdf de la factura y de los documentos del cliente (si tiene).
 
+       ☐ TIMBRADO
+               ☐ Agregar los campos xml, status_timbrado y uuid en la tabla "facturacion".
+               ☐ Al guardar la factura que se haga el intento de timbrado del xml usando los webservices.
+               ☐ Si el timbrado se realiza correctamente entonces se tiene que reemplazar el archivo XML por el que regresa el webservice y tambien guardarlo en el campo "xml" de la tabla "facturacion", tambien guardar el "uuid". Cambiar el status de timbrado de la factura.
+               ☐ Si el timbrado queda pendiente, entonces en el listado de facturas colocar un boton para que se pueda estar comprobando si el timbrado se ha realizado y si se realiza correctamente entonces realizar el proceso anterior.
+               ☐ Si es error por estructura de xml, eliminar de la bdd el registro de la factura agregada, el archivo xml, y mandar un mensaje que verifique los datos fiscales de la empresa y/o cliente.
+
+      ✔ En el listado de series y folios que cargue todas. @done (13-07-30 17:02)
+      ✔ tipo de comprobante para facturas es ingreso. @done (13-07-30 17:36)
+      ✔ cargar las series y folio que no son nota de credito. @done (13-07-30 17:36)
+      ✔ Si no tiene folio entonces no agregarlo a la cadena original y xml. @done (13-07-30 17:41)
+
+      ✔ Al agregar la factura que se inserten los documentos del cliente seleccionado. @done (13-07-22 23:07)
 
      ✔ Certificado en el XML quitar el begin y end. @done (13-07-22 20:19)
 

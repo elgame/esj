@@ -47,7 +47,7 @@ class UploadFiles{
 		if(isset($_FILES[$file])){
 			if($_FILES[$file]['name']!=''){
 				$config['upload_path'] = $path;
-				
+
 				if ($_FILES[$file]["error"] == UPLOAD_ERR_OK) {
 					$tmp_name = $_FILES[$file]["tmp_name"];
 	        move_uploaded_file($tmp_name, $config['upload_path'].$_FILES[$file]["name"]);
@@ -119,19 +119,20 @@ class UploadFiles{
 		return $base64;
 	}
 
-	public static function base64SaveImg($base64, $name_file, $type='jpg'){
+	public static function base64SaveImg($base64, $name_file, $type='jpg', $path=null){
 		$base64 = str_replace('data:image/' . $type . ';base64,', '', $base64);
 		$img = imagecreatefromstring(base64_decode($base64));
 		if($img != false)
 		{
-			$path = self::validaDir(date("Y"), APPPATH.'/bascula/');
-			$path = self::validaDir(date("F"), $path);
+      if ($path === null) {
+  			$path = self::validaDir(date("Y"), APPPATH.'/bascula/');
+  			$path = self::validaDir(date("F"), $path);
+      }
+
 			imagejpeg($img, $path.$name_file.'.'.$type);
 			imagedestroy($img);
 		}
 	}
-
-
 
 	/**
 	 * Valida si el directorio espesificado existe o si no lo crea.

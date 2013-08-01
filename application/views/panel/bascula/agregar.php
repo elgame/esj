@@ -444,7 +444,7 @@
           <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgsalida"><i class="icon-camera"></i></button>
         </div>
         <div class="span12">
-          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+          <img src="<?php //echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
         </div>
         <div class="span12" id="snapshot"></div>
       </div>
@@ -457,7 +457,7 @@
           <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgentrada"><i class="icon-camera"></i></button>
         </div>
         <div class="span12">
-          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+          <img src="<?php //echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
         </div>
         <div class="span12" id="snapshot"></div>
       </div>
@@ -470,7 +470,7 @@
           <button class="btn pull-right" type="button" id="btnCamera" data-name="pimgentrada2"><i class="icon-camera"></i></button>
         </div>
         <div class="span12">
-          <img src="<?php echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
+          <img src="<?php //echo $this->config->item('base_url_cam_salida_stream') ?>" width="320">
         </div>
         <div class="span12" id="snapshot"></div>
       </div>

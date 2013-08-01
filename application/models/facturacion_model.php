@@ -48,7 +48,7 @@ class facturacion_model extends privilegios_model{
 
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
-                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total
+                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -121,7 +121,7 @@ class facturacion_model extends privilegios_model{
    * @param string $serie
    * @param string $empresa
 	 */
-	public function getFolioSerie($serie, $empresa)
+	public function getFolioSerie($serie, $empresa, $sqlX = null)
   {
 		$res = $this->db->select('folio')
       ->from('facturacion')
@@ -130,6 +130,9 @@ class facturacion_model extends privilegios_model{
       ->limit(1)->get()->row();
 
 		$folio = (isset($res->folio)? $res->folio: 0)+1;
+
+    if ( ! is_null($sqlX))
+      $this->db->where($sqlX);
 
 		$res = $this->db->select('*')
       ->from('facturacion_series_folios')
@@ -153,16 +156,23 @@ class facturacion_model extends privilegios_model{
 	}
 
   /**
-   * Obtiene el folio de acuerdo a la serie seleccionada
+   * Obtiene el folio de acuerdo a la serie seleccionada.
    *
    * @param string $ide
    */
-  public function getSeriesEmpresa($id_empresa)
+  public function getSeriesEmpresa($id_empresa, $sqlX = null)
   {
-    $query = $this->db->select('id_serie_folio, id_empresa, serie, leyenda')->
-                      from('facturacion_series_folios')->
-                      where("id_empresa = ".$id_empresa."")->
-                      order_by('serie', 'ASC')->get();
+    if ( is_null($sqlX))
+      $this->db->where("es_nota_credito = 'f' ");
+    else
+      $this->db->where($sqlX);
+
+    $query = $this->db
+      ->select('id_serie_folio, id_empresa, serie, leyenda')
+      ->from('facturacion_series_folios')
+      ->where("id_empresa = ".$id_empresa."")
+      ->order_by('serie', 'ASC')
+      ->get();
 
     $res = array();
     if($query->num_rows() > 0)
@@ -276,19 +286,33 @@ class facturacion_model extends privilegios_model{
       'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'retencion_iva'       => $this->input->post('total_retiva'),
     );
+
+    // Si el tipo de comprobante es "egreso" o una nota de credito.
+    if ($_POST['dtipo_comprobante'] === 'egreso')
+      $datosFactura['id_nc'] = $_GET['id'];
+
     // Inserta los datos de la factura y obtiene el Id.
     $this->db->insert('facturacion', $datosFactura);
     $idFactura = $this->db->insert_id('facturacion', 'id_factura');
 
-    // Obtiene los documentos que el cliente tiene asignados.
-    $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
-
-    // Inserta los documentos del cliente con un status false.
-    if ($docsCliente)
-      $this->db->insert_batch('facturacion_documentos', $docsCliente);
-
     // Obtiene los datos para la cadena original
     $datosCadOrig = $this->datosCadenaOriginal();
+
+    // Si es un ingreso o una factura.
+    if ($_POST['dtipo_comprobante'] === 'ingreso')
+    {
+      // Obtiene los documentos que el cliente tiene asignados.
+      $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
+
+      // Inserta los documentos del cliente con un status false.
+      if ($docsCliente)
+      {
+        $this->db->insert_batch('facturacion_documentos', $docsCliente);
+
+        $this->load->model('documentos_model');
+        $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['folio']);
+      }
+    }
 
     $dataCliente = array(
       'id_factura'  => $idFactura,
@@ -357,7 +381,6 @@ class facturacion_model extends privilegios_model{
     $datosCadOrig['concepto']  = $productosCadOri;
 
     // Asignamos las retenciones a los datos de la cadena original.
-
      $impuestosRetencion = array(
       'impuesto' => 'IVA',
       'importe'  => $this->input->post('total_retiva'),
@@ -403,7 +426,7 @@ class facturacion_model extends privilegios_model{
     // Genera la cadena original y el sello.
     $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
     $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-    
+
     // Obtiene el contentido del certificado.
     $certificado = $this->cfdi->obtenCertificado($this->db
       ->select('cer')
@@ -631,14 +654,14 @@ class facturacion_model extends privilegios_model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		$sql = '';
-		// if($this->input->get('fserie')!='')
-		// 	$this->db->where('serie',$this->input->get('fserie'));
+    if($this->input->get('fserie') != '')
+      $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
 
 		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
 				FROM facturacion_series_folios AS fsf
-					INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
-				WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."' ".$sql."
+				INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
+        {$sql}
 				ORDER BY fsf.serie", $params, true);
 
     $res = $this->db->query($query['query']);
@@ -666,7 +689,7 @@ class facturacion_model extends privilegios_model{
 		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
 
 		$res = $this->db->select('fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
-				fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa')
+				fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, fsf.es_nota_credito, e.nombre_fiscal AS empresa')
 			->from('facturacion_series_folios AS fsf')
 				->join('empresas AS e', 'e.id_empresa = fsf.id_empresa', 'inner')
 			->where('fsf.id_serie_folio', $id_serie_folio)->get()->result();
@@ -697,6 +720,9 @@ class facturacion_model extends privilegios_model{
 
 		if($this->input->post('fleyenda2') !== '')
 			$data['leyenda2'] = $this->input->post('fleyenda2');
+
+    if(isset($_POST['fnota_credito']))
+      $data['es_nota_credito'] = 't';
 
 		$this->db->insert('facturacion_series_folios', $data);
 
@@ -747,6 +773,11 @@ class facturacion_model extends privilegios_model{
 
 		if($this->input->post('fleyenda2')!='')
 			$data['leyenda2'] = $this->input->post('fleyenda2');
+
+    if(isset($_POST['fnota_credito']))
+      $data['es_nota_credito'] = 't';
+    else
+      $data['es_nota_credito'] = 'f';
 
 		$this->db->update('facturacion_series_folios', $data, array('id_serie_folio'=>$id_serie_folio));
 

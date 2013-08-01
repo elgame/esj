@@ -273,7 +273,7 @@ class empresas_model extends CI_Model{
 	public function getEmpresasAjax(){
 		$sql = '';
 		$res = $this->db->query("
-				SELECT id_empresa, nombre_fiscal
+				SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, localidad, municipio, estado, pais
 				FROM empresas
 				WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
 				ORDER BY nombre_fiscal ASC
