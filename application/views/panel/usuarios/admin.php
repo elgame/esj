@@ -85,7 +85,7 @@
 												'btn_type' => 'btn-success')
 										);
 										if ($usuario->status == 't') {
-											if($usuario->id_usuario != $this->session->userdata('id'))
+											if($usuario->id_usuario != $this->session->userdata('id_usuario'))
 												echo $this->usuarios_model->getLinkPrivSm('usuarios/eliminar/', array(
 														'params'   => 'id='.$usuario->id_usuario,
 														'btn_type' => 'btn-danger',

@@ -151,7 +151,7 @@
 										</div> -->
 
 										<div class="control-group">
-											<label class="control-label" for="dkey_path">Llave .PEM:</label>
+											<label class="control-label" for="dkey_path">Llave .KEY:</label>
 											<div class="controls">
 												<input type="file" name="dkey_path" id="dkey_path" class="span12">
 											</div>

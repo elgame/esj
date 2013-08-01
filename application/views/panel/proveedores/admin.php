@@ -103,7 +103,6 @@
 												'btn_type' => 'btn-success')
 										);
 										if ($proveedor->status == 'ac') {
-											if($proveedor->id_proveedor != $this->session->userdata('id'))
 												echo $this->usuarios_model->getLinkPrivSm('proveedores/eliminar/', array(
 														'params'   => 'id='.$proveedor->id_proveedor,
 														'btn_type' => 'btn-danger',

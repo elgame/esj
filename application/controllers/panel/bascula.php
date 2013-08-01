@@ -568,12 +568,12 @@ class bascula extends MY_Controller {
    * Procesa los datos para mostrar el reporte rcr en pdf
    * @return void
    */
-  public function rmc_pdf()
+  public function rmc_pdf2()
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rmc_pdf();
   }
-  public function rmc_pdf2()
+  public function rmc_pdf()
   {
     $this->load->model('bascula_model');
 

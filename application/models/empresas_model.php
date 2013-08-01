@@ -81,6 +81,18 @@ class empresas_model extends CI_Model{
 			return false;
 	}
 
+	public function getDefaultEmpresa(){
+		$params = $this->db->select("id_empresa, nombre_fiscal")
+      ->from("empresas")
+      ->where("predeterminado", "t")
+      ->get()
+      ->row();
+      if (isset($params->id_empresa))
+      	return $params;
+      else
+      	return false;
+	}
+
 	/**
 	 * Agrega la informacion de una sucursal de una empresa, o la info de una empresa
 	 * sin sucursales
@@ -103,23 +115,31 @@ class empresas_model extends CI_Model{
 		$cer_caduca = '';
 		$upload_res = UploadFiles::uploadFile('dcer_org');
 		if($upload_res !== false && $upload_res !== 'ok'){
-			$dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
-			//se genera el archivo cer.pem
-			$certificateCAcerContent = file_get_contents($dcer_org);
-			$certificateCApemContent =  '-----BEGIN CERTIFICATE-----'.PHP_EOL
-			.chunk_split(base64_encode($certificateCAcerContent), 64, PHP_EOL)
-			.'-----END CERTIFICATE-----'.PHP_EOL;
-			$dcer = $dcer_org.'.pem';
-			file_put_contents($dcer, $certificateCApemContent);
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
+			$dcer_org   = $upload_res[0];
+			$dcer       = $upload_res[1];
+			
+			// $dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
+			// //se genera el archivo cer.pem
+			// $certificateCAcerContent = file_get_contents($dcer_org);
+			// $certificateCApemContent =  '-----BEGIN CERTIFICATE-----'.PHP_EOL
+			// .chunk_split(base64_encode($certificateCAcerContent), 64, PHP_EOL)
+			// .'-----END CERTIFICATE-----'.PHP_EOL;
+			// $dcer = $dcer_org.'.pem';
+			// file_put_contents($dcer, $certificateCApemContent);
 			//se obtiene la fecha que caduca el certificado
 			$this->load->library('cfdi');
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$dkey_path = '';
+		$new_pass   = 'aaa';
+		$dkey_path  = '';
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
-			$dkey_path = APPPATH.'CFDI/certificados/'.$upload_res;
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/key.php?newpass={$new_pass}&pass={$this->input->post('dpass')}&file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
+			$dkey_path  = $upload_res[0];
+			$_POST['dpass'] = $new_pass;
+			// $dkey_path = APPPATH.'CFDI/certificados/'.$upload_res;
 		}
 
 		$data = array(
@@ -181,25 +201,25 @@ class empresas_model extends CI_Model{
 				UploadFiles::deleteFile($dcer_org);
 				UploadFiles::deleteFile($dcer);
 			}
-			$dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
-			//se genera el archivo cer.pem
-			$certificateCAcerContent = file_get_contents($dcer_org);
-			$certificateCApemContent =  '-----BEGIN CERTIFICATE-----'.PHP_EOL
-			.chunk_split(base64_encode($certificateCAcerContent), 64, PHP_EOL)
-			.'-----END CERTIFICATE-----'.PHP_EOL;
-			$dcer = $dcer_org.'.pem';
-			file_put_contents($dcer, $certificateCApemContent);
+
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
+			$dcer_org   = $upload_res[0];
+			$dcer       = $upload_res[1];
 			//se obtiene la fecha que caduca el certificado
 			$this->load->library('cfdi');
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
+		$new_pass = 'aaa';
 		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
 			if($dkey_path != '' && strpos($dkey_path, $upload_res) === false)
 				UploadFiles::deleteFile($dkey_path);
-			$dkey_path = APPPATH.'CFDI/certificados/'.$upload_res;
+
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/key.php?newpass={$new_pass}&pass={$this->input->post('dpass')}&file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
+			$dkey_path  = $upload_res[0];
+			$_POST['dpass'] = $new_pass;
 		}
 
 		$data = array(

@@ -159,7 +159,7 @@ class Usuarios_model extends privilegios_model {
 	 */
 	public function get_usuario_info($id_usuario=FALSE, $basic_info=FALSE)
 	{
-		$id_usuario = (isset($_GET['id']))?$_GET['id']:$id_usuario;
+		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
 		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status, 
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
@@ -247,8 +247,8 @@ class Usuarios_model extends privilegios_model {
 	 * Revisa si la sesion del usuario esta activa
 	 */
 	public function checkSession($check_admin=true){
-		if($this->session->userdata('id') && $this->session->userdata('usuario')) {
-			if($this->session->userdata('id')!='' && $this->session->userdata('usuario')!=''){
+		if($this->session->userdata('id_usuario') && $this->session->userdata('usuario')) {
+			if($this->session->userdata('id_usuario')!='' && $this->session->userdata('usuario')!=''){
 				if ($check_admin) {
 					if ($this->session->userdata('tipo') === 'admin')
 						return true;
@@ -273,7 +273,7 @@ class Usuarios_model extends privilegios_model {
 		if ($fun_res != FALSE)
 		{
 			$user_data = array(
-					'id'      => $fun_res[0]->id,
+					'id_usuario'      => $fun_res[0]->id,
 					'usuario' => $fun_res[0]->usuario,
 					'email'   => $fun_res[0]->email,
 					'tipo'    => $fun_res[0]->tipo,

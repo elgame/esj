@@ -42,11 +42,11 @@ class UploadFiles{
 	/**
 	 * Sube un archivo tal cual
 	 */
-	public static function uploadFile($file, $path='CFDI/certificados/'){
+	public static function uploadFile($file, $path='openssl/bin/'){
 		$ci =& get_instance();
 		if(isset($_FILES[$file])){
 			if($_FILES[$file]['name']!=''){
-				$config['upload_path'] = APPPATH.$path;
+				$config['upload_path'] = $path;
 				
 				if ($_FILES[$file]["error"] == UPLOAD_ERR_OK) {
 					$tmp_name = $_FILES[$file]["tmp_name"];

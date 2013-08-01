@@ -177,7 +177,7 @@ class privilegios_model extends CI_Model{
 			->select('p.id, p.nombre, p.url_accion, p.mostrar_menu, p.url_icono')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep', 'p.id = ep.privilegio_id', 'inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id')."' AND ".$sql."")
+			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND ".$sql."")
 			->limit(1)
 		->get();
 		if($res->num_rows() > 0){
@@ -196,7 +196,7 @@ class privilegios_model extends CI_Model{
 
 		$res = $this->db
 			->select("p.id, p.nombre, p.id_padre, p.url_accion, p.url_icono, p.target_blank,
-				(SELECT count(privilegio_id) FROM usuarios_privilegios WHERE usuario_id = '".$this->session->userdata('id')."'
+				(SELECT count(privilegio_id) FROM usuarios_privilegios WHERE usuario_id = '".$this->session->userdata('id_usuario')."'
 					AND privilegio_id = p.id) as tiene_p")
 			->from('privilegios AS p')
 			->where("p.id_padre = '".$id_submenu."'")
@@ -263,7 +263,7 @@ class privilegios_model extends CI_Model{
 			->select('p.id, p.nombre, p.id_padre, p.url_accion, p.url_icono, p.target_blank')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep','p.id = ep.privilegio_id','inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'")
+			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'")
 			->order_by('p.nombre', 'asc')
 		->get();
 		foreach($res->result() as $data){
@@ -271,7 +271,7 @@ class privilegios_model extends CI_Model{
 				->select('Count(p.id) AS num')
 				->from('privilegios AS p')
 					->join('usuarios_privilegios AS ep','p.id = ep.privilegio_id','inner')
-				->where("ep.usuario_id = '".$this->session->userdata('id')."' AND p.id_padre = '".$data->id."' AND mostrar_menu = 't'")
+				->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$data->id."' AND mostrar_menu = 't'")
 			->get();
 			$data1 = $res1->row();
 

@@ -371,7 +371,7 @@ class facturacion_model extends privilegios_model{
     {
       $impuestosTraslados[] = array(
         'Impuesto' => 'IVA',
-        'tasa'     => '0.00',
+        'tasa'     => '0',
         'importe'  => '0',
       );
     }
@@ -381,7 +381,7 @@ class facturacion_model extends privilegios_model{
     {
       $impuestosTraslados[] = array(
         'Impuesto' => 'IVA',
-        'tasa'     => '11.00',
+        'tasa'     => '11',
         'importe'  => $traslado11,
       );
     }
@@ -391,7 +391,7 @@ class facturacion_model extends privilegios_model{
     {
       $impuestosTraslados[] = array(
         'Impuesto' => 'IVA',
-        'tasa'     => '16.00',
+        'tasa'     => '16',
         'importe'  => $traslado16,
       );
     }

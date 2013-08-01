@@ -19,16 +19,17 @@
 		}
 
 		body{
-			font-size: 9pt;
+			font-size: 8pt;
 			margin-left: 3pt;
+			width: 90%;
 		}
 		h2, h3, h4{
-			font-size: 10pt;
+			font-size: 9pt;
 			text-align: center;
 			margin: 0;
 		}
 		h3{
-			font-size: 9pt;
+			font-size: 8pt;
 		}
 		h4{
 			font-size: 8pt;
@@ -47,10 +48,10 @@
 		.br_bottom{ border-bottom: 1px #000 solid; }
 		.br_top{ border-top: 1px #000 solid; }
 
-		.font7{ font-size: 7pt;}
-		.font7_5{ font-size: 7.5pt;}
-		.font8{ font-size: 8pt;}
-		.font9{ font-size: 9pt;}
+		.font7{ font-size: 6pt;}
+		.font7_5{ font-size: 6.5pt;}
+		.font8{ font-size: 7pt;}
+		.font9{ font-size: 8pt;}
 
 		.strong{font-weight: bold;}
 

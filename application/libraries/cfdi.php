@@ -1,10 +1,10 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class cfdi{
-  private $path_certificado_org = '';
-  private $path_certificado     = '';
-  private $path_key             = '';
-  private $pass_key             = 'Piloto01';//CHONITA09
+  public $path_certificado_org = '';
+  public $path_certificado     = '';
+  public $path_key             = '';
+  public $pass_key             = 'Piloto01';//CHONITA09
 
 	public $version = '3.2';
 
@@ -83,6 +83,16 @@ class cfdi{
 		return $sello;
 	}
 
+  public function obtenKey()
+  {
+    $pkeyid = openssl_pkey_get_private(file_get_contents($this->path_key), $this->pass_key);
+    openssl_pkcs12_export(file_get_contents($this->path_certificado), $keystr, $pkeyid, $this->pass_key);
+    var_dump($keystr);
+    openssl_free_key($pkeyid);
+    exit;
+    return $sello;
+  }
+
   /**
    * Lee el contenido del certificado .pem y obtiene el contenido que se encuentra
    * entre los lineas -----BEGIN CERTIFICATE----- y -----END CERTIFICATE-----
@@ -90,18 +100,34 @@ class cfdi{
    * @param  string $path
    * @return string
    */
-  public function obtenCertificado($path)
+  public function obtenCertificado($path, $one_line=true)
   {
     // Lee el contenido del .cer.pem
     $datacer = file_get_contents($path);
     openssl_x509_export($datacer, $content);
 
-    $cerpem = explode('-----BEGIN CERTIFICATE-----', $content);
+    if($one_line){
+      $cerpem = explode('-----BEGIN CERTIFICATE-----', $content);
+      $cerpem = explode('-----END CERTIFICATE-----', $cerpem[1]);
 
-    $cerpem = explode('-----END CERTIFICATE-----', $cerpem[1]);
+      // Retorna la cadena del certificado sin espacios.
+      return str_replace("\n", "", $cerpem[0]);
+    }
+    return $content;
+  }
 
-    // Retorna la cadena del certificado sin espacios.
-    return str_replace("\n", "", $cerpem[0]);
+  /**
+   * Lee el contenido de la llave key.pem y obtiene el contenido
+   *
+   * @param  string $path
+   * @return string
+   */
+  public function obtenLlave($path)
+  {
+    // Lee el contenido del .key.pem
+    $datacer = file_get_contents($path);
+
+    return $datacer;
   }
 
   /**

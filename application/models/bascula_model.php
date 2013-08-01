@@ -770,7 +770,7 @@ class Bascula_model extends CI_Model {
           $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
                          $caja->folio,
                          $caja->cuenta_cpi,
-                         substr($caja->proveedor, 0, 35),
+                         substr($caja->proveedor, 0, 28),
                          String::formatoNumero($caja->promedio, 2, '', false),
                          $caja->cajas,
                          $caja->kilos,
