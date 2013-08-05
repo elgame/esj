@@ -15,6 +15,8 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
+
+    'facturacion/xml/'
   );
 
   public function _remap($method)
@@ -95,6 +97,8 @@ class facturacion extends MY_Controller {
 
       if($respons['passes'])
         redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+      else
+        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }
 
     $params['series'] = $this->facturacion_model->getSeriesFolios(100);
@@ -139,7 +143,7 @@ class facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $this->facturacion_model->pagaFactura();
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=9'));
+      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=7'));
     }
   }
 
@@ -155,9 +159,59 @@ class facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $this->facturacion_model->cancelaFactura();
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=5'));
+      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=4'));
     }
   }
+
+  /**
+   * Descarga el XML de la factura.
+   *
+   * @return void
+   */
+  public function xml()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('facturacion_model');
+      $this->facturacion_model->descargarXML($_GET['id']);
+
+      // redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=4'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | METODOS PARA EL TIMBRADO
+   |------------------------------------------------------------------------
+   */
+
+  /**
+   * Verifique si un timbre pendiente ya ah sido enviado al sat.
+   *
+   * @return void
+   */
+  public function timbre_pending()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('facturacion_model');
+
+      $finalizado = $this->facturacion_model->verificarTimbrePendiente($_GET['id']);
+
+      if ($finalizado)
+        redirect(base_url('panel/facturacion/?msg=101'));
+      else
+        redirect(base_url('panel/facturacion/?msg=102'));
+    }
+    else redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | Texto
+   |------------------------------------------------------------------------
+   */
 
   /**
    * Configura los metodos de agregar y modificar
@@ -712,7 +766,7 @@ class facturacion extends MY_Controller {
       $model_resp = $this->facturacion_model->addSerieFolio();
 
       if($model_resp['passes'])
-        redirect(base_url('panel/facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=6'));
+        redirect(base_url('panel/facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=5'));
     }
 
     if(isset($_GET['msg']{0}))
@@ -743,7 +797,7 @@ class facturacion extends MY_Controller {
         $model_resp = $this->facturacion_model->editSerieFolio($_GET['id']);
 
         if($model_resp['passes'])
-          $params['frm_errors'] = $this->showMsgs(7);
+          $params['frm_errors'] = $this->showMsgs(6);
       }
 
       $params['info_empleado']  = $this->info_empleado['info'];
@@ -1005,32 +1059,48 @@ class facturacion extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La Factura se modifico correctamente.';
-        $icono = 'success';
-        break;
-      case 4:
         $txt = 'La Factura se agrego correctamente.';
         $icono = 'success';
         break;
-      case 5:
+      case 4:
         $txt = 'La Factura se cancelo correctamente.';
         $icono = 'success';
         break;
-      case 6:
+      case 5:
         $txt = 'La Serie y Folio se agregaron correctamente.';
         $icono = 'success';
         break;
-      case 7:
+      case 6:
         $txt = 'La Serie y Folio se modifico correctamente.';
         $icono = 'success';
         break;
-      case 8:
+      case 7:
+        $txt = 'La Factura se pagó correctamente.';
+        $icono = 'success';
+        break;
+       case 97:
+        $txt = 'La Factura se timbro correctamente.';
+        $icono = 'success';
+        break;
+      case 98:
+        $txt = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
+        $icono = 'success';
+        break;
+      case 99:
+        $txt = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
+        $icono = 'error';
+        break;
+      case 100:
         $txt = $msg;
         $icono = 'success';
         break;
-      case 9:
-        $txt = 'La Factura se pagó correctamente.';
+      case 101:
+        $txt = 'El timbrado ya se ha realizado correctamente!';
         $icono = 'success';
+        break;
+      case 102:
+        $txt = 'El timbrado aun esta pendiente.';
+        $icono = 'error';
         break;
     }
 

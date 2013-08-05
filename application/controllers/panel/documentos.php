@@ -114,14 +114,17 @@ class documentos extends MY_Controller {
         $docsCliente = $this->documentos_model->getClienteDocs($_GET['id']);
 
         $total = 0;
-        foreach ($docsCliente as $doc)
+        if ($docsCliente)
         {
-          if ($doc->status === 't')
-            $total++;
-        }
+          foreach ($docsCliente as $doc)
+          {
+            if ($doc->status === 't')
+              $total++;
+          }
 
-        if (count($docsCliente) === $total)
-          $params['finalizar'] = true;
+          if (count($docsCliente) === $total)
+            $params['finalizar'] = true;
+        }
       }
       else
         $params['finalizados'] = true;
@@ -527,9 +530,10 @@ class documentos extends MY_Controller {
     }
 
     return array(
-        'title' => $title,
-        'msg' => $txt,
-        'ico' => $icono);
+      'title' => $title,
+      'msg' => $txt,
+      'ico' => $icono
+    );
   }
 
 }
