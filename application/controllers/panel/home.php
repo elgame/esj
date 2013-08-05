@@ -50,7 +50,7 @@ class home extends MY_Controller {
 
 
 		$this->load->library('cfdi');
-		$this->cfdi->cargaDatosFiscales(1);
+		$this->cfdi->cargaDatosFiscales(2);
 		// echo $this->cfdi->obtenCertificado($this->cfdi->path_certificado, false);
 		// echo $this->cfdi->obtenLlave($this->cfdi->path_key);
 
