@@ -100,12 +100,31 @@ FACTURACION:
        ☐ Envio de un email del pdf de la factura y de los documentos del cliente (si tiene).
 
        ☐ TIMBRADO
-               ☐ Agregar los campos xml, status_timbrado y uuid en la tabla "facturacion".
-               ☐ Al guardar la factura que se haga el intento de timbrado del xml usando los webservices.
-               ☐ Si el timbrado se realiza correctamente entonces se tiene que reemplazar el archivo XML por el que regresa el webservice y tambien guardarlo en el campo "xml" de la tabla "facturacion", tambien guardar el "uuid". Cambiar el status de timbrado de la factura.
-               ☐ Si el timbrado queda pendiente, entonces en el listado de facturas colocar un boton para que se pueda estar comprobando si el timbrado se ha realizado y si se realiza correctamente entonces realizar el proceso anterior.
-               ☐ Si es error por estructura de xml, eliminar de la bdd el registro de la factura agregada, el archivo xml, y mandar un mensaje que verifique los datos fiscales de la empresa y/o cliente.
+               ✔ Agregar los campos xml, status_timbrado y uuid en la tabla "facturacion". @done (13-08-01 18:22)
+                     SQL:
+                       xml text, -- Es el xml timbrado
+                       status_timbrado character varying(2) NOT NULL DEFAULT 't'::character varying, -- status del timbrado( t:timbrado, p:pendiente, ca:cancelado)
+                       uuid character varying(50), -- uuid del timbrado
+               ☐ Status del timbre
+                    - Timbrado 't' color verde
+                    - Pendiente 'p' color amarillo
+                    - Cancelado 'ca'
 
+               ✔ Al guardar la factura que se haga el intento de timbrado del xml usando los webservices. @done (13-08-01 18:53)
+               ✔ Si el timbrado se realiza correctamente entonces se tiene que reemplazar el archivo XML por el que regresa el webservice y tambien guardarlo en el campo "xml" de la tabla "facturacion", tambien guardar el "uuid". Cambiar el status de timbrado de la factura. @done (13-08-01 18:53)
+               ✔ Si es error por estructura de xml, eliminar de la bdd el registro de la factura agregada, el archivo xml, y mandar un mensaje que verifique los datos fiscales de la empresa y/o cliente. @done (13-08-01 19:37)
+               ✔ Si el timbrado queda pendiente, entonces en el listado de facturas colocar un boton para que se pueda estar comprobando si se la factura ya esta finalizada. Si la factura ya esta finalizada entonces cambiar el status del timbrado a 't'. @done (13-08-05 10:29)
+
+               ☐ 72 horas para que ellos la timbren una vez que se hizo la factura. Colocar un boton para timbrar. Si pasan esas horas no dejar que se timbren, tendrian que cancelarlas. (NO)
+               ☐ Poner un contador si no se pudo timbrar la factura. (NO)
+               ☐ Si esta unicamente como no timbrada que no se puedan enviar los mails con la factura y los documentos. (NO)
+
+               STATUS CUANDO QUEDA PENDIENTE:
+                    F es Finished -> YA QUEDO TIMBRADA Y EL SAT TAMBIEN LA TIENE.
+                    S es Stamped -> QUEDO UNICAMENTE TIMBRADA PERO EL SAT NO LA TIENE.
+                    C es Cancelled -> SABE
+
+      ✔ Colocar boton para descar el XML. @done (13-08-05 12:41)
       ✔ En el listado de series y folios que cargue todas. @done (13-07-30 17:02)
       ✔ tipo de comprobante para facturas es ingreso. @done (13-07-30 17:36)
       ✔ cargar las series y folio que no son nota de credito. @done (13-07-30 17:36)

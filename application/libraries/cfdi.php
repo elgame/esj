@@ -383,8 +383,10 @@ class cfdi{
 		$this->cargaDatosFiscales($data['id_empresa']);
 
 		// $vers = str_replace('.', '_', $this->version);
-		$this->guardarXML($data);
+		$pathXML = $this->guardarXML($data);
 		// $this->generarUnPDF($data);
+
+    return array('pathXML' => $pathXML);
 	}
 
 	public function actualizarArchivos($data){
@@ -549,7 +551,7 @@ class cfdi{
    */
 
   /**
-   * Guarda el XML en capertas especificas AÑO/MES
+   * Guarda el XML en capertas especificas AÑO/MES.
    *
    * @param  array  $data
    * @param  boolean $update
@@ -584,23 +586,36 @@ class cfdi{
 		$fp = fopen($path_guardar, 'w');
 		fwrite($fp, $xml);
 		fclose($fp);
+
+    return $path_guardar;
 	}
 
   /**
    * Descarga el XML.
    *
    * @param  array $data
+   * @param  string $pathXML
    * @return void
    */
-	public function descargarXML($data)
+	public function descargarXML($data = null, $pathXML = null)
   {
-		$this->cargaDatosFiscales($data['id_empresa']);
+    // Carga los datos fiscales de la empresa.
+    $this->cargaDatosFiscales($data['id_empresa']);
 
-    $vers = str_replace('.', '_', $this->version);
-    $xml  = $this->{'generarXML'.$vers}($data);
+    // Si el parametro $data contiene datos.
+    if ( ! is_null($data) && is_null($pathXML))
+    {
+      $vers = str_replace('.', '_', $this->version);
+      $xml  = $this->{'generarXML'.$vers}($data);
+    }
+    else
+    {
+      // Obtiene el contenido del XML.
+      $xml = file_get_contents($pathXML);
+    }
 
-		header('Content-type: content-type: text/xml');
-		header('Content-Disposition: attachment; filename="'.$this->rfc.'-'.$data['comprobante']['serie'].'-'.$this->acomodarFolio($data['comprobante']['folio']).'.xml"');
+    header('Content-type: content-type: text/xml');
+    header('Content-Disposition: attachment; filename="'.$this->rfc.'-'.$data['comprobante']['serie'].'-'.$this->acomodarFolio($data['comprobante']['folio']).'.xml"');
 
     echo $xml;
 	}

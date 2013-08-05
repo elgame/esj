@@ -48,7 +48,8 @@ class facturacion_model extends privilegios_model{
 
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
-                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc
+                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
+                f.status_timbrado, f.uuid
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -446,7 +447,7 @@ class facturacion_model extends privilegios_model{
     $this->db->insert_batch('facturacion_productos', $productosFactura);
 
     // Datos para el XML3.2
-    $datosXML = $cadenaOriginal['datos'];
+    $datosXML               = $cadenaOriginal['datos'];
     $datosXML['id_empresa'] = $this->input->post('did_empresa');
     $datosXML['comprobante']['serie']         = $this->input->post('dserie');
     $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
@@ -471,16 +472,137 @@ class facturacion_model extends privilegios_model{
     $datosXML['retencion'] = $impuestosRetencion;
     $datosXML['traslado']  = $impuestosTraslados;
 
-    $this->cfdi->generaArchivos($datosXML);
-    // $this->cfdi->descargarXML($datosXML);
+    // Genera el archivo XML y lo guarda en disco.
+    $archivos = $this->cfdi->generaArchivos($datosXML);
+
+    // Timbrado de la factura.
+    $result = $this->timbrar($archivos['pathXML'], $idFactura);
+
+    // if ($result['passes'])
+    //   $this->cfdi->descargarXML($datosXML, $archivos['pathXML']);
 
     // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
     // echo "<pre>";
     //   var_dump($datosXML);
     // echo "</pre>";exit;
 
-		return array('passes' => true, 'id_factura' => $idFactura);
+    return $result;
 	}
+
+  /**
+   * Realiza el timbrado de una factura.
+   *
+   * @param  string $xml
+   * @param  string $idFactura
+   * @param  boolean $delFiles
+   * @return void
+   */
+  private function timbrar($pathXML, $idFactura, $delFiles = true)
+  {
+    $this->load->library('facturartebarato_api');
+
+    $this->facturartebarato_api->setPathXML($pathXML);
+
+    // Realiza el timbrado usando la libreria.
+    $timbrado = $this->facturartebarato_api->timbrar();
+
+    $result = array(
+      'id_factura' => $idFactura,
+      'codigo'     => $timbrado->codigo
+    );
+
+    // Si no hubo errores al momento de realizar el timbrado.
+    if ($timbrado->status)
+    {
+      // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
+      // significa que el timbrado esta pendiente.
+      if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
+      {
+        // Se coloca el status de timbre de la factura como pendiente.
+        $statusTimbrado = 'p';
+      }
+      else
+      {
+        // Si el timbrado se realizo correctamente.
+
+        // Se coloca el status de timbre de la factura como timbrado.
+        $statusTimbrado = 't';
+      }
+
+      // Actualiza los datos en la BDD.
+      $dataTimbrado = array(
+        'xml'             => $this->facturartebarato_api->getXML(),
+        'status_timbrado' => $statusTimbrado,
+        'uuid'            => $this->facturartebarato_api->getUUID(),
+      );
+
+      $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+
+      $result['passes'] = true;
+    }
+    else
+    {
+      // Si es true $delFile entonces elimina todo lo relacionado con la factura.
+      if ($delFiles)
+      {
+        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        unlink($pathXML);
+      }
+
+      // Entra si hubo un algun tipo de error de conexion a internet.
+      if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
+        $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
+      elseif ($timbrado->codigo === '500')
+        $result['msg'] = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
+      else
+        $result['msg'] = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
+
+      $result['passes'] = false;
+    }
+
+    // echo "<pre>";
+    //   var_dump($timbrado);
+    // echo "</pre>";exit;
+
+    return $result;
+  }
+
+  /**
+   * Verifica que el timbrado de la factura se ha realiza. Esto es en caso
+   * de que el timbrado alla quedado pendiente.
+   *
+   * @param  string $idFactura
+   * @return boolean
+   */
+  public function verificarTimbrePendiente($idFactura)
+  {
+    $this->load->library('facturartebarato_api');
+
+    // Obtenemos el uuid de la factura pendiente a timbrar.
+    $uuid = $this->db
+      ->select('uuid')
+      ->from('facturacion')
+      ->where('id_factura', $idFactura)
+      ->get()->row()->uuid;
+
+    $this->facturartebarato_api->setUUID($uuid);
+
+    // Reliza la peticion para verificar el stutus de la factura.
+    $result = $this->facturartebarato_api->verificarPendiente();
+
+    // Si el status es Finished entonces ya se timbro correctamente.
+    if ($result->data->status === 'F')
+    {
+      $this->db->update('facturacion',
+        array('status_timbrado' => 't'),
+        array('id_factura' => $idFactura)
+      );
+    }
+
+    return $result->data->status === 'F' ? true : false;
+  }
+
 
 	/**
 	 * Cancela una factura. Cambia el status a 'ca'.
@@ -503,6 +625,37 @@ class facturacion_model extends privilegios_model{
   {
     $this->db->update('facturacion', array('status' => 'pa'), "id_factura = '".$_GET['id']."'");
     return array(true, '');
+  }
+
+  public function descargarXML($idFactura)
+  {
+    $factura = $this->getInfoFactura($idFactura);
+
+    // echo "<pre>";
+    //   var_dump($factura);
+    // echo "</pre>";exit;
+
+    $this->load->library('cfdi');
+
+    $data = array(
+      'id_empresa' => $factura['info']->id_empresa,
+      'comprobante' => array('serie' => $factura['info']->serie, 'folio' => $factura['info']->folio)
+    );
+
+    $fecha = explode('-', $factura['info']->fecha);
+
+    $ano = $fecha[0];
+    $mes = strtoupper(String::mes(floatval($fecha[1])));
+
+    $rfc = $factura['info']->empresa->rfc;
+
+    $serie = $factura['info']->serie;
+
+    $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
+
+    $pathXML = APPPATH."media/cfdi/facturasXML/{$ano}/{$mes}/{$rfc}-{$serie}-{$folio}.xml";
+
+    $this->cfdi->descargarXML($data, $pathXML);
   }
 
 	/**
