@@ -132,7 +132,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass   = 'aaa';
+		$new_pass   = 'gamaL1&l';
 		$dkey_path  = '';
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
@@ -210,7 +210,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass = 'aaa';
+		$new_pass = 'gamaL1&l';
 		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){

@@ -85,12 +85,15 @@ class cfdi{
 
   public function obtenKey()
   {
-    $pkeyid = openssl_pkey_get_private(file_get_contents($this->path_key), $this->pass_key);
-    openssl_pkcs12_export(file_get_contents($this->path_certificado), $keystr, $pkeyid, $this->pass_key);
-    var_dump($keystr);
-    openssl_free_key($pkeyid);
-    exit;
-    return $sello;
+    $text = file_get_contents($this->path_key);
+    $data = base64_encode($text);
+    return $data;
+  }
+  public function obtenCer()
+  {
+    $text = file_get_contents($this->path_certificado);
+    $data = base64_encode($text);
+    return $data;
   }
 
   /**
