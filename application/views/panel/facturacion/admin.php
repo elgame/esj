@@ -169,6 +169,15 @@
                       {
                         echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
                       }
+
+                      if ($fact->docs_finalizados === 't' || $fact->id_nc !== null)
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
+                          'params'   => 'id='.$fact->id_factura,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar los documentos?', 'Facturas', this); return false;"))
+                        );
+                      }
                     ?>
                   </td>
                 </tr>

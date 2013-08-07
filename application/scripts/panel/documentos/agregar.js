@@ -44,7 +44,7 @@
       'placement': 'right'
     });
 
-    $('ul#nav-tabs').on('click', 'li', function(event) {
+    $('#listadoDocs').on('click', 'li', function(event) {
       event.preventDefault();
 
       var $this = $(this),
@@ -359,6 +359,9 @@
   // Funciones para el documento acomodo embarque.
   var doc_acoemb = (function ($, window) {
 
+    var lastMove = 0,
+        initPos  = 0;
+
     function init () {
       draggable();
       droppable();
@@ -368,8 +371,9 @@
     }
 
     function draggable () {
-      $("div#draggable").draggable({
+      $("div.draggableitem").draggable({
         scroll: true,
+        // helper: 'clone',
         revert : function(event, ui) {
           // on older version of jQuery use "draggable"
           // $(this).data("draggable")

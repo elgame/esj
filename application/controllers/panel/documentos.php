@@ -394,7 +394,7 @@ class documentos extends MY_Controller {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->folio);
+    $path = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
     $filename = 'CHOFER FOTO FIRMA MANIFIESTO';
 

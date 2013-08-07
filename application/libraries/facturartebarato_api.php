@@ -65,8 +65,6 @@ class facturartebarato_api {
    */
   protected $uuid;
 
-
-
   /**
    * Constructor.
    *
@@ -206,11 +204,20 @@ class facturartebarato_api {
   /**
    * Cancela una factura.
    *
+   * @param  array $params
    * @return void
    */
-  public function cancelar()
+  public function cancelar(Array $params)
   {
+    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}cancel";
 
+    $resultAPI = $this->post($apiURL, $params);
+
+     echo "<pre>";
+      var_dump($params, $resultAPI);
+    echo "</pre>";exit;
+
+    return $resultAPI;
   }
 
   /*
@@ -309,7 +316,7 @@ class facturartebarato_api {
       curl_setopt($curl, CURLOPT_POST, true);
       curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
 
-      // OBTIENE EL RESULTADO DEL ENVIO DE DATOS DEL EVENTO
+      // Obtiene el resultado de la peticion.
       $response = json_decode(curl_exec($curl));
 
       // Obtiene la informacion de la peticion.

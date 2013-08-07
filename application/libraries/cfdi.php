@@ -83,12 +83,23 @@ class cfdi{
 		return $sello;
 	}
 
+  /**
+   * Obtiene el .key.pem y lo pasa a base64.
+   *
+   * @return string
+   */
   public function obtenKey()
   {
     $text = file_get_contents($this->path_key);
     $data = base64_encode($text);
     return $data;
   }
+
+  /**
+   * Obtiene el contenido del .cer.pem y lo pasa a base64.
+   *
+   * @return string
+   */
   public function obtenCer()
   {
     $text = file_get_contents($this->path_certificado);
@@ -294,11 +305,11 @@ class cfdi{
     $datos['concepto'] = array();
     foreach ($data['concepto'] as $key => $producto)
     {
-      $datos['concepto'][] = $producto['cantidad'];
+      $datos['concepto'][] = (float)$producto['cantidad'];
       $datos['concepto'][] = $producto['unidad'];
       $datos['concepto'][] = $producto['descripcion'];
-      $datos['concepto'][] = $producto['valorUnitario'];
-      $datos['concepto'][] = $producto['importe'];
+      $datos['concepto'][] = (float)$producto['valorUnitario'];
+      $datos['concepto'][] = (float)$producto['importe'];
     }
 
     // ----------> Nodo retencion
@@ -309,9 +320,9 @@ class cfdi{
     foreach ($data['retencion'] as $key => $retencion)
     {
       $datos['retencion'][] = $retencion['impuesto'];
-      $datos['retencion'][] = $retencion['importe'];
+      $datos['retencion'][] = (float)$retencion['importe'];
     }
-    $datos['retencion'][] = $data['totalImpuestosRetenidos'];
+    $datos['retencion'][] = (float)$data['totalImpuestosRetenidos'];
 
     // ----------> Nodo traslado
     // Impuesto
@@ -323,9 +334,9 @@ class cfdi{
     {
       $datos['traslado'][] = $traslado['Impuesto'];
       $datos['traslado'][] = $traslado['tasa'];
-      $datos['traslado'][] = $traslado['importe'];
+      $datos['traslado'][] = (float)$traslado['importe'];
     }
-    $datos['traslado'][] = $data['totalImpuestosTrasladados'];
+    $datos['traslado'][] = (float)$data['totalImpuestosTrasladados'];
 
     $mergeDatos = array_merge(
       array_values($datos['comprobante']),
@@ -752,6 +763,12 @@ class cfdi{
 		return $xml;
 	}
 
+  /*
+   |------------------------------------------------------------------------
+   | FUNCIONES HELPERS
+   |------------------------------------------------------------------------
+   */
+
   /**
    * Reemplaza los siguientes caracteres especiales segun anexo 20:
    *
@@ -772,6 +789,30 @@ class cfdi{
     // $caracteres = array('/&/', '/</', '/>/', '/”/', '/"/', '/\'/', '/’/');
     // $reemplazo  =  array('&amp;', '&lt;', '&gt;', '&quot;', '&quot;', '&apos;', '&apos;');
     // return preg_replace($caracteres, $reemplazo, $texto);
+  }
+
+  /**
+   * Da formato numerico a una cadena
+   *
+   * @param string|int $number
+   * @param int $decimales
+   * @param string $sigini
+   * @param boolean $condecim
+   *
+   * @return string
+   */
+  private function limpiaDecimales($number, $decimales=2, $sigini='$', $condecim=true)
+  {
+    $number = floatval($number);
+    $num = explode('.', $number);
+    if($condecim)
+    {
+      if(isset($num[1]))
+        $decimales = (strlen($num[1])<$decimales? strlen($num[1]): $decimales);
+      else
+        $decimales = 0;
+    }
+    return $sigini.number_format($number, $decimales, '.', ',');
   }
 
   /*
