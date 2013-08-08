@@ -17,7 +17,7 @@ class facturacion_model extends privilegios_model{
    * @return
 	 */
 	public function getFacturas($perpage = '40', $sql2='')
-  {
+    {
 		$sql = '';
 		//paginacion
 		$params = array(
@@ -49,20 +49,20 @@ class facturacion_model extends privilegios_model{
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid
+                f.status_timbrado, f.uuid, f.docs_finalizados
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
 				WHERE 1 = 1".$sql.$sql2."
-				ORDER BY (Date(f.fecha)) DESC
+				ORDER BY (f.fecha, f.folio) DESC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
 		$response = array(
-				'fact' => array(),
-				'total_rows' 		=> $query['total_rows'],
-				'items_per_page' 	=> $params['result_items_per_page'],
-				'result_page' 		=> $params['result_page']
+        'fact'           => array(),
+        'total_rows'     => $query['total_rows'],
+        'items_per_page' => $params['result_items_per_page'],
+        'result_page'    => $params['result_page']
 		);
 		if($res->num_rows() > 0)
 			$response['fact'] = $res->result();
@@ -74,10 +74,12 @@ class facturacion_model extends privilegios_model{
 	 * Obtiene la informacion de una factura
 	 */
 	public function getInfoFactura($idFactura, $info_basic=false)
-  {
-		$res = $this->db->select("*")->
-                      from('facturacion')->
-                      where("id_factura = {$idFactura}")->get();
+    {
+		$res = $this->db
+            ->select("*")
+            ->from('facturacion')
+            ->where("id_factura = {$idFactura}")
+            ->get();
 
     if($res->num_rows() > 0)
     {
@@ -112,18 +114,18 @@ class facturacion_model extends privilegios_model{
 
 			return $response;
 		}
-    else
+        else
 			return false;
 	}
 
 	/**
 	 * Obtiene el folio de acuerdo a la serie seleccionada
-   *
-   * @param string $serie
-   * @param string $empresa
+     *
+     * @param string $serie
+     * @param string $empresa
 	 */
 	public function getFolioSerie($serie, $empresa, $sqlX = null)
-  {
+    {
 		$res = $this->db->select('folio')
       ->from('facturacion')
       ->where("serie = '".$serie."' AND id_empresa = ".$empresa)
@@ -156,513 +158,700 @@ class facturacion_model extends privilegios_model{
 		return array($res, $msg);
 	}
 
-  /**
-   * Obtiene el folio de acuerdo a la serie seleccionada.
-   *
-   * @param string $ide
-   */
-  public function getSeriesEmpresa($id_empresa, $sqlX = null)
-  {
-    if ( is_null($sqlX))
-      $this->db->where("es_nota_credito = 'f' ");
-    else
-      $this->db->where($sqlX);
-
-    $query = $this->db
-      ->select('id_serie_folio, id_empresa, serie, leyenda')
-      ->from('facturacion_series_folios')
-      ->where("id_empresa = ".$id_empresa."")
-      ->order_by('serie', 'ASC')
-      ->get();
-
-    $res = array();
-    if($query->num_rows() > 0)
+   /**
+    * Obtiene el folio de acuerdo a la serie seleccionada.
+    *
+    * @param string $ide
+    */
+    public function getSeriesEmpresa($id_empresa, $sqlX = null)
     {
-      $res = $query->result();
-      $msg = 'ok';
+        if ( is_null($sqlX))
+          $this->db->where("es_nota_credito = 'f' ");
+        else
+          $this->db->where($sqlX);
+
+        $query = $this->db
+          ->select('id_serie_folio, id_empresa, serie, leyenda')
+          ->from('facturacion_series_folios')
+          ->where("id_empresa = ".$id_empresa."")
+          ->order_by('serie', 'ASC')
+          ->get();
+
+        $res = array();
+        if($query->num_rows() > 0)
+        {
+          $res = $query->result();
+          $msg = 'ok';
+        }
+        else
+          $msg = 'La empresa seleccionada no cuenta con Series y Folios.';
+
+        return array($res, $msg);
     }
-    else
-      $msg = 'La empresa seleccionada no cuenta con Series y Folios.';
 
-    return array($res, $msg);
-  }
+    /**
+    * Inicializa los datos que serviran para generar la cadena original.
+    *
+    * @return array
+    */
+    private function datosCadenaOriginal()
+    {
+        $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
-  /**
-   * Inicializa los datos que serviran para generar la cadena original.
-   *
-   * @return array
-   */
-  private function datosCadenaOriginal()
-  {
-    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+        // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+        // pago son las parcialidades "Parcialidad 1 de X".
+        $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
 
-    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
-    // pago son las parcialidades "Parcialidad 1 de X".
-    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+        // Obtiene los datos del receptor.
+        $cliente = $this->clientes_model->getClienteInfo($_POST['did_cliente'], true);
 
-    // Obtiene los datos del receptor.
-    $cliente = $this->clientes_model->getClienteInfo($_POST['did_cliente'], true);
+        // Array con los datos necesarios para generar la cadena original.
+        $data = array(
+          'id_empresa'        => $this->input->post('did_empresa'),
+          'version'           => $this->input->post('dversion'),
+          'serie'             => $this->input->post('dserie'),
+          'folio'             => $this->input->post('dfolio'),
+          'fecha'             => $this->input->post('dfecha').date(':s'),
+          'noAprobacion'      => $this->input->post('dno_aprobacion'),
+          'anoAprobacion'     => $anoAprobacion[0],
+          'tipoDeComprobante' => $this->input->post('dtipo_comprobante'),
+          'formaDePago'       => $formaPago, //$this->input->post('dforma_pago'),
+          'condicionesDePago' => $this->input->post('dcondicion_pago'),
+          'subTotal'          => $this->input->post('total_subtotal'), //total_importe
+          'total'             => $this->input->post('total_totfac'),
+          'metodoDePago'      => $this->input->post('dmetodo_pago'),
+          'NumCtaPago'        => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
 
-    // Array con los datos necesarios para generar la cadena original.
-    $data = array(
-      'id_empresa'        => $this->input->post('did_empresa'),
-      'version'           => $this->input->post('dversion'),
-      'serie'             => $this->input->post('dserie'),
-      'folio'             => $this->input->post('dfolio'),
-      'fecha'             => $this->input->post('dfecha').date(':s'),
-      'noAprobacion'      => $this->input->post('dno_aprobacion'),
-      'anoAprobacion'     => $anoAprobacion[0],
-      'tipoDeComprobante' => $this->input->post('dtipo_comprobante'),
-      'formaDePago'       => $formaPago, //$this->input->post('dforma_pago'),
-      'condicionesDePago' => $this->input->post('dcondicion_pago'),
-      'subTotal'          => $this->input->post('total_subtotal'), //total_importe
-      'total'             => $this->input->post('total_totfac'),
-      'metodoDePago'      => $this->input->post('dmetodo_pago'),
-      'NumCtaPago'        => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
+          'rfc'               => $cliente['info']->rfc,
+          'nombre'            => $cliente['info']->nombre_fiscal,
+          'calle'             => $cliente['info']->calle,
+          'noExterior'        => $cliente['info']->no_exterior,
+          'noInterior'        => $cliente['info']->no_interior,
+          'colonia'           => $cliente['info']->colonia,
+          'localidad'         => $cliente['info']->localidad,
+          'municipio'         => $cliente['info']->municipio,
+          'estado'            => $cliente['info']->estado,
+          'pais'              => 'MEXICO',
+          'codigoPostal'      => $cliente['info']->cp,
 
-      'rfc'               => $cliente['info']->rfc,
-      'nombre'            => $cliente['info']->nombre_fiscal,
-      'calle'             => $cliente['info']->calle,
-      'noExterior'        => $cliente['info']->no_exterior,
-      'noInterior'        => $cliente['info']->no_interior,
-      'colonia'           => $cliente['info']->colonia,
-      'localidad'         => $cliente['info']->localidad,
-      'municipio'         => $cliente['info']->municipio,
-      'estado'            => $cliente['info']->estado,
-      'pais'              => 'MEXICO',
-      'codigoPostal'      => $cliente['info']->cp,
+          'concepto'          => array(),
 
-      'concepto'          => array(),
+          'retencion'         => array(),
+          'totalImpuestosRetenidos' => 0,
 
-      'retencion'         => array(),
-      'totalImpuestosRetenidos' => 0,
+          'traslado'          => array(),
+          'totalImpuestosTrasladados' => 0
+        );
 
-      'traslado'          => array(),
-      'totalImpuestosTrasladados' => 0
-    );
-
-    return $data;
-  }
+        return $data;
+    }
 
 	/**
 	 * Agrega una Factura.
-   *
-   * @return  array
+     *
+     * @return  array
 	 */
-	public function addFactura()
-  {
-    $this->load->library('cfdi');
-    $this->load->model('clientes_model');
-
-    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
-
-    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
-    // pago son las parcialidades "Parcialidad 1 de X".
-    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
-
-    $datosFactura = array(
-      'id_cliente'          => $this->input->post('did_cliente'),
-      'id_empresa'          => $this->input->post('did_empresa'),
-      'version'             => $this->input->post('dversion'),
-      'serie'               => $this->input->post('dserie'),
-      'folio'               => $this->input->post('dfolio'),
-      'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
-      'subtotal'            => $this->input->post('total_subtotal'),
-      'importe_iva'         => $this->input->post('total_iva'),
-      'total'               => $this->input->post('total_totfac'),
-      'total_letra'         => $this->input->post('dttotal_letra'),
-      'no_aprobacion'       => $this->input->post('dno_aprobacion'),
-      'ano_aprobacion'      => $anoAprobacion[0],
-      'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-      'forma_pago'          => $formaPago,
-      'metodo_pago'         => $this->input->post('dmetodo_pago'),
-      'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
-      'no_certificado'      => $this->input->post('dno_certificado'),
-      'cadena_original'     => '',
-      'sello'               => '',
-      'certificado'         => '',
-      'condicion_pago'      => $this->input->post('dcondicion_pago'),
-      'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
-      'observaciones'       => $this->input->post('dobservaciones'),
-      'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
-      'retencion_iva'       => $this->input->post('total_retiva'),
-    );
-
-    // Si el tipo de comprobante es "egreso" o una nota de credito.
-    if ($_POST['dtipo_comprobante'] === 'egreso')
-      $datosFactura['id_nc'] = $_GET['id'];
-
-    // Inserta los datos de la factura y obtiene el Id.
-    $this->db->insert('facturacion', $datosFactura);
-    $idFactura = $this->db->insert_id('facturacion', 'id_factura');
-
-    // Obtiene los datos para la cadena original
-    $datosCadOrig = $this->datosCadenaOriginal();
-
-    // Si es un ingreso o una factura.
-    if ($_POST['dtipo_comprobante'] === 'ingreso')
+    public function addFactura()
     {
-      // Obtiene los documentos que el cliente tiene asignados.
-      $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
+        $this->load->library('cfdi');
+        $this->load->model('clientes_model');
 
-      // Inserta los documentos del cliente con un status false.
-      if ($docsCliente)
-      {
-        $this->db->insert_batch('facturacion_documentos', $docsCliente);
+        $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
-        $this->load->model('documentos_model');
-        $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['folio']);
-      }
-    }
+        // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+        // pago son las parcialidades "Parcialidad 1 de X".
+        $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
 
-    $dataCliente = array(
-      'id_factura'  => $idFactura,
-      'nombre'      => $datosCadOrig['nombre'],
-      'rfc'         => $datosCadOrig['rfc'],
-      'calle'       => $datosCadOrig['calle'],
-      'no_exterior' => $datosCadOrig['noExterior'],
-      'no_interior' => $datosCadOrig['noInterior'],
-      'colonia'     => $datosCadOrig['colonia'],
-      'localidad'   => $datosCadOrig['localidad'],
-      'municipio'   => $datosCadOrig['municipio'],
-      'estado'      => $datosCadOrig['estado'],
-      'cp'          => $datosCadOrig['codigoPostal'],
-      'pais'        => $datosCadOrig['pais'],
-    );
-    // Inserta los datos del cliente.
-    $this->db->insert('facturacion_cliente', $dataCliente);
-
-    // Productos e Impuestos
-    $productosCadOri    = array(); // Productos para la CadOriginal
-    $productosFactura   = array(); // Productos para la Factura
-
-    $impuestosTraslados = array(); // Traslados
-    $traslado0  = false; // Total de traslado 0%
-    $traslado11 = 0; // Total de traslado 11%
-    $traslado16 = 0; // Total de traslado 16%
-
-    // Ciclo para obtener los impuestos traslados, tambien construye
-    // los datos de  los productos a insertar tanto en la cadena original como
-    // en la factura.
-    foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
-    {
-      if ($_POST['prod_importe'][$key] != 0)
-      {
-        $productosCadOri[] = array(
-          'cantidad'      => $_POST['prod_dcantidad'][$key],
-          'unidad'        => $_POST['prod_dmedida'][$key],
-          'descripcion'   => $descripcion,
-          'valorUnitario' => $_POST['prod_dpreciou'][$key],
-          'importe'       => $_POST['prod_importe'][$key],
+        $datosFactura = array(
+          'id_cliente'          => $this->input->post('did_cliente'),
+          'id_empresa'          => $this->input->post('did_empresa'),
+          'version'             => $this->input->post('dversion'),
+          'serie'               => $this->input->post('dserie'),
+          'folio'               => $this->input->post('dfolio'),
+          'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
+          'subtotal'            => $this->input->post('total_subtotal'),
+          'importe_iva'         => $this->input->post('total_iva'),
+          'total'               => $this->input->post('total_totfac'),
+          'total_letra'         => $this->input->post('dttotal_letra'),
+          'no_aprobacion'       => $this->input->post('dno_aprobacion'),
+          'ano_aprobacion'      => $anoAprobacion[0],
+          'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
+          'forma_pago'          => $formaPago,
+          'metodo_pago'         => $this->input->post('dmetodo_pago'),
+          'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
+          'no_certificado'      => $this->input->post('dno_certificado'),
+          'cadena_original'     => '',
+          'sello'               => '',
+          'certificado'         => '',
+          'condicion_pago'      => $this->input->post('dcondicion_pago'),
+          'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
+          'observaciones'       => $this->input->post('dobservaciones'),
+          'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+          'retencion_iva'       => $this->input->post('total_retiva'),
         );
 
-        if ($_POST['prod_diva_porcent'][$key] == '11')
-          $traslado11 += floatval($_POST['prod_diva_total'][$key]);
-        else if ($_POST['prod_diva_porcent'][$key] == '16')
-          $traslado16 += floatval($_POST['prod_diva_total'][$key]);
+        // Si el tipo de comprobante es "egreso" o una nota de credito.
+        if ($_POST['dtipo_comprobante'] === 'egreso')
+          $datosFactura['id_nc'] = $_GET['id'];
+
+        // Inserta los datos de la factura y obtiene el Id.
+        $this->db->insert('facturacion', $datosFactura);
+        $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+
+        // Obtiene los datos para la cadena original
+        $datosCadOrig = $this->datosCadenaOriginal();
+
+        // Si es un ingreso o una factura.
+        if ($_POST['dtipo_comprobante'] === 'ingreso')
+        {
+          // Obtiene los documentos que el cliente tiene asignados.
+          $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
+
+          // Inserta los documentos del cliente con un status false.
+            if ($docsCliente)
+            {
+                $this->db->insert_batch('facturacion_documentos', $docsCliente);
+
+                $this->load->model('documentos_model');
+                $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+            }
+            else
+                $datosFactura['docs_finalizados'] = 't';
+        }
         else
-          $traslado0 = true;
+        {
+            $this->load->model('documentos_model');
+            $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+            $datosFactura['docs_finalizados'] = 't';
+        }
 
-        $productosFactura[] = array(
-          'id_factura'       => $idFactura,
-          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-          'num_row'          => intval($key),
-          'cantidad'         => $_POST['prod_dcantidad'][$key],
-          'descripcion'      => $descripcion,
-          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-          'importe'          => $_POST['prod_importe'][$key],
-          'iva'              => $_POST['prod_diva_total'][$key],
-          'unidad'           => $_POST['prod_dmedida'][$key],
-          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+        $dataCliente = array(
+          'id_factura'  => $idFactura,
+          'nombre'      => $datosCadOrig['nombre'],
+          'rfc'         => $datosCadOrig['rfc'],
+          'calle'       => $datosCadOrig['calle'],
+          'no_exterior' => $datosCadOrig['noExterior'],
+          'no_interior' => $datosCadOrig['noInterior'],
+          'colonia'     => $datosCadOrig['colonia'],
+          'localidad'   => $datosCadOrig['localidad'],
+          'municipio'   => $datosCadOrig['municipio'],
+          'estado'      => $datosCadOrig['estado'],
+          'cp'          => $datosCadOrig['codigoPostal'],
+          'pais'        => $datosCadOrig['pais'],
         );
-      }
-    }
+        // Inserta los datos del cliente.
+        $this->db->insert('facturacion_cliente', $dataCliente);
 
-    // Asignamos los productos o conceptos a los datos de la cadena original.
-    $datosCadOrig['concepto']  = $productosCadOri;
+        // Productos e Impuestos
+        $productosCadOri    = array(); // Productos para la CadOriginal
+        $productosFactura   = array(); // Productos para la Factura
 
-    // Asignamos las retenciones a los datos de la cadena original.
-     $impuestosRetencion = array(
-      'impuesto' => 'IVA',
-      'importe'  => $this->input->post('total_retiva'),
-    );
+        $impuestosTraslados = array(); // Traslados
+        $traslado0  = false; // Total de traslado 0%
+        $traslado11 = 0; // Total de traslado 11%
+        $traslado16 = 0; // Total de traslado 16%
 
-    $datosCadOrig['retencion'][] = $impuestosRetencion;
-    $datosCadOrig['totalImpuestosRetenidos'] = $this->input->post('total_retiva');
+        // Ciclo para obtener los impuestos traslados, tambien construye
+        // los datos de  los productos a insertar tanto en la cadena original como
+        // en la factura.
+        foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+        {
+          if ($_POST['prod_importe'][$key] != 0)
+          {
+            $productosCadOri[] = array(
+              'cantidad'      => $_POST['prod_dcantidad'][$key],
+              'unidad'        => $_POST['prod_dmedida'][$key],
+              'descripcion'   => $descripcion,
+              'valorUnitario' => $_POST['prod_dpreciou'][$key],
+              'importe'       => $_POST['prod_importe'][$key],
+            );
 
-    // Si hay conceptos con traslado 0% lo agrega.
-    if ($traslado0)
-    {
-      $impuestosTraslados[] = array(
-        'Impuesto' => 'IVA',
-        'tasa'     => '0',
-        'importe'  => '0',
-      );
-    }
+            if ($_POST['prod_diva_porcent'][$key] == '11')
+              $traslado11 += floatval($_POST['prod_diva_total'][$key]);
+            else if ($_POST['prod_diva_porcent'][$key] == '16')
+              $traslado16 += floatval($_POST['prod_diva_total'][$key]);
+            else
+              $traslado0 = true;
 
-    // Si hay conceptos con traslado 11% lo agrega.
-    if ($traslado11 !== 0)
-    {
-      $impuestosTraslados[] = array(
-        'Impuesto' => 'IVA',
-        'tasa'     => '11',
-        'importe'  => $traslado11,
-      );
-    }
+            $productosFactura[] = array(
+              'id_factura'       => $idFactura,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+              'num_row'          => intval($key),
+              'cantidad'         => $_POST['prod_dcantidad'][$key],
+              'descripcion'      => $descripcion,
+              'precio_unitario'  => $_POST['prod_dpreciou'][$key],
+              'importe'          => $_POST['prod_importe'][$key],
+              'iva'              => $_POST['prod_diva_total'][$key],
+              'unidad'           => $_POST['prod_dmedida'][$key],
+              'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+            );
+          }
+        }
 
-    // Si hay conceptos con traslado 16% lo agrega.
-    if ($traslado16 !== 0)
-    {
-      $impuestosTraslados[] = array(
-        'Impuesto' => 'IVA',
-        'tasa'     => '16',
-        'importe'  => $traslado16,
-      );
-    }
+        // Asignamos los productos o conceptos a los datos de la cadena original.
+        $datosCadOrig['concepto']  = $productosCadOri;
 
-    // Asigna los impuestos traslados.
-    $datosCadOrig['traslado']  = $impuestosTraslados;
-    $datosCadOrig['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+        // Asignamos las retenciones a los datos de la cadena original.
+         $impuestosRetencion = array(
+          'impuesto' => 'IVA',
+          'importe'  => $this->input->post('total_retiva'),
+        );
 
-    // Genera la cadena original y el sello.
-    $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
-    $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
+        $datosCadOrig['retencion'][] = $impuestosRetencion;
+        $datosCadOrig['totalImpuestosRetenidos'] = $this->input->post('total_retiva');
 
-    // Obtiene el contentido del certificado.
-    $certificado = $this->cfdi->obtenCertificado($this->db
-      ->select('cer')
-      ->from("empresas")
-      ->where("id_empresa", $_POST['did_empresa'])
-      ->get()->row()->cer
-    );
+        // Si hay conceptos con traslado 0% lo agrega.
+        if ($traslado0 && $traslado11 === 0 && $traslado16 === 0)
+        {
+            $impuestosTraslados[] = array(
+                'Impuesto' => 'IVA',
+                'tasa'     => '0',
+                'importe'  => '0',
+            );
+        }
 
-    // Datos que actualizara de la factura
-    $updateFactura = array(
-      'cadena_original' => $cadenaOriginal['cadenaOriginal'],
-      'sello'           => $sello,
-      'certificado'     => $certificado,
-    );
-    $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
+        // Si hay conceptos con traslado 11% lo agrega.
+        if ($traslado11 !== 0)
+        {
+          $impuestosTraslados[] = array(
+            'Impuesto' => 'IVA',
+            'tasa'     => '11',
+            'importe'  => $traslado11,
+          );
+        }
 
-    $this->db->insert_batch('facturacion_productos', $productosFactura);
+        // Si hay conceptos con traslado 16% lo agrega.
+        if ($traslado16 !== 0)
+        {
+          $impuestosTraslados[] = array(
+            'Impuesto' => 'IVA',
+            'tasa'     => '16',
+            'importe'  => $traslado16,
+          );
+        }
 
-    // Datos para el XML3.2
-    $datosXML               = $cadenaOriginal['datos'];
-    $datosXML['id_empresa'] = $this->input->post('did_empresa');
-    $datosXML['comprobante']['serie']         = $this->input->post('dserie');
-    $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
-    $datosXML['comprobante']['sello']         = $sello;
-    $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
-    $datosXML['comprobante']['certificado']   = $certificado;
-    $datosXML['concepto']                     = $productosCadOri;
+        // Asigna los impuestos traslados.
+        $datosCadOrig['traslado']  = $impuestosTraslados;
+        $datosCadOrig['totalImpuestosTrasladados'] = $this->input->post('total_iva');
 
-    $datosXML['domicilio']['calle']        = $dataCliente['calle'];
-    $datosXML['domicilio']['noExterior']   = $dataCliente['no_exterior'];
-    $datosXML['domicilio']['noInterior']   = $dataCliente['no_interior'];
-    $datosXML['domicilio']['colonia']      = $dataCliente['colonia'];
-    $datosXML['domicilio']['localidad']    = $dataCliente['localidad'];
-    $datosXML['domicilio']['municipio']    = $dataCliente['municipio'];
-    $datosXML['domicilio']['estado']       = $dataCliente['estado'];
-    $datosXML['domicilio']['pais']         = $dataCliente['pais'];
-    $datosXML['domicilio']['codigoPostal'] = $dataCliente['cp'];
+        // Genera la cadena original y el sello.
+        $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
+        $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
 
-    $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
-    $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+        // Obtiene el contentido del certificado.
+        $certificado = $this->cfdi->obtenCertificado($this->db
+          ->select('cer')
+          ->from("empresas")
+          ->where("id_empresa", $_POST['did_empresa'])
+          ->get()->row()->cer
+        );
 
-    $datosXML['retencion'] = $impuestosRetencion;
-    $datosXML['traslado']  = $impuestosTraslados;
+        // Datos que actualizara de la factura
+        $updateFactura = array(
+          'cadena_original' => $cadenaOriginal['cadenaOriginal'],
+          'sello'           => $sello,
+          'certificado'     => $certificado,
+        );
+        $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
 
-    // Genera el archivo XML y lo guarda en disco.
-    $archivos = $this->cfdi->generaArchivos($datosXML);
+        $this->db->insert_batch('facturacion_productos', $productosFactura);
 
-    // Timbrado de la factura.
-    $result = $this->timbrar($archivos['pathXML'], $idFactura);
+        // Datos para el XML3.2
+        $datosXML               = $cadenaOriginal['datos'];
+        $datosXML['id_empresa'] = $this->input->post('did_empresa');
+        $datosXML['comprobante']['serie']         = $this->input->post('dserie');
+        $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
+        $datosXML['comprobante']['sello']         = $sello;
+        $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
+        $datosXML['comprobante']['certificado']   = $certificado;
+        $datosXML['concepto']                     = $productosCadOri;
 
-    // if ($result['passes'])
-    //   $this->cfdi->descargarXML($datosXML, $archivos['pathXML']);
+        $datosXML['domicilio']['calle']        = $dataCliente['calle'];
+        $datosXML['domicilio']['noExterior']   = $dataCliente['no_exterior'];
+        $datosXML['domicilio']['noInterior']   = $dataCliente['no_interior'];
+        $datosXML['domicilio']['colonia']      = $dataCliente['colonia'];
+        $datosXML['domicilio']['localidad']    = $dataCliente['localidad'];
+        $datosXML['domicilio']['municipio']    = $dataCliente['municipio'];
+        $datosXML['domicilio']['estado']       = $dataCliente['estado'];
+        $datosXML['domicilio']['pais']         = $dataCliente['pais'];
+        $datosXML['domicilio']['codigoPostal'] = $dataCliente['cp'];
 
-    // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
-    // echo "<pre>";
-    //   var_dump($datosXML);
-    // echo "</pre>";exit;
+        $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
+        $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
 
-    return $result;
+        $datosXML['retencion'] = $impuestosRetencion;
+        $datosXML['traslado']  = $impuestosTraslados;
+
+        // Genera el archivo XML y lo guarda en disco.
+        $archivos = $this->cfdi->generaArchivos($datosXML);
+
+        // Timbrado de la factura.
+        $result = $this->timbrar($archivos['pathXML'], $idFactura);
+
+        if ($result['passes'])
+        {
+          // $this->cfdi->descargarXML($datosXML, $archivos['pathXML']);
+
+          $this->generaFacturaPdf($idFactura, $pathDocs);
+        }
+
+        // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
+        // echo "<pre>";
+        //   var_dump($datosXML);
+        // echo "</pre>";exit;
+
+        return $result;
 	}
 
-  /**
-   * Realiza el timbrado de una factura.
-   *
-   * @param  string $xml
-   * @param  string $idFactura
-   * @param  boolean $delFiles
-   * @return void
-   */
-  private function timbrar($pathXML, $idFactura, $delFiles = true)
-  {
-    $this->load->library('facturartebarato_api');
-
-    $this->facturartebarato_api->setPathXML($pathXML);
-
-    // Realiza el timbrado usando la libreria.
-    $timbrado = $this->facturartebarato_api->timbrar();
-
-    $result = array(
-      'id_factura' => $idFactura,
-      'codigo'     => $timbrado->codigo
-    );
-
-    // Si no hubo errores al momento de realizar el timbrado.
-    if ($timbrado->status)
+    /**
+    * Realiza el timbrado de una factura.
+    *
+    * @param  string $xml
+    * @param  string $idFactura
+    * @param  boolean $delFiles
+    * @return void
+    */
+    private function timbrar($pathXML, $idFactura, $delFiles = true)
     {
-      // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
-      // significa que el timbrado esta pendiente.
-      if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
-      {
-        // Se coloca el status de timbre de la factura como pendiente.
-        $statusTimbrado = 'p';
-      }
-      else
-      {
-        // Si el timbrado se realizo correctamente.
+        $this->load->library('facturartebarato_api');
 
-        // Se coloca el status de timbre de la factura como timbrado.
-        $statusTimbrado = 't';
-      }
+        $this->facturartebarato_api->setPathXML($pathXML);
 
-      // Actualiza los datos en la BDD.
-      $dataTimbrado = array(
-        'xml'             => $this->facturartebarato_api->getXML(),
-        'status_timbrado' => $statusTimbrado,
-        'uuid'            => $this->facturartebarato_api->getUUID(),
-      );
+        // Realiza el timbrado usando la libreria.
+        $timbrado = $this->facturartebarato_api->timbrar();
 
-      $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
+        $result = array(
+          'id_factura' => $idFactura,
+          'codigo'     => $timbrado->codigo
+        );
 
-      $result['passes'] = true;
-    }
-    else
-    {
-      // Si es true $delFile entonces elimina todo lo relacionado con la factura.
-      if ($delFiles)
-      {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
-        unlink($pathXML);
-      }
+        // Si no hubo errores al momento de realizar el timbrado.
+        if ($timbrado->status)
+        {
+          // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
+          // significa que el timbrado esta pendiente.
+          if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
+          {
+            // Se coloca el status de timbre de la factura como pendiente.
+            $statusTimbrado = 'p';
+          }
+          else
+          {
+            // Si el timbrado se realizo correctamente.
 
-      // Entra si hubo un algun tipo de error de conexion a internet.
-      if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
-        $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
-      elseif ($timbrado->codigo === '500')
-        $result['msg'] = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
-      else
-        $result['msg'] = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
+            // Se coloca el status de timbre de la factura como timbrado.
+            $statusTimbrado = 't';
+          }
 
-      $result['passes'] = false;
-    }
+          // Actualiza los datos en la BDD.
+          $dataTimbrado = array(
+            'xml'             => $this->facturartebarato_api->getXML(),
+            'status_timbrado' => $statusTimbrado,
+            'uuid'            => $this->facturartebarato_api->getUUID(),
+          );
 
-    // echo "<pre>";
-    //   var_dump($timbrado);
-    // echo "</pre>";exit;
+          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
 
-    return $result;
-  }
+          $result['passes'] = true;
+        }
+        else
+        {
+          // Si es true $delFile entonces elimina todo lo relacionado con la factura.
+          if ($delFiles)
+          {
+            $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+            $this->db->delete('facturacion', array('id_factura' => $idFactura));
+            unlink($pathXML);
+          }
 
-  /**
-   * Verifica que el timbrado de la factura se ha realiza. Esto es en caso
-   * de que el timbrado alla quedado pendiente.
-   *
-   * @param  string $idFactura
-   * @return boolean
-   */
-  public function verificarTimbrePendiente($idFactura)
-  {
-    $this->load->library('facturartebarato_api');
+          // Entra si hubo un algun tipo de error de conexion a internet.
+          if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
+            $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
+          elseif ($timbrado->codigo === '500')
+            $result['msg'] = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
+          else
+            $result['msg'] = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
 
-    // Obtenemos el uuid de la factura pendiente a timbrar.
-    $uuid = $this->db
-      ->select('uuid')
-      ->from('facturacion')
-      ->where('id_factura', $idFactura)
-      ->get()->row()->uuid;
+          $result['passes'] = false;
+        }
 
-    $this->facturartebarato_api->setUUID($uuid);
+        // echo "<pre>";
+        //   var_dump($timbrado);
+        // echo "</pre>";exit;
 
-    // Reliza la peticion para verificar el stutus de la factura.
-    $result = $this->facturartebarato_api->verificarPendiente();
-
-    // Si el status es Finished entonces ya se timbro correctamente.
-    if ($result->data->status === 'F')
-    {
-      $this->db->update('facturacion',
-        array('status_timbrado' => 't'),
-        array('id_factura' => $idFactura)
-      );
+        return $result;
     }
 
-    return $result->data->status === 'F' ? true : false;
-  }
+    /**
+    * Verifica que el timbrado de la factura se ha realiza. Esto es en caso
+    * de que el timbrado alla quedado pendiente.
+    *
+    * @param  string $idFactura
+    * @return boolean
+    */
+    public function verificarTimbrePendiente($idFactura)
+    {
+        $this->load->library('facturartebarato_api');
 
+        // Obtenemos el uuid de la factura pendiente a timbrar.
+        $uuid = $this->db
+          ->select('uuid')
+          ->from('facturacion')
+          ->where('id_factura', $idFactura)
+          ->get()->row()->uuid;
+
+        $this->facturartebarato_api->setUUID($uuid);
+
+        // Reliza la peticion para verificar el stutus de la factura.
+        $result = $this->facturartebarato_api->verificarPendiente();
+
+        // Si el status es Finished entonces ya se timbro correctamente.
+        if ($result->data->status === 'F')
+        {
+          $this->db->update('facturacion',
+            array('status_timbrado' => 't'),
+            array('id_factura' => $idFactura)
+          );
+        }
+
+        return $result->data->status === 'F' ? true : false;
+    }
 
 	/**
 	 * Cancela una factura. Cambia el status a 'ca'.
    *
    * @return array
 	 */
-	public function cancelaFactura()
-  {
-		$this->db->update('facturacion', array('status' => 'ca'), "id_factura = '".$_GET['id']."'");
+	public function cancelaFactura($idFactura)
+    {
 
-		return array(true, '');
+        $this->load->library('cfdi');
+        $this->load->library('facturartebarato_api');
+
+        // Obtenemos la info de la factura a cancelar.
+        $factura = $this->getInfoFactura($idFactura);
+
+        // echo "<pre>";
+        //   var_dump($factura);
+        // echo "</pre>";exit;
+
+        // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+        $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
+
+        // Parametros que necesita el webservice para la cancelacion.
+        $params = array(
+          'rfc'   => $factura['info']->empresa->rfc,
+          'uuids' => $factura['info']->uuid,
+          'cer'   => $this->cfdi->obtenCer(),
+          'key'   => $this->cfdi->obtenKey(),
+        );
+
+        // Lama el metodo cancelar para que realiza la peticion al webservice.
+        $result = $this->facturartebarato_api->cancelar($params);
+
+        if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+        {
+          $this->db->update('facturacion',
+            array('status' => 'ca', 'status_timbrado' => 'ca'),
+            "id_factura = {$idFactura}"
+          );
+        }
+
+		return array('msg' => $result->data->status_uuid);
 	}
 
-  /**
-   * Paga una factura cambiando su status a pagada 'pa'.
-   *
-   * @return array
-   */
-  public function pagaFactura()
-  {
-    $this->db->update('facturacion', array('status' => 'pa'), "id_factura = '".$_GET['id']."'");
-    return array(true, '');
-  }
+   /**
+    * Paga una factura cambiando su status a pagada 'pa'.
+    *
+    * @return array
+    */
+    public function pagaFactura()
+    {
+        $this->db->update('facturacion', array('status' => 'pa'), "id_factura = '".$_GET['id']."'");
+        return array(true, '');
+    }
 
-  public function descargarXML($idFactura)
-  {
-    $factura = $this->getInfoFactura($idFactura);
+   /**
+    * Descarga el XML.
+    *
+    * @param  string $idFactura
+    * @return void
+    */
+    public function descargarXML($idFactura)
+    {
+        $this->load->library('cfdi');
 
-    // echo "<pre>";
-    //   var_dump($factura);
-    // echo "</pre>";exit;
+        // Obtiene la info de la factura.
+        $factura = $this->getInfoFactura($idFactura);
 
-    $this->load->library('cfdi');
+        $data = array(
+          'id_empresa' => $factura['info']->id_empresa,
+          'comprobante' => array('serie' => $factura['info']->serie, 'folio' => $factura['info']->folio)
+        );
 
-    $data = array(
-      'id_empresa' => $factura['info']->id_empresa,
-      'comprobante' => array('serie' => $factura['info']->serie, 'folio' => $factura['info']->folio)
-    );
+        $fecha = explode('-', $factura['info']->fecha);
+        $ano   = $fecha[0];
+        $mes   = strtoupper(String::mes(floatval($fecha[1])));
+        $rfc   = $factura['info']->empresa->rfc;
+        $serie = $factura['info']->serie;
+        $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
 
-    $fecha = explode('-', $factura['info']->fecha);
+        $pathXML = APPPATH."media/cfdi/facturasXML/{$ano}/{$mes}/{$rfc}-{$serie}-{$folio}.xml";
 
-    $ano = $fecha[0];
-    $mes = strtoupper(String::mes(floatval($fecha[1])));
+        $this->cfdi->descargarXML($data, $pathXML);
+    }
 
-    $rfc = $factura['info']->empresa->rfc;
+   /**
+    * Envia el email al ciente con todos los documentos que tiene asignados.
+    *
+    * @param  string $idFactura
+    * @return void
+    */
+    public function enviarEmail($idFactura)
+    {
+        $this->load->library('my_email');
 
-    $serie = $factura['info']->serie;
+        // Obtiene la informacion de la factura.
+        $factura = $this->getInfoFactura($idFactura);
 
-    $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
+        // El cliente necesita tener un email para poderle enviar los documentos.
+        if ( ! is_null($factura['info']->cliente->email) && ! empty($factura['info']->cliente->email))
+        {
+          //////////////////
+          // Datos Correo //
+          //////////////////
 
-    $pathXML = APPPATH."media/cfdi/facturasXML/{$ano}/{$mes}/{$rfc}-{$serie}-{$folio}.xml";
+            $asunto = 'Ha recibido una COMPROBANTE FISCAL DIGITAL de CHONITA BANANAS S.P.R. DE R.L.';
 
-    $this->cfdi->descargarXML($data, $pathXML);
-  }
+            $tipoFactura = is_null($factura['info']->id_nc) ? 'Factura': 'Nota de Crédito';
+
+            // Si la factura esta timbrada
+            if ($factura['info']->status_timbrado === "t")
+            {
+                $altBody = "Estimado Cliente: {$factura['info']->cliente->nombre_fiscal}. Usted está recibiendo un comprobante fiscal digital ({$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}) de
+                CHONITA BANANAS, SPR DE RL]";
+                $body = "
+                <p>Estimado Cliente: <strong>{$factura['info']->cliente->nombre_fiscal}</strong></p>
+                <p>Usted está recibiendo un comprobante fiscal digital ({$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}) de CHONITA BANANAS, SPR DE RL</p>
+                ";
+            }
+            elseif ($factura['info']->status_timbrado === "ca")
+            {
+                $altBody = "HEMOS CANCELADO EL COMPROBANTE FISCAL DIGITAL {$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}, HA QUEDADO SIN EFECTOS FISCALES PARA SU EMPRESA, POR LO QUE PEDIMOS ELIMINARLO Y NO INCLUIRLO EN SU CONTABILIDAD, YA QUE PUEDE REPRESENTAR UN PROBLEMA FISCAL PARA USTED O SU EMPRESA CUANDO EL SAT REALICE UNA FUTURA AUDITORIA EN SU CONTABILIDAD.";
+                $body = "
+                <p>Estimado Cliente: <strong>{$factura['info']->cliente->nombre_fiscal}</strong></p>
+                <p>HEMOS CANCELADO EL COMPROBANTE FISCAL DIGITAL {$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}, HA QUEDADO SIN EFECTOS FISCALES PARA SU EMPRESA, POR LO QUE PEDIMOS ELIMINARLO Y NO INCLUIRLO EN SU CONTABILIDAD, YA QUE PUEDE REPRESENTAR UN PROBLEMA FISCAL PARA USTED O SU EMPRESA CUANDO EL SAT REALICE UNA FUTURA AUDITORIA EN SU CONTABILIDAD.</p>
+                ";
+            }
+
+            $body .= '
+                <p>Si usted desea que llegue el comprobante fiscal a otro correo electronico notifiquelo a: <br>
+                  administracion@chonitabananas.com</p>
+                <p>Si por algun motivo, desea obtener nuevamente su factura puede descargarla directamente de nuestra pagina en la seccion Facturación.<br>
+                <a href="http://www.chonitabananas.com/es/facturacion/">www.chonitabananas.com</a></p>
+                <br><br>
+                <p>De acuerdo a la reglamentación del Servicio de Administración Tributaria (SAT) publicada en el Diario Oficial de la Federación (RMISC 2004) el 31 de mayo del 2004, la factura electrónica es 100% valida y legal.
+                  A partir de ahora la entrega del documento fiscal (FACTURA ELECTRONICA) será emitida y entregada por correo electrónico a nuestros socios de negocio.
+                  Cabe destacar que la factura electrónica se entregará en formato PDF y archivo XML, el cual podrá imprimir libremente e incluirla en su contabilidad (Articulo 29, Fracción IV de CFF), resguardar la impresión y archivo XML por un periodo de 5 años.
+                  Importante: Contenido de la Factura Electrónica
+                  En el anexo 20 del Diario Oficial de la Federación, publicado el 1 de septiembre de 2004, en párrafo 2.22.8, se estipula que la impresión de la factura electrónica, que además de los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: “Este documento es una representación impresa de un CFD”.
+                  <br><strong>Sistema de facturacion electrónica - Facturacion "Chonita Bananas"</strong></p>
+                ';
+
+            //////////////////////
+            // Datos del Emisor //
+            //////////////////////
+
+            $correoEmisorEm = ""; // Correo con el q se emitira el correo.
+            $nombreEmisor   = "Nombre Emisor";
+            $correoEmisor   = ""; // Correo para el auth.
+            $contrasena     = ""; // Contraseña cd $correEmisor
+
+            ////////////////////////
+            // Datos del Receptor //
+            ////////////////////////
+
+            $correoDestino = $factura['info']->cliente->email;
+            $nombreDestino = strtoupper($factura['info']->cliente->nombre_fiscal);
+
+            $datosEmail = array(
+                'correoEmisorEm' => $correoEmisorEm,
+                'correoEmisor'   => $correoEmisor,
+                'nombreEmisor'   => $nombreEmisor,
+                'contrasena'     => $contrasena,
+                'asunto'         => $asunto,
+                'altBody'        => $altBody,
+                'body'           => $body,
+                'correoDestino'  => $correoDestino,
+                'nombreDestino'  => $nombreDestino,
+                'adjuntos'       => array()
+            );
+
+            // Adjuntos.
+            if ($factura['info']->docs_finalizados === 't' || $factura['info']->id_nc !== null)
+            {
+                $this->load->model('documentos_model');
+                // $docs = $this->documentos_model->getClienteDocs($factura['info']->id_factura);
+
+                // Si tiene documentos
+                // if ($docs)
+                // {
+                    $cliente = strtoupper($factura['info']->cliente->nombre_fiscal);
+                    $fecha   = explode('-', $factura['info']->fecha);
+                    $ano     = $fecha[0];
+                    $mes     = strtoupper(String::mes(floatval($fecha[1])));
+                    $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
+                    $folio   = $factura['info']->folio;
+
+                    $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+                    // echo "<pre>";
+                    //   var_dump($pathDocs);
+                    // echo "</pre>";exit;
+
+                    // Scanea el directorio para obtener los archivos.
+                    $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+                    $adjuntos = array();
+                    foreach ($archivos as $arch)
+                        $adjuntos[$arch] = $pathDocs.$arch;
+
+                    $datosEmail['adjuntos'] = $adjuntos;
+                // }
+            }
+
+            // Envia el email.
+            $result = $this->my_email->setData($datosEmail)->zip()->send();
+
+            $response = array(
+                'passes' => true,
+                'msg'    => 10
+            );
+
+            if (isset($result['error']))
+            {
+                $response = array(
+                'passes' => false,
+                'msg'    => 9
+                );
+            }
+        }
+        else
+        {
+          $response = array(
+            'passes' => false,
+            'msg'    => 8
+          );
+        }
+
+        return $response;
+    }
 
 	/**
 	 * Actualiza los digitos del metodo de pago de una factura
 	 */
 	public function metodo_pago()
-  {
+    {
 		$this->db->update('facturas', array('metodo_pago_digitos' => $_POST['mp_digitos']), "id_factura = '".$_POST['id_factura']."'");
 		return array(true, '');
 	}
@@ -673,29 +862,29 @@ class facturacion_model extends privilegios_model{
    * @param  string
    * @return mixed array|boolean
    */
-  public function getClienteDocs($idCliente, $idFactura = null)
-  {
-    $query = $this->db->query(
-      "SELECT id_documento
-       FROM clientes_documentos
-       WHERE id_cliente = {$idCliente}
-       ORDER BY id_documento ASC"
-    );
-
-    if ($query->num_rows() > 0)
+    public function getClienteDocs($idCliente, $idFactura = null)
     {
-      $docs = array();
-      foreach ($query->result()  as $objDoc)
-      {
-        if (is_null($idFactura))
-          $docs[] = $objDoc->id_documento;
-        else
-          $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento);
-      }
-    }
+        $query = $this->db->query(
+          "SELECT id_documento
+           FROM clientes_documentos
+           WHERE id_cliente = {$idCliente}
+           ORDER BY id_documento ASC"
+        );
 
-    return isset($docs) ? $docs : false;
-  }
+        if ($query->num_rows() > 0)
+        {
+          $docs = array();
+          foreach ($query->result()  as $objDoc)
+          {
+            if (is_null($idFactura))
+              $docs[] = $objDoc->id_documento;
+            else
+              $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento);
+          }
+        }
+
+        return isset($docs) ? $docs : false;
+    }
 
   /*
    |-------------------------------------------------------------------------
@@ -710,7 +899,7 @@ class facturacion_model extends privilegios_model{
 	 * @param unknown_type $concepto
 	 */
 	public function addAbono($id_factura=null, $concepto=null, $registr_bancos=true)
-  {
+    {
 		$id_factura = $id_factura==null? $this->input->get('id'): $id_factura;
 		$concepto = $concepto==null? $this->input->post('dconcepto'): $concepto;
 
@@ -755,7 +944,7 @@ class facturacion_model extends privilegios_model{
 	 * @param unknown_type $id_factura
 	 */
 	public function deleteAbono($id_abono, $id_factura)
-  {
+    {
 		$this->db->delete('facturas_abonos', "id_abono = '".$id_abono."'");
 
 		$data = $this->obtenTotalAbonosC($id_factura);
@@ -769,7 +958,7 @@ class facturacion_model extends privilegios_model{
 	}
 
 	private function obtenTotalAbonosC($id)
-  {
+    {
 		$data = $this->db->query("
 				SELECT
 						c.total,
@@ -797,7 +986,7 @@ class facturacion_model extends privilegios_model{
    * @return array
 	 */
 	public function getSeriesFolios($per_pag='30')
-  {
+    {
 		//paginacion
 		$params = array(
 				'result_items_per_page' => $per_pag,
@@ -807,23 +996,23 @@ class facturacion_model extends privilegios_model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		$sql = '';
-    if($this->input->get('fserie') != '')
-      $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
+        if($this->input->get('fserie') != '')
+            $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
 
 		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
 				FROM facturacion_series_folios AS fsf
 				INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
-        {$sql}
+                {$sql}
 				ORDER BY fsf.serie", $params, true);
 
-    $res = $this->db->query($query['query']);
+        $res = $this->db->query($query['query']);
 
 		$data = array(
-      'series'         => array(),
-      'total_rows'     => $query['total_rows'],
-      'items_per_page' => $params['result_items_per_page'],
-      'result_page'    => $params['result_page']
+            'series'         => array(),
+            'total_rows'     => $query['total_rows'],
+            'items_per_page' => $params['result_items_per_page'],
+            'result_page'    => $params['result_page']
 		);
 
 		if($res->num_rows() > 0)
@@ -838,13 +1027,13 @@ class facturacion_model extends privilegios_model{
 	 * @param array
 	 */
 	public function getInfoSerieFolio($id_serie_folio = '')
-  {
+    {
 		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
 
 		$res = $this->db->select('fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 				fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, fsf.es_nota_credito, e.nombre_fiscal AS empresa')
 			->from('facturacion_series_folios AS fsf')
-				->join('empresas AS e', 'e.id_empresa = fsf.id_empresa', 'inner')
+			->join('empresas AS e', 'e.id_empresa = fsf.id_empresa', 'inner')
 			->where('fsf.id_serie_folio', $id_serie_folio)->get()->result();
 		return $res;
 	}
@@ -855,15 +1044,15 @@ class facturacion_model extends privilegios_model{
    * @return array
 	 */
 	public function addSerieFolio()
-  {
-    $data	= array(
-			'id_empresa'     => $this->input->post('fid_empresa'),
-			'serie'          => strtoupper($this->input->post('fserie')),
-			'no_aprobacion'  => $this->input->post('fno_aprobacion'),
-			'folio_inicio'   => $this->input->post('ffolio_inicio'),
-			'folio_fin'      => $this->input->post('ffolio_fin'),
-			'ano_aprobacion' => $this->input->post('fano_aprobacion'),
-		);
+    {
+        $data = array(
+    		'id_empresa'     => $this->input->post('fid_empresa'),
+    		'serie'          => strtoupper($this->input->post('fserie')),
+    		'no_aprobacion'  => $this->input->post('fno_aprobacion'),
+    		'folio_inicio'   => $this->input->post('ffolio_inicio'),
+    		'folio_fin'      => $this->input->post('ffolio_fin'),
+    		'ano_aprobacion' => $this->input->post('fano_aprobacion'),
+    	);
 
 		if($this->input->post('fleyenda') !== '')
 			$data['leyenda'] = $this->input->post('fleyenda');
@@ -874,8 +1063,8 @@ class facturacion_model extends privilegios_model{
 		if($this->input->post('fleyenda2') !== '')
 			$data['leyenda2'] = $this->input->post('fleyenda2');
 
-    if(isset($_POST['fnota_credito']))
-      $data['es_nota_credito'] = 't';
+        if(isset($_POST['fnota_credito']))
+            $data['es_nota_credito'] = 't';
 
 		$this->db->insert('facturacion_series_folios', $data);
 
@@ -944,7 +1133,7 @@ class facturacion_model extends privilegios_model{
    */
 
 	public function exist($table, $sql, $return_res=false)
-  {
+    {
 		$res = $this->db->get_where($table, $sql);
 		if($res->num_rows() > 0){
 			if($return_res)
@@ -960,53 +1149,53 @@ class facturacion_model extends privilegios_model{
    |-------------------------------------------------------------------------
    */
 
-  /**
-   * Obtiene el listado de empresas para usar en peticiones Ajax.
-   */
-  public function getFacEmpresasAjax()
-  {
-    $sql = '';
-    $res = $this->db->query("
-        SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org
-        FROM empresas AS e
-        WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
-              rfc != '' AND
-              calle != '' AND
-              no_exterior != '' AND
-              colonia != '' AND
-              localidad != '' AND
-              municipio != '' AND
-              estado != '' AND
-              regimen_fiscal != '' AND
-              cer_org != '' AND
-              cer != '' AND
-              key_path != '' AND
-              pass != '' AND
-              cfdi_version != '' AND
-              status = true
-        ORDER BY nombre_fiscal ASC
-        LIMIT 20");
+    /**
+     * Obtiene el listado de empresas para usar en peticiones Ajax.
+     */
+    public function getFacEmpresasAjax()
+    {
+        $sql = '';
+        $res = $this->db->query("
+            SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org
+            FROM empresas AS e
+            WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' AND
+                  rfc != '' AND
+                  calle != '' AND
+                  no_exterior != '' AND
+                  colonia != '' AND
+                  localidad != '' AND
+                  municipio != '' AND
+                  estado != '' AND
+                  regimen_fiscal != '' AND
+                  cer_org != '' AND
+                  cer != '' AND
+                  key_path != '' AND
+                  pass != '' AND
+                  cfdi_version != '' AND
+                  status = true
+            ORDER BY nombre_fiscal ASC
+            LIMIT 20");
 
-    $this->load->library('cfdi');
+        $this->load->library('cfdi');
 
-    $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
+        $response = array();
+        if($res->num_rows() > 0){
+          foreach($res->result() as $itm){
 
-        if ($itm->cer_org !== '')
-          $itm->no_certificado = $this->cfdi->obtenNoCertificado($itm->cer_org);
+            if ($itm->cer_org !== '')
+              $itm->no_certificado = $this->cfdi->obtenNoCertificado($itm->cer_org);
 
-        $response[] = array(
-            'id' => $itm->id_empresa,
-            'label' => $itm->nombre_fiscal,
-            'value' => $itm->nombre_fiscal,
-            'item' => $itm,
-        );
-      }
+            $response[] = array(
+                'id' => $itm->id_empresa,
+                'label' => $itm->nombre_fiscal,
+                'value' => $itm->nombre_fiscal,
+                'item' => $itm,
+            );
+          }
+        }
+
+        return $response;
     }
-
-    return $response;
-  }
 
   /*
    |-------------------------------------------------------------------------
@@ -1014,102 +1203,101 @@ class facturacion_model extends privilegios_model{
    |-------------------------------------------------------------------------
    */
 
-  public function getRVP()
-  {
-    $sql = '';
-    //Filtros para buscar
-    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql = " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-    elseif($this->input->get('ffecha1') != '')
-      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
-    elseif($this->input->get('ffecha2') != '')
-      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+    public function getRVP()
+    {
+        $sql = '';
+        //Filtros para buscar
+        if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+          $sql = " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+        elseif($this->input->get('ffecha1') != '')
+          $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+        elseif($this->input->get('ffecha2') != '')
+          $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
 
-    if ($this->input->get('dfamilia') != '')
-      $sql .= " AND p.id_familia = " . $this->input->get('dfamilia');
+        if ($this->input->get('dfamilia') != '')
+          $sql .= " AND p.id_familia = " . $this->input->get('dfamilia');
 
-    // var_dump($sql);exit;
+        // var_dump($sql);exit;
 
-    $query = $this->db->query("SELECT fp.id_producto, SUM(fp.cantidad) AS total_cantidad, SUM(fp.importe) AS total_importe, p.codigo, p.nombre as producto
-                                FROM facturas_productos AS fp
-                                INNER JOIN facturas AS f ON f.id_factura = fp.id_factura
-                                INNER JOIN productos AS p ON p.id_producto = fp.id_producto
-                                WHERE f.status != 'ca' $sql
-                                GROUP BY fp.id_producto");
+        $query = $this->db->query("SELECT fp.id_producto, SUM(fp.cantidad) AS total_cantidad, SUM(fp.importe) AS total_importe, p.codigo, p.nombre as producto
+                                    FROM facturas_productos AS fp
+                                    INNER JOIN facturas AS f ON f.id_factura = fp.id_factura
+                                    INNER JOIN productos AS p ON p.id_producto = fp.id_producto
+                                    WHERE f.status != 'ca' $sql
+                                    GROUP BY fp.id_producto");
 
-    return $query->result();
+        return $query->result();
+    }
 
-  }
+    public function rvc_pdf()
+    {
+        $_GET['ffecha1'] = date("Y-m").'-01';
+        $_GET['ffecha2'] = date("Y-m-d");
 
-   public function rvc_pdf()
-   {
-      $_GET['ffecha1'] = date("Y-m").'-01';
-      $_GET['ffecha2'] = date("Y-m-d");
+        $data = $this->getFacturas('10000');
 
-      $data = $this->getFacturas('10000');
-
-      $this->load->library('mypdf');
-      // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('P', 'mm', 'Letter');
-      $pdf->show_head = true;
-      $pdf->titulo2 = 'Reporte Ventas Cliente';
+        $this->load->library('mypdf');
+        // Creación del objeto de la clase heredada
+        $pdf = new MYpdf('P', 'mm', 'Letter');
+        $pdf->show_head = true;
+        $pdf->titulo2 = 'Reporte Ventas Cliente';
 
 
-      if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
-      elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1'];
-      elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+        if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+            $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        elseif (!empty($_GET['ffecha1']))
+            $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+        elseif (!empty($_GET['ffecha2']))
+            $pdf->titulo3 = "Del ".$_GET['ffecha2'];
 
-      $pdf->AliasNbPages();
-      // $links = array('', '', '', '');
-      $pdf->SetY(30);
-      $aligns = array('C', 'C', 'C', 'C','C', 'C', 'C', 'C');
-      $widths = array(20, 25, 13, 51, 30, 25, 18, 22);
-      $header = array('Fecha', 'Serie', 'Folio', 'Cliente', 'Empresa', 'Forma de pago', 'Estado', 'Total');
-      $total = 0;
+        $pdf->AliasNbPages();
+        // $links = array('', '', '', '');
+        $pdf->SetY(30);
+        $aligns = array('C', 'C', 'C', 'C','C', 'C', 'C', 'C');
+        $widths = array(20, 25, 13, 51, 30, 25, 18, 22);
+        $header = array('Fecha', 'Serie', 'Folio', 'Cliente', 'Empresa', 'Forma de pago', 'Estado', 'Total');
+        $total = 0;
 
-      foreach($data['fact'] as $key => $item)
-      {
-        $band_head = false;
-        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        foreach($data['fact'] as $key => $item)
         {
-          $pdf->AddPage();
+            $band_head = false;
+            if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+            {
+                $pdf->AddPage();
 
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetTextColor(255,255,255);
-          $pdf->SetFillColor(160,160,160);
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
+                $pdf->SetFont('Arial','B',8);
+                $pdf->SetTextColor(255,255,255);
+                $pdf->SetFillColor(160,160,160);
+                $pdf->SetX(6);
+                $pdf->SetAligns($aligns);
+                $pdf->SetWidths($widths);
+                $pdf->Row($header, true);
+            }
+
+            $pdf->SetFont('Arial','',8);
+            $pdf->SetTextColor(0,0,0);
+
+            $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
+            $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
+            $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
+            $total += floatval($item->total);
+
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($datos, false);
         }
 
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetTextColor(0,0,0);
-
-        $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
-        $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
-        $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
-        $total += floatval($item->total);
-
         $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($datos, false);
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->Row(array('', '', '', '', '', '', 'Total:', String::formatoNumero($total)), true);
+
+        $pdf->Output('Reporte_Ventas_Cliente.pdf', 'I');
       }
 
-      $pdf->SetX(6);
-      $pdf->SetFont('Arial','B',8);
-      $pdf->SetTextColor(255,255,255);
-      $pdf->Row(array('', '', '', '', '', '', 'Total:', String::formatoNumero($total)), true);
-
-      $pdf->Output('Reporte_Ventas_Cliente.pdf', 'I');
-  }
-
-  public function rvp_pdf()
-  {
+    public function rvp_pdf()
+    {
       $data = $this->getRVP();
 
       $this->load->library('mypdf');
@@ -1161,7 +1349,414 @@ class facturacion_model extends privilegios_model{
       }
 
       $pdf->Output('Reporte_Ventas_Productos.pdf', 'I');
-  }
+    }
+
+    /*
+    |------------------------------------------------------------------------
+    | FACTURA PDF
+    |------------------------------------------------------------------------
+    */
+
+    public function generaFacturaPdf($idFactura, $path = null)
+    {
+        include(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+        $factura = $this->getInfoFactura($idFactura);
+
+        $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $factura['info']->xml));
+
+        // echo "<pre>";
+        //   var_dump($factura, $xml);
+        // echo "</pre>";exit;
+
+        $this->load->library('mypdf');
+
+        // Creación del objeto de la clase heredada
+        $pdf = new MYpdf('P', 'mm', 'Letter');
+
+        $pdf->show_head = false;
+
+        $pdf->AliasNbPages();
+        $pdf->AddPage();
+
+        //////////
+        // Logo //
+        //////////
+
+        $pdf->SetXY(30, 2);
+        $pdf->Image(APPPATH.'images/logo.png');
+
+        //////////////////////////
+        // Rfc y Regimen Fiscal //
+        //////////////////////////
+
+        // 0, 171, 72 = verde
+
+        $pdf->SetFont('helvetica','B', 18);
+        // $pdf->SetFillColor(0, 171, 72);
+        $pdf->SetTextColor(255, 255, 255);
+        // $pdf->SetXY(0, 0);
+        // $pdf->Cell(108, 15, "Factura Electrónica (CFDI)", 0, 0, 'C', 1);
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 3);
+        $pdf->Cell(108, 14, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
+
+        $pdf->SetFont('helvetica','B', 14);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 14);
+        $pdf->Cell(108, 8, "Régimen Fiscal:", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','', 12);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 8);
+        $pdf->MultiCell(108, 6, $xml->Emisor->RegimenFiscal[0]['Regimen'], 0, 'C', 0);
+
+        /////////////////////////////////////
+        // Folio Fisca, CSD, Lugar y Fecha //
+        /////////////////////////////////////
+
+        $pdf->SetFont('helvetica','B', 14);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(109, 0);
+        $pdf->Cell(108, 8, "Folio Fiscal:", 0, 0, 'R', 1);
+
+        $pdf->SetXY(109, 0);
+        $pdf->Cell(50, 8, $factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito', 0, 0, 'L', 1);
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(109, 10);
+        $pdf->Cell(108, 8, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
+
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(109, $pdf->GetY() + 8);
+        $pdf->Cell(108, 8, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(109, $pdf->GetY() + 8);
+        $pdf->Cell(108, 8, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(109, $pdf->GetY() + 9);
+        $pdf->Cell(108, 8, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+
+        $pdf->SetFont('helvetica','', 12);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(109, $pdf->GetY() + 8);
+
+        $pais   = strtoupper($xml->Emisor->DomicilioFiscal[0]['pais']);
+        $estado = strtoupper($xml->Emisor->DomicilioFiscal[0]['estado']);
+        $fecha = $xml[0]['fecha'];
+
+        $pdf->Cell(108, 8, "{$pais} {$estado} {$fecha}", 0, 0, 'R', 0);
+
+        //////////////////
+        // Rfc Receptor //
+        //////////////////
+
+        $pdf->SetFillColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 13);
+        $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 13);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Cell(216, 8, "RFC Receptor:", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 13);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 8);
+        $pdf->Cell(216, 8, $xml->Receptor[0]['rfc'], 0, 0, 'C', 0);
+
+        ///////////////
+        // Productos //
+        ///////////////
+
+        $pdf->SetFillColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 8);
+        $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+        $pdf->SetXY(0, $pdf->GetY());
+        $aligns = array('C', 'C', 'C', 'C','C');
+        $widths = array(30, 35, 91, 30, 30);
+        $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Precio Unitario', 'Importe');
+
+        $conceptos = current($xml->Conceptos);
+
+        // for ($i=0; $i < 3; $i++)
+        //   $conceptos[] = $conceptos[$i];
+
+        // echo "<pre>";
+        //   var_dump($conceptos, is_array($conceptos));
+        // echo "</pre>";exit;
+
+        if (! is_array($conceptos))
+          $conceptos = array($conceptos);
+
+        $pdf->limiteY = 250;
+
+        $pdf->setY($pdf->GetY() + 1);
+        foreach($conceptos as $key => $item)
+        {
+          $band_head = false;
+
+          if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+          {
+            if($key > 0) $pdf->AddPage();
+
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFillColor(242, 242, 242);
+            $pdf->SetX(0);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+          }
+
+          $pdf->SetFont('Arial', '', 10);
+          $pdf->SetTextColor(0,0,0);
+
+          $pdf->SetX(0);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row(array(
+            $item[0]['cantidad'],
+            $item[0]['unidad'],
+            $item[0]['descripcion'],
+            String::formatoNumero($item[0]['valorUnitario'], 3),
+            String::formatoNumero($item[0]['importe'], 3),
+          ), false);
+        }
+
+        /////////////
+        // Totales //
+        /////////////
+
+        if($pdf->GetY() + 30 >= $pdf->limiteY) //salta de pagina si exede el max
+            $pdf->AddPage();
+
+        $pdf->SetFillColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Cell(156, 30, "", 1, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(1, $pdf->GetY() + 1);
+        $pdf->Cell(154, 8, "Total con letra:", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica', '', 11);
+        $pdf->SetXY(0, $pdf->GetY() + 8);
+        $pdf->MultiCell(156, 8, $factura['info']->total_letra, 0, 'C', 0);
+
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->SetXY(1, $pdf->GetY() + 6);
+        $pdf->Cell(78, 5, $xml[0]['formaDePago'], 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->SetXY(78, $pdf->GetY());
+        $pdf->Cell(78, 5, "Pago en {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
 
 
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->SetXY(156, $pdf->GetY() - 23);
+        $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
+
+        $pdf->SetXY(186, $pdf->GetY());
+        $pdf->Cell(30, 6, String::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
+
+        // Traslados | IVA
+        $ivas = current($xml->Impuestos->Traslados);
+        $traslado11 = 0;
+        $traslado16 = 0;
+        foreach ($ivas as $key => $iva)
+        {
+          if ($iva[0]['tasa'] == '11')
+            $traslado11 = $iva[0]['importe'];
+          elseif ($iva[0]['tasa'] == '16')
+            $traslado16 = $iva[0]['importe'];
+        }
+
+        $pdf->SetXY(156, $pdf->GetY() + 6);
+        $pdf->Cell(30, 6, "IVA(11%)", 1, 0, 'C', 1);
+
+        $pdf->SetXY(186, $pdf->GetY());
+        $pdf->Cell(30, 6,String::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
+
+        $pdf->SetXY(156, $pdf->GetY() + 6);
+        $pdf->Cell(30, 6, "IVA(16%)", 1, 0, 'C', 1);
+
+        $pdf->SetXY(186, $pdf->GetY());
+        $pdf->Cell(30, 6,String::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
+
+        $pdf->SetXY(156, $pdf->GetY() + 6);
+        $pdf->Cell(30, 6, "IVA Retenido", 1, 0, 'C', 1);
+
+        $pdf->SetXY(186, $pdf->GetY());
+        $pdf->Cell(30, 6,String::formatoNumero($xml->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
+
+        $pdf->SetXY(156, $pdf->GetY() + 6);
+        $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
+
+        $pdf->SetXY(186, $pdf->GetY());
+        $pdf->Cell(30, 6,String::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
+
+        ///////////////////
+        // Observaciones //
+        ///////////////////
+
+        $pdf->SetXY(0, $pdf->GetY() + 6);
+
+        $width = (($pdf->GetStringWidth($factura['info']->observaciones) / 216) * 8) + 9;
+
+        if($pdf->GetY() + $width >= $pdf->limiteY) //salta de pagina si exede el max
+            $pdf->AddPage();
+
+        if ( ! empty($factura['info']->observaciones))
+        {
+            $pdf->SetX(0);
+            $pdf->SetFont('helvetica','B', 10);
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->Row(array('Observaciones'), true);
+
+            $pdf->SetFont('helvetica','', 9);
+            $pdf->SetXY(0, $pdf->GetY());
+            $pdf->SetAligns(array('L'));
+            $pdf->SetWidths(array(216));
+            $pdf->Row(array($factura['info']->observaciones), true, 1);
+        }
+
+        ////////////////////
+        // Timbrado Datos //
+        ////////////////////
+
+        if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+            $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetXY(10, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(196));
+        $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
+
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetY($pdf->GetY() - 3);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(196));
+        $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['selloCFD']), false, 0);
+
+        if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+            $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetXY(10, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(196));
+        $pdf->Row(array('Sello Digital del SAT:'), false, 0);
+
+        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetY($pdf->GetY() - 3);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(196));
+        $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['selloSAT']), false, 0);
+
+        /////////////
+        // QR CODE //
+        /////////////
+
+        // formato
+        // ?re=XAXX010101000&rr=XAXX010101000&tt=1234567890.123456&id=ad662d33-6934-459c-a128-BDf0393f0f44
+        // 0000001213.520000
+
+        $total = explode('.', $xml[0]['total']);
+
+        // Obtiene la diferencia de caracteres en la parte entera.
+        $diff = 10 - strlen($total[0]);
+
+        // Agrega los 0 faltantes  a la parte entera.
+        for ($i=0; $i < $diff; $i++)
+          $total[0] = "0{$total[0]}";
+
+        // Si el total no contiene decimales le asigna en la parte decimal 6 ceros.
+        if (count($total) === 1)
+        {
+          $total[1] = '000000';
+        }
+        else
+        {
+          // Obtiene la diferencia de caracteres en la parte decimal.
+          $diff = 6 - strlen($total[1]);
+
+          // Agregar los 0 restantes en la parte decimal.
+          for ($i=0; $i < $diff; $i++)
+            $total[1] = "{$total[1]}0";
+        }
+
+        $code = "?re={$xml->Emisor[0]['rfc']}";
+        $code .= "&rr={$xml->Receptor[0]['rfc']}";
+        $code .= "&tt={$total[0]}.{$total[1]}";
+        $code .= "&id={$xml->Complemento->TimbreFiscalDigital[0]['UUID']}";
+
+        // echo "<pre>";
+        //   var_dump($code, $total, $diff);
+        // echo "</pre>";exit;
+
+        QRcode::png($code, APPPATH.'media/qrtemp.png', 'H', 4);
+
+        if($pdf->GetY() + 50 >= $pdf->limiteY) //salta de pagina si exede el max
+            $pdf->AddPage();
+
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Image(APPPATH.'media/qrtemp.png');
+
+        // Elimina el QR generado temporalmente.
+        unlink(APPPATH.'media/qrtemp.png');
+
+        ////////////////////
+        // Timbrado Datos //
+        ////////////////////
+
+        $pdf->SetFont('helvetica', 'B', 9);
+        $pdf->SetXY(60, $pdf->GetY() - 59);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(145));
+        $pdf->Row(array('Cadena Original del complemento de certificación digital del SAT:'), false, 0);
+
+        $pdf->SetFont('helvetica', '', 9);
+        $cadenaOriginalSAT = "||{$xml->Complemento->TimbreFiscalDigital[0]['version']}|{$xml->Complemento->TimbreFiscalDigital[0]['UUID']}|{$xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado']}|{$xml->Complemento->TimbreFiscalDigital[0]['selloCFD']}|{$xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT']}||";
+        $pdf->SetXY(60, $pdf->GetY() - 3);
+        $pdf->Row(array($cadenaOriginalSAT), false, 0);
+
+        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(60, $pdf->GetY() + 1);
+        $pdf->Cell(80, 8, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+
+        $pdf->SetXY(140, $pdf->GetY());
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(65, 8, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+
+        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(60, $pdf->GetY() + 16);
+        $pdf->Cell(80, 8, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+
+        $pdf->SetXY(140, $pdf->GetY());
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Cell(65, 8, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
+
+        if ($path)
+          $pdf->Output($path.'Factura.pdf', 'F');
+        else
+          $pdf->Output('Factura', 'I');
+    }
 }

@@ -26,6 +26,9 @@ DOCUMENTOS:
         "Doc Seguro Camion";70;FALSE;"documentos/seguro_camion/";"copy";FALSE
         "Doc Certificado de TLC";70;FALSE;"documentos/certificado_tlc/";"copy";FALSE
         "Doc Manifiesto Camion";70;FALSE;"documentos/manifiesto_camion/";"copy";FALSE
+        "Nota Credito";70;FALSE;"notas_credito/agregar/";"file-text-alt";FALSE
+        "Verificar";70;FALSE;"facturacion/timbre_pending/";"refresh";FALSE
+        "E-mail";70;FALSE;"facturacion/enviar_documentos/";"envelope";FALSE
 
         ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
           SQL:

@@ -133,7 +133,7 @@
               <tr>
                 <td><?php echo $pallet->folio ?></td>
                 <td>
-                  <div id="draggable" class="ui-widget-content" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" style="z-index: 10;">
+                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" style="z-index: 10;">
                     <p><?php echo $pallet->no_cajas ?></p>
                   </div>
                 </td>

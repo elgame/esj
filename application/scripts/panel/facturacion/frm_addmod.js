@@ -234,19 +234,23 @@ function addProducto() {
 }
 
 function calculaTotal ($tr) {
-  var total_importes = 0,
-      total_descuentos = 0,
-      total_ivas = 0,
+  var total_importes    = 0,
+      total_descuentos  = 0,
+      total_ivas        = 0,
       total_retenciones = 0,
-      total_factura = 0;
+      total_factura     = 0;
 
   $('input#prod_importe').each(function(i, e) {
     total_importes += parseFloat($(this).val());
   });
 
+  total_importes = trunc2Dec(total_importes);
+
   $('input#prod_ddescuento').each(function(i, e) {
     total_descuentos += parseFloat($(this).val());
   });
+
+  total_descuentos = trunc2Dec(total_descuentos);
 
   var total_subtotal = parseFloat(total_importes) - parseFloat(total_descuentos);
 
