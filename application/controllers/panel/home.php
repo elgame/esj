@@ -21,27 +21,115 @@ class home extends MY_Controller {
 	}
 
 	public function index(){
-
-    $this->carabiner->js(array(
-      array('general/msgbox.js'),
+		$this->carabiner->css(array(
+			array('libs/jquery.treeview.css', 'screen')
+		));
+		$this->carabiner->js(array(
+			array('libs/jquery.treeview.js'),
+			array('general/msgbox.js'),
       array('panel/home.js'),
-    ));
+		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
 			'titulo' => 'Panel de Administración'
 		);
 
+		/*$gestor = @fopen("Catalogo de Cuentas.txt", "r");
+		if ($gestor) {
+			$idconta = 1;
+			$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
+		    while (($bufer = fgets($gestor, 4096)) !== false) {
+		    	$nivel = trim(substr($bufer, 4, 3));
+		    	if($nivel == '1'){
+		    		$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
+		    		$ids[$nivel+1] = $idconta;
+		    	}elseif ($nivel == '2') {
+		    		$ids[$nivel+1] = $idconta;
+		    	}elseif ($nivel == '3') {
+		    		$ids[$nivel+1] = $idconta;
+		    	}else
+		    		$nivel = 4;
+
+		    	$bufer = utf8_encode($bufer);
+		    	echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
+		    	$idconta++;
+		    }
+		    if (!feof($gestor)) {
+		        echo "Error: fallo inesperado de fgets()\n";
+		    }
+		    fclose($gestor);
+		}*/
+
+		$params['cuentas'] = $this->getArbolCuenta();
+
 		$this->load->library('cfdi');
 		$this->cfdi->cargaDatosFiscales(2);
 		// echo $this->cfdi->obtenCertificado($this->cfdi->path_certificado, false);
 		// echo $this->cfdi->obtenLlave($this->cfdi->path_key);
-		// echo base64_decode("LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpQcm9jLVR5cGU6IDQsRU5DUllQVEVECkRFSy1JbmZvOiBERVMtRURFMy1DQkMsQ0YyNzFGNDE1Q0NERjMzOQoKeUZVMEtVMEdNdThya21BWWZ5ZHY0WjJLOUttSkpPVHJEMDdqVWNuUWhTbmMwVVBSK0VRdCtwejkvczFxdmtmSgp5OHkyMlphUS9LNGc2TTJLVWNZZkFvWnIwZHNjSHM3MGc5eDBLZU9tdkhXS3ZFN3M2aFY2ZVpVVjZSTEdoWWgzCkQ2Q1NIS2JHdXovNlltU0JCME5DQTJZemZ0SCt6U09zV0o4b2pESzhadmd0N1RiejRza01GaXNmeStlQU9FSEQKMk1GNjJWNVZlVFg5bGhma1ZWREVmOTJvb0VSMDZjdVQ4czlKa1BXemJ1ZGVlMkZYV210U3BkNXU3NURGVlpGdApCZ2d3cU15QytRMjRUd2J5WXNWZkpQS3ViUXdsWlVvTkdyMnBlMTJaajJCOUc2aDcxbTExQ2Flam5maHhqNExECjhucS81T21uUUFvYVlvQXNJTHJ1MWhsSUJWN2dRSXBmNDMxbEJnZnczL0NjdVJTYklrVGw4WXF4aE9OVS9UdmUKNWNrVFpYYkVZb2o5MUVrems2dW5JOWg2Vm9IYjNzNGtSRml2b2E3OE9tWm5EWXJKVUp1OU9PUHpTKzhIY2FIdgo3aEtjY1R3WWJETFB1YUNWdHZjT0paek9Qb0laaCtrbXQyODdyYm55VXZ4NTlaOUd3ZjJmM0dYYzE0WTF6VjFlCkdLUWRCZlZuZWZQc1FNRHVPVHhnc1pKNmc1VXllNlc4MDFLZDJRbWk4NE8xanp6UUhjVytHRGRid2tIaFlNdFUKd2dsek8wZGJLSGxyYVdPa0NUdnNZVjJlQlBlNXZRd0xkWDNOQjBHNHBESjFhbGhtT2F3NzBYeGdSd2M2UHV2MQpSOVRtVVRjQlVjTUY2dVQwdWYzaXhkVHVaY0lMYkVyaTZVTHFvWStNaVFSQ0Z6ZEdvcEJhNTFRM1hpWFhzbGZPCnh1Y0tRbVFDTituVjQyOHFHckZaVmxzVXo4ZzBoR0hSSy95WGc1RG1rVm9MdlE4dzRBUFVCQ2s3clRIbGFQc3UKMFNQZTZDaldjdHNXT0JMdStmNWduZEMxNm44VDRxU3RBZnRLS1hGa1o0UmV3ZFNEeWwwS21BPT0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0K");
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/general/home', $params);
 		$this->load->view('panel/footer');
+	}
+
+	public function getArbolCuenta($id_submenu='NULL', $firs=true, $tipo=null, $showp=false){
+		$txt = "";
+		$bande = true;
+
+		$res = $this->db
+			->select("p.id_cuenta, p.nivel, p.id_padre, p.cuenta, p.nombre, p.tipo")
+			->from('cuentas_contpaq AS p')
+			->where($id_submenu=='NULL'? "p.id_padre is ".$id_submenu."": "p.id_padre = ".$id_submenu."")
+			->order_by('p.nombre', 'asc')
+		->get();
+		$txt .= $firs? '<ul class="treeview">': '<ul>';
+		foreach($res->result() as $data){
+			$res1 = $this->db
+				->select('Count(p.id_cuenta) AS num')
+				->from('cuentas_contpaq AS p')
+				->where("p.id_padre = '".$data->id_cuenta."'")
+			->get();
+			$data1 = $res1->row();
+
+			if($tipo != null && !is_array($tipo)){
+				$set_nombre = 'dprivilegios';
+				$set_val = set_radio($set_nombre, $data->id_cuenta, ($tipo==$data->id_cuenta? true: false));
+				$tipo_obj = 'radio';
+			}else{
+				$set_nombre = 'dprivilegios[]';
+				if(is_array($tipo))
+					$set_val = set_checkbox($set_nombre, $data->id_cuenta,
+							(array_search($data->id_cuenta, $tipo)!==false? true: false) );
+				else
+					$set_val = set_checkbox($set_nombre, $data->id_cuenta);
+				$tipo_obj = 'checkbox';
+			}
+
+			if($bande==true && $firs==true && $showp==true){
+				$txt .= '<li><label style="font-size:11px;">
+				<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="0" '.$set_val.($data->id_padre==0?  ' checked': '').'> Padre</label>
+				</li>';
+				$bande = false;
+			}
+
+			if($data1->num > 0){
+				$txt .= '<li><label style="font-size:11px;">
+					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="'.$data->id_cuenta.'" '.$set_val.'> '.$data->nombre.' - '.$data->cuenta.'</label>
+					'.$this->getArbolCuenta($data->id_cuenta, false, $tipo).'
+				</li>';
+			}else{
+				$txt .= '<li><label style="font-size:11px;">
+					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="'.$data->id_cuenta.'" '.$set_val.'> '.$data->nombre.' - '.$data->cuenta.'</label>
+				</li>';
+			}
+			$res1->free_result();
+		}
+		$txt .= '</ul>';
+		$res->free_result();
+
+		return $txt;
 	}
 
 

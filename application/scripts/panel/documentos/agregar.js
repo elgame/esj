@@ -278,6 +278,8 @@
           if (data.passes) {
             noty({"text": 'El documento se actualizo correctamente', "layout":"topRight", "type": 'success'});
 
+
+
             // Actualiza el listado de los documentos.
             $('#listadoDocs').html(data.htmlDocs)
           }

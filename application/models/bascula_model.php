@@ -493,8 +493,10 @@ class Bascula_model extends CI_Model {
       {
         $data['totales']['importe']     += floatval($caja->importe);
         $data['totales']['total']       += floatval($caja->importe);
-        $data['totales']['kilos']       += floatval($caja->kilos);
-        $data['totales']['cajas']       += floatval($caja->cajas);
+        if(!is_numeric($caja->id_bonificacion)){
+          $data['totales']['kilos']       += floatval($caja->kilos);
+          $data['totales']['cajas']       += floatval($caja->cajas);
+        }
         // $data['precio_prom'] += floatval($caja->promedio);
 
         if ($caja->status === 'p' || $caja->status === 'b')
@@ -756,6 +758,9 @@ class Bascula_model extends CI_Model {
             $pdf->Row($header, false);
           }
 
+          $pdf->SetFont('helvetica','',8);
+          $pdf->SetTextColor(0,0,0);
+
           $promedio += $caja->promedio;
           $cajas    += $caja->cajas;
           $kilos    += $caja->kilos;
@@ -823,10 +828,10 @@ class Bascula_model extends CI_Model {
       $pdf->SetAligns(array('C', 'C', 'C', 'C'));
       $pdf->SetWidths(array(50, 50, 50, 50));
       $pdf->Row(array(
-        String::formatoNumero($totalPagado),
-        String::formatoNumero($totalNoPagado),
-        String::formatoNumero($data['cancelados']),
-        String::formatoNumero($totalImporte)), false);
+        String::formatoNumero($totalPagado, 2, '$', false),
+        String::formatoNumero($totalNoPagado, 2, '$', false),
+        String::formatoNumero($data['cancelados'], 2, '$', false),
+        String::formatoNumero($totalImporte, 2, '$', false)), false);
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
@@ -978,8 +983,8 @@ class Bascula_model extends CI_Model {
               substr($proveedor->proveedor, 0, 42),
               String::formatoNumero($proveedor->kilos, 2, ''),
               String::formatoNumero($proveedor->cajas, 2, ''),
-              String::formatoNumero($proveedor->precio),
-              String::formatoNumero($proveedor->importe)
+              String::formatoNumero($proveedor->precio, 2, '$', false),
+              String::formatoNumero($proveedor->importe, 2, '$', false)
             ), false, false);
         $total_cajas   += $proveedor->cajas;
         $total_kilos   += $proveedor->kilos;
@@ -998,8 +1003,8 @@ class Bascula_model extends CI_Model {
             '',
             String::formatoNumero($total_kilos, 2, ''),
             String::formatoNumero($total_cajas, 2, ''),
-            String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1)),
-            String::formatoNumero($total_importe)
+            String::formatoNumero($total_importe/($total_kilos>0? $total_kilos: 1), 2, '$', false),
+            String::formatoNumero($total_importe, 2, '$', false)
           ), false, false);
 
       //Total de pagadas no pagadas
@@ -1009,15 +1014,15 @@ class Bascula_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(30, 45));
-      $pdf->Row(array('Pagados', String::formatoNumero($data['pagados_yno']->pagadas)), false);
+      $pdf->Row(array('Pagados', String::formatoNumero($data['pagados_yno']->pagadas, 2, '$', false)), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
-      $pdf->Row(array('No Pagados', String::formatoNumero($data['pagados_yno']->pendientes)), false);
+      $pdf->Row(array('No Pagados', String::formatoNumero($data['pagados_yno']->pendientes, 2, '$', false)), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(6);
-      $pdf->Row(array('Total', String::formatoNumero( ($data['pagados_yno']->pendientes+$data['pagados_yno']->pagadas) )), false);
+      $pdf->Row(array('Total', String::formatoNumero( ($data['pagados_yno']->pendientes+$data['pagados_yno']->pagadas), 2, '$', false )), false);
 
 
       $pdf->Output('REPORTE_ACUMULADOS_PROD_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');

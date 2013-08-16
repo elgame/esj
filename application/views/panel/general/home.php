@@ -39,7 +39,7 @@
           <div><?php echo $bajos_inventario; ?></div>
         </a>
 			</div> -->
-
+      <?php echo $cuentas; ?>
       <div class="row-fluid sortable">
         <div class="box span6">
           <div class="box-header well">

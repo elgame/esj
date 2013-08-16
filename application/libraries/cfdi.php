@@ -175,11 +175,11 @@ class cfdi{
     $datos['comprobante']['tipoDeComprobante']    = $data['tipoDeComprobante'];
     $datos['comprobante']['formaDePago']          = $data['formaDePago'];
     $datos['comprobante']['condicionesDePago']    = $data['condicionesDePago'];
-    $datos['comprobante']['subTotal']             = $data['subTotal'];
+    $datos['comprobante']['subTotal']             = (float)$data['subTotal'];
     // $datos['comprobante']['descuento']            = $data['descuento'];
     // $datos['comprobante']['TipoCambio']           = $data['TipoCambio'];
     // $datos['comprobante']['Moneda']               = $data['Moneda'];
-    $datos['comprobante']['total']                = $data['total'];
+    $datos['comprobante']['total']                = (float)$data['total'];
     $datos['comprobante']['metodoDePago']         = $data['metodoDePago'];
     $datos['comprobante']['LugarExpedición']      = $this->municipio.', '.$this->estado;
     $datos['comprobante']['NumCtaPago']           = $data['NumCtaPago'];
@@ -655,8 +655,8 @@ class cfdi{
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬noCertificado="'.$data['comprobante']['noCertificado'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬certificado="'.$data['comprobante']['certificado'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬condicionesDePago="'.$data['comprobante']['condicionesDePago'].'" ';
-    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬subTotal="'.$data['comprobante']['subTotal'].'" ';
-    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.$data['comprobante']['total'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬subTotal="'.(float)$data['comprobante']['subTotal'].'" ';
+    $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.(float)$data['comprobante']['total'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬tipoDeComprobante="'.$data['comprobante']['tipoDeComprobante'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬metodoDePago="'.$data['comprobante']['metodoDePago'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬LugarExpedicion="'.$this->municipio.', '.$this->estado.'" ';

@@ -142,6 +142,7 @@ class cuentas_cobrar extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('cuentas_cobrar_model');
+    $this->load->model('banco_cuentas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Agregar abonos');
@@ -171,6 +172,8 @@ class cuentas_cobrar extends MY_Controller {
         $params['data'] = array('saldo' => $_GET['total']);
       else  
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
+      //Cuentas de banco
+      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
 
       $params['template'] = $this->load->view('panel/cuentas_cobrar/tpl_agregar_abono', $params, true);;
     }else
@@ -211,6 +214,9 @@ class cuentas_cobrar extends MY_Controller {
               'rules'   => 'required|max_length[200]'),
         array('field'   => 'dmonto',
               'label'   => 'Monto',
+              'rules'   => 'required|numeric'),
+        array('field'   => 'dcuenta',
+              'label'   => 'Cuenta Bancaria',
               'rules'   => 'required|numeric'),
     );
     $this->form_validation->set_rules($rules);

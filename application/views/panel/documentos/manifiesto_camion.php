@@ -34,7 +34,7 @@
       <div class="control-group">
         <label class="control-label" for="dfecha_embarque">Fecha de Embarque</label>
         <div class="controls">
-          <input type="date" name="dfecha_embarque" class="span6" id="dfecha_embarque" value="<?php echo set_value('dfecha_embarque', isset($dataDocumento->fecha_embarque) ? $dataDocumento->fecha_embarque : $dataEmbarque['info'][0]->fecha_embarque); ?>">
+          <input type="date" name="dfecha_embarque" class="span6" id="dfecha_embarque" value="<?php echo set_value('dfecha_embarque', isset($dataDocumento->fecha_embarque) ? $dataDocumento->fecha_embarque : isset($dataEmbarque['info'][0]->fecha_embarque) ? $dataEmbarque['info'][0]->fecha_embarque : date('Y-m-d') ); ?>">
         </div>
       </div><!--/control-group -->
 
@@ -75,21 +75,26 @@
       <div class="control-group">
         <label class="control-label" for="dmc_camion_placas">Camion Placas</label>
         <div class="controls">
-          <input type="text" name="dmc_camion_placas" class="span6" id="dmc_camion_placas" value="<?php echo set_value('dmc_camion_placas', isset($dataDocumento->camion_placas) ? $dataDocumento->camion_placas : $dataManChofer->camion_placas); ?>">
+          <input type="text" name="dmc_camion_placas" class="span6" id="dmc_camion_placas" value="<?php echo set_value('dmc_camion_placas', isset($dataDocumento->camion_placas) ? $dataDocumento->camion_placas : isset($dataManChofer->camion_placas) ? $dataManChofer->camion_placas : ''); ?>">
         </div>
       </div><!--/control-group -->
 
       <div class="control-group">
         <label class="control-label" for="dmc_caja_no">Caja No</label>
         <div class="controls">
-          <input type="text" name="dmc_caja_no" class="span6" id="dmc_caja_no" value="<?php echo set_value('dmc_caja_no', isset($dataDocumento->caja_no) ? $dataDocumento->caja_no : $dataManChofer->camion_placas_termo.' NUMERO ECONOMICO '.$dataManChofer->camion_placas_termo_econ); ?>">
+
+          <?php
+            $caja_no =  isset($dataManChofer->camion_placas_termo) && isset($dataManChofer->camion_placas_termo_econ) ? $dataManChofer->camion_placas_termo.' NUMERO ECONOMICO '.$dataManChofer->camion_placas_termo_econ : '';
+           ?>
+
+          <input type="text" name="dmc_caja_no" class="span6" id="dmc_caja_no" value="<?php echo set_value('dmc_caja_no', isset($dataDocumento->caja_no) ? $dataDocumento->caja_no : $caja_no); ?>">
         </div>
       </div><!--/control-group -->
 
       <div class="control-group">
         <label class="control-label" for="dmc_linea_transporte">Linea de Transporte</label>
         <div class="controls">
-          <input type="text" name="dmc_linea_transporte" class="span6" id="dmc_linea_transporte" value="<?php echo set_value('dmc_linea_transporte', isset($dataDocumento->linea_transporte) ? $dataDocumento->linea_transporte : $dataManChofer->linea_trans); ?>">
+          <input type="text" name="dmc_linea_transporte" class="span6" id="dmc_linea_transporte" value="<?php echo set_value('dmc_linea_transporte', isset($dataDocumento->linea_transporte) ? $dataDocumento->linea_transporte : isset($dataManChofer->linea_trans) ? $dataManChofer->linea_trans : ''); ?>">
         </div>
       </div><!--/control-group -->
 
@@ -103,7 +108,7 @@
       <div class="control-group">
         <label class="control-label" for="dmc_razon_social">Nombre o Razon Social</label>
         <div class="controls">
-          <input type="text" name="dmc_razon_social" class="span6" id="dmc_razon_social" value="<?php echo set_value('dmc_razon_social', isset($dataDocumento->razon_social) ? $dataDocumento->razon_social : $dataManChofer->linea_trans); ?>">
+          <input type="text" name="dmc_razon_social" class="span6" id="dmc_razon_social" value="<?php echo set_value('dmc_razon_social', isset($dataDocumento->razon_social) ? $dataDocumento->razon_social : isset($dataManChofer->linea_trans) ? $dataManChofer->linea_trans : ''); ?>">
         </div>
       </div><!--/control-group -->
 

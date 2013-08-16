@@ -1,3 +1,43 @@
+SQL
+  Tabla facturacion:
+    poliza_diario boolean NOT NULL DEFAULT false,
+    COMMENT ON COLUMN facturacion.poliza_diario IS 'si es false no se a registrado, si es true ya se registro, tambien depende de si esta cancelada o pendiente';
+
+    CREATE TABLE banco_cuentas
+    (
+      id_cuenta serial NOT NULL,
+      numero character varying(20),
+      alias character varying(80) NOT NULL,
+      cuenta_cpi character varying(12), -- cuenta afectable del contpaqi
+      status character varying(2) NOT NULL DEFAULT 'ac'::character varying, -- ac:activo, e:eliminado
+      CONSTRAINT banco_cuentas_pkey PRIMARY KEY (id_cuenta)
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE banco_cuentas OWNER TO programa;
+    COMMENT ON COLUMN banco_cuentas.cuenta_cpi IS 'cuenta afectable del contpaqi';
+    COMMENT ON COLUMN banco_cuentas.status IS 'ac:activo, e:eliminado';
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('AFIRME CTA 1114100..', '11200013');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BAJIO CTA 702014', '11200007');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BANAMEX CTA 514166..', '11200011');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BANAMEX PRODUCTIVA..', '11200012');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BANAMEX SA CTA 514..', '11200002');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BANCOMER CTA 92214', '11200001');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('BANORTE CTA 33360', '11200006');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('HSBC CTA 0763', '11200005');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('HSBC CTA 4202', '11200010');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('SANTANDER CTA 2202', '11200008');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('SANTANDER CTA 5250..', '11200003');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('SANTANDER CTA 6117', '11200009');
+    INSERT INTO banco_cuentas (alias, cuenta_cpi) VALUES ('SANTANDER NUEVA 98..', '11200004');
+
+    Tabla facturacion_abonos:
+      poliza_ingreso boolean NOT NULL DEFAULT false,
+      id_cuenta integer NOT NULL
+      COMMENT ON COLUMN facturacion_abonos.poliza_ingreso IS 'si es false no se a registrado, si es true ya se registro (exportado al contpaq)';
+
+
 EMPRESAS:
         ☐ Cuando agrego una empresa y la modifico cambiando los archivos .CER y .KEY la clave la cambia como "aaa" y aparte que no agrega los nuevos archivos .CER y .KEY
 

@@ -53,7 +53,9 @@
               $params['dataManChofer'] = $this->documentos_model->getJsonDataDocus($factura['info']->id_factura, 1);
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, 2);
 
-              $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
+              $params['dataClasificaciones'] = array('clasificaciones' => array());
+              if(count($params['dataEmbarque']) > 0)
+                $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
             }
 
             // Carga la vista del documento.
