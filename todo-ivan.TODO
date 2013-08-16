@@ -55,25 +55,25 @@ DOCUMENTOS:
                 SQL:
                      -- View: embarque_pallets_libres
 
-                      -- DROP VIEW embarque_pallets_libres;
+                    -- DROP VIEW embarque_pallets_libres;
 
-                      CREATE OR REPLACE VIEW embarque_pallets_libres AS
-                       SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
-                         FROM rastria_pallets rp
-                         LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
-                         JOIN ( SELECT rpr.id_pallet, cl.nombre
-                            FROM rastria_pallets_rendimiento rpr
-                         JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
-                        GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
-                        ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
-                        WHERE fdp.id_embarque IS NULL
-                        GROUP BY rp.id_pallet, rp.no_cajas
-                        ORDER BY rp.id_pallet DESC;
+                    CREATE OR REPLACE VIEW embarque_pallets_libres AS
+                     SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
+                       FROM rastria_pallets rp
+                       LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
+                       JOIN ( SELECT rpr.id_pallet, cl.nombre
+                          FROM rastria_pallets_rendimiento rpr
+                       JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+                      GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+                      ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
+                      WHERE fdp.id_embarque IS NULL
+                      GROUP BY rp.id_pallet, rp.no_cajas
+                      ORDER BY rp.id_pallet DESC;
 
-                      ALTER TABLE embarque_pallets_libres
-                        OWNER TO programa;
-                      COMMENT ON VIEW embarque_pallets_libres
-                        IS 'Muestra los pallets que no han sido colocados en embarque.';
+                    ALTER TABLE embarque_pallets_libres
+                      OWNER TO programa;
+                    COMMENT ON VIEW embarque_pallets_libres
+                      IS 'Muestra los pallets que no han sido colocados en embarque.';
 
           ✔ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json. @done (13-07-26 12:33)
           ✔ utilizar el drag&drop @done (13-07-26 12:33)
