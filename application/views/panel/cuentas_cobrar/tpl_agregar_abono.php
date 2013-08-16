@@ -23,6 +23,21 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="dcuenta">Cuenta Bancaria</label>
+                <div class="controls">
+                  <select name="dcuenta" id="dcuenta">
+                <?php 
+                foreach ($cuentas['cuentas'] as $key => $value) {
+                ?>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias; ?></option>
+                <?php
+                }
+                ?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="dconcepto">Descripcion</label>
                 <div class="controls">
                   <input type="text" name="dconcepto" class="span12" id="dconcepto" value="<?php echo set_value('dconcepto'); ?>">

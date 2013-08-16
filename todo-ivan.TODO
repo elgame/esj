@@ -7,6 +7,15 @@ Notas de Credito:
 DOCUMENTOS:
 
       TABLA RASTRIA_DOCUMENTOS
+      UPDATE rastria_documentos SET nombre = 'MANIFIESTO DEL CHOFER',url_form='panel/documentos/manifiesto_chofer',url_print='panel/documentos/imprime_manifiesto_chofer' WHERE id_documento = 1;
+      UPDATE rastria_documentos SET nombre = 'ACOMODO DEL EMBARQUE',url_form='panel/documentos/acomodo_embarque',url_print='panel/documentos/imprime_embarque' WHERE id_documento = 2;
+      UPDATE rastria_documentos SET nombre = 'CHOFER COPIA DEL IFE',url_form='panel/documentos/chofer_copia_ife',url_print='' WHERE id_documento = 3;
+      UPDATE rastria_documentos SET nombre = 'CHOFER COPIA LICENCIA',url_form='panel/documentos/chofer_copia_licencia',url_print='' WHERE id_documento = 4;
+      UPDATE rastria_documentos SET nombre = 'CHOFER FOTO FIRMA MANIFIESTO',url_form='panel/documentos/chofer_foto_firma_manifiesto',url_print='' WHERE id_documento = 5;
+      UPDATE rastria_documentos SET nombre = 'SEGURO CAMION',url_form='panel/documentos/seguro_camion',url_print='' WHERE id_documento = 6;
+      UPDATE rastria_documentos SET nombre = 'CERTIFICADO DE TLC',url_form='panel/documentos/certificado_tlc',url_print='panel/documentos/imprime_certificado_tlc' WHERE id_documento = 7;
+      UPDATE rastria_documentos SET nombre = 'MANIFIESTO DEL CAMION',url_form='panel/documentos/manifiesto_camion',url_print='panel/documentos/imprime_manifiesto_camion' WHERE id_documento = 8;
+
       "1";"MANIFIESTO DEL CHOFER";"panel/documentos/manifiesto_chofer";"panel/documentos/imprime_manifiesto_chofer"
       "2";"ACOMODO DEL EMBARQUE";"panel/documentos/acomodo_embarque";"panel/documentos/imprime_embarque"
       "3";"CHOFER COPIA DEL IFE";"panel/documentos/chofer_copia_ife";""
@@ -17,6 +26,23 @@ DOCUMENTOS:
       "8";"MANIFIESTO DEL CAMION";"panel/documentos/manifiesto_camion";"panel/documentos/imprime_manifiesto_camion"
 
       PRIVILEGIOS:
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Manifiesto Chofer', 70, FALSE, 'documentos/manifiesto_chofer/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Chofer Foto Firma Manifiesto', 70, FALSE, 'documentos/chofer_foto_firma_manifiesto/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Acomodo Embarque', 70, FALSE, 'documentos/acomodo_embarque/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Finalizar Documentos', 70, FALSE, 'documentos/finalizar_docs/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Chofer Copia del IFE', 70, FALSE, 'documentos/chofer_copia_ife/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Chofer Copia Licencia', 70, FALSE, 'documentos/chofer_copia_licencia/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Seguro Camion', 70, FALSE, 'documentos/seguro_camion/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Certificado de TLC', 70, FALSE, 'documentos/certificado_tlc/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Doc Manifiesto Camion', 70, FALSE, 'documentos/manifiesto_camion/', 'copy', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Nota Credito', 70, FALSE, 'notas_credito/agregar/', 'file-text-alt', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Verificar', 70, FALSE, 'facturacion/timbre_pending/', 'refresh', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('E-mail', 70, FALSE, 'facturacion/enviar_documentos/', 'envelope', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Pagar',70,FALSE,'facturacion/pagar/','credit-card',FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cancelar',70,FALSE,'facturacion/cancelar/','ban-circle',FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Imprimir',70,FALSE,'facturacion/imprimir/','print',FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Documentos',70,FALSE,'documentos/agregar/','copy',FALSE);
+
        "Doc Manifiesto Chofer";70;FALSE;"documentos/manifiesto_chofer/";"copy";FALSE
         "Doc Chofer Foto Firma Manifiesto";70;FALSE;"documentos/chofer_foto_firma_manifiesto/";"copy";FALSE
         "Doc Acomodo Embarque";70;FALSE;"documentos/acomodo_embarque/";"copy";FALSE
@@ -29,6 +55,10 @@ DOCUMENTOS:
         "Nota Credito";70;FALSE;"notas_credito/agregar/";"file-text-alt";FALSE
         "Verificar";70;FALSE;"facturacion/timbre_pending/";"refresh";FALSE
         "E-mail";70;FALSE;"facturacion/enviar_documentos/";"envelope";FALSE
+        "Pagar";70;FALSE;"facturacion/pagar/";"credit-card";FALSE
+        "Cancelar";70;FALSE;"facturacion/cancelar/";"ban-circle";FALSE
+        "Imprimir";70;FALSE;"facturacion/imprimir/";"print";FALSE
+        "Documentos";70;FALSE;"documentos/agregar/";"copy";FALSE
 
         ✔ Agregar un campo en facturacion que indique si los documentos de esa factura ya se finalizaron. @done (13-07-29 09:46)
           SQL:
@@ -67,7 +97,7 @@ DOCUMENTOS:
                         GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
                         ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
                         WHERE fdp.id_embarque IS NULL
-                        GROUP BY rp.id_pallet, rp.no_cajas
+                        GROUP BY rp.id_pallet, rp.no_cajas, rp.folio
                         ORDER BY rp.id_pallet DESC;
 
                       ALTER TABLE embarque_pallets_libres

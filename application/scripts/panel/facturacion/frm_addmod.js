@@ -252,7 +252,7 @@ function calculaTotal ($tr) {
 
   total_descuentos = trunc2Dec(total_descuentos);
 
-  var total_subtotal = parseFloat(total_importes) - parseFloat(total_descuentos);
+  var total_subtotal = trunc2Dec(parseFloat(total_importes) - parseFloat(total_descuentos));
 
   $('input#prod_diva_total').each(function(i, e) {
     total_ivas += parseFloat($(this).val());
@@ -262,7 +262,7 @@ function calculaTotal ($tr) {
     total_retenciones += parseFloat($(this).val());
   });
 
-  total_factura = parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones));
+  total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
 
   $('#importe-format').html(util.darFormatoNum(total_importes));
   $('#total_importe').val(total_importes);

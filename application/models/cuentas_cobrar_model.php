@@ -794,7 +794,9 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 	}
 
-	public function addAbono($data=null){
+	public function addAbono($data=null, $id=null){
+		$id = $id==null? $this->input->get('id') : $id; //id factura o nota de venta
+
 		if ($this->input->get('tipo') == 'f') {
 			$camps = array('id_factura', 'facturacion_abonos', 'facturacion');
 		}else{
@@ -802,13 +804,14 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 
 		if ($data == null) {
-			$data = array('fecha'    => $this->input->post('dfecha'),
-										'concepto' => $this->input->post('dconcepto'),
-										'total'    => $this->input->post('dmonto'));
+			$data = array('fecha'     => $this->input->post('dfecha'),
+										'concepto'  => $this->input->post('dconcepto'),
+										'total'     => $this->input->post('dmonto'),
+										'id_cuenta' => $this->input->post('dcuenta') );
 		}
 
 		$pagada = false;
-		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($this->input->get('id'));
+		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($id);
 		if ($inf_factura['saldo'] <= $data['total']){ //se ajusta
 			$data['total'] -= $data['total']-$inf_factura['saldo'];
 			$pagada = true;
@@ -816,7 +819,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 
 		$data = array(
-			$camps[0]  => $this->input->get('id'), 
+			$camps[0]  => $id, 
 			'fecha'    => $data['fecha'],
 			'concepto' => $data['concepto'],
 			'total'    => $data['total']);
@@ -826,7 +829,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		//verifica si la factura se pago, se cambia el status
 		if($pagada){
-			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$_GET['id']}");
+			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
 		}
 
 		return $data;
