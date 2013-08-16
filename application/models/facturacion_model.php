@@ -721,7 +721,7 @@ class facturacion_model extends privilegios_model{
           // Datos Correo //
           //////////////////
 
-            $asunto = 'Ha recibido una COMPROBANTE FISCAL DIGITAL de CHONITA BANANAS S.P.R. DE R.L.';
+            $asunto = 'Ha recibido una COMPROBANTE FISCAL DIGITAL de {nombre_empresa}';
 
             $tipoFactura = is_null($factura['info']->id_nc) ? 'Factura': 'Nota de Crédito';
 
@@ -729,10 +729,10 @@ class facturacion_model extends privilegios_model{
             if ($factura['info']->status_timbrado === "t")
             {
                 $altBody = "Estimado Cliente: {$factura['info']->cliente->nombre_fiscal}. Usted está recibiendo un comprobante fiscal digital ({$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}) de
-                CHONITA BANANAS, SPR DE RL]";
+                {nombre_empresa}]";
                 $body = "
                 <p>Estimado Cliente: <strong>{$factura['info']->cliente->nombre_fiscal}</strong></p>
-                <p>Usted está recibiendo un comprobante fiscal digital ({$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}) de CHONITA BANANAS, SPR DE RL</p>
+                <p>Usted está recibiendo un comprobante fiscal digital ({$tipoFactura} {$factura['info']->serie}-{$factura['info']->folio}) de {nombre_empresa}</p>
                 ";
             }
             elseif ($factura['info']->status_timbrado === "ca")
@@ -744,28 +744,29 @@ class facturacion_model extends privilegios_model{
                 ";
             }
 
+            /*<p>Si por algun motivo, desea obtener nuevamente su factura puede descargarla directamente de nuestra pagina en la seccion Facturación.<br>
+                <a href="http://www.chonitabananas.com/es/facturacion/">www.chonitabananas.com</a></p>*/
             $body .= '
                 <p>Si usted desea que llegue el comprobante fiscal a otro correo electronico notifiquelo a: <br>
-                  administracion@chonitabananas.com</p>
-                <p>Si por algun motivo, desea obtener nuevamente su factura puede descargarla directamente de nuestra pagina en la seccion Facturación.<br>
-                <a href="http://www.chonitabananas.com/es/facturacion/">www.chonitabananas.com</a></p>
+                  empaquesanjorge@hotmail.com</p>
+                
                 <br><br>
                 <p>De acuerdo a la reglamentación del Servicio de Administración Tributaria (SAT) publicada en el Diario Oficial de la Federación (RMISC 2004) el 31 de mayo del 2004, la factura electrónica es 100% valida y legal.
                   A partir de ahora la entrega del documento fiscal (FACTURA ELECTRONICA) será emitida y entregada por correo electrónico a nuestros socios de negocio.
                   Cabe destacar que la factura electrónica se entregará en formato PDF y archivo XML, el cual podrá imprimir libremente e incluirla en su contabilidad (Articulo 29, Fracción IV de CFF), resguardar la impresión y archivo XML por un periodo de 5 años.
                   Importante: Contenido de la Factura Electrónica
                   En el anexo 20 del Diario Oficial de la Federación, publicado el 1 de septiembre de 2004, en párrafo 2.22.8, se estipula que la impresión de la factura electrónica, que además de los datos fiscales y comerciales, deberá contener la cadena original, el certificado de sello digital, el sello digital y la leyenda: “Este documento es una representación impresa de un CFD”.
-                  <br><strong>Sistema de facturacion electrónica - Facturacion "Chonita Bananas"</strong></p>
+                  <br><strong>Sistema de facturacion electrónica - Facturacion "{nombre_empresa}"</strong></p>
                 ';
 
             //////////////////////
             // Datos del Emisor //
             //////////////////////
 
-            $correoEmisorEm = ""; // Correo con el q se emitira el correo.
-            $nombreEmisor   = "Nombre Emisor";
-            $correoEmisor   = ""; // Correo para el auth.
-            $contrasena     = ""; // Contraseña cd $correEmisor
+            $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+            $nombreEmisor   = "{nombre_empresa}";
+            $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
+            $contrasena     = "s4nj0rg3"; // Contraseña cd $correEmisor
 
             ////////////////////////
             // Datos del Receptor //

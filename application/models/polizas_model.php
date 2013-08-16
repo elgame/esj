@@ -167,6 +167,9 @@ class polizas_model extends CI_Model {
           file_put_contents(APPPATH.'media/polizas/polizadiario.txt', $response['data']);
         }
       }
+    }elseif ($this->input->get('ftipo') == '1')  //Polizas Ingresos
+    {
+      # code...
     }
 
     return $response;
