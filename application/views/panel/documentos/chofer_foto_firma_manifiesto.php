@@ -36,7 +36,7 @@
           <?php if (isset($dataDocumento->url)) { ?>
             <br>
             <div class="row-fluid">
-              <a class="btn btn-success btn-large span12" href="<?php echo str_replace('\\', '', base_url($dataDocumento->url)) ?>" target="_BLANK">Ver</a>
+              <a href="<?php echo str_replace('\\', '', base_url($dataDocumento->url)) ?>" class="btn btn-success btn-large span12" rel="superbox-80x600">Ver</a>
             </div>
           <?php } ?>
         </div>

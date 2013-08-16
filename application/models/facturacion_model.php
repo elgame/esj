@@ -74,7 +74,7 @@ class facturacion_model extends privilegios_model{
 	 * Obtiene la informacion de una factura
 	 */
 	public function getInfoFactura($idFactura, $info_basic=false)
-    {
+  {
 		$res = $this->db
             ->select("*")
             ->from('facturacion')
@@ -104,7 +104,7 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi')
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->where('id_factura = ' . $idFactura)

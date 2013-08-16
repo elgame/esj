@@ -83,6 +83,7 @@ class documentos extends MY_Controller {
       $this->carabiner->js(array(
           array('libs/jquery.numeric.js'),
           array('libs/jquery.dataTables.min.js'),
+          array('general/supermodal.js'),
           array('general/keyjump.js'),
           array('general/util.js'),
           array('panel/documentos/agregar.js'),

@@ -35,14 +35,15 @@ class documentos_model extends CI_Model {
     * @param  string $idDocumento
     * @return boolean
     */
-  private function updateDocumento(Array $data, $idFactura, $idDocumento)
+  private function updateDocumento($data, $idFactura, $idDocumento, $status = 't')
   {
     // Convierte los datos del documento a json.
-    $json = json_encode($data);
+    if (is_array($data))
+      $data = json_encode($data);
 
     $data = array(
-      'data'   => $json,
-      'status' => 't'
+      'data'   => $data,
+      'status' => $status
     );
 
     // Actualiza los datos del documento.
@@ -121,17 +122,28 @@ class documentos_model extends CI_Model {
         //   var_dump($data['chofer']['info']->url_licencia);
         // echo "</pre>";exit;
 
+        $this->load->model('facturacion_model');
+
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+
+        // Si ya existe los documentos en la carpeta de la factura entonces
+        // los elimina.
+        $files = array_diff(scandir($path), array('..', '.'));
+        foreach ($files as $f)
+        {
+          $ff = explode('.', $f);
+
+          if ($ff[0] === 'CHOFER COPIA LICENCIA' || $ff[0] === 'CHOFER COPIA DEL IFE')
+            unlink($path.$ff[0].'.'.$ff[1]);
+        }
+
         // Si el chofer cuenta con la licencia o ife.
         if ($data['chofer']['info']->url_licencia !== null || $data['chofer']['info']->url_ife !== null)
         {
-          $this->load->model('facturacion_model');
-
-          // Obtiene la informacion de la factura.
-          $factura = $this->facturacion_model->getInfoFactura($idFactura);
-
-          // Obtiene la ruta donde se guardan los documentos del cliente.
-          $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
-
           // Si tiene la licencia la copea.
           if ($data['chofer']['info']->url_licencia)
           {
@@ -145,6 +157,8 @@ class documentos_model extends CI_Model {
             // Actualiza el documento copia licencia para la factura.
             $this->updateDocumento($licencia, $idFactura, 4);
           }
+          else
+            $this->updateDocumento(null, $idFactura, 4, 'f');
 
           // Si tiene la ife la copea.
           if ($data['chofer']['info']->url_ife)
@@ -159,6 +173,8 @@ class documentos_model extends CI_Model {
             // Actualiza el documento copia ife para la factura.
             $this->updateDocumento($ife, $idFactura, 3);
           }
+          else
+            $this->updateDocumento(null, $idFactura, 3, 'f');
         }
       }
 
@@ -773,7 +789,11 @@ class documentos_model extends CI_Model {
    */
   public function pdfManifiestoDelChofer($idFactura, $idDocumento)
   {
+    $this->load->model('facturacion_model');
+
     $data = $this->getJsonDataDocus($idFactura, $idDocumento);
+
+    $dataFactura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // echo "<pre>";
     //   var_dump($data);
@@ -809,7 +829,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetFont('Arial','B',12);
     $pdf->SetXY(115, 35);
-    $pdf->Cell(80, 6, 'FOLIO FACTURA :' . $data->folio, 0, 0, 'C');
+    $pdf->Cell(80, 6, 'FOLIO FACTURA: ' . $dataFactura['info']->serie . $data->folio, 0, 0, 'C');
 
     $pdf->SetXY(10, 45);
     $pdf->SetFillColor(146,208,80);
@@ -1040,7 +1060,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetXY(167, 3);
     $pdf->SetFont('Arial','B',9);
-    $pdf->SetFillColor(34, 34, 34);
+    $pdf->SetFillColor(146,208,80);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->Cell(40, 6, 'CTRL. DE EMBARQUE', 1, 0, 'C', 1);
 
@@ -1056,7 +1076,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(40, 6, $jsonData->fecha, 1, 0, 'C', 1);
 
     $pdf->SetXY(7, 33);
-    $pdf->SetFillColor(34, 34, 34);
+    $pdf->SetFillColor(146,208,80);
     $pdf->SetTextColor(255, 255, 255);
     $pdf->Cell(200, 6, 'DATOS DEL EMBARQUE', 1, 0, 'C', 1);
 

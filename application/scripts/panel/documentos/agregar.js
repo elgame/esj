@@ -188,8 +188,9 @@
 
 
                   if (data.chofer.info.url_ife === null || data.chofer.info.url_licencia === null) {
-
                     $('#alertChofer').css('display', 'block');
+                  } else {
+                    $('#alertChofer').css('display', 'none');
                   }
 
                 } else {
@@ -277,8 +278,6 @@
           // Si se actualiza correctamente el documento.
           if (data.passes) {
             noty({"text": 'El documento se actualizo correctamente', "layout":"topRight", "type": 'success'});
-
-
 
             // Actualiza el listado de los documentos.
             $('#listadoDocs').html(data.htmlDocs)

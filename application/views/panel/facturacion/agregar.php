@@ -165,7 +165,7 @@
                 <label class="control-label" for="dcondicion_pago">Condición de pago</label>
                 <div class="controls">
                   <select name="dcondicion_pago" class="span9" id="dcondicion_pago">
-                    <option value="co" <?php echo set_select('dcondicion_pago', 'co'); ?>>Contado</option>
+                    <!-- <option value="co" <?php //echo set_select('dcondicion_pago', 'co'); ?>>Contado</option> -->
                     <option value="cr" <?php echo set_select('dcondicion_pago', 'cr'); ?>>Credito</option>
                   </select>
                 </div>

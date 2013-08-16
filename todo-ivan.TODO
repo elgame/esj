@@ -1,3 +1,14 @@
+Correcciones (Facturacion y Documentos):
+    ✔ Facturacion. Quitar la condicion de pago "Contado". @done (13-08-16 16:05)
+    ✔ En el documento manifiesto chofer al cargar el ticket si el chofer no tiene documentos eliminarlo en caso de que tenga. @done (13-08-16 17:06)
+    ✔ Quitar el mensaje si el chofer tiene documentos. @done (13-08-16 17:09)
+    ✔ Ponerle en el pdf de manifiesto chofer la serie junto al folio. @done (13-08-16 16:15)
+    ✔ Los archivos "ver" abrirlos en el supermodal con un 90% de ancho. @done (13-08-16 17:32)
+    ☐ Al enviar el correo colocar la empresa que hizo la factura.
+    ✔ El pdf embarque cambiarle el negro por el verde. @done (13-08-16 16:08)
+    ☐ Agregar el xml en los documentos enviados.
+    ☐ Listado Facturacion. Agregar el boton pagar factura.
+
 Notas de Credito:
       ✔ En el listado de facturas poner la opcion "nota de credito". @done (13-07-30 21:06)
       ✔ tipo comprobante es egreso. @done (13-07-30 21:06)
@@ -85,27 +96,6 @@ DOCUMENTOS:
                 SQL:
                      -- View: embarque_pallets_libres
 
-<<<<<<< HEAD
-                    -- DROP VIEW embarque_pallets_libres;
-
-                    CREATE OR REPLACE VIEW embarque_pallets_libres AS
-                     SELECT rp.id_pallet, rp.no_cajas, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, rp.folio
-                       FROM rastria_pallets rp
-                       LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
-                       JOIN ( SELECT rpr.id_pallet, cl.nombre
-                          FROM rastria_pallets_rendimiento rpr
-                       JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
-                      GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
-                      ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
-                      WHERE fdp.id_embarque IS NULL
-                      GROUP BY rp.id_pallet, rp.no_cajas
-                      ORDER BY rp.id_pallet DESC;
-
-                    ALTER TABLE embarque_pallets_libres
-                      OWNER TO programa;
-                    COMMENT ON VIEW embarque_pallets_libres
-                      IS 'Muestra los pallets que no han sido colocados en embarque.';
-=======
                       -- DROP VIEW embarque_pallets_libres;
 
                       CREATE OR REPLACE VIEW embarque_pallets_libres AS
@@ -125,7 +115,6 @@ DOCUMENTOS:
                         OWNER TO programa;
                       COMMENT ON VIEW embarque_pallets_libres
                         IS 'Muestra los pallets que no han sido colocados en embarque.';
->>>>>>> origin/master
 
           ✔ la informacion se guarda en facturacion_doc_embarque y facturacion_doc_embarque_pallets. La informacion que no se guarda en estas tablas almacenarlas en el json. @done (13-07-26 12:33)
           ✔ utilizar el drag&drop @done (13-07-26 12:33)

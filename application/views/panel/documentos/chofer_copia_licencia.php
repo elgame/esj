@@ -26,7 +26,7 @@
                 if (count($dataDocumento) > 0) {
                 $span = '6';
               ?>
-                <a href="<?php echo base_url($dataDocumento->url); ?>" class="btn btn-success btn-large span6" target="_BLANK">Ver</a>
+                <a href="<?php echo base_url($dataDocumento->url) ?>" class="btn btn-success btn-large span6" rel="superbox-80x600">Ver</a>
             <?php } ?>
 
             <?php if ($finalizados === 'f') { ?>

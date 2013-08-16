@@ -25,7 +25,7 @@
             $params['doc'] = $doc;
 
             $active = '';
-            if ( $key === 0)
+            if ($key === 0)
             {
               $active = 'active';
 
