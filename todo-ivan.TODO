@@ -4,9 +4,9 @@ Correcciones (Facturacion y Documentos):
     ✔ Quitar el mensaje si el chofer tiene documentos. @done (13-08-16 17:09)
     ✔ Ponerle en el pdf de manifiesto chofer la serie junto al folio. @done (13-08-16 16:15)
     ✔ Los archivos "ver" abrirlos en el supermodal con un 90% de ancho. @done (13-08-16 17:32)
-    ☐ Al enviar el correo colocar la empresa que hizo la factura.
+    ✔ Al enviar el correo colocar la empresa que hizo la factura. @done (13-08-16 18:02)
     ✔ El pdf embarque cambiarle el negro por el verde. @done (13-08-16 16:08)
-    ☐ Agregar el xml en los documentos enviados.
+    ✔ Agregar el xml en los documentos enviados. @done (13-08-16 18:02)
     ☐ Listado Facturacion. Agregar el boton pagar factura.
 
 Notas de Credito:

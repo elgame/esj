@@ -279,8 +279,11 @@
           if (data.passes) {
             noty({"text": 'El documento se actualizo correctamente', "layout":"topRight", "type": 'success'});
 
+            setTimeout("location.reload(true);", 500);
+
+
             // Actualiza el listado de los documentos.
-            $('#listadoDocs').html(data.htmlDocs)
+            // $('#listadoDocs').html(data.htmlDocs)
           }
 
         }, 'json');
