@@ -53,6 +53,7 @@
       <?php 
       if (isset($_GET['poliza_nombre'])) {
       ?>  
+          window.parent.newPoliza();
           window.location = '<?php echo base_url("panel/polizas/descargar_poliza/?poliza_nombre={$_GET['poliza_nombre']}"); ?>';
       <?php 
       };

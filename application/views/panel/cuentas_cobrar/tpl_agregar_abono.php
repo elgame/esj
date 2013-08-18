@@ -10,7 +10,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.String::getVarsLink(array())); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/agregar_abono?'.String::getVarsLink(array())); ?>" method="post" id="form">
 
           <div class="row-fluid">
             <div class="span12">
@@ -18,14 +18,14 @@
               <div class="control-group">
                 <label class="control-label" for="dfecha">Fecha</label>
                 <div class="controls">
-                  <input type="datetime-local" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d\TH:i")); ?>" autofocus>
+                  <input type="datetime-local" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d\TH:i")); ?>" autofocus required>
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dcuenta">Cuenta Bancaria</label>
                 <div class="controls">
-                  <select name="dcuenta" id="dcuenta">
+                  <select name="dcuenta" id="dcuenta" required>
                 <?php 
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
@@ -38,18 +38,26 @@
               </div>
 
               <div class="control-group">
-                <label class="control-label" for="dconcepto">Descripcion</label>
+                <label class="control-label" for="dreferencia">Referencia</label>
                 <div class="controls">
-                  <input type="text" name="dconcepto" class="span12" id="dconcepto" value="<?php echo set_value('dconcepto'); ?>">
+                  <input type="text" name="dreferencia" class="span6" id="dreferencia" value="<?php echo set_value('dreferencia'); ?>" maxlength="10" required>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dconcepto">Concepto</label>
+                <div class="controls">
+                  <input type="text" name="dconcepto" class="span12" id="dconcepto" value="<?php echo set_value('dconcepto'); ?>" maxlength="100" required>
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
-                  <input type="number" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
+                  <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
                 </div>
               </div>
+              
             </div>
             <button type="submit" class="btn btn-success btn-large">Guardar</button>
           </div><!--/row-->

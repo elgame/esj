@@ -106,7 +106,7 @@
                       echo $this->usuarios_model->getLinkPrivSm('ventas/imprimir/', array(
                           'params'   => 'id='.$fact->id_venta,
                           'btn_type' => 'btn-info',
-                          'attrs' => array('target' => "_blank"))
+                          'attrs' => array('target' => "_BLANK"))
                       );
                     ?>
                   </td>

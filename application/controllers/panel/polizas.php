@@ -9,6 +9,7 @@ class polizas extends MY_Controller {
   private $excepcion_privilegio = array(
     'polizas/genera_poliza/',
     'polizas/descargar_poliza/',
+    'polizas/get_folio/'
     );
 
   public function _remap($method){
@@ -30,7 +31,7 @@ class polizas extends MY_Controller {
   {
     $this->carabiner->js(array(
       // array('general/msgbox.js'),
-      array('panel/bascula/admin.js'),
+      array('panel/polizas/genera.js'),
       array('panel/bascula/reportes/rde.js')
     ));
 
@@ -40,7 +41,12 @@ class polizas extends MY_Controller {
     );
 
     $this->load->model('empresas_model');
+    $this->load->model('polizas_model');
+
+
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $params['folio'] = $this->polizas_model->getFolio('3', 'v');
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -67,6 +73,12 @@ class polizas extends MY_Controller {
     header("Content-disposition: attachment; filename={$_GET['poliza_nombre']}");
     header("Content-type: application/octet-stream");
     readfile(APPPATH."media/polizas/{$_GET['poliza_nombre']}");
+  }
+
+  public function get_folio(){
+    $this->load->model('polizas_model');
+    $params['folio'] = $this->polizas_model->getFolio();
+    echo json_encode($params);
   }
 
   /**

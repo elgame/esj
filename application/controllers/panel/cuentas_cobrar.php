@@ -211,13 +211,16 @@ class cuentas_cobrar extends MY_Controller {
               'rules'   => 'required'),
         array('field'   => 'dconcepto',
               'label'   => 'Concepto',
-              'rules'   => 'required|max_length[200]'),
+              'rules'   => 'required|max_length[100]'),
         array('field'   => 'dmonto',
               'label'   => 'Monto',
               'rules'   => 'required|numeric'),
         array('field'   => 'dcuenta',
               'label'   => 'Cuenta Bancaria',
               'rules'   => 'required|numeric'),
+        array('field'   => 'dreferencia',
+              'label'   => 'Referencia',
+              'rules'   => 'required|max_length[10]'),
     );
     $this->form_validation->set_rules($rules);
   }

@@ -72,36 +72,47 @@ class Ventas_model extends privilegios_model{
 	/**
 	 * Obtiene la informacion de una factura
 	 */
-	public function getInfoFactura($id, $info_basic=false)
+	public function getInfoVenta($id, $info_basic=false)
   {
-		$res = $this->db->select("*")->
-                      from('facturas')->
-                      where("id_factura = '".$id."'")->get();
+		$res = $this->db
+            ->select("*")
+            ->from('facturacion_ventas_remision')
+            ->where("id_venta = {$id}")
+            ->get();
 
     if($res->num_rows() > 0)
     {
 			$response['info'] = $res->row();
-			$response['info']->fecha = substr($response['info']->fecha, 0, 10);
+      $response['info']->fechaT = str_replace(' ', 'T', substr($response['info']->fecha, 0, 16));
+      $response['info']->fecha = substr($response['info']->fecha, 0, 10);
+
 			$res->free_result();
-			if($info_basic)
+
+      if($info_basic)
 				return $response;
 
+      // Carga la info de la empresa.
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
+      $response['info']->empresa = $empresa['info'];
+
+      // Carga la info del cliente.
 			$this->load->model('clientes_model');
-			$prov = $this->clientes_model->getInfoCliente($response['info']->id_cliente, true);
+			$prov = $this->clientes_model->getClienteInfo($response['info']->id_cliente);
 			$response['info']->cliente = $prov['info'];
 
-      $res = $this->db->select('fp.id_fac_prod, fp.id_factura, fp.id_producto, fp.descripcion, fp.taza_iva, fp.cantidad, fp.precio_unitario,
-                                fp.importe, fp.importe_iva, fp.total, fp.descuento, fp.retencion, pu.abreviatura as unidad, fp.unidad as unidad2')->
-                        from('facturas_productos as fp')->
-                        join('productos as p', 'p.id_producto = fp.id_producto', 'left')->
-                        join('productos_unidades as pu', 'pu.id_unidad = p.id_unidad', 'left')->
-                        where('id_factura = '.$id)->get();
+      $res = $this->db
+        ->select('fp.id_venta, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
+                fp.importe, fp.unidad, cl.cuenta_cpi')
+        ->from('facturacion_ventas_remision_productos as fp')
+        	->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
+        ->where('fp.id_venta = ' . $id)
+        ->get();
 
       $response['productos'] = $res->result();
 
 			return $response;
-		}
-    else
+		}else
 			return false;
 	}
 
@@ -211,295 +222,259 @@ class Ventas_model extends privilegios_model{
     return array(true, '');
   }
 
+	public function generaNotaRemisionPdf($id_venta, $path = null)
+	{
+    include(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-  /*
-   |-------------------------------------------------------------------------
-   |  ABONOS
-   |-------------------------------------------------------------------------
-   */
+    $venta = $this->getInfoVenta($id_venta);
 
-	/**
-	 * Agrega abono a una factura
-   *
-	 * @param unknown_type $id_factura
-	 * @param unknown_type $concepto
-	 */
-	public function addAbono($id_factura=null, $concepto=null, $registr_bancos=true)
-  {
-		$id_factura = $id_factura==null? $this->input->get('id'): $id_factura;
-		$concepto = $concepto==null? $this->input->post('dconcepto'): $concepto;
+    // echo "<pre>";
+    //   var_dump($venta);
+    // echo "</pre>";exit;
 
-		$data = $this->obtenTotalAbonosC($id_factura);
-		if($data->abonos < $data->total){ //Evitar que se agreguen abonos si esta pagada
-			$pagada = false;
-			//compruebo si se pasa el abono al total de la factura y activa a pagado
-			if(($this->input->post('dmonto')+$data->abonos) >= $data->total){
-				if(($this->input->post('dmonto')+$data->abonos) > $data->total)
-					$_POST['dmonto'] = $this->input->post('dmonto') - (($this->input->post('dmonto')+$data->abonos) - $data->total);
-				$pagada = true;
-			}
+    $this->load->library('mypdf');
 
-			$id_abono = BDUtil::getId();
-			$data_abono = array(
-					'id_abono' => $id_abono,
-					'id_factura' => $id_factura,
-					'fecha' => $this->input->post('dfecha'),
-					'concepto' => $concepto,
-					'total' => $this->input->post('dmonto')
-			);
-			$this->db->insert('facturas_abonos', $data_abono);
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
 
-			if($pagada){
-				$this->db->update('facturas', array('status' => 'pa'), "id_factura = '".$id_factura."'");
-			}
+    $pdf->show_head = false;
 
-			if($registr_bancos){
-				//Registramos la Operacion en Bancos
-				$this->load->model('banco_model');
-				$respons = $this->banco_model->addOperacion($this->input->post('dcuenta'));
-			}
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
 
-			return array(true, 'Se agregó el abono correctamente.', $id_abono);
-		}
-		return array(true, 'La orden de trabajo ya esta pagada.', '');
-	}
+    //////////
+    // Logo //
+    //////////
 
-	/**
-	 * Elimina abonos de cobranza (de una factura)
-	 * @param unknown_type $id_abono
-	 * @param unknown_type $id_factura
-	 */
-	public function deleteAbono($id_abono, $id_factura)
-  {
-		$this->db->delete('facturas_abonos', "id_abono = '".$id_abono."'");
+    $pdf->SetXY(30, 2);
+    $pdf->Image(APPPATH.'images/logo.png');
 
-		$data = $this->obtenTotalAbonosC($id_factura);
-		if($data->abonos >= $data->total){ //si abonos es = a la factura se pone pagada
-			$this->db->update('facturas', array('status' => 'pa'), "id_factura = '".$id_factura."'");
-		}else{ //si abonos es menor se pone pendiente
-			$this->db->update('facturas', array('status' => 'p'), "id_factura = '".$id_factura."'");
-		}
+    //////////////////////////
+    // Rfc y Regimen Fiscal //
+    //////////////////////////
 
-		return array(true, '');
-	}
+    // 0, 171, 72 = verde
 
-	private function obtenTotalAbonosC($id)
-  {
-		$data = $this->db->query("
-				SELECT
-						c.total,
-						COALESCE(ab.abonos, 0) AS abonos
-				FROM facturas AS c
-					LEFT JOIN (
-						SELECT id_factura, Sum(total) AS abonos
-						FROM facturas_abonos
-						WHERE id_factura = '".$id."' AND tipo <> 'ca'
-						GROUP BY id_factura
-					) AS ab ON c.id_factura = ab.id_factura
-				WHERE c.id_factura = '".$id."'", true);
-		return $data->row();
-	}
+    $pdf->SetFont('helvetica','B', 18);
+    // $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetTextColor(255, 255, 255);
+    // $pdf->SetXY(0, 0);
+    // $pdf->Cell(108, 15, "Factura Electrónica (CFDI)", 0, 0, 'C', 1);
 
-  /*
-   |-------------------------------------------------------------------------
-   |  SERIES Y FOLIOS
-   |-------------------------------------------------------------------------
-   */
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(3, $pdf->GetY());
+    $pdf->Cell(108, 14, "RFC: {$venta['info']->empresa->rfc}", 0, 0, 'L', 0);
 
-	/**
-	 * Obtiene el listado de series y folios para administrarlos
-   *
-   * @return array
-	 */
-	public function getSeriesFolios($per_pag='30')
-  {
-		//paginacion
-		$params = array(
-				'result_items_per_page' => $per_pag,
-				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
-		);
-		if($params['result_page'] % $params['result_items_per_page'] == 0)
-			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+    $pdf->SetFont('helvetica','B', 13);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(3, $pdf->GetY() + 10);
+    $pdf->Cell(216, 8, $venta['info']->empresa->nombre_fiscal, 0, 0, 'L', 0);
 
-		$sql = '';
-		// if($this->input->get('fserie')!='')
-		// 	$this->db->where('serie',$this->input->get('fserie'));
+    // $pdf->SetFont('helvetica','B', 14);
+    // $pdf->SetFillColor(242, 242, 242);
+    // $pdf->SetTextColor(0, 171, 72);
+    // $pdf->SetXY(0, $pdf->GetY() + 14);
+    // $pdf->Cell(108, 8, "Régimen Fiscal:", 0, 0, 'L', 1);
 
-		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
-					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
-				FROM facturacion_series_folios AS fsf
-					INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
-				WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."' ".$sql."
-				ORDER BY fsf.serie", $params, true);
+    // $pdf->SetFont('helvetica','', 12);
+    // $pdf->SetTextColor(0, 0, 0);
+    // $pdf->SetXY(0, $pdf->GetY() + 8);
+    // $pdf->MultiCell(108, 6, $venta['info']->empresa->regimen_fiscal, 0, 'C', 0);
 
-    $res = $this->db->query($query['query']);
+    /////////////////////////////////////
+    // Folio Fisca, CSD, Lugar y Fecha //
+    /////////////////////////////////////
 
-		$data = array(
-      'series'         => array(),
-      'total_rows'     => $query['total_rows'],
-      'items_per_page' => $params['result_items_per_page'],
-      'result_page'    => $params['result_page']
-		);
+    $pdf->SetFont('helvetica','B', 14);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(109, 0);
+    $pdf->Cell(108, 8, "Folio:", 0, 0, 'L', 1);
 
-		if($res->num_rows() > 0)
-			$data['series'] = $res->result();
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(109, 0);
+    $pdf->Cell(108, 8, $venta['info']->folio, 0, 0, 'C', 0);
 
-		return $data;
-	}
+    // $pdf->SetTextColor(0, 171, 72);
+    // $pdf->SetXY(109, $pdf->GetY() + 8);
+    // $pdf->Cell(108, 8, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
 
-	/**
-	 * Obtiene la informacion de una serie/folio
-   *
-	 * @param array
-	 */
-	public function getInfoSerieFolio($id_serie_folio = '')
-  {
-		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
+    // $pdf->SetTextColor(0, 0, 0);
+    // $pdf->SetXY(109, $pdf->GetY() + 8);
+    // $pdf->Cell(108, 8, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
 
-		$res = $this->db->select('fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
-				fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa')
-			->from('facturacion_series_folios AS fsf')
-				->join('empresas AS e', 'e.id_empresa = fsf.id_empresa', 'inner')
-			->where('fsf.id_serie_folio', $id_serie_folio)->get()->result();
-		return $res;
-	}
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(109, $pdf->GetY() + 9);
+    $pdf->Cell(108, 8, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
 
-	/**
-	 * Agrega una serie/folio a la base de datos
-   *
-   * @return array
-	 */
-	public function addSerieFolio()
-  {
-    $data	= array(
-			'id_empresa'     => $this->input->post('fid_empresa'),
-			'serie'          => strtoupper($this->input->post('fserie')),
-			'no_aprobacion'  => $this->input->post('fno_aprobacion'),
-			'folio_inicio'   => $this->input->post('ffolio_inicio'),
-			'folio_fin'      => $this->input->post('ffolio_fin'),
-			'ano_aprobacion' => $this->input->post('fano_aprobacion'),
-		);
+    $pdf->SetFont('helvetica','', 12);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(109, $pdf->GetY() + 8);
 
-		if($this->input->post('fleyenda') !== '')
-			$data['leyenda'] = $this->input->post('fleyenda');
+    $pais   = strtoupper($venta['info']->empresa->pais);
+    $estado = strtoupper($venta['info']->empresa->estado);
+    $fecha = $venta['info']->fecha;
 
-		if($this->input->post('fleyenda1') !== '')
-			$data['leyenda1'] = $this->input->post('fleyenda1');
+    $pdf->Cell(108, 8, "{$pais}, {$estado} {$fecha}", 0, 0, 'R', 0);
 
-		if($this->input->post('fleyenda2') !== '')
-			$data['leyenda2'] = $this->input->post('fleyenda2');
+    //////////////////
+    // Rfc Receptor //
+    //////////////////
 
-		$this->db->insert('facturacion_series_folios', $data);
+    $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 20);
+    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-		return array('passes' => true);
-	}
+    $pdf->SetFont('helvetica','B', 13);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 1);
+    $pdf->Cell(216, 8, "RFC Receptor: {$venta['info']->cliente->rfc}", 0, 0, 'L', 1);
 
-	/**
-	 * Modifica la informacion de un serie/folio.
-	 *
-   * @param string $id_serie_folio
-   * @return array
-	 */
-	public function editSerieFolio($id_serie_folio = '')
-  {
-		$id_serie_folio = ($id_serie_folio != '') ? $id_serie_folio : $this->input->get('id');
+    $pdf->SetFont('helvetica','B', 12);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 8);
+    $pdf->Cell(216, 8, $venta['info']->cliente->nombre_fiscal, 0, 0, 'L', 1);
 
-		// $path_img = '';
-		//valida la imagen
-		// $upload_res = UploadFiles::uploadImgSerieFolio();
+    ///////////////
+    // Productos //
+    ///////////////
 
-		// if(is_array($upload_res)){
-		// 	if($upload_res[0] == false)
-		// 		return array(false, $upload_res[1]);
-		// 	$path_img = $upload_res[1]['file_name']; //APPPATH.'images/series_folios/'.$upload_res[1]['file_name'];
+    $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 8);
+    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-		// 	/*$old_img = $this->db->select('imagen')->from('facturas_series_folios')->where('id_serie_folio',$id_serie_folio)->get()->row()->imagen;
+    $pdf->SetXY(0, $pdf->GetY());
+    $aligns = array('C', 'C', 'C', 'C','C');
+    $widths = array(30, 35, 91, 30, 30);
+    $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Precio Unitario', 'Importe');
 
-		// 	UploadFiles::deleteFile($old_img);*/
-		// }
+    // $conceptos = current($xml->Conceptos);
 
-		$data	= array(
-				'id_empresa'     => $this->input->post('fid_empresa'),
-				'serie'          => strtoupper($this->input->post('fserie')),
-				'no_aprobacion'  => $this->input->post('fno_aprobacion'),
-				'folio_inicio'   => $this->input->post('ffolio_inicio'),
-				'folio_fin'      => $this->input->post('ffolio_fin'),
-				'ano_aprobacion' => $this->input->post('fano_aprobacion')
-		);
+    // for ($i=0; $i < 3; $i++)
+    //   $conceptos[] = $conceptos[$i];
 
-		// if($path_img!='')
-		// 	$data['imagen'] = $path_img;
+    // echo "<pre>";
+    //   var_dump($conceptos, is_array($conceptos));
+    // echo "</pre>";exit;
 
-		if($this->input->post('fleyenda')!='')
-			$data['leyenda'] = $this->input->post('fleyenda');
+    // if (! is_array($conceptos))
+    //   $conceptos = array($conceptos);
 
-		if($this->input->post('fleyenda1')!='')
-			$data['leyenda1'] = $this->input->post('fleyenda1');
+    $pdf->limiteY = 250;
 
-		if($this->input->post('fleyenda2')!='')
-			$data['leyenda2'] = $this->input->post('fleyenda2');
+    $pdf->setY($pdf->GetY() + 1);
+    foreach($venta['productos'] as $key => $item)
+    {
+      $band_head = false;
 
-		$this->db->update('facturacion_series_folios', $data, array('id_serie_folio'=>$id_serie_folio));
+      if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+      {
+        if($key > 0) $pdf->AddPage();
 
-		return array('passes' => true);
-	}
-
-  /*
-   |-------------------------------------------------------------------------
-   |  HELPERS
-   |-------------------------------------------------------------------------
-   */
-
-	public function exist($table, $sql, $return_res=false)
-  {
-		$res = $this->db->get_where($table, $sql);
-		if($res->num_rows() > 0){
-			if($return_res)
-				return $res->row();
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-  /*
-   |-------------------------------------------------------------------------
-   |  AJAX
-   |-------------------------------------------------------------------------
-   */
-
-  /**
-   * Obtiene el listado de empresas para usar en peticiones Ajax.
-   */
-  public function getFacEmpresasAjax(){
-    $sql = '';
-    $res = $this->db->query("
-        SELECT e.id_empresa, e.nombre_fiscal, e.cer_caduca, ef.version, e.cer_org
-        FROM empresas AS e
-        INNER JOIN empresas_fiscal AS ef ON ef.id_empresa = e.id_empresa
-        WHERE lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'
-        ORDER BY nombre_fiscal ASC
-        LIMIT 20");
-
-    $this->load->library('cfdi');
-
-    $response = array();
-    if($res->num_rows() > 0){
-      foreach($res->result() as $itm){
-
-        if ($itm->cer_org !== '')
-          $itm->no_certificado = $this->cfdi->obtenNoCertificado($itm->cer_org);
-
-        $response[] = array(
-            'id' => $itm->id_empresa,
-            'label' => $itm->nombre_fiscal,
-            'value' => $itm->nombre_fiscal,
-            'item' => $itm,
-        );
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetX(0);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
       }
+
+      $pdf->SetFont('Arial', '', 10);
+      $pdf->SetTextColor(0,0,0);
+
+      $pdf->SetX(0);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $item->cantidad,
+        $item->unidad,
+        $item->descripcion,
+        String::formatoNumero($item->precio_unitario, 3),
+        String::formatoNumero($item->importe, 3),
+      ), false);
+    }
+    
+    /////////////
+    // Totales //
+    /////////////
+
+    if($pdf->GetY() + 30 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetXY(0, $pdf->GetY() + 1);
+    $pdf->Cell(156, 20, "", 1, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(1, $pdf->GetY() + 1);
+    $pdf->Cell(154, 8, "Total con letra:", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica', '', 11);
+    $pdf->SetXY(0, $pdf->GetY() + 8);
+    $pdf->MultiCell(156, 8, $venta['info']->total_letra, 0, 'C', 0);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(1, $pdf->GetY() + 6);
+    $pdf->Cell(78, 5, $venta['info']->forma_pago, 0, 0, 'L', 0);
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(78, $pdf->GetY());
+    $pdf->Cell(78, 5, "Pago en {$venta['info']->metodo_pago}", 0, 0, 'L', 0);
+
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(156, $pdf->GetY() - 23);
+    $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
+
+    $pdf->SetXY(186, $pdf->GetY());
+    $pdf->Cell(30, 6, String::formatoNumero($venta['info']->subtotal), 1, 0, 'C', 1);
+
+    $pdf->SetXY(156, $pdf->GetY() + 6);
+    $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
+
+    $pdf->SetXY(186, $pdf->GetY());
+    $pdf->Cell(30, 6,String::formatoNumero($venta['info']->total, 2), 1, 0, 'C', 1);
+
+    ///////////////////
+    // Observaciones //
+    ///////////////////
+
+    $pdf->SetXY(0, $pdf->GetY() + 25);
+
+    $width = (($pdf->GetStringWidth($venta['info']->observaciones) / 216) * 8) + 9;
+
+    if($pdf->GetY() + $width >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    if ( ! empty($venta['info']->observaciones))
+    {
+        $pdf->SetX(0);
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->Row(array('Observaciones'), true);
+
+        $pdf->SetFont('helvetica','', 9);
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(216));
+        $pdf->Row(array($venta['info']->observaciones), true, 1);
     }
 
-    return $response;
-  }
+    if ($path)
+      $pdf->Output($path.'Factura.pdf', 'F');
+    else
+      $pdf->Output('Factura', 'I');
+	}
+
+
 
   /*
    |-------------------------------------------------------------------------

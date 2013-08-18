@@ -34,6 +34,29 @@
                     </select>
                   </div>
                 </div>
+                <div class="control-group" id="grupftipo2">
+                  <label class="control-label" for="ftipo2">Opciones</label>
+                  <div class="controls">
+                    <select name="ftipo2" id="ftipo2">
+                      <option value="v">Ventas</option>
+                      <option value="g">Gastos</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="ffolio">Folio</label>
+                  <div class="controls">
+                    <input type="text" name="ffolio" id="ffolio" value="<?php echo (isset($folio)? $folio: '') ?>" class="span12" placeholder="Folio" readonly required>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fconcepto">Concepto</label>
+                  <div class="controls">
+                    <textarea name="fconcepto" id="fconcepto" class="span12" maxlength="99" required></textarea>
+                  </div>
+                </div>
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Generar</button>

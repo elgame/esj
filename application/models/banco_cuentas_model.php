@@ -61,7 +61,6 @@ class banco_cuentas_model extends CI_Model {
  	 */
 	public function addCliente($data=NULL)
 	{
-
 		if ($data==NULL)
 		{
 			$data = array(

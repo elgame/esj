@@ -104,7 +104,7 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva')
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->where('id_factura = ' . $idFactura)
@@ -113,8 +113,7 @@ class facturacion_model extends privilegios_model{
       $response['productos'] = $res->result();
 
 			return $response;
-		}
-        else
+		}else
 			return false;
 	}
 

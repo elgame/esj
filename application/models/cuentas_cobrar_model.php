@@ -786,9 +786,11 @@ class cuentas_cobrar_model extends privilegios_model{
 		foreach ($ids as $key => $value) {
 			$_GET['id']   = $value;
 			$_GET['tipo'] = $tipos[$key];
-			$data = array('fecha'    => $this->input->post('dfecha'),
-										'concepto' => $this->input->post('dconcepto'),
-										'total'    => $total);
+			$data = array('fecha'          => $this->input->post('dfecha'),
+										'concepto'       => $this->input->post('dconcepto'),
+										'total'          => $total,
+										'id_cuenta'      => $this->input->post('dcuenta'),
+										'ref_movimiento' => $this->input->post('dreferencia') );
 			$resp = $this->addAbono($data);
 			$total -= $resp['total'];
 		}
@@ -804,10 +806,11 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 
 		if ($data == null) {
-			$data = array('fecha'     => $this->input->post('dfecha'),
-										'concepto'  => $this->input->post('dconcepto'),
-										'total'     => $this->input->post('dmonto'),
-										'id_cuenta' => $this->input->post('dcuenta') );
+			$data = array('fecha'          => $this->input->post('dfecha'),
+										'concepto'       => $this->input->post('dconcepto'),
+										'total'          => $this->input->post('dmonto'),
+										'id_cuenta'      => $this->input->post('dcuenta'),
+										'ref_movimiento' => $this->input->post('dreferencia') );
 		}
 
 		$pagada = false;
@@ -819,10 +822,12 @@ class cuentas_cobrar_model extends privilegios_model{
 
 
 		$data = array(
-			$camps[0]  => $id, 
-			'fecha'    => $data['fecha'],
-			'concepto' => $data['concepto'],
-			'total'    => $data['total']);
+			$camps[0]        => $id, 
+			'fecha'          => $data['fecha'],
+			'concepto'       => $data['concepto'],
+			'total'          => $data['total'],
+			'id_cuenta'      => $data['id_cuenta'],
+			'ref_movimiento' => $data['ref_movimiento'], );
 		//se inserta el abono
 		$this->db->insert($camps[1], $data);
 		$data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
