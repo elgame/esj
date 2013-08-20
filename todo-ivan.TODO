@@ -141,7 +141,11 @@ DOCUMENTOS:
 
      ✔ Manifiesto de Camion @done (13-07-30 10:13)
 FACTURACION:
-       ☐ Envio de un email del pdf de la factura y de los documentos del cliente (si tiene).
+       ✔ Envio de un email del pdf de la factura y de los documentos del cliente (si tiene). @done (13-08-20 13:28)
+       ✔ Almacenar los porcentajes de iva y retencion en facturacion_productos. @done (13-08-20 13:50)
+               SQL:
+                 porcentaje_iva double precision NOT NULL DEFAULT 0,
+                 porcentaje_retencion double precision NOT NULL DEFAULT 0,
 
        ☐ TIMBRADO
                ✔ Agregar los campos xml, status_timbrado y uuid en la tabla "facturacion". @done (13-08-01 18:22)

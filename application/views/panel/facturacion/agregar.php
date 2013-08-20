@@ -278,8 +278,8 @@
                       <select name="dreten_iva" id="dreten_iva" class="span12 prod">
                         <option value="0">No retener</option>
                         <option value="0.04">4%</option>
-                        <option value="0.6666">2 Terceras</option>
-                        <option value="1">100 %</option>
+                        <option value="0.10667">2 Terceras</option>
+                        <option value="0.16">100 %</option>
                       </select>
 
                       <input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">

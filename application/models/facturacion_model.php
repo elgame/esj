@@ -383,6 +383,8 @@ class facturacion_model extends privilegios_model{
               'iva'              => $_POST['prod_diva_total'][$key],
               'unidad'           => $_POST['prod_dmedida'][$key],
               'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+              'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
+              'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
             );
           }
         }
