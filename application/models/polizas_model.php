@@ -11,6 +11,10 @@ class polizas_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE nivel = 4 AND nombre like 'IVA TRASLADADO'")->row();
     return $basic? $data->cuenta: $data;
   }
+  public function getCuentaIvaRetenidoAc($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO'")->row();
+    return $basic? $data->cuenta: $data;
+  }
 
   public function setEspacios($texto, $posiciones, $direccion='l')
   {
@@ -108,7 +112,7 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT id_factura
        FROM facturacion AS f
-      WHERE f.status = 'p' AND poliza_diario = 'f'
+      WHERE poliza_diario = 'f'
          {$sql}
       ORDER BY id_factura ASC
       ");
@@ -120,7 +124,8 @@ class polizas_model extends CI_Model {
 
       $this->load->model('facturacion_model');
 
-      $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0) );
+      $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '1'),
+                         'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '0'), );
 
       //Agregamos el header de la poliza
       $response['data'] = $this->setEspacios('P',2).
@@ -142,17 +147,19 @@ class polizas_model extends CI_Model {
                           $this->setEspacios($inf_factura['info']->cliente->cuenta_cpi,30).  //cuenta contpaq
                           $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
-                          $this->setEspacios( $this->numero($inf_factura['info']->total) , 20).  //importe movimiento
+                          $this->setEspacios( $this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100). //concepto
+                          $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
                           $this->setEspacios('',4)."\n"; //segmento de negocio
         
         $impuestos['iva_trasladar']['importe'] = 0;
+        $impuestos['iva_retenido']['importe']  = 0;
         //Colocamos los Ingresos de la factura
         foreach ($inf_factura['productos'] as $key => $value) 
         {
           $impuestos['iva_trasladar']['importe'] += $value->iva;
+          $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
           $response['data'] .= $this->setEspacios('M',2).
                           $this->setEspacios($value->cuenta_cpi,30).
                           $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
@@ -164,15 +171,15 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('',4)."\n";
         }
         //Colocamos los impuestos de la factura
-        foreach ($impuestos as $key => $value) 
+        foreach ($impuestos as $key => $impuesto) 
         {
           if ($impuestos[$key]['importe'] > 0) 
           {
             $response['data'] .= $this->setEspacios('M',2).
-                          $this->setEspacios($value['cuenta_cpi'],30).
+                          $this->setEspacios($impuesto['cuenta_cpi'],30).
                           $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
-                          $this->setEspacios('1',1).  //clientes es un abono = 1
-                          $this->setEspacios( $this->numero($value['importe']) , 20).
+                          $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                          $this->setEspacios( $this->numero($impuesto['importe']) , 20).
                           $this->setEspacios('0',10).
                           $this->setEspacios('0.0',20).
                           $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
@@ -210,7 +217,8 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT 
         fa.id_abono, f.id_factura, fa.ref_movimiento, fa.concepto, fa.total AS total_abono, 
-        bc.cuenta_cpi, f.subtotal, f.total, f.importe_iva, c.nombre_fiscal, c.cuenta_cpi AS cuenta_cpi_cliente
+        bc.cuenta_cpi, f.subtotal, f.total, f.importe_iva, f.retencion_iva, c.nombre_fiscal, 
+        c.cuenta_cpi AS cuenta_cpi_cliente
       FROM facturacion AS f 
         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
@@ -229,7 +237,9 @@ class polizas_model extends CI_Model {
 
       $impuestos = array(
         'iva_trasladar'  => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '0'),
-        'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '1'),
+        'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '0'),
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '1'), );
 
       //Agregamos el header de la poliza
       $response['data'] = $this->setEspacios('P',2).
@@ -244,12 +254,20 @@ class polizas_model extends CI_Model {
       //Contenido de la Poliza
       foreach ($data as $key => $value) 
       {
+        $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
+        $impuestos['iva_retener']['importe']    = $factor*$value->retencion_iva/100;
+        $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+
+        $impuestos['iva_trasladar']['importe']  = $factor*($value->importe_iva)/100;
+        $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
+        $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
+
         //Colocamos el Cargo al Banco que se deposito el dinero
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
                           $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
-                          $this->setEspacios( $this->numero($value->total_abono) , 20).  //importe movimiento
+                          $this->setEspacios( $this->numero($subtotal) , 20).  //importe movimiento
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
@@ -259,15 +277,12 @@ class polizas_model extends CI_Model {
                           $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
                           $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                           $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
-                          $this->setEspacios( $this->numero($value->total_abono), 20).  //importe movimiento
+                          $this->setEspacios( $this->numero($subtotal), 20).  //importe movimiento
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
                           $this->setEspacios('',4)."\n"; //segmento de negocio
         
-        $pors_iva = $value->total_abono*100/$value->total; //abono*100/total_factura
-        $impuestos['iva_trasladar']['importe'] = $pors_iva*$value->importe_iva/100;
-        $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
         //Colocamos los impuestos de la factura
         foreach ($impuestos as $key => $impuesto) 
         {

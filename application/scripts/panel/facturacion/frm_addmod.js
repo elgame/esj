@@ -164,7 +164,8 @@ function calculaTotalProducto ($tr) {
 
       totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
       totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-      totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
+      totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
+      // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
 
   $totalIva.val(totalIva);
   $totalRetencion.val(totalRetencion);

@@ -35,25 +35,38 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
-		/*$gestor = @fopen("Catalogo de Cuentas.txt", "r");
-		if ($gestor) {
-			$idconta = 1;
-			$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
-		    while (($bufer = fgets($gestor, 4096)) !== false) {
-		    	$nivel = trim(substr($bufer, 4, 3));
-		    	if($nivel == '1'){
-		    		$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
-		    		$ids[$nivel+1] = $idconta;
-		    	}elseif ($nivel == '2') {
-		    		$ids[$nivel+1] = $idconta;
-		    	}elseif ($nivel == '3') {
-		    		$ids[$nivel+1] = $idconta;
-		    	}else
-		    		$nivel = 4;
+		// $gestor = @fopen("Catalogo de Cuentas.txt", "r");
+		// if ($gestor) {
+		// 	$idconta = 1;
+		// 	$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
+		//     while (($bufer = fgets($gestor, 4096)) !== false) {
+		//     	$nivel = trim(substr($bufer, 4, 3));
+		//     	if($nivel == '1'){
+		//     		$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
+		//     		$ids[$nivel+1] = $idconta;
+		//     	}elseif ($nivel == '2') {
+		//     		$ids[$nivel+1] = $idconta;
+		//     	}elseif ($nivel == '3') {
+		//     		$ids[$nivel+1] = $idconta;
+		//     	}else
+		//     		$nivel = 4;
 
-		    	$bufer = utf8_encode($bufer);
-		    	echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
-		    	$idconta++;
+		//     	$bufer = utf8_encode($bufer);
+		//     	echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
+		//     	$idconta++;
+		//     }
+		//     if (!feof($gestor)) {
+		//         echo "Error: fallo inesperado de fgets()\n";
+		//     }
+		//     fclose($gestor);
+		// }
+		/*$gestor = @fopen("Todos los Productos2.txt", "r");
+		if ($gestor) {
+		    while (($bufer = fgets($gestor, 4096)) !== false) {
+		    	// $bufer = utf8_encode($bufer);
+		    	$nombre = trim(substr($bufer, 33, 57));
+		    	if(strpos($nombre, 'LIMON') !== FALSE)
+		    		echo "INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, '".$nombre."', '".trim(substr($bufer, 242, 10))."' );\n";
 		    }
 		    if (!feof($gestor)) {
 		        echo "Error: fallo inesperado de fgets()\n";
