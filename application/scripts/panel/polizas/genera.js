@@ -39,10 +39,13 @@ function getFolioPoliza () {
       'tipo'  : $("#ftipo").val(),
       'tipo2' : $("#ftipo2").val()
     }, function(data){
-      if (data.folio == "")
+      if (data.folio.folio == "")
         noty({"text":"Los folios para este tipo de poliza se teminaron", "layout":"topRight", "type":"error"});
       else
-        $("#ffolio").val(data.folio);
+      {
+        $("#ffolio").val(data.folio.folio);
+        $("#fconcepto").val(data.folio.concepto);
+      }
     }, "json");
 }
 

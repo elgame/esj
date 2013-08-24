@@ -193,7 +193,14 @@ function addProducto() {
                 '<input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                 '<input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">' +
               '</td>' +
-              '<td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>' +
+              '<td>' +
+                '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<option value="Pieza">Pieza</option>' +
+                  '<option value="Caja">Caja</option>' +
+                  '<option value="Kilos">Kilos</option>' +
+                  '<option value="No aplica">No aplica</option>' +
+                '</select>' +
+              '</td>' +
               '<td>' +
                   '<input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
               '</td>' +
@@ -213,8 +220,8 @@ function addProducto() {
                 '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<option value="0">No retener</option>' +
                   '<option value="0.04">4%</option>' +
-                  '<option value="0.6666">2 Terceras</option>' +
-                  '<option value="1">100 %</option>' +
+                  '<option value="0.10667">2 Terceras</option>' +
+                  '<option value="0.16">100 %</option>' +
                 '</select>' +
                 '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
                 '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +

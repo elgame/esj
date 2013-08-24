@@ -7,12 +7,24 @@ class polizas_model extends CI_Model {
     parent::__construct();
   }
 
-  public function getCuentaIvaTrasladar($basic=true){
+  public function getCuentaIvaTrasladado($basic=true){
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE nivel = 4 AND nombre like 'IVA TRASLADADO'")->row();
     return $basic? $data->cuenta: $data;
   }
-  public function getCuentaIvaRetenidoAc($basic=true){
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO'")->row();
+  public function getCuentaIvaXTrasladar($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE nivel = 4 AND nombre like 'IVA X TRASLADAR'")->row();
+    return $basic? $data->cuenta: $data;
+  }
+  public function getCuentaIvaRetCobradoAc($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'")->row();
+    return $basic? $data->cuenta: $data;
+  }
+  public function getCuentaIvaRetXCobrarAc($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'")->row();
+    return $basic? $data->cuenta: $data;
+  }
+  public function getCuentaNCVenta($basic=true){
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'")->row();
     return $basic? $data->cuenta: $data;
   }
 
@@ -51,26 +63,37 @@ class polizas_model extends CI_Model {
     $tipo  = $tipo!=null? $tipo: $this->input->post('tipo');
     $tipo2 = $tipo2!=null? $tipo2: $this->input->post('tipo2');
     $rangos = array(
-      'diario_ventas' => array(1, 150),
-      'diario_gastos' => array(151, 300),
-      'ingresos'      => array(301, 400),
-      'egresos'       => array(401, 500)
+      'diario_ventas'    => array(1, 50),
+      'diario_ventas_nc' => array(51, 100),
+      'diario_gastos'    => array(101, 200),
+      'nomina'           => array(201, 250),
+      'ingresos'         => array(251, 350),
       );
+
+    $response = array('folio' => '', 'concepto' => '');
     $rango_sel = '';
     $sql = '';
-    if ($tipo == '3') 
+    if ($tipo == '3') //Diarios
     {
-      $rango_sel = 'diario_gastos';
+      $response['concepto'] = "Gastos del dia ".String::fechaATexto(date("Y-m-d"));
+      $rango_sel         = 'diario_gastos';
       if ($tipo2 == 'v')
-        $rango_sel = 'diario_ventas';
+      {
+        $response['concepto'] = "Ventas del dia ".String::fechaATexto(date("Y-m-d"));
+        $rango_sel         = 'diario_ventas';
+      }elseif ($tipo2 == 'vnc') 
+      {
+        $response['concepto'] = "Notas de Credito del dia ".String::fechaATexto(date("Y-m-d"));
+        $rango_sel         = 'diario_ventas_nc';
+      }
       $sql = " AND tipo = {$tipo} AND tipo2 = '{$tipo2}'";
-    }elseif ($tipo == '1') 
+    }elseif ($tipo == '1') //Ingresos
     {
       $rango_sel = 'ingresos';
-      $sql = " AND tipo = {$tipo}";
-    }else{
+      $sql       = " AND tipo = {$tipo}";
+    }else{ //Egresos = 2
       $rango_sel = 'egresos';
-      $sql = " AND tipo = {$tipo}";
+      $sql       = " AND tipo = {$tipo}";
     }
 
     $anio = date("Y"); $mes = date("m");
@@ -85,7 +108,8 @@ class polizas_model extends CI_Model {
 
     if($folio > $rangos[$rango_sel][1])
       $folio = '';
-    return $folio;
+    $response['folio'] = $folio;
+    return $response;
   }
 
   /**
@@ -112,7 +136,7 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT id_factura
        FROM facturacion AS f
-      WHERE poliza_diario = 'f'
+      WHERE poliza_diario = 'f' AND id_nc IS NULL 
          {$sql}
       ORDER BY id_factura ASC
       ");
@@ -124,8 +148,8 @@ class polizas_model extends CI_Model {
 
       $this->load->model('facturacion_model');
 
-      $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '1'),
-                         'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '0'), );
+      $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
+                         'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
 
       //Agregamos el header de la poliza
       $response['data'] = $this->setEspacios('P',2).
@@ -194,6 +218,111 @@ class polizas_model extends CI_Model {
   }
 
   /**
+   * GENERA UNA POLIZA DE DIARIOS PARA LAS NOTAS DE CREDITO DE VENTAS
+   * @return [type] [description]
+   */
+  public function polizaDiarioVentasNC()
+  {
+    $response = array('data' => '', 'facturas' => array());
+    $sql = $sql2 = '';
+
+    if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+      $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+      $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+    }
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+      $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      $sql .= " AND Date(f.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    }
+
+    if ($this->input->get('fid_empresa') != '')
+      $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+
+    $query = $this->db->query(
+      "SELECT id_factura
+       FROM facturacion AS f
+      WHERE poliza_diario = 'f' AND id_nc IS NOT NULL 
+         {$sql}
+      ORDER BY id_factura ASC
+      ");
+
+    if($query->num_rows() > 0)
+    {
+      $data = $query->result();
+      $response['facturas'] = $data;
+
+      $this->load->model('facturacion_model');
+
+      $impuestos = array('iva_trasladar' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '1'),
+                         'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '0'), );
+
+      //Agregamos el header de la poliza
+      $response['data'] = $this->setEspacios('P',2).
+                          $this->setEspacios(date("Ymd"),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                          $this->setEspacios($this->input->get('ffolio'),9,'r').  //folio poliza
+                          $this->setEspacios('1',1). //clase
+                          $this->setEspacios('0',10). //iddiario
+                          $this->setEspacios($this->input->get('fconcepto'),100). //concepto
+                          $this->setEspacios('11',2). //sistema de origen
+                          $this->setEspacios('0',1). //impresa
+                          $this->setEspacios('0',1)."\n"; //ajuste
+      //Contenido de la Poliza
+      foreach ($data as $key => $value) 
+      {
+        $inf_factura = $this->facturacion_model->getInfoFactura($value->id_factura);
+
+        //Colocamos el Cargo al Cliente de la factura
+        $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($inf_factura['info']->cliente->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, clientes es un cargo = 1
+                          $this->setEspacios( $this->numero($inf_factura['info']->total) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios('NC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
+                          $this->setEspacios('',4)."\n"; //segmento de negocio
+        
+        $impuestos['iva_trasladar']['importe'] = 0;
+        $impuestos['iva_retenido']['importe']  = 0;
+        //Colocamos los Ingresos de la factura
+        foreach ($inf_factura['productos'] as $key => $value) 
+        {
+          $impuestos['iva_trasladar']['importe'] += $value->iva;
+          $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+          $response['data'] .= $this->setEspacios('M',2).
+                          $this->setEspacios($this->getCuentaNCVenta(), 30).  //cuenta nc ventas
+                          $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
+                          $this->setEspacios('0',1).  //ingresos es un abono = 0
+                          $this->setEspacios( $this->numero($value->importe) , 20).
+                          $this->setEspacios('0',10).
+                          $this->setEspacios('0.0',20).
+                          $this->setEspacios('NC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
+                          $this->setEspacios('',4)."\n";
+        }
+        //Colocamos los impuestos de la factura, negativos por nota de credito
+        foreach ($impuestos as $key => $impuesto) 
+        {
+          if ($impuestos[$key]['importe'] > 0) 
+          {
+            $response['data'] .= $this->setEspacios('M',2).
+                          $this->setEspacios($impuesto['cuenta_cpi'],30).
+                          $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
+                          $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                          $this->setEspacios( '-'.$this->numero($impuesto['importe']) , 20).
+                          $this->setEspacios('0',10).
+                          $this->setEspacios('0.0',20).
+                          $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
+                          $this->setEspacios('',4)."\n";
+          }
+        }
+        unset($inf_factura);
+      }
+    }
+
+    return $response;
+  }
+
+  /**
    * GENERA UNA POLIZA DE INGRESOS
    * @return [type] [description]
    */
@@ -236,10 +365,10 @@ class polizas_model extends CI_Model {
       $this->load->model('facturacion_model');
 
       $impuestos = array(
-        'iva_trasladar'  => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '0'),
-        'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladar(), 'importe' => 0, 'tipo' => '1'),
-        'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '0'),
-        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetenidoAc(), 'importe' => 0, 'tipo' => '1'), );
+        'iva_trasladar'  => array('cuenta_cpi' => $this->getCuentaIvaXTrasladar(), 'importe' => 0, 'tipo' => '1'),
+        'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '0'),
+        'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
+        'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '0'), );
 
       //Agregamos el header de la poliza
       $response['data'] = $this->setEspacios('P',2).
@@ -317,7 +446,7 @@ class polizas_model extends CI_Model {
     $response = array('data' => '', 'facturas' => array());
     if ($this->input->get('ftipo') == '3') //******Polizas Diario
     {
-      if($this->input->get('ftipo2') == 'v')
+      if($this->input->get('ftipo2') == 'v') //**Diario de ventas
       {
         $response = $this->polizaDiarioVentas();
 
@@ -334,6 +463,26 @@ class polizas_model extends CI_Model {
 
             $_GET['poliza_nombre'] = 'polizadiario.txt';
             file_put_contents(APPPATH.'media/polizas/polizadiario.txt', $response['data']);
+            $this->addPoliza($response['data']); //se registra la poliza en la BD
+          }
+        }
+      }elseif($this->input->get('ftipo2') == 'vnc') //**Diario de notas de credito de Ventas
+      {
+        $response = $this->polizaDiarioVentasNC();
+
+        //actualizamos el estado de la factura y descarga el archivo
+        if (isset($_POST['poliza']{0})) 
+        {
+          $idsf = array();
+          foreach ($response['facturas'] as $key => $value) 
+            $idsf[] = $value->id_factura;
+          if(count($idsf) > 0)
+          {
+            $this->db->where_in('id_factura', $idsf);
+            $this->db->update('facturacion', array('poliza_diario' => 't'));
+
+            $_GET['poliza_nombre'] = 'polizadiarionc.txt';
+            file_put_contents(APPPATH.'media/polizas/polizadiarionc.txt', $response['data']);
             $this->addPoliza($response['data']); //se registra la poliza en la BD
           }
         }

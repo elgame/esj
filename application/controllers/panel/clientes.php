@@ -270,7 +270,7 @@ VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
 
 			array('field' => 'femail',
 						'label' => 'Email',
-						'rules' => 'max_length[70]|valid_email'),
+						'rules' => 'max_length[250]|valid_email'),
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),

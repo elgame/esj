@@ -145,6 +145,7 @@
                 <label class="control-label" for="dmetodo_pago">Metodo de pago</label>
                 <div class="controls">
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
+                    <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado'); ?>>No identificado</option>
                     <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo'); ?>>Efectivo</option>
                     <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque'); ?>>Cheque</option>
                     <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta'); ?>>Tarjeta</option>
@@ -165,8 +166,8 @@
                 <label class="control-label" for="dcondicion_pago">Condición de pago</label>
                 <div class="controls">
                   <select name="dcondicion_pago" class="span9" id="dcondicion_pago">
-                    <!-- <option value="co" <?php //echo set_select('dcondicion_pago', 'co'); ?>>Contado</option> -->
                     <option value="cr" <?php echo set_select('dcondicion_pago', 'cr'); ?>>Credito</option>
+                    <option value="co" <?php echo set_select('dcondicion_pago', 'co'); ?>>Contado</option>
                   </select>
                 </div>
               </div>
@@ -215,7 +216,13 @@
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                 </td>
                                 <td>
-                                  <input type="text" name="prod_dmedida[]" class="span12" value="<?php echo $_POST['prod_dmedida'][$k]?>" id="prod_dmedida">
+                                  <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
+                                  <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                                    <option value="Pieza" <?php echo $_POST['prod_dmedida'][$k] == 'Pieza' ? 'selected' : '' ?>>Pieza</option>
+                                    <option value="Caja" <?php echo $_POST['prod_dmedida'][$k] == 'Caja' ? 'selected' : '' ?>>Caja</option>
+                                    <option value="Kilos" <?php echo $_POST['prod_dmedida'][$k] == 'Kilos' ? 'selected' : '' ?>>Kilos</option>
+                                    <option value="No aplica" <?php echo $_POST['prod_dmedida'][$k] == 'No aplica' ? 'selected' : '' ?>>No aplica</option>
+                                  </select>
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]?>" id="prod_dcantidad">
@@ -257,7 +264,15 @@
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                     </td>
-                    <td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"></td>
+                    <td>
+                      <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
+                      <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                        <option value="Pieza">Pieza</option>
+                        <option value="Caja">Caja</option>
+                        <option value="Kilos">Kilos</option>
+                        <option value="No aplica">No aplica</option>
+                      </select>
+                    </td>
                     <td>
                         <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
                     </td>

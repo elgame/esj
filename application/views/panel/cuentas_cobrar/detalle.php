@@ -88,7 +88,7 @@
 									if ($_GET['tipo'] == 'v')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}&".String::getVarsLink(array('ida','msg')),
+                        'params'   => "ida={$cuenta->id_abono}&".String::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
@@ -96,7 +96,7 @@
 									elseif ($_GET['tipo'] == 'f')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}&".String::getVarsLink(array('ida','msg')),
+                        'params'   => "ida={$cuenta->id_abono}".($cuenta->tipo=='nc'? '&nc=si': '')."&".String::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );

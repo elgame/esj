@@ -67,28 +67,31 @@ class cuentas_cobrar_model extends privilegios_model{
 						clientes AS c
 						INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
 						LEFT JOIN (
-							(
-								SELECT 
-									f.id_cliente,
-									Sum(fa.total) AS abonos
-								FROM
-									facturacion AS f INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-								WHERE f.status <> 'ca' 
-									AND Date(fa.fecha) <= '{$fecha}'{$sql}
-								GROUP BY f.id_cliente
-							)
-							UNION
-							(
-								SELECT 
-									f.id_cliente,
-									Sum(f.total) AS abonos
-								FROM
-									facturacion AS f
-								WHERE f.status <> 'ca' AND f.id_nc IS NOT NULL
-									AND Date(f.fecha) <= '{$fecha}'{$sql}
-								GROUP BY f.id_cliente
-							)
-
+							SELECT ffaa.id_cliente, Sum(ffaa.abonos) AS abonos
+							FROM (
+								(
+									SELECT 
+										f.id_cliente,
+										Sum(fa.total) AS abonos
+									FROM
+										facturacion AS f INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+									WHERE f.status <> 'ca' 
+										AND Date(fa.fecha) <= '{$fecha}'{$sql}
+									GROUP BY f.id_cliente
+								)
+								UNION
+								(
+									SELECT 
+										f.id_cliente,
+										Sum(f.total) AS abonos
+									FROM
+										facturacion AS f
+									WHERE f.status <> 'ca' AND f.id_nc IS NOT NULL
+										AND Date(f.fecha) <= '{$fecha}'{$sql}
+									GROUP BY f.id_cliente
+								)
+							) AS ffaa
+							GROUP BY ffaa.id_cliente
 						) AS faa ON c.id_cliente = faa.id_cliente
 					WHERE  f.status <> 'ca' AND f.id_nc IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
 					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
@@ -387,7 +390,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				COALESCE(f.total, 0) AS cargo,
 				COALESCE(f.importe_iva, 0) AS iva, 
 				COALESCE(ac.abono, 0) AS abono,
-				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) AS saldo,
+				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento, 
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
@@ -408,18 +411,18 @@ class cuentas_cobrar_model extends privilegios_model{
 					UNION
 					(
 						SELECT 
-							id_factura,
+							id_nc AS id_factura,
 							Sum(total) AS abonos
 						FROM
 							facturacion
 						WHERE status <> 'ca' AND id_nc IS NOT NULL
 							AND id_cliente = {$_GET['id_cliente']} 
 							AND Date(fecha) <= '{$fecha2}'
-						GROUP BY id_factura
+						GROUP BY id_nc
 					)
 				) AS ac ON f.id_factura = ac.id_factura {$sql}
 			WHERE f.id_cliente = {$_GET['id_cliente']} 
-				AND f.status <> 'ca'
+				AND f.status <> 'ca' AND id_nc IS NULL  
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
 
@@ -712,7 +715,7 @@ class cuentas_cobrar_model extends privilegios_model{
 							'nc' AS tipo
 						FROM facturacion
 						WHERE status <> 'ca' AND id_nc IS NOT NULL
-							AND id_factura = {$_GET['id']} 
+							AND id_nc = {$_GET['id']} 
 							AND Date(fecha) <= '{$fecha2}' ";
 		}
 		else
@@ -729,8 +732,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 
 			//Obtenemos los abonos de la factura o ticket
-			$res = $this->db->query("
-				SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo
+			$res = $this->db->query(
+				"SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo
 				FROM 
 				(
 						SELECT
@@ -841,14 +844,20 @@ class cuentas_cobrar_model extends privilegios_model{
 	}
 
 	public function removeAbono(){
-		if ($this->input->get('tipo') == 'f') {
-			$camps = array('id_abono', 'facturacion_abonos', 'facturacion', 'id_factura');
-		}else{
-			$camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
+		if($this->input->get('nc') == 'si')
+		{
+			$this->load->model('facturacion_model');
+			$this->facturacion_model->cancelaFactura($_GET['ida']);
+		}else
+		{
+			if ($this->input->get('tipo') == 'f') {
+				$camps = array('id_abono', 'facturacion_abonos', 'facturacion', 'id_factura');
+			}else{
+				$camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
+			}
+
+			$this->db->delete($camps[1], "{$camps[0]} = {$_GET['ida']}");
 		}
-
-		$this->db->delete($camps[1], "{$camps[0]} = {$_GET['ida']}");
-
 		//Se cambia el estado de la factura
 		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$_GET['id']}");
 

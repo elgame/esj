@@ -39,6 +39,7 @@
                   <div class="controls">
                     <select name="ftipo2" id="ftipo2">
                       <option value="v">Ventas</option>
+                      <option value="vnc">Ventas Notas Credito</option>
                       <option value="g">Gastos</option>
                     </select>
                   </div>
@@ -47,14 +48,14 @@
                 <div class="control-group">
                   <label class="control-label" for="ffolio">Folio</label>
                   <div class="controls">
-                    <input type="text" name="ffolio" id="ffolio" value="<?php echo (isset($folio)? $folio: '') ?>" class="span12" placeholder="Folio" readonly required>
+                    <input type="text" name="ffolio" id="ffolio" value="<?php echo (isset($folio['folio'])? $folio['folio']: '') ?>" class="span12" placeholder="Folio" readonly required>
                   </div>
                 </div>
 
                 <div class="control-group">
                   <label class="control-label" for="fconcepto">Concepto</label>
                   <div class="controls">
-                    <textarea name="fconcepto" id="fconcepto" class="span12" maxlength="99" required></textarea>
+                    <textarea name="fconcepto" id="fconcepto" class="span12" maxlength="99" required><?php echo (isset($folio['concepto'])? $folio['concepto']: '') ?></textarea>
                   </div>
                 </div>
 

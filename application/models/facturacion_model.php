@@ -485,7 +485,7 @@ class facturacion_model extends privilegios_model{
 
         // Genera el archivo XML y lo guarda en disco.
         $archivos = $this->cfdi->generaArchivos($datosXML);
-
+        
         // Timbrado de la factura.
         $result = $this->timbrar($archivos['pathXML'], $idFactura);
 
