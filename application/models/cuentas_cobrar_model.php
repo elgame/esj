@@ -75,7 +75,7 @@ class cuentas_cobrar_model extends privilegios_model{
 										Sum(fa.total) AS abonos
 									FROM
 										facturacion AS f INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-									WHERE f.status <> 'ca' 
+									WHERE f.status <> 'ca' AND f.status <> 'b' 
 										AND Date(fa.fecha) <= '{$fecha}'{$sql}
 									GROUP BY f.id_cliente
 								)
@@ -86,14 +86,14 @@ class cuentas_cobrar_model extends privilegios_model{
 										Sum(f.total) AS abonos
 									FROM
 										facturacion AS f
-									WHERE f.status <> 'ca' AND f.id_nc IS NOT NULL
+									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
 										AND Date(f.fecha) <= '{$fecha}'{$sql}
 									GROUP BY f.id_cliente
 								)
 							) AS ffaa
 							GROUP BY ffaa.id_cliente
 						) AS faa ON c.id_cliente = faa.id_cliente
-					WHERE  f.status <> 'ca' AND f.id_nc IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
+					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
 					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
 				)
 				UNION
