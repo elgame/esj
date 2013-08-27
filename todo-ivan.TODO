@@ -1,3 +1,15 @@
+Correcciones/Modificaciones (Facturacion y Documentos) 26-08-2013:
+
+  ☐ Al agregar una factura de un cliente que no tiene docs truena.
+  ☐ Agregar un status "b" como "borrador", En agregar ffactura estaria los botones agregar y timbrar. El de agregar guarda el borrador.
+  ☐ En el listado de facturacion que aparezca el boton de Email cuando se agregue la factura.
+  ☐ El boton de XML que descargue todo el contenido de la factura en zip.
+  ☐ En enviar el email, el campo "con copia para" asignar el email de la empresa.
+  ☐ En enviar email, hacer el explode de los correos.
+  ☐ Al cancelar una factura agregar al pdf la imagen "Cancelado", y que envie el xml y pdf en zip por mail.
+  ☐ En el listado en las canceladas dejar los botones imprimir y email.
+  ☐ Listado Facturacion. Agregar el boton pagar factura.
+
 Correcciones (Facturacion y Documentos):
     ✔ Facturacion. Quitar la condicion de pago "Contado". @done (13-08-16 16:05)
     ✔ En el documento manifiesto chofer al cargar el ticket si el chofer no tiene documentos eliminarlo en caso de que tenga. @done (13-08-16 17:06)
@@ -7,7 +19,6 @@ Correcciones (Facturacion y Documentos):
     ✔ Al enviar el correo colocar la empresa que hizo la factura. @done (13-08-16 18:02)
     ✔ El pdf embarque cambiarle el negro por el verde. @done (13-08-16 16:08)
     ✔ Agregar el xml en los documentos enviados. @done (13-08-16 18:02)
-    ☐ Listado Facturacion. Agregar el boton pagar factura.
 
 Notas de Credito:
       ✔ En el listado de facturas poner la opcion "nota de credito". @done (13-07-30 21:06)
