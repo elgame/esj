@@ -64,9 +64,12 @@ class my_email {
 
     $mail->From     = $this->data['correoEmisorEm'];
     $mail->FromName = $this->data['nombreEmisor'];
-    $mail->AddAddress($this->data['correoDestino'], $this->data['nombreDestino']);
+
+    foreach ($this->data['correoDestino'] as $correoDestino)
+      $mail->AddAddress(trim($correoDestino), $this->data['nombreDestino']);
+
     $mail->AddReplyTo($this->data['correoEmisorEm'], $this->data['nombreEmisor']);
-    $mail->AddCC($this->data['correoDestino']);
+    $mail->AddCC($this->data['cc']);
 
     $mail->IsHTML(true);
 

@@ -16,6 +16,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
 
+
     'facturacion/xml/'
   );
 
@@ -38,6 +39,7 @@ class facturacion extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
+      array('general/supermodal.js'),
       array('panel/facturacion/admin.js'),
     ));
 
@@ -86,29 +88,40 @@ class facturacion extends MY_Controller {
     $this->load->library('cfdi');
     $this->load->model('facturacion_model');
 
-    $this->configAddModFactura();
-    if($this->form_validation->run() == FALSE)
+    if ( ! isset($_POST['borrador']))
     {
-      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      $this->configAddModFactura();
+
+      if($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $respons = $this->facturacion_model->addFactura();
+
+        if($respons['passes'])
+          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+        else
+          $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+      }
+
     }
     else
-    {
-      $respons = $this->facturacion_model->addFactura();
+      $params['frm_errors'] = $this->procesaBorrador();
 
-      if($respons['passes'])
-        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
-      else
-        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
-    }
-
+    // Parametros por default.
     $params['series'] = $this->facturacion_model->getSeriesFolios(100);
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
+    $params['getId'] = '';
+
+    // Parametros por default.
     if (isset($_GET['id']))
     {
-      $params['id'] = $_GET['id'];
+      $params['getId'] = 'id='.$_GET['id'];
     }
-    else
+    else // Parametros por default.
     {
       // Obtiene los datos de la empresa predeterminada.
       $params['empresa_default'] = $this->db
@@ -122,6 +135,19 @@ class facturacion extends MY_Controller {
       $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
     }
 
+    // Verifica si existe un borrador y carga sus datos.
+    $idBorrador = $this->facturacion_model->getBorradorFactura();
+    if ( ! is_null($idBorrador))
+    {
+      $params['getId'] = 'id='.$idBorrador;
+
+      $params['borrador'] = $this->facturacion_model->getInfoFactura($idBorrador);
+    }
+
+    // echo "<pre>";
+    //   var_dump($params['borrador']);
+    // echo "</pre>";exit;
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -129,6 +155,31 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/facturacion/agregar', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function procesaBorrador()
+  {
+    $this->load->model('facturacion_model');
+
+    $this->configAddModFactura(true);
+
+    if($this->form_validation->run() == FALSE)
+    {
+      return $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      if (isset($_GET['id']))
+        $this->facturacion_model->updateFacturaBorrador($_GET['id']);
+      else
+        $this->facturacion_model->addFacturaBorrador();
+
+      if($respons['passes'])
+        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+      else
+        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+    }
+    redirect(base_url('panel/facturacion/agregar/?&msg=11'));
   }
 
   /**
@@ -173,7 +224,7 @@ class facturacion extends MY_Controller {
     if (isset($_GET['id']{0}))
     {
       $this->load->model('facturacion_model');
-      $this->facturacion_model->descargarXML($_GET['id']);
+      $this->facturacion_model->descargarZip($_GET['id']);
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -233,8 +284,22 @@ class facturacion extends MY_Controller {
    *
    * @return void
    */
-  private function configAddModFactura()
+  private function configAddModFactura($borrador = false)
   {
+    $required = $borrador ? '' : 'required';
+
+    // $callback_seriefolio_check = 'callback_seriefolio_check';
+    $callback_isValidDate      = 'callback_isValidDate';
+    $callback_val_total        = 'callback_val_total';
+    $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
+    if ($borrador)
+    {
+      // $callback_seriefolio_check = '';
+      $callback_isValidDate      = '';
+      $callback_val_total        = '';
+      $callback_chk_cer_caduca   = '';
+    }
+
     $this->load->library('form_validation');
     $rules = array(
 
@@ -252,46 +317,46 @@ class facturacion extends MY_Controller {
               'rules'   => 'required|numeric|callback_seriefolio_check'),
         array('field'   => 'dno_aprobacion',
               'label'   => 'Numero de aprobacion',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
         array('field'   => 'dano_aprobacion',
               'label'   => 'Fecha de aprobacion',
-              'rules'   => 'required|max_length[10]|callback_isValidDate'),
+              'rules'   => $required.'|max_length[10]|'.$callback_isValidDate),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
-              'rules'   => 'required|max_length[25]'), //|callback_isValidDate
+              'rules'   => $required.'|max_length[25]'), //|callback_isValidDate
 
         array('field'   => 'total_importe',
               'label'   => 'SubTotal1',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_subtotal',
               'label'   => 'SubTotal',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
 
         array('field'   => 'total_descuento',
               'label'   => 'Descuento',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_iva',
               'label'   => 'IVA',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_retiva',
               'label'   => 'Retencion IVA',
-              'rules'   => 'required|numeric'),
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_totfac',
               'label'   => 'Total',
-              'rules'   => 'required|numeric|callback_val_total'),
+              'rules'   => $required.'|numeric|'.$callback_val_total),
         array('field'   => 'dforma_pago',
               'label'   => 'Forma de pago',
-              'rules'   => 'required|max_length[80]'),
+              'rules'   => $required.'|max_length[80]'),
         array('field'   => 'dmetodo_pago',
               'label'   => 'Metodo de pago',
-              'rules'   => 'required|max_length[40]'),
+              'rules'   => $required.'|max_length[40]'),
         array('field'   => 'dmetodo_pago_digitos',
               'label'   => 'Ultimos 4 digitos',
               'rules'   => 'max_length[20]'),
         array('field'   => 'dcondicion_pago',
               'label'   => 'Condición de pago',
-              'rules'   => 'required|max_length[2]'),
+              'rules'   => $required.'|max_length[2]'),
 
         array('field'   => 'dplazo_credito',
             'label'   => 'Plazo de crédito',
@@ -361,14 +426,14 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'dcer_caduca',
               'label'   => 'Empresa',
-              'rules'   => 'callback_chk_cer_caduca'),
+              'rules'   => $callback_chk_cer_caduca),
 
         array('field'   => 'dno_certificado',
               'label'   => 'No. Certificado',
-              'rules'   => 'required'),
+              'rules'   => $required),
         array('field'   => 'dtipo_comprobante',
               'label'   => 'Tipo comproante',
-              'rules'   => 'required'),
+              'rules'   => $required),
         array('field'   => 'dobservaciones',
               'label'   => 'Observaciones',
               'rules'   => ''),
@@ -420,7 +485,7 @@ class facturacion extends MY_Controller {
 
       $res = $this->db->select('Count(id_factura) AS num')
         ->from('facturacion')
-        ->where("serie = '".$this->input->post('dserie')."' AND folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa'))
+        ->where("serie = '".$this->input->post('dserie')."' AND folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa').' AND status != \'b\'')
         ->get();
       $data = $res->row();
       if($data->num > 0){
@@ -841,6 +906,10 @@ class facturacion extends MY_Controller {
         break;
       case 10:
         $txt = 'El email se envio correctamente!';
+        $icono = 'success';
+        break;
+      case 11:
+        $txt = 'Factura guardada!';
         $icono = 'success';
         break;
 

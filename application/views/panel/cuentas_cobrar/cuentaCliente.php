@@ -23,9 +23,9 @@
           </div>
           <div class="box-content">
           	<a href="<?php echo base_url('panel/cuentas_cobrar/?'.String::getVarsLink(array('msg'))); ?>" class="linksm">
-							<i class="icon-chevron-left"></i> Atras</a> | 
+							<i class="icon-chevron-left"></i> Atras</a> |
 						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-							<i class="icon-print"></i> Imprimir</a> | 
+							<i class="icon-print"></i> Imprimir</a> |
 						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
 							<i class="icon-table"></i> Excel</a>
 
@@ -34,8 +34,8 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-medium search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-medium search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
-                
+                <input type="date" name="ffecha2" class="input-medium search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
+
                 <label for="ftipo">Pagos:</label>
                 <select name="ftipo" id="ftipo" class="input-large search-query">
                 	<option value="to" <?php echo set_select_get('ftipo', 'to'); ?>>Todas</option>
@@ -45,7 +45,7 @@
 
                 <label for="dcliente">Cliente</label>
                 <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> | 
+                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
@@ -56,12 +56,12 @@
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
-						
+
             <div class="row-fluid">
             	<fieldset class="span6" style="color: #555; font-size: .9em;">
 								<legend style="margin: 0;">Datos del cliente</legend>
 								<strong>Nombre:</strong> <?php echo $data['cliente']->nombre_fiscal; ?> <br>
-								<strong>Dirección: </strong> 
+								<strong>Dirección: </strong>
 										<?php
 											$info = $data['cliente']->calle!=''? $data['cliente']->calle: '';
 											$info .= $data['cliente']->no_exterior!=''? ' #'.$data['cliente']->no_exterior: '';
@@ -72,7 +72,7 @@
 											$info .= $data['cliente']->estado!=''? ', '.$data['cliente']->estado: '';
 											echo $info;
 										?> <br>
-								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?> 
+								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?>
 								<strong>Email: </strong> <?php echo $data['cliente']->email; ?>
 							</fieldset>
 
@@ -127,7 +127,7 @@
 						// }
 						foreach($data['cuentas'] as $cuenta){
 							$ver = true;
-							
+
 							if($ver){
 								$total_cargo += $cuenta->cargo;
 								$total_abono += $cuenta->abono;

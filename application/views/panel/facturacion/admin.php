@@ -116,23 +116,21 @@
                   </td>
                   <td class="center">
                     <?php
-                      if ($fact->status_timbrado === 't')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-info',
-                          'attrs' => array('target' => "_blank"))
-                        );
-                      }
 
-                      echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs'    => array())
+                      echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
+                        'params'   => 'id='.$fact->id_factura,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => "_blank"))
                       );
 
                       if ($fact->status !== 'ca')
                       {
+                         echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                            'params'   => 'id='.$fact->id_factura,
+                            'btn_type' => 'btn-success',
+                            'attrs'    => array())
+                        );
+
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
                           'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-danger',
@@ -140,7 +138,7 @@
                         );
                       }
 
-                      if ($fact->id_nc === null) {
+                      if ($fact->id_nc === null && $fact->status !== 'ca') {
                         echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
                             'params'   => 'id='.$fact->id_factura,
                             'btn_type' => '',
@@ -158,10 +156,10 @@
 
                       if ($fact->status === 'p')
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/pagar/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la factura?', 'Facturas', this); return false;"))
+                        echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                            'params'   => 'id='.$fact->id_factura.'&tipo=f',
+                            'btn_type' => 'btn btn-success',
+                            'attrs'    => array('rel' => 'superbox-50x500'))
                         );
                       }
 
@@ -170,7 +168,7 @@
                         echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
                       }
 
-                      if ($fact->docs_finalizados === 't' || $fact->id_nc !== null)
+                      if ($fact->id_nc === null)
                       {
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
                           'params'   => 'id='.$fact->id_factura,
