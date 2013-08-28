@@ -25,7 +25,8 @@ class banco extends MY_Controller {
 
  	
 
-	public function depositar(){
+	public function depositar()
+	{
 		$this->carabiner->css(array(
 			array('libs/jquery.uniform.css', 'screen'),
 		));
@@ -77,7 +78,54 @@ class banco extends MY_Controller {
 	}
 
 	public function retirar(){
+		$this->carabiner->css(array(
+			array('libs/jquery.uniform.css', 'screen'),
+		));
+		$this->carabiner->js(array(
+			array('libs/jquery.uniform.min.js'),
+			array('general/util.js'),
+			array('panel/banco/deposito_retiro.js'),
+		));
 
+		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
+		$params['seo'] = array(
+			'titulo' => 'Agregar retiro'
+		);
+		
+		$this->load->model('banco_cuentas_model');
+
+		$this->configAddDeposito();
+		if ($this->form_validation->run() == FALSE)
+		{
+			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+		}
+		else
+		{
+			$res_mdl = $this->banco_cuentas_model->addRetiro();
+
+			if(!$res_mdl['error'])
+				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=7 '));
+		}
+
+		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
+		$_GET['id_banco']       = $params['bancos']['bancos'][0]->id_banco;
+		$params['cuentas']      = $this->banco_cuentas_model->getCuentas(false);
+		$params['cuenta_saldo'] = (isset($params['cuentas']['cuentas'][0])? $params['cuentas']['cuentas'][0]->saldo: 0);
+		
+		$params['metods_pago']  = array( 
+			array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+			array('nombre' => 'Cheque', 'value' => 'cheque'),
+			array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+			array('nombre' => 'Deposito', 'value' => 'deposito'),
+		);
+
+		if (isset($_GET['msg']))
+			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+		$this->load->view('panel/header', $params);
+		$this->load->view('panel/general/menu', $params);
+		$this->load->view('panel/banco/movimientos/retiros', $params);
+		$this->load->view('panel/footer');
 	}
 
 	public function get_cuentas_banco(){

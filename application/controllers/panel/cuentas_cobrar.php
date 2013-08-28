@@ -174,6 +174,13 @@ class cuentas_cobrar extends MY_Controller {
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
       //Cuentas de banco
       $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
+      //metodos de pago
+      $params['metods_pago']  = array( 
+        array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+        array('nombre' => 'Cheque', 'value' => 'cheque'),
+        array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+        array('nombre' => 'Deposito', 'value' => 'deposito'),
+      );
 
       $params['template'] = $this->load->view('panel/cuentas_cobrar/tpl_agregar_abono', $params, true);;
     }else

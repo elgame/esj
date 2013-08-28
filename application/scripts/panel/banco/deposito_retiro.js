@@ -2,12 +2,12 @@ $(function(){
 	//si es trapaso
 	$("#ftraspaso").change(function(){
 		if($(this).is(":checked")){
-			$("#campos_traspaso").show();
+			$("#div_destino").show();
 		}else{
-			$("#campos_traspaso").hide();
+			$("#div_destino").hide();
 
-			$("#txtBanco_destino option:first").attr("selected", true);
-			$("#txtCuenta_destino").html("");
+			// $("#fbanco_destino option:first").attr("selected", true);
+			// $("#txtCuenta_destino").html("");
 		}
 	});
 
@@ -16,8 +16,8 @@ $(function(){
 		changeBanco("#fcuenta", $(this));
 	});
 	//Evento al cambiar un banco destino traspaso
-	$("#txtBanco_destino").change(function(){
-		changeBanco("#txtCuenta_destino", $(this));
+	$("#fbanco_destino").change(function(){
+		changeBanco("#fcuenta_destino", $(this));
 	});
 
 	//cuando cambian de cuenta que actualize el numero de referencia en cheques
@@ -33,17 +33,17 @@ $(function(){
 
 	//Autocomplete de Productores
 	if($("#did_proveedor").length > 0){
-		$("#dempresa").autocomplete({
+		$("#dproveedor").autocomplete({
 	      source: base_url+'panel/empresas/ajax_get_empresas/',
 	      minLength: 1,
 	      selectFirst: true,
 	      select: function( event, ui ) {
 	        $("#did_empresa").val(ui.item.id);
-	        $("#dempresa").css("background-color", "#B0FFB0");
+	        $("#dproveedor").css("background-color", "#B0FFB0");
 	      }
 	  }).on("keydown", function(event){
 	      if(event.which == 8 || event == 46){
-	        $("#dempresa").css("background-color", "#FFD9B3");
+	        $("#dproveedor").css("background-color", "#FFD9B3");
 	        $("#did_empresa").val("");
 	      }
 	  });
@@ -67,9 +67,9 @@ $(function(){
 
 	$("#fmetodo_pago").change(function(){
 		var vvth = $(this);
-		$("#autcom_proveedor, #id_proveedor").removeAttr("required");
+		$("#dproveedor, #id_proveedor").removeAttr("required");
 		if (vvth.val() == 'cheque'){
-			$("#autcom_proveedor, #id_proveedor").attr("required", "required");
+			$("#dproveedor, #id_proveedor").attr("required", "required");
 		};
 	});
 

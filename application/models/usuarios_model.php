@@ -73,8 +73,8 @@ class Usuarios_model extends privilegios_model {
 						'estado'           => $this->input->post('festado'),
 						'cp'               => $this->input->post('fcp'),
 						
-						'fecha_nacimiento' => $this->input->post('ffecha_nacimiento'),
-						'fecha_entrada'    => $this->input->post('ffecha_entrada'),
+						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
+						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
 						'estado_civil'     => $this->input->post('festado_civil'),
 						'sexo'             => $this->input->post('fsexo'),

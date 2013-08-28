@@ -45,7 +45,7 @@ $(function(){
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
 
-        loadSerieFolio(ui.item.id);
+        loadFolio();
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){

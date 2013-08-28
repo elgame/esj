@@ -34,8 +34,78 @@ class banco_cuentas_model extends banco_model {
 		}
 
 		$this->db->insert('banco_movimientos', $data);
+		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
 
-		return array('error' => FALSE);
+		return array('error' => FALSE, 'ver_cheque' => ($data['metodo_pago']=='cheque'? 'si': 'no'), 'id_movimiento' => $id_movimiento);
+	}
+
+	public function addRetiro($data=NULL, $data_comision=null, $data_traspaso=null, $traspaso=false, $comision=0)
+	{
+		if ($data==NULL)
+		{
+			$comision = (isset($_POST['fcomision']{0})? $_POST['fcomision']: 0);
+			$traspaso = ($this->input->post('ftraspaso') == 'si'? true: false);
+			$data = array(
+						'id_cuenta'   => $this->input->post('fcuenta'),
+						'id_banco'    => $this->input->post('fbanco'),
+						'fecha'       => $this->input->post('ffecha').':'.date("s"),
+						'numero_ref'  => $this->input->post('freferencia'),
+						'concepto'    => $this->input->post('fconcepto'),
+						'monto'       => $this->input->post('fmonto'),
+						'tipo'        => 'f',
+						'entransito'  => 't',
+						'metodo_pago' => $this->input->post('fmetodo_pago'),
+						'a_nombre_de' => $this->input->post('dproveedor'),
+						);
+			if(is_numeric($_POST['did_proveedor']))
+				$data['id_proveedor'] = $this->input->post('did_proveedor');
+		}
+
+		$this->db->insert('banco_movimientos', $data);
+		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
+
+		//registrar la comision
+		if($comision > 0)
+		{
+			if($data_comision == null)
+			{
+				$data_comision = array(
+						'id_cuenta'   => $this->input->post('fcuenta'),
+						'id_banco'    => $this->input->post('fbanco'),
+						'fecha'       => $this->input->post('ffecha').':'.date("s"),
+						'numero_ref'  => $this->input->post('freferencia'),
+						'concepto'    => 'Comision por SPEI',
+						'monto'       => $comision,
+						'tipo'        => 'f',
+						'entransito'  => 't',
+						'metodo_pago' => $this->input->post('fmetodo_pago'),
+						'a_nombre_de' => $this->input->post('dproveedor'),
+						);
+			}
+			$this->addRetiro($data_comision);
+		}
+
+		//Registro el traspaso de dinero a otra cuenta
+		if($traspaso)
+		{
+			if ($data_traspaso==null) 
+			{
+				$data_traspaso = array(
+						'id_cuenta'   => $this->input->post('fcuenta_destino'),
+						'id_banco'    => $this->input->post('fbanco_destino'),
+						'fecha'       => $this->input->post('ffecha').':'.date("s"),
+						'numero_ref'  => $this->input->post('freferencia'),
+						'concepto'    => $this->input->post('fconcepto'),
+						'monto'       => $this->input->post('fmonto'),
+						'tipo'        => 't',
+						'entransito'  => 't',
+						'metodo_pago' => $this->input->post('fmetodo_pago'),
+						);
+			}
+			$this->addDeposito($data_traspaso);
+		}
+
+		return array('error' => FALSE, 'ver_cheque' => ($data['metodo_pago']=='cheque'? 'si': 'no'), 'id_movimiento' => $id_movimiento);
 	}
 
 

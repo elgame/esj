@@ -159,7 +159,7 @@ class Ventas_model extends privilegios_model{
       'condicion_pago'      => $this->input->post('dcondicion_pago'),
       'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
       'observaciones'       => $this->input->post('dobservaciones'),
-      'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+      'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
     );
 
     $this->db->insert('facturacion_ventas_remision', $datosFactura);

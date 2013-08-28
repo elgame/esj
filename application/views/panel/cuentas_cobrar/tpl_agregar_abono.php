@@ -29,7 +29,7 @@
                 <?php 
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
-                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias; ?></option>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
                 <?php
                 }
                 ?>
@@ -55,6 +55,19 @@
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
                   <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fmetodo_pago">Metodo de pago </label>
+                <div class="controls">
+                  <select name="fmetodo_pago" id="fmetodo_pago" required>
+              <?php  foreach ($metods_pago as $key => $value) {
+              ?>
+                    <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
+              <?php
+              }?>
+                  </select>
                 </div>
               </div>
               

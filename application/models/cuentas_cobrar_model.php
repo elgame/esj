@@ -674,7 +674,8 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Obtiene los abonos de una factura o nota de venta
 	 * @return [type] [description]
 	 */
-	public function getDetalleVentaFacturaData($id_factura=null){
+	public function getDetalleVentaFacturaData($id_factura=null)
+	{
 		$_GET['id'] = $id_factura==null? $_GET['id']: $id_factura;
 		$sql = '';
 	
@@ -701,7 +702,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		{
 			$data['info'] = $this->db->query(
 											"SELECT DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito
+												plazo_credito, id_cliente 
 												FROM facturacion
 												WHERE id_factura={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_abonos', 
@@ -724,7 +725,7 @@ class cuentas_cobrar_model extends privilegios_model{
 											"SELECT fecha, '' as serie, folio, 	
 												condicion_pago,
 												status, total, 
-												plazo_credito
+												plazo_credito, id_cliente
 											FROM facturacion_ventas_remision
 											WHERE id_venta={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_ventas_remision_abonos', 
@@ -752,9 +753,10 @@ class cuentas_cobrar_model extends privilegios_model{
 	
 		//obtenemos la info del cliente
 		$prov['info'] = '';
-		if (isset($_GET['id_cliente'])) {
+		if (isset($data['info'][0]->id_cliente)) 
+		{
 			$this->load->model('clientes_model');
-			$prov = $this->clientes_model->getClienteInfo($_GET['id_cliente'], true);
+			$prov = $this->clientes_model->getClienteInfo($data['info'][0]->id_cliente, true);
 		}
 	
 		$response = array(
@@ -782,10 +784,34 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Abonos de facturas y ventas
 	 * ************************************
 	 */
-	public function addAbonoMasivo(){
+	public function addAbonoMasivo()
+	{
 		$ids   = explode(',', substr($_GET['id'], 1));
 		$tipos = explode(',', substr($_GET['tipo'], 1));
 		$total = $this->input->post('dmonto');
+
+		//Se registra el movimiento en la cuenta bancaria
+		$this->load->model('banco_cuentas_model');
+		$data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($this->input->post('dcuenta'));
+		$data_cuenta  = $data_cuenta['info'];
+		$_GET['id']   = $ids[0];
+		$_GET['tipo'] = $tipos[0];
+		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id']);
+		//Registra deposito
+		$resp = $this->banco_cuentas_model->addDeposito(array(
+					'id_cuenta'   => $this->input->post('dcuenta'),
+					'id_banco'    => $data_cuenta->id_banco,
+					'fecha'       => $this->input->post('dfecha').':'.date("s"),
+					'numero_ref'  => $this->input->post('dreferencia'),
+					'concepto'    => $this->input->post('dconcepto'),
+					'monto'       => $total,
+					'tipo'        => 't',
+					'entransito'  => 't',
+					'metodo_pago' => $this->input->post('fmetodo_pago'),
+					'id_cliente'  => $inf_factura['cliente']->id_cliente,
+					'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
+					));
+
 		foreach ($ids as $key => $value) {
 			$_GET['id']   = $value;
 			$_GET['tipo'] = $tipos[$key];
@@ -794,12 +820,24 @@ class cuentas_cobrar_model extends privilegios_model{
 										'total'          => $total,
 										'id_cuenta'      => $this->input->post('dcuenta'),
 										'ref_movimiento' => $this->input->post('dreferencia') );
-			$resp = $this->addAbono($data);
-			$total -= $resp['total'];
+			$resa = $this->addAbono($data, null, true);
+			$total -= $resa['total'];
+
+			//Registra el rastro de la factura o remision que se abono en bancos
+			if(isset($resp['id_movimiento']))
+			{
+				if($tipos[$key] == 'f') //factura
+					$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $resa['id_abono']));
+				else //remision
+					$this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $resa['id_abono']));
+			}
 		}
+
+		return $resp;
 	}
 
-	public function addAbono($data=null, $id=null){
+	public function addAbono($data=null, $id=null, $masivo=false)
+	{
 		$id = $id==null? $this->input->get('id') : $id; //id factura o nota de venta
 
 		if ($this->input->get('tipo') == 'f') {
@@ -823,6 +861,27 @@ class cuentas_cobrar_model extends privilegios_model{
 			$pagada = true;
 		}
 
+		//Se registra el movimiento en la cuenta bancaria
+		if ($masivo == false) 
+		{
+			$this->load->model('banco_cuentas_model');
+			$data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($data['id_cuenta']);
+			$data_cuenta  = $data_cuenta['info'];
+
+			$resp = $this->banco_cuentas_model->addDeposito(array(
+						'id_cuenta'   => $data['id_cuenta'],
+						'id_banco'    => $data_cuenta->id_banco,
+						'fecha'       => $data['fecha'].':'.date("s"),
+						'numero_ref'  => $data['ref_movimiento'],
+						'concepto'    => $data['concepto'],
+						'monto'       => $data['total'],
+						'tipo'        => 't',
+						'entransito'  => 't',
+						'metodo_pago' => $this->input->post('fmetodo_pago'),
+						'id_cliente'  => $inf_factura['cliente']->id_cliente,
+						'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
+						));
+		}
 
 		$data = array(
 			$camps[0]        => $id, 
@@ -840,10 +899,23 @@ class cuentas_cobrar_model extends privilegios_model{
 			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
 		}
 
-		return $data;
+		//Registra el rastro de la factura o remision que se abono en bancos (si no es masivo)
+		if(isset($resp['id_movimiento']))
+		{
+			if($camps[0] == 'id_factura') //factura
+				$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $data['id_abono']));
+			else //remision
+				$this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $data['id_abono']));
+		}
+
+		if($masivo)
+			return $data;
+		else
+			return $resp;
 	}
 
-	public function removeAbono(){
+	public function removeAbono()
+	{
 		if($this->input->get('nc') == 'si')
 		{
 			$this->load->model('facturacion_model');
