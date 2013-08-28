@@ -104,7 +104,7 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi')
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->where('id_factura = ' . $idFactura)
@@ -127,7 +127,7 @@ class facturacion_model extends privilegios_model{
     {
 		$res = $this->db->select('folio')
       ->from('facturacion')
-      ->where("serie = '".$serie."' AND id_empresa = ".$empresa)
+      ->where("serie = '".$serie."' AND id_empresa = ".$empresa." AND status != 'b'")
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
@@ -250,7 +250,7 @@ class facturacion_model extends privilegios_model{
      *
      * @return  array
 	 */
-    public function addFactura()
+    public function addFactura($borrador = false)
     {
         $this->load->library('cfdi');
         $this->load->model('clientes_model');
@@ -285,7 +285,8 @@ class facturacion_model extends privilegios_model{
           'condicion_pago'      => $this->input->post('dcondicion_pago'),
           'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
           'observaciones'       => $this->input->post('dobservaciones'),
-          'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+          'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
+          // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
           'retencion_iva'       => $this->input->post('total_retiva'),
         );
 
@@ -293,53 +294,12 @@ class facturacion_model extends privilegios_model{
         if ($_POST['dtipo_comprobante'] === 'egreso')
           $datosFactura['id_nc'] = $_GET['id'];
 
+        if (isset($_GET['id']))
+          $this->db->delete('facturacion', array('id_factura' => $_GET['id']));
+
         // Inserta los datos de la factura y obtiene el Id.
         $this->db->insert('facturacion', $datosFactura);
         $idFactura = $this->db->insert_id('facturacion', 'id_factura');
-
-        // Obtiene los datos para la cadena original
-        $datosCadOrig = $this->datosCadenaOriginal();
-
-        // Si es un ingreso o una factura.
-        if ($_POST['dtipo_comprobante'] === 'ingreso')
-        {
-          // Obtiene los documentos que el cliente tiene asignados.
-          $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
-
-          // Inserta los documentos del cliente con un status false.
-            if ($docsCliente)
-            {
-                $this->db->insert_batch('facturacion_documentos', $docsCliente);
-
-                $this->load->model('documentos_model');
-                $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-            }
-            else
-                $datosFactura['docs_finalizados'] = 't';
-        }
-        else
-        {
-            $this->load->model('documentos_model');
-            $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-            $datosFactura['docs_finalizados'] = 't';
-        }
-
-        $dataCliente = array(
-          'id_factura'  => $idFactura,
-          'nombre'      => $datosCadOrig['nombre'],
-          'rfc'         => $datosCadOrig['rfc'],
-          'calle'       => $datosCadOrig['calle'],
-          'no_exterior' => $datosCadOrig['noExterior'],
-          'no_interior' => $datosCadOrig['noInterior'],
-          'colonia'     => $datosCadOrig['colonia'],
-          'localidad'   => $datosCadOrig['localidad'],
-          'municipio'   => $datosCadOrig['municipio'],
-          'estado'      => $datosCadOrig['estado'],
-          'cp'          => $datosCadOrig['codigoPostal'],
-          'pais'        => $datosCadOrig['pais'],
-        );
-        // Inserta los datos del cliente.
-        $this->db->insert('facturacion_cliente', $dataCliente);
 
         // Productos e Impuestos
         $productosCadOri    = array(); // Productos para la CadOriginal
@@ -388,6 +348,54 @@ class facturacion_model extends privilegios_model{
             );
           }
         }
+
+        if (count($productosFactura) > 0)
+          $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+        // Si es un borrador
+        if ($borrador) return true;
+
+        // Obtiene los datos para la cadena original
+        $datosCadOrig = $this->datosCadenaOriginal();
+
+        // Si es un ingreso o una factura.
+        if ($_POST['dtipo_comprobante'] === 'ingreso')
+        {
+          // Obtiene los documentos que el cliente tiene asignados.
+          $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
+
+          $this->load->model('documentos_model');
+          $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+
+          // Inserta los documentos del cliente con un status false.
+          if ($docsCliente)
+            $this->db->insert_batch('facturacion_documentos', $docsCliente);
+          else
+            $datosFactura['docs_finalizados'] = 't';
+        }
+        else
+        {
+            $this->load->model('documentos_model');
+            $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+            $datosFactura['docs_finalizados'] = 't';
+        }
+
+        $dataCliente = array(
+          'id_factura'  => $idFactura,
+          'nombre'      => $datosCadOrig['nombre'],
+          'rfc'         => $datosCadOrig['rfc'],
+          'calle'       => $datosCadOrig['calle'],
+          'no_exterior' => $datosCadOrig['noExterior'],
+          'no_interior' => $datosCadOrig['noInterior'],
+          'colonia'     => $datosCadOrig['colonia'],
+          'localidad'   => $datosCadOrig['localidad'],
+          'municipio'   => $datosCadOrig['municipio'],
+          'estado'      => $datosCadOrig['estado'],
+          'cp'          => $datosCadOrig['codigoPostal'],
+          'pais'        => $datosCadOrig['pais'],
+        );
+        // Inserta los datos del cliente.
+        $this->db->insert('facturacion_cliente', $dataCliente);
 
         // Asignamos los productos o conceptos a los datos de la cadena original.
         $datosCadOrig['concepto']  = $productosCadOri;
@@ -455,8 +463,6 @@ class facturacion_model extends privilegios_model{
         );
         $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
 
-        $this->db->insert_batch('facturacion_productos', $productosFactura);
-
         // Datos para el XML3.2
         $datosXML               = $cadenaOriginal['datos'];
         $datosXML['id_empresa'] = $this->input->post('did_empresa');
@@ -485,7 +491,7 @@ class facturacion_model extends privilegios_model{
 
         // Genera el archivo XML y lo guarda en disco.
         $archivos = $this->cfdi->generaArchivos($datosXML);
-        
+
         // Timbrado de la factura.
         $result = $this->timbrar($archivos['pathXML'], $idFactura);
 
@@ -497,6 +503,7 @@ class facturacion_model extends privilegios_model{
 
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
         }
+        else rmdir($pathDocs);
 
         // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
         // echo "<pre>";
@@ -626,41 +633,43 @@ class facturacion_model extends privilegios_model{
    * @return array
 	 */
 	public function cancelaFactura($idFactura)
+  {
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('documentos_model');
+
+    // Obtenemos la info de la factura a cancelar.
+    $factura = $this->getInfoFactura($idFactura);
+
+    // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+    $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
+
+    // Parametros que necesita el webservice para la cancelacion.
+    $params = array(
+      'rfc'   => $factura['info']->empresa->rfc,
+      'uuids' => $factura['info']->uuid,
+      'cer'   => $this->cfdi->obtenCer(),
+      'key'   => $this->cfdi->obtenKey(),
+    );
+
+    // Lama el metodo cancelar para que realiza la peticion al webservice.
+    $result = $this->facturartebarato_api->cancelar($params);
+
+    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
     {
+      $this->db->update('facturacion',
+        array('status' => 'ca', 'status_timbrado' => 'ca'),
+        "id_factura = {$idFactura}"
+      );
 
-        $this->load->library('cfdi');
-        $this->load->library('facturartebarato_api');
+      // Regenera el PDF de la factura.
+      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+      $this->generaFacturaPdf($idFactura, $pathDocs);
 
-        // Obtenemos la info de la factura a cancelar.
-        $factura = $this->getInfoFactura($idFactura);
+      $this->enviarEmail($idFactura);
+    }
 
-        // echo "<pre>";
-        //   var_dump($factura);
-        // echo "</pre>";exit;
-
-        // Carga los datos fiscales de la empresa dentro de la lib CFDI.
-        $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
-
-        // Parametros que necesita el webservice para la cancelacion.
-        $params = array(
-          'rfc'   => $factura['info']->empresa->rfc,
-          'uuids' => $factura['info']->uuid,
-          'cer'   => $this->cfdi->obtenCer(),
-          'key'   => $this->cfdi->obtenKey(),
-        );
-
-        // Lama el metodo cancelar para que realiza la peticion al webservice.
-        $result = $this->facturartebarato_api->cancelar($params);
-
-        if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
-        {
-          $this->db->update('facturacion',
-            array('status' => 'ca', 'status_timbrado' => 'ca'),
-            "id_factura = {$idFactura}"
-          );
-        }
-
-		return array('msg' => $result->data->status_uuid);
+    return array('msg' => $result->data->status_uuid);
 	}
 
    /**
@@ -702,6 +711,51 @@ class facturacion_model extends privilegios_model{
         $pathXML = APPPATH."media/cfdi/facturasXML/{$ano}/{$mes}/{$rfc}-{$serie}-{$folio}.xml";
 
         $this->cfdi->descargarXML($data, $pathXML);
+    }
+
+    /**
+    * Descarga el ZIP con los documentos.
+    *
+    * @param  string $idFactura
+    * @return void
+    */
+    public function descargarZip($idFactura)
+    {
+        $this->load->library('cfdi');
+
+        // Obtiene la info de la factura.
+        $factura = $this->getInfoFactura($idFactura);
+
+        $cliente = strtoupper($factura['info']->cliente->nombre_fiscal);
+        $fecha   = explode('-', $factura['info']->fecha);
+        $ano     = $fecha[0];
+        $mes     = strtoupper(String::mes(floatval($fecha[1])));
+        $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
+        $folio   = $factura['info']->folio;
+
+        $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+        // Scanea el directorio para obtener los archivos.
+        $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+        $zip = new ZipArchive;
+        if ($zip->open(APPPATH.'media/documentos.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+        {
+          foreach ($archivos as $archivo)
+            $zip->addFile($pathDocs.$archivo, $archivo);
+
+          $zip->close();
+        }
+        else
+        {
+          exit('Error al intentar crear el ZIP.');
+        }
+
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=documentos.zip');
+        readfile(APPPATH.'media/documentos.zip');
+
+        unlink(APPPATH.'media/documentos.zip');
     }
 
    /**
@@ -775,9 +829,10 @@ class facturacion_model extends privilegios_model{
             // Datos del Receptor //
             ////////////////////////
 
-            $correoDestino = $factura['info']->cliente->email;
-            $nombreDestino = strtoupper($factura['info']->cliente->nombre_fiscal);
+            $correoDestino = explode(',', $factura['info']->cliente->email);
 
+            $nombreDestino = strtoupper($factura['info']->cliente->nombre_fiscal);
+            $copiapara =
             $datosEmail = array(
                 'correoEmisorEm' => $correoEmisorEm,
                 'correoEmisor'   => $correoEmisor,
@@ -788,12 +843,13 @@ class facturacion_model extends privilegios_model{
                 'body'           => $body,
                 'correoDestino'  => $correoDestino,
                 'nombreDestino'  => $nombreDestino,
+                'cc'             => $factura['info']->empresa->email,
                 'adjuntos'       => array()
             );
 
             // Adjuntos.
-            if ($factura['info']->docs_finalizados === 't' || $factura['info']->id_nc !== null)
-            {
+            // if ($factura['info']->docs_finalizados === 't' || $factura['info']->id_nc !== null)
+            // {
                 $this->load->model('documentos_model');
                 // $docs = $this->documentos_model->getClienteDocs($factura['info']->id_factura);
 
@@ -822,7 +878,7 @@ class facturacion_model extends privilegios_model{
 
                     $datosEmail['adjuntos'] = $adjuntos;
                 // }
-            }
+            // }
 
             // Envia el email.
             $result = $this->my_email->setData($datosEmail)->zip()->send();
@@ -888,6 +944,98 @@ class facturacion_model extends privilegios_model{
         }
 
         return isset($docs) ? $docs : false;
+    }
+
+    public function addFacturaBorrador()
+    {
+      return $this->addFactura(true);
+    }
+
+    public function updateFacturaBorrador($idBorrador)
+    {
+      $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+
+      // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+      // pago son las parcialidades "Parcialidad 1 de X".
+      $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+      $datosFactura = array(
+        'id_cliente'          => $this->input->post('did_cliente'),
+        'id_empresa'          => $this->input->post('did_empresa'),
+        'version'             => $this->input->post('dversion'),
+        'serie'               => $this->input->post('dserie'),
+        'folio'               => $this->input->post('dfolio'),
+        'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
+        'subtotal'            => $this->input->post('total_subtotal'),
+        'importe_iva'         => $this->input->post('total_iva'),
+        'total'               => $this->input->post('total_totfac'),
+        'total_letra'         => $this->input->post('dttotal_letra'),
+        'no_aprobacion'       => $this->input->post('dno_aprobacion'),
+        'ano_aprobacion'      => $anoAprobacion[0],
+        'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
+        'forma_pago'          => $formaPago,
+        'metodo_pago'         => $this->input->post('dmetodo_pago'),
+        'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
+        'no_certificado'      => $this->input->post('dno_certificado'),
+        'condicion_pago'      => $this->input->post('dcondicion_pago'),
+        'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
+        'observaciones'       => $this->input->post('dobservaciones'),
+        'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
+        'retencion_iva'       => $this->input->post('total_retiva'),
+      );
+
+      // Si el tipo de comprobante es "egreso" o una nota de credito.
+      if ($_POST['dtipo_comprobante'] === 'egreso')
+        $datosFactura['id_nc'] = $_GET['id'];
+
+      // Inserta los datos de la factura y obtiene el Id.
+      $this->db->update('facturacion', $datosFactura, array('id_factura' => $idBorrador));
+
+      // Productos e Impuestos
+      $productosFactura   = array(); // Productos para la Factura
+
+      foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+      {
+        if ($_POST['prod_importe'][$key] != 0)
+        {
+          $productosFactura[] = array(
+            'id_factura'       => $idBorrador,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+            'num_row'          => intval($key),
+            'cantidad'         => $_POST['prod_dcantidad'][$key],
+            'descripcion'      => $descripcion,
+            'precio_unitario'  => $_POST['prod_dpreciou'][$key],
+            'importe'          => $_POST['prod_importe'][$key],
+            'iva'              => $_POST['prod_diva_total'][$key],
+            'unidad'           => $_POST['prod_dmedida'][$key],
+            'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+            'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
+            'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+          );
+        }
+      }
+
+      $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
+
+      if (count($productosFactura) > 0)
+        $this->db->insert_batch('facturacion_productos', $productosFactura);
+    }
+
+    /**
+     * Obtiene la ultima factura que este en status "b" o como borrador.
+     *
+     * @return mixed
+     */
+    public function getBorradorFactura()
+    {
+      $query = $this->db
+        ->select('id_factura')
+        ->from('facturacion')
+        ->where('status', 'b')
+        ->order_by('id_factura', 'DESC')
+        ->limit(1)->get()->row();
+
+      return count($query) > 0 ? $query->id_factura : null;
     }
 
   /*
@@ -1757,6 +1905,13 @@ class facturacion_model extends privilegios_model{
         $pdf->SetXY(140, $pdf->GetY());
         $pdf->SetTextColor(0, 0, 0);
         $pdf->Cell(65, 8, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
+
+
+        //------------ IMAGEN CANDELADO --------------------
+
+        if($factura['info']->status === 'ca'){
+          $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
+        }
 
         if ($path)
           $pdf->Output($path.'Factura.pdf', 'F');

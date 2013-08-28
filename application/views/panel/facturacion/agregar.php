@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar'); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar?'.$getId); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -31,11 +31,12 @@
               <div class="control-group">
                 <label class="control-label" for="dempresa">Empresa</label>
                 <div class="controls">
-                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
-                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa); ?>">
-                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', $empresa_default->cfdi_version); ?>">
-                  <input type="hidden" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $empresa_default->cer_caduca); ?>">
-                  <input type="hidden" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $no_certificado); ?>">
+
+                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', isset($borrador) ? $borrador['info']->empresa->nombre_fiscal : $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
+                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa); ?>">
+                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', isset($borrador) ? $borrador['info']->version :$empresa_default->cfdi_version); ?>">
+                  <input type="hidden" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', isset($borrador) ? $borrador['info']->empresa->cer_caduca : $empresa_default->cer_caduca); ?>">
+                  <input type="hidden" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', isset($borrador) ? $borrador['info']->no_certificado : $no_certificado); ?>">
                 </div>
               </div>
 
@@ -65,36 +66,59 @@
               <div class="control-group">
                 <label class="control-label" for="dcliente">Cliente</label>
                 <div class="controls">
-                  <input type="text" name="dcliente" class="span9" id="dcliente" value="<?php echo set_value('dcliente'); ?>" size="73">
-                  <input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value('did_cliente'); ?>">
+                  <input type="text" name="dcliente" class="span9" id="dcliente" value="<?php echo set_value('dcliente', isset($borrador) ? $borrador['info']->cliente->nombre_fiscal : ''); ?>" size="73">
+                  <input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value('did_cliente', isset($borrador) ? $borrador['info']->cliente->id_cliente : ''); ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dcliente_rfc">RFC</label>
                 <div class="controls">
-                  <input type="text" name="dcliente_rfc" class="span9" id="dcliente_rfc" value="<?php echo set_value('dcliente_rfc'); ?>" size="25">
+                  <input type="text" name="dcliente_rfc" class="span9" id="dcliente_rfc" value="<?php echo set_value('dcliente_rfc', isset($borrador) ? $borrador['info']->cliente->rfc : ''); ?>" size="25">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dcliente_domici">Domicilio</label>
                 <div class="controls">
-                  <input type="text" name="dcliente_domici" class="span9" id="dcliente_domici" value="<?php echo set_value('dcliente_domici'); ?>" size="65">
+
+                  <?php
+                      $domi = '';
+                      if (isset($borrador))
+                      {
+                        $domi .= $borrador['info']->cliente->calle       !== '' ? $borrador['info']->cliente->calle : '';
+                        $domi .= $borrador['info']->cliente->no_exterior !== '' ? ', #'.$borrador['info']->cliente->no_exterior : '';
+                        $domi .= $borrador['info']->cliente->no_interior !== '' ? '-'.$borrador['info']->cliente->no_interior : '';
+                        $domi .= $borrador['info']->cliente->colonia     !== '' ? ' '.$borrador['info']->cliente->colonia : '';
+                      }
+                   ?>
+
+                  <input type="text" name="dcliente_domici" class="span9" id="dcliente_domici" value="<?php echo set_value('dcliente_domici', $domi); ?>" size="65">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dcliente_ciudad">Ciudad</label>
                 <div class="controls">
-                  <input type="text" name="dcliente_ciudad" class="span9" id="dcliente_ciudad" value="<?php echo set_value('dcliente_ciudad'); ?>" size="25">
+
+                  <?php
+                      $ciudad = '';
+                      if (isset($borrador))
+                      {
+                        $ciudad .= $borrador['info']->cliente->municipio !== '' ? ', '.$borrador['info']->cliente->municipio : '';
+                        $ciudad .= $borrador['info']->cliente->estado    !== '' ? ', '.$borrador['info']->cliente->estado : '';
+                        $ciudad .= $borrador['info']->cliente->cp        !== '' ? ', C.P.'.$borrador['info']->cliente->cp : '';
+                      }
+                   ?>
+
+                  <input type="text" name="dcliente_ciudad" class="span9" id="dcliente_ciudad" value="<?php echo set_value('dcliente_ciudad', $ciudad); ?>" size="25">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dobservaciones">Observaciones</label>
                 <div class="controls">
-                  <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones'); ?></textarea>
+                  <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', isset($borrador) ? $borrador['info']->observaciones : ''); ?></textarea>
                 </div>
               </div>
             </div>
@@ -128,8 +152,18 @@
                 <label class="control-label" for="dforma_pago">Forma de pago</label>
                 <div class="controls">
                   <select name="dforma_pago" class="span9" id="dforma_pago">
-                    <option value="Pago en una sola exhibición" <?php echo set_select('dforma_pago', 'Pago en una sola exhibición'); ?>>Pago en una sola exhibición</option>
-                    <option value="Pago en parcialidades" <?php echo set_select('dforma_pago', 'Pago en parcialidades'); ?>>Pago en parcialidades</option>
+
+                    <?php
+                      $option = isset($borrador) ? $borrador['info']->forma_pago : '';
+
+                      $parcialidades = true;
+                      if ($option === 'Pago en una sola exhibición' || $option === '')
+                        $parcialidades = false;
+
+                     ?>
+
+                    <option value="Pago en una sola exhibición" <?php echo set_select('dforma_pago', 'Pago en una sola exhibición', $option === 'Pago en una sola exhibición' ? true : false); ?>>Pago en una sola exhibición</option>
+                    <option value="Pago en parcialidades" <?php echo set_select('dforma_pago', 'Pago en parcialidades', $parcialidades ? true : false); ?>>Pago en parcialidades</option>
                   </select>
                 </div>
               </div>
@@ -137,7 +171,7 @@
               <div class="control-group">
                 <label class="control-label" for="dforma_pago">Parcialidades</label>
                 <div class="controls">
-                  <input type="text" name="dforma_pago_parcialidad" class="span9" id="dforma_pago_parcialidad" value="<?php echo set_value('dforma_pago_parcialidad', 'Parcialidad 1 de X'); ?>">
+                  <input type="text" name="dforma_pago_parcialidad" class="span9" id="dforma_pago_parcialidad" value="<?php echo set_value('dforma_pago_parcialidad', $parcialidades ? $option : 'Parcialidad 1 de X'); ?>">
                 </div>
               </div>
 
@@ -145,12 +179,17 @@
                 <label class="control-label" for="dmetodo_pago">Metodo de pago</label>
                 <div class="controls">
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
-                    <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado'); ?>>No identificado</option>
-                    <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo'); ?>>Efectivo</option>
-                    <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque'); ?>>Cheque</option>
-                    <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta'); ?>>Tarjeta</option>
-                    <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia'); ?>>Transferencia</option>
-                    <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito'); ?>>Deposito</option>
+
+                    <?php
+                      $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
+                     ?>
+
+                    <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado', $metodo === 'no identificado' ? true : false); ?>>No identificado</option>
+                    <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo', $metodo === 'efectivo' ? true : false); ?>>Efectivo</option>
+                    <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque', $metodo === 'cheque' ? true : false); ?>>Cheque</option>
+                    <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', $metodo === 'tarjeta' ? true : false); ?>>Tarjeta</option>
+                    <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', $metodo === 'transferencia' ? true : false); ?>>Transferencia</option>
+                    <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', $metodo === 'deposito' ? true : false); ?>>Deposito</option>
                   </select>
                 </div>
               </div>
@@ -158,7 +197,7 @@
               <div class="control-group">
                 <label class="control-label" for="dmetodo_pago_digitos">Ultimos 4 digitos</label>
                 <div class="controls">
-                  <input type="text" name="dmetodo_pago_digitos" class="span9" id="dmetodo_pago_digitos" value="<?php echo set_value('dmetodo_pago_digitos', 'No identificado'); ?>">
+                  <input type="text" name="dmetodo_pago_digitos" class="span9" id="dmetodo_pago_digitos" value="<?php echo set_value('dmetodo_pago_digitos', isset($borrador) ? $borrador['info']->metodo_pago_digitos : 'No identificado'); ?>">
                 </div>
               </div>
 
@@ -166,8 +205,13 @@
                 <label class="control-label" for="dcondicion_pago">Condición de pago</label>
                 <div class="controls">
                   <select name="dcondicion_pago" class="span9" id="dcondicion_pago">
-                    <option value="cr" <?php echo set_select('dcondicion_pago', 'cr'); ?>>Credito</option>
-                    <option value="co" <?php echo set_select('dcondicion_pago', 'co'); ?>>Contado</option>
+
+                    <?php
+                      $condicion = isset($borrador) ? $borrador['info']->condicion_pago : '';
+                     ?>
+
+                    <option value="cr" <?php echo set_select('dcondicion_pago', 'cr', $condicion === 'cr' ? true : false); ?>>Credito</option>
+                    <option value="co" <?php echo set_select('dcondicion_pago', 'co', $condicion === 'co' ? true : false); ?>>Contado</option>
                   </select>
                 </div>
               </div>
@@ -175,14 +219,15 @@
               <div class="control-group">
                 <label class="control-label" for="dcondicion_pago">Plazo de crédito</label>
                 <div class="controls">
-                  <input type="number" name="dplazo_credito" class="span9 vinteger" id="dplazo_credito" value="<?php echo set_value('dplazo_credito', 0); ?>">
+                  <input type="number" name="dplazo_credito" class="span9 vinteger" id="dplazo_credito" value="<?php echo set_value('dplazo_credito', isset($borrador) ? $borrador['info']->plazo_credito : 0); ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
-                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;" id="submit">Guardar Factura</button>
+                      <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br>
+                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Timbrar</button>
                   </div>
                 </div>
               </div>
@@ -206,7 +251,25 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <?php if (isset($_POST['prod_did_prod'])) {
+                  <?php
+
+                        if (isset($borrador))
+                        {
+                          foreach ($borrador['productos'] as $key => $p) {
+                            $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
+                            $_POST['prod_importe'][$key]            = $p->importe;
+                            $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
+                            $_POST['prod_dmedida'][$key]            = $p->unidad;
+                            $_POST['prod_dcantidad'][$key]          = $p->cantidad;
+                            $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
+                            $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva;
+                            $_POST['prod_diva_total'][$key]         = $p->iva;
+                            $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
+                            $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+                          }
+                        }
+
+                        if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v){
                             if ($_POST['prod_importe'][$k] != 0) { ?>
 
@@ -244,8 +307,8 @@
                                   <select name="dreten_iva" id="dreten_iva" class="span12 prod">
                                     <option value="0" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0 ? 'selected' : '' ?>>No retener</option>
                                     <option value="0.04" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.04 ? 'selected' : '' ?>>4%</option>
-                                    <option value="0.6666" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.6666 ? 'selected' : '' ?>>2 Terceras</option>
-                                    <option value="1" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 1 ? 'selected' : '' ?>>100 %</option>
+                                    <option value="0.10667" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.10667 ? 'selected' : '' ?>>2 Terceras</option>
+                                    <option value="0.16" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.16 ? 'selected' : '' ?>>100 %</option>
                                   </select>
 
                                   <input type="hidden" name="prod_dreten_iva_total[]" value="<?php echo $_POST['prod_dreten_iva_total'][$k] ?>" id="prod_dreten_iva_total" class="span12">
@@ -323,13 +386,13 @@
                 <tbody>
                   <tr>
                     <td rowspan="7">
-                        <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra');?></textarea>
+                        <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra', isset($borrador) ? $borrador['info']->total_letra : '');?></textarea>
                     </td>
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', 0))?></td>
-                    <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', 0); ?>">
+                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                    <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                   </tr>
                   <tr>
                     <td>Descuento</td>
@@ -338,23 +401,23 @@
                   </tr>
                   <tr>
                     <td>SUBTOTAL</td>
-                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', 0))?></td>
-                    <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', 0); ?>">
+                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                    <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', 0))?></td>
-                    <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', 0); ?>">
+                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
+                    <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
                   </tr>
                   <tr>
                     <td>Ret. IVA</td>
-                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', 0))?></td>
-                    <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', 0); ?>">
+                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0))?></td>
+                    <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', 0))?></td>
-                    <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', 0); ?>">
+                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
+                    <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0); ?>">
                   </tr>
                 </tbody>
               </table>
