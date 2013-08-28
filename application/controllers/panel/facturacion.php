@@ -945,6 +945,10 @@ class facturacion extends MY_Controller {
         $txt = 'La factura se cancelo correctamente.';
         $icono = 'success';
         break;
+      case 205:
+        $txt = 'Error al intentar cancelar: UUID No existente.';
+        $icono = 'error';
+        break;
       case 708:
         $txt = 'No se pudo cancelar la factura debido a un error del servicio, vuelva a intentarlo en unos minutos.';
         $icono = 'error';
