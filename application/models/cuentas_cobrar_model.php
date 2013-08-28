@@ -322,7 +322,7 @@ class cuentas_cobrar_model extends privilegios_model{
 								FROM
 									facturacion AS f 
 										INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-								WHERE f.status <> 'ca'
+								WHERE f.status <> 'ca' AND f.status <> 'b'
 									AND f.id_cliente = '{$_GET['id_cliente']}' 
 									AND Date(fa.fecha) <= '{$fecha2}'{$sql}
 								GROUP BY f.id_cliente, f.id_factura
@@ -335,13 +335,13 @@ class cuentas_cobrar_model extends privilegios_model{
 									Sum(f.total) AS abonos
 								FROM
 									facturacion AS f
-								WHERE f.status <> 'ca' AND f.id_nc IS NOT NULL
+								WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
 									AND f.id_cliente = '{$_GET['id_cliente']}' 
 									AND Date(f.fecha) <= '{$fecha2}'{$sql}
 								GROUP BY f.id_cliente, f.id_factura
 							)
 						) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-					WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca'
+					WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
 						AND Date(f.fecha) < '{$fecha1}'{$sql}
 					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
@@ -415,14 +415,14 @@ class cuentas_cobrar_model extends privilegios_model{
 							Sum(total) AS abonos
 						FROM
 							facturacion
-						WHERE status <> 'ca' AND id_nc IS NOT NULL
+						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
 							AND id_cliente = {$_GET['id_cliente']} 
 							AND Date(fecha) <= '{$fecha2}'
 						GROUP BY id_nc
 					)
 				) AS ac ON f.id_factura = ac.id_factura {$sql}
 			WHERE f.id_cliente = {$_GET['id_cliente']} 
-				AND f.status <> 'ca' AND id_nc IS NULL  
+				AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL  
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
 
@@ -714,7 +714,7 @@ class cuentas_cobrar_model extends privilegios_model{
 							('Nota de credito ' || serie || folio) AS concepto,
 							'nc' AS tipo
 						FROM facturacion
-						WHERE status <> 'ca' AND id_nc IS NOT NULL
+						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
 							AND id_nc = {$_GET['id']} 
 							AND Date(fecha) <= '{$fecha2}' ";
 		}
