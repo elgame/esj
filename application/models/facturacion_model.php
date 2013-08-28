@@ -294,9 +294,6 @@ class facturacion_model extends privilegios_model{
         if ($_POST['dtipo_comprobante'] === 'egreso')
           $datosFactura['id_nc'] = $_GET['id'];
 
-        if (isset($_GET['id']))
-          $this->db->delete('facturacion', array('id_factura' => $_GET['id']));
-
         // Inserta los datos de la factura y obtiene el Id.
         $this->db->insert('facturacion', $datosFactura);
         $idFactura = $this->db->insert_id('facturacion', 'id_factura');
@@ -502,6 +499,9 @@ class facturacion_model extends privilegios_model{
           $xmlName = explode('/', $archivos['pathXML']);
 
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
+
+          if (isset($_GET['id']))
+            $this->db->delete('facturacion', array('id_factura' => $_GET['id']));
         }
         else rmdir($pathDocs);
 
