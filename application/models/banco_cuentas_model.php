@@ -8,6 +8,173 @@ class banco_cuentas_model extends banco_model {
 		parent::__construct();
 	}
 
+	public function getSaldosCuentasData()
+	{
+		//Filtros para la consulta
+		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+		
+		$_GET['vertodos'] = $this->input->get('vertodos')!=''? $this->input->get('vertodos'): 'all';
+		$sql = $sql_todos = '';
+		if($_GET['vertodos'] == 'tran')
+			$sql_todos = " AND entransito = 't'";
+		elseif($_GET['vertodos'] == 'notran')
+			$sql_todos = " AND entransito = 'f'";
+
+		if(isset($_GET['fid_banco']{0}))
+			$sql .= " AND bb.id_banco = {$this->input->get('fid_banco')}";
+
+		$this->load->model('empresas_model');
+		$empresa = $this->empresas_model->getDefaultEmpresa();
+		if(isset($_GET['did_empresa']{0}))
+			$sql .= " AND e.id_empresa = {$this->input->get('did_empresa')}";
+		else
+			$sql .= " AND e.id_empresa = {$empresa->id_empresa}";
+			
+		$res = $this->db->query(
+								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, 
+									substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, 
+									(
+										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}') - 
+										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}' {$sql_todos})
+									) AS saldo
+								FROM banco_cuentas AS bc
+									INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco 
+									INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa 
+								WHERE bc.status = 'ac' {$sql}
+								ORDER BY bb.nombre ASC, bc.alias ASC");
+
+		$response = array(
+			'cuentas'        => array(),
+			'total_saldos'   => 0,
+		);
+		if($res->num_rows() > 0)
+		{
+			$response['cuentas'] = $res->result();
+			foreach ($response['cuentas'] as $key => $value) {
+				$response['total_saldos'] += $value->saldo;
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Descarga los saldos de las cuentas
+	 */
+	public function saldosCuentasPdf()
+	{
+		$res = $this->getSaldosCuentasData();
+		
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm', 'Letter');
+		$pdf->titulo2 = 'Saldos de Cuentas '.(isset($_GET['dempresa']{0})? '<'.$this->input->get('dempresa').'>': '');
+		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		if($this->input->get('vertodos') == 'tran')
+			$pdf->titulo3 .= 'Transito';
+		elseif($this->input->get('vertodos') == 'notran')
+			$pdf->titulo3 .= 'Cobrados';
+		else
+			$pdf->titulo3 .= 'Todos';
+
+		$pdf->AliasNbPages();
+		//$pdf->AddPage();
+		$pdf->SetFont('Arial','',8);
+	
+		$aligns = array('L', 'L', 'L', 'R');
+		$widths = array(50, 24, 80, 50);
+		$header = array('Banco', 'Cuenta', 'Alias', 'Saldo');
+		
+		$total_cargo = 0;
+		$total_abono = 0;
+		$total_saldo = 0;
+		
+		foreach($res['cuentas'] as $key => $item){
+			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+				$pdf->AddPage();
+	
+				$pdf->SetFont('Arial','B',8);
+				$pdf->SetTextColor(255,255,255);
+				$pdf->SetFillColor(160,160,160);
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($header, true);
+			}
+			
+			$pdf->SetFont('Arial','',8);
+			$pdf->SetTextColor(0,0,0);
+			
+			$datos = array($item->banco, 
+									$item->numero, 
+									$item->alias,  
+									String::formatoNumero($item->saldo, 2, '$', false) );
+				
+			$pdf->SetX(6);
+			$pdf->SetAligns($aligns);
+			$pdf->SetWidths($widths);
+			$pdf->Row($datos, false);
+		}
+	
+		$pdf->SetX(6);
+		$pdf->SetFont('Arial','B',8);
+		$pdf->SetTextColor(255,255,255);
+		$pdf->SetAligns(array('R', 'R'));
+		$pdf->SetWidths(array(154, 50));
+		$pdf->Row(array('Totales:', 
+										String::formatoNumero($res['total_saldos'], 2, '$', false)
+									), true);
+	
+		$pdf->Output('saldos_cuentas.pdf', 'I');
+	}
+	
+	public function saldosCuentasExcel(&$xls=null, $close=true)
+	{
+		$res = $this->getSaldosCuentasData();
+		
+		$this->load->library('myexcel');
+		if($xls == null)
+			$xls = new myexcel();
+	
+		$worksheet =& $xls->workbook->addWorksheet();
+	
+		$xls->titulo2 = 'Saldos de Cuentas '.(isset($_GET['dempresa']{0})? '<'.$this->input->get('dempresa').'>': '');
+		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		if($this->input->get('vertodos') == 'tran')
+			$xls->titulo4 .= 'Transito';
+		elseif($this->input->get('vertodos') == 'notran')
+			$xls->titulo4 .= 'Cobrados';
+		else
+			$xls->titulo4 .= 'Todos';
+			
+		$row=0;
+		//Header
+		$xls->excelHead($worksheet, $row, 8, array(
+				array($xls->titulo2, 'format_title2'), 
+				array($xls->titulo3, 'format_title3'),
+				array($xls->titulo4, 'format_title3')
+		));
+			
+		$row +=3;
+		$xls->excelContent($worksheet, $row, $res['cuentas'], array(
+				'head' => array('Banco', 'Cuenta', 'Alias', 'Saldo'),
+				'conte' => array(
+						array('name' => 'banco', 'format' => 'format4', 'sum' => -1),
+						array('name' => 'numero', 'format' => 'format4', 'sum' => -1),
+						array('name' => 'alias', 'format' => 'format4', 'sum' => -1),
+						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0) )
+		));
+	
+		if($close)
+		{
+			$xls->workbook->send('saldos_cuentas.xls');
+			$xls->workbook->close();
+		}
+	}
+
+
 
 	/**
 	 * *************************************

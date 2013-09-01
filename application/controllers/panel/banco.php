@@ -6,7 +6,12 @@ class banco extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('banco/get_cuentas_banco/');
+	private $excepcion_privilegio = array(
+		'banco/get_cuentas_banco/',
+
+		'banco/saldos_pdf/',
+		'banco/saldos_xls/',
+		);
 
 	public function _remap($method){
 
@@ -24,7 +29,50 @@ class banco extends MY_Controller {
 	}
 
  	
+	public function index(){
+		$this->carabiner->js(array(
+				array('general/msgbox.js')
+		));
 
+		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
+		$params['seo'] = array(
+			'titulo' => 'Saldos Cuentas Bancarias'
+		);
+
+		$this->load->model('banco_cuentas_model');
+		$this->load->model('empresas_model');
+		$params['data']    = $this->banco_cuentas_model->getSaldosCuentasData();
+		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+		$params['bancos']  = $this->banco_cuentas_model->getBancos(false);
+
+		if (isset($_GET['msg']))
+			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+		$this->load->view('panel/header', $params);
+		$this->load->view('panel/general/menu', $params);
+		$this->load->view('panel/banco/saldos_cuentas', $params);
+		$this->load->view('panel/footer');
+	}
+
+	public function saldos_pdf()
+	{
+		$this->load->model('banco_cuentas_model');
+    $this->banco_cuentas_model->saldosCuentasPdf();
+	}
+
+	public function saldos_xls()
+	{
+		$this->load->model('banco_cuentas_model');
+    $this->banco_cuentas_model->saldosCuentasExcel();
+	}
+
+
+	/**
+	 * **********************************************
+	 * ********* MOVIMIENTOS DE CUENTAS *************
+	 * ********* DEPOSITOS Y RETIROS ****************
+	 * @return [type] [description]
+	 */
 	public function depositar()
 	{
 		$this->carabiner->css(array(
