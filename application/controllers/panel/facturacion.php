@@ -8,6 +8,7 @@ class facturacion extends MY_Controller {
   private $excepcion_privilegio = array(
     'facturacion/get_folio/',
     'facturacion/get_series/',
+    'facturacion/email/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -15,6 +16,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
+
 
 
     'facturacion/xml/'
@@ -230,18 +232,55 @@ class facturacion extends MY_Controller {
   }
 
   /**
-   * Envia los documentos al cliente.
+   * Muestra la vista par el envio de los correo.
    *
    * @return void
    */
   public function enviar_documentos()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/email.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Facturas');
+
+    $this->load->model('facturacion_model');
+    $this->load->model('clientes_model');
+
+    $factura = $this->facturacion_model->getInfoFactura($_GET['id']);
+    $cliente = $this->clientes_model->getClienteInfo($factura['info']->id_cliente);
+
+    $params['emails_default'] = explode(',', $cliente['info']->email);
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] == 10)
+      {
+        $params['close'] = 1;
+      }
+
+    }
+
+    $this->load->view('panel/facturacion/email',$params);
+  }
+
+  /**
+   * Envia los documentos al cliente.
+   *
+   * @return void
+   */
+  public function email()
   {
     if (isset($_GET['id']{0}))
     {
       $this->load->model('facturacion_model');
       $response = $this->facturacion_model->enviarEmail($_GET['id']);
 
-      redirect(base_url("panel/facturacion/?&msg={$response['msg']}"));
+      redirect(base_url("panel/facturacion/enviar_documentos?id={$_GET['id']}&msg={$response['msg']}"));
     }
     else redirect(base_url('panel/facturacion/?msg='));
   }

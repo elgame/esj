@@ -829,7 +829,18 @@ class facturacion_model extends privilegios_model{
             // Datos del Receptor //
             ////////////////////////
 
-            $correoDestino = explode(',', $factura['info']->cliente->email);
+            $correoDestino = array();
+
+            if ($_POST['pextras'] !== '')
+              $correoDestino += explode(',', $_POST['pextras']);
+
+            if (isset($_POST['emails']))
+            {
+              foreach ($_POST['emails'] as $email)
+              {
+                array_push($correoDestino, $email);
+              }
+            }
 
             $nombreDestino = strtoupper($factura['info']->cliente->nombre_fiscal);
             $copiapara =
@@ -911,7 +922,7 @@ class facturacion_model extends privilegios_model{
 	 * Actualiza los digitos del metodo de pago de una factura
 	 */
 	public function metodo_pago()
-    {
+  {
 		$this->db->update('facturas', array('metodo_pago_digitos' => $_POST['mp_digitos']), "id_factura = '".$_POST['id_factura']."'");
 		return array(true, '');
 	}

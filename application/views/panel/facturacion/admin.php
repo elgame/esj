@@ -173,7 +173,7 @@
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
                           'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar los documentos?', 'Facturas', this); return false;"))
+                          'attrs' => array('rel' => 'superbox-50x450'))
                         );
                       }
                     ?>
@@ -211,7 +211,6 @@
 
           <!-- content ends -->
     </div><!--/#content.span10-->
-
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
