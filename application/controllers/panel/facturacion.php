@@ -252,7 +252,9 @@ class facturacion extends MY_Controller {
     $factura = $this->facturacion_model->getInfoFactura($_GET['id']);
     $cliente = $this->clientes_model->getClienteInfo($factura['info']->id_cliente);
 
-    $params['emails_default'] = explode(',', $cliente['info']->email);
+    $params['emails_default'] = array();
+    if ($cliente['info']->email !== '')
+      $params['emails_default'] = explode(',', $cliente['info']->email);
 
     if(isset($_GET['msg']{0}))
     {
