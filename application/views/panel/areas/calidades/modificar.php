@@ -46,6 +46,14 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
+                <div class="controls">
+                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="12" 
+                  value="<?php echo (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: ''); ?>" required placeholder="43000010">
+                </div>
+              </div>
+
               <div class="control-group tipo3">
                 <label class="control-label" for="farea">Area </label>
                 <div class="controls">

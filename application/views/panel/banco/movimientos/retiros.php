@@ -179,15 +179,19 @@
 
 
 <!-- Bloque de alertas -->
-<?php if(isset($frm_errors)){
+<script type="text/javascript" charset="UTF-8">
+<?php 
+if (isset($_GET['id_movimiento']{0}))
+	echo "window.open('".base_url('panel/banco/cheque?id=')."{$_GET['id_movimiento']}', 'Print cheque');";
+
+if(isset($frm_errors)){
 	if($frm_errors['msg'] != ''){
 ?>
-<script type="text/javascript" charset="UTF-8">
 	$(document).ready(function(){
 		noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
 	});
-</script>
 <?php }
-}?>
+}?>	
+</script>
 <!-- Bloque de alertas -->
 

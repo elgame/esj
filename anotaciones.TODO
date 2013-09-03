@@ -1,3 +1,14 @@
+2013-09-02
+  ✔ Agregar cuenta de compaq en calidades, poner default la de limon fruta de compras @done (13-09-03 18:31)
+  ☐ SQL:
+      cuenta_cpi character varying(12) NOT NULL DEFAULT 43000010,
+      COMMENT ON COLUMN calidades.cuenta_cpi IS 'cuenta afectable del contpaqi';
+      limon 43000010
+      piña 43000011
+      coco 43000013
+
+
+
 SQL
   Tabla facturacion:
     poliza_diario boolean NOT NULL DEFAULT false,
