@@ -1,3 +1,21 @@
+Productores:
+
+   ☐ Series y Folios
+          ☐ Empresas -> Proveedores
+
+   ☐ Facturacion
+         Agregar:
+              ☐ Empresa -> Proveedor
+              ☐ Cliente -> Empresa
+              ☐ Se cargarian los tickets, poner abajo de los botones un texinput, un select para las areas(cargar el por default) y cargaria los tipo entrada. Abria un boton de "deshacer" para que los ultimos que se agregaron se eliminen.
+              ☐ Al agregar los productos del ticket el primer producto tendria el boton de eliminar y al dar click en el, se eliminaria todo el conjunto de productos del ticket.
+              ☐ Hacer una vista que cargue los tickets que no esten en facturas.
+              ☐ Ocultar el campo IVA y Retencion.
+              ☐ En Medida siempre seria kilos.
+
+Correcciones/Modificaciones (Facturacion) 02-09-2013:
+      ✔ En email que abra un modal y que despliegue un listados de checkbox con los correo que se dieron de alta en cliente, y tambien que tenga un inputtext para que se pueda especificar mas correos. @done (13-09-02 18:28)
+
 Correcciones/Modificaciones (Facturacion y Documentos) 26-08-2013:
 
   ✔ Al agregar una factura de un cliente que no tiene docs truena. @done (13-08-27 15:31)
