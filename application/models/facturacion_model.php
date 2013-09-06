@@ -206,7 +206,9 @@ class facturacion_model extends privilegios_model{
 
         // Array con los datos necesarios para generar la cadena original.
         $data = array(
-          'id_empresa'        => $this->input->post('did_empresa'),
+          'id'                => $this->input->post('did_empresa'),
+          'table'             => 'empresas',
+
           'version'           => $this->input->post('dversion'),
           'serie'             => $this->input->post('dserie'),
           'folio'             => $this->input->post('dfolio'),
@@ -462,7 +464,8 @@ class facturacion_model extends privilegios_model{
 
         // Datos para el XML3.2
         $datosXML               = $cadenaOriginal['datos'];
-        $datosXML['id_empresa'] = $this->input->post('did_empresa');
+        $datosXML['id']         = $this->input->post('did_empresa');
+        $datosXML['table']      = 'empresas';
         $datosXML['comprobante']['serie']         = $this->input->post('dserie');
         $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
         $datosXML['comprobante']['sello']         = $sello;
@@ -697,7 +700,8 @@ class facturacion_model extends privilegios_model{
         $factura = $this->getInfoFactura($idFactura);
 
         $data = array(
-          'id_empresa' => $factura['info']->id_empresa,
+          'id'          => $factura['info']->id_empresa,
+          'table'       => 'empresa',
           'comprobante' => array('serie' => $factura['info']->serie, 'folio' => $factura['info']->folio)
         );
 
@@ -843,7 +847,6 @@ class facturacion_model extends privilegios_model{
             }
 
             $nombreDestino = strtoupper($factura['info']->cliente->nombre_fiscal);
-            $copiapara =
             $datosEmail = array(
                 'correoEmisorEm' => $correoEmisorEm,
                 'correoEmisor'   => $correoEmisor,

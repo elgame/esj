@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Facturación
+            Proveedores Facturación
           </li>
         </ul>
       </div>
@@ -16,25 +16,25 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Facturas</h2>
+            <h2><i class="icon-file"></i> Proveedores Facturas</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/proveedores_facturacion/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
+
+                <label for="dproveedor">Proveedor</label>
+                <input type="text" name="dproveedor" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
+                <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>">
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa'); ?>">
 
-
-                <label for="dcliente">Cliente</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>">
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', $fecha); ?>" size="10">
@@ -54,7 +54,7 @@
             </form>
 
             <?php
-            echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
+            echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/agregar/', array(
                     'params'   => '',
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -65,8 +65,8 @@
                 <tr>
                   <th>Fecha</th>
                   <th>Serie-Folio</th>
-                  <th>Cliente</th>
                   <th>Empresa</th>
+                  <th>Proveedor</th>
                   <th>Forma de Pago</th>
                   <th>Estado</th>
                   <th>Estado Timbre</th>
@@ -86,7 +86,7 @@
 
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
-                  <td><?php echo $fact->empresa; ?></td>
+                  <td><?php echo $fact->proveedor; ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>
@@ -117,7 +117,7 @@
                   <td class="center">
                     <?php
 
-                      echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
+                      echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/imprimir/', array(
                         'params'   => 'id='.$fact->id_factura,
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => "_blank"))
@@ -125,34 +125,20 @@
 
                       if ($fact->status !== 'ca')
                       {
-                         echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-success',
-                            'attrs'    => array())
-                        );
-
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/cancelar/', array(
                           'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Proveedores Facturación', this); return false;"))
                         );
                       }
 
-                      if ($fact->id_nc === null && $fact->status !== 'ca') {
-                        echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => '',
-                            'attrs' => array('target' => "_blank"))
-                        );
-                      }
-
-                      if ($fact->status_timbrado === 'p') {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/timbre_pending/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-warning',
-                            'attrs'    => array('onclick' => "msb.confirm('Esta acción realizara el timbrado de la factura, deses continuar?', 'Facturas', this); return false;"))
-                        );
-                      }
+                      // if ($fact->id_nc === null && $fact->status !== 'ca') {
+                      //   echo $this->usuarios_model->getLinkPrivSm('proveedores_notas_credito/agregar/', array(
+                      //       'params'   => 'id='.$fact->id_factura,
+                      //       'btn_type' => '',
+                      //       'attrs' => array('target' => "_blank"))
+                      //   );
+                      // }
 
                       if ($fact->status === 'p')
                       {
@@ -165,12 +151,12 @@
 
                       if ($fact->status_timbrado === 't')
                       {
-                        echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                        echo '<a class="btn" href="'.base_url('panel/proveedores_facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
                       }
 
                       if ($fact->id_nc === null)
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/enviar_documentos/', array(
                           'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-success',
                           'attrs' => array('rel' => 'superbox-50x450'))

@@ -1,17 +1,172 @@
-Productores:
+Proveedores:
 
-   ☐ Series y Folios
-          ☐ Empresas -> Proveedores
+    PRIVILEGIOS:
+       "Facturacion";10;TRUE;"proveedores_facturacion/";"icon-dollar";FALSE
+       "Agregar Series y Folios";102;TRUE;"proveedores_facturacion/agregar_serie_folio/";"plus";FALSE
+       "Modificar";102;FALSE;"proveedores_facturacion/modificar_serie_folio/";"edit";FALSE
+       "Series y Folios";102;TRUE;"proveedores_facturacion/series_folios/";"list-alt";FALSE
+       "Facturar";102;TRUE;"proveedores_facturacion/agregar/";"file-text-alt";FALSE
+       "Imprimir";102;FALSE;"proveedores_facturacion/imprimir/";"print";FALSE
+       "Cancelar";102;FALSE;"proveedores_facturacion/cancelar/";"ban-circle";FALSE
+       "E-mail";102;FALSE;"proveedores_facturacion/enviar_documentos/";"envelope";FALSE
+       "Nota Credito";102;FALSE;"proveedores_notas_credito/agregar/";"file-text-alt";FALSE
 
-   ☐ Facturacion
+   ✔ Series y Folios @done (13-09-03 10:25)
+          ✔ Empresas -> Proveedores @done (13-09-03 10:25)
+          ✔ Tabla proveedores_series_folios @done (13-09-03 10:25)
+                    SQL:
+                      CREATE TABLE proveedores_series_folios
+                      (
+                        id_serie_folio serial NOT NULL,
+                        id_proveedor integer NOT NULL,
+                        serie character varying(30),
+                        no_aprobacion bigint NOT NULL,
+                        folio_inicio bigint NOT NULL,
+                        folio_fin bigint NOT NULL,
+                        leyenda text,
+                        leyenda1 text,
+                        leyenda2 text,
+                        es_nota_credito boolean NOT NULL DEFAULT false, -- indica si los folios son notas de credito
+                        ano_aprobacion date NOT NULL,
+                        CONSTRAINT proveedores_series_folios_pkey PRIMARY KEY (id_serie_folio),
+                        CONSTRAINT proveedores_series_folios_id_empresa_fkey FOREIGN KEY (id_proveedor)
+                            REFERENCES proveedores (id_proveedor) MATCH SIMPLE
+                            ON UPDATE CASCADE ON DELETE CASCADE
+                      )
+                      WITH (
+                        OIDS=FALSE
+                      );
+                      ALTER TABLE proveedores_series_folios
+                        OWNER TO programa;
+                      COMMENT ON COLUMN proveedores_series_folios.es_nota_credito IS 'indica si los folios son notas de credito';
+
+   ✔ Facturacion @done (13-09-04 14:08)
          Agregar:
-              ☐ Empresa -> Proveedor
-              ☐ Cliente -> Empresa
-              ☐ Se cargarian los tickets, poner abajo de los botones un texinput, un select para las areas(cargar el por default) y cargaria los tipo entrada. Abria un boton de "deshacer" para que los ultimos que se agregaron se eliminen.
-              ☐ Al agregar los productos del ticket el primer producto tendria el boton de eliminar y al dar click en el, se eliminaria todo el conjunto de productos del ticket.
-              ☐ Hacer una vista que cargue los tickets que no esten en facturas.
-              ☐ Ocultar el campo IVA y Retencion.
-              ☐ En Medida siempre seria kilos.
+              ✔ Empresa -> Proveedor @done (13-09-03 20:28)
+              ✔ Cliente -> Empresa @done (13-09-03 20:28)
+              ✔ Se cargarian los tickets, poner abajo de los botones un texinput, un select para las areas(cargar el por default) y cargaria los tipo entrada. Abria un boton de "deshacer" para que los ultimos que se agregaron se eliminen. @done (13-09-03 20:28)
+              ✔ Al agregar los productos del ticket el primer producto tendria el boton de eliminar y al dar click en el, se eliminaria todo el conjunto de productos del ticket. @done (13-09-03 20:28)
+              ✔ Ocultar el campo IVA y Retencion. @done (13-09-03 20:44)
+              ✔ En Medida siempre seria kilos. @done (13-09-03 20:44)
+
+         SQL:
+
+               ---------------------------------------------------------------------------------------------------------------------
+               TABLA PROVEEDORES NUEVOS CAMPOS
+
+               cer_org character varying(90),
+                cer character varying(90),
+                key_path character varying(90),
+                pass character varying(20),
+                cfdi_version character varying(6) NOT NULL DEFAULT 3.2,
+                cer_caduca date,
+                regimen_fiscal character varying(100),
+                pais character varying(40) NOT NULL DEFAULT 'MEXICO'::character varying,
+
+               ---------------------------------------------------------------------------------------------------------------------
+               CREATE TABLE proveedores_facturacion
+               (
+                id_factura bigserial NOT NULL,
+                id_empresa bigint NOT NULL,
+                id_proveedor integer NOT NULL,
+                version character varying(6) NOT NULL,
+                serie character varying(30) NOT NULL,
+                folio bigint NOT NULL,
+                fecha timestamp with time zone NOT NULL DEFAULT now(),
+                subtotal double precision NOT NULL DEFAULT 0,
+                importe_iva double precision NOT NULL DEFAULT 0,
+                total double precision NOT NULL DEFAULT 0,
+                total_letra character varying(250) NOT NULL,
+                no_aprobacion bigint NOT NULL,
+                ano_aprobacion character varying(4) NOT NULL,
+                tipo_comprobante character varying(10) NOT NULL DEFAULT 'ingreso'::character varying, -- egreso o ingreso
+                forma_pago character varying(80) NOT NULL DEFAULT 'Pago en una sola exhibición'::character varying, -- Pago en una sola exhibición, Parcialidad 1 de X
+                metodo_pago character varying(40) NOT NULL DEFAULT 'efectivo'::character varying, -- cheque, tarjeta de crédito o debito, depósito en cuenta
+                metodo_pago_digitos character varying(20) NOT NULL DEFAULT 'No identificado'::character varying, -- Los ultimos 4 digitos del cheque, tarjeta o cuenta en metodo de pago
+                no_certificado character varying(100) NOT NULL,
+                cadena_original text NOT NULL,
+                sello character varying(250) NOT NULL,
+                certificado text NOT NULL,
+                condicion_pago character varying(2) NOT NULL DEFAULT 'co'::character varying, -- Corresponde a si el documento es a cr:credito o co:contado
+                plazo_credito integer NOT NULL DEFAULT 0,
+                observaciones text NOT NULL DEFAULT ''::text,
+                status character varying(2) NOT NULL DEFAULT 'pa'::character varying, -- Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada, b:borrador
+                id_nc bigint, -- es el id de la factura que esta ligada la nota de credito
+                retencion_iva double precision NOT NULL DEFAULT 0,
+                xml text, -- Es el xml timbrado
+                status_timbrado character varying(2) NOT NULL DEFAULT 't'::character varying, -- status del timbrado( t:timbrado, p:pendiente, ca:cancelado)
+                uuid character varying(50), -- uuid del timbrado
+                CONSTRAINT proveedores_facturacion_pkey PRIMARY KEY (id_factura),
+                CONSTRAINT proveedores_facturacion_id_empresa_fkey FOREIGN KEY (id_empresa)
+                    REFERENCES empresas (id_empresa) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE CASCADE,
+                CONSTRAINT proveedores_facturacion_id_proveedor_fkey FOREIGN KEY (id_proveedor)
+                    REFERENCES proveedores (id_proveedor) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE CASCADE
+              )
+              WITH (
+                OIDS=FALSE
+              );
+              ALTER TABLE proveedores_facturacion
+                OWNER TO programa;
+              COMMENT ON COLUMN proveedores_facturacion.tipo_comprobante IS 'egreso o ingreso';
+              COMMENT ON COLUMN proveedores_facturacion.forma_pago IS 'Pago en una sola exhibición, Parcialidad 1 de X';
+              COMMENT ON COLUMN proveedores_facturacion.metodo_pago IS 'cheque, tarjeta de crédito o debito, depósito en cuenta';
+              COMMENT ON COLUMN proveedores_facturacion.metodo_pago_digitos IS 'Los ultimos 4 digitos del cheque, tarjeta o cuenta en metodo de pago';
+              COMMENT ON COLUMN proveedores_facturacion.condicion_pago IS 'Corresponde a si el documento es a cr:credito o co:contado';
+              COMMENT ON COLUMN proveedores_facturacion.status IS 'Corresponde al status de la factura p:pendiente, pa:pagada, ca:cancelada, b:borrador';
+              COMMENT ON COLUMN proveedores_facturacion.id_nc IS 'es el id de la factura que esta ligada la nota de credito';
+              COMMENT ON COLUMN proveedores_facturacion.xml IS 'Es el xml timbrado';
+              COMMENT ON COLUMN proveedores_facturacion.status_timbrado IS 'status del timbrado( t:timbrado, p:pendiente, ca:cancelado)';
+              COMMENT ON COLUMN proveedores_facturacion.uuid IS 'uuid del timbrado';
+
+              ---------------------------------------------------------------------------------------------------------------------
+              CREATE TABLE proveedores_facturacion_empresa
+                (
+                  id_factura bigint NOT NULL,
+                  nombre character varying(130),
+                  rfc character varying(13),
+                  calle character varying(60),
+                  no_exterior character varying(7),
+                  no_interior character varying(7),
+                  colonia character varying(60),
+                  localidad character varying(45),
+                  municipio character varying(45),
+                  estado character varying(45),
+                  cp character varying(10),
+                  pais character varying(60),
+                  CONSTRAINT proveedores_facturacion_empresa_pkey PRIMARY KEY (id_factura),
+                  CONSTRAINT proveedores_facturacion_empresa_id_factura_fkey FOREIGN KEY (id_factura)
+                      REFERENCES proveedores_facturacion (id_factura) MATCH SIMPLE
+                      ON UPDATE NO ACTION ON DELETE NO ACTION
+                )
+                WITH (
+                  OIDS=FALSE
+                );
+                ALTER TABLE proveedores_facturacion_empresa
+                  OWNER TO programa;
+
+              ---------------------------------------------------------------------------------------------------------------------
+
+              CREATE TABLE proveedores_facturacion_productos
+              (
+                id_factura bigint NOT NULL,
+                id_bascula bigint,
+                num_row integer NOT NULL DEFAULT 0,
+                CONSTRAINT proveedores_facturacion_productos_pkey PRIMARY KEY (id_factura, num_row),
+                CONSTRAINT proveedores_facturacion_productos_id_bascula_fkey FOREIGN KEY (id_bascula)
+                    REFERENCES bascula (id_bascula) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE CASCADE,
+                CONSTRAINT proveedores_facturacion_productos_id_factura_fkey FOREIGN KEY (id_factura)
+                    REFERENCES proveedores_facturacion (id_factura) MATCH SIMPLE
+                    ON UPDATE CASCADE ON DELETE CASCADE
+              )
+              WITH (
+                OIDS=FALSE
+              );
+              ALTER TABLE proveedores_facturacion_productos
+                OWNER TO programa;
+
 
 Correcciones/Modificaciones (Facturacion) 02-09-2013:
       ✔ En email que abra un modal y que despliegue un listados de checkbox con los correo que se dieron de alta en cliente, y tambien que tenga un inputtext para que se pueda especificar mas correos. @done (13-09-02 18:28)

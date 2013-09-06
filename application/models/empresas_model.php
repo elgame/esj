@@ -118,7 +118,7 @@ class empresas_model extends CI_Model{
 			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados/")) );
 			$dcer_org   = $upload_res[0];
 			$dcer       = $upload_res[1];
-			
+
 			// $dcer_org = APPPATH.'CFDI/certificados/'.$upload_res;
 			// //se genera el archivo cer.pem
 			// $certificateCAcerContent = file_get_contents($dcer_org);
@@ -293,5 +293,42 @@ class empresas_model extends CI_Model{
 
 		return $response;
 	}
+
+  /**
+   * Obtiene el listado de proveedores para usar ajax
+   * @param term. termino escrito en la caja de texto, busca en el nombre
+   * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
+   */
+  public function getEmpresasAjaxFac($sqlX = null){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+      "SELECT id_empresa, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
+        FROM empresas
+        WHERE status = 't'
+        {$sql}
+        ORDER BY nombre_fiscal ASC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_empresa,
+            'label' => $itm->nombre_fiscal,
+            'value' => $itm->nombre_fiscal,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
 
 }

@@ -154,10 +154,11 @@ class cfdi{
   {
     // Obtiene el ID de la empresa que emite la factura, si no llega
     // entonces obtiene el ID por default.
-    $id_empresa = isset($data['id_empresa']) ? $data['id_empresa'] : $this->default_id_empresa;
+    // $id_empresa = isset($data['id_empresa']) ? $data['id_empresa'] : $this->default_id_empresa;
+    $id = isset($data['id']) ? $data['id'] : $this->default_id_empresa;
 
     // Carga los datos de la empresa que emite la factura.
-    $this->cargaDatosFiscales($id_empresa);
+    $this->cargaDatosFiscales($id, $data['table']);
 
     // $cadenaOriginal = '||';
 
@@ -358,18 +359,23 @@ class cfdi{
   }
 
   /**
-   * Carga los datos fiscales de la empresa que emitira la factura.
+   * Carga los datos fiscales de la empresa|proveedor que emitira la factura.
    *
    * @param  string|int $id_empresa
    * @return void
    */
-	public function cargaDatosFiscales($id_empresa)
+	public function cargaDatosFiscales($id, $table = 'empresas')
   {
+    if ($table === 'empresas')
+      $pkey = 'id_empresa';
+    else
+      $pkey = 'id_proveedor';
+
 		$CI =& get_instance();
 		$data = $CI->db->query(
-      "SELECT e.*
-       FROM empresas AS e
-       WHERE e.id_empresa = " . $id_empresa
+      "SELECT *
+       FROM {$table}
+       WHERE {$pkey} = {$id}"
     )->row();
 
 		$this->path_certificado_org = $data->cer_org;
@@ -394,7 +400,7 @@ class cfdi{
 
 	public function generaArchivos($data)
   {
-		$this->cargaDatosFiscales($data['id_empresa']);
+		$this->cargaDatosFiscales($data['id'], $data['table']);
 
 		// $vers = str_replace('.', '_', $this->version);
 		$pathXML = $this->guardarXML($data);
@@ -404,7 +410,7 @@ class cfdi{
 	}
 
 	public function actualizarArchivos($data){
-		$this->cargaDatosFiscales($data['id_empresa']);
+		$this->cargaDatosFiscales($data['id'], $data['table']);
 
 		$vers = str_replace('.', '_', $this->version);
 		$this->guardarXML($data,true);
@@ -613,8 +619,8 @@ class cfdi{
    */
 	public function descargarXML($data = null, $pathXML = null)
   {
-    // Carga los datos fiscales de la empresa.
-    $this->cargaDatosFiscales($data['id_empresa']);
+    // Carga los datos fiscales de la empresa|proveedor.
+    $this->cargaDatosFiscales($data['id'], $data['table']);
 
     // Si el parametro $data contiene datos.
     if ( ! is_null($data) && is_null($pathXML))

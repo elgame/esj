@@ -24,9 +24,9 @@ class proveedores_model extends CI_Model {
 		}
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(p.calle) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(p.colonia) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+			$sql = "WHERE ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(p.calle) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(p.colonia) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(p.municipio) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(p.estado) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
@@ -38,7 +38,7 @@ class proveedores_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
 		$query = BDUtil::pagination("
-				SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio, 
+				SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
 							p.telefono, p.estado, p.tipo_proveedor, p.status
 				FROM proveedores p
 				".$sql."
@@ -146,10 +146,11 @@ class proveedores_model extends CI_Model {
 	 */
 	public function getProveedorInfo($id_proveedor=FALSE, $basic_info=FALSE)
 	{
-		$id_proveedor = (isset($_GET['id']))? $_GET['id']: $id_proveedor;
+		$id_proveedor = $id_proveedor ? $id_proveedor : $_GET['id'] ;
 
-		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio, 
-														estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status" )
+		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
+														estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
+                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal" )
 												->from("proveedores")
 												->where("id_proveedor", $id_proveedor)
 												->get();
@@ -160,7 +161,7 @@ class proveedores_model extends CI_Model {
 		$sql_res->free_result();
 
 		if ($basic_info == False) {
-			
+
 		}
 
 		return $data;
@@ -178,7 +179,7 @@ class proveedores_model extends CI_Model {
 		if($this->input->get('type') !== false)
 			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono 
+				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
 				FROM proveedores
 				WHERE status = 'ac' ".$sql."
 				ORDER BY nombre_fiscal ASC

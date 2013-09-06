@@ -105,7 +105,7 @@ class facturartebarato_api {
       $checkResult = $this->checkResultTimbrado();
 
       // echo "<pre>";
-      //   var_dump($this->resultAPI);
+      //   var_dump($this->resultAPI, $postData);
       // echo "</pre>";exit;
 
       return $checkResult;
