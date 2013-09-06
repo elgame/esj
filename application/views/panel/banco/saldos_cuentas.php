@@ -56,7 +56,7 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
 
-                <input type="submit" name="enviar" value="Enviar" class="btn">
+                <button type="submit" class="btn">Enviar</button>
               </div>
             </form>
 
@@ -76,10 +76,10 @@
                 <tr>
                   <td><?php echo $cuenta->banco; ?></td>
                   <td><a href="<?php echo base_url('panel/banco/cuenta').'?id_cuenta='.$cuenta->id_cuenta.'&'.
-                    String::getVarsLink(array('id_cuenta', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->numero; ?></a>
+                    String::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->numero; ?></a>
                   </td>
                   <td><a href="<?php echo base_url('panel/banco/cuenta').'?id_cuenta='.$cuenta->id_cuenta.'&'.
-                    String::getVarsLink(array('id_cuenta', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->alias; ?></a>
+                    String::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->alias; ?></a>
                   </td>
                   <td><?php echo String::formatoNumero($cuenta->saldo); ?></td>
                 </tr>

@@ -34,7 +34,7 @@ class calidades_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." id_area = '".$id_area."'";
 
 		$str_query = "
-				SELECT id_calidad, id_area, nombre, precio_compra, status
+				SELECT id_calidad, id_area, nombre, precio_compra, status, cuenta_cpi
 				FROM calidades
 				".$sql."
 				ORDER BY nombre ASC
@@ -71,6 +71,7 @@ class calidades_model extends CI_Model {
 						'id_area'       => $this->input->post('farea'),
 						'nombre'        => $this->input->post('fnombre'),
 						'precio_compra' => $this->input->post('fprecio_compra'),
+						'cuenta_cpi'    => $this->input->post('fcuenta_cpi'),
 						);
 		}
 
@@ -92,9 +93,10 @@ class calidades_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-					'nombre'          => $this->input->post('fnombre'),
-					'precio_compra'   => $this->input->post('fprecio_compra'),
-					'id_area'         => $this->input->post('farea'),
+					'nombre'        => $this->input->post('fnombre'),
+					'precio_compra' => $this->input->post('fprecio_compra'),
+					'cuenta_cpi'    => $this->input->post('fcuenta_cpi'),
+					'id_area'       => $this->input->post('farea'),
 					);
 		}
 
@@ -113,7 +115,7 @@ class calidades_model extends CI_Model {
 	{
 		$id_calidad = (isset($_GET['id']))? $_GET['id']: $id_calidad;
 
-		$sql_res = $this->db->select("id_calidad, id_area, nombre, precio_compra, status" )
+		$sql_res = $this->db->select("id_calidad, id_area, nombre, precio_compra, status, cuenta_cpi" )
 												->from("calidades")
 												->where("id_calidad", $id_calidad)
 												->get();

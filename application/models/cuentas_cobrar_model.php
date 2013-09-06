@@ -399,27 +399,31 @@ class cuentas_cobrar_model extends privilegios_model{
 			FROM
 				facturacion AS f
 				LEFT JOIN (
-					(
-						SELECT 
-							id_factura,
-							Sum(total) AS abono
-						FROM
-							facturacion_abonos as fa
-						WHERE Date(fecha) <= '{$fecha2}'
-						GROUP BY id_factura
-					)
-					UNION
-					(
-						SELECT 
-							id_nc AS id_factura,
-							Sum(total) AS abonos
-						FROM
-							facturacion
-						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-							AND id_cliente = {$_GET['id_cliente']} 
-							AND Date(fecha) <= '{$fecha2}'
-						GROUP BY id_nc
-					)
+					SELECT id_factura, Sum(abono) AS abono
+					FROM (
+						(
+							SELECT 
+								id_factura,
+								Sum(total) AS abono
+							FROM
+								facturacion_abonos as fa
+							WHERE Date(fecha) <= '{$fecha2}'
+							GROUP BY id_factura
+						)
+						UNION
+						(
+							SELECT 
+								id_nc AS id_factura,
+								Sum(total) AS abonos
+							FROM
+								facturacion
+							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+								AND id_cliente = {$_GET['id_cliente']} 
+								AND Date(fecha) <= '{$fecha2}'
+							GROUP BY id_nc
+						)
+					) AS ffs
+					GROUP BY id_factura
 				) AS ac ON f.id_factura = ac.id_factura {$sql}
 			WHERE f.id_cliente = {$_GET['id_cliente']} 
 				AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL  
@@ -914,24 +918,28 @@ class cuentas_cobrar_model extends privilegios_model{
 			return $resp;
 	}
 
-	public function removeAbono()
+	public function removeAbono($id=null, $tipo=null, $ida=null)
 	{
+		$tipo = $tipo!=null? $tipo : $this->input->get('tipo');
+		$ida  = $ida!=null? $ida : $_GET['ida'];
+		$id   = $id!=null? $id : $_GET['id'];
+
 		if($this->input->get('nc') == 'si')
 		{
 			$this->load->model('facturacion_model');
-			$this->facturacion_model->cancelaFactura($_GET['ida']);
+			$this->facturacion_model->cancelaFactura($ida);
 		}else
 		{
-			if ($this->input->get('tipo') == 'f') {
+			if ($tipo == 'f') {
 				$camps = array('id_abono', 'facturacion_abonos', 'facturacion', 'id_factura');
 			}else{
 				$camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
 			}
 
-			$this->db->delete($camps[1], "{$camps[0]} = {$_GET['ida']}");
+			$this->db->delete($camps[1], "{$camps[0]} = {$ida}");
 		}
 		//Se cambia el estado de la factura
-		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$_GET['id']}");
+		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$id}");
 
 		return true;
 	}

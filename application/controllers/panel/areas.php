@@ -583,7 +583,10 @@ class areas extends MY_Controller {
 						'rules' => 'required|numeric|max_length[11]'),
 			array('field' => 'farea',
 						'label' => 'Area',
-						'rules' => 'required|numeric|max_length[11]'),
+						'rules' => 'required|numeric'),
+			array('field' => 'fcuenta_cpi',
+						'label' => 'Cuenta contpaq',
+						'rules' => 'required|numeric|max_length[12]'),
 		);
 
 		$this->form_validation->set_rules($rules);

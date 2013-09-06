@@ -41,7 +41,7 @@ class String{
 			if(array_search($key, $quit) === false)
 				$vars .= '&'.$key.'='.$val;
 		}
-
+		
 		return substr($vars, 1);
 	}
 

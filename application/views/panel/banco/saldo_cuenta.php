@@ -8,7 +8,10 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Cuentas por Cobrar
+            <a href="<?php echo base_url('panel/banco'); ?>">Saldos</a> <span class="divider">/</span>
+          </li>
+          <li>
+            Cuenta
           </li>
         </ul>
       </div>
@@ -16,157 +19,157 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Cuentas por Cobrar</h2>
+            <h2><i class="icon-archive"></i> Cuenta < <?php echo $data['cuenta']['info']->banco.' - '.$data['cuenta']['info']->alias; ?> ></h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-          	<a href="<?php echo base_url('panel/cuentas_cobrar/?'.String::getVarsLink(array('msg'))); ?>" class="linksm">
-							<i class="icon-chevron-left"></i> Atras</a> |
-						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-							<i class="icon-print"></i> Imprimir</a> |
-						<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-							<i class="icon-table"></i> Excel</a>
+          	<a href="<?php echo base_url('panel/banco/?'.String::getVarsLink(array('msg', 'id_cuenta', 'fstatus'))); ?>" class="linksm">
+              <i class="icon-chevron-left"></i> Atras</a> | 
+            <a href="<?php echo base_url('panel/banco/cuenta_pdf/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+              <i class="icon-print"></i> Imprimir</a> | 
+            <a href="<?php echo base_url('panel/banco/cuenta_xls/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+              <i class="icon-table"></i> Excel</a>
+            <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
+              <i class="icon-archive"></i> Conciliacion</a>
 
-            <form action="<?php echo base_url('panel/cuentas_cobrar/cuenta'); ?>" method="GET" class="form-search">
-              <div class="form-actions form-filters span12">
+            <form action="<?php echo base_url('panel/banco/cuenta/'); ?>" method="GET" class="form-search">
+              <div class="form-actions form-filters">
+              	<input type="hidden" name="id_cuenta" value="<?php echo set_value_get('id_cuenta'); ?>">
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="date" name="ffecha1" class="input-medium search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
+                <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-medium search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
-
-                <label for="ftipo">Pagos:</label>
-                <select name="ftipo" id="ftipo" class="input-large search-query">
-                	<option value="to" <?php echo set_select_get('ftipo', 'to'); ?>>Todas</option>
-                  <option value="pp" <?php echo set_select_get('ftipo', 'pp'); ?>>Pendientes por pagar</option>
-                  <option value="pv" <?php echo set_select_get('ftipo', 'pv'); ?>>Plazo vencido</option>
+                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
+                
+                <label for="vertodos">Tipo:</label>
+                <select name="vertodos" id="vertodos" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('vertodos', ''); ?>>Todas</option>
+                  <option value="tran" <?php echo set_select_get('vertodos', 'tran'); ?>>En transito</option>
+                  <option value="notran" <?php echo set_select_get('vertodos', 'notran'); ?>>Cobrados (no transito)</option>
                 </select><br>
 
-                <label for="dcliente">Cliente</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
+                <label for="fid_banco">Banco:</label>
+                <select name="fid_banco" id="fid_banco" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('fid_banco', ''); ?>></option>
+              <?php 
+              foreach ($bancos['bancos'] as $key => $banco) {
+              ?>
+                  <option value="<?php echo $banco->id_banco; ?>" <?php echo set_select_get('fid_banco', $banco->id_banco); ?>><?php echo $banco->nombre; ?></option>
+              <?php 
+              } ?>
+                </select>
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
 
-                <input type="hidden" name="id_cliente" id="id_cliente" value="<?php echo set_value_get('id_cliente'); ?>">
-
-                <input type="submit" name="enviar" value="Enviar" class="btn">
+                <button type="submit" class="btn">Enviar</button>
               </div>
             </form>
-
-            <div class="row-fluid">
-            	<fieldset class="span6" style="color: #555; font-size: .9em;">
-								<legend style="margin: 0;">Datos del cliente</legend>
-								<strong>Nombre:</strong> <?php echo $data['cliente']->nombre_fiscal; ?> <br>
-								<strong>Dirección: </strong>
-										<?php
-											$info = $data['cliente']->calle!=''? $data['cliente']->calle: '';
-											$info .= $data['cliente']->no_exterior!=''? ' #'.$data['cliente']->no_exterior: '';
-											$info .= $data['cliente']->no_interior!=''? '-'.$data['cliente']->no_interior: '';
-											$info .= $data['cliente']->colonia!=''? ', '.$data['cliente']->colonia: '';
-											$info .= "\n".($data['cliente']->localidad!=''? $data['cliente']->localidad: '');
-											$info .= $data['cliente']->municipio!=''? ', '.$data['cliente']->municipio: '';
-											$info .= $data['cliente']->estado!=''? ', '.$data['cliente']->estado: '';
-											echo $info;
-										?> <br>
-								<strong>Teléfono: </strong> <?php echo $data['cliente']->telefono; ?>
-								<strong>Email: </strong> <?php echo $data['cliente']->email; ?>
-							</fieldset>
-
-							<div class="span6">
-            	<?php echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
-						    'params'   => "",
-                'btn_type' => 'btn-success pull-right btn_abonos_masivo',
-                'attrs' => array('style' => 'margin-top: 30px; display:none;', 'rel' => 'superbox-50x500') )
-							); ?>
-							</div>
-            </div>
 
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-                  <th>Fecha</th>
-									<th>Serie</th>
-									<th>Folio</th>
-									<th>Concepto</th>
-									<th>Cargo</th>
-									<th>Abono</th>
-									<th>Saldo</th>
-									<th>Estado</th>
-									<th>F. Vencimiento</th>
-									<th>D. Transcurridos</th>
+					<th></th>
+					<th>Fecha</th>
+					<th>Ref</th>
+					<th>Cliente / Proveedor</th>
+					<th>Concepto</th>
+					<th>Metodo de pago</th>
+					<th>Retiro</th>
+					<th>Deposito</th>
+					<th>Saldo</th>
+					<th>Estado</th>
+					<th></th>
                 </tr>
               </thead>
               <tbody>
-            		<tr>
-									<td></td>
-									<td></td>
-									<td></td>
-									<td>Saldo anterior a <?php echo $data['fecha1']; ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0) ); ?></td>
-									<td></td>
-									<td></td>
-									<td></td>
-								</tr>
-						<?php
-						$total_cargo = 0;
-						$total_abono = 0;
-						$total_saldo = 0;
-						// if(isset($data['anterior'][0]->saldo)){ //se suma a los totales saldo anterior
-						// 	$total_cargo += $data['anterior'][0]->total;
-						// 	$total_abono += $data['anterior'][0]->abonos;
-						// 	$total_saldo += $data['anterior'][0]->saldo;
-						// }
-						foreach($data['cuentas'] as $cuenta){
-							$ver = true;
-
-							if($ver){
-								$total_cargo += $cuenta->cargo;
-								$total_abono += $cuenta->abono;
-								$total_saldo += $cuenta->saldo;
-						?>
-								<tr>
-									<td><?php echo $cuenta->fecha; ?></td>
-									<td><?php echo $cuenta->serie; ?></td>
-									<td>
-											<a href="<?php echo base_url('panel/cuentas_cobrar/detalle/').'?id='.$cuenta->id_factura.'&tipo='.$cuenta->tipo.
-													'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->folio; ?></a>
-									<td>
-										<a href="<?php echo base_url('panel/cuentas_cobrar/detalle/').'?id='.$cuenta->id_factura.'&tipo='.$cuenta->tipo.
-													'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
-									</td>
-									<td><?php echo String::formatoNumero($cuenta->cargo); ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td class="sel_abonom" data-id="<?php echo $cuenta->id_factura; ?>" data-tipo="<?php echo $cuenta->tipo ?>"><?php echo String::formatoNumero($cuenta->saldo); ?></td>
-									<td><?php echo $cuenta->estado; ?></td>
-									<td><?php echo $cuenta->fecha_vencimiento; ?></td>
-									<td><?php echo $cuenta->dias_transc; ?></td>
-								</tr>
-						<?php }
-						} ?>
-								<tr style="background-color:#ccc;font-weight: bold;">
-									<td colspan="4" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_cargo); ?></td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
-									<td colspan="3"></td>
-								</tr>
+            <?php
+            foreach($data['movimientos'] as $movimiento)
+            {
+            	$status = array();
+            	if($movimiento->entransito!='')
+        			$status = explode('|', $movimiento->entransito);
+            ?>
+            	<tr>
+            		<td><?php 
+            			if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
+            				echo '<input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'" 
+            					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'" 
+            					data-status="'.$status[0].'" '.($status[0]=='Trans'? '' : 'checked').'>';
+            		?></td>
+            		<td><?php echo $movimiento->fecha; ?></td>
+            		<td><?php echo $movimiento->numero_ref; ?></td>
+            		<td><?php echo $movimiento->cli_pro; ?></td>
+            		<td><?php echo $movimiento->concepto; ?></td>
+            		<td><?php echo $movimiento->metodo_pago; ?></td>
+            		<td><?php echo String::formatoNumero($movimiento->retiro); ?></td>
+            		<td><?php echo String::formatoNumero($movimiento->deposito); ?></td>
+            		<td><?php echo String::formatoNumero($movimiento->saldo); ?></td>
+            		<td><?php 
+            			if(count($status)>0)
+            				echo '<span class="label label-'.($status[0]=='Trans'? 'info' : 'success').'">'.$status[0].'</span>'
+        						.'<br><span class="label label-'.($status[1]=='Cancelado'? 'important' : 'success').'">'.$status[1].'</span>';
+            		?></td>
+            		<td><?php
+            			if(count($status)>0)
+            			{
+            				if($movimiento->status == 't')
+		            			echo $this->usuarios_model->getLinkPrivSm('banco/cancelar_movimiento/', array(
+									'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+									'btn_type' => 'btn-danger',
+									'text_link'=> 'hidden',
+									'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
+								);
+							echo $this->usuarios_model->getLinkPrivSm('banco/eliminar_movimiento/', array(
+								'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+								'btn_type' => 'btn-danger',
+								'text_link'=> 'hidden',
+								'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
+							);
+						}
+            		?></td>
+            	</tr>
+            <?php }?>
+                <tr style="background-color:#ccc;font-weight: bold;">
+                  <td style="text-align: right" colspan="5">Total:</td>
+                  <td><?php echo String::formatoNumero($data['total_retiro']); ?></td>
+                  <td><?php echo String::formatoNumero($data['total_deposito']); ?></td>
+                  <td id="total_saldo"><?php echo String::formatoNumero($data['total_saldos']); ?></td>
+                </tr>
               </tbody>
             </table>
+
           </div>
         </div><!--/span-->
 
       </div><!--/row-->
 
-
+      	<div id="saldobanco" style="position: fixed;top:150px;right: 0;width: 240px;font-size: .9em;background-color: #cddD9F;padding: 3px 0 3px 3px;">
+			<table>
+				<tr>
+					<td>Banco (disponible)</td>
+					<td><input type="text" id="sb_banco" class="span11"></td>
+				</tr>
+				<tr>
+					<td>Empresa (REAL)</td>
+					<td id="sb_empresar"></td>
+				</tr>
+				<tr>
+					<td>Dif</td>
+					<td id="sb_dif1"></td>
+				</tr>
+				<tr>
+					<td>Cheq no cob</td>
+					<td id="sb_cheque_ncob"><?php echo String::formatoNumero($data['cheques_no_cobrados']); ?></td>
+				</tr>
+				<tr>
+					<td>Dif</td>
+					<td id="sb_dif2"></td>
+				</tr>
+			</table>
+		</div>
 
 
           <!-- content ends -->

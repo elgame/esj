@@ -8,6 +8,12 @@ class banco extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 		'banco/get_cuentas_banco/',
+		'banco/cambia_entransito/',
+		'banco/conciliacion/',
+		'banco/cheque/',
+
+		'banco/cuenta_pdf/',
+		'banco/cuenta_xls/',
 
 		'banco/saldos_pdf/',
 		'banco/saldos_xls/',
@@ -29,9 +35,11 @@ class banco extends MY_Controller {
 	}
 
  	
-	public function index(){
+	public function index()
+	{
 		$this->carabiner->js(array(
-				array('general/msgbox.js')
+			array('general/msgbox.js'),
+			array('panel/banco/cuentas_banco.js')
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -57,13 +65,61 @@ class banco extends MY_Controller {
 	public function saldos_pdf()
 	{
 		$this->load->model('banco_cuentas_model');
-    $this->banco_cuentas_model->saldosCuentasPdf();
+    	$this->banco_cuentas_model->saldosCuentasPdf();
 	}
 
 	public function saldos_xls()
 	{
 		$this->load->model('banco_cuentas_model');
-    $this->banco_cuentas_model->saldosCuentasExcel();
+    	$this->banco_cuentas_model->saldosCuentasExcel();
+	}
+
+
+	public function cuenta()
+	{
+		$this->carabiner->js(array(
+			array('general/msgbox.js'),
+			array('general/util.js'),
+			array('panel/banco/cuentas_banco.js'),
+			array('panel/banco/saldo_cuenta.js'),
+		));
+
+		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
+		$params['seo'] = array(
+			'titulo' => 'Saldo Cuenta'
+		);
+
+		$this->load->model('banco_cuentas_model');
+		$this->load->model('empresas_model');
+		$params['data']    = $this->banco_cuentas_model->getSaldoCuentaData();
+		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+		$params['bancos']  = $this->banco_cuentas_model->getBancos(false);
+
+		if (isset($_GET['msg']))
+			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+		$this->load->view('panel/header', $params);
+		$this->load->view('panel/general/menu', $params);
+		$this->load->view('panel/banco/saldo_cuenta', $params);
+		$this->load->view('panel/footer');
+	}
+
+	public function cuenta_pdf()
+	{
+		$this->load->model('banco_cuentas_model');
+    	$this->banco_cuentas_model->getSaldoCuentaPdf();
+	}
+
+	public function cuenta_xls()
+	{
+		$this->load->model('banco_cuentas_model');
+    	$this->banco_cuentas_model->getSaldoCuentaExcel();
+	}
+
+	public function conciliacion()
+	{
+		$this->load->model('banco_cuentas_model');
+    	$this->banco_cuentas_model->showConciliacion();
 	}
 
 
@@ -152,7 +208,8 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addRetiro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=7 '));
+				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=7'.
+						($res_mdl['ver_cheque'] ? "&id_movimiento={$res_mdl['id_movimiento']}" : '') ));
 		}
 
 		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
@@ -176,6 +233,16 @@ class banco extends MY_Controller {
 		$this->load->view('panel/footer');
 	}
 
+	public function cheque()
+	{
+		if(isset($_GET['id']{0}))
+		{
+			$this->load->model('banco_cuentas_model');
+			$this->banco_cuentas_model->generaCheque($_GET['id']);
+		}else
+			redirect(base_url('panel/banco?msg=1'));
+	}
+
 	public function get_cuentas_banco(){
 		$response = array('cuentas' => array());
 		if (isset($_GET['id_banco']{0})) {
@@ -183,6 +250,37 @@ class banco extends MY_Controller {
 			$response = $this->banco_cuentas_model->getCuentas(false);
 		}
 		echo json_encode($response);
+	}
+
+	public function eliminar_movimiento(){
+		if (isset($_GET['id_movimiento']{0}))
+		{
+			$this->load->model('banco_cuentas_model');
+			$response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+		}else
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg')).'&msg=1'));
+	}
+
+	public function cancelar_movimiento(){
+		if (isset($_GET['id_movimiento']{0}))
+		{
+			$this->load->model('banco_cuentas_model');
+			$response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento'], true);
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=9'));
+		}else
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg')).'&msg=1'));
+	}
+
+	public function cambia_entransito(){
+		if (isset($_GET['id_movimiento']{0}))
+		{
+			$this->load->model('banco_cuentas_model');
+			$response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'], 
+				array('entransito' => ($this->input->get('mstatus')=='Trans'? 'f' : 't') ));
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=11'));
+		}else
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=1'));
 	}
 
 
@@ -462,6 +560,18 @@ class banco extends MY_Controller {
 				break;
 			case 8:
 				$txt = 'Se registro el retiro correctamente.';
+				$icono = 'success';
+				break;
+			case 9:
+				$txt = 'Se cancelo la operacion correctamente.';
+				$icono = 'success';
+				break;
+			case 10:
+				$txt = 'Se elimino la operacion correctamente.';
+				$icono = 'success';
+				break;
+			case 11:
+				$txt = 'La operacion cambio de estado correctamente.';
 				$icono = 'success';
 				break;
 		}

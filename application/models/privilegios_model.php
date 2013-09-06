@@ -130,7 +130,7 @@ class privilegios_model extends CI_Model{
 				'icon_type' => 'icon-white',
 				'attrs'     => array(),
 				'text_link' => 'hidden-tablet',
-        'html'      => '',
+        		'html'      => '',
 				);
 			$conf = array_merge($conf, $config);
 

@@ -1,3 +1,51 @@
+2013-09-02
+  ✔ Agregar cuenta de compaq en calidades, poner default la de limon fruta de compras @done (13-09-03 18:31)
+  ☐ SQL:
+      cuenta_cpi character varying(12) NOT NULL DEFAULT 43000010,
+      COMMENT ON COLUMN calidades.cuenta_cpi IS 'cuenta afectable del contpaqi';
+      limon 43000010
+      piña 43000011
+      coco 43000013
+
+      Productos piña:
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#5)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#6)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#7)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL(#8)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #5(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #5(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #6(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #6(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #7(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL#7(CARTON)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #8(PLASTICO)', '41080000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'PIÑA MIEL #8(CARTON)', '41080000' );
+      otros:
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TAMARINDO DE PRIMERA', '41060000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TAMARINDO DE SEGUNDA', '41060000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'SEGURO', '42200100' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'AJUSTE PRECIO', '41050000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TARIMA NACIONAL', '42200103' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'ARPILLAS 18KG', '41040000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'COMISION AUTO-VENTA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'SUPERVISOR DE CARGAS', '42200102' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TARIMA CERTIFICADA', '42200103' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CERTIFICADO FITOSANITARIO', '42200101' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CERTIFICADO DE ORIGEN', '42200101' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CONCRETO HID C/RESISTENCIA 250', '42200500' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'AJUSTE DE PRECIO', '41050000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'COCO DESTOPADO', '41070000' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'FIRCO', '42200105' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'TUBO ALCANTARILLADO', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'CEMENTO', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'HRS RETRO EXCAVADORA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'HORAS VIBRO COMPACTADOR', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'ARENA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'GRAVA', '42200400' );
+        INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, 'BALASTRE', '42200400' );
+
+
 SQL
   Tabla facturacion:
     poliza_diario boolean NOT NULL DEFAULT false,

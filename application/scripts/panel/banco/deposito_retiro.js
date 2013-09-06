@@ -34,7 +34,7 @@ $(function(){
 	//Autocomplete de Productores
 	if($("#did_proveedor").length > 0){
 		$("#dproveedor").autocomplete({
-	      source: base_url+'panel/empresas/ajax_get_empresas/',
+	      source: base_url+'panel/proveedores/ajax_get_proveedores/',
 	      minLength: 1,
 	      selectFirst: true,
 	      select: function( event, ui ) {

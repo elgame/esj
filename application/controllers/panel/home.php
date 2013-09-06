@@ -60,24 +60,25 @@ class home extends MY_Controller {
 		//     }
 		//     fclose($gestor);
 		// }
-		/*$gestor = @fopen("Todos los Productos2.txt", "r");
-		if ($gestor) {
-		    while (($bufer = fgets($gestor, 4096)) !== false) {
-		    	// $bufer = utf8_encode($bufer);
-		    	$nombre = trim(substr($bufer, 33, 57));
-		    	if(strpos($nombre, 'LIMON') !== FALSE)
-		    		echo "INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, '".$nombre."', '".trim(substr($bufer, 242, 10))."' );\n";
-		    }
-		    if (!feof($gestor)) {
-		        echo "Error: fallo inesperado de fgets()\n";
-		    }
-		    fclose($gestor);
-		}*/
+		// $gestor = @fopen("Todos los Productos2.txt", "r");
+		// if ($gestor) {
+		//     while (($bufer = fgets($gestor, 4096)) !== false) {
+		//     	// $bufer = utf8_encode($bufer);
+		//     	$nombre = utf8_encode( trim(substr($bufer, 33, 57)) );
+		//     	$cuenta_cpi = trim(substr($bufer, 242, 10));
+		//     	if(!(strpos($nombre, 'PIÑA') !== FALSE) && !(strpos($nombre, 'LIMON') !== FALSE) && $cuenta_cpi!='')
+		//     		echo "INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, '".$nombre."', '".$cuenta_cpi."' );\n";
+		//     }
+		//     if (!feof($gestor)) {
+		//         echo "Error: fallo inesperado de fgets()\n";
+		//     }
+		//     fclose($gestor);
+		// }
 
-		$params['cuentas'] = $this->getArbolCuenta();
+		$params['cuentas'] = '';//$this->getArbolCuenta();
 
-		$this->load->library('cfdi');
-		$this->cfdi->cargaDatosFiscales(2);
+		// $this->load->library('cfdi');
+		// $this->cfdi->cargaDatosFiscales(2);
 		// echo $this->cfdi->obtenCertificado($this->cfdi->path_certificado, false);
 		// echo $this->cfdi->obtenLlave($this->cfdi->path_key);
 
