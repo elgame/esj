@@ -6,6 +6,7 @@ class proveedores_facturacion extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'proveedores_facturacion/admin/',
     'proveedores_facturacion/get_folio/',
     'proveedores_facturacion/get_series/',
     'proveedores_facturacion/email/',
@@ -40,6 +41,34 @@ class proveedores_facturacion extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
+      array('panel/proveedores/facturacion/admin.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('proveedores_facturacion_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Facturas');
+
+    $_GET['ffecha1']    = (isset($_GET['ffecha1']{8})? $_GET['ffecha1']: date("Y-m-d"));
+    $params['datos_s'] = $this->proveedores_facturacion_model->getProveedores( $_GET['ffecha1'] );
+
+    // if(isset($_GET['id_mov']{0}))
+    //   $params['id_mov'] = $_GET['id_mov'];
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/proveedores/facturacion/saldos',$params);
+    $this->load->view('panel/footer', $params);
+  }
+
+  public function admin()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
       array('general/supermodal.js'),
       array('panel/proveedores/facturacion/admin.js'),
     ));
@@ -48,12 +77,11 @@ class proveedores_facturacion extends MY_Controller {
     $this->load->model('proveedores_facturacion_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo'] = array('titulo' => 'Facturas');
 
     $params['datos_s'] = $this->proveedores_facturacion_model->getFacturas();
 
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $_GET['ffecha1']   = (isset($_GET['ffecha1']{8})? $_GET['ffecha1']: date("Y-m-d"));
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

@@ -22,13 +22,23 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/proveedores_facturacion/'); ?>" method="GET" class="form-search">
-              <div class="form-actions form-filters center">
+            <?php
+            $quit_params = array('ffolio', 'dempresa', 'did_empresa', 'fstatus');
+            if($this->input->get('fnombre') == '')
+            {
+              $quit_params[] = 'fnombre';
+              $quit_params[] = 'fid_proveedor';
+            }
+            ?>
+            <a href="<?php echo base_url('panel/proveedores_facturacion?'.String::getVarsLink($quit_params) ); ?>" class="linksm">
+              <i class="icon-chevron-left"></i> Atras</a>
+            <form action="<?php echo base_url('panel/proveedores_facturacion/admin'); ?>" method="GET" class="form-search">
+              <div class="form-actions form-filters">
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
 
                 <label for="dproveedor">Proveedor</label>
-                <input type="text" name="dproveedor" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
+                <input type="text" name="fnombre" class="input-large search-query" id="dproveedor" value="<?php echo set_value_get('fnombre'); ?>" size="73">
                 <input type="hidden" name="fid_proveedor" id="fid_proveedor" value="<?php echo set_value_get('fid_proveedor'); ?>">
 
                 <label for="dempresa">Empresa</label>
@@ -37,9 +47,7 @@
 
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', $fecha); ?>" size="10">
-                <label for="ffecha2">Al</label>
-                <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
+                <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
 
                 <label for="fstatus">Estado</label>
                 <select name="fstatus" class="input-medium" id="fstatus">
@@ -49,7 +57,7 @@
                   <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
                 </select>
 
-                <input type="submit" name="enviar" value="Enviar" class="btn">
+                <button type="submit" class="btn">Enviar</button>
               </div>
             </form>
 

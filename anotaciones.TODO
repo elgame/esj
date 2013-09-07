@@ -1,3 +1,11 @@
+Furby:
+  ☐ Agregar factura proveedor, en empresa cargar por default la marcada default
+  ☐ Al gregar los tickets a la factura, al ir dando enter se queda en el select de calidad, al dar enter en el select que pase el foco al btn "cargar" y al dar enter en ese btn que se agregue el ticket, y que regrese el foco al campo ticket si se agrego bien o si marco error
+  ☐ Las facturas de los proveedores ponerlas en otro directorio, y que se agrupen por proveedor (la carpeta padre sea el id del proveedor), esas no se copian a documentos ni nada
+  ☐ Al agregar una factura no se quita el borrador previamente guardado, se siguen cargando los datos, cuando se timbre que se borre el borrador ya no se ocupa
+  ☐ Al agregar una factura validar que no exeda el limite x proveedor, en proveedores_facturacion_model hay un metodo getLimiteProveedores(), regresa limite y facturado, si facturado+total_new_factura<=limite? si guardar: no guardar;
+  ☐ El logo de las facturas no hay q ponercelo, en facturacion (ventas) falto que fuera de la empresa seleccionada no fijo el de sanjorge
+
 2013-09-02
   ✔ Agregar cuenta de compaq en calidades, poner default la de limon fruta de compras @done (13-09-03 18:31)
   ☐ SQL:

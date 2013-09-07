@@ -240,7 +240,7 @@ class proveedores extends MY_Controller {
 
 			array('field' => 'frfc',
 						'label' => 'RFC',
-						'rules' => 'max_length[13]'),
+						'rules' => 'min_length[12]|max_length[13]'),
 			array('field' => 'fcurp',
 						'label' => 'CURP',
 						'rules' => 'max_length[35]'),
@@ -263,6 +263,16 @@ class proveedores extends MY_Controller {
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),
+
+			array('field'	=> 'dregimen_fiscal',
+						'label'	=> 'Régimen fiscal',
+						'rules'	=> 'max_length[100]'),
+			array('field'	=> 'dpass',
+						'label'	=> 'Clave',
+						'rules'	=> 'max_length[20]'),
+			array('field'	=> 'dcfdi_version',
+					'label'	=> 'Version CFDI',
+					'rules'	=> 'max_length[6]'),
 		);
 
 		$this->form_validation->set_rules($rules);

@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class proveedores_model extends CI_Model {
-
+	private $pass_finkok = 'gamaL1!l';
 
 	function __construct()
 	{
@@ -73,6 +73,29 @@ class proveedores_model extends CI_Model {
  	 */
 	public function addProveedor($data=NULL)
 	{
+		//certificado
+		$dcer_org   = '';
+		$dcer       = '';
+		$cer_caduca = '';
+		$upload_res = UploadFiles::uploadFile('dcer_org');
+		var_dump($upload_res);
+		if($upload_res !== false && $upload_res !== 'ok'){
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados_pv/")) );
+			$dcer_org   = $upload_res[0];
+			$dcer       = $upload_res[1];
+
+			$this->load->library('cfdi');
+			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
+		}
+		//llave
+		$new_pass   = $this->pass_finkok;
+		$dkey_path  = '';
+		$upload_res = UploadFiles::uploadFile('dkey_path');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/key.php?newpass={$new_pass}&pass={$this->input->post('dpass')}&file={$upload_res}&path=".APPPATH."CFDI/certificados_pv/")) );
+			$dkey_path  = $upload_res[0];
+			$_POST['dpass'] = $new_pass;
+		}
 
 		if ($data==NULL)
 		{
@@ -93,6 +116,13 @@ class proveedores_model extends CI_Model {
 						'tipo_proveedor' => $this->input->post('ftipo_proveedor'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
+						'cer_org'        => $dcer_org,
+						'cer'            => $dcer,
+						'key_path'       => $dkey_path,
+						'pass'           => $this->input->post('dpass'),
+						'cfdi_version'   => $this->input->post('dcfdi_version'),
+						'cer_caduca'     => $cer_caduca,
 						);
 		}
 
@@ -110,6 +140,38 @@ class proveedores_model extends CI_Model {
 	 */
 	public function updateProveedor($id_proveedor, $data=NULL)
 	{
+		$info = $this->getProveedorInfo($id_proveedor);
+
+		//certificado
+		$dcer_org   = (isset($info['info']->cer_org)? $info['info']->cer_org: '');
+		$dcer       = (isset($info['info']->cer)? $info['info']->cer: '');
+		$cer_caduca = (isset($info['info']->cer_caduca)? $info['info']->cer_caduca: '');
+		$upload_res = UploadFiles::uploadFile('dcer_org');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			if($dcer_org != '' && strpos($dcer_org, $upload_res) === false){
+				UploadFiles::deleteFile($dcer_org);
+				UploadFiles::deleteFile($dcer);
+			}
+
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/cer.php?file={$upload_res}&path=".APPPATH."CFDI/certificados_pv/")) );
+			$dcer_org   = $upload_res[0];
+			$dcer       = $upload_res[1];
+			//se obtiene la fecha que caduca el certificado
+			$this->load->library('cfdi');
+			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
+		}
+		//llave
+		$new_pass = $this->pass_finkok;
+		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
+		$upload_res = UploadFiles::uploadFile('dkey_path');
+		if($upload_res !== false && $upload_res !== 'ok'){
+			if($dkey_path != '' && strpos($dkey_path, $upload_res) === false)
+				UploadFiles::deleteFile($dkey_path);
+
+			$upload_res = json_decode( file_get_contents(base_url("openssl/bin/key.php?newpass={$new_pass}&pass={$this->input->post('dpass')}&file={$upload_res}&path=".APPPATH."CFDI/certificados_pv/")) );
+			$dkey_path  = $upload_res[0];
+			$_POST['dpass'] = $new_pass;
+		}
 
 		if ($data==NULL)
 		{
@@ -130,6 +192,13 @@ class proveedores_model extends CI_Model {
 						'tipo_proveedor' => $this->input->post('ftipo_proveedor'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'regimen_fiscal' => $this->input->post('dregimen_fiscal'),
+						'cer_org'        => $dcer_org,
+						'cer'            => $dcer,
+						'key_path'       => $dkey_path,
+						'pass'           => $this->input->post('dpass'),
+						'cfdi_version'   => $this->input->post('dcfdi_version'),
+						'cer_caduca'     => $cer_caduca,
 						);
 		}
 
@@ -149,7 +218,7 @@ class proveedores_model extends CI_Model {
 		$id_proveedor = $id_proveedor ? $id_proveedor : $_GET['id'] ;
 
 		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
+							estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
                             cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal" )
 												->from("proveedores")
 												->where("id_proveedor", $id_proveedor)

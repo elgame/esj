@@ -10,6 +10,42 @@ class proveedores_facturacion_model extends privilegios_model{
    |  FACTURACION
    |-------------------------------------------------------------------------
    */
+  /**
+   * Obtiene los saldos de proveedores
+   * @return [type] [description]
+   */
+  public function getProveedores($fecha)
+  {
+    $fechae = explode('-', $fecha);
+
+    $this->load->model('proveedores_model');
+    $data = $this->proveedores_model->getProveedores();
+    foreach ($data['proveedores'] as $key => $value) 
+    {
+      $limite           = $this->getLimiteProveedores($value->id_proveedor, $fechae[0], $fecha);
+      $value->facturado = $limite['facturado'];
+      $value->limite    = $limite['limite'];
+      $value->saldo     = ($limite['limite']-$limite['facturado']);
+
+      $data['proveedores'][$key] = $value;
+    }
+    return $data;
+  }
+
+  public function getLimiteProveedores($id_proveedor, $anio, $fecha='')
+  {
+    $data_salario = $this->db->query("SELECT zona_c AS salario FROM nomina_salarios_minimos WHERE id = 1")->row();
+    $response['limite'] = $data_salario->salario * 40 * 365;
+    
+    $sql_fecha = $fecha!=''? " AND Date(fecha) <= '{$fecha}'": '';
+    $data_saldo = $this->db->query("SELECT Sum(total) AS total 
+      FROM proveedores_facturacion 
+      WHERE id_proveedor = {$id_proveedor} AND status IN('p', 'pa') 
+        AND status_timbrado <> 'ca' AND date_part('year', fecha) = {$anio} {$sql_fecha}")->row();
+
+    $response['facturado'] = $data_saldo->total;
+    return $response;
+  }
 
   /**
    * Obtiene el listado de facturas
@@ -17,7 +53,7 @@ class proveedores_facturacion_model extends privilegios_model{
    * @return
    */
   public function getFacturas($perpage = '40', $sql2='')
-    {
+  {
     $sql = '';
     //paginacion
     $params = array(
@@ -28,12 +64,8 @@ class proveedores_facturacion_model extends privilegios_model{
       $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
     //Filtros para buscar
-    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql = " AND Date(pf.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-    elseif($this->input->get('ffecha1') != '')
-      $sql = " AND Date(pf.fecha) = '".$this->input->get('ffecha1')."'";
-    elseif($this->input->get('ffecha2') != '')
-      $sql = " AND Date(pf.fecha) = '".$this->input->get('ffecha2')."'";
+    if($this->input->get('ffecha1') != '')
+      $sql = " AND Date(pf.fecha) <= '".$this->input->get('ffecha1')."'";
 
     // if($this->input->get('fserie') != '')
     //  $sql .= " AND c.serie = '".$this->input->get('fserie')."'";
@@ -53,7 +85,7 @@ class proveedores_facturacion_model extends privilegios_model{
         FROM proveedores_facturacion AS pf
         INNER JOIN proveedores AS p ON p.id_proveedor = pf.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = pf.id_empresa
-        WHERE 1 = 1".$sql.$sql2."
+        WHERE pf.status <> 'b' ".$sql.$sql2."
         ORDER BY (pf.fecha, pf.folio) DESC
         ", $params, true);
     $res = $this->db->query($query['query']);

@@ -23,7 +23,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/proveedores/agregar'); ?>" method="post" class="form-horizontal">
+						<form action="<?php echo base_url('panel/proveedores/agregar'); ?>" method="post" class="form-horizontal" enctype="multipart/form-data">
 						  <fieldset>
 								<legend></legend>
 
@@ -33,6 +33,24 @@
 									  <div class="controls">
 											<input type="text" name="fnombre_fiscal" id="fnombre_fiscal" class="span10" maxlength="140" 
 											value="<?php echo set_value('fnombre_fiscal'); ?>" required autofocus placeholder="GAS MENGUC SA DE CV, MORA NARANJO ALFREDO">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="frfc">RFC </label>
+									  <div class="controls">
+											<input type="text" name="frfc" id="frfc" class="span12" value="<?php echo set_value('frfc'); ?>" 
+												maxlength="13" placeholder="MPE050528A58, SFM00061515A">
+									  </div>
+									</div>
+
+									<div class="control-group tipo3">
+									  <label class="control-label" for="ftipo_proveedor">Tipo de proveedor </label>
+									  <div class="controls">
+											<select name="ftipo_proveedor" id="ftipo_proveedor">
+												<option value="in" <?php echo set_select('ftipo_proveedor', 'in', false, $this->input->post('ftipo_proveedor')); ?>>Insumos</option>
+												<option value="fr" <?php echo set_select('ftipo_proveedor', 'fr', false, $this->input->post('ftipo_proveedor')); ?>>Fruta</option>
+											</select>
 									  </div>
 									</div>
 
@@ -91,16 +109,22 @@
 												maxlength="45" placeholder="Colima, Jalisco">
 									  </div>
 									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fcp">CP </label>
+									  <div class="controls">
+											<input type="text" name="fcp" id="fcp" class="span10" value="<?php echo set_value('fcp'); ?>" 
+												maxlength="10" placeholder="28084, 28000">
+									  </div>
+									</div>
 								</div> <!--/span-->
 
 								<div class="span5">
-
 									<div class="control-group">
-									  <label class="control-label" for="frfc">RFC </label>
-									  <div class="controls">
-											<input type="text" name="frfc" id="frfc" class="span12" value="<?php echo set_value('frfc'); ?>" 
-												maxlength="10" placeholder="MPE050528A58, SFM00061515A">
-									  </div>
+										<label class="control-label" for="dregimen_fiscal">Régimen fiscal:</label>
+										<div class="controls">
+											<input type="text" name="dregimen_fiscal" id="dregimen_fiscal" class="span12" value="<?php echo set_value('dregimen_fiscal'); ?>" maxlength="100">
+										</div>
 									</div>
 
 									<div class="control-group">
@@ -108,14 +132,6 @@
 									  <div class="controls">
 											<input type="text" name="fcurp" id="fcurp" class="span12" value="<?php echo set_value('fcurp'); ?>" 
 												maxlength="10" placeholder="IIML781216MCMXNS02, MONA731117HMNRRL05">
-									  </div>
-									</div>
-
-									<div class="control-group">
-									  <label class="control-label" for="fcp">CP </label>
-									  <div class="controls">
-											<input type="text" name="fcp" id="fcp" class="span12" value="<?php echo set_value('fcp'); ?>" 
-												maxlength="10" placeholder="28084, 28000">
 									  </div>
 									</div>
 
@@ -135,21 +151,11 @@
 									  </div>
 									</div>
 	                
-	                <div class="control-group">
+									<div class="control-group">
 									  <label class="control-label" for="femail">Email </label>
 									  <div class="controls">
 											<input type="text" name="femail" id="femail" class="span12" value="<?php echo set_value('femail'); ?>" 
 												maxlength="70" placeholder="correo@gmail.com">
-									  </div>
-									</div>
-
-									<div class="control-group tipo3">
-									  <label class="control-label" for="ftipo_proveedor">Tipo de proveedor </label>
-									  <div class="controls">
-											<select name="ftipo_proveedor" id="ftipo_proveedor">
-												<option value="in" <?php echo set_select('ftipo_proveedor', 'in', false, $this->input->post('ftipo_proveedor')); ?>>Insumos</option>
-												<option value="fr" <?php echo set_select('ftipo_proveedor', 'fr', false, $this->input->post('ftipo_proveedor')); ?>>Fruta</option>
-											</select>
 									  </div>
 									</div>
 
@@ -159,6 +165,36 @@
 											<input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span12" value="<?php echo set_value('fcuenta_cpi'); ?>" 
 												maxlength="12" placeholder="12312, 312322">
 									  </div>
+									</div>
+
+									<div class="control-group">
+										<label class="control-label" for="dcer_org">Certificado .CER:</label>
+										<div class="controls">
+											<input type="file" name="dcer_org" id="dcer_org" class="span12">
+										</div>
+									</div>
+
+									<div class="control-group">
+										<label class="control-label" for="dkey_path">Llave .KEY:</label>
+										<div class="controls">
+											<input type="file" name="dkey_path" id="dkey_path" class="span12">
+										</div>
+									</div>
+
+									<div class="control-group">
+										<label class="control-label" for="dpass">Clave:</label>
+										<div class="controls">
+											<input type="text" name="dpass" id="dpass" class="span12" 
+												value="<?php echo set_value('dpass'); ?>" maxlength="20">
+										</div>
+									</div>
+
+									<div class="control-group">
+										<label class="control-label" for="dcfdi_version">Version CFDI:</label>
+										<div class="controls">
+											<input type="text" name="dcfdi_version" id="dcfdi_version" class="span12" 
+												value="<?php echo set_value('dcfdi_version'); ?>" maxlength="6">
+										</div>
 									</div>
 
 	              </div> <!--/span-->

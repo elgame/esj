@@ -1,15 +1,15 @@
 Proveedores:
 
     PRIVILEGIOS:
-       "Facturacion";10;TRUE;"proveedores_facturacion/";"icon-dollar";FALSE
-       "Agregar Series y Folios";102;TRUE;"proveedores_facturacion/agregar_serie_folio/";"plus";FALSE
-       "Modificar";102;FALSE;"proveedores_facturacion/modificar_serie_folio/";"edit";FALSE
-       "Series y Folios";102;TRUE;"proveedores_facturacion/series_folios/";"list-alt";FALSE
-       "Facturar";102;TRUE;"proveedores_facturacion/agregar/";"file-text-alt";FALSE
-       "Imprimir";102;FALSE;"proveedores_facturacion/imprimir/";"print";FALSE
-       "Cancelar";102;FALSE;"proveedores_facturacion/cancelar/";"ban-circle";FALSE
-       "E-mail";102;FALSE;"proveedores_facturacion/enviar_documentos/";"envelope";FALSE
-       "Nota Credito";102;FALSE;"proveedores_notas_credito/agregar/";"file-text-alt";FALSE
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Facturacion', 10, TRUE, 'proveedores_facturacion/', 'list', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Series y Folios', 115, TRUE, 'proveedores_facturacion/series_folios/', 'list-alt', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar Folios', 116, TRUE, 'proveedores_facturacion/agregar_serie_folio/', 'plus', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Modificar', 116, FALSE, 'proveedores_facturacion/modificar_serie_folio/', 'edit', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Facturar', 115, TRUE, 'proveedores_facturacion/agregar/', 'file-text-alt', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Imprimir', 115, FALSE, 'proveedores_facturacion/imprimir/', 'print', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cancelar', 115, FALSE, 'proveedores_facturacion/cancelar/', 'ban-circle', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('E-mail', 115, FALSE, 'proveedores_facturacion/enviar_documentos/', 'envelope', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Nota Credito', 115, FALSE, 'proveedores_notas_credito/agregar/', 'file-text-alt', FALSE);
 
    ✔ Series y Folios @done (13-09-03 10:25)
           ✔ Empresas -> Proveedores @done (13-09-03 10:25)
@@ -138,7 +138,7 @@ Proveedores:
                   CONSTRAINT proveedores_facturacion_empresa_pkey PRIMARY KEY (id_factura),
                   CONSTRAINT proveedores_facturacion_empresa_id_factura_fkey FOREIGN KEY (id_factura)
                       REFERENCES proveedores_facturacion (id_factura) MATCH SIMPLE
-                      ON UPDATE NO ACTION ON DELETE NO ACTION
+                      ON UPDATE CASCADE ON DELETE CASCADE
                 )
                 WITH (
                   OIDS=FALSE
