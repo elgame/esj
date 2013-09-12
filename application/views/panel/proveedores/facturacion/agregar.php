@@ -242,7 +242,7 @@
                 <div class="controls">
                   <input type="text" id="ticket" class="style" placeholder="Ticket, Pesada">
 
-                  <select name="parea" class="" id="parea">
+                  <select name="parea" class="" id="parea" data-next="btnLoadTicket">
                     <option value=""></option>
                     <?php foreach ($areas['areas'] as $area){ ?>
                       <option value="<?php echo $area->id_area ?>"

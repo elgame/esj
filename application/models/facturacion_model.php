@@ -1549,8 +1549,9 @@ class facturacion_model extends privilegios_model{
         // Logo //
         //////////
 
-        $pdf->SetXY(30, 2);
-        $pdf->Image(APPPATH.'images/logo.png');
+        $pdf->SetXY(0, 0);
+        // $pdf->SetXY(30, 2);
+        $pdf->Image($factura['info']->empresa->logo);
 
         //////////////////////////
         // Rfc y Regimen Fiscal //

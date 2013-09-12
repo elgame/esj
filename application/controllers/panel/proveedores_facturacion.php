@@ -18,6 +18,7 @@ class proveedores_facturacion extends MY_Controller {
     'proveedores_facturacion/ajax_get_proveedor_fac/',
     'proveedores_facturacion/ajax_get_empresas/',
     'proveedores_facturacion/ajax_get_ticket/',
+    'proveedores_facturacion/get_empresa_default/',
 
     'proveedores_facturacion/xml/'
   );
@@ -604,6 +605,15 @@ class proveedores_facturacion extends MY_Controller {
     if($str <= 0){
       $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
       return false;
+    } else {
+      $info = $this->proveedores_facturacion_model->getLimiteProveedores($_POST['did_proveedor'], date('Y'));
+
+      if ((floatval($info['facturado']) + floatval($str)) > floatval($info['limite']))
+      {
+        $this->form_validation->set_message('val_total', 'El total de la factura sobrepasa el limite permitido a facturar del proveedor.');
+        return false;
+      }
+
     }
     return true;
   }
@@ -890,6 +900,17 @@ class proveedores_facturacion extends MY_Controller {
     $params = $this->proveedores_facturacion_model->getTicketInfo($_GET['t'], $_GET['a']);
 
     echo json_encode(array('response' => $params));
+  }
+
+  /**
+    * Obtiene los productos del ticket.
+    */
+  public function get_empresa_default()
+  {
+    $this->load->model('empresas_model');
+    $params = $this->empresas_model->getDefaultEmpresa();
+
+    echo json_encode($params);
   }
 
   /*

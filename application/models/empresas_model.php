@@ -82,7 +82,7 @@ class empresas_model extends CI_Model{
 	}
 
 	public function getDefaultEmpresa(){
-		$params = $this->db->select("id_empresa, nombre_fiscal")
+		$params = $this->db->select("*")
       ->from("empresas")
       ->where("predeterminado", "t")
       ->get()

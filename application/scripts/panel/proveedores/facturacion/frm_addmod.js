@@ -59,6 +59,10 @@ $(function(){
     loadSerieFolio($('#did_proveedor').val());
   }
 
+  if ($('#did_empresa').val() === '') {
+    loadEmpresaDefault();
+  }
+
   //Carga el folio para la serie seleccionada
   $("#dserie").on('change', function(){
     loader.create();
@@ -186,6 +190,10 @@ $(function(){
     } else {
       noty({"text": 'Selecciona una area', "layout":"topRight", "type": 'error'});
     }
+  }).on('keypress', function(event) {
+      if (event.which === 13) {
+        $('#ticket').focus();
+      }
   });
 
   $('#btnUndoLastAction').on('click', function(event) {
@@ -377,6 +385,24 @@ function loadSerieFolio (ide) {
       } else {
         noty({"text":res.msg, "layout":"topRight", "type":res.ico});
       }
+      loader.close();
+    }
+  );
+}
+
+function loadEmpresaDefault () {
+  loader.create();
+
+  $.getJSON(base_url+'panel/proveedores_facturacion/get_empresa_default',
+    function(res){
+
+      console.log(res);
+
+      $('#dempresa').val(res.nombre_fiscal);
+      $('#did_empresa').val(res.id_empresa);
+
+      createInfoEmpresa(res);
+
       loader.close();
     }
   );
