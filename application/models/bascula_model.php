@@ -798,7 +798,7 @@ class Bascula_model extends CI_Model {
           String::formatoNumero($kilos/$cajas, 2, '', false),
           $cajas,
           $kilos,
-          String::formatoNumero($precio/count($calidad['cajas']), 2, '$', false),
+          String::formatoNumero($importe/$kilos, 2, '$', false),
           String::formatoNumero($importe, 2, '$', false)), false, false);
 
       }

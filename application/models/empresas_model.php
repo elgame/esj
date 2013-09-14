@@ -1,6 +1,7 @@
 <?php
 
 class empresas_model extends CI_Model{
+	private $pass_finkok = 'gamaL1!l';
 
 	function __construct(){
 		parent::__construct();
@@ -132,7 +133,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass   = 'gamaL1!l';
+		$new_pass   = $this->pass_finkok;
 		$dkey_path  = '';
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){
@@ -210,7 +211,7 @@ class empresas_model extends CI_Model{
 			$cer_caduca = $this->cfdi->obtenFechaCertificado($dcer_org);
 		}
 		//llave
-		$new_pass = 'gamaL1!l';
+		$new_pass = $this->pass_finkok;
 		$dkey_path = (isset($info['info']->key_path)? $info['info']->key_path: '');
 		$upload_res = UploadFiles::uploadFile('dkey_path');
 		if($upload_res !== false && $upload_res !== 'ok'){

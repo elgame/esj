@@ -11,9 +11,9 @@ class UploadFiles{
 			if($_FILES['dlogo']['name']!=''){
 				$config['upload_path'] = APPPATH.'images/empresas/';
 				$config['allowed_types'] = 'jpg|jpeg|gif|png';
-				$config['max_size']	= '200';
-				$config['max_width'] = '1024';
-				$config['max_height'] = '768';
+				$config['max_size']	= '1500';
+				$config['max_width'] = '1925';
+				$config['max_height'] = '1085';
 				$config['encrypt_name'] = true;
 				$ci->load->library('upload', $config);
 				if(!$ci->upload->do_upload('dlogo')){

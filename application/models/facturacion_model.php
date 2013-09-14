@@ -1551,7 +1551,8 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetXY(0, 0);
         // $pdf->SetXY(30, 2);
-        $pdf->Image($factura['info']->empresa->logo);
+        $logo = (file_exists($factura['info']->empresa->logo)) ? $factura['info']->empresa->logo : 'application/images/logo2.png' ;
+        $pdf->Image($logo, 10, null, 0, 21);
 
         //////////////////////////
         // Rfc y Regimen Fiscal //
@@ -1566,7 +1567,7 @@ class facturacion_model extends privilegios_model{
         // $pdf->Cell(108, 15, "Factura Electrónica (CFDI)", 0, 0, 'C', 1);
 
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 3);
+        $pdf->SetXY(0, $pdf->GetY());
         $pdf->Cell(108, 14, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
 
         $pdf->SetFont('helvetica','B', 14);
