@@ -9,6 +9,21 @@ Furby:
 2013-09-02
   ✔ Agregar cuenta de compaq en calidades, poner default la de limon fruta de compras @done (13-09-03 18:31)
   ☐ SQL:
+
+      CREATE TABLE nomina_salarios_minimos
+      (
+        id serial NOT NULL,
+        zona_a real,
+        zona_b real,
+        zona_c real,
+        CONSTRAINT nomina_salarios_minimos_pkey PRIMARY KEY (id)
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE nomina_salarios_minimos OWNER TO programa;
+      INSERT INTO nomina_salarios_minimos   (zona_a, zona_b, zona_c) VALUES (64.76, 61.38, 61.38);
+
       cuenta_cpi character varying(12) NOT NULL DEFAULT 43000010,
       COMMENT ON COLUMN calidades.cuenta_cpi IS 'cuenta afectable del contpaqi';
       limon 43000010
