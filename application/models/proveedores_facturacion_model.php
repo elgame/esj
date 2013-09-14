@@ -20,7 +20,7 @@ class proveedores_facturacion_model extends privilegios_model{
 
     $this->load->model('proveedores_model');
     $data = $this->proveedores_model->getProveedores();
-    foreach ($data['proveedores'] as $key => $value) 
+    foreach ($data['proveedores'] as $key => $value)
     {
       $limite           = $this->getLimiteProveedores($value->id_proveedor, $fechae[0], $fecha);
       $value->facturado = $limite['facturado'];
@@ -36,11 +36,11 @@ class proveedores_facturacion_model extends privilegios_model{
   {
     $data_salario = $this->db->query("SELECT zona_c AS salario FROM nomina_salarios_minimos WHERE id = 1")->row();
     $response['limite'] = $data_salario->salario * 40 * 365;
-    
+
     $sql_fecha = $fecha!=''? " AND Date(fecha) <= '{$fecha}'": '';
-    $data_saldo = $this->db->query("SELECT Sum(total) AS total 
-      FROM proveedores_facturacion 
-      WHERE id_proveedor = {$id_proveedor} AND status IN('p', 'pa') 
+    $data_saldo = $this->db->query("SELECT Sum(total) AS total
+      FROM proveedores_facturacion
+      WHERE id_proveedor = {$id_proveedor} AND status IN('p', 'pa')
         AND status_timbrado <> 'ca' AND date_part('year', fecha) = {$anio} {$sql_fecha}")->row();
 
     $response['facturado'] = $data_saldo->total;
@@ -404,23 +404,11 @@ class proveedores_facturacion_model extends privilegios_model{
         // Si es un ingreso o una factura.
         if ($_POST['dtipo_comprobante'] === 'ingreso')
         {
-          // Obtiene los documentos que el cliente tiene asignados.
-          // $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
-
-          $this->load->model('documentos_model');
-          $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-
-          // Inserta los documentos del cliente con un status false.
-          // if ($docsCliente)
-          //   $this->db->insert_batch('facturacion_documentos', $docsCliente);
-          // else
-          //   $datosFactura['docs_finalizados'] = 't';
+          $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
         }
         else
         {
-            $this->load->model('documentos_model');
-            $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-            // $datosFactura['docs_finalizados'] = 't';
+          $pathDocs = $this->creaDirectorio($datosFactura['id_proveedor'], $datosFactura['serie'], $datosFactura['folio']);
         }
 
         $dataEmpresa = array(
@@ -548,7 +536,7 @@ class proveedores_facturacion_model extends privilegios_model{
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
 
           if (isset($_GET['id']))
-            $this->db->delete('facturacion', array('id_factura' => $_GET['id']));
+            $this->db->delete('proveedores_facturacion', array('id_factura' => $_GET['id']));
         }
         else rmdir($pathDocs);
 
@@ -710,7 +698,8 @@ class proveedores_facturacion_model extends privilegios_model{
       );
 
       // Regenera el PDF de la factura.
-      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->empresa->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+      // $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->empresa->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+      $pathDocs = $this->creaDirectorio($factura['info']->id_proveedor, $factura['info']->serie, $factura['info']->folio);
       $this->generaFacturaPdf($idFactura, $pathDocs);
 
       $this->enviarEmail($idFactura);
@@ -766,6 +755,80 @@ class proveedores_facturacion_model extends privilegios_model{
       return false;
     }
 
+    /**
+   * Crea el directorio por cliente donde se guardara los documentos.
+   *
+   * @param  string $idProveedor
+   * @param  string $serieFactura
+   * @param  string $folioFactura
+   * @return string
+   */
+  public function creaDirectorio($idProveedor, $serieFactura, $folioFactura)
+  {
+    $path = APPPATH.'media/cfdi/proveedores/';
+
+    if ( ! file_exists($path))
+    {
+      // echo $path.'<br>';
+      mkdir($path, 0777);
+    }
+
+    $path .= strtoupper($idProveedor).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= date('Y').'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= $this->mesToString(date('m')).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= 'FACT-'.($serieFactura !== '' ? $serieFactura.'-' : '').$folioFactura.'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    return $path;
+  }
+
+  /**
+   * Regresa el MES que corresponde en texto.
+   *
+   * @param  int $mes
+   * @return string
+   */
+  private function mesToString($mes)
+  {
+    switch(floatval($mes))
+    {
+      case 1: return 'ENERO'; break;
+      case 2: return 'FEBRERO'; break;
+      case 3: return 'MARZO'; break;
+      case 4: return 'ABRIL'; break;
+      case 5: return 'MAYO'; break;
+      case 6: return 'JUNIO'; break;
+      case 7: return 'JULIO'; break;
+      case 8: return 'AGOSTO'; break;
+      case 9: return 'SEPTIEMBRE'; break;
+      case 10: return 'OCTUBRE'; break;
+      case 11: return 'NOVIEMBRE'; break;
+      case 12: return 'DICIEMBRE'; break;
+    }
+  }
+
    /**
     * Descarga el XML.
     *
@@ -810,14 +873,15 @@ class proveedores_facturacion_model extends privilegios_model{
         // Obtiene la info de la factura.
         $factura = $this->getInfoFactura($idFactura);
 
-        $cliente = strtoupper($factura['info']->empresa->nombre_fiscal);
+        // $cliente = strtoupper($factura['info']->empresa->nombre_fiscal);
+        $idProveedor = strtoupper($factura['info']->id_proveedor);
         $fecha   = explode('-', $factura['info']->fecha);
         $ano     = $fecha[0];
         $mes     = strtoupper(String::mes(floatval($fecha[1])));
         $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
         $folio   = $factura['info']->folio;
 
-        $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+        $pathDocs = APPPATH."media/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
         // Scanea el directorio para obtener los archivos.
         $archivos = array_diff(scandir($pathDocs), array('..', '.'));
@@ -951,14 +1015,15 @@ class proveedores_facturacion_model extends privilegios_model{
                 // Si tiene documentos
                 // if ($docs)
                 // {
-                    $empresa = strtoupper($factura['info']->empresa->nombre_fiscal);
+                    $idProveedor = strtoupper($factura['info']->id_proveedor);
                     $fecha   = explode('-', $factura['info']->fecha);
                     $ano     = $fecha[0];
                     $mes     = strtoupper(String::mes(floatval($fecha[1])));
                     $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
                     $folio   = $factura['info']->folio;
 
-                    $pathDocs = APPPATH."documentos/CLIENTES/{$empresa}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+                    // $pathDocs = APPPATH."documentos/CLIENTES/{$empresa}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+                    $pathDocs = APPPATH."media/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
                     // echo "<pre>";
                     //   var_dump($pathDocs);
@@ -1635,8 +1700,8 @@ class proveedores_facturacion_model extends privilegios_model{
         // Logo //
         //////////
 
-        $pdf->SetXY(30, 2);
-        $pdf->Image(APPPATH.'images/logo.png');
+        // $pdf->SetXY(30, 2);
+        // $pdf->Image(APPPATH.'images/logo.png');
 
         //////////////////////////
         // Rfc y Regimen Fiscal //
