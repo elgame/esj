@@ -881,7 +881,7 @@ class proveedores_facturacion_model extends privilegios_model{
         $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
         $folio   = $factura['info']->folio;
 
-        $pathDocs = APPPATH."media/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+        $pathDocs = APPPATH."media/cfdi/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
         // Scanea el directorio para obtener los archivos.
         $archivos = array_diff(scandir($pathDocs), array('..', '.'));
@@ -1023,7 +1023,7 @@ class proveedores_facturacion_model extends privilegios_model{
                     $folio   = $factura['info']->folio;
 
                     // $pathDocs = APPPATH."documentos/CLIENTES/{$empresa}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
-                    $pathDocs = APPPATH."media/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+                    $pathDocs = APPPATH."media/cfdi/proveedores/{$idProveedor}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
 
                     // echo "<pre>";
                     //   var_dump($pathDocs);
