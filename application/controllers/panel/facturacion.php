@@ -119,9 +119,9 @@ class facturacion extends MY_Controller {
     $params['getId'] = '';
 
     // Parametros por default.
-    if (isset($_GET['id']))
+    if (isset($_GET['idb']))
     {
-      $params['getId'] = 'id='.$_GET['id'];
+      $params['getId'] = 'idb='.$_GET['idb'];
     }
     else // Parametros por default.
     {
@@ -141,7 +141,7 @@ class facturacion extends MY_Controller {
     $idBorrador = $this->facturacion_model->getBorradorFactura();
     if ( ! is_null($idBorrador))
     {
-      $params['getId'] = 'id='.$idBorrador;
+      $params['getId'] = 'idb='.$idBorrador;
 
       $params['borrador'] = $this->facturacion_model->getInfoFactura($idBorrador);
     }
@@ -171,13 +171,13 @@ class facturacion extends MY_Controller {
     }
     else
     {
-      if (isset($_GET['id']))
-        $this->facturacion_model->updateFacturaBorrador($_GET['id']);
+      if (isset($_GET['idb']))
+        $this->facturacion_model->updateFacturaBorrador($_GET['idb']);
       else
         $this->facturacion_model->addFacturaBorrador();
 
       if($respons['passes'])
-        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+        redirect(base_url('panel/documentos/agregar/?msg=3&idb='.$respons['id_factura']));
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }

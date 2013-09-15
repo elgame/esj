@@ -53,7 +53,7 @@ class facturacion_model extends privilegios_model{
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-				WHERE 1 = 1".$sql.$sql2."
+				WHERE 1 = 1 AND f.status != 'b' ".$sql.$sql2."
 				ORDER BY (f.fecha, f.folio) DESC
 				", $params, true);
 		$res = $this->db->query($query['query']);
@@ -287,7 +287,7 @@ class facturacion_model extends privilegios_model{
           'condicion_pago'      => $this->input->post('dcondicion_pago'),
           'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
           'observaciones'       => $this->input->post('dobservaciones'),
-          'status'              => isset($_POST['timbrar']) ? 'p' : 'b',
+          'status'              => $borrador ? 'b' : 'p',
           // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
           'retencion_iva'       => $this->input->post('total_retiva'),
         );
@@ -503,8 +503,9 @@ class facturacion_model extends privilegios_model{
 
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
 
-          if (isset($_GET['id']))
-            $this->db->delete('facturacion', array('id_factura' => $_GET['id']));
+          // Elimina el borrador.
+          if (isset($_GET['idb']))
+            $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
         }
         else rmdir($pathDocs);
 
