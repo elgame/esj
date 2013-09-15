@@ -134,7 +134,7 @@
                       if ($fact->status !== 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('proveedores_facturacion/cancelar/', array(
-                          'params'   => 'id='.$fact->id_factura,
+                          'params'   => 'id='.$fact->id_factura.'&'.String::getVarsLink(array('msg')),
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Proveedores Facturación', this); return false;"))
                         );
@@ -148,14 +148,14 @@
                       //   );
                       // }
 
-                      if ($fact->status === 'p')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
-                            'params'   => 'id='.$fact->id_factura.'&tipo=f',
-                            'btn_type' => 'btn btn-success',
-                            'attrs'    => array('rel' => 'superbox-50x500'))
-                        );
-                      }
+                      // if ($fact->status === 'p')
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                      //       'params'   => 'id='.$fact->id_factura.'&tipo=f',
+                      //       'btn_type' => 'btn btn-success',
+                      //       'attrs'    => array('rel' => 'superbox-50x500'))
+                      //   );
+                      // }
 
                       if ($fact->status_timbrado === 't')
                       {

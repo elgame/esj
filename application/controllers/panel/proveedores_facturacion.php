@@ -244,7 +244,7 @@ class proveedores_facturacion extends MY_Controller {
       $this->load->model('proveedores_facturacion_model');
       $response = $this->proveedores_facturacion_model->cancelaFactura($_GET['id']);
 
-      redirect(base_url("panel/proveedores_facturacion/?&msg={$response['msg']}"));
+      redirect(base_url("panel/proveedores_facturacion/admin/?msg={$response['msg']}&".String::getVarsLink(array('msg', 'id')) ));
     }
   }
 
@@ -1061,6 +1061,9 @@ class proveedores_facturacion extends MY_Controller {
       case 205:
         $txt = 'Error al intentar cancelar: UUID No existente.';
         $icono = 'error';
+      case 'error':
+        $txt = 'Error al intentar cancelar: UUID No existente.';
+        $icono = 'error';
         break;
       case 708:
         $txt = 'No se pudo cancelar la factura debido a un error del servicio, vuelva a intentarlo en unos minutos.';
@@ -1075,5 +1078,3 @@ class proveedores_facturacion extends MY_Controller {
   }
 
 }
-
-?>
