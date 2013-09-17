@@ -763,7 +763,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(107));
         $pdf->SetFillColor(200,200,200);
-        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $lote['info']->lote . '  Kilos:' . $kilos), true);
+        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $lote['info']->lote), true);
         $pdf->SetX($x);
         $pdf->SetAligns(array('L', 'C', 'C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 11, 12, 12, 12, 10));
@@ -792,6 +792,11 @@ class rastreabilidad_model extends CI_Model {
             break;
           }
         }
+
+        $pdf->SetXY($x + 61, $y + 17);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFillColor(200,200,200);
+        $pdf->Cell(45, 4, "Kilos: {$kilos}", 0, 0, 'R', 1);
 
       }
 
