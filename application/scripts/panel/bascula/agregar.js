@@ -143,6 +143,18 @@ $(function(){
     select: function( event, ui ) {
       $("#pid_proveedor").val(ui.item.id);
       $("#pproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+
+
+      if ($('#ptipo').find('option:selected').val() === 'en')
+      {
+        $.get(base_url + 'panel/bascula/ajax_check_limite_proveedor/', {'idp': ui.item.id}, function(data) {
+
+          if (data === '1') {
+            noty({"text": 'El limite de facturacion del proveedor seleccionado ya esta superado. ', "layout":"topRight", "type": 'error'});
+          }
+
+        });
+      }
     }
   }).keydown(function(e){
     if (e.which === 8) {

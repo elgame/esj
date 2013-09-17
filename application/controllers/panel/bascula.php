@@ -16,6 +16,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_calidades/',
     'bascula/ajax_get_precio_calidad/',
     'bascula/ajax_get_kilos/',
+    'bascula/ajax_check_limite_proveedor/',
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
@@ -1496,6 +1497,12 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     echo $this->bascula_model->getIdfolio($_GET['folio'], $_GET['tipo'], $_GET['area']);
+  }
+
+  public function ajax_check_limite_proveedor()
+  {
+    $this->load->model('bascula_model');
+    echo $this->bascula_model->checkLimiteProveedor($_GET['idp']);
   }
 
   /*

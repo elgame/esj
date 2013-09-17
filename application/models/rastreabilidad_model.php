@@ -685,52 +685,159 @@ class rastreabilidad_model extends CI_Model {
    }
 
    /**
+    * Obtiene los lotes que pintara en el reporte rpl.
+    *
+    * @param  int $idLote
+    * @return array
+    */
+   private function buildLotesRpl($idLote)
+   {
+      $data = $this->getLoteInfo($idLote);
+
+      $noLoteRecibido = $data['info']->lote;
+
+      $noLoteMax = ceil($noLoteRecibido / 4) * 4;
+
+      $noLoteMin = $noLoteMax - 3;
+
+      $lotes = array();
+
+      for ($i = $noLoteMin; $i <= $noLoteMax; $i++)
+      {
+        $lote = $this->db->select('id_rendimiento')
+          ->from('rastria_rendimiento')
+          ->where('lote', $i)
+          ->where("DATE(fecha) = '{$data['info']->fecha}'")
+          ->get();
+
+        if ($lote->num_rows() == 1)
+        {
+          $idLote = $lote->row()->id_rendimiento;
+
+          $lotes[] = $this->getLoteInfo($idLote);
+        }
+
+      }
+
+      return $lotes;
+   }
+
+   /**
     * Visualiza/Descarga el PDF para el Reporte Rendimiento por Lote
     *
     * @return void
     */
    public function rpl_pdf($id_rendimiento)
    {
-      // Obtiene los datos del reporte.
-      $data = $this->getLoteInfo($id_rendimiento);
-
-      $fecha = new DateTime($data['info']->fecha);
-
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('P', 'mm', array(105, 140));
+      $pdf = new MYpdf('P', 'mm', 'Letter');
       $pdf->show_head = false;
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $pdf->SetXY(25, 3);
-      $pdf->Image(APPPATH.'images/logo.png');
+      $lotes = $this->buildLotesRpl($id_rendimiento);
 
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(92));
-      $pdf->SetFillColor(200,200,200);
-      $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $data['info']->lote), true);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
-      $pdf->SetWidths(array(17, 15, 15, 15, 15, 15));
-      $pdf->Row(array('CLASIF.', 'EXIST.', 'LINEA 1', 'LINEA 2', 'TOTAL', 'RD'), true);
+      $x = 1;
 
-      foreach ($data['clasificaciones'] as $key => $clasifi) {
-        $pdf->SetX(6);
-        $pdf->Row(array(
-          $clasifi->clasificacion,
-          $clasifi->existente,
-          $clasifi->linea1,
-          $clasifi->linea2,
-          $clasifi->total,
-          $clasifi->rendimiento,
-        ), false);
+      foreach ($lotes as $key => $lote)
+      {
+        $x = $key % 2 === 0 ? 1 : 108;
+        $y = $key === 0 || $key === 1 ? 25 : 130;
+
+        $kilos = $this->db->select('SUM(kilos_neto) AS kilos')
+          ->from('bascula')
+          ->where("DATE(fecha_bruto) = '{$lote['info']->fecha}'")
+          ->where("no_lote = {$lote['info']->lote}")
+          ->get()->row()->kilos;
+
+        $fecha = new DateTime($lote['info']->fecha);
+
+        $pdf->SetXY($x + 25, $y);
+        $pdf->Image(APPPATH.'images/logo.png');
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetX($x);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(107));
+        $pdf->SetFillColor(200,200,200);
+        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $lote['info']->lote . '  Kilos:' . $kilos), true);
+        $pdf->SetX($x);
+        $pdf->SetAligns(array('L', 'C', 'C', 'C', 'C', 'C'));
+        $pdf->SetWidths(array(50, 11, 12, 12, 12, 10));
+        $pdf->Row(array('CLASIF.', 'EXIST', 'LINEA1', 'LINEA2', 'TOTAL', 'RD'), true);
+
+        foreach ($lote['clasificaciones'] as $key2 => $clasifi)
+        {
+          if ($key2 < 13)
+          {
+
+            $pdf->SetX($x);
+
+            $clasificacion = $this->acomodaStringClasificacion($clasifi->clasificacion);
+
+            $pdf->Row(array(
+              strlen($clasificacion) > 25 ? substr($clasificacion, 0, 25).'...' : $clasificacion,
+              $clasifi->existente,
+              $clasifi->linea1,
+              $clasifi->linea2,
+              $clasifi->total,
+              $clasifi->rendimiento,
+            ), false);
+          }
+          else
+          {
+            break;
+          }
+        }
+
       }
+
       $pdf->Output('rendimiento_lote_'.$fecha->format('d/m/Y').'.pdf', 'I');
+   }
+
+   private function acomodaStringClasificacion($clasifi)
+   {
+      $arrayPalabras = explode(' ', $clasifi);
+
+      $newArrayPalabras = array();
+
+      foreach ($arrayPalabras as $key => $palabra)
+      {
+        if ($key === 0)
+        {
+          array_push($newArrayPalabras, strtoupper(substr($arrayPalabras[0], 0 , 1)).'.');
+        }
+        else
+        {
+          $abreviacion = '';
+
+          switch ($palabra)
+          {
+            case 'LIMON':
+              $abreviacion = 'LMON.';
+              break;
+            case 'ALIMONADO':
+              $abreviacion = 'ALIM.';
+              break;
+            case 'VERDE':
+              $abreviacion = 'VER.';
+              break;
+            case 'INDUSTRIAL':
+              $abreviacion = 'INDUS.';
+              break;
+            default:
+              $abreviacion = $palabra;
+              break;
+          }
+
+          array_push($newArrayPalabras, $abreviacion);
+        }
+      }
+
+      return implode(' ', $newArrayPalabras);
    }
 
 }
