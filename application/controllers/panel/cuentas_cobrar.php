@@ -169,8 +169,15 @@ class cuentas_cobrar extends MY_Controller {
       }
 
       if(isset($_GET['total']{0})) //si es masivo
-        $params['data'] = array('saldo' => $_GET['total']);
-      else  
+      {
+        $params['data'] = array('saldo' => $_GET['total'], 'facturas' => array() );
+        $ids   = explode(',', substr($_GET['id'], 1));
+        $tipos = explode(',', substr($_GET['tipo'], 1));
+        foreach ($ids as $key => $value) 
+        {
+          $params['data']['facturas'][] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
+        }
+      }else  
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
       //Cuentas de banco
       $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);

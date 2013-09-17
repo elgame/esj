@@ -678,9 +678,10 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Obtiene los abonos de una factura o nota de venta
 	 * @return [type] [description]
 	 */
-	public function getDetalleVentaFacturaData($id_factura=null)
+	public function getDetalleVentaFacturaData($id_factura=null, $tipo=null)
 	{
 		$_GET['id'] = $id_factura==null? $_GET['id']: $id_factura;
+		$_GET['tipo'] = $tipo==null? $_GET['tipo']: $tipo;
 		$sql = '';
 	
 		//Filtros para buscar
@@ -705,8 +706,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		if ($_GET['tipo'] == 'f')
 		{
 			$data['info'] = $this->db->query(
-											"SELECT DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito, id_cliente 
+											"SELECT id_factura AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
+												plazo_credito, id_cliente, 'f' AS tipo 
 												FROM facturacion
 												WHERE id_factura={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_abonos', 
@@ -726,10 +727,10 @@ class cuentas_cobrar_model extends privilegios_model{
 		else
 		{
 			$data['info'] = $this->db->query(
-											"SELECT fecha, '' as serie, folio, 	
+											"SELECT id_venta AS id, fecha, '' as serie, folio, 	
 												condicion_pago,
 												status, total, 
-												plazo_credito, id_cliente
+												plazo_credito, id_cliente, 'v' AS tipo
 											FROM facturacion_ventas_remision
 											WHERE id_venta={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_ventas_remision_abonos', 
@@ -792,7 +793,8 @@ class cuentas_cobrar_model extends privilegios_model{
 	{
 		$ids   = explode(',', substr($_GET['id'], 1));
 		$tipos = explode(',', substr($_GET['tipo'], 1));
-		$total = $this->input->post('dmonto');
+		$total = 0; //$this->input->post('dmonto');
+		$desc  = '';
 
 		//Se registra el movimiento en la cuenta bancaria
 		$this->load->model('banco_cuentas_model');
@@ -802,12 +804,18 @@ class cuentas_cobrar_model extends privilegios_model{
 		$_GET['tipo'] = $tipos[0];
 		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id']);
 		//Registra deposito
+		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value) 
+		{
+			$total += $_POST['montofv'][$key];
+			$desc .= '|'.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
+		}
+		$desc = ' ('.substr($desc, 1).')';
 		$resp = $this->banco_cuentas_model->addDeposito(array(
 					'id_cuenta'   => $this->input->post('dcuenta'),
 					'id_banco'    => $data_cuenta->id_banco,
 					'fecha'       => $this->input->post('dfecha').':'.date("s"),
 					'numero_ref'  => $this->input->post('dreferencia'),
-					'concepto'    => $this->input->post('dconcepto'),
+					'concepto'    => $this->input->post('dconcepto').$desc,
 					'monto'       => $total,
 					'tipo'        => 't',
 					'entransito'  => 't',
@@ -816,12 +824,13 @@ class cuentas_cobrar_model extends privilegios_model{
 					'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
 					));
 
-		foreach ($ids as $key => $value) {
+		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value) 
+		{
 			$_GET['id']   = $value;
-			$_GET['tipo'] = $tipos[$key];
+			$_GET['tipo'] = $_POST['tipos'][$key];
 			$data = array('fecha'          => $this->input->post('dfecha'),
 										'concepto'       => $this->input->post('dconcepto'),
-										'total'          => $total,
+										'total'          => $_POST['montofv'][$key], //$total,
 										'id_cuenta'      => $this->input->post('dcuenta'),
 										'ref_movimiento' => $this->input->post('dreferencia') );
 			$resa = $this->addAbono($data, null, true);
@@ -830,7 +839,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			//Registra el rastro de la factura o remision que se abono en bancos
 			if(isset($resp['id_movimiento']))
 			{
-				if($tipos[$key] == 'f') //factura
+				if($_POST['tipos'][$key] == 'f') //factura
 					$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $resa['id_abono']));
 				else //remision
 					$this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $resa['id_abono']));
@@ -872,6 +881,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($data['id_cuenta']);
 			$data_cuenta  = $data_cuenta['info'];
 
+			$data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.String::formatoNumero($data['total'], 2, '', false).')';
 			$resp = $this->banco_cuentas_model->addDeposito(array(
 						'id_cuenta'   => $data['id_cuenta'],
 						'id_banco'    => $data_cuenta->id_banco,

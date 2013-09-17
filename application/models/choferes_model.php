@@ -31,7 +31,7 @@ class choferes_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." status='".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("
-				SELECT id_chofer, nombre, status
+				SELECT id_chofer, nombre, telefono, id_nextel, no_licencia, no_ife, status, url_licencia, url_ife
 				FROM choferes
 				".$sql."
 				ORDER BY nombre ASC

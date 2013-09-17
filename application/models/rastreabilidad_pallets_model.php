@@ -67,7 +67,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 			if(!$basic_info)
 			{
-				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, Date(rr.fecha) AS fecha, rpr.cajas
+				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas
 					FROM rastria_pallets_rendimiento AS rpr 
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
@@ -99,7 +99,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	 * @return [type]                   [description]
  	 */
  	public function getRendimientoLibre($id_clasificacion){
- 		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, Date(rr.fecha) AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres
+ 		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres
  		                           FROM rastria_rendimiento AS rr 
 																	INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
  		                           WHERE rcl.id_clasificacion = {$id_clasificacion}

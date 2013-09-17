@@ -32,6 +32,8 @@ $(function(){
   });
 
   abonom.init();
+
+  modalAbonos.init();
 });
 
 
@@ -67,6 +69,32 @@ var abonom = (function($){
       btn_abonos_masivo.show();
     else
       btn_abonos_masivo.hide();
+  }
+
+  objs.init = init;
+  return objs;
+})(jQuery);
+
+//Modal Abonos
+var modalAbonos = (function($){
+  var objs = {},
+  btn_abonos_masivo;
+
+  function init()
+  {
+    if ($("#abonomasivo").length > 0) 
+    { 
+      $("#abonomasivo .monto_factura").on('change', calculaMonto);
+    }
+  }
+
+  function calculaMonto()
+  {
+    var monto = 0;
+    $("#abonomasivo .monto_factura").each(function(index, val) {
+      monto += parseFloat($(this).val());
+    });
+    $("#dmonto").val(monto);
   }
 
   objs.init = init;

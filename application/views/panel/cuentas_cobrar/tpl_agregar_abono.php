@@ -72,6 +72,41 @@
               </div>
               
             </div>
+            <?php  
+            if(isset($_GET['total']{0})) //si es masivo
+            {
+            ?>
+            <div class="span11" id="abonomasivo">
+              <table class="table table-striped table-bordered table-condensed bootstrap-datatable">
+              <thead>
+                <tr>
+                  <th>Factura</th>
+                  <th>Saldo</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+              <tbody>
+              <?php  
+              foreach ($data['facturas'] as $key => $value)
+              {
+              ?>
+                <tr>
+                  <td><?php echo $value['cobro'][0]->serie.$value['cobro'][0]->folio; ?>
+                    <input type="hidden" name="factura_desc[]" value="<?php echo $value['cobro'][0]->serie.$value['cobro'][0]->folio; ?>">
+                    <input type="hidden" name="ids[]" value="<?php echo $value['cobro'][0]->id; ?>">
+                    <input type="hidden" name="tipos[]" value="<?php echo $value['cobro'][0]->tipo; ?>">
+                  </td>
+                  <td><?php echo $value['saldo']; ?></td>
+                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="1" max="<?php echo $value['saldo'] ?>"></td>
+                </tr>
+              <?php
+              }
+              ?>
+              </tbody>
+              </table>
+            </div>
+            <div class="clearfix"></div>
+            <?php } ?>
             <button type="submit" class="btn btn-success btn-large">Guardar</button>
           </div><!--/row-->
 

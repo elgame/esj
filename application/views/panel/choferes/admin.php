@@ -52,14 +52,19 @@
 						  <thead>
 							  <tr>
 							  	<th>Nombre</th>
-									<th>Estatus</th>
-								  <th>Opciones</th>
+							  	<th>Documentos</th>
+								<th>Estatus</th>
+								<th>Opciones</th>
 							  </tr>
 						  </thead>
 						  <tbody>
 						<?php foreach($choferes['choferes'] as $chofer){ ?>
 							<tr>
 								<td><?php echo $chofer->nombre; ?></td>
+								<td>
+									IFE <span class="label label-<?php echo ($chofer->url_ife!=''? 'success': 'important'); ?>"><?php echo ($chofer->url_ife!=''? 'Agregado': 'Pendiente'); ?></span><br>
+									Licencia <span class="label label-<?php echo ($chofer->url_licencia!=''? 'success': 'important'); ?>"><?php echo ($chofer->url_licencia!=''? 'Agregado': 'Pendiente'); ?></span>
+								</td>
 								<td>
 									<?php
 										if($chofer->status == 't'){

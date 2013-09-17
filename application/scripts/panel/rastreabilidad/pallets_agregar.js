@@ -65,35 +65,44 @@ var addpallets = (function($){
     var vthis = $(this), idrow = "#row_rend"+vthis.attr("data-id"), html;
 
     var row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
-    if(row_rendsel.length == 0){
-      html = '<tr id="row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'">'+
-          '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
-          '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
-          '<td class="clsif">'+fclasificacion.val()+'</td>'+
-          '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+$(idrow+" .libres").text()+'" min="1" max="'+$(idrow+" .libres").text()+'"></td>'+
-          '<td><input type="hidden" class="span5" name="idrendimientos[]" value="'+vthis.attr("data-id")+'">'+
-          '   <input type="hidden" class="span5" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
-          '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'"><i class="icon-remove"></i></buttom></td>'+
-        '</tr>';
-      tbodysel.append(html);
-      row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
-    }else{
-      $(".cajasel", row_rendsel).val($(idrow+" .libres").text());
-    }
+    if(parseInt(total_cajas_sel.text()) < parseInt(fcajas.val()) ) 
+    {
+      if(row_rendsel.length == 0){
+        html = '<tr id="row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'">'+
+            '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
+            '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
+            '<td class="clsif">'+fclasificacion.val()+'</td>'+
+            '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+calcRestaCajasSel($(idrow+" .libres").text())+'" min="1" max="'+calcRestaCajasSel($(idrow+" .libres").text())+'"></td>'+
+            '<td><input type="hidden" class="span5" name="idrendimientos[]" value="'+vthis.attr("data-id")+'">'+
+            '   <input type="hidden" class="span5" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
+            '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'"><i class="icon-remove"></i></buttom></td>'+
+          '</tr>';
+        tbodysel.append(html);
+        row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
+      }else{
+          $(".cajasel", row_rendsel).val( calcRestaCajasSel($(idrow+" .libres").text()) );
+      }
+      calculaCajasSel();
+    }else
+      noty({"text":"El pallet esta completo.", "layout":"topRight", "type":"error"});
     $("input.cajasel", row_rendsel).focus();
-    calculaCajasSel();
   }
   function quitCajaSel(){
     var vthis = $(this);
     $("#row_rendsel"+vthis.attr("data-idrow")).remove();
     calculaCajasSel();
   }
-  function calculaCajasSel(){
+  function calculaCajasSel(res){
+    res = typeof res === 'boolean'? res : false;
     var num_cajas = 0;
     $(".cajasel", tbodysel).each(function(){
       num_cajas += parseInt($(this).val());
     });
-    total_cajas_sel.text(num_cajas);
+
+    if(res)
+      return num_cajas;
+    else
+      total_cajas_sel.text(num_cajas);
   }
 
   function getRendimientosLibres($clasificacion){
@@ -113,6 +122,16 @@ var addpallets = (function($){
       }else
         noty({"text":"No hay cajas libres en la clasificacion seleccionada.", "layout":"topRight", "type":"error"});
     });
+  }
+
+  function calcRestaCajasSel (cagregar) {
+    var cajas = calculaCajasSel(true),
+    total     = parseInt(fcajas.val());
+    cagregar  = parseInt(cagregar),
+    resta     = total - cajas;
+    if(cagregar < resta)
+      resta = cagregar;
+    return resta;
   }
 
   objr.init = init;
