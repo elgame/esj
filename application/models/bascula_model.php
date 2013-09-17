@@ -391,6 +391,26 @@ class Bascula_model extends CI_Model {
     $pdf->Output();
   }
 
+  public function checkLimiteProveedor($idProveedor)
+  {
+    $total = $this->db->query(
+      "SELECT COALESCE(SUM(importe), 0) AS total
+       FROM bascula
+       WHERE id_proveedor = {$idProveedor} AND
+             tipo = 'en' AND
+             status = 't'");
+
+    $total = $total->result();
+
+    $this->load->model('proveedores_facturacion_model');
+
+    $info = $this->proveedores_facturacion_model->getLimiteProveedores($idProveedor, date('Y'));
+
+    if (floatval($total[0]->total) > floatval($info['limite'])) return true;
+
+    else return false;
+  }
+
   public function getMovimientos()
   {
     $data =  array(
@@ -482,7 +502,7 @@ class Bascula_model extends CI_Model {
                     INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
                     ON pagos.id_bascula = b.id_bascula
         WHERE
-              b.status = true 
+              b.status = true
               {$sql}
         ORDER BY b.folio, bc.id_calidad ASC
       ");

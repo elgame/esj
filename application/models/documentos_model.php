@@ -855,7 +855,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(130, 6, 'DIRECCION : ' . $data->direccion, 1, 0, 'L', 1);
 
     $pdf->SetXY(140, 57);
-    $pdf->Cell(35, 6, '', 1, 0, 'C', 1);
+    $pdf->Cell(35, 6, date('Y-m-d'), 1, 0, 'C', 1);
 
     $pdf->SetXY(175, 57);
     $pdf->Cell(35, 6, '', 1, 0, 'C', 1);
