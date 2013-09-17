@@ -1,6 +1,10 @@
 Proveedores:
 
     PRIVILEGIOS:
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cuenta', 104, FALSE, 'banco/cuenta/', 'archive', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Cancelar', 104, FALSE, 'banco/cancelar_movimiento/', 'ban-circle', FALSE);
+        INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Eliminar', 104, FALSE, 'banco/eliminar_movimiento/', 'minus-sign', FALSE);
+
         INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Facturacion', 10, TRUE, 'proveedores_facturacion/', 'list', FALSE);
         INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Series y Folios', 115, TRUE, 'proveedores_facturacion/series_folios/', 'list-alt', FALSE);
         INSERT INTO privilegios (nombre, id_padre, mostrar_menu, url_accion, url_icono, target_blank) VALUES ('Agregar Folios', 116, TRUE, 'proveedores_facturacion/agregar_serie_folio/', 'plus', FALSE);

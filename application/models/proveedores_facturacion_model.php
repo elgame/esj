@@ -689,7 +689,7 @@ class proveedores_facturacion_model extends privilegios_model{
 
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
-
+    
     if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
     {
       $this->db->update('proveedores_facturacion',
@@ -703,6 +703,9 @@ class proveedores_facturacion_model extends privilegios_model{
       $this->generaFacturaPdf($idFactura, $pathDocs);
 
       $this->enviarEmail($idFactura);
+    }else
+    {
+      $result->data->status_uuid = 'error';
     }
 
     return array('msg' => $result->data->status_uuid);
