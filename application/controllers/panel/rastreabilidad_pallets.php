@@ -58,9 +58,11 @@ class rastreabilidad_pallets extends MY_Controller {
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
+      array('libs/jquery.chosen.css', 'screen'),
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.chosen.min.js'),
       array('libs/jquery.numeric.js'),
       array('general/keyjump.js'),
       array('panel/rastreabilidad/pallets_agregar.js'),
@@ -72,6 +74,7 @@ class rastreabilidad_pallets extends MY_Controller {
     );
 
     $this->load->model('rastreabilidad_pallets_model');
+    $this->load->model('calibres_model');
 
     $this->configAddModPallet();
     if ($this->form_validation->run() == FALSE)
@@ -86,6 +89,8 @@ class rastreabilidad_pallets extends MY_Controller {
     }
 
     $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio();
+
+    $params['calibres'] = $this->calibres_model->getCalibres();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -106,10 +111,12 @@ class rastreabilidad_pallets extends MY_Controller {
     {
       $this->carabiner->css(array(
         array('libs/jquery.uniform.css', 'screen'),
+        array('libs/jquery.chosen.css', 'screen'),
         array('panel/general_sanjorge.css', 'screen'),
       ));
       $this->carabiner->js(array(
         array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.chosen.min.js'),
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('panel/rastreabilidad/pallets_agregar.js'),
@@ -121,6 +128,7 @@ class rastreabilidad_pallets extends MY_Controller {
       );
 
       $this->load->model('rastreabilidad_pallets_model');
+      $this->load->model('calibres_model');
 
       $this->configAddModPallet();
       if ($this->form_validation->run() == FALSE)
@@ -135,6 +143,8 @@ class rastreabilidad_pallets extends MY_Controller {
       }
 
       $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
+
+      $params['calibres'] = $this->calibres_model->getCalibres();
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -154,7 +164,7 @@ class rastreabilidad_pallets extends MY_Controller {
   public function imprimir()
   {
     $this->load->model('rastreabilidad_pallets_model');
-    $this->rastreabilidad_pallets_model->pallet_pdf($this->input->get('id'));
+    $this->rastreabilidad_pallets_model->palletBig_pdf($this->input->get('id'));
   }
 
   /**
@@ -200,6 +210,16 @@ class rastreabilidad_pallets extends MY_Controller {
             'rules' => 'is_natural_no_zero'),
       array('field' => 'idclasificacion[]',
             'label' => 'Clasificacion',
+            'rules' => 'is_natural_no_zero'),
+
+      array('field' => 'fcalibres[]',
+            'label' => 'Calibres',
+            'rules' => 'required|is_natural_no_zero'),
+      array('field' => 'fcliente',
+            'label' => 'Cliente',
+            'rules' => ''),
+      array('field' => 'fid_cliente',
+            'label' => 'Cliente',
             'rules' => 'is_natural_no_zero'),
     );
 
