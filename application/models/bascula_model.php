@@ -610,10 +610,15 @@ class Bascula_model extends CI_Model {
         $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
       }
       if ($this->input->get('fstatus') != '')
+      {
         if ($this->input->get('fstatus') === '1')
-          $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
+          if($this->input->get('fefectivo') == 'si')
+            $sql .= " AND b.accion = 'p'";
+          else
+            $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
         else
           $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
+      }
 
       //Filtros del tipo de pesadas
       if ($this->input->get('ftipo') != '')
@@ -854,6 +859,53 @@ class Bascula_model extends CI_Model {
         String::formatoNumero($totalImporte, 2, '$', false)), false);
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+
+  public function rde_xls()
+  {
+    $res = $this->rde_data();
+
+    $data = array();
+    foreach ($res['rde'] as $key => $calidad)
+    {
+      foreach ($calidad['cajas'] as $key => $caja)
+      {
+        if (array_key_exists($caja->folio, $data))
+          $data[$caja->folio]->importe += $caja->importe;
+        else
+          $data[$caja->folio] = $caja;
+      }
+    }
+    
+    $this->load->library('myexcel');
+    $xls = new myexcel();
+  
+    $worksheet =& $xls->workbook->addWorksheet();
+  
+    $xls->titulo2 = 'REPORTE DIARIO DE ENTRADAS';
+    $xls->titulo3 = "<".$res['area']['info']->nombre."> DEL DIA " . $this->input->get('ffecha1');
+    $xls->titulo4 = 'Pagos en efectivo';
+      
+    $row=0;
+    //Header
+    $xls->excelHead($worksheet, $row, 8, array(
+        array($xls->titulo2, 'format_title2'), 
+        array($xls->titulo3, 'format_title3'),
+        array($xls->titulo4, 'format_title3')
+    ));
+      
+    $row +=3;
+    $xls->excelContent($worksheet, $row, $data, array(
+        'head' => array('BOLETA', 'PRODUCTOR', 'IMPORTE'),
+        'conte' => array(
+            array('name' => 'folio', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'proveedor', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'importe', 'format' => 'format4', 'sum' => 0),
+          )
+    ));
+  
+    $xls->workbook->send('reporte_diario_entradas.xls');
+    $xls->workbook->close();
   }
 
   /**
