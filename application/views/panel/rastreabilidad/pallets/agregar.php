@@ -28,17 +28,38 @@
 								<legend></legend>
 
 								<div class="span12">
-									<div class="span3">
+									<div class="span2">
 									  <label class="span4" for="ffolio">Folio </label>
 										<input type="text" name="ffolio" id="ffolio" class="span6" value="<?php echo set_value('ffolio', $folio); ?>" 
 											maxlength="25" placeholder="Folio pallet" readonly data-next="fcajas">
 									</div>
 
-									<div class="span4">
+									<div class="span3">
 									  <label class="span4" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo set_value('fcajas'); ?>" 
-											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fclasificacion">
+											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fcliente">
 									</div>
+
+									<div class="span3">
+									  <label class="span3" for="fcliente">Cliente </label>
+										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo set_value('fcliente'); ?>" 
+											maxlength="25" placeholder="Cliente" data-next="fcalibres">
+										<input type="hidden" name="fid_cliente" value="<?php echo set_value('fid_cliente'); ?>" id="fid_cliente" class="getjsval">
+									</div>
+
+									<div class="span4">
+									  <label class="span3" for="fcalibres">Calibres </label>
+									  <select name="fcalibres[]" id="fcalibres" class="chosen-select" multiple data-next="fclasificacion">
+									<?php  
+									foreach ($calibres['calibres'] as $key => $calibre)
+									{
+									?>
+										<option value="<?php echo $calibre->id_calibre; ?>" <?php echo set_select('fcalibres[]', $calibre->id_calibre); ?>><?php echo $calibre->nombre; ?></option>
+									<?php 
+									} ?>
+									  </select>
+									</div>
+
 								</div>
 								<div class="clearfix"></div>
 

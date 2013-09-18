@@ -9,14 +9,14 @@
                 <div class="control-group">
                   <label class="control-label" for="ffecha1">Dia</label>
                   <div class="controls">
-                    <input type="date" name="ffecha1" class="span12" id="ffecha1" value="<?php echo set_value($this->input->post('ffecha1'), date('Y-m-d')); ?>" autofocus>
+                    <input type="date" name="ffecha1" class="span12 getjsval" id="ffecha1" value="<?php echo set_value($this->input->post('ffecha1'), date('Y-m-d')); ?>" autofocus>
                   </div>
                 </div>
 
                 <div class="control-group">
                   <label class="control-label" for="name">Area</label>
                   <div class="controls">
-                    <select name="farea" class="span12">
+                    <select name="farea" class="span12 getjsval">
                       <?php foreach ($areas['areas'] as $area) { ?>
                         <?php echo '<option value="'.$area->id_area.'">'.$area->nombre.'</option>' ?>
                       <?php } ?>
@@ -27,7 +27,7 @@
                 <div class="control-group">
                   <label class="control-label" for="ftipo">Tipo</label>
                   <div class="controls">
-                    <select name="ftipo" id="ftipo">
+                    <select name="ftipo" id="ftipo" class="getjsval">
                       <option value="en">ENTRADA</option>
                       <option value="sa">SALIDA</option>
                     </select>
@@ -39,8 +39,8 @@
                   <label class="control-label autocomplet_sa" for="fproveedor">Cliente</label>
                   <div class="controls">
                     <input type="text" name="fproveedor"
-                      value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12" placeholder="Buscar">
-                    <input type="hidden" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor">
+                      value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12 getjsval" placeholder="Buscar">
+                    <input type="hidden" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor" class="getjsval">
                   </div>
                 </div>
 
@@ -48,25 +48,28 @@
                   <label class="control-label" for="fempresa">Empresa</label>
                   <div class="controls">
                     <input type="text" name="fempresa"
-                      value="<?php echo set_value('fempresa') ?>" id="fempresa" class="span12" placeholder="Empresa">
-                    <input type="hidden" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa">
+                      value="<?php echo set_value('fempresa') ?>" id="fempresa" class="span12 getjsval" placeholder="Empresa">
+                    <input type="hidden" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa" class="getjsval">
                   </div>
                 </div>
 
                 <div class="control-group">
                   <label class="control-label" for="fstatus">Status</label>
                   <div class="controls">
-                    <select name="fstatus">
+                    <select name="fstatus" id="fstatus" class="getjsval">
                       <option value="">TODOS</option>
                       <option value="1">PAGADOS</option>
                       <option value="2">NO PAGADOS</option>
                     </select>
+                    <input type="checkbox" name="fefectivo" id="fefectivo" value="si"> <label for="fefectivo">Efectivo</label>
                   </div>
                 </div>
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
+                <a href="" id="linkXls" class="linksm pull-right" data-href="<?php echo base_url('panel/bascula/rde_xls/'); ?>">
+                    <i class="icon-table"></i> Excel</a>
 
               </div>
             </form> <!-- /form -->

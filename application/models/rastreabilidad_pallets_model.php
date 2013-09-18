@@ -78,9 +78,37 @@ class rastreabilidad_pallets_model extends privilegios_model {
 				// 	$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
 				// 	$response['rend_libres'] = $rendimientos_libres['rendimientos'];
 				// }
+				
+				//lista calibres
+				$response['calibres'] = array();
+				$data_calibres = $this->db->query("SELECT rpc.id_pallet, rpc.id_calibre, c.nombre 
+													FROM rastria_pallets_calibres AS rpc
+														INNER JOIN calibres AS c ON c.id_calibre = rpc.id_calibre
+													WHERE id_pallet = {$id_pallet}");
+				if($data_calibres->num_rows() > 0)
+					$response['calibres'] = $data_calibres->result();
+
+				//Info cliente
+				$this->load->model('clientes_model');
+				$data_cliente        = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
+				$response['cliente'] = $data_cliente['info'];
 			}
 		}
 		return $response;
+	}
+
+	public function calibreSelec($id_calibre, $selecs)
+	{
+		$res = false;
+		foreach ($selecs as $key => $value)
+		{
+		  if($id_calibre == $value->id_calibre)
+		  {
+		  	$res = true;
+		  	break;
+		  }
+		}
+		return $res;
 	}
 
 	/**
@@ -103,7 +131,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
  		                           FROM rastria_rendimiento AS rr 
 																	INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
  		                           WHERE rcl.id_clasificacion = {$id_clasificacion}
- 		                           ORDER BY fecha ASC, lote ASC");
+ 		                           ORDER BY fecha DESC, lote ASC");
  		$response = array('rendimientos' => array());
 		if($result->num_rows() > 0)
 			$response['rendimientos'] = $result->result();
@@ -117,7 +145,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
  	 * Agregar un pallet a la bd
  	 * @param [type] $data array con los valores a insertar
  	 */
- 	public function addPallet($data=NULL){
+ 	public function addPallet($data=NULL)
+ 	{
  		if ($data==NULL)
 		{
 			$data = array(
@@ -125,6 +154,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'folio'            => $this->input->post('ffolio'),
 						'no_cajas'         => $this->input->post('fcajas'),
 						);
+			if($this->input->post('fid_cliente') > 0)
+				$data['id_cliente'] = $this->input->post('fid_cliente');
 		}
 
 		//se valida que no este un pallet pendiente de la misma clasificacion
@@ -133,6 +164,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			$id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
 			
 			$this->addPalletRendimientos($id_pallet);
+
+			$this->addPalletCalibres($id_pallet);
 
 			// $this->addPalletRendimiento($data['id_clasificacion']);
 
@@ -153,12 +186,17 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'folio'            => $this->input->post('ffolio'),
 						'no_cajas'         => $this->input->post('fcajas'),
 						);
+			if($this->input->post('fid_cliente') > 0)
+				$data['id_cliente'] = $this->input->post('fid_cliente');
 		}
 
 		$this->db->update('rastria_pallets', $data, "id_pallet = {$id_pallet}");
 		
 		$this->db->delete('rastria_pallets_rendimiento', "id_pallet = {$id_pallet}");
 		$this->addPalletRendimientos($id_pallet);
+
+		$this->db->delete('rastria_pallets_calibres', "id_pallet = {$id_pallet}");
+		$this->addPalletCalibres($id_pallet);
 
 		return array('msg' => 5);
  	}
@@ -186,53 +224,164 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return true;
 	}
 
+	public function addPalletCalibres($id_pallet, $data=null)
+	{
+		if ($data==NULL)
+		{
+			if(is_array($this->input->post('fcalibres')))
+			{
+				foreach ($this->input->post('fcalibres') as $key => $calibre) 
+				{
+					$data[] = array(
+						'id_pallet'  => $id_pallet,
+						'id_calibre' => $calibre,
+						);
+				}
+			}
+		}
+
+		if(count($data) > 0)
+			$this->db->insert_batch('rastria_pallets_calibres', $data);
+
+		return true;
+	}
+
 	public function pallet_pdf($id_pallet){
 		// Obtiene los datos del reporte.
-    $data = $this->getInfoPallet($id_pallet, false, false);
+		$data = $this->getInfoPallet($id_pallet, false, false);
 
 
-      $this->load->library('mypdf');
-      // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('P', 'mm', array(105, 140));
-      $pdf->show_head = false;
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm', array(105, 140));
+		$pdf->show_head = false;
 
-      $pdf->AliasNbPages();
-      $pdf->AddPage();
-      $pdf->SetFont('helvetica','', 8);
+		$pdf->AliasNbPages();
+		$pdf->AddPage();
+		$pdf->SetFont('helvetica','', 8);
 
-      $pdf->SetXY(25, 3);
-      $pdf->Image(APPPATH.'images/logo.png');
+		$pdf->SetXY(25, 3);
+		$pdf->Image(APPPATH.'images/logo.png');
 
-      $clasificaciones = array();
-      foreach ($data['rendimientos'] as $key => $value) {
-      	if(!isset($clasificaciones[$value->id_clasificacion]))
-      		$clasificaciones[$value->id_clasificacion] = $value->nombre;
-      }
-      $clsf_show = (count($clasificaciones) > 1? true: false);
-      
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(46, 46));
-      $pdf->Row(array('DESTINO:', "No CLASIF: ".implode(', ', $clasificaciones)), false);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('C', 'C'));
-      $pdf->Row(array('LOTE', 'CAJAS'), false);
+		$clasificaciones = array();
+		foreach ($data['rendimientos'] as $key => $value) {
+			if(!isset($clasificaciones[$value->id_clasificacion]))
+				$clasificaciones[$value->id_clasificacion] = $value->nombre;
+		}
+		$clsf_show = (count($clasificaciones) > 1? true: false);
 
-      foreach ($data['rendimientos'] as $key => $value) {
-      	$fecha = strtotime($value->fecha);
-      	$pdf->SetX(6);
-	      $pdf->Row(array(date("Ww", $fecha).' '.$value->lote, $value->cajas.($clsf_show? ' '.$value->nombre: '')), false);
-      }
-      $pdf->SetX(6);
-	    $pdf->Row(array('No. TARIMA', $data['info']->no_cajas), false);
+		$pdf->SetTextColor(0,0,0);
+		$pdf->SetX(6);
+		$pdf->SetAligns(array('L'));
+		$pdf->SetWidths(array(46, 46));
+		$pdf->Row(array('DESTINO:', "No CLASIF: ".implode(', ', $clasificaciones)), false);
+		$pdf->SetX(6);
+		$pdf->SetAligns(array('C', 'C'));
+		$pdf->Row(array('LOTE', 'CAJAS'), false);
 
-	    $pdf->SetX(6);
-	    $pdf->SetAligns(array('L'));
-	    $pdf->SetWidths(array(66));
-	    $pdf->Row(array('FECHA: '.$data['info']->fecha), false, false);
+		foreach ($data['rendimientos'] as $key => $value) {
+			$fecha = strtotime($value->fecha);
+			$pdf->SetX(6);
+		  $pdf->Row(array(date("Ww", $fecha).' '.$value->lote, $value->cajas.($clsf_show? ' '.$value->nombre: '')), false);
+		}
+		$pdf->SetX(6);
+		$pdf->Row(array('No. TARIMA', $data['info']->no_cajas), false);
 
-      $pdf->Output('REPORTE_DIARIO.pdf', 'I');
+		$pdf->SetX(6);
+		$pdf->SetAligns(array('L'));
+		$pdf->SetWidths(array(66));
+		$pdf->Row(array('FECHA: '.$data['info']->fecha), false, false);
+
+		$pdf->Output('REPORTE_DIARIO.pdf', 'I');
+	}
+
+	public function palletBig_pdf($id_pallet){
+		// Obtiene los datos del reporte.
+		$data = $this->getInfoPallet($id_pallet, false, false);
+
+
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm');
+		$pdf->show_head = false;
+
+		$pdf->AliasNbPages();
+		$pdf->AddPage();
+		$pdf->SetFont('helvetica','B', 14);
+
+		$pdf->SetAligns(array('L'));
+		$pdf->SetWidths(array(90));
+
+
+		$pdf->Rect(6, 8, 100, 60, '');
+		$pdf->SetXY(23, 23);
+		$pdf->Image(APPPATH.'images/logo.png', null, null, 65);
+
+		$pdf->Rect(106, 8, 100, 20, '');
+		$pdf->SetXY(110, 13);
+		$pdf->Cell(33, 10, 'PALLET No. ', 0);
+		$pdf->SetFont('helvetica','B', 22);
+		$pdf->Cell(90, 10, $data['info']->folio, 0);
+		$pdf->SetFont('helvetica','B', 14);
+
+		$pdf->Rect(106, 28, 100, 40, '');
+		$pdf->SetXY(109, 30);
+		$pdf->Cell(90, 10, 'PACKING DATE/ FECHA DE EMPAQUE', 0);
+		$pdf->SetFont('helvetica','B', 22);
+		$pdf->SetXY(109, 45);
+		$pdf->Row(array( date("d/m/Y", strtotime($data['info']->fecha)) ), false, false);
+		$pdf->SetFont('helvetica','B', 14);
+
+		$pdf->Rect(6, 68, 100, 80, '');
+		$pdf->SetXY(9, 70);
+		$pdf->Cell(90, 10, 'SIZE/ CALIBRE', 0);
+		$nombre_calibres = '';
+		foreach ($data['calibres'] as $key => $value)
+		  $nombre_calibres .= ', '.$value->nombre;
+		$pdf->SetFont('helvetica','B', 22);
+		$pdf->SetXY(9, 90);
+		$pdf->Row(array( substr($nombre_calibres, 2) ), false, false);
+		$pdf->SetFont('helvetica','B', 14);
+
+		$pdf->Rect(106, 68, 100, 40, '');
+		$pdf->SetXY(109, 70);
+		$pdf->Cell(90, 10, 'CLIENTE', 0);
+		$pdf->SetXY(109, 80);
+		$pdf->Row(array($data['cliente']->nombre_fiscal), false, false);
+
+		$pdf->Rect(106, 108, 100, 40, '');
+		$pdf->SetXY(109, 110);
+		$pdf->Cell(90, 10, 'BOXES/ CAJAS', 0);
+		$pdf->SetFont('helvetica','B', 30);
+		$pdf->SetXY(109, 120);
+		$pdf->Row(array($data['info']->cajas), false, false);
+		$pdf->SetFont('helvetica','B', 14);
+
+
+		$pdf->Rect(6, 148, 20, 111, '');
+		$pdf->RotatedText(16, 240, 'LISTA DE LOTIFICACION', 90);
+
+
+		$pdf->SetXY(26, 148);
+		$pdf->SetTextColor(0,0,0);
+		// $pdf->SetX(6);
+		$pdf->SetAligns(array('C', 'C'));
+		$pdf->SetWidths(array(80, 100));
+		$pdf->Row(array('No. LOTE', "No. DE CAJAS"), false);
+		$filas = 13;
+		foreach ($data['rendimientos'] as $key => $value) {
+			$fecha = strtotime($value->fecha);
+			$pdf->SetX(26);
+			$pdf->Row(array(date("Ww", $fecha).' '.$value->lote, $value->cajas), false);
+			$filas--;
+		}
+		for ($i = $filas; $i > 0; $i--)
+		{
+			$pdf->SetX(26);
+			$pdf->Row(array('', ''), false);
+		}
+
+		$pdf->Output('REPORTE_DIARIO.pdf', 'I');
 	}
 
 

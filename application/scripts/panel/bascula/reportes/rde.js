@@ -26,6 +26,21 @@ $(function(){
 
     setAutocomplet($(this).val());
   });
+
+  $("#linkXls").on('click', function(event) {
+    var vthis = $(this), url="";
+    $(".getjsval").each(function(){
+      url += "&"+$(this).attr("name")+"="+$(this).val();
+    });
+    if($("#fefectivo:checked").length == 1)
+      url += "&"+$("#fefectivo:checked").attr("name")+"="+$("#fefectivo:checked").val();
+    vthis.attr("href", vthis.attr("data-href")+"?"+url.substring(1));
+  });
+  $("#fstatus, #fefectivo").on("change", function(){
+    $("#linkXls").hide();
+    if ($("#fstatus").val() == '1' && $("#fefectivo:checked").length == 1)
+      $("#linkXls").show();
+  });
 });
 
 function setAutocomplet(tipo, first){

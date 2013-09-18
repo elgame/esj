@@ -7,6 +7,21 @@ class calibres_model extends CI_Model {
     parent::__construct();
   }
 
+  public function getCalibres()
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT id_calibre, nombre
+        FROM calibres
+        ORDER BY nombre ASC");
+
+    $response = array('calibres' => array());
+    if($res->num_rows() > 0)
+      $response['calibres'] = $res->result();
+
+    return $response;
+  }
+
   public function addCalibre($nombre)
   {
     $existe = $this->db->query(
@@ -31,7 +46,8 @@ class calibres_model extends CI_Model {
     return array('existe' => $existe, 'id' => $id, 'nombre' => $nombre);
   }
 
-  public function getCalibresAjax(){
+  public function getCalibresAjax()
+  {
     $sql = '';
     $res = $this->db->query("
         SELECT id_calibre, nombre

@@ -27,6 +27,7 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_lote/',
 
     'bascula/rde_pdf/',
+    'bascula/rde_xls/',
     'bascula/r_acumulados_pdf/',
 	  'bascula/rmc_pdf/',
 
@@ -561,6 +562,12 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rde_pdf();
+  }
+
+  public function rde_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rde_xls(); 
   }
 
   /**
