@@ -17,7 +17,7 @@
         </ul>
       </div>
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -33,7 +33,7 @@
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40" 
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40"
                   value="<?php echo set_value('fnombre'); ?>" required autofocus placeholder="Limon verde 500, Limon verde 300">
                 </div>
               </div>
@@ -41,7 +41,7 @@
               <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">
-                  <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11" 
+                  <input type="text" name="fprecio_venta" id="fprecio_venta" class="span6 vpositive" maxlength="11"
                   value="<?php echo set_value('fprecio_venta'); ?>" required placeholder="4.4, 33">
                 </div>
               </div> -->
@@ -49,8 +49,29 @@
               <div class="control-group">
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
-                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11" 
+                  <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11"
                   value="<?php echo set_value('fcuenta_cpi'); ?>" required placeholder="123212, 332123">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fcalibres">Autocomplete Calibres </label>
+                <div class="controls">
+                  <input type="text" id="auto-calibres" class="span3"
+                    value="" placeholder="Nombre del Calibre">
+                </div>
+              </div>
+
+               <div class="control-group">
+                <label class="control-label" for="fcalibres">Calibres Seleccionados</label>
+                <div class="controls" id="list-calibres">
+                  <!-- <label><input type="checkbox" name="fcalibres[]" value="1" class="sel-calibres"><input type="hidden" name="fcalibre_nombre[]" value="Calibre 1">Calibre 1</label> -->
+
+                  <?php
+                    if (isset($_POST['fcalibres'])) {
+                      foreach ($_POST['fcalibres'] as $key => $value) { ?>
+                        <label><input type="checkbox" name="fcalibres[]" value="<?php echo $value ?>" class="sel-calibres" checked><input type="hidden" name="fcalibre_nombre[]" value="<?php echo $_POST['fcalibre_nombre'][$key] ?>"><?php echo $_POST['fcalibre_nombre'][$key] ?></label>
+                  <?php }} ?>
                 </div>
               </div>
 

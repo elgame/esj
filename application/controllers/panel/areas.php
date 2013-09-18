@@ -8,7 +8,9 @@ class areas extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'areas/ajax_get_calidades/',
-			'areas/ajax_get_clasificaciones/'
+      'areas/ajax_get_clasificaciones/',
+      'areas/ajax_get_calibres/',
+			'areas/ajax_add_new_calibre/',
 		);
 
 	public function _remap($method){
@@ -392,6 +394,21 @@ class areas extends MY_Controller {
 				));
 	}
 
+  public function ajax_get_calibres()
+  {
+    $this->load->model('calibres_model');
+    echo json_encode($this->calibres_model->getCalibresAjax());
+  }
+
+  public function ajax_add_new_calibre()
+  {
+    $this->load->model('calibres_model');
+
+    $response = $this->calibres_model->addCalibre($_GET['nombre']);
+
+    echo json_encode($response);
+  }
+
 	public function agregar_clasificacion(){
 		if (isset($_GET['id']))
 		{
@@ -405,6 +422,7 @@ class areas extends MY_Controller {
 				array('libs/jquery.numeric.js'),
 				array('general/msgbox.js'),
 				array('panel/areas/frmEditArea.js'),
+        array('panel/areas/calibres.js'),
 			));
 
 			$this->load->model('clasificaciones_model');
@@ -440,7 +458,8 @@ class areas extends MY_Controller {
 			redirect(base_url('panel/areas/modificar/?id='.$this->input->get('id').'&msg=1'));
 	}
 
-	public function modificar_clasificacion(){
+	public function modificar_clasificacion()
+  {
 		if (isset($_GET['id']))
 		{
 			$this->carabiner->css(array(
@@ -453,6 +472,7 @@ class areas extends MY_Controller {
 				array('libs/jquery.numeric.js'),
 				array('general/msgbox.js'),
 				array('panel/areas/frmEditArea.js'),
+        array('panel/areas/calibres.js'),
 			));
 
 			$this->load->model('clasificaciones_model');
@@ -477,6 +497,7 @@ class areas extends MY_Controller {
 			}
 
 			$params['data'] = $this->clasificaciones_model->getClasificacionInfo($_GET['id']);
+
 			$params['areas'] = $this->areas_model->getAreas(false);
 
 			if (isset($_GET['msg']))
@@ -608,6 +629,12 @@ class areas extends MY_Controller {
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'numeric|max_length[12]'),
+      array('field' => 'fcalibres[]',
+            'label' => 'Calibres',
+            'rules' => ''),
+      array('field' => 'fcalibre_nombre[]',
+            'label' => '',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
