@@ -76,7 +76,20 @@ class clasificaciones_model extends CI_Model {
 		}
 
 		$this->db->insert('clasificaciones', $data);
+
 		$id_clasificacion = $this->db->insert_id('clasificaciones', 'id_clasificacion');
+
+    if (isset($_POST['fcalibres']))
+    {
+      $calibres = array();
+
+      foreach ($_POST['fcalibres'] as $idCalibre)
+      {
+        $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+      }
+
+      $this->db->insert_batch('clasificaciones_calibres', $calibres);
+    }
 
 		return array('error' => FALSE, $id_clasificacion);
 	}
@@ -89,7 +102,6 @@ class clasificaciones_model extends CI_Model {
 	 */
 	public function updateClasificacion($id_clasificacion, $data=NULL)
 	{
-
 		if ($data==NULL)
 		{
 			$data = array(
@@ -98,6 +110,20 @@ class clasificaciones_model extends CI_Model {
 						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
 						'id_area'      => $this->input->post('farea'),
 						);
+
+      $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
+
+      if (isset($_POST['fcalibres']))
+      {
+        $calibres = array();
+
+        foreach ($_POST['fcalibres'] as $idCalibre)
+        {
+          $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+        }
+
+        $this->db->insert_batch('clasificaciones_calibres', $calibres);
+      }
 		}
 
 		$this->db->update('clasificaciones', $data, array('id_clasificacion' => $id_clasificacion));
@@ -119,14 +145,28 @@ class clasificaciones_model extends CI_Model {
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
+
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
 			$data['info']	= $sql_res->row();
-		$sql_res->free_result();
 
-		if ($basic_info == False) {
-			
+    $sql_res->free_result();
+
+		if ($basic_info == false)
+    {
+      $sql_res = $this->db->query(
+        "SELECT cal.id_calibre, cal.nombre
+         FROM calibres as cal
+         INNER JOIN clasificaciones_calibres as clas_cal ON clas_cal.id_calibre = cal.id_calibre
+         WHERE clas_cal.id_clasificacion = {$id_clasificacion}");
+
+      $data['calibres'] = array();
+
+      if ($sql_res->num_rows() > 0)
+      {
+        $data['calibres'] = $sql_res->result();
+      }
 		}
 
 		return $data;
@@ -143,7 +183,7 @@ class clasificaciones_model extends CI_Model {
 			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		if($this->input->get('type') !== false)
 			$sql .= " AND id_area = {$this->input->get('type')}";
-		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status 
+		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status
 				FROM clasificaciones
 				WHERE status = true {$sql}
 				ORDER BY nombre ASC
