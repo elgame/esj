@@ -241,7 +241,8 @@ class documentos_model extends CI_Model {
           'id_pallet'   => $_POST['pid_pallet'][$key] !== '' ? $_POST['pid_pallet'][$key] : null ,
           'marca'       => $_POST['pid_pallet'][$key] !== '' ? $_POST['pmarca'][$key] : null,
           'descripcion' => $_POST['pid_pallet'][$key] === '' ? $_POST['pmarca'][$key] : null,
-          'temperatura' => $_POST['pid_pallet'][$key] !== '' ? $_POST['ptemperatura'][$key] : null,
+          // 'temperatura' => $_POST['pid_pallet'][$key] !== '' ? $_POST['ptemperatura'][$key] : null,
+          'temperatura' => $_POST['ptemperatura'][$key],
         );
       }
     }
@@ -306,9 +307,13 @@ class documentos_model extends CI_Model {
                 fep.descripcion,
                 fep.temperatura,
                 rp.no_cajas AS cajas,
-                string_agg(clasi.nombre::text, ', '::text) AS clasificaciones
+                string_agg(clasi.nombre::text, ', '::text) AS clasificaciones,
+                cali.calibres
+
          FROM facturacion_doc_embarque_pallets fep
+
          LEFT JOIN rastria_pallets rp ON rp.id_pallet = fep.id_pallet
+
          LEFT JOIN (
             SELECT rpr.id_pallet, cl.nombre
             FROM rastria_pallets_rendimiento rpr
@@ -316,9 +321,18 @@ class documentos_model extends CI_Model {
             GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
             ORDER BY rpr.id_pallet
          ) AS clasi ON clasi.id_pallet = fep.id_pallet
-         WHERE id_embarque = {$data['info'][0]->id_embarque}
-         GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas
-         ORDER BY fep.no_posicion ASC"
+
+        LEFT JOIN (
+            SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
+            FROM rastria_pallets_calibres rpc
+            INNER JOIN calibres cal ON  rpc.id_calibre = cal.id_calibre
+            GROUP BY rpc.id_pallet
+            ORDER BY rpc.id_pallet
+        ) cali ON cali.id_pallet = fep.id_pallet
+
+        WHERE id_embarque = {$data['info'][0]->id_embarque}
+        GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas, cali.calibres
+        ORDER BY fep.no_posicion ASC"
       );
 
       if ($sql->num_rows() > 0)
@@ -676,6 +690,53 @@ class documentos_model extends CI_Model {
       case 11: return 'NOVIEMBRE'; break;
       case 12: return 'DICIEMBRE'; break;
     }
+  }
+
+  private function acomodaStringClasificacion($clasifi)
+  {
+    if ( ! $clasifi) return '';
+
+    $arrayPalabras = explode(' ', $clasifi);
+
+    $newArrayPalabras = array();
+
+    foreach ($arrayPalabras as $key => $palabra)
+    {
+      if ($key === 0)
+      {
+        array_push($newArrayPalabras, strtoupper(substr($arrayPalabras[0], 0 , 1)).'.');
+      }
+      else
+      {
+        $abreviacion = '';
+
+        switch ($palabra)
+        {
+          case 'LIMON':
+            $abreviacion = 'LMON.';
+            break;
+          case 'ALIMONADO':
+            $abreviacion = 'ALIM.';
+            break;
+          case 'VERDE':
+            $abreviacion = 'VER.';
+            break;
+          case 'INDUSTRIAL':
+            $abreviacion = 'INDUS.';
+            break;
+          case 'ECONOMICO':
+            $abreviacion = 'ECON.';
+            break;
+          default:
+            $abreviacion = $palabra;
+            break;
+        }
+
+        array_push($newArrayPalabras, $abreviacion);
+      }
+    }
+
+    return implode(' ', $newArrayPalabras);
   }
 
   /*
@@ -1137,15 +1198,16 @@ class documentos_model extends CI_Model {
     $pdf->SetXY(50, 52);
     $pdf->SetFont('Arial','B',9);
     $pdf->SetFillColor(255, 255, 255);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(10, 30, 72, 15, 30));
-    $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CAJAS', 'TEMPERATURA'), true);
+    $pdf->SetAligns(array('C', 'C', 'L', 'L', 'C', 'C'));
+    $pdf->SetWidths(array(10, 30, 60, 29, 13, 12));
+    $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CALIBRE', 'CAJAS', 'TEMP'), true);
 
     $pdf->SetFont('Arial','',9);
     for ($i = 1; $i < 25 ; $i++)
     {
       $marca         = '';
       $clasificacion = '';
+      $calibres      = '';
       $cajas         = '';
       $temperatura   = '';
 
@@ -1155,17 +1217,21 @@ class documentos_model extends CI_Model {
           {
             $marca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
             $clasificacion = $pallet->clasificaciones;
+            $calibres      = $pallet->calibres;
             $cajas         = $pallet->cajas;
             $temperatura   = $pallet->temperatura;
             break;
           }
         }
 
+      $clasificacion = $this->acomodaStringClasificacion($clasificacion);
+
       $pdf->SetX(50);
         $pdf->Row(array(
           $i,
           $marca,
           $clasificacion,
+          $calibres,
           $cajas,
           $temperatura,
         ), false);
@@ -1926,6 +1992,7 @@ class documentos_model extends CI_Model {
 
     return array('pdf' => $pdf, 'texto' => 'MANIFIESTO DEL CAMION.pdf');
   }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

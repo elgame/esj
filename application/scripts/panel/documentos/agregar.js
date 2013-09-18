@@ -359,7 +359,6 @@
 
   })(window.jQuery, window);
 
-
   // Funciones para el documento acomodo embarque.
   var doc_acoemb = (function ($, window) {
 
@@ -420,12 +419,14 @@
 
           idPallet        = $draggable.attr('data-id-pallet');
           clasificaciones = $draggable.attr('data-clasificaciones');
+          calibres        = $draggable.attr('data-calibres');
           cajas           = $draggable.attr('data-cajas');
 
           $tableDETr.find('#pid_pallet').val(idPallet);
           $tableDETr.find('#pclasificacion').val(clasificaciones);
+          $tableDETr.find('#pcalibres').val(calibres);
           $tableDETr.find('#pcajas').val(cajas);
-
+          $tableDETr.find('#pcajas-span').html(cajas);
 
           $droppable.find('p').html(cajas).css('color', 'red');
           $droppable.attr("data-drag", $draggable.attr('data-id-pallet'));
@@ -452,7 +453,10 @@
 
             $tableDETr.find('#pid_pallet').val('');
             $tableDETr.find('#pclasificacion').val('');
+            $tableDETr.find('#pcalibres').val('');
             $tableDETr.find('#pcajas').val('');
+            $tableDETr.find('#pcajas-span').html('0');
+
 
             $droppable.attr("data-drag", '');
           }
@@ -596,7 +600,6 @@
     };
 
   })(jQuery);
-
 
   function buildDomicilio (data) {
     var domicilio = [];

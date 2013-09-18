@@ -133,7 +133,7 @@
               <tr>
                 <td><?php echo $pallet->folio ?></td>
                 <td>
-                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" style="z-index: 10;">
+                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" style="z-index: 10;">
                     <p><?php echo $pallet->no_cajas ?></p>
                   </div>
                 </td>
@@ -218,8 +218,9 @@
             <th>No</th>
             <th>Marca</th>
             <th>Clasificacion(es)</th>
+            <th>Calbre(s)</th>
             <th>Cajas</th>
-            <th>Temperatura</th>
+            <th>Temp.</th>
             <th></th>
           </tr>
 
@@ -229,7 +230,8 @@
                   $idPallet       = '';
                   $pmarca         = 'SAN JORGE';
                   $pclasificacion = '';
-                  $pcajas         = '';
+                  $pcalibres      = '';
+                  $pcajas         = '0';
                   $ptemperatura   = '';
                   $potro          = '';
                   $checked        = '';
@@ -242,7 +244,8 @@
                         $idPallet       = $pallet->id_pallet != null ? $pallet->id_pallet : '';
                         $pmarca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
                         $pclasificacion = $pallet->clasificaciones;
-                        $pcajas         = $pallet->cajas;
+                        $pcalibres      = $pallet->calibres;
+                        $pcajas         = $pallet->cajas !== null ? $pallet->cajas : '0';
                         $ptemperatura   = $pallet->temperatura;
                         $potro          = $pallet->id_pallet == null ? 'checked="checked"' : '';
                         break;
@@ -259,8 +262,9 @@
               </td>
               <td><input type="text" name="pmarca[]"  value="<?php echo $pmarca ?>" id="pmarca" class="span12"></td>
               <td><input type="text" name="pclasificacion[]" value="<?php echo $pclasificacion ?>" id="pclasificacion" class="span12" readonly></td>
-              <td><input type="text" name="pcajas[]" value="<?php echo $pcajas ?>" id="pcajas" class="span12" readonly></td>
-              <td><input type="text" name="ptemperatura[]" value="<?php echo $ptemperatura ?>" id="ptemperatura" class="span12"></td>
+              <td><input type="text" name="pcalibres[]" value="<?php echo $pcalibres ?>" id="pcalibres" class="span12" readonly></td>
+              <td><input type="hidden" name="pcajas[]" value="<?php echo $pcajas ?>" id="pcajas" class="span12" readonly><span class="badge" id="pcajas-span"><?php echo $pcajas ?></span></td>
+              <td style="width: 40px;"><input type="text" name="ptemperatura[]" value="<?php echo $ptemperatura ?>" id="ptemperatura" class="" style="width: 40px;"></td>
               <td><input type="checkbox" name="potro[]" value="<?php echo $i ?>" id="potro" <?php echo $potro ?>></td>
             </tr>
           <?php } ?>
