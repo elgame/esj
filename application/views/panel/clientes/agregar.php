@@ -99,7 +99,7 @@
 									  <label class="control-label" for="frfc">RFC </label>
 									  <div class="controls">
 											<input type="text" name="frfc" id="frfc" class="span12" value="<?php echo set_value('frfc'); ?>"
-												maxlength="10" placeholder="MPE050528A58, SFM00061515A">
+												maxlength="13" placeholder="MPE050528A58, SFM00061515A">
 									  </div>
 									</div>
 
@@ -107,7 +107,7 @@
 									  <label class="control-label" for="fcurp">CURP </label>
 									  <div class="controls">
 											<input type="text" name="fcurp" id="fcurp" class="span12" value="<?php echo set_value('fcurp'); ?>"
-												maxlength="10" placeholder="IIML781216MCMXNS02, MONA731117HMNRRL05">
+												maxlength="35" placeholder="IIML781216MCMXNS02, MONA731117HMNRRL05">
 									  </div>
 									</div>
 

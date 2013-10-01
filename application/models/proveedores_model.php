@@ -122,8 +122,9 @@ class proveedores_model extends CI_Model {
 						'key_path'       => $dkey_path,
 						'pass'           => $this->input->post('dpass'),
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
-						'cer_caduca'     => $cer_caduca,
 						);
+			if($cer_caduca != '')
+				$data['cer_caduca'] = $cer_caduca;
 		}
 
 		$this->db->insert('proveedores', $data);
@@ -198,8 +199,9 @@ class proveedores_model extends CI_Model {
 						'key_path'       => $dkey_path,
 						'pass'           => $this->input->post('dpass'),
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
-						'cer_caduca'     => $cer_caduca,
 						);
+			if($cer_caduca != '')
+				$data['cer_caduca'] = $cer_caduca;
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));

@@ -19,20 +19,20 @@
 		}
 
 		body{
-			font-size: 8pt;
+			font-size: 9pt;
 			margin-left: 3pt;
-			width: 90%;
+			width: 100%;
 		}
 		h2, h3, h4{
-			font-size: 9pt;
+			font-size: 10pt;
 			text-align: center;
 			margin: 0;
 		}
 		h3{
-			font-size: 8pt;
+			font-size: 9pt;
 		}
 		h4{
-			font-size: 8pt;
+			font-size: 9pt;
 		}
 
 		table, .tblinfo{
@@ -48,10 +48,10 @@
 		.br_bottom{ border-bottom: 1px #000 solid; }
 		.br_top{ border-top: 1px #000 solid; }
 
-		.font7{ font-size: 6pt;}
-		.font7_5{ font-size: 6.5pt;}
-		.font8{ font-size: 7pt;}
-		.font9{ font-size: 8pt;}
+		.font7{ font-size: 7pt;}
+		.font7_5{ font-size: 7.5pt;}
+		.font8{ font-size: 8pt;}
+		.font9{ font-size: 9pt;}
 
 		.strong{font-weight: bold;}
 
@@ -95,7 +95,8 @@
 				<td>
 					<table class="font8">
 						<tr class="br_bottom">
-							<td></td>
+							<!-- <td></td> -->
+							<td>TIPO</td>
 							<td>BOLETA</td>
 							<td>FECHA</td>
 							<td>CALIDAD</td>
@@ -107,7 +108,7 @@
 							<td class="txt_right">TOTAL</td>
 							<td>TIPO PAGO</td>
 							<td>CONCEPTO</td>
-							<td>BONIF</td>
+							<!-- <td>BONIF</td> -->
 						</tr>
 				<?php
 				$lastFolio = 0;
@@ -117,7 +118,8 @@
             {
         ?>
         		<tr>
-							<td><?php echo ($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : ''; ?></td>
+							<!-- <td><?php echo ($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : ''; ?></td> -->
+							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->tipo : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->folio : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->fecha : ''; ?></td>
 							<td><?php echo substr($caja->calidad, 0, 9); ?></td>
@@ -129,7 +131,7 @@
 							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
-							<td><?php echo ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''); ?></td>
+							<!-- <td><?php echo ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''); ?></td> -->
 						</tr>
         <?php
 							$lastFolio = $caja->id_bascula;
@@ -139,6 +141,7 @@
         }
 				?>
 						<tr class="br_top strong">
+							<!-- <td></td> -->
 							<td></td>
 							<td></td>
 							<td></td>
@@ -151,7 +154,7 @@
 							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
 							<td></td>
 							<td></td>
-							<td></td>
+							<!-- <td></td> -->
 						</tr>
 					</table>
 				</td>

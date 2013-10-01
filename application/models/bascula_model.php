@@ -513,16 +513,26 @@ class Bascula_model extends CI_Model {
       {
         $data['totales']['importe']     += floatval($caja->importe);
         $data['totales']['total']       += floatval($caja->importe);
-        if(!is_numeric($caja->id_bonificacion)){
+        if(!is_numeric($caja->id_bonificacion))
+        {
           $data['totales']['kilos']       += floatval($caja->kilos);
           $data['totales']['cajas']       += floatval($caja->cajas);
-        }
+        }else
+          $caja->calidad = 'BONIFICACION';
         // $data['precio_prom'] += floatval($caja->promedio);
 
         if ($caja->status === 'p' || $caja->status === 'b')
+        {
           $data['totales']['pagados'] += floatval($caja->importe);
-        else
+          if ($caja->status === 'p')
+            $caja->tipo_pago = 'EFECTIVO';
+        }else
           $data['totales']['no_pagados'] += floatval($caja->importe);
+
+        if ($caja->tipo == 'en')
+          $caja->tipo = 'E';
+        elseif ($caja->tipo == 'sa')
+          $caja->tipo = 'S';
       }
 
 
