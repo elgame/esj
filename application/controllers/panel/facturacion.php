@@ -12,6 +12,7 @@ class facturacion extends MY_Controller {
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
+    'facturacion/prodfact_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -893,6 +894,28 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
     $this->facturacion_model->rvp_pdf();
+  }
+
+  public function prodfact()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/admin.js'),
+      array('panel/facturacion/rep_productos_facturados.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/facturacion/rpf',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function prodfact_pdf()
+  {
+    $this->load->model('facturacion_model');
+    $this->facturacion_model->prodfact_pdf();
   }
 
   /*

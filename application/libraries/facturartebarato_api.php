@@ -213,10 +213,6 @@ class facturartebarato_api {
 
     $resultAPI = $this->post($apiURL, $params);
 
-    //  echo "<pre>";
-    //   var_dump($params, $resultAPI);
-    // echo "</pre>";exit;
-
     return $resultAPI;
   }
 
