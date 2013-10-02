@@ -1581,22 +1581,26 @@ class facturacion_model extends privilegios_model{
         // Creación del objeto de la clase heredada
         $pdf = new MYpdf('P', 'mm', 'Letter');
         $pdf->show_head = true;
-        $pdf->titulo2 = 'Reporte Productos Facturados';
+        $pdf->titulo2 = "Reporte Productos Facturados";
 
+        $pdf->titulo3 = "{$_GET['dproducto']} \n";
         if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+            $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
         elseif (!empty($_GET['ffecha1']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+            $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
         elseif (!empty($_GET['ffecha2']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+            $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
 
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
         $pdf->SetY(30);
-        $aligns = array('C', 'C', 'C', 'C','C', 'C');
-        $widths = array(20, 17, 120, 15, 15, 18);
+        $aligns = array('C', 'C', 'L', 'R','R', 'R');
+        $widths = array(20, 17, 108, 15, 22, 22);
         $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Cantidad', 'Precio', 'Importe');
-        $total = 0;
+
+        $cantidad = 0;
+        $importe = 0;
+        $promedio = 0;
 
         foreach($facturas as $key => $item)
         {
@@ -1622,11 +1626,13 @@ class facturacion_model extends privilegios_model{
               $item->serie.'-'.$item->folio,
               $item->cliente,
               $item->cantidad,
-              String::formatoNumero($item->precio_unitario),
-              String::formatoNumero($item->importe)
+              String::formatoNumero($item->precio_unitario, 2, '$', false),
+              String::formatoNumero($item->importe, 2, '$', false)
             );
 
-            // $total += floatval($item->total);
+            $cantidad += floatval($item->cantidad);
+            $importe  += floatval($item->precio_unitario);
+            $promedio += floatval($item->importe);
 
             $pdf->SetX(6);
             $pdf->SetAligns($aligns);
@@ -1634,10 +1640,10 @@ class facturacion_model extends privilegios_model{
             $pdf->Row($datos, false);
         }
 
-        // $pdf->SetX(6);
-        // $pdf->SetFont('Arial','B',8);
-        // $pdf->SetTextColor(255,255,255);
-        // $pdf->Row(array('', '', '', '', '', '', 'Total:', String::formatoNumero($total)), true);
+        $pdf->SetX(6);
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->Row(array('', '', '', $cantidad, String::formatoNumero($importe, 2, '$', false), $cantidad == 0 ? 0 : String::formatoNumero($importe/$cantidad, 2, '$', false)), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
       }

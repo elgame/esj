@@ -908,7 +908,7 @@ class facturacion extends MY_Controller {
     $params['seo']        = array('titulo' => 'Reporte Productos Facturados');
 
     $this->load->view('panel/header',$params);
-    $this->load->view('panel/general/menu',$params);
+    // $this->load->view('panel/general/menu',$params);
     $this->load->view('panel/facturacion/rpf',$params);
     $this->load->view('panel/footer',$params);
   }
