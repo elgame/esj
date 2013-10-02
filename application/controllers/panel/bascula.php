@@ -40,6 +40,8 @@ class bascula extends MY_Controller {
 
     'bascula/imprimir2/',
     'bascula/rmc_pdf2/',
+
+    'bascula/bonificaciones_pdf/'
     );
 
   public function _remap($method){
@@ -690,6 +692,61 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->bascula_model->r_acumulados_pdf();
   }
+
+  /**
+   * Muestra la vista para el reporte bonificaciones.
+   * @return void
+   */
+  public function bonificaciones()
+  {
+    if (isset($_GET['fid_proveedor']))
+      if ($_GET['fid_proveedor'] == '')
+        redirect(base_url('panel/bascula/movimientos/?msg=13'));
+
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/reportes/r_bonificaciones.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de bonificaciones'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['movimientos'] = $this->bascula_model->getMovimientos();
+    $params['areas'] = $this->areas_model->getAreas();
+
+    // echo "<pre>";
+    //   var_dump($params['movimientos']);
+    // echo "</pre>";exit;
+
+    if (isset($_GET['p']) && isset($_GET['pe']))
+    {
+      $params['p'] = true;
+      $params['pe'] = $_GET['pe'];
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/bascula/reportes/r_bonificaciones', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte bonificaciones en pdf
+   * @return void
+   */
+  public function bonificaciones_pdf()
+  {
+    $this->load->model('bascula_rpts_model');
+    $this->bascula_rpts_model->bonificaciones_pdf();
+  }
+
 
   /*
    |------------------------------------------------------------------------
