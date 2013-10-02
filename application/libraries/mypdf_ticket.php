@@ -7,7 +7,7 @@ class mypdf_ticket extends FPDF {
     var $font_size = 8;
 
     var $fount_txt = 'helvetica';
-    var $fount_num = 'SFNewRepublic';
+    var $fount_num = 'SciFly-Sans';
 
     var $pag_size = array();
 
@@ -92,7 +92,7 @@ class mypdf_ticket extends FPDF {
               // $this->SetWidths(array(8, 12, 12, 10, 10, 18));
               // $this->SetAligns(array('L'));
               $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num,$this->fount_num,$this->fount_num), 
-                         array(0,-1,0,0,0,0));
+                         array(.5,-1,.5,.5,.5,.5));
             foreach ($data_info as $prod){
               $this->SetY($this->GetY()-3);
               $this->Row(array($prod->cajas,
