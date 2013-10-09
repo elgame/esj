@@ -50,6 +50,7 @@
 											<select name="ftipo_proveedor" id="ftipo_proveedor">
 												<option value="in" <?php echo set_select('ftipo_proveedor', 'in', false, $this->input->post('ftipo_proveedor')); ?>>Insumos</option>
 												<option value="fr" <?php echo set_select('ftipo_proveedor', 'fr', false, $this->input->post('ftipo_proveedor')); ?>>Fruta</option>
+												<option value="ot" <?php echo set_select('ftipo_proveedor', 'ot', false, $this->input->post('ftipo_proveedor')); ?>>Otros</option>
 											</select>
 									  </div>
 									</div>

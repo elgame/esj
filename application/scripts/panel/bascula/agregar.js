@@ -4,6 +4,8 @@ var ppro_cont   = 0,
 
 $(function(){
 
+  $.ajaxSetup({ cache: false });
+
   actualFolio = $('#pfolio').val();
   autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
@@ -34,6 +36,8 @@ $(function(){
           'tipo': $tipo.find('option:selected').val(),
           'area': $area.find('option:selected').val(),
         };
+
+    $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo') );
 
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {

@@ -99,7 +99,7 @@
                       <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?> data-next="pfolio">
                         <option value=""></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
-                          <option value="<?php echo $area->id_area ?>"
+                          <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
                             <?php echo set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') ) ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
                       </select>
