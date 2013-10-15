@@ -133,11 +133,19 @@
                     </div>
                   </div>
 
+                  <div class="control-group" id="groupProveedorRancho">
+                    <label class="control-label" for="prancho">Rancho</label>
+                    <div class="controls">
+                      <input type="text" name="prancho" value="<?php echo set_value('prancho', $this->input->post('prancho')) ?>" 
+                        id="prancho" class="input-xlarge" placeholder="Rancho" <?php echo $disabled ?>>
+                    </div>
+                  </div>
+
                   <div class="control-group" id="groupCliente" style="display: none;">
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
-                      <input type="text" name="pcliente"
-                        value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" class="input-xlarge sikey" data-replace="pproveedor" placeholder="Cliente" <?php echo $disabled ?>>
+                      <input type="text" name="pcliente" value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" 
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="Cliente" <?php echo $disabled ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -168,6 +176,7 @@
                       <input type="hidden" name="pid_chofer" value="<?php echo set_value('pid_chofer', $this->input->post('pid_chofer')) ?>" id="pid_chofer">
                     </div>
                   </div>
+
                 </div><!--/span-->
 
                 <div class="span5">

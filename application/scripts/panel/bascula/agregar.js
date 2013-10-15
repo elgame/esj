@@ -89,13 +89,13 @@ $(function(){
         option = $this.find('option:selected').val();
 
     if (option === 'en') {
-      $('#groupProveedor').css({'display': 'block'});
+      $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
 
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
     } else {
-      $('#groupProveedor').css({'display': 'none'});
+      $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
 
       $('#pkilos_brutos').prop("readonly", 'readonly');
@@ -164,6 +164,20 @@ $(function(){
     if (e.which === 8) {
      $(this).css({'background-color': '#FFD9B3'});
       $('#pid_proveedor').val('');
+    }
+  });
+
+  // Autocomplete RANCHOS
+  $("#prancho").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_ranchos/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#prancho").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
     }
   });
 
@@ -545,7 +559,7 @@ var recargaTipo = function () {
   var option = $('#ptipo').find('option:selected').val();
 
   if (option === 'en') {
-    $('#groupProveedor').css({'display': 'block'});
+    $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
 
     if ($('#paccion').val() === 'n') {
@@ -553,7 +567,7 @@ var recargaTipo = function () {
       $('#pkilos_tara').prop("readonly", 'readonly');
     }
   } else {
-    $('#groupProveedor').css({'display': 'none'});
+    $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
 
     if ($('#paccion').val() === 'n') {

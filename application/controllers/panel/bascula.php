@@ -17,6 +17,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_precio_calidad/',
     'bascula/ajax_get_kilos/',
     'bascula/ajax_check_limite_proveedor/',
+    'bascula/ajax_get_ranchos/',
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
@@ -174,6 +175,7 @@ class bascula extends MY_Controller {
 
           $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
           $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+          $_POST['prancho']       = $info['info'][0]->rancho;
         }
         else
         {
@@ -419,6 +421,7 @@ class bascula extends MY_Controller {
 
             $_POST['pproveedor']    = $proveedor['info']->nombre_fiscal;
             $_POST['pid_proveedor'] = $info['info'][0]->id_proveedor;
+            $_POST['prancho']       = $info['info'][0]->rancho;
           }
           else
           {
@@ -427,6 +430,7 @@ class bascula extends MY_Controller {
 
             $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
             $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+            $_POST['prancho']     = '';
           }
 
           if ($info['info'][0]->id_chofer != null)
@@ -1156,6 +1160,9 @@ class bascula extends MY_Controller {
           $rules[] = array('field' => 'pkilos_brutos',
                            'label' => 'Kilos Brutos',
                            'rules' => 'required');
+          $rules[] = array('field' => 'prancho',
+                           'label' => 'Rancho',
+                           'rules' => 'required');
         }
         else
         {
@@ -1490,6 +1497,16 @@ class bascula extends MY_Controller {
   {
     $this->load->model('proveedores_model');
     echo json_encode($this->proveedores_model->getProveedoresAjax());
+  }
+
+  /**
+    * Obtiene los ranchos por peticion Ajax.
+    * @return void
+    */
+  public function ajax_get_ranchos()
+  {
+    $this->load->model('proveedores_model');
+    echo json_encode($this->proveedores_model->getRanchosAjax());
   }
 
   /**

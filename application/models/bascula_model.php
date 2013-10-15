@@ -143,9 +143,14 @@ class Bascula_model extends CI_Model {
         }
 
         if ($_POST['ptipo'] === 'en')
+        {
           $data['id_proveedor'] = $this->input->post('pid_proveedor');
-        else
+          $data['rancho']       = mb_strtoupper($this->input->post('prancho'), 'UTF-8');
+        }else
+        {
           $data['id_cliente'] = $this->input->post('pid_cliente');
+          $data['rancho']     = '';
+        }
 
         $this->db->insert('bascula', $data);
         $idb = $this->db->insert_id();
@@ -376,6 +381,17 @@ class Bascula_model extends CI_Model {
     $this->load->library('mypdf_ticket');
 
     $data = $this->getBasculaInfo($id);
+
+    //Actualiza el control de impresiones, se le suma 1 
+    //al valor de la BD para la siguiente impresion
+    $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false)
+        ->update('bascula');
+
+    foreach ($data['cajas'] as $key => $value)
+    {
+      if ($data['info'][0]->id_bonificacion != NULL)
+        $data['cajas'][$key]->calidad = 'BONIF.';
+    }
 
     // echo "<pre>";
     //   var_dump($data);
