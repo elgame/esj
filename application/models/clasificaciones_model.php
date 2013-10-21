@@ -79,17 +79,17 @@ class clasificaciones_model extends CI_Model {
 
 		$id_clasificacion = $this->db->insert_id('clasificaciones', 'id_clasificacion');
 
-    if (isset($_POST['fcalibres']))
-    {
-      $calibres = array();
+    // if (isset($_POST['fcalibres']))
+    // {
+    //   $calibres = array();
 
-      foreach ($_POST['fcalibres'] as $idCalibre)
-      {
-        $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
-      }
+    //   foreach ($_POST['fcalibres'] as $idCalibre)
+    //   {
+    //     $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+    //   }
 
-      $this->db->insert_batch('clasificaciones_calibres', $calibres);
-    }
+    //   $this->db->insert_batch('clasificaciones_calibres', $calibres);
+    // }
 
 		return array('error' => FALSE, $id_clasificacion);
 	}
@@ -111,19 +111,19 @@ class clasificaciones_model extends CI_Model {
 						'id_area'      => $this->input->post('farea'),
 						);
 
-      $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
+      // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
 
-      if (isset($_POST['fcalibres']))
-      {
-        $calibres = array();
+      // if (isset($_POST['fcalibres']))
+      // {
+      //   $calibres = array();
 
-        foreach ($_POST['fcalibres'] as $idCalibre)
-        {
-          $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
-        }
+      //   foreach ($_POST['fcalibres'] as $idCalibre)
+      //   {
+      //     $calibres[] = array('id_clasificacion' => $id_clasificacion, 'id_calibre' => $idCalibre);
+      //   }
 
-        $this->db->insert_batch('clasificaciones_calibres', $calibres);
-      }
+      //   $this->db->insert_batch('clasificaciones_calibres', $calibres);
+      // }
 		}
 
 		$this->db->update('clasificaciones', $data, array('id_clasificacion' => $id_clasificacion));
