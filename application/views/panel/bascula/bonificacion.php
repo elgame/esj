@@ -101,6 +101,7 @@
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
                       <input type="hidden" name="pid_proveedor" value="<?php echo set_value('pid_proveedor', $this->input->post('pid_proveedor')) ?>" id="pid_proveedor">
+                      <input type="hidden" name="prancho" value="<?php echo set_value('prancho', $this->input->post('prancho')) ?>" id="prancho">
                     </div>
                   </div>
 

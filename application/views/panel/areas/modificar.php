@@ -41,6 +41,7 @@
                   <select name="ftipo" id="ftipo">
                     <option value="fr" <?php echo set_select('ftipo', 'fr', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Fruta</option>
                     <option value="in" <?php echo set_select('ftipo', 'in', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Insumos</option>
+                    <option value="ot" <?php echo set_select('ftipo', 'ot', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Otros</option>
                   </select>
                 </div>
               </div>

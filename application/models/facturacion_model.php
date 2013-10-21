@@ -1631,8 +1631,7 @@ class facturacion_model extends privilegios_model{
             );
 
             $cantidad += floatval($item->cantidad);
-            $importe  += floatval($item->precio_unitario);
-            $promedio += floatval($item->importe);
+            $importe  += floatval($item->importe);
 
             $pdf->SetX(6);
             $pdf->SetAligns($aligns);
@@ -1643,7 +1642,10 @@ class facturacion_model extends privilegios_model{
         $pdf->SetX(6);
         $pdf->SetFont('Arial','B',8);
         $pdf->SetTextColor(255,255,255);
-        $pdf->Row(array('', '', '', $cantidad, String::formatoNumero($importe, 2, '$', false), $cantidad == 0 ? 0 : String::formatoNumero($importe/$cantidad, 2, '$', false)), true);
+        $pdf->Row(array('', '', '', 
+            $cantidad, 
+            $cantidad == 0 ? 0 : String::formatoNumero($importe/$cantidad, 2, '$', false),
+            String::formatoNumero($importe, 2, '$', false) ), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
       }

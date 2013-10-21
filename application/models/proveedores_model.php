@@ -271,6 +271,32 @@ class proveedores_model extends CI_Model {
 		return $response;
 	}
 
+	public function getRanchosAjax(){
+		$sql = '';
+		if ($this->input->get('term') !== false)
+			$sql = " AND upper(rancho) LIKE '%".mb_strtoupper($this->input->get('term'), 'UTF-8')."%'";
+		$res = $this->db->query("
+				SELECT rancho
+				FROM ranchos_bascula
+				WHERE rancho <> '' ".$sql."
+				ORDER BY rancho ASC
+				LIMIT 20");
+
+		$response = array();
+		if($res->num_rows() > 0){
+			foreach($res->result() as $itm){
+				$response[] = array(
+						'id'    => '0',
+						'label' => $itm->rancho,
+						'value' => $itm->rancho,
+						'item'  => $itm,
+				);
+			}
+		}
+
+		return $response;
+	}
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

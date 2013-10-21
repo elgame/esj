@@ -7,7 +7,7 @@ class mypdf_ticket extends FPDF {
     var $font_size = 8;
 
     var $fount_txt = 'helvetica';
-    var $fount_num = 'SFNewRepublic';
+    var $fount_num = 'SciFly-Sans';
 
     var $pag_size = array();
 
@@ -36,7 +36,9 @@ class mypdf_ticket extends FPDF {
             // Título
             $this->SetFont($this->fount_txt, '', 8);
             $this->SetXY(0, 3);
-            $this->MultiCell($this->pag_size[0], 6, $this->titulo1, 0, 'C');
+            $this->MultiCell($this->pag_size[0], 4, $this->titulo1, 0, 'C');
+            $this->SetFont($this->fount_txt, '', 7);
+            $this->MultiCell($this->pag_size[0], 4, 'REG. ESJ97052763A0620061646', 0, 'C');
 
             $this->header_entrar = false;
         }
@@ -92,7 +94,7 @@ class mypdf_ticket extends FPDF {
               // $this->SetWidths(array(8, 12, 12, 10, 10, 18));
               // $this->SetAligns(array('L'));
               $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num,$this->fount_num,$this->fount_num), 
-                         array(0,-1,0,0,0,0));
+                         array(.5,-1,.5,.5,.5,.5));
             foreach ($data_info as $prod){
               $this->SetY($this->GetY()-3);
               $this->Row(array($prod->cajas,
@@ -138,6 +140,7 @@ class mypdf_ticket extends FPDF {
 
 
         $this->SetY($this->GetY()-1);
+        $this->MultiCell($this->pag_size[0], 3, 'RANCHO: ' . strtoupper($data->rancho), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');
@@ -147,13 +150,15 @@ class mypdf_ticket extends FPDF {
 
       $this->SetY($this->GetY());
 
+      $txt_impresion = $data->no_impresiones>0? 'Copia '.$data->no_impresiones: 'Original';
+
       $this->SetFont($this->fount_txt, '', $this->font_size+1);
-      $this->SetWidths(array($this->pag_size[0]));
-      $this->SetAligns(array('L'));
+      $this->SetWidths(array(35, 27));
+      $this->SetAligns(array('L', 'R'));
       $this->Row(array('EXPEDIDO EL:' ), false, false);
       $this->SetY($this->GetY() - 3);
-      $this->SetFounts(array($this->fount_num), array(1));
-      $this->Row(array(substr($data->fecha_tara, 0, 19)), false, false);
+      $this->SetFounts(array($this->fount_num, $this->fount_txt), array(1, 0));
+      $this->Row(array(substr($data->fecha_tara, 0, 19), $txt_impresion), false, false);
 
       $this->SetFont($this->fount_txt, '', $this->font_size);
       $this->SetY($this->GetY() + 5);

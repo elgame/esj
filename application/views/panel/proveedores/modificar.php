@@ -53,6 +53,7 @@
                       <select name="ftipo_proveedor" id="ftipo_proveedor">
                         <option value="in" <?php echo set_select('ftipo_proveedor', 'in', false, (isset($data->tipo_proveedor)?$data->tipo_proveedor:'') ); ?>>Insumos</option>
                         <option value="fr" <?php echo set_select('ftipo_proveedor', 'fr', false, (isset($data->tipo_proveedor)?$data->tipo_proveedor:'') ); ?>>Fruta</option>
+                        <option value="ot" <?php echo set_select('ftipo_proveedor', 'ot', false, (isset($data->tipo_proveedor)?$data->tipo_proveedor:'') ); ?>>Otros</option>
                       </select>
                     </div>
                   </div>
