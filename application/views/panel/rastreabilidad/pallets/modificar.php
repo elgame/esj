@@ -39,49 +39,57 @@
 									<div class="span3">
 									  <label class="span4" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo (isset($data->no_cajas)? $data->no_cajas: ''); ?>" 
-											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fclasificacion">
+											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fcliente">
 									</div>
 
 									<div class="span3">
 									  <label class="span3" for="fcliente">Cliente </label>
 										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo (isset($info['cliente']->nombre_fiscal)? $info['cliente']->nombre_fiscal: ''); ?>" 
-											maxlength="25" placeholder="Cliente" data-next="fcalibres">
+											maxlength="25" placeholder="Cliente" data-next="fclasificacion">
 										<input type="hidden" name="fid_cliente" value="<?php echo (isset($info['cliente']->id_cliente)? $info['cliente']->id_cliente: ''); ?>" id="fid_cliente" class="getjsval">
 									</div>
 
-									<div class="span4">
-									  <label class="span3" for="fcalibres">Calibres </label>
-									  <select name="fcalibres[]" id="fcalibres" class="chosen-select" multiple data-next="fclasificacion">
-									<?php  
-									foreach ($calibres['calibres'] as $key => $calibre)
-									{
-										$default = $this->rastreabilidad_pallets_model->calibreSelec($calibre->id_calibre, $info['calibres']);
-									?>
-										<option value="<?php echo $calibre->id_calibre; ?>" 
-											<?php echo set_select('fcalibres[]', $calibre->id_calibre, $default ); ?>><?php echo $calibre->nombre; ?></option>
-									<?php 
-									} ?>
-									  </select>
-									</div>
 								</div>
 								<div class="clearfix"></div>
 
 								<div class="row-fluid">
 									<fieldset class="span6">
 										<legend>Disponibles</legend>
-										<div class="span12">
-										  <label class="span4" for="fclasificacion">Clasificacion </label>
-											<input type="text" name="fclasificacion" id="fclasificacion" class="span7" value="<?php echo set_value('fclasificacion'); ?>" 
-												maxlength="100" placeholder="Nombre" data-next="btn_submit">
-											<input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
+										<div class="row-fluid">
+											<div class="span5">
+												<input type="text" name="fclasificacion" id="fclasificacion" class="span12" value="<?php echo set_value('fclasificacion'); ?>" 
+													maxlength="100" placeholder="Clasificación" data-next="funidad">
+												<input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
+											</div>
+
+											<div class="span2">
+												<input type="text" name="funidad" id="funidad" class="span12" value="<?php echo set_value('funidad'); ?>" 
+													maxlength="100" placeholder="Unidad" data-next="fcalibre">
+												<input type="hidden" name="fidunidad" id="fidunidad" value="<?php echo set_value('fidunidad'); ?>">
+											</div>
+
+											<div class="span2">
+												<input type="text" name="fcalibre" id="fcalibre" class="span12" value="<?php echo set_value('fcalibre'); ?>" 
+													maxlength="100" placeholder="Calibre" data-next="fetiqueta">
+												<input type="hidden" name="fidcalibre" id="fidcalibre" value="<?php echo set_value('fidcalibre'); ?>">
+											</div>
+
+											<div class="span3">
+												<input type="text" name="fetiqueta" id="fetiqueta" class="span12" value="<?php echo set_value('fetiqueta'); ?>" 
+													maxlength="100" placeholder="Etiqueta" data-next="fclasificacion">
+												<input type="hidden" name="fidetiqueta" id="fidetiqueta" value="<?php echo set_value('fidetiqueta'); ?>">
+											</div>
 										</div>
 										<table class="table table-striped table-bordered bootstrap-datatable">
 										  <thead>
 											  <tr>
 											  	<th>Fecha</th>
-												  <th>Lote</th>
-													<th>Cajas libres</th>
-												  <th>Opciones</th>
+												<th>Lote</th>
+												<th>Unidad</th>
+												<th>Calibre</th>
+												<th>Etiqueta</th>
+												<th>Cajas libres</th>
+												<th>Opciones</th>
 											  </tr>
 										  </thead>
 										  <tbody id="tblrendimientos">
@@ -95,10 +103,11 @@
 										  <thead>
 											  <tr>
 											  	<th>Fecha</th>
-												  <th>Lote</th>
-												  <th>Clasif</th>
-													<th>Cajas</th>
-												  <th>Opciones</th>
+												<th>Lote</th>
+												<th>Clasif</th>
+												<th>Más Inf.</th>
+												<th>Cajas</th>
+												<th>Opciones</th>
 											  </tr>
 										  </thead>
 										  <tbody id="tblrendimientossel">
@@ -111,9 +120,14 @@
 								          <td class="fecha"><?php echo $value->fecha; ?></td>
 								          <td class="lote"><?php echo $value->lote; ?></td>
 								          <td class="clsif"><?php echo $value->nombre; ?></td>
+								          <td class="mas"><?php echo $value->unidad.'|'.$value->calibre.'|'.$value->etiqueta; ?></td>
 								          <td><input type="number" class="span12 cajasel" name="rendimientos[]" value="<?php echo $value->cajas; ?>" min="1" max="<?php echo $value->cajas; ?>"></td>
-								          <td><input type="hidden" class="span5" name="idrendimientos[]" value="<?php echo $value->id_rendimiento; ?>">
-								             <input type="hidden" class="span5" name="idclasificacion[]" value="<?php echo $value->id_clasificacion; ?>">
+								          <td><input type="hidden" name="idrendimientos[]" value="<?php echo $value->id_rendimiento; ?>">
+											<input type="hidden" name="idclasificacion[]" value="<?php echo $value->id_clasificacion; ?>">
+											<input type="hidden" name="idunidad[]" value="<?php echo $value->id_unidad; ?>">
+											<input type="hidden" name="idcalibre[]" value="<?php echo $value->id_calibre; ?>">
+											<input type="hidden" name="idetiqueta[]" value="<?php echo $value->id_etiqueta; ?>">
+
 								             <buttom class="btn btn-danger remove_cajassel" data-idrow="<?php echo $value->id_rendimiento; ?>_<?php echo $value->id_clasificacion; ?>"><i class="icon-remove"></i></buttom></td>
 								        </tr>
 							       <?php 

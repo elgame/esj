@@ -90,7 +90,7 @@ class rastreabilidad_pallets extends MY_Controller {
 
     $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio();
 
-    $params['calibres'] = $this->calibres_model->getCalibres();
+    // $params['calibres'] = $this->calibres_model->getCalibres();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -144,7 +144,7 @@ class rastreabilidad_pallets extends MY_Controller {
 
       $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
 
-      $params['calibres'] = $this->calibres_model->getCalibres();
+      // $params['calibres'] = $this->calibres_model->getCalibres();
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -172,7 +172,9 @@ class rastreabilidad_pallets extends MY_Controller {
    */
   public function ajax_get_rendimientos(){
     $this->load->model('rastreabilidad_pallets_model');
-    $params = $this->rastreabilidad_pallets_model->getRendimientoLibre($this->input->get('id'));
+    $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
+                $this->input->get('id'), $this->input->get('idunidad'), 
+                $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
 
     echo json_encode($params);
   }
@@ -212,7 +214,7 @@ class rastreabilidad_pallets extends MY_Controller {
             'label' => 'Clasificacion',
             'rules' => 'is_natural_no_zero'),
 
-      array('field' => 'fcalibres[]',
+      array('field' => 'idcalibre[]',
             'label' => 'Calibres',
             'rules' => 'required|is_natural_no_zero'),
       array('field' => 'fcliente',

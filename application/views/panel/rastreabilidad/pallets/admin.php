@@ -28,7 +28,7 @@
 
 								<label for="fnombre">Buscar</label>
 								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
-									class="input-large search-query" placeholder="Limon verde, 212" autofocus> |
+									class="input-large search-query" placeholder="Cliente, Folio" autofocus> |
 
 								<label for="ffecha">Buscar</label>
 								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> | 
@@ -56,7 +56,7 @@
 							  <tr>
 							  	<th>Folio</th>
 							  	<th>Fecha</th>
-								  <th>Clasificacion</th>
+								  <th>Cliente</th>
 									<th>Cajas</th>
 									<th>Cajas agregs</th>
 									<th>Cajas Falt</th>
@@ -69,7 +69,7 @@
 							<tr>
 								<td><?php echo $pallet->folio; ?></td>
 								<td><?php echo $pallet->fecha; ?></td>
-								<td><?php echo ''; ?></td>
+								<td><?php echo $pallet->nombre_fiscal; ?></td>
 								<td><?php echo $pallet->no_cajas; ?></td>
 								<td><?php echo $pallet->cajas; ?></td>
 								<td><?php echo ($pallet->no_cajas-$pallet->cajas); ?></td>

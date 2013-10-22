@@ -15,6 +15,9 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_edit_clasifi/',
     'rastreabilidad/ajax_get_prev_clasifi/',
     'rastreabilidad/ajax_del_clasifi/',
+    'rastreabilidad/ajax_get_unidades/',
+    'rastreabilidad/ajax_get_calibres/',
+    'rastreabilidad/ajax_get_etiquetas/',
 
     'rastreabilidad/rpl_pdf/',
 
@@ -192,6 +195,24 @@ class rastreabilidad extends MY_Controller {
     echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
   }
 
+  public function ajax_get_unidades()
+  {
+    $this->load->model('unidades_model');
+    echo json_encode($this->unidades_model->ajaxUnidades());
+  }
+
+  public function ajax_get_calibres()
+  {
+    $this->load->model('calibres_model');
+    echo json_encode($this->calibres_model->getCalibresAjax());
+  }
+
+  public function ajax_get_etiquetas()
+  {
+    $this->load->model('etiquetas_model');
+    echo json_encode($this->etiquetas_model->ajaxEtiquetas());
+  }
+
   public function ajax_save_clasifi()
   {
   $this->load->model('rastreabilidad_model');
@@ -213,7 +234,8 @@ class rastreabilidad extends MY_Controller {
   public function ajax_get_prev_clasifi()
   {
     $this->load->model('rastreabilidad_model');
-    echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], $_GET['id_clasificacion'], $_GET['loteActual']));
+    echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], 
+      $_GET['id_clasificacion'], $_GET['loteActual'], $_GET['id_unidad'], $_GET['id_calibre'], $_GET['id_etiqueta']));
   }
 
 
