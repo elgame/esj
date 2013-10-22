@@ -26,17 +26,17 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		if($this->input->get('fnombre') != '')
 			$sql = "WHERE ( lower(c.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' 
 								".(is_numeric($this->input->get('fnombre'))? " OR rp.folio = '".$this->input->get('fnombre')."'": '')." )";
-		
+
 		if($this->input->get('ffecha') != '')
 			$sql .= ($sql==''? 'WHERE': ' AND')." Date(rp.fecha) = '".$this->input->get('ffecha')."'";
 
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." rp.status = '".$this->input->get('fstatus')."'";
 
-		$query = BDUtil::pagination("SELECT 
+		$query = BDUtil::pagination("SELECT
 					rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas,
 					c.nombre_fiscal
-				FROM rastria_pallets AS rp 
+				FROM rastria_pallets AS rp
 					LEFT JOIN rastria_pallets_rendimiento AS rpr ON rp.id_pallet = rpr.id_pallet
 					LEFT JOIN clientes AS c ON rp.id_cliente = c.id_cliente
 				{$sql}
@@ -71,7 +71,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			{
 				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
 						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta
-					FROM rastria_pallets_rendimiento AS rpr 
+					FROM rastria_pallets_rendimiento AS rpr
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
 						INNER JOIN unidades AS u ON rpr.id_unidad = u.id_unidad
@@ -84,10 +84,10 @@ class rastreabilidad_pallets_model extends privilegios_model {
 				// 	$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
 				// 	$response['rend_libres'] = $rendimientos_libres['rendimientos'];
 				// }
-				
+
 				//lista calibres
 				$response['calibres'] = array();
-				$data_calibres = $this->db->query("SELECT rpc.id_pallet, rpc.id_calibre, c.nombre 
+				$data_calibres = $this->db->query("SELECT rpc.id_pallet, rpc.id_calibre, c.nombre
 													FROM rastria_pallets_calibres AS rpc
 														INNER JOIN calibres AS c ON c.id_calibre = rpc.id_calibre
 													WHERE id_pallet = {$id_pallet}");
@@ -95,9 +95,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
 					$response['calibres'] = $data_calibres->result();
 
 				//Info cliente
-				$this->load->model('clientes_model');
-				$data_cliente        = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
-				$response['cliente'] = $data_cliente['info'];
+        $response['cliente'] = array();
+        if ($response['info']->id_cliente !== null)
+        {
+          $this->load->model('clientes_model');
+          $data_cliente        = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
+          $response['cliente'] = $data_cliente['info'];
+        }
 			}
 		}
 		return $response;
@@ -138,7 +142,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
  		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
  										u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta
- 		                           FROM rastria_rendimiento AS rr 
+ 		                           FROM rastria_rendimiento AS rr
 									INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
 									LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
 									LEFT JOIN calibres AS c ON rcl.id_calibre = c.id_calibre
@@ -175,7 +179,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		// if($this->checkPalletPendiente($data['id_clasificacion'])){
 			$this->db->insert('rastria_pallets', $data);
 			$id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
-			
+
 			$this->addPalletRendimientos($id_pallet);
 
 			$this->addPalletCalibres($id_pallet);
@@ -204,7 +208,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		}
 
 		$this->db->update('rastria_pallets', $data, "id_pallet = {$id_pallet}");
-		
+
 		$this->db->delete('rastria_pallets_rendimiento', "id_pallet = {$id_pallet}");
 		$this->addPalletRendimientos($id_pallet);
 
@@ -219,7 +223,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		{
 			if(is_array($this->input->post('rendimientos')))
 			{
-				foreach ($this->input->post('rendimientos') as $key => $cajas) 
+				foreach ($this->input->post('rendimientos') as $key => $cajas)
 				{
 					$data[] = array(
 						'id_pallet'        => $id_pallet,
@@ -408,7 +412,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 
  	public function addPalletRendimiento($id_clasificacion){
- 		$pallets = $this->db->query("SELECT 
+ 		$pallets = $this->db->query("SELECT
 									id_pallet, id_clasificacion, folio, fecha, no_cajas, status, nombre, cajas, cajas_faltantes
 								FROM rastria_pallets_lista
 								WHERE id_clasificacion = {$id_clasificacion} AND cajas_faltantes > 0
@@ -417,7 +421,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
  			$cajas_faltantes = $pallet->cajas_faltantes;
  			$cajas_pallet = $pallet->cajas;
  			$pallets_rendimiento = array();
- 			$cajas = $this->db->query("SELECT 
+ 			$cajas = $this->db->query("SELECT
 										id_rendimiento, id_clasificacion, rendimiento, cajas, libres
 									FROM rastria_cajas_libres
 									WHERE id_clasificacion = {$id_clasificacion}

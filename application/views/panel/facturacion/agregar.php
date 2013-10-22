@@ -121,6 +121,15 @@
                   <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', isset($borrador) ? $borrador['info']->observaciones : ''); ?></textarea>
                 </div>
               </div>
+
+              <div class="control-group" style="margin-top: 145px;">
+                <label class="control-label">Folio Pallet</label>
+                <div class="controls">
+                  <div class="input-append">
+                    <input type="text" id="folio" class="span7"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="span6">
@@ -252,7 +261,6 @@
                 </thead>
                 <tbody>
                   <?php
-
                         if (isset($borrador))
                         {
                           foreach ($borrador['productos'] as $key => $p) {
@@ -267,16 +275,16 @@
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
                           }
-                        }
+                        } ?>
 
-                        if (isset($_POST['prod_did_prod'])) {
+                        <? if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v){
                             if ($_POST['prod_importe'][$k] != 0) { ?>
-
-                              <tr>
+                              <tr data-pallet="<?php echo $_POST['pallet_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
+                                  <input type="text" name="pallet_id[]" value="<?php echo $_POST['pallet_id'][$k] ?>" id="pallet_id" class="span12">
                                 </td>
                                 <td>
                                   <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
@@ -326,6 +334,7 @@
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                      <input type="text" name="pallet_id[]" value="" id="pallet_id" class="span12">
                     </td>
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->

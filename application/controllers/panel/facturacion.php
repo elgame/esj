@@ -17,8 +17,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
-
-
+    'facturacion/ajax_get_pallet_folio/',
 
     'facturacion/xml/'
   );
@@ -840,6 +839,28 @@ class facturacion extends MY_Controller {
     $params = $this->clientes_model->getClientesAjax(" AND rfc != ''");
 
     echo json_encode($params);
+  }
+
+  /**
+    * Obtiene listado de los clientes que tienen RFC por ajax.
+    */
+  public function ajax_get_pallet_folio(){
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $pallet = $this->db->select('id_pallet')->from('rastria_pallets')->where('folio', $_GET['folio'])->get();
+
+    if ($pallet->num_rows() > 0)
+    {
+      $pallet = $pallet->row();
+
+      $info = $this->rastreabilidad_pallets_model->getInfoPallet($pallet->id_pallet);
+
+      echo json_encode($info);
+    }
+    else
+    {
+      echo json_encode(false);
+    }
   }
 
   /*

@@ -54,26 +54,26 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fcalibres">Autocomplete Calibres </label>
                 <div class="controls">
                   <input type="text" id="auto-calibres" class="span3"
                     value="" placeholder="Nombre del Calibre">
                 </div>
-              </div>
+              </div> -->
 
-               <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="fcalibres">Calibres Seleccionados</label>
                 <div class="controls" id="list-calibres">
                   <!-- <label><input type="checkbox" name="fcalibres[]" value="1" class="sel-calibres"><input type="hidden" name="fcalibre_nombre[]" value="Calibre 1">Calibre 1</label> -->
 
-                  <?php
+                  <?php /*
                     if (isset($_POST['fcalibres'])) {
                       foreach ($_POST['fcalibres'] as $key => $value) { ?>
                         <label><input type="checkbox" name="fcalibres[]" value="<?php echo $value ?>" class="sel-calibres" checked><input type="hidden" name="fcalibre_nombre[]" value="<?php echo $_POST['fcalibre_nombre'][$key] ?>"><?php echo $_POST['fcalibre_nombre'][$key] ?></label>
-                  <?php }} ?>
-                </div>
-              </div>
+                  <?php }} */?>
+                <!--</div>
+              </div> -->
 
               <input type="hidden" name="farea" id="farea" value="<?php echo $this->input->get('id'); ?>">
 
