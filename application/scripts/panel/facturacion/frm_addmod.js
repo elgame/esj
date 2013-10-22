@@ -89,7 +89,12 @@ $(function(){
 
   // Elimina un prod del listado
   $(document).on('click', 'button#delProd', function(e) {
-      $(this).parent().parent().remove();
+      var $this = $(this),
+          $tr = $this.parent().parent(),
+          id_pallet = $tr.attr('data-pallet');
+
+      $tr.remove();
+
       calculaTotal();
   });
 
@@ -148,8 +153,49 @@ $(function(){
 
     calculaTotalProducto ($tr)
   });
+
+  loadPallet();
+
 });
 
+function loadPallet() {
+  $('#loadPallet').on('click', function(event) {
+    var $folio = $('#folio');
+
+    if ($folio.val() !== '') {
+
+      $.get(base_url + 'panel/facturacion/ajax_get_pallet_folio/?folio='+$folio.val(), function(data) {
+        if (data) {
+          console.log(data);
+          var existe = false;
+          // $('.pallet_id').each(function(index, el) {
+          //   if ($(this).val() == data['info']['id_pallet']) {
+          //     existe = true;
+          //     noty({"text": 'El pallet ya esta cargado', "layout":"topRight", "type": 'error'});
+          //   }
+          // });
+
+          if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
+            for(var i in data['rendimientos']) {
+              addProducto({
+                'id': data['rendimientos'][i]['id_clasificacion'],
+                'nombre': data['rendimientos'][i]['nombre'],
+                'cajas': data['rendimientos'][i]['cajas'],
+                'id_pallet': data['info']['id_pallet'],
+              });
+            }
+          } else {
+            noty({"text": 'El pallet ya esta cargado', "layout":"topRight", "type": 'error'});
+          }
+        } else {
+          noty({"text": 'No existe un pallet con el folio especificado.', "layout":"topRight", "type": 'error'});
+        }
+      }, 'json');
+    } else {
+      noty({"text": 'Especifique el folio de un Pallet', "layout":"topRight", "type": 'error'});
+    }
+  });
+}
 
 function calculaTotalProducto ($tr) {
 
@@ -178,7 +224,7 @@ function calculaTotalProducto ($tr) {
 }
 
 var jumpIndex = 0;
-function addProducto() {
+function addProducto(prod) {
   // var importe   = trunc2Dec(parseFloat($('#dcantidad').val() * parseFloat($('#dpreciou').val()))),
   //     descuento = trunc2Dec((importe * parseFloat($('#ddescuento').val())) / 100),
   //     iva       = trunc2Dec(((importe - descuento) * parseFloat($('#diva option:selected').val())) / 100),
@@ -188,10 +234,22 @@ function addProducto() {
       trHtml = '',
       indexJump = jumpIndex + 1;
 
-  trHtml = '<tr>' +
+      console.log(prod);
+
+
+  var prod_nombre = prod_id = pallet = '', prod_cajas = 0;
+  if (prod) {
+    prod_nombre = prod.nombre;
+    prod_id     = prod.id;
+    prod_cajas  = prod.cajas;
+    pallet      = prod.id_pallet;
+  }
+
+  trHtml = '<tr data-pallet="'+pallet+'">' +
               '<td>' +
-                '<input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                '<input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">' +
+                '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
+                '<input type="text" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
               '</td>' +
               '<td>' +
                 '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -202,7 +260,7 @@ function addProducto() {
                 '</select>' +
               '</td>' +
               '<td>' +
-                  '<input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
               '</td>' +
               '<td>' +
                 '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
