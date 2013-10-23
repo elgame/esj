@@ -298,14 +298,9 @@
                                 <td>
                                   <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                                    <option value="MADERA" <?php echo $_POST['prod_dmedida'][$k] == 'MADERA' ? 'selected' : '' ?>>MADERA</option>
-                                    <option value="MAD/CERT" <?php echo $_POST['prod_dmedida'][$k] == 'MAD/CERT' ? 'selected' : '' ?>>MAD/CERT</option>
-                                    <option value="CARTON" <?php echo $_POST['prod_dmedida'][$k] == 'CARTON' ? 'selected' : '' ?>>CARTON</option>
-                                    <option value="CHAROLA" <?php echo $_POST['prod_dmedida'][$k] == 'CHAROLA' ? 'selected' : '' ?>>CHAROLA</option>
-                                    <option value="PLASTICO" <?php echo $_POST['prod_dmedida'][$k] == 'PLASTICO' ? 'selected' : '' ?>>PLASTICO</option>
-                                    <option value="ARPILLA" <?php echo $_POST['prod_dmedida'][$k] == 'ARPILLA' ? 'selected' : '' ?>>ARPILLA</option>
-                                    <option value="ARPILLITA" <?php echo $_POST['prod_dmedida'][$k] == 'ARPILLITA' ? 'selected' : '' ?>>ARPILLITA</option>
-                                    <option value="A GRANEL" <?php echo $_POST['prod_dmedida'][$k] == 'A GRANEL' ? 'selected' : '' ?>>A GRANEL</option>
+                                    <?php foreach ($unidades as $key => $u) { ?>
+                                      <option value="<?php echo $u->nombre ?>" <?php echo $_POST['prod_dmedida'][$k] == $u->nombre ? 'selected' : '' ?>><?php echo $u->nombre ?></option>
+                                    <?php } ?>
                                   </select>
                                 </td>
                                 <td>
@@ -352,14 +347,9 @@
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
                       <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                        <option value="MADERA">MADERA</option>
-                        <option value="MAD/CERT">MAD/CERT</option>
-                        <option value="CARTON">CARTON</option>
-                        <option value="CHAROLA">CHAROLA</option>
-                        <option value="PLASTICO">PLASTICO</option>
-                        <option value="ARPILLA">ARPILLA</option>
-                        <option value="ARPILLITA">ARPILLITA</option>
-                        <option value="A GRANEL">A GRANEL</option>
+                        <?php foreach ($unidades as $key => $u) { ?>
+                          <option value="<?php echo $u->nombre ?>"><?php echo $u->nombre ?></option>
+                        <?php } ?>
                       </select>
                     </td>
                     <td>
