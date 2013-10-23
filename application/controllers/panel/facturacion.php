@@ -18,6 +18,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
     'facturacion/ajax_get_pallet_folio/',
+    'facturacion/ajax_get_unidades/',
 
     'facturacion/xml/'
   );
@@ -149,6 +150,8 @@ class facturacion extends MY_Controller {
     // echo "<pre>";
     //   var_dump($params['borrador']);
     // echo "</pre>";exit;
+
+    $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -844,7 +847,8 @@ class facturacion extends MY_Controller {
   /**
     * Obtiene listado de los clientes que tienen RFC por ajax.
     */
-  public function ajax_get_pallet_folio(){
+  public function ajax_get_pallet_folio()
+  {
     $this->load->model('rastreabilidad_pallets_model');
 
     $pallet = $this->db->select('id_pallet')->from('rastria_pallets')->where('folio', $_GET['folio'])->get();
@@ -876,6 +880,18 @@ class facturacion extends MY_Controller {
       echo json_encode(false);
     }
   }
+
+  /**
+    * Obtiene las unidades por ajax.
+    *
+    * @return JSON
+    */
+   public function ajax_get_unidades()
+   {
+    $unidades = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
+    echo json_encode($unidades);
+   }
 
   /*
    |-------------------------------------------------------------------------
