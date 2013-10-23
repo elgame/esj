@@ -12,6 +12,9 @@ class rastreabilidad_model extends CI_Model {
     $data = array(
       'id_rendimiento'   => $_POST['id_rendimiento'],
       'id_clasificacion' => $_POST['id_clasificacion'],
+      'id_unidad'        => $_POST['id_unidad'],
+      'id_calibre'       => $_POST['id_calibre'],
+      'id_etiqueta'      => $_POST['id_etiqueta'],
       'existente'        => $_POST['existente'],
       'linea1'           => $_POST['linea1'],
       'linea2'           => $_POST['linea2'],
@@ -46,6 +49,10 @@ class rastreabilidad_model extends CI_Model {
   public function editClasificacion()
   {
     $data = array(
+      'id_unidad'        => $_POST['id_unidad'],
+      'id_calibre'       => $_POST['id_calibre'],
+      'id_etiqueta'      => $_POST['id_etiqueta'],
+
       'existente'        => $_POST['existente'],
       'linea1'           => $_POST['linea1'],
       'linea2'           => $_POST['linea2'],
@@ -56,7 +63,10 @@ class rastreabilidad_model extends CI_Model {
     // Actualiza los datos de la clasificacion
     $this->db->update('rastria_rendimiento_clasif',$data, array(
       'id_rendimiento'   => $_POST['id_rendimiento'],
-      'id_clasificacion' => $_POST['id_clasificacion'])
+      'id_clasificacion' => $_POST['id_clasificacion'],
+      'id_unidad'        => $_POST['id_unidad'],
+      'id_calibre'       => $_POST['id_calibre'],
+      'id_etiqueta'      => $_POST['id_etiqueta'])
     );
 
     // Elimina la clasificacion de los pallets
@@ -254,12 +264,17 @@ class rastreabilidad_model extends CI_Model {
 
         $sql = $this->db->query(
           "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.linea1, rrc.linea2,
-                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion
+                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion, 
+                  u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre, 
+                  e.id_etiqueta, e.nombre AS etiqueta
           FROM rastria_rendimiento_clasif AS rrc
-          INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
+            INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
+            LEFT JOIN unidades AS u ON u.id_unidad = rrc.id_unidad 
+            LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre 
+            LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta 
           WHERE
-            id_rendimiento = {$id_rendimiento}
-          ORDER BY id_rendimiento ASC
+            rrc.id_rendimiento = {$id_rendimiento}
+          ORDER BY (rrc.id_rendimiento, cl.nombre, u.nombre, ca.nombre, e.nombre) ASC
           ");
 
         if ($sql->num_rows() > 0)
@@ -277,7 +292,8 @@ class rastreabilidad_model extends CI_Model {
    * @param  string $id_clasificacion
    * @return array
    */
-  public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote)
+  public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote, 
+                                        $id_unidad, $id_calibre, $id_etiqueta)
   {
 
     $info = $this->getLoteInfo($id_rendimiento, false);
@@ -288,6 +304,9 @@ class rastreabilidad_model extends CI_Model {
         ->from('rastria_cajas_libres AS rcl')
         ->join('rastria_rendimiento AS rd','rd.id_rendimiento = rcl.id_rendimiento', 'join')
         ->where('rcl.id_clasificacion', $id_clasificacion)
+        ->where('rcl.id_unidad', $id_unidad)
+        ->where('rcl.id_calibre', $id_calibre)
+        ->where('rcl.id_etiqueta', $id_etiqueta)
         ->where('DATE(rd.fecha) <', $info['info']->fecha)
         ->get();
     }
@@ -315,7 +334,9 @@ class rastreabilidad_model extends CI_Model {
           $sql = $this->db->query(
             "SELECT total AS existentes
               FROM rastria_rendimiento_clasif
-              WHERE id_clasificacion = {$id_clasificacion} AND id_rendimiento = {$lotee->id_rendimiento}
+              WHERE id_clasificacion = {$id_clasificacion} AND id_rendimiento = {$lotee->id_rendimiento} 
+                    AND id_unidad = {$id_unidad} AND id_calibre = {$id_calibre}
+                    AND id_etiqueta = {$id_etiqueta}
           ");
 
           if ($sql->num_rows() > 0)
@@ -334,6 +355,9 @@ class rastreabilidad_model extends CI_Model {
           ->from('rastria_cajas_libres AS rcl')
           ->join('rastria_rendimiento AS rd','rd.id_rendimiento = rcl.id_rendimiento', 'join')
           ->where('rcl.id_clasificacion', $id_clasificacion)
+          ->where('rcl.id_unidad', $id_unidad)
+          ->where('rcl.id_calibre', $id_calibre)
+          ->where('rcl.id_etiqueta', $id_etiqueta)
           ->where('DATE(rd.fecha) <', $info['info']->fecha)
           ->get();
       }

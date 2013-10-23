@@ -43,21 +43,8 @@
 									<div class="span3">
 									  <label class="span3" for="fcliente">Cliente </label>
 										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo set_value('fcliente'); ?>" 
-											maxlength="25" placeholder="Cliente" data-next="fcalibres">
+											maxlength="25" placeholder="Cliente" data-next="fclasificacion">
 										<input type="hidden" name="fid_cliente" value="<?php echo set_value('fid_cliente'); ?>" id="fid_cliente" class="getjsval">
-									</div>
-
-									<div class="span4">
-									  <label class="span3" for="fcalibres">Calibres </label>
-									  <select name="fcalibres[]" id="fcalibres" class="chosen-select" multiple data-next="fclasificacion">
-									<?php  
-									foreach ($calibres['calibres'] as $key => $calibre)
-									{
-									?>
-										<option value="<?php echo $calibre->id_calibre; ?>" <?php echo set_select('fcalibres[]', $calibre->id_calibre); ?>><?php echo $calibre->nombre; ?></option>
-									<?php 
-									} ?>
-									  </select>
 									</div>
 
 								</div>
@@ -66,19 +53,41 @@
 								<div class="row-fluid">
 									<fieldset class="span6">
 										<legend>Disponibles</legend>
-										<div class="span12">
-										  <label class="span4" for="fclasificacion">Clasificacion </label>
-											<input type="text" name="fclasificacion" id="fclasificacion" class="span7" value="<?php echo set_value('fclasificacion'); ?>" 
-												maxlength="100" placeholder="Nombre" data-next="btn_submit">
-											<input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
+										<div class="row-fluid">
+											<div class="span5">
+												<input type="text" name="fclasificacion" id="fclasificacion" class="span12" value="<?php echo set_value('fclasificacion'); ?>" 
+													maxlength="100" placeholder="Clasificación" data-next="funidad">
+												<input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
+											</div>
+
+											<div class="span2">
+												<input type="text" name="funidad" id="funidad" class="span12" value="<?php echo set_value('funidad'); ?>" 
+													maxlength="100" placeholder="Unidad" data-next="fcalibre">
+												<input type="hidden" name="fidunidad" id="fidunidad" value="<?php echo set_value('fidunidad'); ?>">
+											</div>
+
+											<div class="span2">
+												<input type="text" name="fcalibre" id="fcalibre" class="span12" value="<?php echo set_value('fcalibre'); ?>" 
+													maxlength="100" placeholder="Calibre" data-next="fetiqueta">
+												<input type="hidden" name="fidcalibre" id="fidcalibre" value="<?php echo set_value('fidcalibre'); ?>">
+											</div>
+
+											<div class="span3">
+												<input type="text" name="fetiqueta" id="fetiqueta" class="span12" value="<?php echo set_value('fetiqueta'); ?>" 
+													maxlength="100" placeholder="Etiqueta" data-next="fclasificacion">
+												<input type="hidden" name="fidetiqueta" id="fidetiqueta" value="<?php echo set_value('fidetiqueta'); ?>">
+											</div>
 										</div>
 										<table class="table table-striped table-bordered bootstrap-datatable">
 										  <thead>
 											  <tr>
 											  	<th>Fecha</th>
-												  <th>Lote</th>
-													<th>Cajas libres</th>
-												  <th>Opciones</th>
+												<th>Lote</th>
+												<th>Unidad</th>
+												<th>Calibre</th>
+												<th>Etiqueta</th>
+												<th>Cajas libres</th>
+												<th>Opciones</th>
 											  </tr>
 										  </thead>
 										  <tbody id="tblrendimientos">
@@ -86,23 +95,24 @@
 									  </table>
 								  </fieldset>
 
-								  <fieldset class="span6">
+								  <fieldset class="span6 nomarg">
 										<legend>Seleccionadas</legend>
 										<table class="table table-striped table-bordered bootstrap-datatable">
 										  <thead>
 											  <tr>
-											  	<th>Fecha</th>
-												  <th>Lote</th>
-												  <th>Clasif</th>
-													<th>Cajas</th>
-												  <th>Opciones</th>
+												<th>Fecha</th>
+												<th>Lote</th>
+												<th>Clasif</th>
+												<th>Más Inf.</th>
+												<th>Cajas</th>
+												<th>Opciones</th>
 											  </tr>
 										  </thead>
 										  <tbody id="tblrendimientossel">
 										  </tbody>
 										  <tfoot>
 										  	<tr>
-										  		<td colspan="3" style="text-align: right;">Cajas seleccionadas</td>
+										  		<td colspan="4" style="text-align: right;">Cajas seleccionadas</td>
 										  		<td id="total_cajas_sel" style="font-weight: bold;">0</td>
 										  	</tr>
 										  </tfoot>

@@ -80,9 +80,12 @@
                 <thead>
                   <tr>
                     <th>CLASIFICACIÓN</th>
-                    <th>EXISTENTE</th>
-                    <th>LINEA 1</th>
-                    <th>LINEA 2</th>
+                    <th style="width:110px;">UNIDAD</th>
+                    <th style="width:55px;">CALIBRE</th>
+                    <th style="width:110px;">ETIQUETA</th>
+                    <th style="width:55px;">EXISTENTE</th>
+                    <th style="width:55px;">LINEA 1</th>
+                    <th style="width:55px;">LINEA 2</th>
                     <th>TOTAL</th>
                     <th>RENDIMIENTO</th>
                     <th>ACCIONES</th>
@@ -95,6 +98,18 @@
                       <td>
                         <input type="text" id="fclasificacion" value="<?php echo $c->clasificacion ?>" class="span12">
                         <input type="hidden" id="fidclasificacion" value="<?php echo $c->id_clasificacion ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="funidad" value="<?php echo $c->unidad ?>" class="span12">
+                        <input type="hidden" id="fidunidad" value="<?php echo $c->id_unidad ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fcalibre" value="<?php echo $c->calibre ?>" class="span12">
+                        <input type="hidden" id="fidcalibre" value="<?php echo $c->id_calibre ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fetiqueta" value="<?php echo $c->etiqueta ?>" class="span12">
+                        <input type="hidden" id="fidetiqueta" value="<?php echo $c->id_etiqueta ?>" class="span12">
                       </td>
                       <td>
                         <input type="text" id="fexistente" value="<?php echo $c->existente ?>" class="span12 vpositive">
@@ -124,6 +139,18 @@
                     <td>
                       <input type="text" id="fclasificacion" value="" class="span12">
                       <input type="hidden" id="fidclasificacion" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="funidad" value="" class="span12">
+                      <input type="hidden" id="fidunidad" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fcalibre" value="" class="span12">
+                      <input type="hidden" id="fidcalibre" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fetiqueta" value="" class="span12">
+                      <input type="hidden" id="fidetiqueta" value="" class="span12">
                     </td>
                     <td>
                       <input type="text" id="fexistente" value="0" class="span12 vpositive">

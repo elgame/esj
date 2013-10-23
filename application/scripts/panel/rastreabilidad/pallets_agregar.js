@@ -11,10 +11,12 @@ $(function(){
 
 var addpallets = (function($){
   var objr = {}, tbody, tbodysel, total_cajas_sel, fcajas,
-  fid_clasificacion, fclasificacion;
+  fid_clasificacion, fclasificacion,
+  funidad, fidunidad,
+  fcalibre, fidcalibre,
+  fetiqueta, fidetiqueta;
 
   function init(){
-    asignaAutocomplets();
     formPallet();
 
     tbody             = $("#tblrendimientos");
@@ -23,6 +25,14 @@ var addpallets = (function($){
     fcajas            = $("#fcajas");
     fid_clasificacion = $("#fid_clasificacion");
     fclasificacion    = $("#fclasificacion");
+    funidad           = $("#funidad");
+    fidunidad         = $("#fidunidad");
+    fcalibre          = $("#fcalibre");
+    fidcalibre        = $("#fidcalibre");
+    fetiqueta         = $("#fetiqueta");
+    fidetiqueta       = $("#fidetiqueta");
+
+    asignaAutocomplets();
   }
 
   function formPallet(){
@@ -44,12 +54,66 @@ var addpallets = (function($){
         fid_clasificacion.val(ui.item.id);
         fclasificacion.val(ui.item.label).css({'background-color': '#99FF99'});
 
-        getRendimientosLibres(ui.item.id);
+        getRendimientosLibres();
       }
     }).keydown(function(e){
       if (e.which === 8) {
         $(this).css({'background-color': '#FFD9B3'});
         fid_clasificacion.val('');
+      }
+    });
+
+    // Autocomplete unidad
+    funidad.autocomplete({
+      source: base_url + 'panel/rastreabilidad/ajax_get_unidades/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        fidunidad.val(ui.item.id);
+        funidad.val(ui.item.label).css({'background-color': '#99FF99'});
+
+        getRendimientosLibres();
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        fidunidad.val('');
+      }
+    });
+
+    // Autocomplete calibre
+    fcalibre.autocomplete({
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        fidcalibre.val(ui.item.id);
+        fcalibre.val(ui.item.label).css({'background-color': '#99FF99'});
+
+        getRendimientosLibres();
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        fidcalibre.val('');
+      }
+    });
+
+    // Autocomplete etiqueta
+    fetiqueta.autocomplete({
+      source: base_url + 'panel/rastreabilidad/ajax_get_etiquetas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        fidetiqueta.val(ui.item.id);
+        fetiqueta.val(ui.item.label).css({'background-color': '#99FF99'});
+
+        getRendimientosLibres();
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        fidetiqueta.val('');
       }
     });
 
@@ -79,8 +143,10 @@ var addpallets = (function($){
 
   function addCajaSel(){
     var vthis = $(this), idrow = "#row_rend"+vthis.attr("data-id"), html;
+    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel),
+        //ids = id_rendimiento, id_unidad, id_calibre, id_etiqueta
+        ids = vthis.attr("data-id").split('_');
 
-    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
     if(parseInt(total_cajas_sel.text()) < parseInt(fcajas.val()) ) 
     {
       if(row_rendsel.length == 0){
@@ -88,9 +154,14 @@ var addpallets = (function($){
             '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
             '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
             '<td class="clsif">'+fclasificacion.val()+'</td>'+
+            '<td class="mas">'+$(idrow+" .unidad").text()+'|'+$(idrow+" .calibre").text()+'|'+$(idrow+" .etiqueta").text()+'</td>'+
             '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+calcRestaCajasSel($(idrow+" .libres").text())+'" min="1" max="'+calcRestaCajasSel($(idrow+" .libres").text())+'"></td>'+
-            '<td><input type="hidden" class="span5" name="idrendimientos[]" value="'+vthis.attr("data-id")+'">'+
-            '   <input type="hidden" class="span5" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
+            '<td><input type="hidden" name="idrendimientos[]" value="'+ids[0]+'">'+
+            '   <input type="hidden" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
+            '   <input type="hidden" name="idunidad[]" value="'+ids[1]+'">'+
+            '   <input type="hidden" name="idcalibre[]" value="'+ids[2]+'">'+
+            '   <input type="hidden" name="idetiqueta[]" value="'+ids[3]+'">'+
+
             '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'"><i class="icon-remove"></i></buttom></td>'+
           '</tr>';
         tbodysel.append(html);
@@ -121,17 +192,29 @@ var addpallets = (function($){
       total_cajas_sel.text(num_cajas);
   }
 
-  function getRendimientosLibres($clasificacion){
-    $.getJSON(base_url+"panel/rastreabilidad_pallets/ajax_get_rendimientos", {id: $clasificacion}, function(resp){
-      var html = '';
+  function getRendimientosLibres(){
+    var datavar = {
+      id: fid_clasificacion.val(),
+      idunidad: fidunidad.val(),
+      idcalibre: fidcalibre.val(),
+      idetiqueta: fidetiqueta.val()
+    }
+    $.getJSON(base_url+"panel/rastreabilidad_pallets/ajax_get_rendimientos", datavar, function(resp){
+      var html = '', idrow;
       if (resp.rendimientos.length > 0) {
         for (var i = 0; i < resp.rendimientos.length; i++) {
-          html += '<tr id="row_rend'+resp.rendimientos[i].id_rendimiento+'">'+
+          idrow = resp.rendimientos[i].id_rendimiento+'_'+resp.rendimientos[i].id_unidad+'_'+resp.rendimientos[i].id_calibre+'_'+resp.rendimientos[i].id_etiqueta;
+          html += '<tr id="row_rend'+idrow+'">'+
             '<td class="fecha">'+resp.rendimientos[i].fecha+'</td>'+
             '<td class="lote">'+resp.rendimientos[i].lote+'</td>'+
+
+            '<td class="unidad">'+resp.rendimientos[i].unidad+'</td>'+
+            '<td class="calibre">'+resp.rendimientos[i].calibre+'</td>'+
+            '<td class="etiqueta">'+resp.rendimientos[i].etiqueta+'</td>'+
+
             '<td class="libres">'+resp.rendimientos[i].libres+'</td>'+
             '<td><buttom class="btn rendimientos cajasdisponibles"'+ 
-            '  data-id="'+resp.rendimientos[i].id_rendimiento+'" data-libres="'+resp.rendimientos[i].libres+'"><i class="icon-angle-right"></i></buttom></td>'+
+            '  data-id="'+idrow+'" data-libres="'+resp.rendimientos[i].libres+'"><i class="icon-angle-right"></i></buttom></td>'+
           '</tr>';
         };
         tbody.html(html);
