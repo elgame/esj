@@ -67,6 +67,7 @@
                   <th>Serie-Folio</th>
                   <th>Cliente</th>
                   <th>Empresa</th>
+                  <th>Observaciones</th>
                   <th>Forma de Pago</th>
                   <th>Estado</th>
                   <th>Estado Timbre</th>
@@ -87,6 +88,7 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
+                  <td><?php echo $fact->observaciones; ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>

@@ -306,11 +306,27 @@ class cfdi{
     $datos['concepto'] = array();
     foreach ($data['concepto'] as $key => $producto)
     {
-      $datos['concepto'][] = (float)$producto['cantidad'];
-      $datos['concepto'][] = $producto['unidad'];
-      $datos['concepto'][] = $producto['descripcion'];
-      $datos['concepto'][] = (float)$producto['valorUnitario'];
-      $datos['concepto'][] = (float)$producto['importe'];
+      if ($data['sinCosto'])
+      {
+        if ($producto['idClasificacion'] != '48' AND $producto['idClasificacion'] != '49' AND
+            $producto['idClasificacion'] != '50' AND $producto['idClasificacion'] != '51' AND
+            $producto['idClasificacion'] != '52')
+        {
+          $datos['concepto'][] = (float)$producto['cantidad'];
+          $datos['concepto'][] = $producto['unidad'];
+          $datos['concepto'][] = $producto['descripcion'];
+          $datos['concepto'][] = (float)$producto['valorUnitario'];
+          $datos['concepto'][] = (float)$producto['importe'];
+        }
+      }
+      else
+      {
+        $datos['concepto'][] = (float)$producto['cantidad'];
+        $datos['concepto'][] = $producto['unidad'];
+        $datos['concepto'][] = $producto['descripcion'];
+        $datos['concepto'][] = (float)$producto['valorUnitario'];
+        $datos['concepto'][] = (float)$producto['importe'];
+      }
     }
 
     // ----------> Nodo retencion
@@ -726,15 +742,35 @@ class cfdi{
 
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Conceptos>';
 
-		foreach($data['concepto'] as $concepto){
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬valorUnitario="'.(float)$concepto['valorUnitario'].'" ';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$concepto['importe'].'"';
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬>';
-			$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Concepto>';
+		foreach($data['concepto'] as $concepto)
+    {
+      if ($data['sinCosto'])
+      {
+        if ($concepto['idClasificacion'] != '48' AND $concepto['idClasificacion'] != '49' AND
+            $concepto['idClasificacion'] != '50' AND $concepto['idClasificacion'] != '51' AND
+            $concepto['idClasificacion'] != '52')
+        {
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬valorUnitario="'.(float)$concepto['valorUnitario'].'" ';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$concepto['importe'].'"';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬>';
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Concepto>';
+        }
+      }
+      else
+      {
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬valorUnitario="'.(float)$concepto['valorUnitario'].'" ';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬importe="'.(float)$concepto['importe'].'"';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬>';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Concepto>';
+      }
 		}
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Conceptos>';
 

@@ -156,36 +156,56 @@ $(function(){
 
   loadPallet();
 
+  EventKeyPressFolioPallet();
+  EventOnClickSinCosto();
 });
+
+var EventKeyPressFolioPallet = function () {
+  $('#folioPallet').on('keypress', function(event) {
+    if (event.which === 13) {
+      event.preventDefault();
+      $('#loadPallet').trigger('click');
+    }
+  });
+};
+
+var EventOnClickSinCosto = function () {
+  $('#dsincosto').on('click', function(event) {
+    var $this = $(this);
+
+    calculaTotal();
+  });
+};
 
 function loadPallet() {
   $('#loadPallet').on('click', function(event) {
-    var $folio = $('#folio');
+    var $folio = $('#folioPallet');
 
     if ($folio.val() !== '') {
 
       $.get(base_url + 'panel/facturacion/ajax_get_pallet_folio/?folio='+$folio.val(), function(data) {
         if (data) {
-          console.log(data);
+          // console.log(data);
           var existe = false;
-          // $('.pallet_id').each(function(index, el) {
-          //   if ($(this).val() == data['info']['id_pallet']) {
-          //     existe = true;
-          //     noty({"text": 'El pallet ya esta cargado', "layout":"topRight", "type": 'error'});
-          //   }
-          // });
 
+          // Verifica si el pallet ya esta cargado en el listado.
           if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
-            for(var i in data['rendimientos']) {
-              addProducto({
-                'id': data['rendimientos'][i]['id_clasificacion'],
-                'nombre': data['rendimientos'][i]['nombre'],
-                'cajas': data['rendimientos'][i]['cajas'],
-                'id_pallet': data['info']['id_pallet'],
-              });
+
+            if (data['rendimientos'].length > 0) {
+              for(var i in data['rendimientos']) {
+                addProducto({
+                  'id': data['rendimientos'][i]['id_clasificacion'],
+                  'nombre': data['rendimientos'][i]['nombre'],
+                  'cajas': data['rendimientos'][i]['cajas'],
+                  'id_pallet': data['info']['id_pallet'],
+                });
+              }
+            } else {
+              noty({"text": 'El pallet no cuenta con cajas para agregar.', "layout":"topRight", "type": 'error'});
             }
+            $folio.val('');
           } else {
-            noty({"text": 'El pallet ya esta cargado', "layout":"topRight", "type": 'error'});
+            noty({"text": 'El pallet ya esta cargado en el listado o ya existe en una factura.', "layout":"topRight", "type": 'error'});
           }
         } else {
           noty({"text": 'No existe un pallet con el folio especificado.', "layout":"topRight", "type": 'error'});
@@ -234,9 +254,6 @@ function addProducto(prod) {
       trHtml = '',
       indexJump = jumpIndex + 1;
 
-      console.log(prod);
-
-
   var prod_nombre = prod_id = pallet = '', prod_cajas = 0;
   if (prod) {
     prod_nombre = prod.nombre;
@@ -249,7 +266,7 @@ function addProducto(prod) {
               '<td>' +
                 '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                 '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
-                '<input type="text" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
+                '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
               '</td>' +
               '<td>' +
                 '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -299,33 +316,66 @@ function addProducto(prod) {
   $('.jump'+indexJump).focus();
 }
 
-function calculaTotal ($tr) {
+function calculaTotal () {
   var total_importes    = 0,
       total_descuentos  = 0,
       total_ivas        = 0,
       total_retenciones = 0,
       total_factura     = 0;
 
-  $('input#prod_importe').each(function(i, e) {
-    total_importes += parseFloat($(this).val());
-  });
+  var $sinCosto = $('#dsincosto'),
+      isCheckedSinCosto = $sinCosto.is(':checked');
 
+  $('input#prod_importe').each(function(i, e) {
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_importes += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+        total_importes += parseFloat($(this).val());
+      }
+    }
+  });
   total_importes = trunc2Dec(total_importes);
 
   $('input#prod_ddescuento').each(function(i, e) {
-    total_descuentos += parseFloat($(this).val());
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_descuentos += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+        total_descuentos += parseFloat($(this).val());
+      }
+    }
   });
-
   total_descuentos = trunc2Dec(total_descuentos);
 
   var total_subtotal = trunc2Dec(parseFloat(total_importes) - parseFloat(total_descuentos));
 
   $('input#prod_diva_total').each(function(i, e) {
-    total_ivas += parseFloat($(this).val());
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_ivas += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+        total_ivas += parseFloat($(this).val());
+      }
+    }
   });
 
   $('input#prod_dreten_iva_total').each(function(i, e) {
-    total_retenciones += parseFloat($(this).val());
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_retenciones += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+        total_retenciones += parseFloat($(this).val());
+      }
+    }
   });
 
   total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
@@ -349,7 +399,6 @@ function calculaTotal ($tr) {
   $('#total_totfac').val(total_factura);
 
   $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()))
-
 }
 
 function loadSerieFolio (ide) {

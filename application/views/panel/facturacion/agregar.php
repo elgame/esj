@@ -126,7 +126,15 @@
                 <label class="control-label">Folio Pallet</label>
                 <div class="controls">
                   <div class="input-append">
-                    <input type="text" id="folio" class="span7"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                    <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Sin Costo</label>
+                <div class="controls">
+                  <div class="input-append">
+                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($_POST['dsincosto']) ? 'checked' : '' ?>>
                   </div>
                 </div>
               </div>
@@ -274,6 +282,7 @@
                             $_POST['prod_diva_total'][$key]         = $p->iva;
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+                            $_POST['pallet_id'][$key]               = $p->id_pallet;
                           }
                         } ?>
 
@@ -284,7 +293,7 @@
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
-                                  <input type="text" name="pallet_id[]" value="<?php echo $_POST['pallet_id'][$k] ?>" id="pallet_id" class="span12">
+                                  <input type="hidden" name="pallet_id[]" value="<?php echo $_POST['pallet_id'][$k] ?>" id="pallet_id" class="span12">
                                 </td>
                                 <td>
                                   <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
@@ -334,7 +343,7 @@
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
-                      <input type="text" name="pallet_id[]" value="" id="pallet_id" class="span12">
+                      <input type="hidden" name="pallet_id[]" value="" id="pallet_id" class="span12">
                     </td>
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->

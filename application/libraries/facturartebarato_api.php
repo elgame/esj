@@ -21,7 +21,7 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $apiURL = 'facturartebarato.com/api/v1/';
+  protected $apiURL = 'development.facturartebarato.com/api/v1/';
 
   /**
    * Almacena la informacion de la peticion por curl.

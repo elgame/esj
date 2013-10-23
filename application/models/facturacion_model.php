@@ -49,7 +49,7 @@ class facturacion_model extends privilegios_model{
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid, f.docs_finalizados
+                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -104,7 +104,7 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion')
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.id_pallet')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->where('id_factura = ' . $idFactura)
@@ -290,6 +290,7 @@ class facturacion_model extends privilegios_model{
           'status'              => $borrador ? 'b' : 'p',
           // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
           'retencion_iva'       => $this->input->post('total_retiva'),
+          'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
         );
 
         // Si el tipo de comprobante es "egreso" o una nota de credito.
@@ -309,6 +310,9 @@ class facturacion_model extends privilegios_model{
         $traslado11 = 0; // Total de traslado 11%
         $traslado16 = 0; // Total de traslado 16%
 
+        $pallets = array(); // Ids de los pallets cargados en la factura.
+        $lastPalletId = 0;
+
         // Ciclo para obtener los impuestos traslados, tambien construye
         // los datos de  los productos a insertar tanto en la cadena original como
         // en la factura.
@@ -317,11 +321,12 @@ class facturacion_model extends privilegios_model{
           if ($_POST['prod_importe'][$key] != 0)
           {
             $productosCadOri[] = array(
-              'cantidad'      => $_POST['prod_dcantidad'][$key],
-              'unidad'        => $_POST['prod_dmedida'][$key],
-              'descripcion'   => $descripcion,
-              'valorUnitario' => $_POST['prod_dpreciou'][$key],
-              'importe'       => $_POST['prod_importe'][$key],
+              'cantidad'         => $_POST['prod_dcantidad'][$key],
+              'unidad'           => $_POST['prod_dmedida'][$key],
+              'descripcion'      => $descripcion,
+              'valorUnitario'    => $_POST['prod_dpreciou'][$key],
+              'importe'          => $_POST['prod_importe'][$key],
+              'idClasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
             );
 
             if ($_POST['prod_diva_porcent'][$key] == '11')
@@ -344,18 +349,36 @@ class facturacion_model extends privilegios_model{
               'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+              'id_pallet'       => $_POST['pallet_id'][$key] !== '' ? $_POST['pallet_id'][$key] : null,
             );
+
+            if ($_POST['pallet_id'][$key] != '')
+            {
+              if ($_POST['pallet_id'][$key] != $lastPalletId)
+              {
+                $pallets[] = array(
+                  'id_factura' => $idFactura,
+                  'id_pallet'  => $_POST['pallet_id'][$key]
+                );
+                $lastPalletId = $_POST['pallet_id'][$key];
+              }
+            }
+
           }
         }
 
         if (count($productosFactura) > 0)
           $this->db->insert_batch('facturacion_productos', $productosFactura);
 
+        if (count($pallets) > 0)
+          $this->db->insert_batch('facturacion_pallets', $pallets);
+
         // Si es un borrador
         if ($borrador) return true;
 
         // Obtiene los datos para la cadena original
         $datosCadOrig = $this->datosCadenaOriginal();
+        $datosCadOrig['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
 
         // Si es un ingreso o una factura.
         if ($_POST['dtipo_comprobante'] === 'ingreso')
@@ -465,6 +488,7 @@ class facturacion_model extends privilegios_model{
         // Datos para el XML3.2
         $datosXML               = $cadenaOriginal['datos'];
         $datosXML['id']         = $this->input->post('did_empresa');
+        $datosXML['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
         $datosXML['table']      = 'empresas';
         $datosXML['comprobante']['serie']         = $this->input->post('dserie');
         $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
@@ -1008,6 +1032,8 @@ class facturacion_model extends privilegios_model{
 
       // Productos e Impuestos
       $productosFactura   = array(); // Productos para la Factura
+      $pallets = array(); // Ids de los pallets cargados en la factura.
+      $lastPalletId = 0;
 
       foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
       {
@@ -1026,14 +1052,31 @@ class facturacion_model extends privilegios_model{
             'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
             'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
             'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+            'id_pallet'       => $_POST['pallet_id'][$key] !== '' ? $_POST['pallet_id'][$key] : null,
           );
+
+          if ($_POST['pallet_id'][$key] != '')
+          {
+            if ($_POST['pallet_id'][$key] != $lastPalletId)
+            {
+              $pallets[] = array(
+                'id_factura' => $idBorrador,
+                'id_pallet'  => $_POST['pallet_id'][$key]
+              );
+              $lastPalletId = $_POST['pallet_id'][$key];
+            }
+          }
         }
       }
 
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
+      $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
 
       if (count($productosFactura) > 0)
         $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+      if (count($pallets) > 0)
+        $this->db->insert_batch('facturacion_pallets', $pallets);
     }
 
     /**
@@ -1642,8 +1685,8 @@ class facturacion_model extends privilegios_model{
         $pdf->SetX(6);
         $pdf->SetFont('Arial','B',8);
         $pdf->SetTextColor(255,255,255);
-        $pdf->Row(array('', '', '', 
-            $cantidad, 
+        $pdf->Row(array('', '', '',
+            $cantidad,
             $cantidad == 0 ? 0 : String::formatoNumero($importe/$cantidad, 2, '$', false),
             String::formatoNumero($importe, 2, '$', false) ), true);
 

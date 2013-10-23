@@ -853,9 +853,23 @@ class facturacion extends MY_Controller {
     {
       $pallet = $pallet->row();
 
-      $info = $this->rastreabilidad_pallets_model->getInfoPallet($pallet->id_pallet);
+      $existentes = $this->db->select('fp.id_factura')
+        ->from('facturacion_pallets as fp')
+        ->join('facturacion as f', 'f.id_factura = fp.id_factura', 'inner')
+        ->where('fp.id_pallet', $pallet->id_pallet)
+        ->where_in('f.status', array('p', 'pa'))
+        ->get();
 
-      echo json_encode($info);
+      if ($existentes->num_rows() > 0)
+      {
+        echo json_encode(false);
+      }
+      else
+      {
+        $info = $this->rastreabilidad_pallets_model->getInfoPallet($pallet->id_pallet);
+
+        echo json_encode($info);
+      }
     }
     else
     {
