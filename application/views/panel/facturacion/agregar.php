@@ -287,7 +287,7 @@
                         } ?>
 
                         <?php if (isset($_POST['prod_did_prod'])) {
-                          foreach ($_POST['prod_did_prod'] as $k => $v) {
+                          foreach ($_POST['prod_did_prod'] as $k => $v){
                             if ($_POST['prod_importe'][$k] != 0) { ?>
                               <tr data-pallet="<?php echo $_POST['pallet_id'][$k] ?>">
                                 <td>
@@ -304,27 +304,27 @@
                                   </select>
                                 </td>
                                 <td>
-                                    <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]?>" id="prod_dcantidad">
+                                    <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
                                 </td>
                                 <td>
-                                  <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $_POST['prod_dpreciou'][$k]?>" id="prod_dpreciou">
+                                  <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
                                 </td>
                                 <td>
                                     <select name="diva" id="diva" class="span12">
-                                      <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : '' ?>>0%</option>
-                                      <option value="11" <?php echo $_POST['prod_diva_porcent'][$k] == 11 ? 'selected' : '' ?>>11%</option>
-                                      <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : '' ?>>16%</option>
+                                      <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : ''; ?>>0%</option>
+                                      <option value="11" <?php echo $_POST['prod_diva_porcent'][$k] == 11 ? 'selected' : ''; ?>>11%</option>
+                                      <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
                                     </select>
 
-                                    <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]?>" id="prod_diva_total">
-                                    <input type="hidden" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]?>" id="prod_diva_porcent">
+                                    <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total">
+                                    <input type="hidden" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]; ?>" id="prod_diva_porcent">
                                 </td>
                                 <td>
                                   <select name="dreten_iva" id="dreten_iva" class="span12 prod">
-                                    <option value="0" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0 ? 'selected' : '' ?>>No retener</option>
-                                    <option value="0.04" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.04 ? 'selected' : '' ?>>4%</option>
-                                    <option value="0.10667" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.10667 ? 'selected' : '' ?>>2 Terceras</option>
-                                    <option value="0.16" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.16 ? 'selected' : '' ?>>100 %</option>
+                                    <option value="0" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0 ? 'selected' : ''; ?>>No retener</option>
+                                    <option value="0.04" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.04 ? 'selected' : ''; ?>>4%</option>
+                                    <option value="0.10667" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.10667 ? 'selected' : ''; ?>>2 Terceras</option>
+                                    <option value="0.16" <?php echo $_POST['prod_dreten_iva_porcent'][$k] == 0.16 ? 'selected' : ''; ?>>100 %</option>
                                   </select>
 
                                   <input type="hidden" name="prod_dreten_iva_total[]" value="<?php echo $_POST['prod_dreten_iva_total'][$k] ?>" id="prod_dreten_iva_total" class="span12">
@@ -337,7 +337,7 @@
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                 </td>
                               </tr>
-                  <?php }}} ?>
+                        <?php }}} ?>
                   <tr data-pallet="">
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">

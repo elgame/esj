@@ -168,8 +168,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		{
 			$data = array(
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
-						'folio'            => $this->input->post('ffolio'),
-						'no_cajas'         => $this->input->post('fcajas'),
+						'folio'    => $this->input->post('ffolio'),
+						'no_cajas' => $this->input->post('fcajas'),
+						'no_hojas' => $this->input->post('fhojaspapel'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -200,8 +201,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		{
 			$data = array(
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
-						'folio'            => $this->input->post('ffolio'),
-						'no_cajas'         => $this->input->post('fcajas'),
+						'folio'    => $this->input->post('ffolio'),
+						'no_cajas' => $this->input->post('fcajas'),
+						'no_hojas' => $this->input->post('fhojaspapel'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');

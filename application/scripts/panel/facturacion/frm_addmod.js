@@ -351,7 +351,7 @@ function calculaTotal () {
       total_importes += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
         total_importes += parseFloat($(this).val());
       }
     }
@@ -364,7 +364,7 @@ function calculaTotal () {
       total_descuentos += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
         total_descuentos += parseFloat($(this).val());
       }
     }
@@ -379,7 +379,7 @@ function calculaTotal () {
       total_ivas += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
         total_ivas += parseFloat($(this).val());
       }
     }
@@ -391,7 +391,7 @@ function calculaTotal () {
       total_retenciones += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '48' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
         total_retenciones += parseFloat($(this).val());
       }
     }
