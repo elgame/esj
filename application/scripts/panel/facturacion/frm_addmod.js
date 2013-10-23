@@ -116,8 +116,24 @@ $(function(){
       var $tr = $(this).parent().parent();
 
       if (valida_agregar($tr)) {
-        $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
-        addProducto();
+
+        if ($tr.attr('data-pallet') == '') {
+          $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+          addProducto();
+        } else {
+          var $allTr = $('tr[data-pallet="'+$tr.attr('data-pallet')+'"]');
+          $allTr.each(function(index, el) {
+            if ($tr.get(0) == $(this).get(0)) {
+              if (index == ($allTr.length - 1)) {
+                addProducto();
+              }
+            }
+          });
+
+          // if ($('tr[data-pallet="'+$tr.attr('data-pallet')+'"]').length) {
+
+          // }
+        }
       } else {
         $tr.find('#prod_ddescripcion').focus();
         $tr.find('td').effect("highlight", {'color': '#da4f49'}, 500);
@@ -192,6 +208,7 @@ function loadPallet() {
           if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
 
             if (data['rendimientos'].length > 0) {
+
               for(var i in data['rendimientos']) {
                 addProducto({
                   'id': data['rendimientos'][i]['id_clasificacion'],
@@ -200,6 +217,9 @@ function loadPallet() {
                   'id_pallet': data['info']['id_pallet'],
                 });
               }
+
+              $('tr[data-pallet="'+data['info']['id_pallet']+'"]').first().find('#prod_ddescripcion').focus();
+
             } else {
               noty({"text": 'El pallet no cuenta con cajas para agregar.', "layout":"topRight", "type": 'error'});
             }
@@ -208,7 +228,7 @@ function loadPallet() {
             noty({"text": 'El pallet ya esta cargado en el listado o ya existe en una factura.', "layout":"topRight", "type": 'error'});
           }
         } else {
-          noty({"text": 'No existe un pallet con el folio especificado.', "layout":"topRight", "type": 'error'});
+          noty({"text": 'No existe un pallet con el folio especificado o ya esta en una factura.', "layout":"topRight", "type": 'error'});
         }
       }, 'json');
     } else {
@@ -262,56 +282,60 @@ function addProducto(prod) {
     pallet      = prod.id_pallet;
   }
 
-  trHtml = '<tr data-pallet="'+pallet+'">' +
-              '<td>' +
-                '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
-                '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<option value="Pieza">Pieza</option>' +
-                  '<option value="Caja">Caja</option>' +
-                  '<option value="Kilos">Kilos</option>' +
-                  '<option value="No aplica">No aplica</option>' +
-                '</select>' +
-              '</td>' +
-              '<td>' +
-                  '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-              '</td>' +
-              '<td>' +
-                '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-              '</td>' +
-              '<td>' +
-                  '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                    '<option value="0">0%</option>' +
-                    '<option value="11">11%</option>' +
-                    '<option value="16">16%</option>' +
+  trHtml = $('<tr data-pallet="'+pallet+'">' +
+                '<td>' +
+                  '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
+                  '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<option value="MADERA">MADERA</option>' +
+                    '<option value="MAD/CERT">MAD/CERT</option>' +
+                    '<option value="CARTON">CARTON</option>' +
+                    '<option value="CHAROLA">CHAROLA</option>' +
+                    '<option value="PLASTICO">PLASTICO</option>' +
+                    '<option value="ARPILLA">ARPILLA</option>' +
+                    '<option value="ARPILLITA">ARPILLITA</option>' +
+                    '<option value="A GRANEL">A GRANEL</option>' +
                   '</select>' +
-                  '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
-                  '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<option value="0">No retener</option>' +
-                  '<option value="0.04">4%</option>' +
-                  '<option value="0.10667">2 Terceras</option>' +
-                  '<option value="0.16">100 %</option>' +
-                '</select>' +
-                '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
-                '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
-              '</td>' +
-              '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
-            '</tr>';
-
+                '</td>' +
+                '<td>' +
+                    '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                '</td>' +
+                '<td>' +
+                  '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                '</td>' +
+                '<td>' +
+                    '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                      '<option value="0">0%</option>' +
+                      '<option value="11">11%</option>' +
+                      '<option value="16">16%</option>' +
+                    '</select>' +
+                    '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
+                    '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<option value="0">No retener</option>' +
+                    '<option value="0.04">4%</option>' +
+                    '<option value="0.10667">2 Terceras</option>' +
+                    '<option value="0.16">100 %</option>' +
+                  '</select>' +
+                  '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
+                  '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'" '+(prod ? 'data-next="jump'+(jumpIndex + 1)+'"' : '')+'>' +
+                '</td>' +
+                '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
+              '</tr>');
 
   $(trHtml).appendTo($tabla.find('tbody'));
 
-  for (i = indexJump, max = jumpIndex; i <= max; i += 1)
+  for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
     $.fn.keyJump.setElem($('.jump'+i));
+  }
 
   $('.jump'+indexJump).focus();
 }

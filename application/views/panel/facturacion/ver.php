@@ -198,7 +198,9 @@
                 </thead>
                 <tbody>
                   <?php if (isset($factura['productos'])) {
-                          foreach ($factura['productos'] as $key => $concepto){?>
+                          foreach ($factura['productos'] as $key => $concepto) {
+                            if ( $factura['info']->sin_costo == 'f') {
+                  ?>
                             <tr>
                               <td>
                                 <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $concepto->descripcion?>" id="prod_ddescripcion" readonly>
@@ -223,7 +225,39 @@
                                 <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $concepto->importe?>" id="prod_importe" readonly>
                               </td>
                             </tr>
-                  <?php }} ?>
+                  <?php } else {
+
+                        if ($concepto->id_clasificacion != '48' AND $concepto->id_clasificacion != '49' AND
+                            $concepto->id_clasificacion != '50' AND $concepto->id_clasificacion != '51' AND
+                            $concepto->id_clasificacion != '52')
+                        {
+                    ?>
+                          <tr>
+                            <td>
+                              <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $concepto->descripcion?>" id="prod_ddescripcion" readonly>
+                              <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $concepto->id_clasificacion ?>" id="prod_did_prod">
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dmedida[]" class="span12" value="<?php echo $concepto->unidad?>" id="prod_dmedida" readonly>
+                            </td>
+                            <td>
+                                <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $concepto->cantidad?>" id="prod_dcantidad" readonly>
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $concepto->precio_unitario?>" id="prod_dpreciou" readonly>
+                            </td>
+                            <td>
+                                <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo $concepto->iva?>" id="prod_diva_total" readonly>
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dreten_iva_total[]" value="<?php echo $concepto->retencion_iva ?>" id="prod_dreten_iva_total" class="span12" readonly>
+                            </td>
+                             <td>
+                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $concepto->importe?>" id="prod_importe" readonly>
+                            </td>
+                          </tr>
+
+                <? } }}} ?>
                 </tbody>
               </table>
             </div>
