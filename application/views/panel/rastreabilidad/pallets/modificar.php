@@ -49,6 +49,16 @@
 										<input type="hidden" name="fid_cliente" value="<?php echo (isset($info['cliente']->id_cliente)? $info['cliente']->id_cliente: ''); ?>" id="fid_cliente" class="getjsval">
 									</div>
 
+									<div class="span3"><?php $no_hojas = (isset($data->no_hojas)? intval($data->no_hojas): 0); ?>
+									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
+									  <select name="fhojaspapel" id="fhojaspapel" class="span9">
+									  	<option value="0" <?php echo set_select('fhojaspapel', 0, false, $no_hojas); ?>>Sin papel</option>
+									  	<option value="2" <?php echo set_select('fhojaspapel', 2, false, $no_hojas); ?>>2 Hojas</option>
+									  	<option value="4" <?php echo set_select('fhojaspapel', 4, false, $no_hojas); ?>>4 Hojas</option>
+									  	<option value="7" <?php echo set_select('fhojaspapel', 7, false, $no_hojas); ?>>7 Hojas</option>
+									  </select>
+									</div>
+
 								</div>
 								<div class="clearfix"></div>
 

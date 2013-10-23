@@ -43,8 +43,18 @@
 									<div class="span3">
 									  <label class="span3" for="fcliente">Cliente </label>
 										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo set_value('fcliente'); ?>" 
-											maxlength="25" placeholder="Cliente" data-next="fclasificacion">
+											maxlength="25" placeholder="Cliente" data-next="fhojaspapel">
 										<input type="hidden" name="fid_cliente" value="<?php echo set_value('fid_cliente'); ?>" id="fid_cliente" class="getjsval">
+									</div>
+
+									<div class="span3">
+									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
+									  <select name="fhojaspapel" id="fhojaspapel" class="span9">
+									  	<option value="0" <?php echo set_select('fhojaspapel', 0); ?>>Sin papel</option>
+									  	<option value="2" <?php echo set_select('fhojaspapel', 2); ?>>2 Hojas</option>
+									  	<option value="4" <?php echo set_select('fhojaspapel', 4); ?>>4 Hojas</option>
+									  	<option value="7" <?php echo set_select('fhojaspapel', 7); ?>>7 Hojas</option>
+									  </select>
 									</div>
 
 								</div>
