@@ -134,7 +134,7 @@
                 <label class="control-label">Sin Costo</label>
                 <div class="controls">
                   <div class="input-append">
-                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($_POST['dsincosto']) ? 'checked' : '' ?>>
+                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
                   </div>
                 </div>
               </div>
@@ -286,8 +286,8 @@
                           }
                         } ?>
 
-                        <? if (isset($_POST['prod_did_prod'])) {
-                          foreach ($_POST['prod_did_prod'] as $k => $v){
+                        <?php if (isset($_POST['prod_did_prod'])) {
+                          foreach ($_POST['prod_did_prod'] as $k => $v) {
                             if ($_POST['prod_importe'][$k] != 0) { ?>
                               <tr data-pallet="<?php echo $_POST['pallet_id'][$k] ?>">
                                 <td>
@@ -298,10 +298,14 @@
                                 <td>
                                   <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                                    <option value="Pieza" <?php echo $_POST['prod_dmedida'][$k] == 'Pieza' ? 'selected' : '' ?>>Pieza</option>
-                                    <option value="Caja" <?php echo $_POST['prod_dmedida'][$k] == 'Caja' ? 'selected' : '' ?>>Caja</option>
-                                    <option value="Kilos" <?php echo $_POST['prod_dmedida'][$k] == 'Kilos' ? 'selected' : '' ?>>Kilos</option>
-                                    <option value="No aplica" <?php echo $_POST['prod_dmedida'][$k] == 'No aplica' ? 'selected' : '' ?>>No aplica</option>
+                                    <option value="MADERA" <?php echo $_POST['prod_dmedida'][$k] == 'MADERA' ? 'selected' : '' ?>>MADERA</option>
+                                    <option value="MAD/CERT" <?php echo $_POST['prod_dmedida'][$k] == 'MAD/CERT' ? 'selected' : '' ?>>MAD/CERT</option>
+                                    <option value="CARTON" <?php echo $_POST['prod_dmedida'][$k] == 'CARTON' ? 'selected' : '' ?>>CARTON</option>
+                                    <option value="CHAROLA" <?php echo $_POST['prod_dmedida'][$k] == 'CHAROLA' ? 'selected' : '' ?>>CHAROLA</option>
+                                    <option value="PLASTICO" <?php echo $_POST['prod_dmedida'][$k] == 'PLASTICO' ? 'selected' : '' ?>>PLASTICO</option>
+                                    <option value="ARPILLA" <?php echo $_POST['prod_dmedida'][$k] == 'ARPILLA' ? 'selected' : '' ?>>ARPILLA</option>
+                                    <option value="ARPILLITA" <?php echo $_POST['prod_dmedida'][$k] == 'ARPILLITA' ? 'selected' : '' ?>>ARPILLITA</option>
+                                    <option value="A GRANEL" <?php echo $_POST['prod_dmedida'][$k] == 'A GRANEL' ? 'selected' : '' ?>>A GRANEL</option>
                                   </select>
                                 </td>
                                 <td>
@@ -339,7 +343,7 @@
                                 </td>
                               </tr>
                   <?php }}} ?>
-                  <tr>
+                  <tr data-pallet="">
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
@@ -348,10 +352,14 @@
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
                       <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                        <option value="Pieza">Pieza</option>
-                        <option value="Caja">Caja</option>
-                        <option value="Kilos">Kilos</option>
-                        <option value="No aplica">No aplica</option>
+                        <option value="MADERA">MADERA</option>
+                        <option value="MAD/CERT">MAD/CERT</option>
+                        <option value="CARTON">CARTON</option>
+                        <option value="CHAROLA">CHAROLA</option>
+                        <option value="PLASTICO">PLASTICO</option>
+                        <option value="ARPILLA">ARPILLA</option>
+                        <option value="ARPILLITA">ARPILLITA</option>
+                        <option value="A GRANEL">A GRANEL</option>
                       </select>
                     </td>
                     <td>
