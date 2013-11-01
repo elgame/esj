@@ -46,6 +46,9 @@ class facturacion_model extends privilegios_model{
     if($this->input->get('did_empresa') != '')
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 
+    if($this->input->get('dobserv') != '')
+      $sql .= " AND lower(f.Observaciones) LIKE '%".$this->input->get('dobserv')."%'";
+
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
