@@ -69,7 +69,7 @@ class bascula extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Administración de Pesadas'
+      'titulo' => 'Administración de Movimientos'
     );
 
     $this->load->model('bascula_model');
@@ -638,6 +638,49 @@ class bascula extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
+  /**
+   * Muestra la vista para realizar movimientos de cuenta.
+   * @return void
+   */
+  public function admin_movimientos()
+  {
+    $this->carabiner->js(array(
+        array('general/msgbox.js'),
+        array('panel/bascula/admin.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Pesadas'
+    );
+
+    $this->load->model('bascula_model');
+    $this->load->model('areas_model');
+
+    $params['basculas'] = $this->bascula_model->getPagos();
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/admin_movimientos', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function cancelar_movimiento()
+  {
+    if (isset($_GET['id']{0}))
+    {
+      $this->load->model('bascula_model');
+
+      $res_mdl = $this->bascula_model->cancelar_pago($_GET['id']);
+      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
+    }else
+      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
+  }
+
   public function pago_basculas()
   {
     $this->load->model('bascula_model');
@@ -1160,15 +1203,19 @@ class bascula extends MY_Controller {
           $rules[] = array('field' => 'pkilos_brutos',
                            'label' => 'Kilos Brutos',
                            'rules' => 'required');
+
           $rules[] = array('field' => 'prancho',
                            'label' => 'Rancho',
-                           'rules' => 'required');
+                           'rules' => '');
         }
         else
         {
           $rules[] = array('field' => 'pkilos_tara',
                            'label' => 'Kilos tara',
                            'rules' => 'required');
+          $rules[] = array('field' => 'prancho',
+                           'label' => 'Rancho',
+                           'rules' => '');
         }
       }
       else if ($_POST['paccion'] == 'en' || $_POST['paccion'] == 'sa')

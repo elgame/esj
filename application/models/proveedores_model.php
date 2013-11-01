@@ -247,8 +247,8 @@ class proveedores_model extends CI_Model {
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		if($this->input->get('type') !== false)
-			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
+		// if($this->input->get('type') !== false)
+		// 	$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
 		$res = $this->db->query("
 				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
 				FROM proveedores

@@ -308,9 +308,9 @@ class cfdi{
     {
       if ($data['sinCosto'])
       {
-        if ($producto['idClasificacion'] != '48' AND $producto['idClasificacion'] != '49' AND
-            $producto['idClasificacion'] != '50' AND $producto['idClasificacion'] != '51' AND
-            $producto['idClasificacion'] != '52')
+        if ($producto['idClasificacion'] != '49' AND $producto['idClasificacion'] != '50' AND
+            $producto['idClasificacion'] != '51' AND $producto['idClasificacion'] != '52' AND
+            $producto['idClasificacion'] != '53')
         {
           $datos['concepto'][] = (float)$producto['cantidad'];
           $datos['concepto'][] = $producto['unidad'];
@@ -746,9 +746,9 @@ class cfdi{
     {
       if ($data['sinCosto'])
       {
-        if ($concepto['idClasificacion'] != '48' AND $concepto['idClasificacion'] != '49' AND
-            $concepto['idClasificacion'] != '50' AND $concepto['idClasificacion'] != '51' AND
-            $concepto['idClasificacion'] != '52')
+        if ($concepto['idClasificacion'] != '49' AND $concepto['idClasificacion'] != '50' AND
+            $concepto['idClasificacion'] != '51' AND $concepto['idClasificacion'] != '52' AND
+            $concepto['idClasificacion'] != '53')
         {
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';

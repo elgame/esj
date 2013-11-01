@@ -116,20 +116,8 @@ $(function(){
       var $tr = $(this).parent().parent();
 
       if (valida_agregar($tr)) {
-
-        if ($tr.attr('data-pallet') == '') {
-          $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
-          addProducto();
-        } else {
-          var $allTr = $('tr[data-pallet="'+$tr.attr('data-pallet')+'"]');
-          $allTr.each(function(index, el) {
-            if ($tr.get(0) == $(this).get(0)) {
-              if (index == ($allTr.length - 1)) {
-                addProducto();
-              }
-            }
-          });
-        }
+        $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+        addProducto();
       } else {
         $tr.find('#prod_ddescripcion').focus();
         $tr.find('td').effect("highlight", {'color': '#da4f49'}, 500);
@@ -204,7 +192,6 @@ function loadPallet() {
           if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
 
             if (data['rendimientos'].length > 0) {
-
               for(var i in data['rendimientos']) {
                 addProducto({
                   'id': data['rendimientos'][i]['id_clasificacion'],
@@ -213,9 +200,6 @@ function loadPallet() {
                   'id_pallet': data['info']['id_pallet'],
                 });
               }
-
-              $('tr[data-pallet="'+data['info']['id_pallet']+'"]').first().find('#prod_ddescripcion').focus();
-
             } else {
               noty({"text": 'El pallet no cuenta con cajas para agregar.', "layout":"topRight", "type": 'error'});
             }
@@ -224,7 +208,7 @@ function loadPallet() {
             noty({"text": 'El pallet ya esta cargado en el listado o ya existe en una factura.', "layout":"topRight", "type": 'error'});
           }
         } else {
-          noty({"text": 'No existe un pallet con el folio especificado o ya esta en una factura.', "layout":"topRight", "type": 'error'});
+          noty({"text": 'No existe un pallet con el folio especificado.', "layout":"topRight", "type": 'error'});
         }
       }, 'json');
     } else {
@@ -278,61 +262,58 @@ function addProducto(prod) {
     pallet      = prod.id_pallet;
   }
 
-  var unidades = '';
-  $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(data) {
-    for (var i in data) {
-      unidades += '<option value="'+data[i].nombre+'">'+data[i].nombre+'</option>';
-    }
-    trHtml = $('<tr data-pallet="'+pallet+'">' +
-                  '<td>' +
-                    '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                    '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
-                    '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
-                  '</td>' +
-                  '<td>' +
-                    '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                      unidades +
-                    '</select>' +
-                  '</td>' +
-                  '<td>' +
-                      '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td>' +
-                    '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td>' +
-                      '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                        '<option value="0">0%</option>' +
-                        '<option value="11">11%</option>' +
-                        '<option value="16">16%</option>' +
-                      '</select>' +
-                      '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
-                      '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
-                  '</td>' +
-                  '<td>' +
-                    '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                      '<option value="0">No retener</option>' +
-                      '<option value="0.04">4%</option>' +
-                      '<option value="0.10667">2 Terceras</option>' +
-                      '<option value="0.16">100 %</option>' +
-                    '</select>' +
-                    '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
-                    '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
-                  '</td>' +
-                  '<td>' +
-                    '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'" '+(prod ? 'data-next="jump'+(jumpIndex + 1)+'"' : '')+'>' +
-                  '</td>' +
-                  '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
-                '</tr>');
+  trHtml = '<tr data-pallet="'+pallet+'">' +
+              '<td>' +
+                '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
+                '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
+              '</td>' +
+              '<td>' +
+                '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<option value="Pieza">Pieza</option>' +
+                  '<option value="Caja">Caja</option>' +
+                  '<option value="Kilos">Kilos</option>' +
+                  '<option value="No aplica">No aplica</option>' +
+                '</select>' +
+              '</td>' +
+              '<td>' +
+                  '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+              '</td>' +
+              '<td>' +
+                '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+              '</td>' +
+              '<td>' +
+                  '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<option value="0">0%</option>' +
+                    '<option value="11">11%</option>' +
+                    '<option value="16">16%</option>' +
+                  '</select>' +
+                  '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
+                  '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
+              '</td>' +
+              '<td>' +
+                '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<option value="0">No retener</option>' +
+                  '<option value="0.04">4%</option>' +
+                  '<option value="0.10667">2 Terceras</option>' +
+                  '<option value="0.16">100 %</option>' +
+                '</select>' +
+                '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
+                '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
+              '</td>' +
+              '<td>' +
+                '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
+              '</td>' +
+              '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
+            '</tr>';
 
-    $(trHtml).appendTo($tabla.find('tbody'));
 
-    for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
-      $.fn.keyJump.setElem($('.jump'+i));
-    }
+  $(trHtml).appendTo($tabla.find('tbody'));
 
-    $('.jump'+indexJump).focus();
-  }, 'json');
+  for (i = indexJump, max = jumpIndex; i <= max; i += 1)
+    $.fn.keyJump.setElem($('.jump'+i));
+
+  $('.jump'+indexJump).focus();
 }
 
 function calculaTotal () {
@@ -351,7 +332,7 @@ function calculaTotal () {
       total_importes += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
         total_importes += parseFloat($(this).val());
       }
     }
@@ -364,7 +345,7 @@ function calculaTotal () {
       total_descuentos += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
         total_descuentos += parseFloat($(this).val());
       }
     }
@@ -379,7 +360,7 @@ function calculaTotal () {
       total_ivas += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
         total_ivas += parseFloat($(this).val());
       }
     }
@@ -391,7 +372,7 @@ function calculaTotal () {
       total_retenciones += parseFloat($(this).val());
     } else {
       idProd = $parent.find('#prod_did_prod').val();
-      if (idProd != '187' && idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52') {
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
         total_retenciones += parseFloat($(this).val());
       }
     }

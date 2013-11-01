@@ -14,7 +14,7 @@ class empresas_model extends CI_Model{
 		$sql = '';
 		//paginacion
 		$params = array(
-				'result_items_per_page' => '30',
+				'result_items_per_page' => '40',
 				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
 		);
 		if($params['result_page'] % $params['result_items_per_page'] == 0)

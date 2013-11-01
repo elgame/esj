@@ -515,7 +515,8 @@ class Bascula_model extends CI_Model {
           LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
           LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto
                     FROM bascula_pagos AS bp
-                    INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago) AS pagos
+                    INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = bp.id_pago
+                    WHERE bp.status = 't') AS pagos
                     ON pagos.id_bascula = b.id_bascula
         WHERE
               b.status = true
@@ -597,6 +598,80 @@ class Bascula_model extends CI_Model {
     $this->db->insert_batch('bascula_pagos_basculas', $pesadas);
 
     return array('passess' => true);
+  }
+
+  public function getPagos($paginados=true)
+  {
+    $sql = '';
+    //paginacion
+    if($paginados)
+    {
+      $this->load->library('pagination');
+      $params = array(
+          'result_items_per_page' => '60',
+          'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
+      );
+      if($params['result_page'] % $params['result_items_per_page'] == 0)
+        $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+    }
+
+    //Filtros para buscar
+    if($this->input->get('fnombre') !== '')
+      $sql = " AND (
+                      ( lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' ) )";
+
+    if (isset($_GET['fechaini']))
+      if ($this->input->get('fechaini') !== '')
+        $sql .= " AND DATE(b.fecha_bruto) >= '".$this->input->get('fechaini')."'";
+
+    if (isset($_GET['fechaend']))
+      if ($this->input->get('fechaend') !== '')
+        $sql .= " AND DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
+
+    $str_query =
+        "SELECT 
+                bp.id_pago,
+                bp.tipo_pago,
+                bp.monto,
+                bp.concepto,
+                string_agg(b.folio::text, ', ') AS folios,
+                p.nombre_fiscal AS proveedor
+        FROM bascula AS b
+          INNER JOIN areas AS a ON a.id_area = b.id_area
+          LEFT JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          INNER JOIN bascula_pagos_basculas AS bpb ON b.id_bascula = bpb.id_bascula
+          INNER JOIN bascula_pagos AS bp ON bpb.id_pago = bp.id_pago
+        WHERE (b.accion = 'p' OR b.accion = 'b') AND bp.status = 't' {$sql}
+        GROUP BY p.nombre_fiscal, bp.id_pago, bp.tipo_pago, bp.monto, bp.concepto
+        ORDER BY bp.id_pago DESC
+        ";
+    if($paginados){
+      $query = BDUtil::pagination($str_query, $params, true);
+      $res = $this->db->query($query['query']);
+    }else
+      $res = $this->db->query($str_query);
+
+    $response = array(
+        'basculas'       => array(),
+        'total_rows'     => (isset($query['total_rows'])? $query['total_rows']: ''),
+        'items_per_page' => (isset($params['result_items_per_page'])? $params['result_items_per_page']: ''),
+        'result_page'    => (isset($params['result_page'])? $params['result_page']: '')
+    );
+    if($res->num_rows() > 0){
+      $response['basculas'] = $res->result();
+    }
+
+    return $response;
+  }
+
+  public function cancelar_pago($id_pago)
+  {
+    $basculas = $this->db->query("SELECT id_bascula FROM bascula_pagos_basculas WHERE id_pago = {$id_pago}");
+    foreach ($basculas->result() as $key => $value)
+    {
+      $this->db->update('bascula', array('accion' => 'sa'), "id_bascula = {$value->id_bascula}");
+    }
+    $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
   }
 
 
