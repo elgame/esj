@@ -109,9 +109,10 @@
         var presentaciones = ui.item.item.presentaciones,
             html = '<option value=""></option>';
 
+            console.log(ui.item.item.presentaciones);
         if (ui.item.item.presentaciones.length > 0) {
           for(var i in presentaciones) {
-            html += '<option value="'+presentaciones[i].id_presentacion+'">'+presentaciones[i].nombre+'</option>';
+            html += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+'</option>';
           }
         }
          $fpresentacion.html(html);
@@ -175,7 +176,7 @@
 
         if (ui.item.item.presentaciones.length > 0) {
           for(var i in presentaciones) {
-            html += '<option value="'+presentaciones[i].id_presentacion+'">'+presentaciones[i].nombre+'</option>';
+            html += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+'</option>';
           }
         }
          $fpresentacion.html(html);
@@ -259,6 +260,7 @@
           'precio_unitario': $fprecio.val(),
           'presentacion': $fpresentacion.find('option:selected').text() || '',
           'presentacionId': $fpresentacion.find('option:selected').val() || '',
+          'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
           'unidad': $funidad.find('option:selected').val(),
           'traslado': $ftraslado.find('option:selected').val(),
         };
@@ -398,6 +400,7 @@
                   '<td style="width: 160px;">' +
                     '<input type="text" name="presentacionName[]" value="'+producto.presentacion+'" class="span12 jump'+(++jumpIndex)+'" id="presentacionName" class="span12" data-next="jump'+(++jumpIndex)+'" readonly>' +
                     '<input type="hidden" name="presentacion[]" value="'+producto.presentacionId+'" id="presentacion" class="span12">' +
+                    '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
                   '</td>' +
                   '<td style="width: 150px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +

@@ -10,6 +10,8 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajax_producto_by_codigo/',
     'compras_ordenes/ajax_producto/',
 
+    'compras_ordenes/ligar/',
+
     'bascula/show_view_agregar_empresa/',
 
     'bascula/rde_pdf/',
@@ -33,8 +35,9 @@ class compras_ordenes extends MY_Controller {
   public function index()
   {
     $this->carabiner->js(array(
-        array('general/msgbox.js'),
-        array('panel/compras_ordenes/admin.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/compras_ordenes/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -48,6 +51,43 @@ class compras_ordenes extends MY_Controller {
     $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $params['requisicion'] = false;
+    $params['method']     = '';
+    $params['titleBread'] = 'Ordenes de Compras';
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/compras_ordenes/admin', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function requisicion()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/compras_ordenes/admin.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Ordenes de Requisición'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('compras_ordenes_model');
+
+    $params['ordenes'] = $this->compras_ordenes_model->getOrdenes(40, false);
+
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $params['requisicion'] = true;
+    $params['method']     = 'requisicion/';
+    $params['titleBread'] = 'Ordenes de Requisición';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -92,7 +132,7 @@ class compras_ordenes extends MY_Controller {
     $params['departamentos'] = $this->compras_ordenes_model->departamentos();
     $params['unidades']      = $this->compras_ordenes_model->unidades();
 
-    $this->configAddModBascula();
+    $this->configAddOrden();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -151,7 +191,7 @@ class compras_ordenes extends MY_Controller {
 
     if ( ! isset($_GET['m']))
     {
-      $this->configAddModBascula();
+      $this->configAddOrden();
       if ($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -162,7 +202,14 @@ class compras_ordenes extends MY_Controller {
 
         if ($response['passes'])
         {
-          redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$response['msg']));
+          if (isset($_POST['autorizar']))
+          {
+            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c'));
+          }
+          else
+          {
+            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$response['msg']));
+          }
         }
       }
     }
@@ -198,17 +245,17 @@ class compras_ordenes extends MY_Controller {
 
   public function autorizar()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?id=' . $_GET['id']));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
   }
 
   public function entrada()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?id=' . $_GET['id']));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
   }
 
   public function ver()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?id=' . $_GET['id']));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
   }
 
   public function cancelar()
@@ -216,7 +263,68 @@ class compras_ordenes extends MY_Controller {
     $this->load->model('compras_ordenes_model');
     $this->compras_ordenes_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/compras_ordenes/?msg=8'));
+    if ($_GET['w'] === 'c')
+    {
+      redirect(base_url('panel/compras_ordenes/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+    }
+    else
+    {
+      redirect(base_url('panel/compras_ordenes/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+    }
+  }
+
+  public function ligar()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/util.js'),
+      array('general/keyjump.js'),
+      array('general/msgbox.js'),
+      array('panel/compras_ordenes/agregar.js'),
+    ));
+
+    $this->load->model('proveedores_model');
+    $this->load->model('compras_ordenes_model');
+
+    $this->configAddOrdenLigar();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_GET['ids']);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      }
+    }
+
+    $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $ids = explode(',', $_GET['ids']);
+
+    $params['productos'] = array();
+    foreach ($ids as $key => $ordenId)
+    {
+      $orden = $this->compras_ordenes_model->info($ordenId, true);
+
+      foreach ($orden['info'][0]->productos as $prod)
+      {
+        $params['productos'][] = $prod;
+      }
+    }
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['rel']))
+      $params['reload'] = true;
+
+    $this->load->view('panel/compras_ordenes/ligar_ordenes', $params);
   }
 
   /*
@@ -253,7 +361,7 @@ class compras_ordenes extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddModBascula()
+  public function configAddOrden()
   {
     $this->load->library('form_validation');
 
@@ -343,6 +451,81 @@ class compras_ordenes extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configAddOrdenLigar()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'proveedorId',
+            'label' => 'Proveedor',
+            'rules' => 'required'),
+
+      array('field' => 'serie',
+            'label' => 'Serie',
+            'rules' => ''),
+      array('field' => 'folio',
+            'label' => 'Folio',
+            'rules' => 'required'),
+
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
+
+      array('field' => 'condicionPago',
+            'label' => 'Condicion de Pago',
+            'rules' => 'required'),
+      array('field' => 'plazoCredito',
+            'label' => 'Plazo Credito',
+            'rules' => ''),
+
+      array('field' => 'totalLetra',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'concepto[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'cantidad[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'productoId[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'ordenId[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'row[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'valorUnitario[]',
+            'label' => 'Precio Unitario',
+            'rules' => 'greater_than[0]'),
+      array('field' => 'trasladoTotal[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'trasladoPorcent[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'importe[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'total[]',
+            'label' => '',
+            'rules' => ''),
+
+      array('field' => 'totalImporte',
+            'label' => 'Subtotal',
+            'rules' => ''),
+      array('field' => 'totalImpuestosTrasladados',
+            'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'totalOrden',
+            'label' => 'Total',
+            'rules' => 'greater_than[0]'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Mensajes.
@@ -381,6 +564,10 @@ class compras_ordenes extends MY_Controller {
       break;
       case 8:
         $txt = 'La orden se cancelo correctamente.';
+        $icono = 'success';
+      break;
+      case 9:
+        $txt = 'La compra se agrego correctamente.';
         $icono = 'success';
       break;
     }

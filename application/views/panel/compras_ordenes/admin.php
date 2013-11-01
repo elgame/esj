@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Ordenes de Compras
+            <?php echo $titleBread ?>
           </li>
         </ul>
       </div>
@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/compras_ordenes/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/compras_ordenes/'.$method); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
@@ -41,24 +41,29 @@
                 <label for="ffecha2">Al</label>
                 <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
-                <label for="fstatus">Estado</label>
-                <select name="fstatus" class="input-medium" id="fstatus">
-                  <option value="">TODAS</option>
-                  <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTES</option>
-                  <option value="r" <?php echo set_select_get('fstatus', 'r'); ?>>RECHAZADAS</option>
-                  <option value="a" <?php echo set_select_get('fstatus', 'a'); ?>>ACEPTADAS</option>
-                  <option value="f" <?php echo set_select_get('fstatus', 'f'); ?>>FACTURADAS</option>
-                  <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
-                </select>
+                <?php if ( ! $requisicion) { ?>
+                  <label for="fstatus">Estado</label>
+                  <select name="fstatus" class="input-medium" id="fstatus">
+                    <option value="">TODAS</option>
+                    <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTES</option>
+                    <option value="r" <?php echo set_select_get('fstatus', 'r'); ?>>RECHAZADAS</option>
+                    <option value="a" <?php echo set_select_get('fstatus', 'a'); ?>>ACEPTADAS</option>
+                    <option value="f" <?php echo set_select_get('fstatus', 'f'); ?>>FACTURADAS</option>
+                    <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
+                  </select>
+                <?php } ?>
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
 
-            <a href="<?php echo base_url('panel/compras_ordenes/ligar_ordenes') ?>" rel="superbox-80x550" class="btn btn-info" type="button">Ligar Ordenes</a>
+            <?php if ( ! $requisicion) { ?>
+              <a href="<?php echo base_url('panel/compras_ordenes/ligar') ?>" type="button" class="btn btn-info" id="btnLigarOrdenes" rel="superbox-80x550" data-supermodal-callback="getOrdenesIds" data-supermodal-autoshow="false">Ligar Ordenes</a>
+            <?php } ?>
+
             <?php
               echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/agregar/', array(
-                'params'   => '',
+                'params'   => 'w='.($requisicion ? 'r' : 'c'),
                 'btn_type' => 'btn-success pull-right',
                 'attrs' => array('style' => 'margin-bottom: 10px;') )
               );
@@ -67,9 +72,7 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-                  <?php if (isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== ''){ ?>
                   <th></th>
-                  <?php } ?>
                   <th>Fecha</th>
                   <th>Folio</th>
                   <th>Proveedor</th>
@@ -82,9 +85,11 @@
               <tbody>
             <?php foreach($ordenes['ordenes'] as $orden) {?>
                 <tr>
-                  <?php if (isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== ''){ ?>
-                    <td><input type="checkbox" class="" id="" value="<?php echo $orden->id_orden ?>"></td>
-                  <?php } ?>
+                  <td>
+                    <?php if ($orden->status === 'a' && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== ''){ ?>
+                      <input type="checkbox" class="addToFactura" value="<?php echo $orden->id_orden ?>">
+                    <?php } ?>
+                  </td>
                   <td><?php echo substr($orden->fecha, 0, 10); ?></td>
                   <td><span class="label"><?php echo $orden->folio; ?></span></td>
                   <td><?php echo $orden->proveedor; ?></td>
@@ -114,14 +119,17 @@
 
                       if ($orden->status === 'p' && $orden->autorizado === 'f')
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar/', array(
-                          'params'   => 'id='.$orden->id_orden.'&mod=t',
-                          'btn_type' => 'btn-info',
-                          'attrs' => array())
-                        );
+                        if ($this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/"))
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar/', array(
+                            'params'   => 'id='.$orden->id_orden.'&mod=t'.'&w='.($requisicion ? 'r' : 'c'),
+                            'btn_type' => 'btn-info',
+                            'attrs' => array())
+                          );
+                        }
 
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/autorizar/', array(
-                          'params'   => 'id='.$orden->id_orden,
+                          'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-info',
                           'attrs' => array())
                         );
@@ -130,7 +138,7 @@
                       if ($orden->status === 'p' && $orden->autorizado === 't')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/entrada/', array(
-                          'params'   => 'id='.$orden->id_orden.'&mod=t',
+                          'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-warning',
                           'attrs' => array())
                         );
@@ -139,7 +147,7 @@
                       if ($orden->status === 'r')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar/', array(
-                          'params'   => 'id='.$orden->id_orden,
+                          'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-info',
                           'attrs' => array())
                         );
@@ -148,7 +156,7 @@
                       if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/ver/', array(
-                          'params'   => 'id='.$orden->id_orden,
+                          'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-success',
                           'attrs' => array())
                         );
@@ -157,7 +165,7 @@
                       if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/cancelar/', array(
-                          'params'   => 'id='.$orden->id_orden,
+                          'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la orden de compra?', 'Ordenes de Compras', this); return false;"))
                         );

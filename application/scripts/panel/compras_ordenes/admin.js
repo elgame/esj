@@ -7,6 +7,12 @@
     autocompleteEmpresas();
   });
 
+  /*
+   |------------------------------------------------------------------------
+   | Autocompletes
+   |------------------------------------------------------------------------
+   */
+
   // Autocomplete para los Proveedores.
   var autocompleteProveedores = function () {
     $("#proveedor").autocomplete({
@@ -49,3 +55,25 @@
     });
   };
 });
+
+function getOrdenesIds ($button, $modal) {
+  var idp   = $('#proveedorId').val(),
+      exist = false,
+      ids   = [];
+
+  $('.addToFactura').each(function(index, el) {
+    var $check = $(this);
+
+    if ($check.is(':checked')) {
+      ids.push($(this).val());
+      exist = true;
+    }
+  });
+
+  if (exist) {
+    $button.attr('href', base_url + '/panel/compras_ordenes/ligar/?idp='+idp+'&ids=' + ids.join(','));
+    $modal.modal('show');
+  } else {
+    noty({"text": 'Seleccione una o mas ordenes de compras para ligarlas a una factura!', "layout":"topRight", "type": 'error'});
+  }
+}

@@ -12,7 +12,7 @@ class compras_ordenes_model extends CI_Model {
    *
    * @return
    */
-  public function getOrdenes($perpage = '40')
+  public function getOrdenes($perpage = '40', $autorizadas = true)
     {
     $sql = '';
     //paginacion
@@ -53,6 +53,7 @@ class compras_ordenes_model extends CI_Model {
       $sql .= " AND co.status = '".$this->input->get('fstatus')."'";
     }
 
+    $sql .= $autorizadas ? " AND co.autorizado = 't'" : " AND co.autorizado = 'f'";
 
     $query = BDUtil::pagination(
         "SELECT co.id_orden,
@@ -88,6 +89,11 @@ class compras_ordenes_model extends CI_Model {
     return $response;
   }
 
+  /**
+   * Agrega una orden de compra
+   *
+   * @return array
+   */
   public function agregar()
   {
     $data = array(
@@ -106,14 +112,26 @@ class compras_ordenes_model extends CI_Model {
     $productos = array();
     foreach ($_POST['concepto'] as $key => $concepto)
     {
+
+      if ($_POST['presentacionCant'][$key] !== '')
+      {
+        $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+        $pu       = floatval($_POST['valorUnitario'][$key]) / floatval($_POST['presentacionCant'][$key]);
+      }
+      else
+      {
+        $cantidad = $_POST['cantidad'][$key];
+        $pu       = $_POST['valorUnitario'][$key];
+      }
+
       $productos[] = array(
         'id_orden'        => $this->db->insert_id(),
         'num_row'         => $key,
         'id_producto'     => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
         'id_presentacion' => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
         'descripcion'     => $concepto,
-        'cantidad'        => $_POST['cantidad'][$key],
-        'precio_unitario' => $_POST['valorUnitario'][$key],
+        'cantidad'        => $cantidad,
+        'precio_unitario' => $pu,
         'importe'         => $_POST['importe'][$key],
         'iva'             => $_POST['trasladoTotal'][$key],
         'total'           => $_POST['total'][$key],
@@ -126,6 +144,14 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
+  /**
+   * Actualiza los datos de una orden de compra junton con sus productos.
+   *
+   * @param  string $idOrden
+   * @param  mixed $orden
+   * @param  mixed $productos
+   * @return array
+   */
   public function actualizar($idOrden, $orden = null, $productos = null)
   {
     // Si $orden o $productos son pasados a la funcion.
@@ -163,13 +189,20 @@ class compras_ordenes_model extends CI_Model {
         'tipo_orden'      => $_POST['tipoOrden'],
       );
 
+      if (isset($_POST['autorizar']) && $status === 'p')
+      {
+        $data['id_autorizo']        = $this->session->userdata('id_usuario');
+        $data['fecha_autorizacion'] = date('Y-m-d H:i:s');
+        $data['autorizado']         = 't';
+      }
+
       // Si esta modificando una orden rechazada entonces agrega mas campos
       // que se actualizaran.
       if ($status === 'r')
       {
-        $data['id_autorizo'] = null;
+      //   $data['id_autorizo'] = null;
         $data['status']      = 'p';
-        $data['autorizado']  = 'f';
+      //   $data['autorizado']  = 'f';
       }
 
       $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
@@ -177,14 +210,26 @@ class compras_ordenes_model extends CI_Model {
       $productos = array();
       foreach ($_POST['concepto'] as $key => $concepto)
       {
+
+        if ($_POST['presentacionCant'][$key] !== '')
+        {
+          $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+          $pu       = floatval($_POST['valorUnitario'][$key]) / floatval($_POST['presentacionCant'][$key]);
+        }
+        else
+        {
+          $cantidad = $_POST['cantidad'][$key];
+          $pu       = $_POST['valorUnitario'][$key];
+        }
+
         $productos[] = array(
           'id_orden'        => $idOrden,
           'num_row'         => $key,
           'id_producto'     => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
           'id_presentacion' => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
           'descripcion'     => $concepto,
-          'cantidad'        => $_POST['cantidad'][$key],
-          'precio_unitario' => $_POST['valorUnitario'][$key],
+          'cantidad'        => $cantidad,
+          'precio_unitario' => $pu,
           'importe'         => $_POST['importe'][$key],
           'iva'             => $_POST['trasladoTotal'][$key],
           'total'           => $_POST['total'][$key],
@@ -197,6 +242,77 @@ class compras_ordenes_model extends CI_Model {
     }
 
     return array('passes' => true, 'msg' => 7);
+  }
+
+  /**
+   * Agrega una compra. Esto es cuando se agregan o ligan ordenes a una factura.
+   *
+   * @param  string $proveedorId
+   * @param  string $ordenesIds
+   * @return array
+   */
+  public function agregarCompra($proveedorId, $ordenesIds)
+  {
+    // obtiene un array con los ids de las ordenes a ligar con la compra.
+    $ordenesIds = explode(',', $ordenesIds);
+
+    // datos de la compra.
+    $data = array(
+      'id_proveedor'   => $proveedorId,
+      'id_empleado'    => $this->session->userdata('id_usuario'),
+      'serie'          => $_POST['serie'],
+      'folio'          => $_POST['folio'],
+      'condicion_pago' => $_POST['condicionPago'],
+      'plazo_credito'  => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
+      // 'tipo_documento' => $_POST['algo'],
+      'fecha'          => str_replace('T', ' ', $_POST['fecha']),
+      'subtotal'       => $_POST['totalImporte'],
+      'importe_iva'    => $_POST['totalImpuestosTrasladados'],
+      'total'          => $_POST['totalOrden'],
+      'concepto'       => 'Concepto',
+      'isgasto'        => 'f',
+      'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
+    );
+
+    // inserta la compra
+    $this->db->insert('compras', $data);
+
+    // obtiene el id de la compra insertada.
+    $compraId = $this->db->insert_id();
+
+    // construye el array de las ordenes a ligar con la compra.
+    $ordenes = array();
+    foreach ($ordenesIds as $ordenId)
+    {
+      $ordenes[] = array(
+        'id_compra' => $compraId,
+        'id_orden'  => $ordenId,
+      );
+
+      $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $ordenId));
+    }
+
+    // inserta los ids de las ordenes.
+    $this->db->insert_batch('compras_facturas', $ordenes);
+
+    // Actualiza los productos.
+    foreach ($_POST['concepto'] as $key => $producto)
+    {
+      $prodData = array(
+        'precio_unitario' => $_POST['valorUnitario'][$key],
+        'importe'         => $_POST['importe'][$key],
+        'iva'             => $_POST['trasladoTotal'][$key],
+        'total'           => $_POST['total'][$key],
+        'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
+      );
+
+      $this->db->update('compras_productos', $prodData, array(
+        'id_orden' => $_POST['ordenId'][$key],
+        'num_row'  => $_POST['row'][$key]
+      ));
+    }
+
+    return array('passes' => true);
   }
 
   public function cancelar($idOrden)
@@ -236,14 +352,16 @@ class compras_ordenes_model extends CI_Model {
       if ($full)
       {
         $query = $this->db->query(
-          "SELECT cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad,
-                  cp.id_presentacion, pp.nombre AS presentacion,
+          "SELECT cp.id_orden, cp.num_row,
+                  cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
+                  cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.status
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
+           LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
            WHERE id_orden = {$data['info'][0]->id_orden}");
 
         $data['info'][0]->productos = array();
@@ -292,14 +410,26 @@ class compras_ordenes_model extends CI_Model {
     $productos = array();
     foreach ($_POST['concepto'] as $key => $concepto)
     {
+
+      if ($_POST['presentacionCant'][$key] !== '')
+      {
+        $cantidad = floatval($_POST['cantidad'][$key]) * floatval($_POST['presentacionCant'][$key]);
+        $pu       = floatval($_POST['valorUnitario'][$key]) / floatval($_POST['presentacionCant'][$key]);
+      }
+      else
+      {
+        $cantidad = $_POST['cantidad'][$key];
+        $pu       = $_POST['valorUnitario'][$key];
+      }
+
       $productos[] = array(
         'id_orden'        => $idOrden,
         'num_row'         => $key,
         'id_producto'     => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
         'id_presentacion' => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
         'descripcion'     => $concepto,
-        'cantidad'        => $_POST['cantidad'][$key],
-        'precio_unitario' => $_POST['valorUnitario'][$key],
+        'cantidad'        => $cantidad,
+        'precio_unitario' => $pu,
         'importe'         => $_POST['importe'][$key],
         'iva'             => $_POST['trasladoTotal'][$key],
         'total'           => $_POST['total'][$key],

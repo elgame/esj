@@ -6,7 +6,11 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
+        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'c'){ ?>
+          <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
+        <?php } else { ?>
+          <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
+        <?php } ?>
       </li>
       <li>Agregar</li>
     </ul>
@@ -23,7 +27,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/agregar'); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -201,6 +205,7 @@
                               <td style="width: 160px;">
                                 <input type="text" name="presentacionName[]" value="<?php echo $_POST['presentacionName'][$key] ?>" class="span12" id="presentacionName" class="span12" readonly>
                                 <input type="hidden" name="presentacion[]" value="<?php echo $_POST['presentacion'][$key] ?>" id="presentacion" class="span12">
+                                <input type="hidden" name="presentacionCant[]" value="<?php echo $_POST['presentacionCant'][$key] ?>" id="presentacionCant" class="span12">
                               </td>
                               <td style="width: 120px;">
                                 <select name="unidad[]" id="unidad" class="span12">

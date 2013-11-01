@@ -6,7 +6,11 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
+        <?php if ($_GET['w'] === 'c'){ ?>
+          <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
+        <?php } else { ?>
+          <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
+        <?php } ?>
       </li>
       <li>Modificar | Ver</li>
     </ul>
@@ -166,7 +170,10 @@
                   <div class="control-group">
                     <div class="controls">
                       <div class="well span9">
-                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;"><?php echo $txtButton ?></button>
+                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;"><?php echo $txtButton ?></button><br><br>
+                          <?php if ($this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/") && isset($_GET['mod'])) { ?>
+                            <label style="font-weight: bold;"><input type="checkbox" name="autorizar" value="1"> AUTORIZAR ENTRADA</label>
+                          <?php } ?>
                       </div>
                     </div>
                   </div>
@@ -307,6 +314,17 @@
                                   $iva      += $prod->iva;
                                   $total    += $prod->total;
 
+                                  if ($prod->id_presentacion !== null)
+                                  {
+                                    $cantidad = $prod->cantidad / $prod->presen_cantidad;
+                                    $pu       = $prod->precio_unitario * $prod->presen_cantidad;
+                                  }
+                                  else
+                                  {
+                                    $cantidad = $prod->cantidad;
+                                    $pu       = $prod->precio_unitario;
+                                  }
+
                                   $redBg = $prod->status === 'r' ? 'background-color: #FFE5E5;' : '';
                                 ?>
                                <tr>
@@ -323,6 +341,7 @@
                                  <td style="width: 160px;<?php echo $redBg ?>">
                                    <input type="text" name="presentacionName[]" value="<?php echo $prod->presentacion ?>" class="span12" id="presentacionName" class="span12" readonly>
                                    <input type="hidden" name="presentacion[]" value="<?php echo $prod->id_presentacion ?>" id="presentacion" class="span12">
+                                   <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
                                    <select name="unidad[]" id="unidad" class="span12" <?php echo $disabled ?>>
@@ -332,10 +351,10 @@
                                    </select>
                                  </td>
                                  <td style="width: 65px;<?php echo $redBg ?>">
-                                     <input type="number" name="cantidad[]" value="<?php echo $prod->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $readonly ?>>
+                                     <input type="number" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 90px;<?php echo $redBg ?>">
-                                     <input type="text" name="valorUnitario[]" value="<?php echo $prod->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>
+                                     <input type="text" name="valorUnitario[]" value="<?php echo $pu ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                      <select name="traslado[]" id="traslado" class="span12" <?php echo $disabled ?>>
