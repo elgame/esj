@@ -561,4 +561,46 @@ class compras_ordenes_model extends CI_Model {
 
     return $response;
   }
+
+  public function getProductoByCodigoAjax($idEmpresa, $tipo, $codigo)
+  {
+    $sql = '';
+
+    $term = "lower(p.codigo) = '".mb_strtolower($codigo, 'UTF-8')."'";
+
+    $res = $this->db->query(
+       "SELECT p.*,
+              pf.nombre as familia, pf.codigo as codigo_familia,
+              pu.nombre as unidad, pu.abreviatura as unidad_abreviatura
+        FROM productos as p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        WHERE p.status = 'ac' AND
+              {$term} AND
+              p.id_empresa = {$idEmpresa} AND
+              pf.tipo = '{$tipo}' AND
+              pf.status = 'ac'
+        ORDER BY p.nombre ASC
+        LIMIT 20");
+
+    $prod = array();
+    if($res->num_rows() > 0)
+    {
+      $prod = $res->result();
+
+      $query = $this->db->select('*')
+        ->from("productos_presentaciones")
+        ->where("id_producto", $prod[0]->id_producto)
+        ->where("status", "ac")
+        ->get();
+
+      $prod[0]->presentaciones = array();
+      if ($query->num_rows() > 0)
+      {
+        $prod[0]->presentaciones = $query->result();
+      }
+    }
+
+    return $prod;
+  }
 }

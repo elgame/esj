@@ -7,15 +7,17 @@
 
     autocompleteEmpresas();
     autocompleteProveedores();
-    autocompleteCodigo();
+    // autocompleteCodigo();
     autocompleteConcepto();
 
+    eventCodigoBarras();
     eventBtnAddProducto();
     eventIvaKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
     eventBtnDelProducto();
     eventCheckboxProducto();
+    eventOnChangePresentacionTable();
   });
 
   /*
@@ -90,6 +92,7 @@
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
+
         var $fcodigo    = $(this),
             $fconcepto     = $('#fconcepto'),
             $fconceptoId   = $('#fconceptoId'),
@@ -99,23 +102,34 @@
             $funidad       = $('#funidad'),
             $ftraslado     = $('#ftraslado');
 
-        $fcodigo.css("background-color", "#B6E7FF");
-        $fconcepto.val(ui.item.item.nombre);
-        $fconceptoId.val(ui.item.id);
-        $fcantidad.val('1');
-        $fprecio.val('0');
-        $funidad.val(ui.item.item.id_unidad);
-
         var presentaciones = ui.item.item.presentaciones,
-            html = '<option value=""></option>';
+            selectHtml = '<select name="presentacion[]" id="presentacion"><option value=""></option>';
 
-            console.log(ui.item.item.presentaciones);
         if (ui.item.item.presentaciones.length > 0) {
           for(var i in presentaciones) {
-            html += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+'</option>';
+            selectHtml += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+' '+presentaciones[i].cantidad+' '+ui.item.item.unidad_abreviatura+'</option>';
           }
         }
-         $fpresentacion.html(html);
+        selectHtml += '</select>';
+
+        producto = {
+          'codigo': ui.item.codigo,
+          'concepto': ui.item.item.nombre,
+          'id': ui.item.id,
+          'cantidad': '1',
+          'precio_unitario': '0',
+          'presentacion': selectHtml,
+          // 'presentacionId': $fpresentacion.find('option:selected').val() || '',
+          'presentacionCantidad': '',
+          'unidad': ui.item.item.id_unidad,
+          'traslado': '0',
+        };
+
+        console.log(producto);
+
+        addProducto(producto);
+
+        $fcodigo.val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -176,7 +190,7 @@
 
         if (ui.item.item.presentaciones.length > 0) {
           for(var i in presentaciones) {
-            html += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+'</option>';
+            html += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+' '+presentaciones[i].cantidad+' '+ui.item.item.unidad_abreviatura+'</option>';
           }
         }
          $fpresentacion.html(html);
@@ -200,6 +214,48 @@
    | Events
    |------------------------------------------------------------------------
    */
+  var eventCodigoBarras = function () {
+    $('#fcodigo').on('keypress', function(event) {
+      var $codigo = $(this);
+      if (isEmpresaSelected()) {
+        if (event.which === 13 && $codigo.val() !== '') {
+          $.get(base_url + 'panel/compras_ordenes/ajax_producto_by_codigo/?ide=' + $('#empresaId').val() + '&cod=' + $codigo.val() + '&tipo=' + $('#tipoOrden').find('option:selected').val(), function(data) {
+            if (data.length > 0) {
+              var presentaciones = data[0].presentaciones,
+                  selectHtml = '<select name="presentacion[]" id="presentacion"><option value=""></option>';
+
+              if (presentaciones.length > 0) {
+                for(var i in presentaciones) {
+                  selectHtml += '<option value="'+presentaciones[i].id_presentacion+'" data-cantidad="'+presentaciones[i].cantidad+'">'+presentaciones[i].nombre+' '+presentaciones[i].cantidad+' '+data[0].unidad_abreviatura+'</option>';
+                }
+              }
+              selectHtml += '</select>';
+
+              producto = {
+                'codigo': data[0].codigo,
+                'concepto': data[0].nombre,
+                'id': data[0].id_producto,
+                'cantidad': '1',
+                'precio_unitario': '0',
+                'presentacion': selectHtml,
+                'presentacionCantidad': '',
+                'unidad': data[0].id_unidad,
+                'traslado': '0',
+              };
+
+              addProducto(producto);
+
+              $codigo.val('');
+            } else {
+              noty({"text": 'No se encontro el codigo.', "layout":"topRight", "type": 'error'});
+            }
+          }, 'json');
+        }
+      } else {
+        noty({"text": 'Favor de Seleccionar una empresa.', "layout":"topRight", "type": 'error'});
+      }
+    });
+  }
 
   var eventIvaKeypress = function () {
     $('#ftraslado').on('keypress', function(event) {
@@ -251,6 +307,15 @@
 
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
+
+      var selectHtml = '<select name="presentacion[]" id="presentacion">',
+          selected = $fpresentacion.find('option:selected').val();
+
+      $fpresentacion.find('option').each(function(index, el) {
+        selectHtml += '<option value="'+$(this).val()+'" data-cantidad="'+($(this).attr('data-cantidad') || '')+'" '+($(this).val() == selected ? 'selected' : '')+'>'+$(this).text()+'</option>';
+      });
+      selectHtml += '</select>';
+
       if ( ! error) {
         producto = {
           'codigo': $fcodigo.val(),
@@ -258,8 +323,7 @@
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
           'precio_unitario': $fprecio.val(),
-          'presentacion': $fpresentacion.find('option:selected').text() || '',
-          'presentacionId': $fpresentacion.find('option:selected').val() || '',
+          'presentacion': selectHtml,
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
           'unidad': $funidad.find('option:selected').val(),
           'traslado': $ftraslado.find('option:selected').val(),
@@ -335,6 +399,16 @@
     });
   };
 
+  var eventOnChangePresentacionTable = function () {
+    $('#table-productos').on('change', 'select#presentacion', function(event) {
+      var $select = $(this),
+          $parent = $select.parents('tr');
+
+      $parent.find('#presentacionCant').val($select.find('option:selected').attr('data-cantidad') || '');
+      $parent.find('#presentacionText').val($select.find('option:selected').text() || '');
+    });
+  };
+
   /*
    |------------------------------------------------------------------------
    | HTML builders
@@ -398,9 +472,9 @@
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
                   '<td style="width: 160px;">' +
-                    '<input type="text" name="presentacionName[]" value="'+producto.presentacion+'" class="span12 jump'+(++jumpIndex)+'" id="presentacionName" class="span12" data-next="jump'+(++jumpIndex)+'" readonly>' +
-                    '<input type="hidden" name="presentacion[]" value="'+producto.presentacionId+'" id="presentacion" class="span12">' +
+                    $(producto.presentacion).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
                     '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
+                    '<input type="hidden" name="presentacionText[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
                   '</td>' +
                   '<td style="width: 150px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +

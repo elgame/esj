@@ -36,9 +36,9 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa') ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
-                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId') ?>">
+                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
                 </div>
               </div><!--/control-group -->
 
@@ -125,7 +125,7 @@
                   <div class="span12 mquit">
                     <div class="span3">
                       <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo">
+                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
                     </div><!--/span3s -->
                     <div class="span6">
                       <div class="input-append span12">
@@ -203,9 +203,11 @@
                                   <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                               </td>
                               <td style="width: 160px;">
-                                <input type="text" name="presentacionName[]" value="<?php echo $_POST['presentacionName'][$key] ?>" class="span12" id="presentacionName" class="span12" readonly>
-                                <input type="hidden" name="presentacion[]" value="<?php echo $_POST['presentacion'][$key] ?>" id="presentacion" class="span12">
+                                <select name="presentacion[]">
+                                  <option value="<?php echo $_POST['presentacion'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant'][$key] ?>"><?php echo $_POST['presentacionText'][$key] ?></option>
+                                </select>
                                 <input type="hidden" name="presentacionCant[]" value="<?php echo $_POST['presentacionCant'][$key] ?>" id="presentacionCant" class="span12">
+                                <input type="hidden" name="presentacionText[]" value="<?php echo $_POST['presentacionText'][$key] ?>" id="presentacionText" class="span12">
                               </td>
                               <td style="width: 120px;">
                                 <select name="unidad[]" id="unidad" class="span12">

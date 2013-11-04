@@ -150,6 +150,14 @@ class compras_ordenes extends MY_Controller {
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->db
+      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+      ->from("empresas AS e")
+      ->where("e.predeterminado", "t")
+      ->get()
+      ->row();
+
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/compras_ordenes/agregar', $params);
@@ -337,11 +345,9 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
 
-    $where = "lower(p.codigo) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
+    $producto = $this->compras_ordenes_model->getProductoByCodigoAjax($_GET['ide'], $_GET['tipo'], $_GET['cod']);
 
-    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where);
-
-    echo json_encode($productos);
+    echo json_encode($producto);
   }
 
   public function ajax_producto()

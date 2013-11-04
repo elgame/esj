@@ -263,7 +263,13 @@
                       </thead>
                       <tbody>
                         <?php if (isset($_POST['concepto'])) {
-                              foreach ($_POST['concepto'] as $key => $concepto) { ?>
+                              $subtotal = $iva = $total = 0;
+                              foreach ($_POST['concepto'] as $key => $concepto) {
+
+                                $subtotal += $_POST['importe'][$key];
+                                $iva      += $_POST['trasladoTotal'][$key];
+                                $total    += $_POST['total'][$key];
+                            ?>
                             <tr>
                               <td style="width: 70px;">
                                 <?php echo $_POST['codigo'][$key] ?>
@@ -275,8 +281,11 @@
                                   <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                               </td>
                               <td style="width: 160px;">
-                                <input type="text" name="presentacionName[]" value="<?php echo $_POST['presentacionName'][$key] ?>" class="span12" id="presentacionName" class="span12" readonly>
-                                <input type="hidden" name="presentacion[]" value="<?php echo $_POST['presentacion'][$key] ?>" id="presentacion" class="span12">
+                                <select name="presentacion[]">
+                                  <option value="<?php echo $_POST['presentacion'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant'][$key] ?>"><?php echo $_POST['presentacionText'][$key] ?></option>
+                                </select>
+                                <input type="hidden" name="presentacionCant[]" value="<?php echo $_POST['presentacionCant'][$key] ?>" id="presentacionCant" class="span12">
+                                <input type="hidden" name="presentacionText[]" value="<?php echo $_POST['presentacionText'][$key] ?>" id="presentacionText" class="span12">
                               </td>
                               <td style="width: 120px;">
                                 <select name="unidad[]" id="unidad" class="span12">
@@ -339,9 +348,11 @@
                                      <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
                                  </td>
                                  <td style="width: 160px;<?php echo $redBg ?>">
-                                   <input type="text" name="presentacionName[]" value="<?php echo $prod->presentacion ?>" class="span12" id="presentacionName" class="span12" readonly>
-                                   <input type="hidden" name="presentacion[]" value="<?php echo $prod->id_presentacion ?>" id="presentacion" class="span12">
+                                   <select name="presentacion[]">
+                                    <option value="<?php echo $prod->id_presentacion ?>" data-cantidad="<?php echo $prod->presen_cantidad ?>"><?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?></option>
+                                   </select>
                                    <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
+                                   <input type="hidden" name="presentacionText[]" value="<?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?>" id="presentacionText" class="span12">
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
                                    <select name="unidad[]" id="unidad" class="span12" <?php echo $disabled ?>>
