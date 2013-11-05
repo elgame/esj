@@ -139,6 +139,17 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="tipoOrden">Tipo de Orden</label>
+                <div class="controls">
+                  <select name="tipoOrden" class="span9" id="tipoOrden" <?php echo $disabled ?>>
+                    <option value="p" <?php echo set_select('tipoOrden', 'p', $orden['info'][0]->tipo_orden === 'p' ? true : false); ?>>Productos</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Descripciones</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?>>Fletes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $orden['info'][0]->folio); ?>" readonly>
@@ -151,17 +162,6 @@
                   <select name="tipoPago" class="span9" id="tipoPago" <?php echo $disabled ?>>
                     <option value="cr" <?php echo set_select('tipoPago', 'cr', $orden['info'][0]->tipo_pago === 'cr' ? true : false); ?>>Credito</option>
                     <option value="co" <?php echo set_select('tipoPago', 'co', $orden['info'][0]->tipo_pago === 'co' ? true : false); ?>>Contado</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="control-group">
-                <label class="control-label" for="tipoOrden">Tipo de Orden</label>
-                <div class="controls">
-                  <select name="tipoOrden" class="span9" id="tipoOrden" <?php echo $disabled ?>>
-                    <option value="p" <?php echo set_select('tipoOrden', 'p', $orden['info'][0]->tipo_orden === 'p' ? true : false); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Descripciones</option>
-                    <!-- <option value="f" <?php //echo set_select('tipoOrden', 'f'); ?>>Fletes</option> -->
                   </select>
                 </div>
               </div>
@@ -257,17 +257,19 @@
                           <th>CANT.</th>
                           <th>P.U.</th>
                           <th>IVA</th>
+                          <th>RET 4%</th>
                           <th>IMPORTE</th>
                           <th></th>
                         </tr>
                       </thead>
                       <tbody>
                         <?php if (isset($_POST['concepto'])) {
-                              $subtotal = $iva = $total = 0;
+                              $subtotal = $iva = $total = $retencion = 0;
                               foreach ($_POST['concepto'] as $key => $concepto) {
 
                                 $subtotal += $_POST['importe'][$key];
                                 $iva      += $_POST['trasladoTotal'][$key];
+                                $retencion+= $_POST['retTotal'][$key];
                                 $total    += $_POST['total'][$key];
                             ?>
                             <tr>
@@ -309,6 +311,9 @@
                                   <input type="hidden" name="trasladoTotal[]" value="<?php echo $_POST['trasladoTotal'][$key] ?>" id="trasladoTotal" class="span12">
                                   <input type="hidden" name="trasladoPorcent[]" value="<?php echo $_POST['trasladoPorcent'][$key] ?>" id="trasladoPorcent" class="span12">
                               </td>
+                              <td style="width: 66px;">
+                                  <input type="text" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
+                              </td>
                               <td>
                                   <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
@@ -317,10 +322,11 @@
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>
                           <?php  }} else {
-                               $subtotal = $iva = $total = 0;
+                               $subtotal = $iva = $total = $retencion = 0;
                                foreach ($orden['info'][0]->productos as $key => $prod) {
                                   $subtotal += $prod->importe;
                                   $iva      += $prod->iva;
+                                  $retencion+= $prod->retencion_iva;
                                   $total    += $prod->total;
 
                                   if ($prod->id_presentacion !== null)
@@ -348,11 +354,19 @@
                                      <input type="hidden" name="productoId[]" value="<?php echo $prod->id_producto ?>" id="productoId" class="span12">
                                  </td>
                                  <td style="width: 160px;<?php echo $redBg ?>">
-                                   <select name="presentacion[]">
-                                    <option value="<?php echo $prod->id_presentacion ?>" data-cantidad="<?php echo $prod->presen_cantidad ?>"><?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?></option>
-                                   </select>
-                                   <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
-                                   <input type="hidden" name="presentacionText[]" value="<?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?>" id="presentacionText" class="span12">
+                                    <?php if ($prod->id_presentacion){ ?>
+                                      <select name="presentacion[]">
+                                        <option value="<?php echo $prod->id_presentacion ?>" data-cantidad="<?php echo $prod->presen_cantidad ?>"><?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?></option>
+                                      </select>
+                                      <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
+                                      <input type="hidden" name="presentacionText[]" value="<?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?>" id="presentacionText" class="span12">
+                                    <?php } else { ?>
+                                      <select name="presentacion[]">
+                                        <option value="" data-cantidad=""></option>
+                                      </select>
+                                      <input type="hidden" name="presentacionCant[]" value="" id="presentacionCant" class="span12">
+                                      <input type="hidden" name="presentacionText[]" value="" id="presentacionText" class="span12">
+                                    <?php } ?>
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
                                    <select name="unidad[]" id="unidad" class="span12" <?php echo $disabled ?>>
@@ -375,6 +389,9 @@
                                      </select>
                                      <input type="hidden" name="trasladoTotal[]" value="<?php echo $prod->iva ?>" id="trasladoTotal" class="span12">
                                      <input type="hidden" name="trasladoPorcent[]" value="<?php echo $prod->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
+                                 </td>
+                                 <td style="width: 66px;">
+                                     <input type="text" name="retTotal[]" value="<?php echo $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                  </td>
                                  <td style="<?php echo $redBg ?>">
                                      <span><?php echo String::formatoNumero($prod->importe) ?></span>
@@ -421,6 +438,11 @@
                     <td>IVA</td>
                     <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
                     <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', $iva); ?>">
+                  </tr>
+                  <tr>
+                    <td>RET.</td>
+                    <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', $retencion))?></td>
+                    <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', $retencion); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>

@@ -134,8 +134,10 @@ class compras_ordenes_model extends CI_Model {
         'precio_unitario' => $pu,
         'importe'         => $_POST['importe'][$key],
         'iva'             => $_POST['trasladoTotal'][$key],
+        'retencion_iva'   => $_POST['retTotal'][$key],
         'total'           => $_POST['total'][$key],
         'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
+        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
       );
     }
 
@@ -232,8 +234,10 @@ class compras_ordenes_model extends CI_Model {
           'precio_unitario' => $pu,
           'importe'         => $_POST['importe'][$key],
           'iva'             => $_POST['trasladoTotal'][$key],
+          'retencion_iva'   => $_POST['retTotal'][$key],
           'total'           => $_POST['total'][$key],
           'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
+          'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
         );
       }
 
@@ -251,7 +255,7 @@ class compras_ordenes_model extends CI_Model {
    * @param  string $ordenesIds
    * @return array
    */
-  public function agregarCompra($proveedorId, $ordenesIds)
+  public function agregarCompra($proveedorId, $empresaId, $ordenesIds)
   {
     // obtiene un array con los ids de las ordenes a ligar con la compra.
     $ordenesIds = explode(',', $ordenesIds);
@@ -259,6 +263,7 @@ class compras_ordenes_model extends CI_Model {
     // datos de la compra.
     $data = array(
       'id_proveedor'   => $proveedorId,
+      'id_empresa'     => $empresaId,
       'id_empleado'    => $this->session->userdata('id_usuario'),
       'serie'          => $_POST['serie'],
       'folio'          => $_POST['folio'],
@@ -302,8 +307,10 @@ class compras_ordenes_model extends CI_Model {
         'precio_unitario' => $_POST['valorUnitario'][$key],
         'importe'         => $_POST['importe'][$key],
         'iva'             => $_POST['trasladoTotal'][$key],
+        'retencion_iva'   => $_POST['retTotal'][$key],
         'total'           => $_POST['total'][$key],
         'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
+        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
       );
 
       $this->db->update('compras_productos', $prodData, array(
@@ -376,10 +383,11 @@ class compras_ordenes_model extends CI_Model {
     return $data;
   }
 
-  public function folio()
+  public function folio($tipo = 'p')
   {
     $res = $this->db->select('folio')
       ->from('compras_ordenes')
+      ->where('tipo_orden', $tipo)
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
@@ -432,8 +440,10 @@ class compras_ordenes_model extends CI_Model {
         'precio_unitario' => $pu,
         'importe'         => $_POST['importe'][$key],
         'iva'             => $_POST['trasladoTotal'][$key],
+        'retencion_iva'   => $_POST['retTotal'][$key],
         'total'           => $_POST['total'][$key],
         'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
+        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
         'status'          => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r'
       );
 

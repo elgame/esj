@@ -37,7 +37,7 @@
 
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', $fecha); ?>" size="10">
+                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01\TH:i')); ?>" size="10">
                 <label for="ffecha2">Al</label>
                 <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
@@ -86,7 +86,8 @@
             <?php foreach($ordenes['ordenes'] as $orden) {?>
                 <tr>
                   <td>
-                    <?php if ($orden->status === 'a' && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== ''){ ?>
+                    <?php if ($orden->status === 'a' && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== '' &&
+                              isset($_GET['did_empresa']) && $_GET['did_empresa'] !== ''){ ?>
                       <input type="checkbox" class="addToFactura" value="<?php echo $orden->id_orden ?>">
                     <?php } ?>
                   </td>

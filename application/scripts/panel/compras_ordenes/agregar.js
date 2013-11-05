@@ -18,7 +18,35 @@
     eventBtnDelProducto();
     eventCheckboxProducto();
     eventOnChangePresentacionTable();
+    eventOnChangeTipoOrden();
   });
+
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+   // Obtiene el siguiente folio segun el tipo de orden.
+  var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
+  var eventOnChangeTipoOrden = function () {
+    $('#tipoOrden').on('change', function(event) {
+      var $this      = $(this),
+          $folio     = $('#folio'),
+          $tableProd = $('#table-productos');
+
+      if ($tableProd.find('tbody tr').length > 0) {
+        noty({"text": 'Ya tiene productos para un tipo de orden, si desea cambiar de tipo de orden elimine los productos del listado', "layout":"topRight", "type": 'error'});
+
+        $this.val(tipoOrderActual);
+      } else {
+        $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
+          $folio.val(folio);
+          tipoOrderActual = $this.find('option:selected').val()
+        });
+      }
+    });
+  };
 
   /*
    |------------------------------------------------------------------------
@@ -269,16 +297,16 @@
 
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
-      var $fcodigo     = $('#fcodigo'),
-          $fconcepto   = $('#fconcepto'),
+      var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
+          $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId = $('#fconceptoId'),
-          $fcantidad   = $('#fcantidad'),
-          $fprecio     = $('#fprecio'),
+          $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
+          $fprecio     = $('#fprecio').css({'background-color': '#FFF'}),
           $fpresentacion = $('#fpresentacion'),
           $funidad     = $('#funidad'),
           $ftraslado   = $('#ftraslado'),
 
-          campos = [$fconcepto, $fcantidad, $fprecio],
+          campos = [$fcantidad, $fprecio],
           producto,
           error = false;
 
@@ -290,6 +318,15 @@
           error = true;
         } else {
           campos[i].css({'background-color': '#FFF'})
+        }
+      }
+
+      // Si el tipo de orden es producto entonces verifica si se selecciono
+      // un producto, si no no deja agregar descripciones.
+      if ($('#tipoOrden').find('option:selected').val() === 'p') {
+        if ($fconceptoId.val() == '') {
+          $fconcepto.css({'background-color': '#FDFC9A'});
+          error = true;
         }
       }
 
@@ -309,12 +346,22 @@
       // completar.
 
       var selectHtml = '<select name="presentacion[]" id="presentacion">',
-          selected = $fpresentacion.find('option:selected').val();
+          selected = $fpresentacion.find('option:selected').val(),
+          existOpt = false;
 
       $fpresentacion.find('option').each(function(index, el) {
         selectHtml += '<option value="'+$(this).val()+'" data-cantidad="'+($(this).attr('data-cantidad') || '')+'" '+($(this).val() == selected ? 'selected' : '')+'>'+$(this).text()+'</option>';
+        existOpt = true;
       });
+        console.log(existOpt);
+
+      if ( ! existOpt) {
+        selectHtml += '<option value="" data-cantidad=""></option>';
+      }
+
       selectHtml += '</select>';
+
+      console.log(selectHtml);
 
       if ( ! error) {
         producto = {
@@ -336,11 +383,12 @@
           campos[i].val('').css({'background-color': '#FFF'});
         }
 
-        $fcodigo.val('').css({'background-color': '#FFF'}).focus();
+        $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
         $funidad.val('');
         $ftraslado.val('0');
         $fpresentacion.html('');
+        $fcodigo.val('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -408,7 +456,6 @@
       $parent.find('#presentacionText').val($select.find('option:selected').text() || '');
     });
   };
-
   /*
    |------------------------------------------------------------------------
    | HTML builders
@@ -494,6 +541,9 @@
                       '<input type="hidden" name="trasladoTotal[]" value="" id="trasladoTotal" class="span12">' +
                       '<input type="hidden" name="trasladoPorcent[]" value="'+producto.traslado+'" id="trasladoPorcent" class="span12">' +
                   '</td>' +
+                  '<td style="width: 66px;">' +
+                      '<input type="text" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>' +
+                  '</td>' +
                   '<td>' +
                     '<span>'+util.darFormatoNum('0')+'</span>' +
                     '<input type="hidden" name="importe[]" value="0" id="importe" class="span12 vpositive">' +
@@ -526,9 +576,10 @@
 
   // Calcula el subtotal(importe),  iva y total de la orden de compra.
   function calculaTotal () {
-     var total_importes = 0,
-         total_ivas     = 0,
-         total_orden    = 0;
+    var total_importes = 0,
+        total_ivas     = 0,
+        total_ret      = 0,
+        total_orden    = 0;
 
      $('input#importe').each(function(i, e) {
        total_importes += parseFloat($(this).val());
@@ -543,13 +594,21 @@
      });
      total_ivas = util.trunc2Dec(total_ivas);
 
-     total_orden = parseFloat(total_subtotal) + (parseFloat(total_ivas));
+     $('input#retTotal').each(function(i, e) {
+       total_ret += parseFloat($(this).val());
+     });
+     total_ret = util.trunc2Dec(total_ret);
 
-     $('#importe-format').html(util.darFormatoNum(total_subtotal));
+     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) - parseFloat(total_ret);
+
+    $('#importe-format').html(util.darFormatoNum(total_subtotal));
      $('#totalImporte').val(total_subtotal);
 
      $('#traslado-format').html(util.darFormatoNum(total_ivas));
      $('#totalImpuestosTrasladados').val(total_ivas);
+
+     $('#retencion-format').html(util.darFormatoNum(total_ret));
+     $('#totalRetencion').val(total_ret);
 
      $('#total-format').html(util.darFormatoNum(total_orden));
      $('#totalOrden').val(total_orden);
@@ -564,11 +623,18 @@
         $iva               = $tr.find('#traslado'), // Select iva
         $importe           = $tr.find('#importe'), // Input hidden importe
         $totalIva          = $tr.find('#trasladoTotal'), // Input hidden iva total
+        $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
         $total             = $tr.find('#total'), // Input hidden iva total
 
         totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
         totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
+        totalRet     = util.trunc2Dec(totalImporte * 0.04),
         total        = util.trunc2Dec(totalImporte + totalIva);
+
+    if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
+      total -= parseFloat(totalRet);
+      $totalRet.val(totalRet);
+    }
 
     $totalIva.val(totalIva);
     $importe.parent().find('span').text(util.darFormatoNum(totalImporte));
