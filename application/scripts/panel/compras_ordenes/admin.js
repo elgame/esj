@@ -58,6 +58,7 @@
 
 function getOrdenesIds ($button, $modal) {
   var idp   = $('#proveedorId').val(),
+      ide   = $('#empresaId').val(),
       exist = false,
       ids   = [];
 
@@ -71,7 +72,7 @@ function getOrdenesIds ($button, $modal) {
   });
 
   if (exist) {
-    $button.attr('href', base_url + '/panel/compras_ordenes/ligar/?idp='+idp+'&ids=' + ids.join(','));
+    $button.attr('href', base_url + 'panel/compras_ordenes/ligar/?idp='+idp+'&ide='+ide+'&ids=' + ids.join(','));
     $modal.modal('show');
   } else {
     noty({"text": 'Seleccione una o mas ordenes de compras para ligarlas a una factura!', "layout":"topRight", "type": 'error'});

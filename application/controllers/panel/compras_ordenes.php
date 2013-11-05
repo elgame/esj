@@ -9,6 +9,7 @@ class compras_ordenes extends MY_Controller {
   private $excepcion_privilegio = array(
     'compras_ordenes/ajax_producto_by_codigo/',
     'compras_ordenes/ajax_producto/',
+    'compras_ordenes/ajax_get_folio/',
 
     'compras_ordenes/ligar/',
 
@@ -127,7 +128,7 @@ class compras_ordenes extends MY_Controller {
       'titulo' => 'Agregar orden de compra'
     );
 
-    $params['next_folio']    = $this->compras_ordenes_model->folio('en');
+    $params['next_folio']    = $this->compras_ordenes_model->folio();
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_ordenes_model->departamentos();
     $params['unidades']      = $this->compras_ordenes_model->unidades();
@@ -149,6 +150,14 @@ class compras_ordenes extends MY_Controller {
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->db
+      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+      ->from("empresas AS e")
+      ->where("e.predeterminado", "t")
+      ->get()
+      ->row();
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -294,7 +303,7 @@ class compras_ordenes extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_GET['ids']);
+      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'], $_GET['ids']);
 
       if ($res_mdl['passes'])
       {
@@ -314,6 +323,7 @@ class compras_ordenes extends MY_Controller {
 
       foreach ($orden['info'][0]->productos as $prod)
       {
+        $prod->tipo_orden = $orden['info'][0]->tipo_orden;
         $params['productos'][] = $prod;
       }
     }
@@ -337,11 +347,9 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
 
-    $where = "lower(p.codigo) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
+    $producto = $this->compras_ordenes_model->getProductoByCodigoAjax($_GET['ide'], $_GET['tipo'], $_GET['cod']);
 
-    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where);
-
-    echo json_encode($productos);
+    echo json_encode($producto);
   }
 
   public function ajax_producto()
@@ -353,6 +361,12 @@ class compras_ordenes extends MY_Controller {
     $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where, 'nombre');
 
     echo json_encode($productos);
+  }
+
+  public function ajax_get_folio()
+  {
+    $this->load->model('compras_ordenes_model');
+    echo $this->compras_ordenes_model->folio($_GET['tipo']);
   }
 
   /*
@@ -430,6 +444,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'trasladoPorcent[]',
             'label' => '',
             'rules' => ''),
+      array('field' => 'retTotal[]',
+            'label' => '',
+            'rules' => ''),
       array('field' => 'importe[]',
             'label' => '',
             'rules' => ''),
@@ -442,6 +459,9 @@ class compras_ordenes extends MY_Controller {
             'rules' => ''),
       array('field' => 'totalImpuestosTrasladados',
             'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'totalRetencion',
+            'label' => 'RET.',
             'rules' => ''),
       array('field' => 'totalOrden',
             'label' => 'Total',
@@ -516,6 +536,9 @@ class compras_ordenes extends MY_Controller {
             'label' => 'Subtotal',
             'rules' => ''),
       array('field' => 'totalImpuestosTrasladados',
+            'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'totalRetencion',
             'label' => 'IVA',
             'rules' => ''),
       array('field' => 'totalOrden',

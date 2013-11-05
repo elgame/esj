@@ -36,9 +36,9 @@
                 <label class="control-label" for="empresa">Empresa </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa') ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal) ?>" placeholder="" autofocus><a href="<?php echo base_url('panel/empresas/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
                   </div>
-                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId') ?>">
+                  <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa) ?>">
                 </div>
               </div><!--/control-group -->
 
@@ -74,6 +74,17 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="tipoOrden">Tipo de Orden</label>
+                <div class="controls">
+                  <select name="tipoOrden" class="span9" id="tipoOrden">
+                    <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Descripciones</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f'); ?>>Fletes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="folio">Folio</label>
                 <div class="controls">
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $next_folio); ?>" size="25" readonly>
@@ -86,17 +97,6 @@
                   <select name="tipoPago" class="span9" id="tipoPago">
                     <option value="cr" <?php echo set_select('tipoPago', 'cr'); ?>>Credito</option>
                     <option value="co" <?php echo set_select('tipoPago', 'co'); ?>>Contado</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="control-group">
-                <label class="control-label" for="tipoOrden">Tipo de Orden</label>
-                <div class="controls">
-                  <select name="tipoOrden" class="span9" id="tipoOrden">
-                    <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Descripciones</option>
-                    <!-- <option value="f" <?php //echo set_select('tipoOrden', 'f'); ?>>Fletes</option> -->
                   </select>
                 </div>
               </div>
@@ -125,7 +125,7 @@
                   <div class="span12 mquit">
                     <div class="span3">
                       <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo">
+                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
                     </div><!--/span3s -->
                     <div class="span6">
                       <div class="input-append span12">
@@ -184,6 +184,7 @@
                           <th>CANT.</th>
                           <th>P.U.</th>
                           <th>IVA</th>
+                          <th>RET 4%</th>
                           <th>IMPORTE</th>
                           <th></th>
                         </tr>
@@ -203,9 +204,11 @@
                                   <input type="hidden" name="productoId[]" value="<?php echo $_POST['productoId'][$key] ?>" id="productoId" class="span12">
                               </td>
                               <td style="width: 160px;">
-                                <input type="text" name="presentacionName[]" value="<?php echo $_POST['presentacionName'][$key] ?>" class="span12" id="presentacionName" class="span12" readonly>
-                                <input type="hidden" name="presentacion[]" value="<?php echo $_POST['presentacion'][$key] ?>" id="presentacion" class="span12">
+                                <select name="presentacion[]">
+                                  <option value="<?php echo $_POST['presentacion'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant'][$key] ?>"><?php echo $_POST['presentacionText'][$key] ?></option>
+                                </select>
                                 <input type="hidden" name="presentacionCant[]" value="<?php echo $_POST['presentacionCant'][$key] ?>" id="presentacionCant" class="span12">
+                                <input type="hidden" name="presentacionText[]" value="<?php echo $_POST['presentacionText'][$key] ?>" id="presentacionText" class="span12">
                               </td>
                               <td style="width: 120px;">
                                 <select name="unidad[]" id="unidad" class="span12">
@@ -228,6 +231,9 @@
                                   </select>
                                   <input type="hidden" name="trasladoTotal[]" value="<?php echo $_POST['trasladoTotal'][$key] ?>" id="trasladoTotal" class="span12">
                                   <input type="hidden" name="trasladoPorcent[]" value="<?php echo $_POST['trasladoPorcent'][$key] ?>" id="trasladoPorcent" class="span12">
+                              </td>
+                              <td style="width: 66px;">
+                                  <input type="text" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
                               </td>
                               <td>
                                   <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
@@ -270,6 +276,11 @@
                     <td>IVA</td>
                     <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', 0))?></td>
                     <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', 0); ?>">
+                  </tr>
+                  <tr>
+                    <td>RET.</td>
+                    <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', 0))?></td>
+                    <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', 0); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
