@@ -153,8 +153,6 @@
           'traslado': '0',
         };
 
-        console.log(producto);
-
         addProducto(producto);
 
         $fcodigo.val('');
@@ -353,15 +351,12 @@
         selectHtml += '<option value="'+$(this).val()+'" data-cantidad="'+($(this).attr('data-cantidad') || '')+'" '+($(this).val() == selected ? 'selected' : '')+'>'+$(this).text()+'</option>';
         existOpt = true;
       });
-        console.log(existOpt);
 
       if ( ! existOpt) {
         selectHtml += '<option value="" data-cantidad=""></option>';
       }
 
       selectHtml += '</select>';
-
-      console.log(selectHtml);
 
       if ( ! error) {
         producto = {
