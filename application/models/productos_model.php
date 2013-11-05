@@ -121,7 +121,7 @@ class productos_model extends CI_Model {
 	 */
 	public function getFamiliaInfo($id_familia=FALSE, $basic_info=FALSE)
 	{
-		$id_familia = (isset($_GET['id']))? $_GET['id']: $id_familia;
+		$id_familia = ($id_familia==FALSE)? $_GET['id']: $id_familia;
 
 		$sql_res = $this->db->select("id_familia, id_empresa, codigo, nombre, tipo, status" )
 												->from("productos_familias")
@@ -195,7 +195,7 @@ class productos_model extends CI_Model {
 		$sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";
 
 		$str_query = "
-				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status
+				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status, cuenta_cpi
 				FROM productos
 				".$sql."
 				ORDER BY nombre ASC
@@ -238,6 +238,7 @@ class productos_model extends CI_Model {
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
 				'ubicacion'  => $this->input->post('ubicacion'),
+				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}
 
@@ -266,6 +267,7 @@ class productos_model extends CI_Model {
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
 				'ubicacion'  => $this->input->post('ubicacion'),
+				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}
 
@@ -321,10 +323,11 @@ class productos_model extends CI_Model {
 	{
 		$id_producto = (isset($_GET['id']))? $_GET['id']: $id_producto;
 
-		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status" )
-												->from("productos")
-												->where("id_producto", $id_producto)
-												->get();
+		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, 
+									ubicacion, precio_promedio, status, cuenta_cpi" )
+							->from("productos")
+							->where("id_producto", $id_producto)
+							->get();
 
 		$data['info'] = array();
 

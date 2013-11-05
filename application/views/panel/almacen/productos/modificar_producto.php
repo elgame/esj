@@ -39,7 +39,7 @@
           <p>Usted está usando un navegador desactualizado. <a href="http://browsehappy.com/">Actualice su navegador</a> o <a href="http://www.google.com/chromeframe/?redirect=true">instale Google Chrome Frame</a> para experimentar mejor este sitio.</p>
         </div>
       <![endif]-->
-    <div id="content" class="span10">
+    <div id="content" class="span12">
       <!-- content starts -->
 
       
@@ -56,46 +56,58 @@
 
             <form action="<?php echo base_url('panel/productos/modificar/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
               
-              <div class="control-group">
-                <label class="control-label" for="fcodigo">Codigo </label>
-                <div class="controls">
-                  <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', (isset($data['info']->codigo)? $data['info']->codigo: '')) ?>" id="fcodigo" class="span6" axlength="25" placeholder="Codigo" required autofocus>
+              <div class="span6">
+                <div class="control-group">
+                  <label class="control-label" for="fcodigo">Codigo </label>
+                  <div class="controls">
+                    <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', (isset($data['info']->codigo)? $data['info']->codigo: '')) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required autofocus>
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fnombre">Nombre </label>
+                  <div class="controls">
+                    <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90" 
+                    value="<?php echo set_value('fcodigo', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="funidad">Unidad medida </label>
+                  <div class="controls">
+                    <select name="funidad" id="funidad" class="span12" required>
+                  <?php foreach ($unidades['unidades'] as $key => $value)
+                  { ?>
+                      <option value="<?php echo $value->id_unidad; ?>" <?php echo set_select('funidad', $value->id_unidad, false, (isset($data['info']->id_unidad)? $data['info']->id_unidad: '')); ?>><?php echo $value->nombre; ?></option>
+                  <?php } ?>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div class="control-group">
-                <label class="control-label" for="fnombre">Nombre </label>
-                <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="90" 
-                  value="<?php echo set_value('fcodigo', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
+              <div class="span6">
+                <div class="control-group">
+                  <label class="control-label" for="fstock_min">Stock min </label>
+                  <div class="controls">
+                    <input type="text" name="fstock_min" id="fstock_min" class="span12 vpositive" maxlength="40" 
+                    value="<?php echo set_value('fcodigo', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
+                  </div>
                 </div>
-              </div>
 
-              <div class="control-group">
-                <label class="control-label" for="funidad">Unidad medida </label>
-                <div class="controls">
-                  <select name="funidad" id="funidad" required>
-                <?php foreach ($unidades['unidades'] as $key => $value)
-                { ?>
-                    <option value="<?php echo $value->id_unidad; ?>" <?php echo set_select('funidad', $value->id_unidad, false, (isset($data['info']->id_unidad)? $data['info']->id_unidad: '')); ?>><?php echo $value->nombre; ?></option>
-                <?php } ?>
-                  </select>
+                <div class="control-group">
+                  <label class="control-label" for="ubicacion">Ubicacion </label>
+                  <div class="controls">
+                    <input type="text" name="ubicacion" id="ubicacion" class="span12" maxlength="70" 
+                    value="<?php echo set_value('fcodigo', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
+                  </div>
                 </div>
-              </div>
 
-              <div class="control-group">
-                <label class="control-label" for="fstock_min">Stock min </label>
-                <div class="controls">
-                  <input type="text" name="fstock_min" id="fstock_min" class="span6 vpositive" maxlength="40" 
-                  value="<?php echo set_value('fcodigo', (isset($data['info']->stock_min)? $data['info']->stock_min: '')) ?>" placeholder="Stock min">
-                </div>
-              </div>
-
-              <div class="control-group">
-                <label class="control-label" for="ubicacion">Ubicacion </label>
-                <div class="controls">
-                  <input type="text" name="ubicacion" id="ubicacion" class="span6" maxlength="70" 
-                  value="<?php echo set_value('fcodigo', (isset($data['info']->ubicacion)? $data['info']->ubicacion: '')) ?>" placeholder="Ubicacion del producto">
+                <div class="control-group">
+                  <label class="control-label" for="cuenta_contpaq"><strong>Cuenta contpaq</strong> </label>
+                  <div class="controls">
+                    <input type="text" name="cuenta_contpaq" id="cuenta_contpaq" class="span12" maxlength="12" 
+                    value="<?php echo set_value('fcodigo', (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: '')) ?>" placeholder="Cuenta afectable contpaq">
+                  </div>
                 </div>
               </div>
 
@@ -115,6 +127,8 @@
               {
                 foreach ($data['presentaciones'] as $key => $value)
                 {
+                  if ($value != '')
+                  {
               ?>
                     <tr class="rowprod">
                       <td><input type="text" name="pnombre[]" value="<?php echo $value->nombre; ?>" class="span12 presnombre" placeholder="Presentacion">
@@ -125,6 +139,7 @@
                             id="pquitar<?php echo $value->id_presentacion; ?>" value="si">Eliminar</label></td>
                     </tr>
               <?php
+                  }
                 }
               } ?>
                     <tr class="rowprod">

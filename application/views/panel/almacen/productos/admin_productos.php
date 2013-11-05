@@ -15,7 +15,7 @@
                 <td class="center">
                     <?php 
                     echo $this->usuarios_model->getLinkPrivSm('productos/modificar/', array(
-                        'params'   => 'id='.$producto->id_producto,
+                        'params'   => 'id='.$producto->id_producto."&fid_familia=".$this->input->get('fid_familia'),
                         'btn_type' => 'btn-success', 'text_link' => 'hide',
                         'attrs'    => array('rel' => 'superbox-40x500') )
                     );

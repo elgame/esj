@@ -379,6 +379,9 @@ class productos extends MY_Controller {
 			array('field' => 'ubicacion',
 						'label' => 'Ubicacion',
 						'rules' => 'max_length[70]'),
+			array('field' => 'cuenta_contpaq',
+						'label' => 'Cuenta contpaq',
+						'rules' => 'max_length[12]'),
 
 			array('field' => 'pnombre[]',
 						'label' => 'Presentacion',

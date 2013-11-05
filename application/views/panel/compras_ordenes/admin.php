@@ -58,7 +58,7 @@
             </form>
 
             <?php if ( ! $requisicion) { ?>
-              <a href="<?php echo base_url('panel/compras_ordenes/ligar') ?>" type="button" class="btn btn-info" id="btnLigarOrdenes" rel="superbox-80x550" data-supermodal-callback="getOrdenesIds" data-supermodal-autoshow="false">Ligar Ordenes</a>
+              <a href="<?php echo base_url('/panel/compras_ordenes/ligar') ?>" type="button" class="btn btn-info" id="btnLigarOrdenes" rel="superbox-80x550" data-supermodal-callback="getOrdenesIds" data-supermodal-autoshow="false">Ligar Ordenes</a>
             <?php } ?>
 
             <?php

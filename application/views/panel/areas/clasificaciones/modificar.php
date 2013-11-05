@@ -81,8 +81,8 @@
                 <div class="controls" id="list-calibres"> -->
                   <!-- <label><input type="checkbox" name="fcalibres[]" value="1" class="sel-calibres"><input type="hidden" name="fcalibre_nombre[]" value="Calibre 1">Calibre 1</label> -->
 
-                  <?/*php
-                    if (isset($_POST['fcalibres'])) {
+                  <?php
+                    /*if (isset($_POST['fcalibres'])) {
                       foreach ($_POST['fcalibres'] as $key => $value) { ?>
                         <label><input type="checkbox" name="fcalibres[]" value="<?php echo $value ?>" class="sel-calibres" checked><input type="hidden" name="fcalibre_nombre[]" value="<?php echo $_POST['fcalibre_nombre'][$key] ?>"><?php echo $_POST['fcalibre_nombre'][$key] ?></label>
                   <?php }}

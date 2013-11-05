@@ -580,6 +580,11 @@ class banco_cuentas_model extends banco_model {
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
 		}
 
+		//Valida que tenga saldo disponible
+		$cuenta = $this->getCuentas(false, $data['id_cuenta']);
+		if ($cuenta['cuentas'][0]->saldo < $data['monto']+$comision)
+			return array('error' => true, 'msg' => 30);
+
 		$this->db->insert('banco_movimientos', $data);
 		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
 
@@ -675,6 +680,9 @@ class banco_cuentas_model extends banco_model {
 		$data_notas_venta = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_venta_remision, af.id_venta
 			FROM banco_movimientos_ventas_remision AS bm INNER JOIN facturacion_ventas_remision_abonos AS af ON af.id_abono = bm.id_abono_venta_remision 
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+		$data_compras = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, af.id_compra
+			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono 
+			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 
 		if($cancelar)//cancelar movimiento
 			$this->updateMovimiento($id_movimiento, array('status' => 'f') );
@@ -693,6 +701,14 @@ class banco_cuentas_model extends banco_model {
 		if(count($data_notas_venta) > 0){
 			foreach ($data_notas_venta as $key => $value) {
 				$this->cuentas_cobrar_model->removeAbono($value->id_venta, 'vr', $value->id_abono_venta_remision);
+			}
+		}
+
+		//cuendo es una compra se cancelan los abonos a la compra
+		$this->load->model('cuentas_pagar_model');
+		if(count($data_compras) > 0){
+			foreach ($data_compras as $key => $value) {
+				$this->cuentas_pagar_model->removeAbono($value->id_compra, 'f', $value->id_compra_abono);
 			}
 		}
 		
@@ -714,7 +730,7 @@ class banco_cuentas_model extends banco_model {
 	 * @param  boolean $paginados [description]
 	 * @return [type]             [description]
 	 */
-	public function getCuentas($paginados = true)
+	public function getCuentas($paginados = true, $id_cuenta=null)
 	{
 		$sql = '';
 		$query['total_rows'] = $params['result_items_per_page'] = $params['result_page'] = '';
@@ -742,6 +758,9 @@ class banco_cuentas_model extends banco_model {
 
 		if(isset($_GET['id_banco']{0}))
 			$sql .= ($sql==''? ' WHERE ': ' AND ')." bb.id_banco = '{$this->input->get('id_banco')}'";
+
+		if ($id_cuenta != null)
+			$sql .= ($sql==''? ' WHERE ': ' AND ')." c.id_cuenta = {$id_cuenta}";
 
  		$query['query'] = 
  						"SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco, e.nombre_fiscal, 
