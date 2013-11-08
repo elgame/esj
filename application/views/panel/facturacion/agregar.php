@@ -283,11 +283,12 @@
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
                             $_POST['pallet_id'][$key]               = $p->id_pallet;
+                            $_POST['prod_dmedida_id'][$key]        = $p->id_unidad;
                           }
                         } ?>
 
                         <?php if (isset($_POST['prod_did_prod'])) {
-                          foreach ($_POST['prod_did_prod'] as $k => $v){
+                          foreach ($_POST['prod_did_prod'] as $k => $v) {
                             if ($_POST['prod_importe'][$k] != 0) { ?>
                               <tr data-pallet="<?php echo $_POST['pallet_id'][$k] ?>">
                                 <td>
@@ -296,12 +297,12 @@
                                   <input type="hidden" name="pallet_id[]" value="<?php echo $_POST['pallet_id'][$k] ?>" id="pallet_id" class="span12">
                                 </td>
                                 <td>
-                                  <!-- <input type="text" name="prod_dmedida[]" class="span12" value="<?php ?>" id="prod_dmedida"> -->
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
                                     <?php foreach ($unidades as $key => $u) { ?>
-                                      <option value="<?php echo $u->nombre ?>" <?php echo $_POST['prod_dmedida'][$k] == $u->nombre ? 'selected' : '' ?>><?php echo $u->nombre ?></option>
+                                      <option value="<?php echo $u->nombre ?>" <?php echo $_POST['prod_dmedida'][$k] == $u->nombre ? 'selected' : '' ?> data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
                                     <?php } ?>
                                   </select>
+                                  <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $_POST['prod_dmedida_id'][$k] ?>" id="prod_dmedida_id" class="span12 vpositive">
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
@@ -347,9 +348,12 @@
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
                       <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                        <?php foreach ($unidades as $key => $u) { ?>
-                          <option value="<?php echo $u->nombre ?>"><?php echo $u->nombre ?></option>
+                        <?php foreach ($unidades as $key => $u) {
+                            if ($key === 0) $uni = $u->id_unidad;
+                          ?>
+                          <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
                         <?php } ?>
+                        <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
                       </select>
                     </td>
                     <td>

@@ -107,9 +107,11 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.id_pallet')
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.id_pallet,
+                u.id_unidad')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
+        ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
         ->where('id_factura = ' . $idFactura)
         ->get();
 
@@ -533,6 +535,50 @@ class facturacion_model extends privilegios_model{
           // Elimina el borrador.
           if (isset($_GET['idb']))
             $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
+
+          // Procesa la salida
+          $this->load->model('unidades_model');
+          $this->load->model('productos_salidas_model');
+
+          $infoSalida      = array();
+          $productosSalida = array(); // contiene los productos que se daran salida.
+
+          $infoSalida = array(
+            'id_empresa'      => $_POST['did_empresa'],
+            'id_empleado'     => $this->session->userdata('id_usuario'),
+            'folio'           => $this->productos_salidas_model->folio(),
+            'fecha_creacion'  => date('Y-m-d H:i:s'),
+            'fecha_registro'  => date('Y-m-d H:i:s'),
+            'status'          => 's',
+          );
+
+          $res = $this->productos_salidas_model->agregar($infoSalida);
+
+          $row = 0;
+          foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+          {
+            if ($_POST['prod_importe'][$key] != 0)
+            {
+              if ($_POST['prod_dmedida_id'][$key] !== '')
+              {
+                $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
+
+                foreach ($unidad['info'][0]->productos as $uniProd)
+                {
+                  $productosSalida[] = array(
+                    'id_salida'       => $res['id_salida'],
+                    'id_producto'     => $uniProd->id_producto,
+                    'no_row'          => $row,
+                    'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
+                  );
+
+                  $row++;
+                }
+              }
+            }
+          }
+
+          $this->productos_salidas_model->agregarProductos(null, $productosSalida);
         }
         else rmdir($pathDocs);
 

@@ -80,35 +80,50 @@ class productos_salidas_model extends CI_Model {
   }
 
   /**
-   * Agrega una orden de compra
+   * Agrega la info de una salida sin productos.
    *
    * @return array
    */
-  public function agregar()
+  public function agregar($data = null)
   {
-    $data = array(
-      'id_empresa'      => $_POST['empresaId'],
-      'id_empleado'     => $this->session->userdata('id_usuario'),
-      'folio'           => $_POST['folio'],
-      'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
-      'fecha_registro'  => str_replace('T', ' ', $_POST['fecha']),
-      // 'concepto'        => '', //$_POST['conceptoSalida']
-      'status'          => 's',
-    );
+    if ( ! $data)
+    {
+      $data = array(
+        'id_empresa'      => $_POST['empresaId'],
+        'id_empleado'     => $this->session->userdata('id_usuario'),
+        'folio'           => $_POST['folio'],
+        'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
+        'fecha_registro'  => str_replace('T', ' ', $_POST['fecha']),
+        // 'concepto'        => '', //$_POST['conceptoSalida']
+        'status'          => 's',
+      );
+    }
 
     $this->db->insert('compras_salidas', $data);
 
-    $productos = array();
-    foreach ($_POST['concepto'] as $key => $concepto)
-    {
+    return array('passes' => true, 'msg' => 3, 'id_salida' => $this->db->insert_id());
+  }
 
-      $productos[] = array(
-        'id_salida'       => $this->db->insert_id(),
-        'id_producto'     => $_POST['productoId'][$key],
-        'no_row'          => $key,
-        'cantidad'        => $_POST['cantidad'][$key],
-        'precio_unitario' => $_POST['valorUnitario'][$key],
-      );
+  /**
+   * Agrega los productos de una salida.
+   *
+   * @return array
+   */
+  public function agregarProductos($idSalida, $productos = null)
+  {
+    if ( ! $productos)
+    {
+      $productos = array();
+      foreach ($_POST['concepto'] as $key => $concepto)
+      {
+        $productos[] = array(
+          'id_salida'       => $idSalida,
+          'id_producto'     => $_POST['productoId'][$key],
+          'no_row'          => $key,
+          'cantidad'        => $_POST['cantidad'][$key],
+          'precio_unitario' => $_POST['valorUnitario'][$key],
+        );
+      }
     }
 
     $this->db->insert_batch('compras_salidas_productos', $productos);

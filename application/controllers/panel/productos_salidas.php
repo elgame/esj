@@ -89,6 +89,7 @@ class productos_salidas extends MY_Controller {
     else
     {
       $res_mdl = $this->productos_salidas_model->agregar();
+      $this->productos_salidas_model->agregarProductos($res_mdl['id_salida']);
 
       if ($res_mdl['passes'])
       {

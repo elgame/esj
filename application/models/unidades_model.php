@@ -8,7 +8,38 @@ class unidades_model extends CI_Model {
 		parent::__construct();
 	}
 
-	
+	public function info($idUnidad, $full = false)
+  {
+    $query = $this->db->query(
+      "SELECT *
+        FROM unidades
+        WHERE id_unidad = {$idUnidad}");
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data['info'] = $query->result();
+
+      $query->free_result();
+      if ($full)
+      {
+        $query = $this->db->query(
+          "SELECT up.id_unidad, up.id_producto, up.cantidad, pr.nombre
+           FROM unidades_productos AS up
+           INNER JOIN productos AS pr ON pr.id_producto = up.id_producto
+           WHERE up.id_unidad = {$data['info'][0]->id_unidad}");
+
+        $data['info'][0]->productos = array();
+        if ($query->num_rows() > 0)
+        {
+          $data['info'][0]->productos = $query->result();
+        }
+      }
+
+    }
+
+    return $data;
+  }
 
 	/**
 	 * Obtiene el listado de unidades para usar ajax
