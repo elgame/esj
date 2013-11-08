@@ -117,7 +117,9 @@ $(function(){
 
       if (valida_agregar($tr)) {
         $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
-        addProducto();
+          $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+            addProducto(unidades);
+          }, 'json');
       } else {
         $tr.find('#prod_ddescripcion').focus();
         $tr.find('td').effect("highlight", {'color': '#da4f49'}, 500);
@@ -158,6 +160,7 @@ $(function(){
 
   EventKeyPressFolioPallet();
   EventOnClickSinCosto();
+  EventOnChangeMedida();
 });
 
 var EventKeyPressFolioPallet = function () {
@@ -185,21 +188,24 @@ function loadPallet() {
 
       $.get(base_url + 'panel/facturacion/ajax_get_pallet_folio/?folio='+$folio.val(), function(data) {
         if (data) {
-          // console.log(data);
           var existe = false;
 
           // Verifica si el pallet ya esta cargado en el listado.
           if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
 
             if (data['rendimientos'].length > 0) {
-              for(var i in data['rendimientos']) {
-                addProducto({
-                  'id': data['rendimientos'][i]['id_clasificacion'],
-                  'nombre': data['rendimientos'][i]['nombre'],
-                  'cajas': data['rendimientos'][i]['cajas'],
-                  'id_pallet': data['info']['id_pallet'],
-                });
-              }
+              $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+                for(var i in data['rendimientos']) {
+                  addProducto(unidades, {
+                    'id': data['rendimientos'][i]['id_clasificacion'],
+                    'nombre': data['rendimientos'][i]['nombre'],
+                    'cajas': data['rendimientos'][i]['cajas'],
+                    'id_pallet': data['info']['id_pallet'],
+                    'id_unidad': data['rendimientos'][i]['id_unidad'],
+                    'unidad': data['rendimientos'][i]['unidad'],
+                  });
+                }
+              }, 'json');
             } else {
               noty({"text": 'El pallet no cuenta con cajas para agregar.', "layout":"topRight", "type": 'error'});
             }
@@ -216,6 +222,16 @@ function loadPallet() {
     }
   });
 }
+
+var EventOnChangeMedida = function () {
+  $('#table_prod').on('change', 'select#prod_dmedida', function(event) {
+    var $select = $(this),
+        $parent = $select.parents('tr'),
+        $medidaId = $parent.find('#prod_dmedida_id');
+
+    $medidaId.val($select.find('option:selected').attr('data-id'));
+  });
+};
 
 function calculaTotalProducto ($tr) {
 
@@ -244,7 +260,7 @@ function calculaTotalProducto ($tr) {
 }
 
 var jumpIndex = 0;
-function addProducto(prod) {
+function addProducto(unidades, prod) {
   // var importe   = trunc2Dec(parseFloat($('#dcantidad').val() * parseFloat($('#dpreciou').val()))),
   //     descuento = trunc2Dec((importe * parseFloat($('#ddescuento').val())) / 100),
   //     iva       = trunc2Dec(((importe - descuento) * parseFloat($('#diva option:selected').val())) / 100),
@@ -260,6 +276,17 @@ function addProducto(prod) {
     prod_id     = prod.id;
     prod_cajas  = prod.cajas;
     pallet      = prod.id_pallet;
+    idUnidad    = prod.id_unidad ? prod.id_unidad : '';
+    unidad      = prod.unidad ? prod.unidad : '';
+  } else {
+    idUnidad = unidades[0].id_unidad;
+    unidad = unidades[0].nombre;
+  }
+
+  var unidadesHtml = '';
+
+  for (var i in unidades) {
+    unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].nombre == unidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
   }
 
   trHtml = '<tr data-pallet="'+pallet+'">' +
@@ -270,11 +297,13 @@ function addProducto(prod) {
               '</td>' +
               '<td>' +
                 '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<option value="Pieza">Pieza</option>' +
-                  '<option value="Caja">Caja</option>' +
-                  '<option value="Kilos">Kilos</option>' +
-                  '<option value="No aplica">No aplica</option>' +
+                  unidadesHtml +
+                  // '<option value="Pieza">Pieza</option>' +
+                  // '<option value="Caja">Caja</option>' +
+                  // '<option value="Kilos">Kilos</option>' +
+                  // '<option value="No aplica">No aplica</option>' +
                 '</select>' +
+                '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidad+'" id="prod_dmedida_id" class="span12 vpositive">' +
               '</td>' +
               '<td>' +
                   '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

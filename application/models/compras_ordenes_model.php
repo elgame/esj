@@ -459,7 +459,7 @@ class compras_ordenes_model extends CI_Model {
     {
       $data = array(
         'fecha_aceptacion' => date('Y-m-d H:i:s'),
-        'status' => 'a',
+        'status'           => 'a',
       );
 
       $msg = 5;

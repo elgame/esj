@@ -12,10 +12,6 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajax_get_folio/',
 
     'compras_ordenes/ligar/',
-
-    'bascula/show_view_agregar_empresa/',
-
-    'bascula/rde_pdf/',
     );
 
   public function _remap($method){
