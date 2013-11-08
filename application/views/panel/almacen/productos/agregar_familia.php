@@ -116,6 +116,9 @@
 <script type="text/javascript" charset="UTF-8">
   function closemodal(){
     window.parent.$('#supermodal').modal('hide');
+
+    var pag = parseInt(window.parent.$('#content_familias .pagination li.active a').text())-1;
+    window.parent.familias.page(pag);
   }
 
   <?php if ($closeModal) { ?>
