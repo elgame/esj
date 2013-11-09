@@ -316,41 +316,6 @@ class inventario_model extends privilegios_model{
 	 */
 	public function promedioData($id_producto, $fecha1, $fecha2)
 	{
-		//saldo anterior
-		// $saldo = $this->db->query(
-		// "SELECT c.id_producto, COALESCE(c.cantidad, 0) AS entradas, COALESCE(c.importe, 0) AS importe, COALESCE(s.cantidad, 0) AS salidas
-		// FROM 
-		// 	(
-		// 		SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad, Sum(cp.importe) AS importe, 'c' AS tipo
-		// 		FROM compras_ordenes AS co 
-		// 		INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-		// 		WHERE cp.id_producto = {$id_producto} AND co.status IN ('a','f','n') 
-		// 			AND co.tipo_orden = 'p' AND Date(co.fecha_aceptacion) < '{$fecha1}'
-		// 		GROUP BY cp.id_producto, tipo
-		// 	) AS c
-		// 	LEFT JOIN 
-		// 	(
-		// 		SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad, 0 AS importe, 's' AS tipo
-		// 		FROM compras_salidas AS sa 
-		// 		INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida 
-		// 		WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) < '{$fecha1}'
-		// 		GROUP BY sp.id_producto, tipo
-		// 	) AS s ON s.id_producto = c.id_producto")->row();
-		// if (isset($saldo->id_producto))
-		// {
-		// 	$saldo->pu = $saldo->importe/($saldo->entradas>0? $saldo->entradas: 1);
-		// 	$saldo->importe = $saldo->pu * $saldo->entradas;
-		// 	$saldo->saldo_cantidad = $saldo->entradas - $saldo->salidas;
-		// 	$saldo->saldo_importe = $saldo->saldo_cantidad * $saldo->pu;
-		// }else{
-		// 	$saldo = new stdClass;
-		// 	$saldo->importe = 0;
-		// 	$saldo->entradas = 0;
-		// 	$saldo->salidas = 0;
-		// 	$saldo->saldo_cantidad = 0;
-		// 	$saldo->saldo_importe = 0;
-		// 	$saldo->pu = 0;
-		// }
 
 		$res = $this->db->query(
 		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo 
@@ -510,4 +475,115 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('promedio.pdf', 'I');
 	}
 
+	/**
+	 * Reporte de existencias por clasificaciones
+	 * @return [type] [description]
+	 */
+	public function getEClasifData()
+	{
+		$sql = '';
+
+		//Filtros para buscar
+		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-d"): $this->input->get('ffecha1');
+
+		if($this->input->get('did_unidad') != ''){
+			$sql .= " AND rpr.id_unidad = ".$this->input->get('did_unidad');
+		}
+		if($this->input->get('did_etiqueta') != ''){
+			$sql .= " AND rpr.id_etiqueta = ".$this->input->get('did_etiqueta');
+		}
+		if($this->input->get('did_calibre') != ''){
+			$sql .= " AND rpr.id_calibre = ".$this->input->get('did_calibre');
+		}
+
+		$res = $this->db->query(
+			"SELECT c.id_clasificacion, c.nombre, COALESCE(en.cajas, 0) AS entradas, COALESCE(sa.cajas, 0) AS salidas, 
+				(COALESCE(en.cajas, 0) - COALESCE(sa.cajas, 0)) AS existencia, COALESCE(en.kilos, 0) AS entradas_kilos, 
+				COALESCE(sa.kilos, 0) AS salidas_kilos, (COALESCE(en.kilos, 0) - COALESCE(sa.kilos, 0)) AS existencia_kilos
+			FROM clasificaciones AS c
+			LEFT JOIN 
+			(
+				SELECT rpr.id_clasificacion, Sum(rpr.cajas) AS cajas, (rrc.kilos * Sum(rpr.cajas)) AS kilos
+				FROM rastria_pallets_rendimiento AS rpr
+				INNER JOIN rastria_rendimiento_clasif AS rrc ON (rrc.id_rendimiento = rpr.id_rendimiento AND rrc.id_clasificacion = rpr.id_clasificacion AND rrc.id_unidad = rpr.id_unidad AND rrc.id_calibre = rpr.id_calibre AND rrc.id_etiqueta = rpr.id_etiqueta)
+				WHERE Date(rpr.fecha) <= '{$_GET['ffecha1']}' {$sql}
+				GROUP BY rpr.id_clasificacion, rrc.kilos
+			) AS en ON en.id_clasificacion = c.id_clasificacion
+			LEFT JOIN 
+			(
+				SELECT rpr.id_clasificacion, Sum(rpr.cajas) AS cajas, (rrc.kilos * Sum(rpr.cajas)) AS kilos
+				FROM facturacion AS f 
+					INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura
+					INNER JOIN rastria_pallets_rendimiento AS rpr ON rpr.id_pallet = fp.id_pallet
+					INNER JOIN rastria_rendimiento_clasif AS rrc ON rrc.id_rendimiento = rpr.id_rendimiento AND rrc.id_clasificacion = rpr.id_clasificacion AND rrc.id_unidad = rpr.id_unidad AND rrc.id_calibre = rpr.id_calibre AND rrc.id_etiqueta = rpr.id_etiqueta
+				WHERE Date(f.fecha) <= '{$_GET['ffecha1']}' {$sql}
+				GROUP BY rpr.id_clasificacion, rrc.kilos
+			) AS sa ON sa.id_clasificacion = c.id_clasificacion
+			WHERE c.status = 't'
+			ORDER BY nombre ASC
+			");
+		
+		$response = array();
+		if($res->num_rows() > 0)
+		{
+			$response = $res->result();
+		}
+
+		return $response;
+	}
+	/**
+	 * Reporte existencias por clasificaciones pdf
+	 */
+	public function getEClasifPdf()
+	{
+		$res = $this->getEClasifData();
+
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm', 'Letter');
+		$pdf->titulo2 = 'Existencia de Clasificaciones';
+		$pdf->titulo3 = " Al ".$this->input->get('ffecha1')."\n";
+		$pdf->AliasNbPages();
+		//$pdf->AddPage();
+		$pdf->SetFont('Arial','',8);
+		
+		$aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R');
+		$widths = array(75, 20, 20, 20, 23, 23, 23);
+		$header = array('Clasificacion', 'Entradas', 'Salidas', 'Existencia', 'Kg Entradas', 'Kg Salidas', 'Kg Existencia');
+
+		$familia = '';
+		$total_cargos = $total_abonos = $total_saldo = 0;
+		foreach($res as $key => $item){
+			$band_head = false;
+			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+				$pdf->AddPage();
+
+				$pdf->SetFont('Arial','B',8);
+				$pdf->SetTextColor(255,255,255);
+				$pdf->SetFillColor(160,160,160);
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($header, true);
+			}
+			
+			$pdf->SetFont('Arial','',8);
+			$pdf->SetTextColor(0,0,0);
+			$datos = array($item->nombre, 
+				String::formatoNumero($item->entradas, 2, '', false),
+				String::formatoNumero($item->salidas, 2, '', false),
+				String::formatoNumero(($item->existencia), 2, '', false),
+				String::formatoNumero($item->entradas_kilos, 2, '', false),
+				String::formatoNumero($item->salidas_kilos, 2, '', false),
+				String::formatoNumero(($item->existencia_kilos), 2, '', false),
+				);
+			
+			$pdf->SetX(6);
+			$pdf->SetAligns($aligns);
+			$pdf->SetWidths($widths);
+			$pdf->Row($datos, false);
+		}
+		
+		$pdf->Output('eclasif.pdf', 'I');
+	}
 }

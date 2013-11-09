@@ -16,6 +16,7 @@ class rastreabilidad_model extends CI_Model {
       'id_calibre'       => $_POST['id_calibre'],
       'id_etiqueta'      => $_POST['id_etiqueta'],
       'existente'        => $_POST['existente'],
+      'kilos'            => $_POST['kilos'],
       'linea1'           => $_POST['linea1'],
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
@@ -54,6 +55,7 @@ class rastreabilidad_model extends CI_Model {
       'id_etiqueta'      => $_POST['id_etiqueta'],
 
       'existente'        => $_POST['existente'],
+      'kilos'            => $_POST['kilos'],
       'linea1'           => $_POST['linea1'],
       'linea2'           => $_POST['linea2'],
       'total'            => $_POST['total'],
@@ -263,7 +265,7 @@ class rastreabilidad_model extends CI_Model {
         $sql->free_result();
 
         $sql = $this->db->query(
-          "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.linea1, rrc.linea2,
+          "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.kilos, rrc.linea1, rrc.linea2,
                   rrc.total, rrc.rendimiento, cl.nombre as clasificacion, 
                   u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre, 
                   e.id_etiqueta, e.nombre AS etiqueta

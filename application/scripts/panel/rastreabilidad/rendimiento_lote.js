@@ -389,6 +389,7 @@
     postData.id_calibre       = $tr.find('#fidcalibre').val();
     postData.id_etiqueta      = $tr.find('#fidetiqueta').val();
     postData.existente        = $tr.find('#fexistente').val();
+    postData.kilos            = $tr.find('#fkilos').val();
     postData.linea1           = $tr.find('#flinea1').val();
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
@@ -421,6 +422,7 @@
     postData.id_calibre       = $tr.find('#fidcalibre').val();
     postData.id_etiqueta      = $tr.find('#fidetiqueta').val();
     postData.existente        = $tr.find('#fexistente').val();
+    postData.kilos            = $tr.find('#fkilos').val();
     postData.linea1           = $tr.find('#flinea1').val();
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
@@ -510,6 +512,9 @@
                   '<input type="hidden" id="fidetiqueta" value="" class="span12">'+
                 '</td>'+
                 '<td>' +
+                  '<input type="text" id="fkilos" value="0" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                '</td>' +
+                '<td>' +
                   '<input type="text" id="fexistente" value="0" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                 '</td>' +
                 '<td>' +
@@ -535,7 +540,10 @@
     $(trHtml).appendTo($tabla.find('tbody'));
 
     for (i = indexJump, max = jumpIndex; i <= max; i += 1)
+    {
       $.fn.keyJump.setElem($('.jump'+i));
+      $("input#fkilos.jump"+i).numeric({ negative: false });
+    }
 
     $('.jump'+indexJump).focus();
   };

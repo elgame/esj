@@ -83,6 +83,7 @@
                     <th style="width:110px;">UNIDAD</th>
                     <th style="width:55px;">CALIBRE</th>
                     <th style="width:110px;">ETIQUETA</th>
+                    <th style="width:55px;">KILOS</th>
                     <th style="width:55px;">EXISTENTE</th>
                     <th style="width:55px;">LINEA 1</th>
                     <th style="width:55px;">LINEA 2</th>
@@ -110,6 +111,9 @@
                       <td>
                         <input type="text" id="fetiqueta" value="<?php echo $c->etiqueta ?>" class="span12">
                         <input type="hidden" id="fidetiqueta" value="<?php echo $c->id_etiqueta ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fkilos" value="<?php echo $c->kilos ?>" class="span12 vpositive">
                       </td>
                       <td>
                         <input type="text" id="fexistente" value="<?php echo $c->existente ?>" class="span12 vpositive">
@@ -151,6 +155,9 @@
                     <td>
                       <input type="text" id="fetiqueta" value="" class="span12">
                       <input type="hidden" id="fidetiqueta" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fkilos" value="0" class="span12 vpositive">
                     </td>
                     <td>
                       <input type="text" id="fexistente" value="0" class="span12 vpositive">
