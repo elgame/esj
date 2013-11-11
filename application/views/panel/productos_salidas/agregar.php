@@ -100,17 +100,9 @@
                       <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
                     </div><!--/span3s -->
                     <div class="span2">
-                      <input type="text" class="span12 vpositive" id="fprecio" placeholder="Precio Unitario">
-                    </div><!--/span3s -->
-
-                  </div><!--/span12 -->
-                  <br><br>
-                  <div class="span12 mquit">
-                    <div class="span2 offset10">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
                     </div><!--/span2 -->
                   </div><!--/span12 -->
-
                 </div><!--/row-fluid -->
                 <br>
                 <div class="row-fluid">
@@ -121,7 +113,6 @@
                           <th>CODIGO</th>
                           <th>PRODUCTO</th>
                           <th>CANT.</th>
-                          <th>P.U.</th>
                           <th></th>
                         </tr>
                       </thead>
@@ -141,9 +132,6 @@
                               </td>
                               <td style="width: 65px;">
                                   <input type="number" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
-                              </td>
-                              <td style="width: 90px;">
-                                  <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>

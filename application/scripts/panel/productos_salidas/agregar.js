@@ -11,7 +11,7 @@
     eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnDelProducto();
-    eventPrecioUniKeypress();
+    eventCantKeypress();
   });
 
   /*
@@ -68,14 +68,12 @@
         var $fconcepto    = $(this),
             $fcodigo     = $('#fcodigo'),
             $fconceptoId   = $('#fconceptoId'),
-            $fcantidad     = $('#fcantidad'),
-            $fprecio       = $('#fprecio');
+            $fcantidad     = $('#fcantidad');
 
         $fconcepto.css("background-color", "#B6E7FF");
         $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
         $fcantidad.val('1');
-        $fprecio.val('0');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -83,7 +81,6 @@
         $("#fcodigo").val("");
         $('#fconceptoId').val('');
         $('#fcantidad').val('');
-        $('#fprecio').val('');
       }
     });
   };
@@ -129,9 +126,8 @@
           $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId = $('#fconceptoId'),
           $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
-          $fprecio     = $('#fprecio').css({'background-color': '#FFF'}),
 
-          campos = [$fcantidad, $fprecio],
+          campos = [$fcantidad],
           producto,
           error = false;
 
@@ -159,12 +155,6 @@
         error = true;
       }
 
-      // Valida si el campo precio es 0.
-      if ($fprecio.val() === '0') {
-        $fprecio.css({'background-color': '#FDFC9A'})
-        error = true;
-      }
-
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
 
@@ -174,7 +164,6 @@
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
-          'precio_unitario': $fprecio.val(),
         };
 
         addProducto(producto);
@@ -206,8 +195,8 @@
     });
   };
 
-  var eventPrecioUniKeypress = function () {
-    $('#fprecio').on('keypress', function(event) {
+  var eventCantKeypress = function () {
+    $('#fcantidad').on('keypress', function(event) {
       if (event.which === 13) {
         $('#btnAddProd').click();
       }
@@ -270,9 +259,6 @@
                   '</td>' +
                   '<td style="width: 65px;">' +
                       '<input type="number" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="1" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario[]" value="'+producto.precio_unitario+'" id="valorUnitario" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +
                 '</tr>');

@@ -196,10 +196,7 @@ class productos_salidas extends MY_Controller {
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]'),
-      array('field' => 'valorUnitario[]',
-            'label' => '',
-            'rules' => ''),
+            'rules' => 'required|greater_than[0]')
     );
 
     $this->form_validation->set_rules($rules);

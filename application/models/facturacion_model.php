@@ -578,9 +578,22 @@ class facturacion_model extends privilegios_model{
             }
           }
 
-          $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+          // Si hay al menos 1 producto para las salidas lo inserta.
+          if (count($productosSalida) > 0)
+          {
+            $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+          }
+
+          // Si no hay productos para ninguna de las medidas elimina la salida.
+          else
+          {
+            $this->db->delete('compras_salidas', array('id_salida' => $res['id_salida']));
+          }
         }
-        else rmdir($pathDocs);
+        else
+        {
+          rmdir($pathDocs);
+        }
 
         // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
         // echo "<pre>";
