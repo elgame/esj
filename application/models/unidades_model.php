@@ -58,16 +58,19 @@ class unidades_model extends CI_Model {
     $idUnidad = $this->db->insert_id();
 
     $productos = array();
-    foreach ($_POST['productoId'] as $key => $idProd)
+    if (isset($_POST['productoId']))
     {
-      $productos[] = array(
-        'id_unidad'   => $idUnidad,
-        'id_producto' => $idProd,
-        'cantidad'    => $_POST['cantidad'][$key],
-      );
-    }
+      foreach ($_POST['productoId'] as $key => $idProd)
+      {
+        $productos[] = array(
+          'id_unidad'   => $idUnidad,
+          'id_producto' => $idProd,
+          'cantidad'    => $_POST['cantidad'][$key],
+        );
+      }
 
-    $this->db->insert_batch('unidades_productos', $productos);
+      $this->db->insert_batch('unidades_productos', $productos);
+    }
 
     return array('passes' => true, 'msg' => 3);
   }

@@ -180,10 +180,10 @@ class unidades extends MY_Controller {
             'rules' => ''),
       array('field' => 'productoId[]',
             'label' => 'Productos',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]'),
+            'rules' => 'greater_than[0]'),
     );
 
     $this->form_validation->set_rules($rules);
