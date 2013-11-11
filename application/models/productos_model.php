@@ -8,7 +8,7 @@ class productos_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getFamilias($paginados = true)
+	public function getFamilias($paginados = true, $tipo=null)
 	{
 		$sql = '';
 		//paginacion
@@ -31,6 +31,9 @@ class productos_model extends CI_Model {
 
 		$_GET['fstatus'] = (isset($_GET['fstatus'])? $_GET['fstatus']: 'ac');
 		$sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";
+
+		if ($tipo!=null)
+			$sql .= ($sql==''? 'WHERE': ' AND ')." tipo = '".$tipo."'";
 
 		$str_query = "
 				SELECT id_familia, id_empresa, codigo, nombre, tipo, status

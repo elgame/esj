@@ -141,7 +141,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$sql .= $idcalibre!=''? ' AND rcl.id_calibre = '.$idcalibre: '';
 		$sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
  		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
- 										u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta
+ 										rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta
  		                           FROM rastria_rendimiento AS rr
 									INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
 									LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
