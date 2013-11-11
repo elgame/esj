@@ -103,7 +103,6 @@
                 'concepto': data[0].nombre,
                 'id': data[0].id_producto,
                 'cantidad': '1',
-                'precio_unitario': '0',
               };
 
               addProducto(producto);
@@ -266,7 +265,6 @@
       $($trHtml).appendTo($tabla.find('tbody'));
 
       for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
-        console.log('.jump'+i);
         $.fn.keyJump.setElem($('.jump'+i));
       }
 

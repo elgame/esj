@@ -192,10 +192,7 @@ class productos_bajas extends MY_Controller {
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]'),
-      array('field' => 'valorUnitario[]',
-            'label' => 'Precio Unitario',
-            'rules' => 'required|greater_than[0]'),
+            'rules' => 'required|greater_than[0]')
     );
 
     $this->form_validation->set_rules($rules);

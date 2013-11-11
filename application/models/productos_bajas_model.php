@@ -98,16 +98,20 @@ class productos_bajas_model extends CI_Model {
 
     $this->db->insert('compras_salidas', $data);
 
+    $this->load->model('inventario_model');
     $productos = array();
     foreach ($_POST['concepto'] as $key => $concepto)
     {
+      $res = $this->inventario_model->promedioData($_POST['productoId'][$key], date('Y-m-d'), date('Y-m-d'));
+
+      $saldo = array_shift($res);
 
       $productos[] = array(
         'id_salida'       => $this->db->insert_id(),
         'id_producto'     => $_POST['productoId'][$key],
         'no_row'          => $key,
         'cantidad'        => $_POST['cantidad'][$key],
-        'precio_unitario' => $_POST['valorUnitario'][$key],
+        'precio_unitario' => $saldo['saldo'][1],
       );
     }
 
