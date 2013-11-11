@@ -517,8 +517,15 @@ class compras_ordenes_model extends CI_Model {
     return array();
   }
 
-  public function getProductoAjax($idEmpresa, $tipo, $term, $def = 'codigo'){
+  public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo'){
     $sql = '';
+
+    $sqlEmpresa = "";
+    if ($idEmpresa)
+    {
+      $sqlEmpresa = "p.id_empresa = {$idEmpresa} AND";
+    }
+
     $res = $this->db->query(
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia,
@@ -528,7 +535,7 @@ class compras_ordenes_model extends CI_Model {
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
         WHERE p.status = 'ac' AND
               {$term}
-              p.id_empresa = {$idEmpresa} AND
+              {$sqlEmpresa}
               pf.tipo = '{$tipo}' AND
               pf.status = 'ac'
         ORDER BY p.nombre ASC
@@ -613,4 +620,5 @@ class compras_ordenes_model extends CI_Model {
 
     return $prod;
   }
+
 }
