@@ -152,31 +152,85 @@ class inventario extends MY_Controller {
   }
 
 
+  /**
+   * Nivelar inventario
+   * @return [type] [description]
+   */
+  public function nivelar()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.numeric.js'),
+      array('panel/almacen/nivelar_inventario.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('productos_model');
+    $this->load->model('inventario_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Existencia de Clasificaciones');
+
+    $this->configNivelar();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->inventario_model->nivelar();
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
+    $params['familias'] = $this->productos_model->getFamilias(false, 'p');
+
+    $params['empresa']   = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($params['empresa']->id_empresa)? $params['empresa']->id_empresa: '');
+
+    $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);
+    $params['data'] = $this->inventario_model->getNivelarData($id_familia);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/inventario/nivelar',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function eclasifd_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getEClasifPdf();
+
+  }
 
 
   /**
    * Configura los metodos de agregar y modificar
    */
-  private function configAddAbono()
+  private function configNivelar()
   {
     $this->load->library('form_validation');
     $rules = array(
 
-        array('field'   => 'dfecha',
-              'label'   => 'Fecha',
-              'rules'   => 'required'),
-        array('field'   => 'dconcepto',
-              'label'   => 'Concepto',
-              'rules'   => 'required|max_length[100]'),
-        array('field'   => 'dmonto',
-              'label'   => 'Monto',
+        array('field'   => 'idproducto[]',
+              'label'   => 'Producto',
               'rules'   => 'required|numeric'),
-        array('field'   => 'dcuenta',
-              'label'   => 'Cuenta Bancaria',
+        array('field'   => 'precio_producto[]',
+              'label'   => 'Precio',
               'rules'   => 'required|numeric'),
-        array('field'   => 'dreferencia',
-              'label'   => 'Referencia',
-              'rules'   => 'required|max_length[10]'),
+        array('field'   => 'esistema[]',
+              'label'   => 'E. Sistema',
+              'rules'   => 'max_length[10]'),
+        array('field'   => 'efisica[]',
+              'label'   => 'E. Fisica',
+              'rules'   => 'max_length[10]'),
+        array('field'   => 'diferencia[]',
+              'label'   => 'Diferencia',
+              'rules'   => 'max_length[10]'),
     );
     $this->form_validation->set_rules($rules);
   }
@@ -204,7 +258,7 @@ class inventario extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'El abono se modifico correctamente.';
+        $txt = 'Se nivelo el inventario correctamente.';
         $icono = 'success';
         break;
       case 4:

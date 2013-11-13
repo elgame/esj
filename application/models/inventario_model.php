@@ -322,7 +322,7 @@ class inventario_model extends privilegios_model{
 		FROM 
 			(
 				(
-				SELECT cp.id_producto, co.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+				SELECT cp.id_producto, cp.num_row, co.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
 				FROM compras_ordenes AS co 
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
 				WHERE cp.id_producto = {$id_producto} AND co.status IN ('a','f','n') 
@@ -330,7 +330,7 @@ class inventario_model extends privilegios_model{
 				)
 				UNION
 				(
-				SELECT sp.id_producto, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
 				FROM compras_salidas AS sa 
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida 
 				WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
@@ -401,7 +401,7 @@ class inventario_model extends privilegios_model{
 		}
 		$result[] = array('fecha' => 'Totales', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe), 
 						'saldo' => array(($entrada_cantidad-$salida_cantidad), '',($entrada_importe-$salida_importe)) );
-
+		
 		return $result;
 	}
 
@@ -474,6 +474,156 @@ class inventario_model extends privilegios_model{
 
 		$pdf->Output('promedio.pdf', 'I');
 	}
+
+
+	public function getNivelarData($id_familia)
+	{
+		$this->load->library('pagination');
+		$params = array(
+				'result_items_per_page' => '2',
+				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
+		);
+		if($params['result_page'] % $params['result_items_per_page'] == 0)
+			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+
+		$sql = '';
+
+		//Filtros para buscar
+		$sql .= " AND p.id_familia = ".$id_familia;
+
+	    $query = BDUtil::pagination(
+	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
+			FROM productos AS p 
+				INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
+				INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
+			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
+			ORDER BY nombre, nombre_producto ASC
+			", $params, true);
+		$res = $this->db->query($query['query']);
+		
+		$response = array(
+			'productos'       => array(),
+			'total_rows'     => $query['total_rows'],
+			'items_per_page' => $params['result_items_per_page'],
+			'result_page'    => $params['result_page'],
+		);
+		if($res->num_rows() > 0){
+			$response['productos'] = $res->result();
+			$fecha = date("Y-m-d", strtotime("+1 day"));
+			foreach ($response['productos'] as $key => $value)
+			{
+				$data = $this->promedioData($value->id_producto, $fecha, $fecha);
+				array_pop($data);
+				$value->data = array_pop($data)['saldo'];
+				$response[$key] = $value;
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Realiza una nivelacion de inventario, agregando ordenes de compra y/o salidas de productos
+	 * @return [type] [description]
+	 */
+	public function nivelar()
+	{
+		$compra = array();
+		$salida = array();
+		foreach ($_POST['idproducto'] as $key => $produto)
+		{
+			if($_POST['diferencia'][$key] > 0) //salida
+			{
+				$salida[] = array(
+					'id_producto'     => $produto,
+					'cantidad'        => abs($_POST['diferencia'][$key]),
+					'precio_unitario' => $_POST['precio_producto'][$key],
+					);
+			}elseif($_POST['diferencia'][$key] < 0) //compra
+			{
+				$presenta = $this->db->query("SELECT id_presentacion FROM productos_presentaciones WHERE status = 'ac' AND id_producto = {$produto} AND cantidad = 1 LIMIT 1")->row();
+				$compra[] = array(
+					'id_producto'     => $produto,
+					'id_presentacion' => (count($presenta)>0? $presenta->id_presentacion: NULL),
+					'descripcion'     => $_POST['descripcion'][$key],
+					'cantidad'        => abs($_POST['diferencia'][$key]),
+					'precio_unitario' => $_POST['precio_producto'][$key],
+					'importe'         => (abs($_POST['diferencia'][$key])*$_POST['precio_producto'][$key]),
+					'status'          => 'a',
+					);
+			}
+		}
+
+		if(count($salida) > 0) //registra salida
+		{
+			$this->load->model('productos_salidas_model');
+
+			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) FROM compras_salidas AS cs LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida WHERE status = 'n' AND Date(fecha_creacion) = Date(now()) GROUP BY cs.id_salida")->row();
+
+			$rows_salidas = 0;
+			if (isset($res_salidas->count)) //ya existe una salida nivelacion en el dia
+			{
+				$rows_salidas = $res_salidas->count;
+				$id_salida    = $res_salidas->id_salida;
+			}else
+			{
+				$res = $this->productos_salidas_model->agregar(array(
+						'id_empresa'      => $_GET['did_empresa'],
+						'id_empleado'     => $this->session->userdata('id_usuario'),
+						'folio'           => 0,
+						'concepto'        => 'Nivelacion de inventario',
+						'status'          => 'n',
+					));
+				$id_salida = $res['id_salida'];
+			}
+			foreach ($salida as $key => $value)
+			{
+				$rows_salidas++;
+				$salida[$key]['id_salida'] = $id_salida;
+				$salida[$key]['no_row']    = $rows_salidas;
+			}
+			$this->productos_salidas_model->agregarProductos($id_salida, $salida);
+		}
+
+		if (count($compra) > 0) //se registra una orden de compra
+		{
+			$this->load->model('compras_ordenes_model');
+
+			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden WHERE cs.status = 'n' AND Date(fecha_aceptacion) = Date(now()) GROUP BY cs.id_orden")->row();
+			$rows_compras = 0;
+
+			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia
+			{
+				$rows_compras = $res_compra->count;
+				$id_orden    = $res_compra->id_orden;
+			}else
+			{
+				$proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
+				$departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
+				$data = array(
+					'id_empresa'      => $_GET['did_empresa'],
+					'id_proveedor'    => $proveedor->id_proveedor,
+					'id_departamento' => $departamento->id_departamento,
+					'id_empleado'     => $this->session->userdata('id_usuario'),
+					'folio'           => 0,
+					'status'          => 'n',
+					'autorizado'      => 't'
+				);
+				$res = $this->compras_ordenes_model->agregarData($data);
+				$id_orden = $res['id_orden'];
+			}
+			foreach ($compra as $key => $value)
+			{
+				$rows_compras++;
+				$compra[$key]['id_orden'] = $id_orden;
+				$compra[$key]['num_row']   = $rows_compras;
+			}
+			$this->compras_ordenes_model->agregarProductosData($compra);
+		}
+		return array('passes' => true, 'msg' => 3);
+	}
+
 
 	/**
 	 * Reporte de existencias por clasificaciones

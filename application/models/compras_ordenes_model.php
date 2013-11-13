@@ -146,6 +146,22 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
+  public function agregarData($data)
+  {
+
+    $this->db->insert('compras_ordenes', $data);
+
+    return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
+  }
+
+  public function agregarProductosData($data)
+  {
+
+    $this->db->insert_batch('compras_productos', $data);
+
+    return array('passes' => true, 'msg' => 3);
+  }
+
   /**
    * Actualiza los datos de una orden de compra junton con sus productos.
    *
