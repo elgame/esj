@@ -219,7 +219,10 @@ var addpallets = (function($){
         };
         tbody.html(html);
       }else
+      {
+        tbody.html("");
         noty({"text":"No hay cajas libres en la clasificacion seleccionada.", "layout":"topRight", "type":"error"});
+      }
     });
   }
 
