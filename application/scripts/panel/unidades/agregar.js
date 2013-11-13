@@ -5,10 +5,8 @@
   $(function(){
     $('#form').keyJump();
 
-    autocompleteEmpresas();
     autocompleteConcepto();
 
-    eventCodigoBarras();
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantKeypress();
@@ -45,42 +43,31 @@
   var autocompleteConcepto = function () {
     $("#fconcepto").autocomplete({
       source: function (request, response) {
-        if (isEmpresaSelected()) {
-          $.ajax({
-            url: base_url + 'panel/compras_ordenes/ajax_producto/',
-            dataType: 'json',
-            data: {
-              term : request.term,
-              ide: $('#empresaId').val(),
-              tipo: 'p'
-            },
-            success: function (data) {
-              response(data)
-            }
-          });
-        } else {
-          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-        }
+        $.ajax({
+          url: base_url + 'panel/compras_ordenes/ajax_get_producto_all/',
+          dataType: 'json',
+          data: {
+            term : request.term,
+            tipo: 'p'
+          },
+          success: function (data) {
+            response(data)
+          }
+        });
       },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
         var $fconcepto    = $(this),
-            $fcodigo     = $('#fcodigo'),
-            $fconceptoId   = $('#fconceptoId'),
-            $fcantidad     = $('#fcantidad');
+            $fconceptoId   = $('#fconceptoId');
 
         $fconcepto.css("background-color", "#B6E7FF");
-        $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
-        $fcantidad.val('1');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $(this).css("background-color", "#FDFC9A");
-        $("#fcodigo").val("");
         $('#fconceptoId').val('');
-        $('#fcantidad').val('');
       }
     });
   };
@@ -101,8 +88,7 @@
               producto = {
                 'codigo': data[0].codigo,
                 'concepto': data[0].nombre,
-                'id': data[0].id_producto,
-                'cantidad': '1',
+                'id': data[0].id_producto
               };
 
               addProducto(producto);
@@ -121,8 +107,7 @@
 
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
-      var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
-          $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
+      var $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId = $('#fconceptoId'),
           $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
 
@@ -159,7 +144,6 @@
 
       if ( ! error) {
         producto = {
-          'codigo': $fcodigo.val(),
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
@@ -174,7 +158,6 @@
 
         $fconcepto.val('').css({'background-color': '#FFF'}).focus();
         $fconceptoId.val('').css({'background-color': '#FFF'});
-        $fcodigo.val('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -189,8 +172,6 @@
     $table.on('click', 'button#btnDelProd', function(event) {
       var $parent = $(this).parent().parent();
       $parent.remove();
-
-      calculaTotal();
     });
   };
 
@@ -215,42 +196,10 @@
         indexJump = jumpIndex,
         exist     = false;
 
-    // Si el dato "id" es diferente de nada entonces es un producto seleccionado
-    // del catalogo.
-    // if (producto.id !== '') {
-
-    //   // Recorre los productos existentes para ver si el que se quiere agregar
-    //   // ya existe en la tabla y si existe le suma 1 a la cantidad.
-    //   var check = productoIsSelected(producto.id);
-    //   if (check[0]) {
-    //     var $parent = check[1].parent().parent(),
-    //         $cantidad = $parent.find('input#cantidad');
-
-    //     exist = true;
-    //     $cantidad.val(parseFloat($cantidad.val()) + 1);
-
-    //     calculaTotalProducto($parent);
-    //   }
-    // }
-
     // Si el producto a agregar no existe en el listado los agrega por primera
     // vez.
-    if ( ! exist) {
-
-      // var htmlPresen = '<select name="presentacion[]" class="span12" id="presentacion">';
-      // $('#fpresentacion').find('option').each(function(index, el) {
-      //   var selected = $(this).val() == producto.presentacionId ? 'selected' : '';
-      //   if (selected != '') {
-      //     htmlPresen += '<option value="'+$(this).val()+'" '+selected+'>'+$(this).text()+'</option>';
-      //   }
-      // });
-      // htmlPresen += '</select>';
-
+    if ( ! productoIsSelected(producto.id)) {
       $trHtml = $('<tr>' +
-                  '<td style="width: 70px;">' +
-                    producto.codigo +
-                    '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
-                  '</td>' +
                   '<td>' +
                     producto.concepto +
                     '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
@@ -267,13 +216,8 @@
       for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
         $.fn.keyJump.setElem($('.jump'+i));
       }
-
-      $(".vnumeric").numeric(); //numero
-      $(".vinteger").numeric({ decimal: false }); //Valor entero
-      $(".vpositive").numeric({ negative: false }); //Numero positivo
-      $(".vpos-int").numeric({ decimal: false, negative: false }); //Numero entero positivo
-
-      // $('.jump'+indexJump).focus();
+    } else {
+      noty({"text": 'El producto ya se encuentra seleccionado', "layout":"topRight", "type": 'error'});
     }
   }
   /*
@@ -283,8 +227,16 @@
    */
 
   // Regresa true si esta seleccionada una empresa si no false.
-  var isEmpresaSelected = function () {
-    return $('#empresaId').val() !== '';
+  var productoIsSelected = function (id) {
+    var exist = false;
+    $('input#productoId').each(function(index, el) {
+      if ($(this).val() == id) {
+        exist = true;
+        return false;
+      }
+    });
+
+    return exist;
   };
 
 });

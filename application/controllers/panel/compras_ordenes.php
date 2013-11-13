@@ -10,6 +10,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajax_producto_by_codigo/',
     'compras_ordenes/ajax_producto/',
     'compras_ordenes/ajax_get_folio/',
+    'compras_ordenes/ajax_get_producto_all/',
 
     'compras_ordenes/ligar/',
     );
@@ -355,6 +356,17 @@ class compras_ordenes extends MY_Controller {
     $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
 
     $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where, 'nombre');
+
+    echo json_encode($productos);
+  }
+
+  public function ajax_get_producto_all()
+  {
+    $this->load->model('compras_ordenes_model');
+
+    $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
+
+    $productos = $this->compras_ordenes_model->getProductoAjax(null, $_GET['tipo'], $where, 'nombre');
 
     echo json_encode($productos);
   }

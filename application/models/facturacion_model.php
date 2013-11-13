@@ -539,6 +539,7 @@ class facturacion_model extends privilegios_model{
           // Procesa la salida
           $this->load->model('unidades_model');
           $this->load->model('productos_salidas_model');
+          $this->load->model('inventario_model');
 
           $infoSalida      = array();
           $productosSalida = array(); // contiene los productos que se daran salida.
@@ -565,11 +566,15 @@ class facturacion_model extends privilegios_model{
 
                 foreach ($unidad['info'][0]->productos as $uniProd)
                 {
+                  $inv   = $this->inventario_model->promedioData($uniProd->id_producto, date('Y-m-d'), date('Y-m-d'));
+                  $saldo = array_shift($inv);
+
                   $productosSalida[] = array(
                     'id_salida'       => $res['id_salida'],
                     'id_producto'     => $uniProd->id_producto,
                     'no_row'          => $row,
                     'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
+                    'precio_unitario' => $saldo['saldo'][1],
                   );
 
                   $row++;
@@ -578,9 +583,22 @@ class facturacion_model extends privilegios_model{
             }
           }
 
-          $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+          // Si hay al menos 1 producto para las salidas lo inserta.
+          if (count($productosSalida) > 0)
+          {
+            $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+          }
+
+          // Si no hay productos para ninguna de las medidas elimina la salida.
+          else
+          {
+            $this->db->delete('compras_salidas', array('id_salida' => $res['id_salida']));
+          }
         }
-        else rmdir($pathDocs);
+        else
+        {
+          rmdir($pathDocs);
+        }
 
         // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
         // echo "<pre>";

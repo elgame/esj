@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class productos_bajas extends MY_Controller {
+class unidades extends MY_Controller {
 
   /**
    * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
@@ -29,27 +29,24 @@ class productos_bajas extends MY_Controller {
     $this->carabiner->js(array(
       array('general/supermodal.js'),
       array('general/msgbox.js'),
-      array('panel/compras_ordenes/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Administración de Bajas de Productos'
+      'titulo' => 'Administración de Unidades'
     );
 
     $this->load->library('pagination');
-    $this->load->model('productos_bajas_model');
+    $this->load->model('unidades_model');
 
-    $params['bajas'] = $this->productos_bajas_model->getBajas();
-
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['unidades'] = $this->unidades_model->getUnidades();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/productos_bajas/admin', $params);
+    $this->load->view('panel/unidades/admin', $params);
     $this->load->view('panel/footer');
   }
 
@@ -68,55 +65,47 @@ class productos_bajas extends MY_Controller {
       array('general/msgbox.js'),
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
-      array('general/supermodal.js'),
-      array('general/util.js'),
       array('general/keyjump.js'),
-      array('panel/productos_bajas/agregar.js'),
+      array('panel/unidades/agregar.js'),
     ));
 
-    $this->load->model('productos_bajas_model');
+    $this->load->model('unidades_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar baja'
+      'titulo' => 'Agregar Unidad'
     );
 
-    $this->configAddBaja();
+    $this->configAddUnidad();
     if ($this->form_validation->run() == FALSE)
     {
       $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
     }
     else
     {
-      $res_mdl = $this->productos_bajas_model->agregar();
+      $res_mdl = $this->unidades_model->agregar();
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_bajas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/unidades/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
-
-    $params['next_folio']    = $this->productos_bajas_model->folio();
-    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
-    // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
-
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/productos_bajas/agregar', $params);
+    $this->load->view('panel/unidades/agregar', $params);
     $this->load->view('panel/footer');
   }
 
-  public function ver()
+   /**
+   * Visualiza el formulario para modificar.
+   *
+   * @return void
+   */
+  public function modificar()
   {
     $this->carabiner->css(array(
       array('libs/jquery.uniform.css', 'screen'),
@@ -126,33 +115,49 @@ class productos_bajas extends MY_Controller {
       array('general/msgbox.js'),
       array('libs/jquery.uniform.min.js'),
       array('libs/jquery.numeric.js'),
-      array('general/supermodal.js'),
-      array('general/util.js'),
       array('general/keyjump.js'),
-      array('panel/productos_bajas/agregar.js'),
+      array('panel/unidades/agregar.js'),
     ));
 
-    $this->load->model('productos_bajas_model');
+    $this->load->model('unidades_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Ver salida'
+      'titulo' => 'Agregar Unidad'
     );
 
-    $params['salida'] = $this->productos_bajas_model->info($_GET['id'], true);
+    $this->configAddUnidad();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->unidades_model->modificar($_GET['id']);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/unidades/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
+    $params['unidad'] = $this->unidades_model->info($_GET['id'], true);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/productos_bajas/ver', $params);
+    $this->load->view('panel/unidades/modificar', $params);
     $this->load->view('panel/footer');
   }
 
-  public function cancelar()
+  public function eliminar()
   {
-    $this->load->model('productos_bajas_model');
-    $this->productos_bajas_model->cancelar($_GET['id']);
+    $this->load->model('unidades_model');
+    $this->unidades_model->eliminar($_GET['id']);
 
-    redirect(base_url('panel/productos_bajas/?' . String::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/unidades/?&msg=5'));
   }
 
   /*
@@ -161,38 +166,24 @@ class productos_bajas extends MY_Controller {
    |------------------------------------------------------------------------
    */
 
-  public function configAddBaja()
+  public function configAddUnidad()
   {
     $this->load->library('form_validation');
 
     $rules = array(
-      array('field' => 'empresaId',
-            'label' => 'Empresa',
-            'rules' => 'required'),
-      array('field' => 'empresa',
-            'label' => '',
-            'rules' => ''),
+      array('field' => 'nombre',
+            'label' => 'Nombre',
+            'rules' => 'required|max_length[20]'),
 
-      array('field' => 'conceptoSalida',
-            'label' => 'Concepto',
-            'rules' => 'max_length[200]|required'),
-
-      array('field' => 'fecha',
-            'label' => 'Fecha',
-            'rules' => 'required'),
-
-      array('field' => 'codigo[]',
-            'label' => '',
-            'rules' => ''),
       array('field' => 'concepto[]',
             'label' => 'Productos',
-            'rules' => 'required'),
+            'rules' => ''),
       array('field' => 'productoId[]',
-            'label' => '',
+            'label' => 'Productos',
             'rules' => ''),
       array('field' => 'cantidad[]',
             'label' => 'Cantidad',
-            'rules' => 'required|greater_than[0]')
+            'rules' => 'greater_than[0]'),
     );
 
     $this->form_validation->set_rules($rules);
@@ -215,13 +206,17 @@ class productos_bajas extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La baja se agregó correctamente.';
+        $txt = 'La unidad se agregó correctamente.';
         $icono = 'success';
         break;
       case 4:
-        $txt = 'La baja se cancelo correctamente.';
+        $txt = 'La unidad se modifico correctamente.';
         $icono = 'success';
-      break;
+        break;
+      case 5:
+        $txt = 'La unidad se elimino correctamente.';
+        $icono = 'success';
+        break;
     }
 
     return array(
