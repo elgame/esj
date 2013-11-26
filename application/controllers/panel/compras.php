@@ -60,6 +60,18 @@ class compras extends MY_Controller {
     $this->load->model('compras_model');
     $this->load->model('compras_ordenes_model');
 
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(4);
+    }
+
     $ordenes = $this->db->select('id_orden')->from('compras_facturas')->where('id_compra', $_GET['id'])->get()->result();
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
@@ -89,12 +101,41 @@ class compras extends MY_Controller {
     redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
   }
 
+  public function configUpdateXml()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'xml',
+            'label' => 'XML',
+            'rules' => 'callback_xml_check'),
+      array('field' => 'aux',
+            'label' => '',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function xml_check($file)
+  {
+    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    {
+      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
   /*
    |------------------------------------------------------------------------
    | Mensajes.
    |------------------------------------------------------------------------
    */
-  private function showMsgs($tipo, $msg='', $title='Bascula')
+  private function showMsgs($tipo, $msg='', $title='Compras')
   {
     switch($tipo){
       case 1:
@@ -107,6 +148,10 @@ class compras extends MY_Controller {
         break;
       case 3:
         $txt = 'La orden se cancelo correctamente.';
+        $icono = 'success';
+      break;
+      case 4:
+        $txt = 'EL XML se actualizo correctamente.';
         $icono = 'success';
       break;
     }

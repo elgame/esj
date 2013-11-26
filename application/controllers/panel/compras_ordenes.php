@@ -314,16 +314,18 @@ class compras_ordenes extends MY_Controller {
     }
     else
     {
-      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'], $_GET['ids']);
+      $res_mdl = $this->compras_ordenes_model->agregarCompra($_POST['proveedorId'], $_POST['empresaId'], $_GET['ids'], $_FILES['xml']);
 
       if ($res_mdl['passes'])
       {
         $params['frm_errors'] = $this->showMsgs(9);
         $params['id_movimiento'] = ($res_mdl['ver_cheque'] ? $res_mdl['id_movimiento'] : '');
         $params['reload'] = true;
-      }else
+      }
+      else
+      {
         $params['frm_errors'] = $this->showMsgs($res_mdl['msg']);
-
+      }
       // if ($res_mdl['passes'])
       // {
       //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
@@ -350,7 +352,7 @@ class compras_ordenes extends MY_Controller {
     //Cuentas de banco
     $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
     //metodos de pago
-    $params['metods_pago']  = array( 
+    $params['metods_pago']  = array(
       array('nombre' => 'Transferencia', 'value' => 'transferencia'),
       array('nombre' => 'Cheque', 'value' => 'cheque'),
       array('nombre' => 'Efectivo', 'value' => 'efectivo'),
@@ -620,13 +622,29 @@ class compras_ordenes extends MY_Controller {
             'rules' => ''),
       array('field' => 'totalRetencion',
             'label' => 'IVA',
-            'rules' => ''),
+            'rules' => '')  ,
       array('field' => 'totalOrden',
             'label' => 'Total',
             'rules' => 'greater_than[0]'),
+      array('field' => 'xml',
+            'label' => 'XML',
+            'rules' => 'callback_xml_check'),
     );
 
     $this->form_validation->set_rules($rules);
+  }
+
+  public function xml_check($file)
+  {
+    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    {
+      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
   }
 
   /*

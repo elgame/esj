@@ -61,6 +61,7 @@
                   <th>Proveedor</th>
                   <th>Empresa</th>
                   <th>Estado</th>
+                  <th>XML?</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -79,6 +80,16 @@
                           $label = 'warning';
                         } else if ($compra->status === 'pa') {
                           $texto = 'PAGADA';
+                          $label = 'success';
+                        }
+                      ?>
+                      <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
+                  </td>
+                  <td><?php
+                          $texto = 'NO';
+                          $label = 'warning';
+                        if ($compra->xml) {
+                          $texto = 'SI';
                           $label = 'success';
                         }
                       ?>

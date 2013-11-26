@@ -55,7 +55,7 @@
                 <div class="span12"><h2><?php echo $proveedor['info']->nombre_fiscal ?></h2></div>
               </div>
 
-              <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" id="form">
+              <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" id="form" enctype="multipart/form-data">
                 <input type="hidden" name="proveedorId" value="<?php echo $proveedor['info']->id_proveedor ?>">
                 <input type="hidden" name="empresaId" value="<?php echo $_GET['ide'] ?>">
                 <div class="row-fluid">
@@ -100,15 +100,21 @@
                       </div>
                     </div>
                   </div>
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false">
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
                 <div class="row-fluid" id="group_pago_contado">
                   <div class="span3">
                     <div class="control-group">
                       <div class="controls span9">
                         Cuenta Bancaria
                         <select name="dcuenta" class="span12" id="dcuenta">
-                        <?php 
+                        <?php
                         foreach ($cuentas['cuentas'] as $key => $value) {
                         ?>
                             <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
@@ -303,7 +309,7 @@
 
         <?php if(isset($reload)) { ?>
           setTimeout(function(){
-            <?php  
+            <?php
                 if (isset($id_movimiento{0}))
                   echo "window.open(base_url+'panel/banco/cheque?id='+{$id_movimiento}, 'Print cheque');";
             ?>
