@@ -99,7 +99,7 @@
                       <div class="span4">
                         <div class="control-group">
                           <div class="controls span9">
-                            XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false">
+                            XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
                             <input type="hidden" name="aux" value="1">
                             <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                           </div>

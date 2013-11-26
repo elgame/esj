@@ -312,10 +312,10 @@ class proveedores_model extends CI_Model {
 		{
 			foreach ($this->input->post('cuentas_alias') as $key => $value)
 			{
-				$data = array('id_proveedor' => $id_proveedor, 
-								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'), 
-								'alias'      => $_POST['cuentas_alias'][$key], 
-								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]), 
+				$data = array('id_proveedor' => $id_proveedor,
+								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'),
+								'alias'      => $_POST['cuentas_alias'][$key],
+								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]),
 								'cuenta'     => $_POST['cuentas_cuenta'][$key], );
 				if (is_numeric($_POST['cuentas_id'][$key]))  //update
 				{

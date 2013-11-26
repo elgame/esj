@@ -51,13 +51,18 @@ class compras_model extends privilegios_model{
       $sql .= " AND co.status = '".$this->input->get('fstatus')."'";
     }
 
+    if($this->input->get('ftipo') != '')
+    {
+      $sql .= " AND co.isgasto = '".$this->input->get('ftipo')."'";
+    }
+
     $query = BDUtil::pagination(
         "SELECT co.id_compra,
                 co.id_proveedor, p.nombre_fiscal AS proveedor,
                 co.id_empresa, e.nombre_fiscal as empresa,
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
-                co.tipo_documento, co.fecha, co.status, co.xml
+                co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa

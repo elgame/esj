@@ -103,7 +103,7 @@
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false">
+                        XML<input type="file" name="xml" class="span12" id="xml" data-uniform="false" accept="text/xml">
                       </div>
                     </div>
                   </div>
