@@ -292,6 +292,7 @@ class compras_ordenes extends MY_Controller {
 
     $this->load->model('proveedores_model');
     $this->load->model('compras_ordenes_model');
+    $this->load->model('banco_cuentas_model');
 
     $this->configAddOrdenLigar();
     if ($this->form_validation->run() == FALSE)
@@ -304,8 +305,16 @@ class compras_ordenes extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
-      }
+        $params['frm_errors'] = $this->showMsgs(9);
+        $params['id_movimiento'] = ($res_mdl['ver_cheque'] ? $res_mdl['id_movimiento'] : '');
+        $params['reload'] = true;
+      }else
+        $params['frm_errors'] = $this->showMsgs($res_mdl['msg']);
+
+      // if ($res_mdl['passes'])
+      // {
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      // }
     }
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
@@ -324,6 +333,18 @@ class compras_ordenes extends MY_Controller {
         $params['productos'][] = $prod;
       }
     }
+
+    //Cuentas de banco
+    $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
+    //metodos de pago
+    $params['metods_pago']  = array( 
+      array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+      array('nombre' => 'Cheque', 'value' => 'cheque'),
+      array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+      array('nombre' => 'Deposito', 'value' => 'deposito'),
+    );
+    //Cuentas del proeveedor
+    $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_GET['idp']);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -600,6 +621,11 @@ class compras_ordenes extends MY_Controller {
       case 9:
         $txt = 'La compra se agrego correctamente.';
         $icono = 'success';
+      break;
+
+      case 30:
+        $txt = 'La cuenta no tiene saldo suficiente.';
+        $icono = 'error';
       break;
     }
 

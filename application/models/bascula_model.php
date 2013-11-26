@@ -994,13 +994,20 @@ class Bascula_model extends CI_Model {
         array($xls->titulo3, 'format_title3'),
         array($xls->titulo4, 'format_title3')
     ));
+
+    foreach ($data as $key => $value)
+    {
+      $data[$key]->colnull = '';
+    }
       
     $row +=3;
     $xls->excelContent($worksheet, $row, $data, array(
-        'head' => array('BOLETA', 'PRODUCTOR', 'IMPORTE'),
+        'head' => array('BOLETA', 'PRODUCTOR', '', '', 'IMPORTE'),
         'conte' => array(
             array('name' => 'folio', 'format' => 'format4', 'sum' => -1),
             array('name' => 'proveedor', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'colnull', 'format' => 'format4', 'sum' => -1),
+            array('name' => 'colnull', 'format' => 'format4', 'sum' => -1),
             array('name' => 'importe', 'format' => 'format4', 'sum' => 0),
           )
     ));

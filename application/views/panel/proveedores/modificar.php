@@ -204,6 +204,70 @@
 
                 </div> <!--/span-->
 
+                <div class="span11">
+                          <table class="table table-striped table-bordered table-hover table-condensed">
+                    <thead>
+                      <tr>
+                        <th>Banamex</th>
+                        <th>ALIAS</th>
+                        <th>SUCURSAL</th>
+                        <th>CUENTA/CLABE</th>
+                        <th>OPC</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableCuentas">
+                    <?php if (count($cuentas_proveedor) > 0)
+                    {
+                      foreach ($cuentas_proveedor as $key => $value)
+                      {
+                    ?>
+                      <tr>
+                          <td><input type="checkbox" class="chk_banamex" value="si" <?php echo ($value->is_banamex=='t'? 'checked': ''); ?> data-uniform="false">
+                            <input type="hidden" name="cuentas_banamex[]" value="<?php echo ($value->is_banamex=='t'? 'true': 'false'); ?>" class="cuentas_banamex">
+                            <input type="hidden" name="cuentas_id[]" value="<?php echo $value->id_cuenta; ?>" class="cuentas_id">
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $value->alias; ?>" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $value->sucursal; ?>" class="cuentas_sucursal vpos-int" <?php echo ($value->is_banamex=='t'? '': 'readonly'); ?>></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $value->cuenta; ?>" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+                    <?php
+                      }
+                    } ?>
+
+                    <?php if (is_array($this->input->post('cuentas_alias')))
+                    {
+                      foreach ($this->input->post('cuentas_alias') as $key => $value)
+                      {
+                    ?>
+                      <tr>
+                          <td><input type="checkbox" class="chk_banamex" value="si" <?php echo ($_POST['cuentas_banamex'][$key]=='true'? 'checked': ''); ?> data-uniform="false">
+                            <input type="hidden" name="cuentas_banamex[]" value="<?php echo $_POST['cuentas_banamex'][$key]; ?>" class="cuentas_banamex">
+                            <input type="hidden" name="cuentas_id[]" value="<?php echo $_POST['cuentas_id'][$key]; ?>" class="cuentas_id">
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $_POST['cuentas_alias'][$key]; ?>" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $_POST['cuentas_sucursal'][$key]; ?>" class="cuentas_sucursal vpos-int" <?php echo ($_POST['cuentas_banamex'][$key]=='true'? '': 'readonly'); ?>></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $_POST['cuentas_cuenta'][$key]; ?>" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+                    <?php
+                      }
+                    } ?>
+                      <tr>
+                          <td><input type="checkbox" class="chk_banamex" value="si" checked data-uniform="false">
+                            <input type="hidden" name="cuentas_banamex[]" value="true" class="cuentas_banamex">
+                            <input type="hidden" name="cuentas_id[]" value="" class="cuentas_id">
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_sucursal[]" value="" class="cuentas_sucursal vpos-int"></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                        </div>
+
                 <div class="clearfix"></div>
 
                 <div class="form-actions">

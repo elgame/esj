@@ -78,6 +78,9 @@ class proveedores extends MY_Controller {
 		));
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
+			array('libs/jquery.numeric.js'),
+			array('general/keyjump.js'),
+			array('panel/proveedores/addmod.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -123,6 +126,9 @@ class proveedores extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('libs/jquery.treeview.js'),
+				array('libs/jquery.numeric.js'),
+				array('general/keyjump.js'),
+				array('panel/proveedores/addmod.js'),
 				array('panel/usuarios/add_mod_frm.js')
 			));
 
@@ -147,6 +153,8 @@ class proveedores extends MY_Controller {
 			}
 
 			$params['data'] = $this->proveedores_model->getProveedorInfo();
+			//Cuentas del proeveedor
+    		$params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_GET['id']);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -273,6 +281,22 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'dcfdi_version',
 					'label'	=> 'Version CFDI',
 					'rules'	=> 'max_length[6]'),
+
+			array('field'	=> 'cuentas_banamex[]',
+					'label'	=> 'Cuenta banamex',
+					'rules'	=> 'max_length[6]'),
+			array('field'	=> 'cuentas_id[]',
+					'label'	=> 'Id cuenta',
+					'rules'	=> 'max_length[9]'),
+			array('field'	=> 'cuentas_alias[]',
+					'label'	=> 'ALIAS',
+					'rules'	=> 'max_length[60]'),
+			array('field'	=> 'cuentas_sucursal[]',
+					'label'	=> 'SUCURSAL',
+					'rules'	=> 'max_length[9]'),
+			array('field'	=> 'cuentas_cuenta[]',
+					'label'	=> 'CUENTA/CLABE',
+					'rules'	=> 'max_length[18]'),
 		);
 
 		$this->form_validation->set_rules($rules);
