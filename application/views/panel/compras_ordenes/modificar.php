@@ -29,6 +29,8 @@
 
     $method     = '';
     $htmlProdOk = '';
+    $prodOk = false;
+
     if ($orden['info'][0]->status === 'p' AND $orden['info'][0]->autorizado === 'f' AND ! isset($_GET['mod']))
     {
       $badgeTitle = 'NO AUTORIZADO';
@@ -48,7 +50,8 @@
         $disabled = 'disabled';
         $txtButton = 'Dar Entrada';
         $method = '&m=e';
-        $htmlProdOk = '<input type="checkbox" value="1" class="prodOk"><input type="hidden" name="isProdOk[]" value="0" id="idProdOk">';
+        // $htmlProdOk = '<input type="checkbox" value="1" class="prodOk"><input type="hidden" name="isProdOk[]" value="0" id="idProdOk">';
+        $prodOk = true;
       }
       else if ($orden['info'][0]->status === 'a' AND $orden['info'][0]->autorizado === 't')
       {
@@ -92,7 +95,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/modificar?'.String::getVarsLink(array('m', 'msg')).$method); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/modificar?'.String::getVarsLink(array('m', 'msg', 'print')).$method); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -115,6 +118,16 @@
                   </div>
                 </div>
                   <input type="hidden" name="proveedorId" id="proveedorId" value="<?php echo set_value('proveedorId', $orden['info'][0]->id_proveedor) ?>">
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dserie">Solicito</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="">
+                  </div>
+                </div>
+                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId', $orden['info'][0]->id_solicito) ?>">
               </div>
 
               <div class="control-group">
@@ -255,6 +268,7 @@
                           <th>PRESEN.</th>
                           <th>UNIDAD</th>
                           <th>CANT.</th>
+                          <th>FALTANTES</th>
                           <th>P.U.</th>
                           <th>IVA</th>
                           <th>RET 4%</th>
@@ -299,6 +313,9 @@
                               <td style="width: 65px;">
                                   <input type="number" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
                               </td>
+                              <td style="width: 65px;">
+                                  <input type="number" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
+                              </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">
                               </td>
@@ -340,7 +357,37 @@
                                     $pu       = $prod->precio_unitario;
                                   }
 
-                                  $redBg = $prod->status === 'r' ? 'background-color: #FFE5E5;' : '';
+                                  $readonly = $prod->status === 'a' ? 'readonly' : '';
+                                  $disabled = $prod->status === 'a' ? 'disabled' : '';
+
+                                  $redBg    = $prod->status === 'r' ? 'background-color: #FFE5E5;' : '';
+
+                                  $htmlProdOk = '';
+                                  if ( ! isset($_GET['mod']))
+                                  {
+                                    if ($prod->status === 'a')
+                                    {
+                                      if ($prodOk)
+                                      {
+                                        $htmlProdOk = '<input type="checkbox" value="1" class="prodOk" checked><input type="hidden" name="isProdOk[]" value="1" id="idProdOk">';
+                                      }
+                                      else
+                                      {
+                                        $htmlProdOk = '<input type="hidden" name="isProdOk[]" value="1" id="idProdOk">';
+                                      }
+                                    }
+                                    else
+                                    {
+                                      if ($prodOk)
+                                      {
+                                        $htmlProdOk = '<input type="checkbox" value="1" class="prodOk"><input type="hidden" name="isProdOk[]" value="0" id="idProdOk">';
+                                      }
+                                      else
+                                      {
+                                        $htmlProdOk = '<input type="hidden" name="isProdOk[]" value="0" id="idProdOk">';
+                                      }
+                                    }
+                                  }
                                 ?>
                                <tr>
                                  <td style="width: 70px;<?php echo $redBg ?>">
@@ -355,13 +402,13 @@
                                  </td>
                                  <td style="width: 160px;<?php echo $redBg ?>">
                                     <?php if ($prod->id_presentacion){ ?>
-                                      <select name="presentacion[]">
+                                      <select name="presentacion[]" <?php echo $readonly ?>>
                                         <option value="<?php echo $prod->id_presentacion ?>" data-cantidad="<?php echo $prod->presen_cantidad ?>"><?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?></option>
                                       </select>
                                       <input type="hidden" name="presentacionCant[]" value="<?php echo $prod->presen_cantidad ?>" id="presentacionCant" class="span12">
                                       <input type="hidden" name="presentacionText[]" value="<?php echo $prod->presentacion .' '.$prod->presen_cantidad .' '.$prod->abreviatura ?>" id="presentacionText" class="span12">
                                     <?php } else { ?>
-                                      <select name="presentacion[]">
+                                      <select name="presentacion[]" <?php echo $readonly ?>>
                                         <option value="" data-cantidad=""></option>
                                       </select>
                                       <input type="hidden" name="presentacionCant[]" value="" id="presentacionCant" class="span12">
@@ -378,6 +425,9 @@
                                  <td style="width: 65px;<?php echo $redBg ?>">
                                      <input type="number" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $readonly ?>>
                                  </td>
+                                 <td style="width: 65px;<?php echo $redBg ?>">
+                                     <input type="number" name="faltantes[]" value="<?php echo $prod->faltantes ?>" id="faltantes" class="span12 vpositive" min="0" <?php echo $readonly ?>>
+                                 </td>
                                  <td style="width: 90px;<?php echo $redBg ?>">
                                      <input type="text" name="valorUnitario[]" value="<?php echo $pu ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>
                                  </td>
@@ -390,7 +440,7 @@
                                      <input type="hidden" name="trasladoTotal[]" value="<?php echo $prod->iva ?>" id="trasladoTotal" class="span12">
                                      <input type="hidden" name="trasladoPorcent[]" value="<?php echo $prod->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
                                  </td>
-                                 <td style="width: 66px;">
+                                 <td style="width: 66px;<?php echo $redBg ?>">
                                      <input type="text" name="retTotal[]" value="<?php echo $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                  </td>
                                  <td style="<?php echo $redBg ?>">
@@ -460,6 +510,21 @@
   </div><!--/row-->
 
 </div>
+
+<?php if (isset($print)) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/compras_ordenes/imprimir/?id=' . $_GET['id'].'&p=true'."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
+
+<?php if (isset($print_faltantes)) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/compras_ordenes/imprimir_recibo_faltantes/?id=' . $_GET['id'].'&p=true'."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
+
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

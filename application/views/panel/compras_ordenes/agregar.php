@@ -16,7 +16,6 @@
     </ul>
   </div>
 
-
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
@@ -50,6 +49,16 @@
                   </div>
                 </div>
                   <input type="hidden" name="proveedorId" id="proveedorId" value="<?php echo set_value('proveedorId') ?>">
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dserie">Solicito</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="">
+                  </div>
+                </div>
+                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId') ?>">
               </div>
 
               <div class="control-group">
@@ -182,6 +191,7 @@
                           <th>PRESEN.</th>
                           <th>UNIDAD</th>
                           <th>CANT.</th>
+                          <th>FALTANTES</th>
                           <th>P.U.</th>
                           <th>IVA</th>
                           <th>RET 4%</th>
@@ -219,6 +229,9 @@
                               </td>
                               <td style="width: 65px;">
                                   <input type="number" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
+                              </td>
+                              <td style="width: 65px;">
+                                  <input type="number" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">

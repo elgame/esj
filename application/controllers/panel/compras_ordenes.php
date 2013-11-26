@@ -13,6 +13,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajax_get_producto_all/',
 
     'compras_ordenes/ligar/',
+    'compras_ordenes/imprimir_recibo_faltantes/',
     );
 
   public function _remap($method){
@@ -234,7 +235,13 @@ class compras_ordenes extends MY_Controller {
       {
         $response = $this->compras_ordenes_model->entrada($_GET['id']);
 
-        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg='.$response['msg']));
+        if ($response['msg'] === 5)
+        {
+          $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
+
+          redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
+        }
+        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
       }
     }
 
@@ -242,6 +249,12 @@ class compras_ordenes extends MY_Controller {
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    if (isset($_GET['print']))
+      $params['print'] = true;
+
+    if (isset($_GET['print_faltantes']))
+      $params['print_faltantes'] = true;
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -334,6 +347,34 @@ class compras_ordenes extends MY_Controller {
     $this->load->view('panel/compras_ordenes/ligar_ordenes', $params);
   }
 
+  public function imprimir()
+  {
+    $this->load->model('compras_ordenes_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->compras_ordenes_model->print_orden_compra($_GET['id']);
+    }
+    else
+    {
+      $this->load->view('panel/compras_ordenes/print_orden_compra');
+    }
+  }
+
+  public function imprimir_recibo_faltantes()
+  {
+    $this->load->model('compras_ordenes_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->compras_ordenes_model->print_recibo_faltantes($_GET['id']);
+    }
+    else
+    {
+      $this->load->view('panel/compras_ordenes/print_orden_compra');
+    }
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -402,6 +443,13 @@ class compras_ordenes extends MY_Controller {
             'label' => '',
             'rules' => ''),
 
+      array('field' => 'solicitoId',
+            'label' => 'Solicito',
+            'rules' => ''),
+      array('field' => 'solicito',
+            'label' => '',
+            'rules' => ''),
+
       array('field' => 'departamento',
             'label' => 'Departamento',
             'rules' => 'required'),
@@ -441,6 +489,9 @@ class compras_ordenes extends MY_Controller {
             'label' => '',
             'rules' => ''),
       array('field' => 'cantidad[]',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'faltantes[]',
             'label' => '',
             'rules' => ''),
       array('field' => 'valorUnitario[]',

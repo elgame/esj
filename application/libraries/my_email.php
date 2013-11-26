@@ -89,6 +89,13 @@ class my_email {
 
           $mail->AddAttachment($pathZip, 'Documentos.zip');
         }
+        else
+        {
+          foreach ($this->data['adjuntos'] as $fileName => $pathFile)
+          {
+            $mail->AddAttachment($pathFile, $fileName);
+          }
+        }
       }
     }
 

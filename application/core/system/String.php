@@ -41,7 +41,7 @@ class String{
 			if(array_search($key, $quit) === false)
 				$vars .= '&'.$key.'='.$val;
 		}
-		
+
 		return substr($vars, 1);
 	}
 
@@ -282,7 +282,7 @@ class String{
 		}
 		$tex = $neg . substr($tex, 1) . $fin;
 		//Zi hack --> return ucfirst($tex);
-		
+
 		$tipo_moneda = 'pesos';
 		switch ($moneda) {
 			case 'USD':

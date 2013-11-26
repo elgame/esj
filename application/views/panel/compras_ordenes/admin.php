@@ -163,6 +163,15 @@
                         );
                       }
 
+                      if ($orden->status === 'a')
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/imprimir/', array(
+                          'params'   => 'id='.$orden->id_orden.'&p=true',
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('target' => '_BLANK'))
+                        );
+                      }
+
                       if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/cancelar/', array(
