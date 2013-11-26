@@ -20,6 +20,9 @@
     eventCheckboxProducto();
     eventOnChangePresentacionTable();
     eventOnChangeTipoOrden();
+    //Ligar ordenes
+    eventOnChangeCondicionPago();
+    eventOnChangeMetodoPago();
   });
 
   /*
@@ -469,6 +472,42 @@
       $parent.find('#presentacionText').val($select.find('option:selected').text() || '');
     });
   };
+
+  /*
+   | Ligar ordenes
+   */
+  // Evento onchange del select condicion de pago.
+  var eventOnChangeCondicionPago = function () {
+    $('#condicionPago').on('change', function(event) {
+      var $this = $(this);
+      if ($this.val() == 'cr')
+      {
+        $("#grup_plazo_credito").show();
+        $("#group_pago_contado").hide();
+      }
+      else
+      {
+        $("#grup_plazo_credito").hide();
+        $("#group_pago_contado").show();
+      }
+    });
+  };
+  // Evento onchange del select metodo de pago.
+  var eventOnChangeMetodoPago = function () {
+    $('#fmetodo_pago').on('change', function(event) {
+      var $this = $(this);
+      if ($this.val() == 'transferencia')
+      {
+        $("#cuenta_proveedor").show();
+      }
+      else
+      {
+        $("#cuenta_proveedor").hide();
+      }
+    });
+  };
+
+
   /*
    |------------------------------------------------------------------------
    | HTML builders

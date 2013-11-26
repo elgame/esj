@@ -128,7 +128,8 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->insert('proveedores', $data);
-		// $id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
+		$id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
+		$this->addCuentas($id_proveedor);
 
 		return array('error' => FALSE);
 	}
@@ -205,6 +206,7 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));
+		$this->addCuentas($id_proveedor);
 
 		return array('error' => FALSE);
 	}
@@ -292,6 +294,58 @@ class proveedores_model extends CI_Model {
 						'item'  => $itm,
 				);
 			}
+		}
+
+		return $response;
+	}
+
+
+	/**
+	 * ******* CUENTAS DE PROVEEDORES ****************
+	 * ***********************************************
+	 * Agrega o actualiza cuentas del proveedor
+	 * @param [type] $id_proveedor [description]
+	 */
+	private function addCuentas($id_proveedor)
+	{
+		if ( is_array($this->input->post('cuentas_alias')) )
+		{
+			foreach ($this->input->post('cuentas_alias') as $key => $value)
+			{
+				$data = array('id_proveedor' => $id_proveedor, 
+								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'), 
+								'alias'      => $_POST['cuentas_alias'][$key], 
+								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]), 
+								'cuenta'     => $_POST['cuentas_cuenta'][$key], );
+				if (is_numeric($_POST['cuentas_id'][$key]))  //update
+				{
+					if($_POST['cuentas_delte'][$key] == 'true')
+						$data['status'] = 'f';
+					$this->db->update('proveedores_cuentas', $data, "id_cuenta = {$_POST['cuentas_id'][$key]}");
+				}else  //insert
+				{
+					if($data['alias'] != '' && $data['cuenta'] != '')
+						$this->db->insert('proveedores_cuentas', $data);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Obtiene el listado de proveedores
+	 * @return [type] [description]
+	 */
+	public function getCuentas($id_proveedor){
+		$sql = '';
+		$res = $this->db->query("
+				SELECT id_cuenta, id_proveedor, is_banamex, alias, sucursal, cuenta, status, (alias || ' *' || substring(cuenta from '....$')) AS full_alias
+				FROM proveedores_cuentas
+				WHERE status = 't' AND id_proveedor = {$id_proveedor}
+				ORDER BY full_alias ASC");
+
+		$response = array();
+		if($res->num_rows() > 0){
+			$response = $res->result();
 		}
 
 		return $response;

@@ -86,26 +86,81 @@
                     <div class="control-group">
                       <div class="controls span9">
                         Condicion de Pago
-                        <select name="condicionPago" class="span12" id="condicionPago">
+                        <select name="condicionPago" class="span12" id="condicionPago" data-next="plazoCredito|dcuenta">
                           <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                           <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
                         </select>
                       </div>
                     </div>
                   </div>
-                  <div class="span4">
+                  <div class="span4" id="grup_plazo_credito" style="display: none;">
                     <div class="control-group">
                       <div class="controls span9">
                         Plazo de Crédito<input type="text" name="plazoCredito" class="span12" id="plazoCredito" value="<?php echo set_value('plazoCredito', '0'); ?>">
                       </div>
                     </div>
                   </div>
-                  <div class="span4">
+                </div>
+
+                <div class="row-fluid" id="group_pago_contado">
+                  <div class="span3">
                     <div class="control-group">
                       <div class="controls span9">
-                        <div class="well span12">
-                            <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
-                        </div>
+                        Cuenta Bancaria
+                        <select name="dcuenta" class="span12" id="dcuenta">
+                        <?php 
+                        foreach ($cuentas['cuentas'] as $key => $value) {
+                        ?>
+                            <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                        <?php
+                        }
+                        ?>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="span3">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Referencia <input type="text" name="dreferencia" class="span12" id="dreferencia" value="<?php echo set_value('dreferencia', ''); ?>" maxlength="10">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="span3">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Metodo de pago
+                        <select name="fmetodo_pago" class="span12" id="fmetodo_pago">
+                        <?php  foreach ($metods_pago as $key => $value) {
+                        ?>
+                            <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
+                        <?php
+                        }?>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="span3" id="cuenta_proveedor">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Cuenta Proveedor
+                        <select name="fcuentas_proveedor" class="span12" id="fcuentas_proveedor">
+                        <?php  foreach ($cuentas_proveedor as $key => $value) {
+                        ?>
+                            <option value="<?php echo $value->id_cuenta; ?>"><?php echo $value->full_alias; ?></option>
+                        <?php
+                        }?>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="span4 pull-right">
+                  <div class="control-group">
+                    <div class="controls span9">
+                      <div class="well span12">
+                          <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                       </div>
                     </div>
                   </div>
@@ -248,6 +303,11 @@
 
         <?php if(isset($reload)) { ?>
           setTimeout(function(){
+            <?php  
+                if (isset($id_movimiento{0}))
+                  echo "window.open(base_url+'panel/banco/cheque?id='+{$id_movimiento}, 'Print cheque');";
+            ?>
+
             window.parent.location.reload();
           },1500)
         <?php } ?>

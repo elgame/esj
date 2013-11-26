@@ -148,6 +148,22 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
+  public function agregarData($data)
+  {
+
+    $this->db->insert('compras_ordenes', $data);
+
+    return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
+  }
+
+  public function agregarProductosData($data)
+  {
+
+    $this->db->insert_batch('compras_productos', $data);
+
+    return array('passes' => true, 'msg' => 3);
+  }
+
   /**
    * Actualiza los datos de una orden de compra junton con sus productos.
    *
@@ -284,11 +300,33 @@ class compras_ordenes_model extends CI_Model {
       'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
     );
 
+    //si es contado, se verifica que la cuenta tenga saldo
+    if ($data['condicion_pago'] == 'co')
+    {
+      $this->load->model('banco_cuentas_model');
+      $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
+      if ($cuenta['cuentas'][0]->saldo < $data['total'])
+        return array('passes' => false, 'msg' => 30);
+    }
+
     // inserta la compra
     $this->db->insert('compras', $data);
 
     // obtiene el id de la compra insertada.
     $compraId = $this->db->insert_id();
+
+    //si es contado, se registra el abono y el retiro del banco
+    if ($data['condicion_pago'] == 'co')
+    {
+      $this->load->model('cuentas_pagar_model');
+      $data_abono = array('fecha'        => $data['fecha'],
+                        'concepto'       => 'Pago de contado',
+                        'total'          => $data['total'],
+                        'id_cuenta'      => $this->input->post('dcuenta'),
+                        'ref_movimiento' => $this->input->post('dreferencia') );
+      $_GET['tipo'] = 'f';
+      $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
+    }
 
     // construye el array de las ordenes a ligar con la compra.
     $ordenes = array();
@@ -324,7 +362,9 @@ class compras_ordenes_model extends CI_Model {
       ));
     }
 
-    return array('passes' => true);
+    $respons['passes'] = true;
+
+    return $respons;
   }
 
   public function cancelar($idOrden)
