@@ -25,9 +25,14 @@ $(function(){
     else
       $("#grupftipo2").hide();
 
+    if(vthis.val() == '2')
+      $("#grupftipo3").show();
+    else
+      $("#grupftipo3").hide();
+
     getFolioPoliza();
   });
-  $("#ftipo2").on("change", function(){
+  $("#ftipo2, #ftipo3").on("change", function(){
     getFolioPoliza();
   });
 });
@@ -37,7 +42,8 @@ function getFolioPoliza () {
   $.post(base_url+"panel/polizas/get_folio", 
     {
       'tipo'  : $("#ftipo").val(),
-      'tipo2' : $("#ftipo2").val()
+      'tipo2' : $("#ftipo2").val(),
+      'tipo3' : $("#ftipo3").val(),
     }, function(data){
       if (data.folio.folio == "")
         noty({"text":"Los folios para este tipo de poliza se teminaron", "layout":"topRight", "type":"error"});

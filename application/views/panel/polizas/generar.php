@@ -44,6 +44,16 @@
                     </select>
                   </div>
                 </div>
+                <div class="control-group" id="grupftipo3" style="display: none;">
+                  <label class="control-label" for="ftipo3">Opciones</label>
+                  <div class="controls">
+                    <select name="ftipo3" id="ftipo3">
+                      <option value="el">Limon</option>
+                      <option value="ec">Cheques</option>
+                      <option value="eg">Gastos</option>
+                    </select>
+                  </div>
+                </div>
 
                 <div class="control-group">
                   <label class="control-label" for="ffolio">Folio</label>
