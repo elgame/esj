@@ -51,13 +51,18 @@ class compras_model extends privilegios_model{
       $sql .= " AND co.status = '".$this->input->get('fstatus')."'";
     }
 
+    if($this->input->get('ftipo') != '')
+    {
+      $sql .= " AND co.isgasto = '".$this->input->get('ftipo')."'";
+    }
+
     $query = BDUtil::pagination(
         "SELECT co.id_compra,
                 co.id_proveedor, p.nombre_fiscal AS proveedor,
                 co.id_empresa, e.nombre_fiscal as empresa,
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
-                co.tipo_documento, co.fecha, co.status
+                co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -152,4 +157,112 @@ class compras_model extends privilegios_model{
     return true;
   }
 
+  public function updateXml($compraId, $proveedorId, $xml)
+  {
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+
+      $this->db->update('compras', array('xml' => 'application'.$xmlFile[1]), array('id_compra' => $compraId));
+    }
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | HELPERS
+   |------------------------------------------------------------------------
+   */
+
+  /**
+   * Crea el directorio por proveedor.
+   *
+   * @param  string $clienteNombre
+   * @param  string $folioFactura
+   * @return string
+   */
+  public function creaDirectorioProveedorCfdi($proveedor)
+  {
+    $path = APPPATH.'media/compras/cfdi/';
+
+    if ( ! file_exists($path))
+    {
+      // echo $path.'<br>';
+      mkdir($path, 0777);
+    }
+
+    $path .= strtoupper($proveedor).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= date('Y').'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= $this->mesToString(date('m')).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    // $path .= ($serie !== '' ? $serie.'-' : '').$folio.'/';
+    // if ( ! file_exists($path))
+    // {
+    //   // echo $path;
+    //   mkdir($path, 0777);
+    // }
+
+    return $path;
+  }
+
+  /**
+   * Regresa el MES que corresponde en texto.
+   *
+   * @param  int $mes
+   * @return string
+   */
+  private function mesToString($mes)
+  {
+    switch(floatval($mes))
+    {
+      case 1: return 'ENERO'; break;
+      case 2: return 'FEBRERO'; break;
+      case 3: return 'MARZO'; break;
+      case 4: return 'ABRIL'; break;
+      case 5: return 'MAYO'; break;
+      case 6: return 'JUNIO'; break;
+      case 7: return 'JULIO'; break;
+      case 8: return 'AGOSTO'; break;
+      case 9: return 'SEPTIEMBRE'; break;
+      case 10: return 'OCTUBRE'; break;
+      case 11: return 'NOVIEMBRE'; break;
+      case 12: return 'DICIEMBRE'; break;
+    }
+  }
 }

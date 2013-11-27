@@ -1,12 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Usuarios extends MY_Controller {
+class usuarios extends MY_Controller {
 
 	/**
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('ajax_get_siguiente_numero');
+	private $excepcion_privilegio = array(
+    'usuarios/ajax_get_usuarios/',
+  );
 
 	public function _remap($method){
 
@@ -172,6 +174,19 @@ class Usuarios extends MY_Controller {
 		else
 			redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
+
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+   public function ajax_get_usuarios()
+   {
+      $this->load->model('usuarios_model');
+      echo json_encode($this->usuarios_model->getUsuariosAjax());
+   }
+
 
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo

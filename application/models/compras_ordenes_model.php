@@ -105,6 +105,7 @@ class compras_ordenes_model extends CI_Model {
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
       'tipo_pago'       => $_POST['tipoPago'],
       'tipo_orden'      => $_POST['tipoOrden'],
+      'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
     );
 
     $this->db->insert('compras_ordenes', $data);
@@ -125,19 +126,20 @@ class compras_ordenes_model extends CI_Model {
       }
 
       $productos[] = array(
-        'id_orden'        => $this->db->insert_id(),
-        'num_row'         => $key,
-        'id_producto'     => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
-        'id_presentacion' => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
-        'descripcion'     => $concepto,
-        'cantidad'        => $cantidad,
-        'precio_unitario' => $pu,
-        'importe'         => $_POST['importe'][$key],
-        'iva'             => $_POST['trasladoTotal'][$key],
-        'retencion_iva'   => $_POST['retTotal'][$key],
-        'total'           => $_POST['total'][$key],
-        'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
-        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+        'id_orden'             => $this->db->insert_id(),
+        'num_row'              => $key,
+        'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
+        'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
+        'descripcion'          => $concepto,
+        'cantidad'             => $cantidad,
+        'precio_unitario'      => $pu,
+        'importe'              => $_POST['importe'][$key],
+        'iva'                  => $_POST['trasladoTotal'][$key],
+        'retencion_iva'        => $_POST['retTotal'][$key],
+        'total'                => $_POST['total'][$key],
+        'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+        'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+        'faltantes'            => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
       );
     }
 
@@ -148,7 +150,6 @@ class compras_ordenes_model extends CI_Model {
 
   public function agregarData($data)
   {
-
     $this->db->insert('compras_ordenes', $data);
 
     return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
@@ -205,6 +206,7 @@ class compras_ordenes_model extends CI_Model {
         'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
         'tipo_pago'       => $_POST['tipoPago'],
         'tipo_orden'      => $_POST['tipoOrden'],
+        'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
       );
 
       if (isset($_POST['autorizar']) && $status === 'p')
@@ -253,7 +255,9 @@ class compras_ordenes_model extends CI_Model {
           'retencion_iva'   => $_POST['retTotal'][$key],
           'total'           => $_POST['total'][$key],
           'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
-          'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+          'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+          'faltantes' => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
+          'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p'
         );
       }
 
@@ -271,7 +275,7 @@ class compras_ordenes_model extends CI_Model {
    * @param  string $ordenesIds
    * @return array
    */
-  public function agregarCompra($proveedorId, $empresaId, $ordenesIds)
+  public function agregarCompra($proveedorId, $empresaId, $ordenesIds, $xml = null)
   {
     // obtiene un array con los ids de las ordenes a ligar con la compra.
     $ordenesIds = explode(',', $ordenesIds);
@@ -302,6 +306,32 @@ class compras_ordenes_model extends CI_Model {
       $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
       if ($cuenta['cuentas'][0]->saldo < $data['total'])
         return array('passes' => false, 'msg' => 30);
+    }
+
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+      $data['xml'] = 'application'.$xmlFile[1];
     }
 
     // inserta la compra
@@ -381,13 +411,15 @@ class compras_ordenes_model extends CI_Model {
               co.id_autorizo, us.nombre AS autorizo,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
-              co.autorizado
+              co.autorizado,
+              co.id_solicito, (uss.nombre || ' ' || uss.apellido_paterno || ' ' || uss.apellido_materno) as empleado_solicito
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
+       LEFT JOIN usuarios AS uss ON uss.id = co.id_solicito
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -404,7 +436,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.status
+                  cp.porcentaje_retencion, cp.status, cp.faltantes
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -456,6 +488,7 @@ class compras_ordenes_model extends CI_Model {
     $ordenRechazada = false;
 
     $productos = array();
+    $faltantes = false;
     foreach ($_POST['concepto'] as $key => $concepto)
     {
 
@@ -469,6 +502,8 @@ class compras_ordenes_model extends CI_Model {
         $cantidad = $_POST['cantidad'][$key];
         $pu       = $_POST['valorUnitario'][$key];
       }
+
+      $faltantesProd = $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key];
 
       $productos[] = array(
         'id_orden'        => $idOrden,
@@ -484,8 +519,15 @@ class compras_ordenes_model extends CI_Model {
         'total'           => $_POST['total'][$key],
         'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
         'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
-        'status'          => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r'
+        'status'          => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r',
+        'fecha_aceptacion' => date('Y-m-d H:i:s'),
+        'faltantes'       => $faltantesProd,
       );
+
+      if ($faltantesProd !== '0')
+      {
+        $faltantes = true;
+      }
 
       if ($_POST['isProdOk'][$key] === '0')
       {
@@ -518,7 +560,47 @@ class compras_ordenes_model extends CI_Model {
 
     $this->actualizar($idOrden, $data, $productos);
 
-    return array('status' => true, 'msg' => $msg);
+    // Si la orden no esta rechazada verifica si el proveedor tiene el email
+    // asignado para enviarle la orden de compra.
+    if ( ! $ordenRechazada)
+    {
+      $this->load->model('proveedores_model');
+      $proveedor = $this->proveedores_model->getProveedorInfo($_POST['proveedorId']);
+
+      if ($proveedor['info']->email !== '')
+      {
+        // Si el proveedor tiene email asigando le envia la orden.
+        $this->load->library('my_email');
+
+        $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+        $nombreEmisor   = 'Empaque San Jorge';
+        $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
+        $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
+
+        $path = APPPATH . 'media/temp/';
+
+        $file = $this->print_orden_compra($idOrden, $path);
+
+        $datosEmail = array(
+          'correoEmisorEm' => $correoEmisorEm,
+          'correoEmisor'   => $correoEmisor,
+          'nombreEmisor'   => $nombreEmisor,
+          'contrasena'     => $contrasena,
+          'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
+          'altBody'        => 'Nueva orden de compra.',
+          'body'           => 'Nueva orden de compra.',
+          'correoDestino'  => array($proveedor['info']->email),
+          'nombreDestino'  => $proveedor['info']->nombre_fiscal,
+          'cc'             => '',
+          'adjuntos'       => array('ORDEN COMPRA' => $file)
+        );
+
+        $result = $this->my_email->setData($datosEmail)->send();
+        unlink($file);
+      }
+    }
+
+    return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes);
   }
 
   /*
@@ -661,4 +743,306 @@ class compras_ordenes_model extends CI_Model {
     return $prod;
   }
 
+  /*
+   |------------------------------------------------------------------------
+   | PDF's
+   |------------------------------------------------------------------------
+   */
+
+  /**
+    * Visualiza/Descarga el PDF de la orden de compra.
+    *
+    * @return void
+    */
+   public function print_orden_compra($ordenId, $path = null)
+   {
+      $orden = $this->info($ordenId, true);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      // $pdf->show_head = true;
+      $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
+      $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->id_orden;
+
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'C', 'C', 'C');
+      $widths = array(25, 25, 104, 25, 25);
+      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+
+      $subtotal = $iva = $total = 0;
+      foreach ($orden['info'][0]->productos as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array(
+          $prod->cantidad,
+          $prod->codigo,
+          $prod->descripcion,
+          String::formatoNumero($prod->precio_unitario),
+          String::formatoNumero($prod->importe),
+        );
+
+        $pdf->SetX(6);
+        $pdf->Row($datos, false);
+
+        $subtotal += floatval($prod->importe);
+        $iva      += floatval($prod->iva);
+        $total    += floatval($prod->total);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'C'));
+      $pdf->SetWidths(array(154, 25, 25));
+      $pdf->Row(array(
+        'AREA DE APLICACION: ' . $orden['info'][0]->departamento,
+        'SUB-TOTAL',
+        String::formatoNumero($subtotal),
+      ), false, false);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '',
+        'IVA',
+        String::formatoNumero($iva),
+      ), false, false);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        '',
+        'TOTAL',
+        String::formatoNumero($total),
+      ), false, false);
+
+      $x = $pdf->GetX();
+      $y = $pdf->GetY();
+
+      $pdf->SetXY($x - 4, $y + 5);
+      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PAR QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
+
+      $pdf->SetAligns(array('C', 'C', 'C'));
+      $pdf->SetWidths(array(65, 65, 65));
+      $pdf->SetX(6);
+      $pdf->SetY($y + 11);
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->Row(array(
+        'SOLICITA',
+        'AUTORIZA',
+        'REGISTRO',
+      ), false, false);
+
+      $pdf->SetY($y + 20);
+      $pdf->Row(array(
+        '____________________________________',
+        '____________________________________',
+        '____________________________________',
+      ), false, false);
+
+      $pdf->SetY($y + 30);
+      $pdf->Row(array(
+        strtoupper($orden['info'][0]->empleado_solicito),
+        strtoupper($orden['info'][0]->autorizo),
+        strtoupper($orden['info'][0]->empleado),
+      ), false, false);
+
+      // $pdf->AutoPrint(true);
+
+      if ($path)
+      {
+        $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+        $pdf->Output($file, 'F');
+        return $file;
+      }
+      else
+      {
+        $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+      }
+   }
+
+   /**
+    * Visualiza/Descarga el PDF de la orden de compra.
+    *
+    * @return void
+    */
+   public function print_recibo_faltantes($ordenId)
+   {
+      $orden = $this->info($ordenId, true);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      // $pdf->show_head = true;
+      $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
+      $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->id_orden." \n RECIBO DE FALTANTES";
+
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'C', 'C');
+      $widths = array(25, 25, 129, 25);
+      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'FALTANTES');
+
+      $subtotal = $iva = $total = 0;
+      foreach ($orden['info'][0]->productos as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+
+        if ($prod->faltantes > 0)
+        {
+          $datos = array(
+            $prod->cantidad,
+            $prod->codigo,
+            $prod->descripcion,
+            $prod->faltantes,
+          );
+
+          $pdf->SetX(6);
+          $pdf->Row($datos, false);
+        }
+      }
+
+      $x = $pdf->GetX();
+      $y = $pdf->GetY();
+
+      $pdf->SetXY($x - 4, $y + 5);
+      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PAR QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
+
+      $pdf->SetAligns(array('C', 'C', 'C'));
+      $pdf->SetWidths(array(65, 65, 65));
+      $pdf->SetX(6);
+      $pdf->SetY($y + 11);
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->Row(array(
+        'SOLICITA',
+        'AUTORIZA',
+        'REGISTRO',
+      ), false, false);
+
+      $pdf->SetY($y + 20);
+      $pdf->Row(array(
+        '____________________________________',
+        '____________________________________',
+        '____________________________________',
+      ), false, false);
+
+      $pdf->SetY($y + 30);
+      $pdf->Row(array(
+        strtoupper($orden['info'][0]->empleado_solicito),
+        strtoupper($orden['info'][0]->autorizo),
+        strtoupper($orden['info'][0]->empleado),
+      ), false, false);
+
+      // $pdf->AutoPrint(true);
+      $pdf->Output('ORDEN_COMPRA_FALTANTES_'.date('Y-m-d').'.pdf', 'I');
+   }
+
+  /*
+   |------------------------------------------------------------------------
+   | HELPERS
+   |------------------------------------------------------------------------
+   */
+
+  /**
+   * Crea el directorio por proveedor.
+   *
+   * @param  string $clienteNombre
+   * @param  string $folioFactura
+   * @return string
+   */
+  public function creaDirectorioProveedorCfdi($proveedor)
+  {
+    $path = APPPATH.'media/compras/cfdi/';
+
+    if ( ! file_exists($path))
+    {
+      // echo $path.'<br>';
+      mkdir($path, 0777);
+    }
+
+    $path .= strtoupper($proveedor).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= date('Y').'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    $path .= $this->mesToString(date('m')).'/';
+    if ( ! file_exists($path))
+    {
+      // echo $path;
+      mkdir($path, 0777);
+    }
+
+    // $path .= ($serie !== '' ? $serie.'-' : '').$folio.'/';
+    // if ( ! file_exists($path))
+    // {
+    //   // echo $path;
+    //   mkdir($path, 0777);
+    // }
+
+    return $path;
+  }
+
+  /**
+   * Regresa el MES que corresponde en texto.
+   *
+   * @param  int $mes
+   * @return string
+   */
+  private function mesToString($mes)
+  {
+    switch(floatval($mes))
+    {
+      case 1: return 'ENERO'; break;
+      case 2: return 'FEBRERO'; break;
+      case 3: return 'MARZO'; break;
+      case 4: return 'ABRIL'; break;
+      case 5: return 'MAYO'; break;
+      case 6: return 'JUNIO'; break;
+      case 7: return 'JULIO'; break;
+      case 8: return 'AGOSTO'; break;
+      case 9: return 'SEPTIEMBRE'; break;
+      case 10: return 'OCTUBRE'; break;
+      case 11: return 'NOVIEMBRE'; break;
+      case 12: return 'DICIEMBRE'; break;
+    }
+  }
 }

@@ -7,6 +7,7 @@
 
     autocompleteEmpresas();
     autocompleteProveedores();
+    autocompleteSolicito();
     // autocompleteCodigo();
     autocompleteConcepto();
 
@@ -99,6 +100,23 @@
     });
   };
 
+  var autocompleteSolicito= function () {
+    $("#solicito").autocomplete({
+      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $solicito =  $(this);
+
+        $solicito.css("background-color", "#A1F57A");
+        $("#solicitoId").val(ui.item.id);
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {$("#solicito").css("background-color", "#FFD071");
+        $("#solicitoId").val('');
+      }
+    });
+  };
   // Autocomplete para el codigo.
   var autocompleteCodigo = function () {
     $("#fcodigo").autocomplete({
@@ -562,6 +580,9 @@
                   '</td>' +
                   '<td style="width: 65px;">' +
                       '<input type="number" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="1" data-next="jump'+(++jumpIndex)+'">' +
+                  '</td>' +
+                  '<td style="width: 65px;">' +
+                      '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 90px;">' +
                     '<input type="text" name="valorUnitario[]" value="'+producto.precio_unitario+'" id="valorUnitario" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

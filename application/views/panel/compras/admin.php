@@ -35,6 +35,13 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa'); ?>">
 
+                <label for="ftipo">Tipo</label>
+                <select name="ftipo" class="input-medium" id="ftipo">
+                  <option value="">TODAS</option>
+                  <option value="f" <?php echo set_select_get('ftipo', 'f'); ?>>COMPRAS</option>
+                  <option value="t" <?php echo set_select_get('ftipo', 't'); ?>>GASTOS</option>
+                </select>
+
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date('Y-m-01\TH:i')); ?>" size="10">
@@ -60,7 +67,9 @@
                   <th>Folio</th>
                   <th>Proveedor</th>
                   <th>Empresa</th>
+                  <th>Tipo</th>
                   <th>Estado</th>
+                  <th>XML?</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -71,6 +80,10 @@
                   <td><span class="label"><?php echo $compra->folio; ?></span></td>
                   <td><?php echo $compra->proveedor; ?></td>
                   <td><?php echo $compra->empresa; ?></td>
+                  <td>
+                    <?php $tipo = $compra->isgasto === 't' ? 'GASTO' : 'COMPRA' ; ?>
+                    <span class="label label-info"><?php echo $tipo ?></span>
+                  </td>
                   <td><?php
                           $texto = 'CANCELADA';
                           $label = 'warning';
@@ -79,6 +92,16 @@
                           $label = 'warning';
                         } else if ($compra->status === 'pa') {
                           $texto = 'PAGADA';
+                          $label = 'success';
+                        }
+                      ?>
+                      <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
+                  </td>
+                  <td><?php
+                          $texto = 'NO';
+                          $label = 'warning';
+                        if ($compra->xml) {
+                          $texto = 'SI';
                           $label = 'success';
                         }
                       ?>
@@ -96,11 +119,22 @@
                         );
                       }
 
-                      echo $this->usuarios_model->getLinkPrivSm('compras/ver/', array(
-                        'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
-                        'btn_type' => 'btn-success',
-                        'attrs' => array('rel' => 'superbox-80x550'))
-                      );
+                      if ($compra->isgasto === 't')
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('gastos/ver/', array(
+                          'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('rel' => 'superbox-80x550'))
+                        );
+                      }
+                      else
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('compras/ver/', array(
+                          'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('rel' => 'superbox-80x550'))
+                        );
+                      }
                     ?>
                   </td>
                 </tr>

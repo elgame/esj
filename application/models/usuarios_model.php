@@ -24,8 +24,8 @@ class Usuarios_model extends privilegios_model {
 		}
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(u.usuario) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+			$sql = "WHERE ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(u.usuario) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(u.email) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%')";
 
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
@@ -65,14 +65,14 @@ class Usuarios_model extends privilegios_model {
 						'apellido_materno' => $this->input->post('fapellido_paterno'),
 						'usuario'          => $this->input->post('fusuario'),
 						'password'         => $this->input->post('fpass'),
-						
+
 						'calle'            => $this->input->post('fcalle'),
 						'numero'           => $this->input->post('fnumero'),
 						'colonia'          => $this->input->post('fcolonia'),
 						'municipio'        => $this->input->post('fmunicipio'),
 						'estado'           => $this->input->post('festado'),
 						'cp'               => $this->input->post('fcp'),
-						
+
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
 						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
@@ -115,14 +115,14 @@ class Usuarios_model extends privilegios_model {
 						'apellido_materno' => $this->input->post('fapellido_paterno'),
 						'usuario'          => $this->input->post('fusuario'),
 						'password'         => $this->input->post('fpass'),
-						
+
 						'calle'            => $this->input->post('fcalle'),
 						'numero'           => $this->input->post('fnumero'),
 						'colonia'          => $this->input->post('fcolonia'),
 						'municipio'        => $this->input->post('fmunicipio'),
 						'estado'           => $this->input->post('festado'),
 						'cp'               => $this->input->post('fcp'),
-						
+
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
 						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'fecha_salida'     => ($this->input->post('ffecha_salida')!=''? $this->input->post('ffecha_salida'): NULL),
@@ -161,9 +161,9 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status, 
+		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
-						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada, 
+						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi" )
  												->from("usuarios u")
 												->where("id", $id_usuario)
@@ -280,7 +280,7 @@ class Usuarios_model extends privilegios_model {
 					'idunico' => uniqid('l', true));
 				$this->crea_session($user_data);
 		}
-			
+
 			return array($fun_res, 'msg'=>'El correo electrónico y/o contraseña son incorrectos');
 		// return array($fun_res);
 	}
@@ -322,6 +322,35 @@ class Usuarios_model extends privilegios_model {
 		$this->session->set_userdata($user_data);
 	}
 
+  /**
+   * Obtiene el listado de empresas para usar en peticiones Ajax.
+   */
+  public function getUsuariosAjax(){
+    $sql = '';
+    $res = $this->db->query("
+        SELECT id, nombre, usuario, apellido_paterno, apellido_materno
+        FROM usuarios
+        WHERE status = 't' AND
+                (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                 lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                 lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
+        ORDER BY nombre ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id' => $itm->id,
+            'label' => $itm->nombre.' '.$itm->apellido_paterno.' '.$itm->apellido_materno,
+            'value' => $itm->nombre.' '.$itm->apellido_paterno.' '.$itm->apellido_materno,
+            'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */
