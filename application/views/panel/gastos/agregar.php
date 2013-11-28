@@ -26,6 +26,14 @@
               <div class="span6">
 
                 <div class="control-group">
+                  <label class="control-label" for="empresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal); ?>" autofocus>
+                    <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa); ?>">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dserie">Proveedor</label>
                   <div class="controls">
                     <div class="input-append span12">
