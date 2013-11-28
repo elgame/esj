@@ -683,6 +683,9 @@ class banco_cuentas_model extends banco_model {
 		$data_compras = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, af.id_compra
 			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono 
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
+			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago 
+			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 
 		if($cancelar)//cancelar movimiento
 			$this->updateMovimiento($id_movimiento, array('status' => 'f') );
@@ -709,6 +712,14 @@ class banco_cuentas_model extends banco_model {
 		if(count($data_compras) > 0){
 			foreach ($data_compras as $key => $value) {
 				$this->cuentas_pagar_model->removeAbono($value->id_compra, 'f', $value->id_compra_abono);
+			}
+		}
+
+		//cuendo es pago de bascula cancelan los abonos
+		$this->load->model('bascula_model');
+		if(count($data_bascula) > 0){
+			foreach ($data_bascula as $key => $value) {
+				$this->bascula_model->cancelar_pago($value->id_bascula_pago, true);
 			}
 		}
 		

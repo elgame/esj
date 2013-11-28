@@ -344,11 +344,12 @@ class compras_ordenes_model extends CI_Model {
     if ($data['condicion_pago'] == 'co')
     {
       $this->load->model('cuentas_pagar_model');
-      $data_abono = array('fecha'        => $data['fecha'],
-                        'concepto'       => 'Pago de contado',
-                        'total'          => $data['total'],
-                        'id_cuenta'      => $this->input->post('dcuenta'),
-                        'ref_movimiento' => $this->input->post('dreferencia') );
+      $data_abono = array('fecha'             => $data['fecha'],
+                        'concepto'            => 'Pago de contado',
+                        'total'               => $data['total'],
+                        'id_cuenta'           => $this->input->post('dcuenta'),
+                        'ref_movimiento'      => $this->input->post('dreferencia'),
+                        'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
       $_GET['tipo'] = 'f';
       $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
     }

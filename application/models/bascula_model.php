@@ -302,7 +302,7 @@ class Bascula_model extends CI_Model {
       if ($basic_info === false)
       {
         $sql_res = $this->db
-          ->select("bc.*, c.nombre as calidad")
+          ->select("bc.*, c.nombre as calidad, c.cuenta_cpi")
           ->from("bascula_compra AS bc")
           ->join("calidades AS c", "c.id_calidad = bc.id_calidad", "inner")
           ->where("id_bascula", $data['info'][0]->id_bascula)
@@ -664,14 +664,17 @@ class Bascula_model extends CI_Model {
     return $response;
   }
 
-  public function cancelar_pago($id_pago)
+  public function cancelar_pago($id_pago, $delete=false)
   {
     $basculas = $this->db->query("SELECT id_bascula FROM bascula_pagos_basculas WHERE id_pago = {$id_pago}");
     foreach ($basculas->result() as $key => $value)
     {
       $this->db->update('bascula', array('accion' => 'sa'), "id_bascula = {$value->id_bascula}");
     }
-    $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
+    if($delete)
+      $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
+    else
+      $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
   }
 
 
