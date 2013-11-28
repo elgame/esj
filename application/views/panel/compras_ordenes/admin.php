@@ -163,12 +163,18 @@
                         );
                       }
 
-                      if ($orden->status === 'a')
+                      if ($orden->status === 'a' || $orden->status === 'f')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/imprimir/', array(
                           'params'   => 'id='.$orden->id_orden.'&p=true',
                           'btn_type' => 'btn-success',
                           'attrs' => array('target' => '_BLANK'))
+                        );
+
+                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/email/', array(
+                          'params'   => 'id='.$orden->id_orden,
+                          'btn_type' => '',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar el email al proveedor?', 'Ordenes de Compras', this); return false;"))
                         );
                       }
 
@@ -179,6 +185,17 @@
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la orden de compra?', 'Ordenes de Compras', this); return false;"))
                         );
+                      }
+
+                      echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/imprimir_recibo_faltantes/', array(
+                        'params'   => 'id='.$orden->id_orden.'&p=true',
+                        'btn_type' => 'btn-success',
+                        'attrs' => array('target' => '_BLANK'))
+                      );
+
+                      if ($orden->faltantes > 0)
+                      {
+                        echo '<a class="btn btn-info" href="'.base_url('panel/compras_ordenes/imprimir_recibo_faltantes/?id='.$orden->id_orden.'&p=true').'" target="_BLANK" title="Imprimir Recibo Faltantes"><i class="icon-print icon-white"></i> <span class="hidden-tablet">Faltantes</span></a>';
                       }
                     ?>
                   </td>

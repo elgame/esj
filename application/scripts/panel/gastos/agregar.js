@@ -47,15 +47,20 @@
         $("#proveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
 
-        $.get(base_url + 'panel/gastos/ajax_get_cuentas_proveedor?idp=' + ui.item.id, function(data) {
-          console.log(data);
-        }, 'json');
+        $.get(base_url + 'panel/gastos/ajax_get_cuentas_proveedor/?idp=' + ui.item.id, function(data) {
+          var htmlOptions = '';
+          for (var i in data) {
+            htmlOptions += '<option value="' + data[i].id_cuenta + '">' + data[i].full_alias + '</option>'
+          }
 
+          $('#fcuentas_proveedor').html(htmlOptions);
+        }, 'json');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#proveedor").css("background-color", "#FFD071");
         $("#proveedorId").val('');
+        $('#fcuentas_proveedor').html('');
       }
     });
 

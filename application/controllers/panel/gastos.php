@@ -103,6 +103,11 @@ class gastos extends MY_Controller {
       array('nombre' => 'Deposito', 'value' => 'deposito'),
     );
 
+    if (isset($_POST['proveedorId']))
+    {
+      $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_POST['proveedorId']);
+    }
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -120,6 +125,7 @@ class gastos extends MY_Controller {
     $this->load->model('gastos_model');
     $this->load->model('compras_model');
     $this->load->model('proveedores_model');
+    $this->load->model('empresas_model');
 
     $this->configUpdateXml();
     if ($this->form_validation->run() == FALSE)
@@ -134,7 +140,8 @@ class gastos extends MY_Controller {
     }
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
-    $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
 
     $this->load->view('panel/gastos/ver', $params);
   }
@@ -155,6 +162,7 @@ class gastos extends MY_Controller {
 
    public function ajax_get_cuentas_proveedor()
    {
+      $this->load->model('proveedores_model');
      //Cuentas del proeveedor
       $cuentas = $this->proveedores_model->getCuentas($_GET['idp']);
       echo json_encode($cuentas);
@@ -204,6 +212,10 @@ class gastos extends MY_Controller {
       array('field' => 'concepto',
             'label' => 'Concepto',
             'rules' => 'max_length[200]'),
+
+      array('field' => 'fcuentas_proveedor',
+            'label' => 'Cuenta Proveedor',
+            'rules' => ''),
 
       array('field' => 'subtotal',
             'label' => 'Subtotal',
