@@ -26,6 +26,14 @@
               <div class="span6">
 
                 <div class="control-group">
+                  <label class="control-label" for="empresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="empresa" class="span11" id="empresa" value="<?php echo set_value('empresa', $empresa_default->nombre_fiscal); ?>" autofocus>
+                    <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value('empresaId', $empresa_default->id_empresa); ?>">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dserie">Proveedor</label>
                   <div class="controls">
                     <div class="input-append span12">
@@ -97,7 +105,7 @@
               </div><!--/span6 -->
             </div><!--/row-fluid -->
 
-          <div class="row-fluid" id="group_pago_contado">
+          <div class="row-fluid" id="group_pago_contado" style="display: <?php echo isset($_POST['condicionPago']) ? ($_POST['condicionPago'] === 'cr' ? 'none' : 'block') : '' ?>;">
             <div class="span3">
               <div class="control-group">
                 <div class="controls span9">
@@ -142,7 +150,7 @@
                   <select name="fcuentas_proveedor" class="span12" id="fcuentas_proveedor">
                   <?php  foreach ($cuentas_proveedor as $key => $value) {
                   ?>
-                      <option value="<?php echo $value->id_cuenta; ?>"><?php echo $value->full_alias; ?></option>
+                      <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('fcuentas_proveedor', $value->id_cuenta) ?>><?php echo $value->full_alias; ?></option>
                   <?php
                   }?>
                   </select>

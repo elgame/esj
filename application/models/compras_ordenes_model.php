@@ -64,7 +64,8 @@ class compras_ordenes_model extends CI_Model {
                 co.id_autorizo, us.nombre AS autorizo,
                 co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
                 co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
-                co.autorizado
+                co.autorizado,
+                (SELECT SUM(faltantes) FROM compras_productos WHERE id_orden = co.id_orden) as faltantes
         FROM compras_ordenes AS co
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -1045,5 +1046,53 @@ class compras_ordenes_model extends CI_Model {
       case 11: return 'NOVIEMBRE'; break;
       case 12: return 'DICIEMBRE'; break;
     }
+  }
+
+  public function email($ordenId)
+  {
+    $this->load->model('proveedores_model');
+
+    $orden = $this->info($ordenId);
+    $proveedor = $this->proveedores_model->getProveedorInfo($orden['info'][0]->id_proveedor);
+
+    if ($proveedor['info']->email !== '')
+    {
+      // Si el proveedor tiene email asigando le envia la orden.
+      $this->load->library('my_email');
+
+      $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+      $nombreEmisor   = 'Empaque San Jorge';
+      $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
+      $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
+
+      $path = APPPATH . 'media/temp/';
+
+      $file = $this->print_orden_compra($ordenId, $path);
+
+      $datosEmail = array(
+        'correoEmisorEm' => $correoEmisorEm,
+        'correoEmisor'   => $correoEmisor,
+        'nombreEmisor'   => $nombreEmisor,
+        'contrasena'     => $contrasena,
+        'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
+        'altBody'        => 'Nueva orden de compra.',
+        'body'           => 'Nueva orden de compra.',
+        'correoDestino'  => array($proveedor['info']->email),
+        'nombreDestino'  => $proveedor['info']->nombre_fiscal,
+        'cc'             => '',
+        'adjuntos'       => array('ORDEN COMPRA' => $file)
+      );
+
+      $result = $this->my_email->setData($datosEmail)->send();
+      unlink($file);
+
+      $msg = 10;
+    }
+    else
+    {
+      $msg = 11;
+    }
+
+    return array('passes' => true, 'msg' => $msg);
   }
 }

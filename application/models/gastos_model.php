@@ -15,6 +15,7 @@ class gastos_model extends privilegios_model{
   {
     // datos del gasto.
     $datos = array(
+      'id_empresa'     => $data['empresaId'],
       'id_proveedor'   => $data['proveedorId'],
       'id_empleado'    => $this->session->userdata('id_usuario'),
       'serie'          => $data['serie'],

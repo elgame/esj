@@ -7,6 +7,7 @@ class gastos extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'gastos/ajax_get_cuentas_proveedor/'
   );
 
   public function _remap($method){
@@ -38,7 +39,7 @@ class gastos extends MY_Controller {
       array('general/keyjump.js'),
       array('general/msgbox.js'),
       // array('general/supermodal.js'),
-      array('panel/compras_ordenes/agregar.js'),
+      // array('panel/compras_ordenes/agregar.js'),
       array('panel/gastos/agregar.js')
     ));
 
@@ -77,6 +78,14 @@ class gastos extends MY_Controller {
       // }
     }
 
+    // Obtiene los datos de la empresa predeterminada.
+    $params['empresa_default'] = $this->db
+      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+      ->from("empresas AS e")
+      ->where("e.predeterminado", "t")
+      ->get()
+      ->row();
+
     $params['proveedores'] = $this->db->query(
       "SELECT p.id_proveedor, p.nombre_fiscal
         FROM proveedores p
@@ -93,8 +102,11 @@ class gastos extends MY_Controller {
       array('nombre' => 'Efectivo', 'value' => 'efectivo'),
       array('nombre' => 'Deposito', 'value' => 'deposito'),
     );
-    //Cuentas del proeveedor
-    // $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_GET['idp']);
+
+    if (isset($_POST['proveedorId']))
+    {
+      $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_POST['proveedorId']);
+    }
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -113,6 +125,7 @@ class gastos extends MY_Controller {
     $this->load->model('gastos_model');
     $this->load->model('compras_model');
     $this->load->model('proveedores_model');
+    $this->load->model('empresas_model');
 
     $this->configUpdateXml();
     if ($this->form_validation->run() == FALSE)
@@ -127,7 +140,8 @@ class gastos extends MY_Controller {
     }
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
-    $params['gasto'] = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
 
     $this->load->view('panel/gastos/ver', $params);
   }
@@ -140,11 +154,32 @@ class gastos extends MY_Controller {
     redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
   }
 
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+   public function ajax_get_cuentas_proveedor()
+   {
+      $this->load->model('proveedores_model');
+     //Cuentas del proeveedor
+      $cuentas = $this->proveedores_model->getCuentas($_GET['idp']);
+      echo json_encode($cuentas);
+   }
+
   public function configAddGasto()
   {
     $this->load->library('form_validation');
 
     $rules = array(
+      array('field' => 'empresaId',
+            'label' => 'Empresa',
+            'rules' => 'required'),
+      array('field' => 'empresa',
+            'label' => '',
+            'rules' => ''),
+
       array('field' => 'proveedorId',
             'label' => 'Proveedor',
             'rules' => 'required'),
@@ -177,6 +212,10 @@ class gastos extends MY_Controller {
       array('field' => 'concepto',
             'label' => 'Concepto',
             'rules' => 'max_length[200]'),
+
+      array('field' => 'fcuentas_proveedor',
+            'label' => 'Cuenta Proveedor',
+            'rules' => ''),
 
       array('field' => 'subtotal',
             'label' => 'Subtotal',

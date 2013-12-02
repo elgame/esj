@@ -112,6 +112,11 @@ class compras_model extends privilegios_model{
       // $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
       // $response['info']->empresa = $empresa['info'];
 
+      // Carga la info de la empresa.
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
+      $response['info']->empresa = $empresa['info'];
+
       // Carga la info del proveedor.
 			$this->load->model('proveedores_model');
 			$prov = $this->proveedores_model->getProveedorInfo($response['info']->id_proveedor);

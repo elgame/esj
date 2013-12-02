@@ -384,6 +384,15 @@ class compras_ordenes extends MY_Controller {
     }
   }
 
+  public function email()
+  {
+    $this->load->model('compras_ordenes_model');
+
+    $response = $this->compras_ordenes_model->email($_GET['id']);
+
+    redirect(base_url('panel/compras_ordenes/?msg=' . $response['msg']));
+  }
+
   public function imprimir_recibo_faltantes()
   {
     $this->load->model('compras_ordenes_model');
@@ -690,6 +699,14 @@ class compras_ordenes extends MY_Controller {
       case 9:
         $txt = 'La compra se agrego correctamente.';
         $icono = 'success';
+      break;
+      case 10:
+        $txt = 'El email se envio correctamente.';
+        $icono = 'success';
+      break;
+      case 11:
+        $txt = 'El email no se pudo enviar porque el proveedor no cuenta con un email.';
+        $icono = 'error';
       break;
 
       case 30:
