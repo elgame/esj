@@ -36,8 +36,8 @@
 											maxlength="25" placeholder="Folio pallet" readonly data-next="fcajas">
 									</div>
 
-									<div class="span3">
-									  <label class="span4" for="fcajas">Cajas del pallet </label>
+									<div class="span2">
+									  <label class="span5" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo (isset($data->no_cajas)? $data->no_cajas: ''); ?>" 
 											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fcliente">
 									</div>
@@ -45,13 +45,19 @@
 									<div class="span3">
 									  <label class="span3" for="fcliente">Cliente </label>
 										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo (isset($info['cliente']->nombre_fiscal)? $info['cliente']->nombre_fiscal: ''); ?>" 
-											maxlength="25" placeholder="Cliente" data-next="fclasificacion">
+											maxlength="25" placeholder="Cliente" data-next="fkilos">
 										<input type="hidden" name="fid_cliente" value="<?php echo (isset($info['cliente']->id_cliente)? $info['cliente']->id_cliente: ''); ?>" id="fid_cliente" class="getjsval">
+									</div>
+
+									<div class="span2">
+									  <label class="span3" for="fkilos">Kilos </label>
+										<input type="text" name="fkilos" id="fkilos" class="span7 vpos-int" value="<?php echo (isset($data->kilos_pallet)? $data->kilos_pallet: ''); ?>" 
+											maxlength="25" placeholder="Kilos" required data-next="fhojaspapel">
 									</div>
 
 									<div class="span3"><?php $no_hojas = (isset($data->no_hojas)? intval($data->no_hojas): 0); ?>
 									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
-									  <select name="fhojaspapel" id="fhojaspapel" class="span9">
+									  <select name="fhojaspapel" id="fhojaspapel" class="span8" data-next="fclasificacion">
 									  	<option value="0" <?php echo set_select('fhojaspapel', 0, false, $no_hojas); ?>>Sin papel</option>
 									  	<option value="2" <?php echo set_select('fhojaspapel', 2, false, $no_hojas); ?>>2 Hojas</option>
 									  	<option value="4" <?php echo set_select('fhojaspapel', 4, false, $no_hojas); ?>>4 Hojas</option>
@@ -124,25 +130,27 @@
 										 <?php
 										 $total_cajas_sel = 0;
 										 if(isset($info['rendimientos'])){
-										 		foreach ($info['rendimientos'] as $key => $value) {
+										 	foreach ($info['rendimientos'] as $key => $value) {
+										 		$idrow = $value->id_rendimiento.'_'.$value->id_unidad.'_'.$value->id_calibre.'_'.$value->id_etiqueta.'_'.$value->id_clasificacion.'_'.$value->id_size;
 										 ?>
-										 		<tr id="row_rendsel<?php echo $value->id_rendimiento; ?>_<?php echo $value->id_clasificacion; ?>">
-								          <td class="fecha"><?php echo $value->fecha; ?></td>
-								          <td class="lote"><?php echo $value->lote; ?></td>
-								          <td class="clsif"><?php echo $value->nombre; ?></td>
-								          <td class="mas"><?php echo $value->unidad.'|'.$value->calibre.'|'.$value->etiqueta; ?></td>
-								          <td><input type="number" class="span12 cajasel" name="rendimientos[]" value="<?php echo $value->cajas; ?>" min="1" max="<?php echo $value->cajas; ?>"></td>
-								          <td><input type="hidden" name="idrendimientos[]" value="<?php echo $value->id_rendimiento; ?>">
-											<input type="hidden" name="idclasificacion[]" value="<?php echo $value->id_clasificacion; ?>">
-											<input type="hidden" name="idunidad[]" value="<?php echo $value->id_unidad; ?>">
-											<input type="hidden" name="idcalibre[]" value="<?php echo $value->id_calibre; ?>">
-											<input type="hidden" name="idetiqueta[]" value="<?php echo $value->id_etiqueta; ?>">
+										 	<tr id="row_rendsel<?php echo $idrow; ?>">
+												<td class="fecha"><?php echo $value->fecha; ?></td>
+												<td class="lote"><?php echo $value->lote; ?></td>
+												<td class="clsif"><?php echo $value->nombre; ?></td>
+												<td class="mas"><?php echo $value->unidad.'|'.$value->calibre.'|'.$value->etiqueta; ?></td>
+												<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="<?php echo $value->cajas; ?>" min="1" max="<?php echo $value->cajas; ?>"></td>
+												<td><input type="hidden" name="idrendimientos[]" value="<?php echo $value->id_rendimiento; ?>">
+													<input type="hidden" name="idclasificacion[]" value="<?php echo $value->id_clasificacion; ?>">
+													<input type="hidden" name="idunidad[]" value="<?php echo $value->id_unidad; ?>">
+													<input type="hidden" name="idcalibre[]" value="<?php echo $value->id_calibre; ?>">
+													<input type="hidden" name="idetiqueta[]" value="<?php echo $value->id_etiqueta; ?>">
+													<input type="hidden" name="idsize[]" value="<?php echo $value->id_size; ?>">
 
-								             <buttom class="btn btn-danger remove_cajassel" data-idrow="<?php echo $value->id_rendimiento; ?>_<?php echo $value->id_clasificacion; ?>"><i class="icon-remove"></i></buttom></td>
-								        </tr>
+													 <buttom class="btn btn-danger remove_cajassel" data-idrow="<?php echo $idrow; ?>"><i class="icon-remove"></i></buttom></td>
+											</tr>
 							       <?php 
-							       			$total_cajas_sel += $value->cajas;
-							       		}
+							       				$total_cajas_sel += $value->cajas;
+							       			}
 							     		} 
 							     		?>
 										  </tbody>

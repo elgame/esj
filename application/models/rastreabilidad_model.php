@@ -9,11 +9,27 @@ class rastreabilidad_model extends CI_Model {
 
   public function saveClasificacion()
   {
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($_POST['id_calibre']))
+    {
+      $this->load->model('calibres_model');
+      $data_calibre        = $this->calibres_model->addCalibre($_POST['fcalibre']);
+      $_POST['id_calibre'] = $data_calibre['id'];
+    }
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($_POST['id_size']))
+    {
+      $this->load->model('calibres_model');
+      $data_size        = $this->calibres_model->addCalibre($_POST['fsize']);
+      $_POST['id_size'] = $data_calibre['id'];
+    }
+
     $data = array(
       'id_rendimiento'   => $_POST['id_rendimiento'],
       'id_clasificacion' => $_POST['id_clasificacion'],
       'id_unidad'        => $_POST['id_unidad'],
       'id_calibre'       => $_POST['id_calibre'],
+      'id_size'          => $_POST['id_size'],
       'id_etiqueta'      => $_POST['id_etiqueta'],
       'existente'        => $_POST['existente'],
       'kilos'            => $_POST['kilos'],
@@ -49,9 +65,25 @@ class rastreabilidad_model extends CI_Model {
    */
   public function editClasificacion()
   {
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($_POST['id_calibre']))
+    {
+      $this->load->model('calibres_model');
+      $data_calibre        = $this->calibres_model->addCalibre($_POST['fcalibre']);
+      $_POST['id_calibre'] = $data_calibre['id'];
+    }
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($_POST['id_size']))
+    {
+      $this->load->model('calibres_model');
+      $data_size        = $this->calibres_model->addCalibre($_POST['fsize']);
+      $_POST['id_size'] = $data_calibre['id'];
+    }
+
     $data = array(
       'id_unidad'        => $_POST['id_unidad'],
       'id_calibre'       => $_POST['id_calibre'],
+      'id_size'          => $_POST['id_size'],
       'id_etiqueta'      => $_POST['id_etiqueta'],
 
       'existente'        => $_POST['existente'],
@@ -268,12 +300,13 @@ class rastreabilidad_model extends CI_Model {
           "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.kilos, rrc.linea1, rrc.linea2,
                   rrc.total, rrc.rendimiento, cl.nombre as clasificacion, 
                   u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre, 
-                  e.id_etiqueta, e.nombre AS etiqueta
+                  e.id_etiqueta, e.nombre AS etiqueta, cas.id_calibre AS id_size, cas.nombre AS size
           FROM rastria_rendimiento_clasif AS rrc
             INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
             LEFT JOIN unidades AS u ON u.id_unidad = rrc.id_unidad 
             LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre 
             LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta 
+            LEFT JOIN calibres AS cas ON cas.id_calibre = rrc.id_size 
           WHERE
             rrc.id_rendimiento = {$id_rendimiento}
           ORDER BY (rrc.id_rendimiento, cl.nombre, u.nombre, ca.nombre, e.nombre) ASC
@@ -773,11 +806,13 @@ class rastreabilidad_model extends CI_Model {
         $x = $key % 2 === 0 ? 1 : 108;
         $y = $key === 0 || $key === 1 ? 25 : 130;
 
-        $kilos = $this->db->select('SUM(kilos_neto) AS kilos')
+        $kilos = floatval(
+          $this->db->select('SUM(kilos_neto) AS kilos')
           ->from('bascula')
           ->where("DATE(fecha_bruto) = '{$lote['info']->fecha}'")
           ->where("no_lote = {$lote['info']->lote}")
-          ->get()->row()->kilos;
+          ->get()->row()->kilos
+          );
 
         $fecha = new DateTime($lote['info']->fecha);
 
@@ -789,12 +824,13 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(107));
         $pdf->SetFillColor(200,200,200);
-        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '  ' . $lote['info']->lote), true);
+        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '-' . $lote['info']->lote), true);
         $pdf->SetX($x);
         $pdf->SetAligns(array('L', 'C', 'C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 11, 12, 12, 12, 10));
         $pdf->Row(array('CLASIF.', 'EXIST', 'LINEA1', 'LINEA2', 'TOTAL', 'RD'), true);
 
+        $kilos_reales = 0;
         foreach ($lote['clasificaciones'] as $key2 => $clasifi)
         {
           if ($key2 < 13)
@@ -812,6 +848,7 @@ class rastreabilidad_model extends CI_Model {
               $clasifi->total,
               $clasifi->rendimiento,
             ), false);
+            $kilos_reales += $clasifi->kilos;
           }
           else
           {
@@ -819,10 +856,10 @@ class rastreabilidad_model extends CI_Model {
           }
         }
 
-        $pdf->SetXY($x + 61, $y + 17);
+        $pdf->SetXY($x + 56, $y + 17);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFillColor(200,200,200);
-        $pdf->Cell(45, 4, "Kilos: {$kilos}", 0, 0, 'R', 1);
+        $pdf->Cell(50, 4, "Kilos=> E:{$kilos} | S:{$kilos_reales}", 0, 0, 'R', 1);
 
       }
 

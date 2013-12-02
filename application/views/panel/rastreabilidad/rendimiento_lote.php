@@ -82,6 +82,7 @@
                     <th>CLASIFICACIÓN</th>
                     <th style="width:110px;">UNIDAD</th>
                     <th style="width:55px;">CALIBRE</th>
+                    <th style="width:55px;">SIZE</th>
                     <th style="width:110px;">ETIQUETA</th>
                     <th style="width:55px;">KILOS</th>
                     <th style="width:55px;">EXISTENTE</th>
@@ -107,6 +108,10 @@
                       <td>
                         <input type="text" id="fcalibre" value="<?php echo $c->calibre ?>" class="span12">
                         <input type="hidden" id="fidcalibre" value="<?php echo $c->id_calibre ?>" class="span12">
+                      </td>
+                      <td>
+                        <input type="text" id="fsize" value="<?php echo $c->size ?>" class="span12">
+                        <input type="hidden" id="fidsize" value="<?php echo $c->id_size ?>" class="span12">
                       </td>
                       <td>
                         <input type="text" id="fetiqueta" value="<?php echo $c->etiqueta ?>" class="span12">
@@ -151,6 +156,10 @@
                     <td>
                       <input type="text" id="fcalibre" value="" class="span12">
                       <input type="hidden" id="fidcalibre" value="" class="span12">
+                    </td>
+                    <td>
+                      <input type="text" id="fsize" value="" class="span12">
+                      <input type="hidden" id="fidsize" value="" class="span12">
                     </td>
                     <td>
                       <input type="text" id="fetiqueta" value="" class="span12">

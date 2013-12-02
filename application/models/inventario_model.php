@@ -12,7 +12,7 @@ class inventario_model extends privilegios_model{
    * @return
 	 */
 	public function getEPUData()
-  {
+  	{
 		$sql = '';
 
 		//Filtros para buscar
@@ -44,7 +44,7 @@ class inventario_model extends privilegios_model{
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co 
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-				WHERE co.status IN ('a','f','n') AND co.tipo_orden = 'p' AND Date(co.fecha_aceptacion) <= '{$fecha}'
+				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) <= '{$fecha}'
 				GROUP BY cp.id_producto 
 			) AS co ON co.id_producto = p.id_producto
 			LEFT JOIN 
@@ -322,11 +322,11 @@ class inventario_model extends privilegios_model{
 		FROM 
 			(
 				(
-				SELECT cp.id_producto, cp.num_row, co.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+				SELECT cp.id_producto, cp.num_row, cp.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
 				FROM compras_ordenes AS co 
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-				WHERE cp.id_producto = {$id_producto} AND co.status IN ('a','f','n') 
-					AND co.tipo_orden = 'p' AND Date(co.fecha_aceptacion) <= '{$fecha2}'
+				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a' 
+					AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
 				)
 				UNION
 				(
@@ -354,7 +354,7 @@ class inventario_model extends privilegios_model{
 
 				$row['saldo'][0] = $value->cantidad+$result[$key]['saldo'][0];
 				$row['saldo'][2] = $row['entrada'][2]+$result[$key]['saldo'][2];
-				$row['saldo'][1] = $row['saldo'][2]/$row['saldo'][0];
+				$row['saldo'][1] = $row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
 			}else
 			{
 				$row['salida'][0] = $value->cantidad;

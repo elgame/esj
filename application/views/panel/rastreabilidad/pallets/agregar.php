@@ -34,8 +34,8 @@
 											maxlength="25" placeholder="Folio pallet" readonly data-next="fcajas">
 									</div>
 
-									<div class="span3">
-									  <label class="span4" for="fcajas">Cajas del pallet </label>
+									<div class="span2">
+									  <label class="span5" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo set_value('fcajas'); ?>" 
 											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fcliente">
 									</div>
@@ -43,13 +43,19 @@
 									<div class="span3">
 									  <label class="span3" for="fcliente">Cliente </label>
 										<input type="text" name="fcliente" id="fcliente" class="span9" value="<?php echo set_value('fcliente'); ?>" 
-											maxlength="25" placeholder="Cliente" data-next="fhojaspapel">
+											maxlength="25" placeholder="Cliente" data-next="fkilos">
 										<input type="hidden" name="fid_cliente" value="<?php echo set_value('fid_cliente'); ?>" id="fid_cliente" class="getjsval">
+									</div>
+
+									<div class="span2">
+									  <label class="span3" for="fkilos">Kilos </label>
+										<input type="text" name="fkilos" id="fkilos" class="span7 vpos-int" value="<?php echo set_value('fkilos'); ?>" 
+											maxlength="25" placeholder="Kilos" required data-next="fhojaspapel">
 									</div>
 
 									<div class="span3">
 									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
-									  <select name="fhojaspapel" id="fhojaspapel" class="span9">
+									  <select name="fhojaspapel" id="fhojaspapel" class="span9" data-next="fclasificacion">
 									  	<option value="0" <?php echo set_select('fhojaspapel', 0); ?>>Sin papel</option>
 									  	<option value="2" <?php echo set_select('fhojaspapel', 2); ?>>2 Hojas</option>
 									  	<option value="4" <?php echo set_select('fhojaspapel', 4); ?>>4 Hojas</option>

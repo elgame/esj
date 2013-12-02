@@ -16,6 +16,8 @@
     autocompleteCalibreLive();
     autocompleteEtiqueta();
     autocompleteEtiquetaLive();
+    autocompleteSize();
+    autocompleteSizeLive();
 
     $('#box-content').keyJump();
 
@@ -305,6 +307,52 @@
     }
   };
 
+  //Autocomplete Size
+  var autocompleteSize = function () {
+    $("input#fsize").autocomplete({
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      minLength: 1,
+      selectFirst: true,
+      select: funcAutocompleteSize
+    }).keydown(funcAutocompleteSizeKey);
+  };
+  // Autocomplete Size live
+  var autocompleteSizeLive = function () {
+    $("#tableClasif").on("focus", 'input#fsize:not(.ui-autocomplete-input)', function (event) {
+        $(this).autocomplete({
+          source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+          minLength: 1,
+          selectFirst: true,
+          select: funcAutocompleteSize
+        }).keydown(funcAutocompleteSizeKey);
+    });
+  };
+  var funcAutocompleteSize = function( event, ui ) {
+    var $lote = $('#glote'), // Obj Select lotes
+        $tr = $(this).parent().parent(), // tr padre
+        $prevLote; // Almacena un obj option
+
+    // Si la clasificacion que se esta agregando no existe
+    // idUnidad, idCalibre, idEtiqueta
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val() )) {
+      $tr.find("#fidsize").val(ui.item.id); // Asigna el id al input
+      $tr.find("#fsize").val(ui.item.label).css({'background-color': '#99FF99'});
+    } else {
+      $tr.find("#fidsize").val("");
+      $tr.find("#fsize").val("");
+
+      noty({"text": 'El Size que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
+    }
+  };
+  var funcAutocompleteSizeKey = function(e){
+    var $tr = $(this).parent().parent(); // tr padre
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      // $tr.find('#fidsize').val('');
+      $(this).parent().parent().find('#fidsize').val('');
+    }
+  };
+
   //Autocomplete Etiqueta
   var autocompleteEtiqueta = function () {
     $("input#fetiqueta").autocomplete({
@@ -387,6 +435,7 @@
     postData.id_clasificacion = $tr.find('#fidclasificacion').val();
     postData.id_unidad        = $tr.find('#fidunidad').val();
     postData.id_calibre       = $tr.find('#fidcalibre').val();
+    postData.id_size          = $tr.find('#fidsize').val();
     postData.id_etiqueta      = $tr.find('#fidetiqueta').val();
     postData.existente        = $tr.find('#fexistente').val();
     postData.kilos            = $tr.find('#fkilos').val();
@@ -394,9 +443,12 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
+    
+    postData.fcalibre         = $tr.find('#fcalibre').val();
+    postData.fsize            = $tr.find('#fsize').val();
 
-    if (postData.id_clasificacion != '' && postData.id_unidad != '' && postData.id_calibre != ''
-       && postData.id_etiqueta != '') {
+    if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
+       && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
       $.post(base_url + 'panel/rastreabilidad/ajax_save_clasifi/', postData, function(data) {
         $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
 
@@ -408,7 +460,7 @@
       });
     } else {
       $tr.find('#fclasificacion').focus();
-      noty({"text": 'Seleccione una clasificación, unidad, calibre y etiqueta', "layout":"topRight", "type": 'error'});
+      noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
     }
   };
 
@@ -420,6 +472,7 @@
     postData.id_clasificacion = $tr.find('#fidclasificacion').val();
     postData.id_unidad        = $tr.find('#fidunidad').val();
     postData.id_calibre       = $tr.find('#fidcalibre').val();
+    postData.id_size          = $tr.find('#fidsize').val();
     postData.id_etiqueta      = $tr.find('#fidetiqueta').val();
     postData.existente        = $tr.find('#fexistente').val();
     postData.kilos            = $tr.find('#fkilos').val();
@@ -428,8 +481,11 @@
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
 
-    if (postData.id_clasificacion != '' && postData.id_unidad != '' && postData.id_calibre != ''
-       && postData.id_etiqueta != '') {
+    postData.fcalibre         = $tr.find('#fcalibre').val();
+    postData.fsize            = $tr.find('#fsize').val();
+
+    if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
+       && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
       $.post(base_url + 'panel/rastreabilidad/ajax_edit_clasifi/', postData, function(data) {
 
         noty({"text": 'La clasificacion se modifico correctamente!', "layout":"topRight", "type": 'success'});
@@ -442,7 +498,7 @@
       });
       // console.log($tr.next().find('#fclasificacion').focus());
     } else {
-      noty({"text": 'Seleccione una clasificación, unidad, calibre y etiqueta', "layout":"topRight", "type": 'error'});
+      noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
     }
   };
 
@@ -506,6 +562,10 @@
                 '<td>'+
                   '<input type="text" id="fcalibre" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidcalibre" value="" class="span12">'+
+                '</td>'+
+                '<td>'+
+                  '<input type="text" id="fsize" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="hidden" id="fidsize" value="" class="span12">'+
                 '</td>'+
                 '<td>'+
                   '<input type="text" id="fetiqueta" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

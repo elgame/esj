@@ -24,16 +24,17 @@ class calibres_model extends CI_Model {
 
   public function addCalibre($nombre)
   {
+    $nombre = str_replace(' ', '', $nombre);
     $existe = $this->db->query(
-      "SELECT COUNT(id_calibre) as total
+      "SELECT id_calibre
        FROM calibres
        WHERE nombre = '{$nombre}'")
       ->result();
 
-    if (floatval($existe[0]->total) > 0)
+    if (count($existe) > 0)
     {
+      $id = $existe[0]->id_calibre;
       $existe = true;
-      $id = null;
     }
     else
     {

@@ -143,14 +143,14 @@ var addpallets = (function($){
 
   function addCajaSel(){
     var vthis = $(this), idrow = "#row_rend"+vthis.attr("data-id"), html;
-    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel),
+    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id"), tbodysel),
         //ids = id_rendimiento, id_unidad, id_calibre, id_etiqueta
         ids = vthis.attr("data-id").split('_');
 
     if(parseInt(total_cajas_sel.text()) < parseInt(fcajas.val()) ) 
     {
       if(row_rendsel.length == 0){
-        html = '<tr id="row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'">'+
+        html = '<tr id="row_rendsel'+vthis.attr("data-id")+'">'+
             '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
             '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
             '<td class="clsif">'+fclasificacion.val()+'</td>'+
@@ -161,13 +161,19 @@ var addpallets = (function($){
             '   <input type="hidden" name="idunidad[]" value="'+ids[1]+'">'+
             '   <input type="hidden" name="idcalibre[]" value="'+ids[2]+'">'+
             '   <input type="hidden" name="idetiqueta[]" value="'+ids[3]+'">'+
+            '   <input type="hidden" name="idsize[]" value="'+ids[5]+'">'+
 
-            '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'_'+fid_clasificacion.val()+'"><i class="icon-remove"></i></buttom></td>'+
+            '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'"><i class="icon-remove"></i></buttom></td>'+
           '</tr>';
         tbodysel.append(html);
-        row_rendsel = $('#row_rendsel'+vthis.attr("data-id")+'_'+fid_clasificacion.val(), tbodysel);
+        row_rendsel = $('#row_rendsel'+vthis.attr("data-id"), tbodysel);
       }else{
-          $(".cajasel", row_rendsel).val( calcRestaCajasSel($(idrow+" .libres").text()) );
+          var cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + parseInt($(idrow+" .libres").text());
+          if( cajas_agregadas > parseInt(vthis.attr("data-totales")) )
+            cajas_agregadas = parseInt(vthis.attr("data-totales"));
+          cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + calcRestaCajasSel(cajas_agregadas);
+
+          $(".cajasel", row_rendsel).val( cajas_agregadas ).attr('max', cajas_agregadas);;
       }
       calculaCajasSel();
     }else
@@ -203,7 +209,7 @@ var addpallets = (function($){
       var html = '', idrow;
       if (resp.rendimientos.length > 0) {
         for (var i = 0; i < resp.rendimientos.length; i++) {
-          idrow = resp.rendimientos[i].id_rendimiento+'_'+resp.rendimientos[i].id_unidad+'_'+resp.rendimientos[i].id_calibre+'_'+resp.rendimientos[i].id_etiqueta;
+          idrow = resp.rendimientos[i].id_rendimiento+'_'+resp.rendimientos[i].id_unidad+'_'+resp.rendimientos[i].id_calibre+'_'+resp.rendimientos[i].id_etiqueta+'_'+resp.rendimientos[i].id_clasificacion+'_'+resp.rendimientos[i].id_size;
           html += '<tr id="row_rend'+idrow+'">'+
             '<td class="fecha">'+resp.rendimientos[i].fecha+'</td>'+
             '<td class="lote">'+resp.rendimientos[i].lote+'</td>'+
@@ -214,7 +220,7 @@ var addpallets = (function($){
 
             '<td class="libres">'+resp.rendimientos[i].libres+'</td>'+
             '<td><buttom class="btn rendimientos cajasdisponibles"'+ 
-            '  data-id="'+idrow+'" data-libres="'+resp.rendimientos[i].libres+'"><i class="icon-angle-right"></i></buttom></td>'+
+            '  data-id="'+idrow+'" data-libres="'+resp.rendimientos[i].libres+'" data-totales="'+resp.rendimientos[i].rendimiento+'"><i class="icon-angle-right"></i></buttom></td>'+
           '</tr>';
         };
         tbody.html(html);
