@@ -12,7 +12,6 @@
     </ul>
   </div>
 
-
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
@@ -127,6 +126,7 @@
                 <div class="controls">
                   <div class="input-append">
                     <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                    <button type="button" class="btn btn-info" id="show-pallets">Ver Pallets</button>
                   </div>
                 </div>
               </div>
@@ -269,7 +269,7 @@
                 </thead>
                 <tbody>
                   <?php
-                        if (isset($borrador))
+                        if (isset($borrador) && ! isset($_POST['prod_did_prod']))
                         {
                           foreach ($borrador['productos'] as $key => $p) {
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
@@ -282,7 +282,7 @@
                             $_POST['prod_diva_total'][$key]         = $p->iva;
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
-                            $_POST['pallet_id'][$key]               = $p->id_pallet;
+                            $_POST['pallets_id'][$key]               = $p->ids_pallets;
                             $_POST['prod_dmedida_id'][$key]        = $p->id_unidad;
                           }
                         } ?>
@@ -290,11 +290,11 @@
                         <?php if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
                             if ($_POST['prod_importe'][$k] != 0) { ?>
-                              <tr data-pallet="<?php echo $_POST['pallet_id'][$k] ?>">
+                              <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
-                                  <input type="hidden" name="pallet_id[]" value="<?php echo $_POST['pallet_id'][$k] ?>" id="pallet_id" class="span12">
+                                  <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
                                 </td>
                                 <td>
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
@@ -339,11 +339,11 @@
                                 </td>
                               </tr>
                         <?php }}} ?>
-                  <tr data-pallet="">
+                  <tr data-pallets="">
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
-                      <input type="hidden" name="pallet_id[]" value="" id="pallet_id" class="span12">
+                      <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
                     </td>
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
@@ -391,6 +391,17 @@
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div id="pallets-selected">
+            <?php
+              if (isset($_POST['palletsIds'])) {
+                foreach ($_POST['palletsIds'] as $palletId) { ?>
+                <input type="text" value="<?php echo $palletId ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $palletId ?>">
+            <?php }} else  if (isset($borrador) && count($borrador['pallets']) > 0) {
+                foreach ($borrador['pallets'] as $pallet) { ?>
+                  <input type="text" value="<?php echo $pallet->id_pallet ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $pallet->id_pallet ?>">
+            <?php }} ?>
           </div>
 
           <div class="row-fluid">
@@ -448,6 +459,40 @@
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
+
+  <!-- Modal -->
+  <div id="modal-pallets" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Pallets del Cliente</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-pallets-cliente">
+          <thead>
+            <tr>
+              <th></th>
+              <th># Folio</th>
+              <th>Cajas</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <th><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></th>
+              <th>9</th>
+              <th>100</th>
+              <th>2013-10-22</th>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddClientePallets">Agregar Pallets</button>
+    </div>
+  </div><!--/modal pallets -->
 
 </div>
 

@@ -19,6 +19,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clientes/',
     'facturacion/ajax_get_pallet_folio/',
     'facturacion/ajax_get_unidades/',
+    'facturacion/ajax_get_pallets_cliente/',
 
     'facturacion/xml/'
   );
@@ -892,6 +893,18 @@ class facturacion extends MY_Controller {
 
     echo json_encode($unidades);
    }
+
+   /**
+    * Obtiene listado de los pallets que tiene un cliente.
+    */
+  public function ajax_get_pallets_cliente()
+  {
+    $this->load->model('facturacion_model');
+
+    $response = $this->facturacion_model->palletsCliente($_GET['id']);
+
+    echo json_encode($response);
+  }
 
   /*
    |-------------------------------------------------------------------------

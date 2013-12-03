@@ -107,7 +107,7 @@ class facturacion_model extends privilegios_model{
 
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.id_pallet,
+                fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
@@ -116,6 +116,14 @@ class facturacion_model extends privilegios_model{
         ->get();
 
       $response['productos'] = $res->result();
+
+      $response['pallets'] = array();
+      $res = $this->db
+        ->select('id_pallet')
+        ->from('facturacion_pallets')
+        ->where('id_factura = ' . $idFactura)
+        ->get();
+      $response['pallets'] = $res->result();
 
 			return $response;
 		}else
@@ -315,9 +323,6 @@ class facturacion_model extends privilegios_model{
         $traslado11 = 0; // Total de traslado 11%
         $traslado16 = 0; // Total de traslado 16%
 
-        $pallets = array(); // Ids de los pallets cargados en la factura.
-        $lastPalletId = 0;
-
         // Ciclo para obtener los impuestos traslados, tambien construye
         // los datos de  los productos a insertar tanto en la cadena original como
         // en la factura.
@@ -354,26 +359,23 @@ class facturacion_model extends privilegios_model{
               'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-              'id_pallet'       => $_POST['pallet_id'][$key] !== '' ? $_POST['pallet_id'][$key] : null,
+              'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
             );
-
-            if ($_POST['pallet_id'][$key] != '')
-            {
-              if ($_POST['pallet_id'][$key] != $lastPalletId)
-              {
-                $pallets[] = array(
-                  'id_factura' => $idFactura,
-                  'id_pallet'  => $_POST['pallet_id'][$key]
-                );
-                $lastPalletId = $_POST['pallet_id'][$key];
-              }
-            }
-
           }
         }
 
         if (count($productosFactura) > 0)
           $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+        $pallets = array(); // Ids de los pallets cargados en la factura.
+        // Crea el array de los pallets a insertar.
+        foreach ($_POST['palletsIds'] as $palletId)
+        {
+          $pallets[] = array(
+            'id_factura' => $idFactura,
+            'id_pallet'  => $palletId
+          );
+        }
 
         if (count($pallets) > 0)
           $this->db->insert_batch('facturacion_pallets', $pallets);
@@ -1968,16 +1970,16 @@ class facturacion_model extends privilegios_model{
           {
             if($key > 0) $pdf->AddPage();
 
-            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->SetFont('Arial', 'B', 8);
             $pdf->SetTextColor(0, 0, 0);
             $pdf->SetFillColor(242, 242, 242);
             $pdf->SetX(0);
             $pdf->SetAligns($aligns);
             $pdf->SetWidths($widths);
-            $pdf->Row($header, true);
+            $pdf->Row($header, true, true, null, 2, 1);
           }
 
-          $pdf->SetFont('Arial', '', 10);
+          $pdf->SetFont('Arial', '', 8);
           $pdf->SetTextColor(0,0,0);
 
           $pdf->SetX(0);
@@ -1989,7 +1991,7 @@ class facturacion_model extends privilegios_model{
             $item[0]['descripcion'],
             String::formatoNumero($item[0]['valorUnitario'], 3),
             String::formatoNumero($item[0]['importe'], 3),
-          ), false);
+          ), false, true, null, 2, 1);
         }
 
         /////////////
@@ -2232,4 +2234,31 @@ class facturacion_model extends privilegios_model{
         else
           $pdf->Output('Factura', 'I');
     }
+
+  public function palletsCliente($clienteId)
+  {
+    $query = $this->db->query(
+      "SELECT rp.*,
+              (SELECT count(f.id_factura)
+               FROM facturacion AS f
+               INNER JOIN facturacion_pallets AS fp ON fp.id_factura = f.id_factura
+               WHERE f.status != 'ca' AND f.status != 'b' AND fp.id_pallet = rp.id_pallet) AS existe
+       FROM rastria_pallets AS rp
+       WHERE id_cliente = {$_GET['id']} AND (SELECT count(f.id_factura) FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON fp.id_factura = f.id_factura WHERE f.status != 'ca' AND f.status != 'b' AND fp.id_pallet = rp.id_pallet) = 0"
+    );
+
+    $palletsInfo = array();
+    if ($query->num_rows() > 0)
+    {
+      $this->load->model('rastreabilidad_pallets_model');
+      $pallets = $query->result();
+
+      foreach ($pallets as $pallet)
+      {
+        $palletsInfo[] = $this->rastreabilidad_pallets_model->getInfoPallet($pallet->id_pallet);
+      }
+    }
+
+    return $palletsInfo;
+  }
 }
