@@ -309,8 +309,7 @@ class documentos_model extends CI_Model {
                 rp.no_cajas AS cajas,
                 rp.kilos_pallet,
                 string_agg(clasi.nombre::text, ', '::text) AS clasificaciones,
-                cali.calibres,
-                string_agg(eti.etiquetas::text, ', '::text) AS etiquetas
+                cali.calibres
 
          FROM facturacion_doc_embarque_pallets fep
 
@@ -323,14 +322,6 @@ class documentos_model extends CI_Model {
             GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
             ORDER BY rpr.id_pallet
          ) AS clasi ON clasi.id_pallet = fep.id_pallet
-
-         LEFT JOIN (
-             SELECT rpr.id_pallet, et.nombre as etiquetas
-             FROM rastria_pallets_rendimiento rpr
-             INNER JOIN etiquetas et ON rpr.id_etiqueta = et.id_etiqueta
-             GROUP BY rpr.id_pallet, rpr.id_etiqueta, et.nombre
-             ORDER BY rpr.id_pallet
-          ) AS eti ON eti.id_pallet = fep.id_pallet
 
         LEFT JOIN (
             SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
@@ -1256,7 +1247,7 @@ class documentos_model extends CI_Model {
         {
           if ($pallet->no_posicion == $i)
           {
-            $marca         = $pallet->id_pallet != null ? $pallet->etiquetas : $pallet->descripcion;
+            $marca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
             $clasificacion = $pallet->clasificaciones;
             $calibres      = $pallet->calibres;
             $cajas         = $pallet->cajas;

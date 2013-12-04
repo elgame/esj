@@ -412,6 +412,7 @@
 
               noPosicion,
               idPallet        = '',
+              etiquetas       = '',
               clasificaciones = '',
               cajas           = 0;
 
@@ -424,12 +425,14 @@
           $totalKilosPallet = $('#kilos-pallets');
 
           idPallet        = $draggable.attr('data-id-pallet');
+          etiquetas       = $draggable.attr('data-etiquetas');
           clasificaciones = $draggable.attr('data-clasificaciones');
           calibres        = $draggable.attr('data-calibres');
           cajas           = $draggable.attr('data-cajas');
           kilosPallet     = $draggable.attr('data-kilos-pallet');
 
           $tableDETr.find('#pid_pallet').val(idPallet);
+          $tableDETr.find('#pmarca').val(etiquetas);
           $tableDETr.find('#pclasificacion').val(clasificaciones);
           $tableDETr.find('#pcalibres').val(calibres);
           $tableDETr.find('#pcajas').val(cajas);
@@ -461,6 +464,7 @@
             $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
 
             $tableDETr.find('#pid_pallet').val('');
+            $tableDETr.find('#pmarca').val('SAN JORGE');
             $tableDETr.find('#pclasificacion').val('');
             $tableDETr.find('#pcalibres').val('');
             $tableDETr.find('#pcajas').val('');

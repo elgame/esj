@@ -142,7 +142,7 @@
               <tr>
                 <td><?php echo $pallet->folio ?></td>
                 <td>
-                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-kilos-pallet="<?php echo $pallet->kilos_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" style="z-index: 10;">
+                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-kilos-pallet="<?php echo $pallet->kilos_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" data-etiquetas="<?php echo $pallet->etiquetas ?>" style="z-index: 10;">
                     <p><?php echo $pallet->no_cajas ?></p>
                   </div>
                 </td>
@@ -277,7 +277,7 @@
                 <input type="hidden" name="pno_posicion[]" value="<?php echo $i ?>" id="pno_posicion" class="span4" readonly>
                 <input type="hidden" name="pid_pallet[]" value="<?php echo $idPallet ?>" id="pid_pallet" class="span12">
               </td>
-              <td><input type="text" name="pmarca[]"  value="<?php echo $pmarca ?>" id="pmarca" class="span12"></td>
+              <td><input type="text" name="pmarca[]"  value="<?php echo $pmarca ?>" id="pmarca" class="span12" maxlength="50"></td>
               <td><input type="text" name="pclasificacion[]" value="<?php echo $pclasificacion ?>" id="pclasificacion" class="span12" readonly></td>
               <td><input type="text" name="pcalibres[]" value="<?php echo $pcalibres ?>" id="pcalibres" class="span12" readonly></td>
               <td><input type="hidden" name="pcajas[]" value="<?php echo $pcajas ?>" id="pcajas" class="span12" readonly><span class="badge" id="pcajas-span"><?php echo $pcajas ?></span></td>
