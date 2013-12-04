@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="dserie">Proveedor</label>
+                  <label class="control-label" for="proveedor">Proveedor</label>
                   <div class="controls">
                     <div class="input-append span12">
                       <input type="text" name="proveedor" class="span11" id="proveedor" value="<?php echo set_value('proveedor') ?>" placeholder=""><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
@@ -46,11 +46,26 @@
                 <div class="control-group">
                   <label class="control-label" for="tipo_documento">Tipo de Documento</label>
                   <div class="controls">
-                    <select name="tipo_documento" class="span12">
+                    <select name="tipo_documento" class="span8" style="float: left;">
                       <option value="fa" <?php echo set_select('tipo_documento', 'fa') ?>>FACTURA</option>
                       <option value="nv" <?php echo set_select('tipo_documento', 'nv') ?>>NOTA DE VENTA</option>
                     </select>
+                    <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo 
+                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="vehiculo|serie" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label>
                   </div>
+                </div>
+
+                <div class="control-group" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">
+                  <label class="control-label" for="vehiculo">Vehiculos</label>
+                  <div class="controls">
+                    <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo set_value('vehiculo') ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" style="float: left;">
+                    
+                    <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="serie">
+                      <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot') ?>>OTRO</option>
+                      <option value="g" <?php echo set_select('tipo_vehiculo', 'g') ?>>GASOLINA</option>
+                    </select>
+                  </div>
+                    <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo set_value('vehiculoId') ?>">
                 </div>
 
                 <div class="control-group">
@@ -81,7 +96,7 @@
                 <div class="control-group">
                   <label class="control-label" for="condicionPago">Condición de Pago</label>
                   <div class="controls">
-                    <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|dcuenta">
+                    <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
                       <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                       <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
                     </select>
@@ -102,8 +117,39 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="concepto">Concepto</label>
+                  <div class="controls">
+                    <textarea name="concepto" class="span12" id="concepto" maxlength="200" data-next="dkilometros|dcuenta|subtotal"><?php echo set_value('concepto', ''); ?></textarea>
+                  </div>
+                </div>
+
               </div><!--/span6 -->
             </div><!--/row-fluid -->
+
+            <div class="row-fluid" id="group_gasolina" style="display: <?php echo isset($_POST['tipo_vehiculo']) ? ($_POST['tipo_vehiculo'] === 'ot' ? 'none' : 'block') : 'none' ?>;">
+              <div class="span4">
+                <div class="control-group">
+                  <div class="controls span9">
+                    Kilometros <input type="text" name="dkilometros" class="span12 sikey vpos-int" id="dkilometros" value="<?php echo set_value('dkilometros', ''); ?>" maxlength="10" data-next="dlitros">
+                  </div>
+                </div>
+              </div>
+              <div class="span4">
+                <div class="control-group">
+                  <div class="controls span9">
+                    Litros <input type="text" name="dlitros" class="span12 sikey vpositive" id="dlitros" value="<?php echo set_value('dlitros', ''); ?>" maxlength="10" data-next="dprecio">
+                  </div>
+                </div>
+              </div>
+              <div class="span4">
+                <div class="control-group">
+                  <div class="controls span9">
+                    Precio <input type="text" name="dprecio" class="span12 sikey vpositive" id="dprecio" value="<?php echo set_value('dprecio', ''); ?>" maxlength="10" data-next="dcuenta">
+                  </div>
+                </div>
+              </div>
+            </div>
 
           <div class="row-fluid" id="group_pago_contado" style="display: <?php echo isset($_POST['condicionPago']) ? ($_POST['condicionPago'] === 'cr' ? 'none' : 'block') : '' ?>;">
             <div class="span3">
@@ -160,28 +206,21 @@
           </div>
 
           <div class="row-fluid">
-            <div class="span3">
-              <div class="control-group">
-                <div class="controls span9">
-                  Concepto <textarea name="concepto" class="span12" id="concepto" maxlength="200"><?php echo set_value('concepto', ''); ?></textarea>
-                </div>
-              </div>
-            </div>
-            <div class="span3">
+            <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
                   Subtotal <input type="text" name="subtotal" class="span12 vpositive" id="subtotal" value="<?php echo set_value('subtotal', '0'); ?>">
                 </div>
               </div>
             </div>
-            <div class="span3">
+            <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
                   IVA <input type="text" name="iva" class="span12 vpositive" id="iva" value="<?php echo set_value('iva', '0'); ?>">
                 </div>
               </div>
             </div>
-            <div class="span3">
+            <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
                   TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', '0'); ?>" readonly>

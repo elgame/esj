@@ -63,10 +63,11 @@ class gastos extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/gastos/agregar/?msg=3'));
-        // $params['frm_errors'] = $this->showMsgs(3);
-        // $params['id_movimiento'] = ($res_mdl['ver_cheque'] ? $res_mdl['id_movimiento'] : '');
-        // $params['reload'] = true;
+        // redirect(base_url('panel/gastos/agregar/?msg=3'));
+        $params['frm_errors'] = $this->showMsgs(3);
+        if(count($res_mdl['banco']) > 0)
+          $params['id_movimiento'] = ($res_mdl['banco']['ver_cheque'] ? $res_mdl['banco']['id_movimiento'] : '');
+        $params['reload'] = true;
       }
       else
       {
@@ -140,7 +141,7 @@ class gastos extends MY_Controller {
     }
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
-    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['gasto']     = $this->compras_model->getInfoCompra($_GET['id'], false);
     $params['empresa']   = $this->empresas_model->getInfoEmpresa($params['gasto']['info']->id_empresa, true);
 
     $this->load->view('panel/gastos/ver', $params);
@@ -211,7 +212,7 @@ class gastos extends MY_Controller {
 
       array('field' => 'concepto',
             'label' => 'Concepto',
-            'rules' => 'max_length[200]'),
+            'rules' => 'required|max_length[200]'),
 
       array('field' => 'fcuentas_proveedor',
             'label' => 'Cuenta Proveedor',
@@ -230,6 +231,36 @@ class gastos extends MY_Controller {
             'label' => 'XML',
             'rules' => 'callback_xml_check'),
     );
+
+    $rules[] = array('field' => 'es_vehiculo',
+                    'label' => 'Vehiculo',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculo',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculoId',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+    if ($this->input->post('es_vehiculo') == 'si')
+    {
+      $rules[count($rules)-1]['rules'] = 'required|numeric';
+
+      $rules[] = array('field' => 'tipo_vehiculo',
+                      'label' => 'Tipo vehiculo',
+                      'rules' => '');
+      if ($this->input->post('tipo_vehiculo') == 'g')
+      {
+        $rules[] = array('field' => 'dkilometros',
+                        'label' => 'Kilometros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dlitros',
+                        'label' => 'Litros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dprecio',
+                        'label' => 'Precio',
+                        'rules' => 'required|numeric');
+      }
+    }
 
     $this->form_validation->set_rules($rules);
   }

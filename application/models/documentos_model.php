@@ -1234,7 +1234,7 @@ class documentos_model extends CI_Model {
     $pdf->SetWidths(array(10, 30, 60, 29, 13, 12));
     $pdf->Row(array('#', 'MARCA', 'CLASIFICACION', 'CALIBRE', 'CAJAS', 'TEMP'), true);
 
-    $pdf->SetFont('Arial','',9);
+    $pdf->SetFont('Arial','',7);
     for ($i = 1; $i < 25 ; $i++)
     {
       $marca         = '';
