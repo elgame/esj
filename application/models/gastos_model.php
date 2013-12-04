@@ -32,6 +32,13 @@ class gastos_model extends privilegios_model{
       // 'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
     );
 
+    //si se registra a un vehiculo
+    if (isset($data['es_vehiculo']))
+    {
+      $datos['tipo_vehiculo'] = $data['tipo_vehiculo'];
+      $datos['id_vehiculo'] = $data['vehiculoId'];
+    }
+
     //si es contado, se verifica que la cuenta tenga saldo
     if ($datos['condicion_pago'] == 'co')
     {
@@ -74,6 +81,7 @@ class gastos_model extends privilegios_model{
     $compraId = $this->db->insert_id();
 
     //si es contado, se registra el abono y el retiro del banco
+    $respons = array();
     if ($datos['condicion_pago'] == 'co')
     {
       $this->load->model('cuentas_pagar_model');
@@ -87,7 +95,22 @@ class gastos_model extends privilegios_model{
       $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
     }
 
-    return array('passes' => true, 'id_compra' => $compraId);
+    //si se registra a un vehiculo
+    if (isset($data['es_vehiculo']))
+    {
+      //si es de tipo gasolina se registra los litros
+      if($data['tipo_vehiculo'] == 'g')
+      {
+        $this->db->insert('compras_vehiculos_gasolina', array(
+          'id_compra'  => $compraId,
+          'kilometros' => $data['dkilometros'],
+          'litros'     => $data['dlitros'],
+          'precio'     => $data['dprecio'],
+          ));
+      }
+    }
+
+    return array('passes' => true, 'id_compra' => $compraId, 'banco' => $respons);
   }
 
   // public function cancelar($compraId)

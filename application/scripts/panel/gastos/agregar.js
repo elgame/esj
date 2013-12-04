@@ -20,6 +20,17 @@
       }
     });
 
+    $("#dlitros, #dprecio").on('keyup', function(event) {
+      var key = event.which;
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        var litros = parseFloat($("#dlitros").val()) || 0,
+        precio = parseFloat($("#dprecio").val()) || 0;
+        $('#subtotal').val(litros*precio);
+        $("#iva").val((litros*precio)*0.16);
+        total();
+      }
+    });
+
     $("#empresa").autocomplete({
         source: base_url+'panel/empresas/ajax_get_empresas/',
         minLength: 1,
@@ -64,6 +75,45 @@
       }
     });
 
+    // Autocomplete para los Vehiculos.
+    $("#vehiculo").autocomplete({
+      source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $vehiculo =  $(this);
+
+        $vehiculo.val(ui.item.id);
+        $("#vehiculoId").val(ui.item.id);
+        $vehiculo.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#vehiculo").css("background-color", "#FFD071");
+        $("#vehiculoId").val('');
+      }
+    });
+
+    $("#es_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.is(":checked")){
+        $("#groupVehiculo").show();
+        if($("#tipo_vehiculo").val() == 'g')
+          $("#group_gasolina").show();
+      }else{
+        $("#groupVehiculo").hide();
+        $("#group_gasolina").hide();
+      }
+    });
+
+    $("#tipo_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.val() == 'g')
+        $("#group_gasolina").show();
+      else
+        $("#group_gasolina").hide();
+    });
+
     $('#condicionPago').on('change', function(event) {
       var $this = $(this);
       if ($this.val() == 'cr')
@@ -85,7 +135,7 @@
         $subtotal = $('#subtotal'),
         $iva = $('#iva');
 
-    $total.val(parseFloat($subtotal.val()||0) + parseFloat($iva.val()||0));
+    $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) + parseFloat($iva.val()||0)) );
   };
 
 });

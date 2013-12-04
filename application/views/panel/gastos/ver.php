@@ -73,11 +73,26 @@
                   <div class="control-group">
                     <label class="control-label" for="tipo_documento">Tipo de Documento</label>
                     <div class="controls">
-                      <select name="tipo_documento" class="span12"  readonly>
-                        <option value="fa" <?php echo set_select('tipo_documento', 'fa', $gasto['info']->tipo_documento) ?>>FACTURA</option>
-                        <option value="nv" <?php echo set_select('tipo_documento', 'nv', $gasto['info']->tipo_documento) ?>>NOTA DE VENTA</option>
+                      <select name="tipo_documento" class="span8" style="float: left;" readonly>
+                        <option value="fa" <?php echo set_select('tipo_documento', 'fa', false, $gasto['info']->tipo_documento) ?>>FACTURA</option>
+                        <option value="nv" <?php echo set_select('tipo_documento', 'nv', false, $gasto['info']->tipo_documento) ?>>NOTA DE VENTA</option>
+                      </select>
+                      <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo 
+                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" readonly <?php echo ($gasto['info']->id_vehiculo != '' ? 'checked' : ''); ?>></label>
+                    </div>
+                  </div>
+
+                  <div class="control-group" id="groupVehiculo" style="display: <?php echo ($gasto['info']->id_vehiculo != '' ? 'block' : 'none'); ?>;">
+                    <label class="control-label" for="vehiculo">Vehiculos</label>
+                    <div class="controls">
+                      <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo (isset($gasto['vehiculo']->nombre)? $gasto['vehiculo']->nombre: ''); ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" readonly style="float: left;">
+                      
+                      <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="serie" readonly>
+                        <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot', false, $gasto['info']->tipo_vehiculo) ?>>OTRO</option>
+                        <option value="g" <?php echo set_select('tipo_vehiculo', 'g', false, $gasto['info']->tipo_vehiculo) ?>>GASOLINA</option>
                       </select>
                     </div>
+                      <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo $gasto['info']->id_vehiculo; ?>">
                   </div>
 
                   <div class="control-group">
@@ -130,32 +145,57 @@
                       </div>
                     </div>
                   <?php } ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="concepto">Concepto</label>
+                    <div class="controls">
+                      <textarea name="concepto" class="span12" id="concepto" maxlength="200" readonly><?php echo set_value('concepto', $gasto['info']->concepto); ?></textarea>
+                    </div>
+                  </div>
+
                 </div><!--/span6 -->
               </div><!--/row-fluid -->
 
-            <div class="row-fluid">
-              <div class="span3">
-                <div class="control-group">
-                  <div class="controls span9">
-                    Concepto <textarea name="concepto" class="span12" id="concepto" maxlength="200" readonly><?php echo set_value('concepto', $gasto['info']->concepto); ?></textarea>
+              <div class="row-fluid" id="group_gasolina" style="display: <?php echo ($gasto['info']->tipo_vehiculo === 'ot' ? 'none' : 'block') ?>;">
+                <div class="span4">
+                  <div class="control-group">
+                    <div class="controls span9">
+                      Kilometros <input type="text" name="dkilometros" class="span12" id="dkilometros" value="<?php echo (isset($gasto['gasolina']->kilometros)? $gasto['gasolina']->kilometros: ''); ?>" maxlength="10" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="span4">
+                  <div class="control-group">
+                    <div class="controls span9">
+                      Litros <input type="text" name="dlitros" class="span12" id="dlitros" value="<?php echo (isset($gasto['gasolina']->litros)? $gasto['gasolina']->litros: ''); ?>" maxlength="10" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="span4">
+                  <div class="control-group">
+                    <div class="controls span9">
+                      Precio <input type="text" name="dprecio" class="span12" id="dprecio" value="<?php echo (isset($gasto['gasolina']->precio)? $gasto['gasolina']->precio: ''); ?>" maxlength="10" readonly>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="span3">
+
+            <div class="row-fluid">
+              <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
                     Subtotal <input type="text" name="subtotal" class="span12 vpositive" id="subtotal" value="<?php echo set_value('subtotal', $gasto['info']->subtotal); ?>" readonly>
                   </div>
                 </div>
               </div>
-              <div class="span3">
+              <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
                     IVA <input type="text" name="iva" class="span12 vpositive" id="iva" value="<?php echo set_value('iva', $gasto['info']->importe_iva); ?>" readonly>
                   </div>
                 </div>
               </div>
-              <div class="span3">
+              <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
                     TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', $gasto['info']->total); ?>" readonly>
