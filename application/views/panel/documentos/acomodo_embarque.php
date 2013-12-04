@@ -116,6 +116,15 @@
   </div>
 
   <div class="row-fluid">
+    <div class="span7 offset5">
+      <h3 style="">
+        <div class="span6">KILOS PESADA: <span style="color: red;"><?php echo $dataEmbarque['kilos_pesada'] ?></span></div>
+        <div class="span6">KILOS PALLETS: <span id="kilos-pallets" style="color: red;">0</span></div>
+      </h3>
+    </div>
+  </div>
+
+  <div class="row-fluid">
 
     <div class="span3"><!-- Listado de Pallets libres -->
       <table class="table table-bordered table-condensed datatable">
@@ -133,7 +142,7 @@
               <tr>
                 <td><?php echo $pallet->folio ?></td>
                 <td>
-                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" style="z-index: 10;">
+                  <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-kilos-pallet="<?php echo $pallet->kilos_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" style="z-index: 10;">
                     <p><?php echo $pallet->no_cajas ?></p>
                   </div>
                 </td>
@@ -157,7 +166,9 @@
           </tr>
         </thead> -->
         <tbody>
-          <?php for ($i=1; $i <24 ; $i = $i + 2) {  ?>
+          <?php
+              $totalKilosPalles = 0;
+              for ($i=1; $i <24 ; $i = $i + 2) {  ?>
               <tr>
                 <td><?php echo $i ?></td>
                 <td><?php echo $i+1 ?></td>
@@ -174,7 +185,10 @@
                         if ($pallet->no_posicion == $i)
                         {
                           if ($pallet->id_pallet != null)
+                          {
                             $txtDefault1 = $pallet->cajas;
+                            $totalKilosPalles += floatval($pallet->kilos_pallet);
+                          }
                           else
                             $txtDefault1 = $pallet->descripcion;
                         }
@@ -182,7 +196,10 @@
                         if ($pallet->no_posicion == $i+1)
                         {
                           if ($pallet->id_pallet != null)
+                          {
                             $txtDefault2 = $pallet->cajas;
+                            $totalKilosPalles += floatval($pallet->kilos_pallet);
+                          }
                           else
                             $txtDefault2 = $pallet->descripcion;
                         }
@@ -206,7 +223,7 @@
           <?php } ?>
         </tbody>
       </table>
-
+      <input type="hidden" value="<?php echo $totalKilosPalles ?>" id="total-kilos-pallets">
     </div><!--/span4 -->
 
     <div class="span7"> <!-- Tabla con el listado de pallets seleccionado -->

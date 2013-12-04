@@ -91,10 +91,42 @@ $(function(){
   $(document).on('click', 'button#delProd', function(e) {
       var $this = $(this),
           $tr = $this.parent().parent(),
-          id_pallet = $tr.attr('data-pallet');
+          palletsClasifi = $tr.attr('data-pallets'), // los pallets que tienen la clasificacion que se esta eliminando.
+          $table = $('#table_prod');
 
-      $tr.remove();
+      $tr.remove(); // elimina el tr padre.
 
+      // Si palletsClasifi no es vacio, significa que se se esta eliminando
+      // una clasificacion que se agrego de pallets.
+      palletsClasifi = palletsClasifi.split('-');
+
+      // auxiliar que indica si existe otra clasificacion con el mismo pallet,
+      // este sirve para evitar eliminar el input que contiene el id del pallet.
+      var existe = false;
+
+      if (palletsClasifi !== '') {
+        for (var i in palletsClasifi) {
+          $table.find('tbody tr').each(function(index, el) {
+            var $this = $(this);
+            if ($this.attr('data-pallets') !== '') {
+              var auxPallets = $this.attr('data-pallets').split('-');
+              for (var ii in auxPallets) {
+                if (auxPallets[ii] == palletsClasifi[i]) {
+                  existe = true;
+                }
+              }
+            }
+          });
+
+          // si no existe otra clasificacion que pertenesca al mismo pallet de la
+          // que se esta eliminando, entonces elimina el input.
+          if ( ! existe) {
+            $('#pallet' + palletsClasifi[i]).remove();
+          }
+
+          existe = false;
+        }
+      }
       calculaTotal();
   });
 
@@ -153,14 +185,101 @@ $(function(){
 
     $tr.find('#prod_dreten_iva_porcent').val($this.find('option:selected').val());
 
-    calculaTotalProducto ($tr)
+    calculaTotalProducto ($tr);
   });
 
-  loadPallet();
+  loadPalletByFolio();
 
   EventKeyPressFolioPallet();
   EventOnClickSinCosto();
   EventOnChangeMedida();
+
+  $('#show-pallets').on('click', function(event) {
+    var $this = $(this), // boton
+        $clienteId = $('#did_cliente'); // Input id del cliente.
+
+    if ($clienteId.val() !== '') {
+      $.ajax({
+        url: base_url + 'panel/facturacion/ajax_get_pallets_cliente',
+        type: 'GET',
+        dataType: 'json',
+        data: {id: $clienteId.val()},
+      })
+      .done(function(pallets) {
+        // console.log(pallets);
+        var $tablePalletsCliente = $('#table-pallets-cliente'),
+            htmlTd = '',
+            disabled = '',
+            bgcolor = '',
+            jsonStr = '';
+
+        if (pallets.length > 0) {
+          for (var i in pallets) {
+            if (pallets[i].info.status === 't') {
+              // console.log(jQuery.parseJSON(JSON.stringify(pallets[i].rendimientos)));
+
+              disabled = '';
+              bgcolor = '';
+              $('.pallet-selected').each(function(index, el) {
+                if ($(this).val() == pallets[i].info.id_pallet) {
+                  disabled = 'disabled';
+                  bgcolor = 'background-color: #FF9A9D;';
+                }
+              });
+
+              jsonStr = JSON.stringify(pallets[i].rendimientos).replace(/\"/g,'&quot;');
+              htmlTd += '<tr style="'+bgcolor+'">'+
+                            '<th><input type="checkbox" value="'+pallets[i].info.id_pallet+'" class="chk-cli-pallets" '+disabled+'><input type="hidden" id="jsonData" value="'+jsonStr+'" ></th>'+
+                            '<th>'+pallets[i].info.folio+'</th>'+
+                            '<th>'+pallets[i].info.cajas+'</th>'+
+                            '<th>'+pallets[i].info.fecha+'</th>'+
+                          '</tr>';
+            }
+          }
+
+          $tablePalletsCliente.find('tbody').html(htmlTd);
+        }
+
+      })
+      .fail(function() {
+        noty({"text": 'Ocurrio un error vuelva a intentarlo', "layout":"topRight", "type": 'error'});
+      });
+
+      $('#modal-pallets').modal('show');
+    } else {
+      noty({"text": 'Seleccione un cliente para mostrar sus pallets disponibles', "layout":"topRight", "type": 'error'});
+    }
+  });
+
+  $('#BtnAddClientePallets').on('click', function(event) {
+    if ($('.chk-cli-pallets:checked').length > 0) {
+      $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+        $('.chk-cli-pallets:checked').each(function(index, el) {
+          var $chkPallet = $(this);
+              $parent = $chkPallet.parent(),
+              jsonObj = jQuery.parseJSON($parent.find('#jsonData').val());
+
+          $('#pallets-selected').append('<input type="hidden" value="' + $chkPallet.val() + '" name="palletsIds[]" class="pallet-selected" id="pallet' + $chkPallet.val() + '">');
+
+          for (var i in jsonObj) {
+            addProducto(unidades, {
+              'id': jsonObj[i]['id_clasificacion'],
+              'nombre': jsonObj[i]['nombre'],
+              'cajas': jsonObj[i]['cajas'],
+              'id_pallet': $chkPallet.val(),
+              'id_unidad': jsonObj[i]['id_unidad'],
+              'unidad': jsonObj[i]['unidad'],
+            });
+          }
+        });
+
+        $('#modal-pallets').modal('hide');
+      }, 'json');
+    } else {
+      noty({"text": 'Seleccione al menos un pallet para agregarlo al listado.', "layout":"topRight", "type": 'error'});
+    }
+  });
+
 });
 
 var EventKeyPressFolioPallet = function () {
@@ -180,7 +299,7 @@ var EventOnClickSinCosto = function () {
   });
 };
 
-function loadPallet() {
+function loadPalletByFolio() {
   $('#loadPallet').on('click', function(event) {
     var $folio = $('#folioPallet');
 
@@ -188,13 +307,23 @@ function loadPallet() {
 
       $.get(base_url + 'panel/facturacion/ajax_get_pallet_folio/?folio='+$folio.val(), function(data) {
         if (data) {
+
           var existe = false;
+          $('.pallet-selected').each(function(index, el) {
+            if ($(this).val() == data['info']['id_pallet']) {
+              existe = true;
+              return false;
+            }
+          });
 
           // Verifica si el pallet ya esta cargado en el listado.
-          if ($('tr[data-pallet="'+data['info']['id_pallet']+'"]').length === 0) {
+          if ( ! existe) {
 
             if (data['rendimientos'].length > 0) {
               $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+
+                $('#pallets-selected').append('<input type="hidden" value="' + data['info']['id_pallet'] + '" name="palletsIds[]" class="pallet-selected" id="pallet' + data['info']['id_pallet'] + '">');
+
                 for(var i in data['rendimientos']) {
                   addProducto(unidades, {
                     'id': data['rendimientos'][i]['id_clasificacion'],
@@ -234,7 +363,6 @@ var EventOnChangeMedida = function () {
 };
 
 function calculaTotalProducto ($tr) {
-
   var $cantidad   = $tr.find('#prod_dcantidad'),
       $precio_uni = $tr.find('#prod_dpreciou'),
       $iva        = $tr.find('#diva'),
@@ -265,13 +393,29 @@ function addProducto(unidades, prod) {
   //     descuento = trunc2Dec((importe * parseFloat($('#ddescuento').val())) / 100),
   //     iva       = trunc2Dec(((importe - descuento) * parseFloat($('#diva option:selected').val())) / 100),
   //     retencion = trunc2Dec(iva * parseFloat($('#dreten_iva option:selected').val()));
-
   var $tabla = $('#table_prod'),
-      trHtml = '',
-      indexJump = jumpIndex + 1;
+      trHtml    = '',
+      indexJump = jumpIndex + 1,
+      existe    = false,
+      $tr, addInputPalletId = true;
 
   var prod_nombre = prod_id = pallet = '', prod_cajas = 0;
   if (prod) {
+    // Verificar si existe la clasificacion...
+    $tabla.find('input#prod_did_prod').each(function(index, el) {
+      var $prodIdInput = $(this), // input hidde prod id.
+          $medidaInput; // input hidde medida.
+
+      $tr = $prodIdInput.parents('tr'); // tr parent.
+      $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
+
+      // console.log($prodIdInput.val(), prod.id, $medidaInput.val(), prod.id_unidad);
+      if ($prodIdInput.val() == prod.id && $medidaInput.val() == prod.id_unidad) {
+        existe = true;
+        return false;
+      }
+    });
+
     prod_nombre = prod.nombre;
     prod_id     = prod.id;
     prod_cajas  = prod.cajas;
@@ -283,66 +427,92 @@ function addProducto(unidades, prod) {
     unidad = unidades[0].nombre;
   }
 
-  var unidadesHtml = '';
+  // Si el producto existe en el listado.
+  if (existe) {
+    var $cantidadInput = $tr.find('#prod_dcantidad'); // input cantidad.
 
-  for (var i in unidades) {
-    unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].nombre == unidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
-  }
+    // Le suma la cantidad de cajas a la clasificacion.
+    console.log($cantidadInput.val(), prod.cajas);
+    $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
+    calculaTotalProducto($tr);
 
-  trHtml = '<tr data-pallet="'+pallet+'">' +
-              '<td>' +
-                '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
-                '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
-                '<input type="hidden" name="pallet_id[]" value="'+pallet+'" id="pallet_id" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  unidadesHtml +
-                  // '<option value="Pieza">Pieza</option>' +
-                  // '<option value="Caja">Caja</option>' +
-                  // '<option value="Kilos">Kilos</option>' +
-                  // '<option value="No aplica">No aplica</option>' +
-                '</select>' +
-                '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidad+'" id="prod_dmedida_id" class="span12 vpositive">' +
-              '</td>' +
-              '<td>' +
-                  '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-              '</td>' +
-              '<td>' +
-                '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-              '</td>' +
-              '<td>' +
-                  '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                    '<option value="0">0%</option>' +
-                    '<option value="11">11%</option>' +
-                    '<option value="16">16%</option>' +
+    var existe2 = false,
+        palletsClasifi = $tr.attr('data-pallets').split('-');
+
+    for (var i in palletsClasifi) {
+      if (palletsClasifi[i] == prod.id_pallet) {
+        existe2 = true;
+        return false;
+      }
+    }
+
+    if ( ! existe2) {
+      var pallets = $tr.attr('data-pallets') + '-' + prod.id_pallet;
+      $tr.attr('data-pallets', pallets);
+      $tr.find('#pallets_id').val(pallets);
+    }
+
+  } else {
+    var unidadesHtml = '';
+    for (var i in unidades) {
+      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].nombre == unidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
+    }
+
+    trHtml = '<tr data-pallets="'+pallet+'">' +
+                '<td>' +
+                  '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
+                  '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    unidadesHtml +
+                    // '<option value="Pieza">Pieza</option>' +
+                    // '<option value="Caja">Caja</option>' +
+                    // '<option value="Kilos">Kilos</option>' +
+                    // '<option value="No aplica">No aplica</option>' +
                   '</select>' +
-                  '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
-                  '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '<option value="0">No retener</option>' +
-                  '<option value="0.04">4%</option>' +
-                  '<option value="0.10667">2 Terceras</option>' +
-                  '<option value="0.16">100 %</option>' +
-                '</select>' +
-                '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
-                '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
-              '</td>' +
-              '<td>' +
-                '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
-              '</td>' +
-              '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
-            '</tr>';
+                  '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidad+'" id="prod_dmedida_id" class="span12 vpositive">' +
+                '</td>' +
+                '<td>' +
+                    '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                '</td>' +
+                '<td>' +
+                  '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                '</td>' +
+                '<td>' +
+                    '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                      '<option value="0">0%</option>' +
+                      '<option value="11">11%</option>' +
+                      '<option value="16">16%</option>' +
+                    '</select>' +
+                    '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
+                    '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<option value="0">No retener</option>' +
+                    '<option value="0.04">4%</option>' +
+                    '<option value="0.10667">2 Terceras</option>' +
+                    '<option value="0.16">100 %</option>' +
+                  '</select>' +
+                  '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
+                  '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
+                '</td>' +
+                '<td>' +
+                  '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
+                '</td>' +
+                '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
+              '</tr>';
 
 
-  $(trHtml).appendTo($tabla.find('tbody'));
+    $(trHtml).appendTo($tabla.find('tbody'));
 
-  for (i = indexJump, max = jumpIndex; i <= max; i += 1)
-    $.fn.keyJump.setElem($('.jump'+i));
+    for (i = indexJump, max = jumpIndex; i <= max; i += 1)
+      $.fn.keyJump.setElem($('.jump'+i));
 
-  $('.jump'+indexJump).focus();
+    $('.jump'+indexJump).focus();
+  }
 }
 
 function calculaTotal () {

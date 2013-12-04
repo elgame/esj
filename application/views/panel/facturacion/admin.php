@@ -181,6 +181,14 @@
                           'attrs' => array('rel' => 'superbox-50x450'))
                         );
                       }
+
+                      if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
+                          'params'   => 'idr='.$fact->id_factura,
+                          'btn_type' => 'btn-success')
+                        );
+                      }
                     ?>
                   </td>
                 </tr>

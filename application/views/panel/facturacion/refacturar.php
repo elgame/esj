@@ -8,21 +8,21 @@
       <li>
         <a href="<?php echo base_url('panel/facturacion/'); ?>">Facturacion</a> <span class="divider">/</span>
       </li>
-      <li>Agregar</li>
+      <li>Refacturar</li>
     </ul>
   </div>
 
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> Agregar Factura</h2>
+        <h2><i class="icon-plus"></i> Refacturar</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar?'.$getId); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/refacturar?idr='.$_GET['idr']); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -31,11 +31,11 @@
                 <label class="control-label" for="dempresa">Empresa</label>
                 <div class="controls">
 
-                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', isset($borrador) ? $borrador['info']->empresa->nombre_fiscal : $empresa_default->nombre_fiscal); ?>" size="73" autofocus>
-                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', isset($borrador) ? $borrador['info']->empresa->id_empresa : $empresa_default->id_empresa); ?>">
-                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', isset($borrador) ? $borrador['info']->version :$empresa_default->cfdi_version); ?>">
-                  <input type="hidden" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', isset($borrador) ? $borrador['info']->empresa->cer_caduca : $empresa_default->cer_caduca); ?>">
-                  <input type="hidden" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', isset($borrador) ? $borrador['info']->no_certificado : $no_certificado); ?>">
+                  <input type="text" name="dempresa" class="span9" id="dempresa" value="<?php echo set_value('dempresa', $factura['info']->empresa->nombre_fiscal); ?>" size="73" autofocus>
+                  <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value('did_empresa', $factura['info']->empresa->id_empresa); ?>">
+                  <input type="hidden" name="dversion" id="dversion" value="<?php echo set_value('dversion', $factura['info']->empresa->cfdi_version); ?>">
+                  <input type="hidden" name="dcer_caduca" id="dcer_caduca" value="<?php echo set_value('dcer_caduca', $factura['info']->empresa->cer_caduca); ?>">
+                  <input type="hidden" name="dno_certificado" id="dno_certificado" value="<?php echo set_value('dno_certificado', $factura['info']->no_certificado); ?>">
                 </div>
               </div>
 
@@ -65,15 +65,15 @@
               <div class="control-group">
                 <label class="control-label" for="dcliente">Cliente</label>
                 <div class="controls">
-                  <input type="text" name="dcliente" class="span9" id="dcliente" value="<?php echo set_value('dcliente', isset($borrador) ? $borrador['info']->cliente->nombre_fiscal : ''); ?>" size="73">
-                  <input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value('did_cliente', isset($borrador) ? $borrador['info']->cliente->id_cliente : ''); ?>">
+                  <input type="text" name="dcliente" class="span9" id="dcliente" value="<?php echo set_value('dcliente', $factura['info']->cliente->nombre_fiscal); ?>" size="73">
+                  <input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value('did_cliente', $factura['info']->cliente->id_cliente); ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dcliente_rfc">RFC</label>
                 <div class="controls">
-                  <input type="text" name="dcliente_rfc" class="span9" id="dcliente_rfc" value="<?php echo set_value('dcliente_rfc', isset($borrador) ? $borrador['info']->cliente->rfc : ''); ?>" size="25">
+                  <input type="text" name="dcliente_rfc" class="span9" id="dcliente_rfc" value="<?php echo set_value('dcliente_rfc', $factura['info']->cliente->rfc); ?>" size="25">
                 </div>
               </div>
 
@@ -83,13 +83,10 @@
 
                   <?php
                       $domi = '';
-                      if (isset($borrador))
-                      {
-                        $domi .= $borrador['info']->cliente->calle       !== '' ? $borrador['info']->cliente->calle : '';
-                        $domi .= $borrador['info']->cliente->no_exterior !== '' ? ', #'.$borrador['info']->cliente->no_exterior : '';
-                        $domi .= $borrador['info']->cliente->no_interior !== '' ? '-'.$borrador['info']->cliente->no_interior : '';
-                        $domi .= $borrador['info']->cliente->colonia     !== '' ? ' '.$borrador['info']->cliente->colonia : '';
-                      }
+                      $domi .= $factura['info']->cliente->calle       !== '' ? $factura['info']->cliente->calle : '';
+                      $domi .= $factura['info']->cliente->no_exterior !== '' ? ', #'.$factura['info']->cliente->no_exterior : '';
+                      $domi .= $factura['info']->cliente->no_interior !== '' ? '-'.$factura['info']->cliente->no_interior : '';
+                      $domi .= $factura['info']->cliente->colonia     !== '' ? ' '.$factura['info']->cliente->colonia : '';
                    ?>
 
                   <input type="text" name="dcliente_domici" class="span9" id="dcliente_domici" value="<?php echo set_value('dcliente_domici', $domi); ?>" size="65">
@@ -102,12 +99,9 @@
 
                   <?php
                       $ciudad = '';
-                      if (isset($borrador))
-                      {
-                        $ciudad .= $borrador['info']->cliente->municipio !== '' ? ', '.$borrador['info']->cliente->municipio : '';
-                        $ciudad .= $borrador['info']->cliente->estado    !== '' ? ', '.$borrador['info']->cliente->estado : '';
-                        $ciudad .= $borrador['info']->cliente->cp        !== '' ? ', C.P.'.$borrador['info']->cliente->cp : '';
-                      }
+                      $ciudad .= $factura['info']->cliente->municipio !== '' ? ', '.$factura['info']->cliente->municipio : '';
+                      $ciudad .= $factura['info']->cliente->estado    !== '' ? ', '.$factura['info']->cliente->estado : '';
+                      $ciudad .= $factura['info']->cliente->cp        !== '' ? ', C.P.'.$factura['info']->cliente->cp : '';
                    ?>
 
                   <input type="text" name="dcliente_ciudad" class="span9" id="dcliente_ciudad" value="<?php echo set_value('dcliente_ciudad', $ciudad); ?>" size="25">
@@ -117,7 +111,7 @@
               <div class="control-group">
                 <label class="control-label" for="dobservaciones">Observaciones</label>
                 <div class="controls">
-                  <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', isset($borrador) ? $borrador['info']->observaciones : ''); ?></textarea>
+                  <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', $factura['info']->observaciones); ?></textarea>
                 </div>
               </div>
 
@@ -171,12 +165,11 @@
                   <select name="dforma_pago" class="span9" id="dforma_pago">
 
                     <?php
-                      $option = isset($borrador) ? $borrador['info']->forma_pago : '';
+                      $option = $factura['info']->forma_pago;
 
                       $parcialidades = true;
                       if ($option === 'Pago en una sola exhibición' || $option === '')
                         $parcialidades = false;
-
                      ?>
 
                     <option value="Pago en una sola exhibición" <?php echo set_select('dforma_pago', 'Pago en una sola exhibición', $option === 'Pago en una sola exhibición' ? true : false); ?>>Pago en una sola exhibición</option>
@@ -198,7 +191,7 @@
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
 
                     <?php
-                      $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
+                      $metodo = $factura['info']->metodo_pago;
                      ?>
 
                     <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado', $metodo === 'no identificado' ? true : false); ?>>No identificado</option>
@@ -214,7 +207,7 @@
               <div class="control-group">
                 <label class="control-label" for="dmetodo_pago_digitos">Ultimos 4 digitos</label>
                 <div class="controls">
-                  <input type="text" name="dmetodo_pago_digitos" class="span9" id="dmetodo_pago_digitos" value="<?php echo set_value('dmetodo_pago_digitos', isset($borrador) ? $borrador['info']->metodo_pago_digitos : 'No identificado'); ?>">
+                  <input type="text" name="dmetodo_pago_digitos" class="span9" id="dmetodo_pago_digitos" value="<?php echo set_value('dmetodo_pago_digitos', $factura['info']->metodo_pago_digitos); ?>">
                 </div>
               </div>
 
@@ -224,7 +217,7 @@
                   <select name="dcondicion_pago" class="span9" id="dcondicion_pago">
 
                     <?php
-                      $condicion = isset($borrador) ? $borrador['info']->condicion_pago : '';
+                      $condicion = $factura['info']->condicion_pago;
                      ?>
 
                     <option value="cr" <?php echo set_select('dcondicion_pago', 'cr', $condicion === 'cr' ? true : false); ?>>Credito</option>
@@ -236,15 +229,14 @@
               <div class="control-group">
                 <label class="control-label" for="dcondicion_pago">Plazo de crédito</label>
                 <div class="controls">
-                  <input type="number" name="dplazo_credito" class="span9 vinteger" id="dplazo_credito" value="<?php echo set_value('dplazo_credito', isset($borrador) ? $borrador['info']->plazo_credito : 0); ?>">
+                  <input type="number" name="dplazo_credito" class="span9 vinteger" id="dplazo_credito" value="<?php echo set_value('dplazo_credito', $factura['info']->plazo_credito); ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
-                      <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br>
-                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Timbrar</button>
+                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;">Timbrar</button>
                   </div>
                 </div>
               </div>
@@ -269,9 +261,9 @@
                 </thead>
                 <tbody>
                   <?php
-                        if (isset($borrador) && ! isset($_POST['prod_did_prod']))
+                        if (isset($factura) && ! isset($_POST['prod_did_prod']))
                         {
-                          foreach ($borrador['productos'] as $key => $p) {
+                          foreach ($factura['productos'] as $key => $p) {
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
                             $_POST['prod_importe'][$key]            = $p->importe;
                             $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
@@ -398,8 +390,8 @@
               if (isset($_POST['palletsIds'])) {
                 foreach ($_POST['palletsIds'] as $palletId) { ?>
                 <input type="hidden" value="<?php echo $palletId ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $palletId ?>">
-            <?php }} else  if (isset($borrador) && count($borrador['pallets']) > 0) {
-                foreach ($borrador['pallets'] as $pallet) { ?>
+            <?php }} else  if (isset($factura) && count($factura['pallets']) > 0) {
+                foreach ($factura['pallets'] as $pallet) { ?>
                   <input type="hidden" value="<?php echo $pallet->id_pallet ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $pallet->id_pallet ?>">
             <?php }} ?>
           </div>
@@ -417,13 +409,13 @@
                 <tbody>
                   <tr>
                     <td rowspan="7">
-                        <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra', isset($borrador) ? $borrador['info']->total_letra : '');?></textarea>
+                        <textarea name="dttotal_letra" rows="10" class="nokey" style="width:98%;max-width:98%;" id="total_letra"><?php echo set_value('dttotal_letra', $factura['info']->total_letra);?></textarea>
                     </td>
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
-                    <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
+                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', $factura['info']->subtotal))?></td>
+                    <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', $factura['info']->subtotal); ?>">
                   </tr>
                   <tr>
                     <td>Descuento</td>
@@ -432,23 +424,23 @@
                   </tr>
                   <tr>
                     <td>SUBTOTAL</td>
-                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
-                    <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
+                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', $factura['info']->subtotal))?></td>
+                    <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', $factura['info']->subtotal); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
-                    <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
+                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', $factura['info']->importe_iva))?></td>
+                    <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', $factura['info']->importe_iva); ?>">
                   </tr>
                   <tr>
                     <td>Ret. IVA</td>
-                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0))?></td>
-                    <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', isset($borrador) ? $borrador['info']->retencion_iva : 0); ?>">
+                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', $factura['info']->retencion_iva))?></td>
+                    <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', $factura['info']->retencion_iva); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
-                    <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0); ?>">
+                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', $factura['info']->total))?></td>
+                    <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', $factura['info']->total); ?>">
                   </tr>
                 </tbody>
               </table>

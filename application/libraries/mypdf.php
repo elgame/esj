@@ -209,11 +209,11 @@ class MYpdf extends FPDF {
     	$this->links=$a;
     }
 
-    function Row($data, $header=false, $bordes=true, $colortxt=null){
+    function Row($data, $header=false, $bordes=true, $colortxt=null, $height=3, $positionY=2){
     	$nb=0;
     	for($i=0;$i<count($data);$i++)
     		$nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
-    		$h=$this->FontSize*$nb+3;
+    		$h=$this->FontSize*$nb+$height;
     		// if($header)
     		// 	$h += 2;
     		$this->CheckPageBreak($h);
@@ -229,9 +229,9 @@ class MYpdf extends FPDF {
 	    			$this->Rect($x,$y,$w,$h);
 
 	    		if($header)
-	    			$this->SetXY($x,$y+2);
+	    			$this->SetXY($x,$y+$positionY);
 	    		else
-	    			$this->SetXY($x,$y+2);
+	    			$this->SetXY($x,$y+$positionY);
 
                 if (isset($colortxt[$i])) {
                     $this->SetTextColor($colortxt[$i][0], $colortxt[$i][1], $colortxt[$i][2]);
@@ -306,10 +306,10 @@ class MYpdf extends FPDF {
         $this->Text($x, $y, $txt);
         $this->Rotate(0);
     }
-    
-    
+
+
     var $angle=0;
-    
+
     function Rotate($angle, $x=-1, $y=-1)
     {
         if($x==-1)
@@ -329,7 +329,7 @@ class MYpdf extends FPDF {
             $this->_out(sprintf('q %.5f %.5f %.5f %.5f %.2f %.2f cm 1 0 0 1 %.2f %.2f cm', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy));
         }
     }
-    
+
 }
 
 
