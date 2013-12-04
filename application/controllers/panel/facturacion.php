@@ -189,6 +189,72 @@ class facturacion extends MY_Controller {
   }
 
   /**
+   * Agrega una factura a la bd
+   *
+   * @return void
+   */
+  public function refacturar()
+  {
+    $this->carabiner->js(array(
+        array('libs/jquery.numeric.js'),
+        array('general/keyjump.js'),
+        array('general/util.js'),
+        array('panel/facturacion/frm_addmod.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info']; //info empleado
+    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
+    $params['seo']            = array('titulo' => 'Facturar');
+    $params['pagar_ordent']   = false;
+
+    if(isset($_GET['ordent']{0}))
+      $this->asignaOrdenTrabajo($_GET['ordent']);
+
+    $this->load->library('cfdi');
+    $this->load->model('facturacion_model');
+
+    $this->configAddModFactura();
+    if($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $respons = $this->facturacion_model->refacturar($_GET['idr']);
+
+      if($respons['passes'])
+        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+      else
+        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+    }
+
+    // Parametros por default.
+    $params['series'] = $this->facturacion_model->getSeriesFolios(100);
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['idr']);
+
+    // echo "<pre>";
+    //   var_dump($params['factura']);
+    // echo "</pre>";exit;
+
+    $params['unidades'] = $this->db->select('*')
+      ->from('unidades')
+      ->where('status', 't')
+      ->order_by('nombre')
+      ->get()
+      ->result();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/facturacion/refacturar', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
    * Paga una factura.
    *
    * @return void

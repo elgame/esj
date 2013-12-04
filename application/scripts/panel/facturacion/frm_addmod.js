@@ -185,7 +185,7 @@ $(function(){
 
     $tr.find('#prod_dreten_iva_porcent').val($this.find('option:selected').val());
 
-    calculaTotalProducto ($tr)
+    calculaTotalProducto ($tr);
   });
 
   loadPalletByFolio();
@@ -363,7 +363,6 @@ var EventOnChangeMedida = function () {
 };
 
 function calculaTotalProducto ($tr) {
-
   var $cantidad   = $tr.find('#prod_dcantidad'),
       $precio_uni = $tr.find('#prod_dpreciou'),
       $iva        = $tr.find('#diva'),
@@ -433,23 +432,26 @@ function addProducto(unidades, prod) {
     var $cantidadInput = $tr.find('#prod_dcantidad'); // input cantidad.
 
     // Le suma la cantidad de cajas a la clasificacion.
+    console.log($cantidadInput.val(), prod.cajas);
     $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
+    calculaTotalProducto($tr);
 
     var existe2 = false,
         palletsClasifi = $tr.attr('data-pallets').split('-');
 
-      for (var i in palletsClasifi) {
-        if (palletsClasifi[i] == prod.id_pallet) {
-          existe2 = true;
-          return false;
-        }
+    for (var i in palletsClasifi) {
+      if (palletsClasifi[i] == prod.id_pallet) {
+        existe2 = true;
+        return false;
       }
+    }
 
     if ( ! existe2) {
       var pallets = $tr.attr('data-pallets') + '-' + prod.id_pallet;
       $tr.attr('data-pallets', pallets);
       $tr.find('#pallets_id').val(pallets);
     }
+
   } else {
     var unidadesHtml = '';
     for (var i in unidades) {

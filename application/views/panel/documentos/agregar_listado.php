@@ -45,7 +45,9 @@
 
             // Si el documento es el ACOMODO DEL EMBARQUE.
             if ($doc->nombre === 'ACOMODO DEL EMBARQUE')
+            {
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, $doc->id_documento);
+            }
 
             // Si el documento es el MANIFIESTO DEL CAMION entonces obtiene los datos de embarque y del manifiesto chofer.
             if ($doc->nombre === 'MANIFIESTO DEL CAMION')
@@ -54,7 +56,7 @@
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, 2);
 
               $params['dataClasificaciones'] = array('clasificaciones' => array());
-              if(count($params['dataEmbarque']) > 0)
+              if(isset($params['dataEmbarque']['info']))
                 $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
             }
 

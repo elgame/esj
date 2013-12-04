@@ -307,8 +307,10 @@ class documentos_model extends CI_Model {
                 fep.descripcion,
                 fep.temperatura,
                 rp.no_cajas AS cajas,
+                rp.kilos_pallet,
                 string_agg(clasi.nombre::text, ', '::text) AS clasificaciones,
-                cali.calibres
+                cali.calibres,
+                string_agg(eti.etiquetas::text, ', '::text) AS etiquetas
 
          FROM facturacion_doc_embarque_pallets fep
 
@@ -322,6 +324,14 @@ class documentos_model extends CI_Model {
             ORDER BY rpr.id_pallet
          ) AS clasi ON clasi.id_pallet = fep.id_pallet
 
+         LEFT JOIN (
+             SELECT rpr.id_pallet, et.nombre as etiquetas
+             FROM rastria_pallets_rendimiento rpr
+             INNER JOIN etiquetas et ON rpr.id_etiqueta = et.id_etiqueta
+             GROUP BY rpr.id_pallet, rpr.id_etiqueta, et.nombre
+             ORDER BY rpr.id_pallet
+          ) AS eti ON eti.id_pallet = fep.id_pallet
+
         LEFT JOIN (
             SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
             FROM rastria_pallets_calibres rpc
@@ -331,13 +341,33 @@ class documentos_model extends CI_Model {
         ) cali ON cali.id_pallet = fep.id_pallet
 
         WHERE id_embarque = {$data['info'][0]->id_embarque}
-        GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas, cali.calibres
+        GROUP BY fep.no_posicion, fep.id_pallet, fep.id_pallet, fep.marca, fep.descripcion, fep.temperatura, rp.no_cajas, cali.calibres, rp.kilos_pallet
         ORDER BY fep.no_posicion ASC"
       );
 
       if ($sql->num_rows() > 0)
         $data['pallets'] = $sql->result();
+
+
     }
+
+    // Obtiene los kilos de la pesada segun el ticket seleccionado en el documento
+    // manifiesto de chofer.
+    $infoManifiesto = $this->getJsonDataDocus($idFactura, 1);
+
+    $data['kilos_pesada'] = 'Ticket no asignado';
+    if ($infoManifiesto && $infoManifiesto->no_ticket !== '')
+    {
+      $data['kilos_pesada'] = $this->db->select('kilos_neto')
+        ->from('bascula')
+        ->where('id_area', $infoManifiesto->area_id)
+        ->where('folio', $infoManifiesto->no_ticket)
+        ->get()->row()->kilos_neto;
+    }
+
+    // echo "<pre>";
+    //   var_dump($data['kilos_pesada']);
+    // echo "</pre>";exit;
 
     return $data;
   }
@@ -1152,6 +1182,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetFont('Arial','',9);
     // TRACK
+    $totalKilosPallets = 0;
     for ($i=1; $i < 24 ; $i = $i + 2)
     {
       $y = $pdf->GetY();
@@ -1170,7 +1201,10 @@ class documentos_model extends CI_Model {
         if ($pallet->no_posicion == $i)
         {
           if ($pallet->id_pallet != null)
+          {
             $txtTrack1 = $pallet->cajas;
+            $totalKilosPallets += floatval($pallet->kilos_pallet);
+          }
           else
             $txtTrack1 = $pallet->descripcion;
         }
@@ -1178,7 +1212,10 @@ class documentos_model extends CI_Model {
         if ($pallet->no_posicion == $i+1)
         {
           if ($pallet->id_pallet != null)
+          {
             $txtTrack2 = $pallet->cajas;
+            $totalKilosPallets += floatval($pallet->kilos_pallet);
+          }
           else
             $txtTrack2 = $pallet->descripcion;
         }
@@ -1193,6 +1230,10 @@ class documentos_model extends CI_Model {
       $pdf->SetXY(27, $y + 12);
       $pdf->Cell(20, 6, $txtTrack2, 1, 0, 'C', 1);
     }
+
+    $pdf->SetFont('Arial','B', 12);
+    $pdf->SetXY(104, 44);
+    $pdf->Cell(100, 6, 'Total Kilos: ' . $totalKilosPallets, 0, 0, 'R', 1);
 
     $pdf->SetTextColor(0,0,0);
     $pdf->SetXY(50, 52);
@@ -1215,7 +1256,7 @@ class documentos_model extends CI_Model {
         {
           if ($pallet->no_posicion == $i)
           {
-            $marca         = $pallet->id_pallet != null ? $pallet->marca : $pallet->descripcion;
+            $marca         = $pallet->id_pallet != null ? $pallet->etiquetas : $pallet->descripcion;
             $clasificacion = $pallet->clasificaciones;
             $calibres      = $pallet->calibres;
             $cajas         = $pallet->cajas;
@@ -1240,25 +1281,25 @@ class documentos_model extends CI_Model {
     $pdf->SetFont('Arial','B',8);
     $y = $pdf->GetY();
 
-    $pdf->SetXY(50, $y + 6);
+    $pdf->SetXY(50, $y + 2);
     $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . $data['info'][0]->fecha_carga, 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 13);
+    $pdf->SetXY(50, $y + 7);
     $pdf->Cell(50, 6, 'INICIO: ' . $jsonData->inicio, 0, 0, 'L', 1);
 
-    $pdf->SetXY(105, $y + 13);
+    $pdf->SetXY(105, $y + 7);
     $pdf->Cell(50, 6, 'TERMINO: ' . $jsonData->termino, 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 20);
+    $pdf->SetXY(50, $y + 12);
     $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . $data['info'][0]->fecha_embarque, 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 27);
+    $pdf->SetXY(50, $y + 17);
     $pdf->Cell(105, 6, 'ELABORO: ' . strtoupper($jsonData->elaboro), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 34);
+    $pdf->SetXY(50, $y + 22);
     $pdf->Cell(105, 6, 'DESTINO: ' . strtoupper($jsonData->destino), 0, 0, 'L', 1);
 
-    $pdf->SetXY(50, $y + 41);
+    $pdf->SetXY(50, $y + 27);
     $pdf->Cell(157, 6, 'DESTINATARIO: ' . strtoupper($jsonData->destinatario), 0, 0, 'L', 1);
 
     return array('pdf' => $pdf, 'texto' => 'ACOMODO DEL EMBARQUE.pdf');

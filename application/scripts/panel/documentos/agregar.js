@@ -371,6 +371,10 @@
       otrosCheckbox();
       otrosAdd();
       sendForm();
+
+      if ($('#total-kilos-pallets').val() !== '0') {
+        $('#kilos-pallets').html($('#total-kilos-pallets').val());
+      }
     }
 
     function draggable () {
@@ -381,8 +385,8 @@
           // on older version of jQuery use "draggable"
           // $(this).data("draggable")
           $(this).data("uiDraggable").originalPosition = {
-              top : 0,
-              left : 0
+            top : 0,
+            left : 0
           };
           // return boolean
           return !event;
@@ -417,10 +421,13 @@
 
           $tableDETr = $tableDatosEmbarque.find('#noPos'+noPosicion);
 
+          $totalKilosPallet = $('#kilos-pallets');
+
           idPallet        = $draggable.attr('data-id-pallet');
           clasificaciones = $draggable.attr('data-clasificaciones');
           calibres        = $draggable.attr('data-calibres');
           cajas           = $draggable.attr('data-cajas');
+          kilosPallet     = $draggable.attr('data-kilos-pallet');
 
           $tableDETr.find('#pid_pallet').val(idPallet);
           $tableDETr.find('#pclasificacion').val(clasificaciones);
@@ -430,6 +437,8 @@
 
           $droppable.find('p').html(cajas).css('color', 'red');
           $droppable.attr("data-drag", $draggable.attr('data-id-pallet'));
+
+          $totalKilosPallet.html(parseFloat($totalKilosPallet.html()) + parseFloat(kilosPallet));
         },
         out: function( event, ui ) {
           // console.log(this);
@@ -457,6 +466,9 @@
             $tableDETr.find('#pcajas').val('');
             $tableDETr.find('#pcajas-span').html('0');
 
+            $totalKilosPallet = $('#kilos-pallets');
+            kilosPallet = $draggable.attr('data-kilos-pallet');
+            $totalKilosPallet.html(parseFloat($totalKilosPallet.html()) - parseFloat(kilosPallet));
 
             $droppable.attr("data-drag", '');
           }
