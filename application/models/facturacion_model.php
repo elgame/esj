@@ -1806,7 +1806,7 @@ class facturacion_model extends privilegios_model{
 
         // 0, 171, 72 = verde
 
-        $pdf->SetFont('helvetica','B', 12);
+        $pdf->SetFont('helvetica','B', 9);
         // $pdf->SetFillColor(0, 171, 72);
         $pdf->SetTextColor(255, 255, 255);
         // $pdf->SetXY(0, 0);
@@ -1814,69 +1814,69 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(0, $pdf->GetY());
-        $pdf->Cell(108, 6, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
+        $pdf->Cell(108, 4, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
 
-        $pdf->SetFont('helvetica','B', 12);
+        // $pdf->SetFont('helvetica','B', 12);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
-        $pdf->Cell(108, 6, "Emisor:", 0, 0, 'L', 1);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 10);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
-        $pdf->MultiCell(108, 6, $xml->Emisor[0]['nombre'], 0, 'L', 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->MultiCell(108, 4, $xml->Emisor[0]['nombre'], 0, 'L', 0);
 
         /////////////////////////////////////
         // Folio Fisca, CSD, Lugar y Fecha //
         /////////////////////////////////////
 
-        $pdf->SetFont('helvetica','B', 12);
+        $pdf->SetFont('helvetica','B', 9);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
         $pdf->SetXY(109, 0);
-        $pdf->Cell(108, 6, "Folio Fiscal:", 0, 0, 'R', 1);
+        $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
 
         $pdf->SetXY(109, 0);
-        $pdf->Cell(50, 6, $factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito', 0, 0, 'L', 1);
+        $pdf->Cell(50, 4, $factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito', 0, 0, 'L', 1);
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(109, 6);
-        $pdf->Cell(108, 6, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
+        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
 
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
-        $pdf->Cell(108, 6, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
 
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
-        $pdf->Cell(108, 6, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
 
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
-        $pdf->Cell(108, 6, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
 
-        $pdf->SetFont('helvetica','', 12);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
 
         $pais   = strtoupper($xml->Emisor->DomicilioFiscal[0]['pais']);
         $estado = strtoupper($xml->Emisor->DomicilioFiscal[0]['estado']);
         $fecha = $xml[0]['fecha'];
 
-        $pdf->Cell(108, 6, "{$pais} {$estado} {$fecha}", 0, 0, 'R', 0);
+        $pdf->Cell(108, 4, "{$pais} {$estado} {$fecha}", 0, 0, 'R', 0);
 
-        $pdf->SetFont('helvetica','b', 12);
+        $pdf->SetFont('helvetica','b', 9);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
-        $pdf->Cell(108, 6, "Régimen Fiscal:", 0, 0, 'R', 1);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "Régimen Fiscal:", 0, 0, 'R', 1);
 
-        $pdf->SetFont('helvetica','', 12);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, $pdf->GetY() + 6);
-        $pdf->MultiCell(108, 6, $xml->Emisor->RegimenFiscal[0]['Regimen'], 0, 'C', 0);
+        $pdf->SetXY(109, $pdf->GetY() + 4);
+        $pdf->MultiCell(108, 4, $xml->Emisor->RegimenFiscal[0]['Regimen'], 0, 'C', 0);
 
         //////////////////
         // domicilioEmisor //
@@ -1891,16 +1891,16 @@ class facturacion_model extends privilegios_model{
         $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['municipio'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['municipio'] : '';
         $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['estado'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['estado'] : '';
 
-        $pdf->SetFont('helvetica','B', 12);
+        $pdf->SetFont('helvetica','B', 9);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY() + 1);
-        $pdf->Cell(216, 6, "Domicilio:", 0, 0, 'L', 1);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(216, 4, "Domicilio:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 10);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
-        $pdf->Cell(216, 6, $domicilioEmisor, 0, 0, 'C', 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(216, 4, $domicilioEmisor, 0, 0, 'C', 0);
 
         //////////////////
         // Datos Receptor //
@@ -1915,31 +1915,31 @@ class facturacion_model extends privilegios_model{
         $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['estado'])) ? ', '.$xml->Receptor->Domicilio[0]['estado'] : '';
 
         $pdf->SetFillColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
         $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','B', 11);
+        $pdf->SetFont('helvetica','B', 9);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(0, $pdf->GetY() + 1);
-        $pdf->Cell(216, 6, "Receptor:", 0, 0, 'L', 1);
+        $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 11);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
-        $pdf->Cell(216, 6, "Nombre: {$xml->Receptor[0]['nombre']} RFC: {$xml->Receptor[0]['rfc']}", 0, 0, 'L', 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(216, 4, "Nombre: {$xml->Receptor[0]['nombre']} RFC: {$xml->Receptor[0]['rfc']}", 0, 0, 'L', 0);
 
-        $pdf->SetFont('helvetica','', 11);
+        $pdf->SetFont('helvetica','', 9);
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 6);
-        $pdf->Cell(216, 6, "Domicilio: {$domicilioReceptor}", 0, 0, 'L', 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(216, 4, "Domicilio: {$domicilioReceptor}", 0, 0, 'L', 0);
 
         ///////////////
         // Productos //
         ///////////////
 
         $pdf->SetFillColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY() + 8);
+        $pdf->SetXY(0, $pdf->GetY() + 5);
         $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
         $pdf->SetXY(0, $pdf->GetY());
@@ -1949,7 +1949,7 @@ class facturacion_model extends privilegios_model{
 
         $conceptos = current($xml->Conceptos);
 
-        // for ($i=0; $i < 3; $i++)
+        // for ($i=0; $i < 30; $i++)
         //   $conceptos[] = $conceptos[$i];
 
         // echo "<pre>";
@@ -2001,38 +2001,6 @@ class facturacion_model extends privilegios_model{
         if($pdf->GetY() + 30 >= $pdf->limiteY) //salta de pagina si exede el max
             $pdf->AddPage();
 
-        $pdf->SetFillColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY());
-        $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
-
-        $pdf->SetFillColor(242, 242, 242);
-        $pdf->SetXY(0, $pdf->GetY() + 1);
-        $pdf->Cell(156, 30, "", 1, 0, 'L', 1);
-
-        $pdf->SetFont('helvetica','B', 9);
-        $pdf->SetXY(1, $pdf->GetY() + 1);
-        $pdf->Cell(154, 8, "Total con letra:", 0, 0, 'L', 1);
-
-        $pdf->SetFont('helvetica', '', 11);
-        $pdf->SetXY(0, $pdf->GetY() + 8);
-        $pdf->MultiCell(156, 8, $factura['info']->total_letra, 0, 'C', 0);
-
-        $pdf->SetFont('helvetica','B', 10);
-        $pdf->SetXY(1, $pdf->GetY() + 6);
-        $pdf->Cell(78, 5, $xml[0]['formaDePago'], 0, 0, 'L', 1);
-
-        $pdf->SetFont('helvetica','B', 10);
-        $pdf->SetXY(78, $pdf->GetY());
-        $pdf->Cell(78, 5, "Pago en {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
-
-
-        $pdf->SetFont('helvetica','B', 10);
-        $pdf->SetXY(156, $pdf->GetY() - 23);
-        $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
-
-        $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6, String::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
-
         // Traslados | IVA
         $ivas = current($xml->Impuestos->Traslados);
 
@@ -2051,35 +2019,77 @@ class facturacion_model extends privilegios_model{
             $traslado16 = $iva[0]['importe'];
         }
 
-        $pdf->SetXY(156, $pdf->GetY() + 6);
-        $pdf->Cell(30, 6, "IVA(11%)", 1, 0, 'C', 1);
+        $pdf->SetFillColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+        $h = 25 - ($traslado11 == 0 ? 5 : 0);
+        $h = $h - ($xml->Impuestos->Retenciones->Retencion[0]['importe'] == 0 ? 5 : 0);
+
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->Cell(156, $h, "", 1, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(1, $pdf->GetY() + 1);
+        $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->MultiCell(156, 6, $factura['info']->total_letra, 0, 'C', 0);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(1, $pdf->GetY());
+        $pdf->Cell(78, 4, $xml[0]['formaDePago'], 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(78, $pdf->GetY());
+        $pdf->Cell(78, 4, "Pago en {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 10);
+        $pdf->SetXY(156, $pdf->GetY() - 11);
+        $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5, String::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
 
-        $pdf->SetXY(156, $pdf->GetY() + 6);
-        $pdf->Cell(30, 6, "IVA(16%)", 1, 0, 'C', 1);
+        // Pinta traslados, retenciones
+
+        if ($traslado11 != 0)
+        {
+          $pdf->SetXY(156, $pdf->GetY() + 5);
+          $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
+
+          $pdf->SetXY(186, $pdf->GetY());
+          $pdf->Cell(30, 5,String::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
+        }
+
+        $pdf->SetXY(156, $pdf->GetY() + 5);
+        $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5,String::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
 
-        $pdf->SetXY(156, $pdf->GetY() + 6);
-        $pdf->Cell(30, 6, "IVA Retenido", 1, 0, 'C', 1);
+        if ($xml->Impuestos->Retenciones->Retencion[0]['importe'] != 0)
+        {
+          $pdf->SetXY(156, $pdf->GetY() + 5);
+          $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
+
+          $pdf->SetXY(186, $pdf->GetY());
+          $pdf->Cell(30, 5,String::formatoNumero($xml->Impuestos->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
+        }
+
+        $pdf->SetXY(156, $pdf->GetY() + 5);
+        $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($xml->Impuestos->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
-
-        $pdf->SetXY(156, $pdf->GetY() + 6);
-        $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
-
-        $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5,String::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
 
         ///////////////////
         // Observaciones //
         ///////////////////
 
-        $pdf->SetXY(0, $pdf->GetY() + 6);
+        $pdf->SetXY(0, $pdf->GetY() + 5);
 
         $width = (($pdf->GetStringWidth($factura['info']->observaciones) / 216) * 8) + 9;
 
@@ -2108,13 +2118,13 @@ class facturacion_model extends privilegios_model{
         if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
             $pdf->AddPage();
 
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->SetXY(10, $pdf->GetY());
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetXY(10, $pdf->GetY() - 1);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
         $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
 
-        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetFont('helvetica', '', 8);
         $pdf->SetY($pdf->GetY() - 3);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
@@ -2123,13 +2133,13 @@ class facturacion_model extends privilegios_model{
         if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
             $pdf->AddPage();
 
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->SetXY(10, $pdf->GetY());
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetXY(10, $pdf->GetY() - 2);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
         $pdf->Row(array('Sello Digital del SAT:'), false, 0);
 
-        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetFont('helvetica', '', 8);
         $pdf->SetY($pdf->GetY() - 3);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
@@ -2176,7 +2186,7 @@ class facturacion_model extends privilegios_model{
         //   var_dump($code, $total, $diff);
         // echo "</pre>";exit;
 
-        QRcode::png($code, APPPATH.'media/qrtemp.png', 'H', 4);
+        QRcode::png($code, APPPATH.'media/qrtemp.png', 'H', 3);
 
         if($pdf->GetY() + 50 >= $pdf->limiteY) //salta de pagina si exede el max
             $pdf->AddPage();
@@ -2191,36 +2201,36 @@ class facturacion_model extends privilegios_model{
         // Timbrado Datos //
         ////////////////////
 
-        $pdf->SetFont('helvetica', 'B', 9);
-        $pdf->SetXY(60, $pdf->GetY() - 59);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetXY(45, $pdf->GetY() - 44);
         $pdf->SetAligns(array('L'));
-        $pdf->SetWidths(array(145));
+        $pdf->SetWidths(array(160));
         $pdf->Row(array('Cadena Original del complemento de certificación digital del SAT:'), false, 0);
 
-        $pdf->SetFont('helvetica', '', 9);
+        $pdf->SetFont('helvetica', '', 8);
         $cadenaOriginalSAT = "||{$xml->Complemento->TimbreFiscalDigital[0]['version']}|{$xml->Complemento->TimbreFiscalDigital[0]['UUID']}|{$xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado']}|{$xml->Complemento->TimbreFiscalDigital[0]['selloCFD']}|{$xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT']}||";
-        $pdf->SetXY(60, $pdf->GetY() - 3);
+        $pdf->SetXY(45, $pdf->GetY() - 3);
         $pdf->Row(array($cadenaOriginalSAT), false, 0);
 
-        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->SetFont('helvetica', 'B', 10);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(60, $pdf->GetY() + 1);
-        $pdf->Cell(80, 8, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+        $pdf->SetXY(45, $pdf->GetY() + 1);
+        $pdf->Cell(80, 6, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
 
-        $pdf->SetXY(140, $pdf->GetY());
+        $pdf->SetXY(125, $pdf->GetY());
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->Cell(65, 8, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+        $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
 
-        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->SetFont('helvetica', 'B', 10);
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(60, $pdf->GetY() + 16);
-        $pdf->Cell(80, 8, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+        $pdf->SetXY(45, $pdf->GetY() + 10);
+        $pdf->Cell(80, 6, "Fecha y hora de certificación:", 0, 0, 'R', 1);
 
-        $pdf->SetXY(140, $pdf->GetY());
+        $pdf->SetXY(125, $pdf->GetY());
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->Cell(65, 8, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
+        $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
 
 
         //------------ IMAGEN CANDELADO --------------------
@@ -2266,6 +2276,17 @@ class facturacion_model extends privilegios_model{
   {
     $this->db->update('facturacion', array('refacturada' => 't'), array('id_factura' => $facturaId));
 
-    return $this->addFactura();
+    $resultTimbrado =  $this->addFactura();
+
+    if ($resultTimbrado['passes'])
+    {
+      // Actualiza el cliente de los pallets.
+      foreach ($_POST['palletsIds'] as $palletId)
+      {
+        $this->db->update('rastria_pallets', array('id_cliente' => $_POST['did_cliente']), array('id_pallet' => $palletId));
+      }
+
+      return $resultTimbrado;
+    }
   }
 }
