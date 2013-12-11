@@ -19,54 +19,58 @@ class Ventas_model extends privilegios_model{
 	public function getVentas($perpage = '40', $sql2='')
   {
 		$sql = '';
-		//paginacion
-		$params = array(
-				'result_items_per_page' => $perpage,
-				'result_page' 			=> (isset($_GET['pag'])? $_GET['pag']: 0)
-		);
-		if($params['result_page'] % $params['result_items_per_page'] == 0)
-			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+    //paginacion
+    $params = array(
+        'result_items_per_page' => $perpage,
+        'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+    );
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
-		//Filtros para buscar
-		if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-			$sql = " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-		elseif($this->input->get('ffecha1') != '')
-			$sql = " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
-		elseif($this->input->get('ffecha2') != '')
-			$sql = " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
+    //Filtros para buscar
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql = " AND Date(f.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    elseif($this->input->get('ffecha1') != '')
+      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha1')."'";
+    elseif($this->input->get('ffecha2') != '')
+      $sql = " AND Date(f.fecha) = '".$this->input->get('ffecha2')."'";
 
-		// if($this->input->get('fserie') != '')
-		// 	$sql .= " AND c.serie = '".$this->input->get('fserie')."'";
-		if($this->input->get('ffolio') != '')
-			$sql .= " AND f.folio = '".$this->input->get('ffolio')."'";
-		if($this->input->get('fstatus') != '')
-			$sql .= " AND f.status = '".$this->input->get('fstatus')."'";
-		if($this->input->get('fid_cliente') != '')
-			$sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
+    // if($this->input->get('fserie') != '')
+    //  $sql .= " AND c.serie = '".$this->input->get('fserie')."'";
+    if($this->input->get('ffolio') != '')
+      $sql .= " AND f.folio = '".$this->input->get('ffolio')."'";
+    if($this->input->get('fstatus') != '')
+      $sql .= " AND f.status = '".$this->input->get('fstatus')."'";
+    if($this->input->get('fid_cliente') != '')
+      $sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
     if($this->input->get('did_empresa') != '')
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 
-		$query = BDUtil::pagination("
-				SELECT f.id_venta, Date(f.fecha) AS fecha, f.folio, c.nombre_fiscal,
-                e.nombre_fiscal as empresa, f.condicion_pago, forma_pago,  f.status, f.total
-				FROM facturacion_ventas_remision AS f
+    if($this->input->get('dobserv') != '')
+      $sql .= " AND lower(f.Observaciones) LIKE '%".$this->input->get('dobserv')."%'";
+
+    $query = BDUtil::pagination("
+        SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
+                e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
+                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada
+        FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-				WHERE 1 = 1".$sql.$sql2."
-				ORDER BY (Date(f.fecha)) DESC
-				", $params, true);
-		$res = $this->db->query($query['query']);
+        WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
+        ORDER BY (f.fecha, f.folio) DESC
+        ", $params, true);
+    $res = $this->db->query($query['query']);
 
-		$response = array(
-				'fact' => array(),
-				'total_rows' 		=> $query['total_rows'],
-				'items_per_page' 	=> $params['result_items_per_page'],
-				'result_page' 		=> $params['result_page']
-		);
-		if($res->num_rows() > 0)
-			$response['fact'] = $res->result();
+    $response = array(
+        'fact'           => array(),
+        'total_rows'     => $query['total_rows'],
+        'items_per_page' => $params['result_items_per_page'],
+        'result_page'    => $params['result_page']
+    );
+    if($res->num_rows() > 0)
+      $response['fact'] = $res->result();
 
-		return $response;
+    return $response;
 	}
 
 	/**
@@ -76,8 +80,8 @@ class Ventas_model extends privilegios_model{
   {
 		$res = $this->db
             ->select("*")
-            ->from('facturacion_ventas_remision')
-            ->where("id_venta = {$id}")
+            ->from('facturacion')
+            ->where("id_factura = {$id}")
             ->get();
 
     if($res->num_rows() > 0)
@@ -102,11 +106,11 @@ class Ventas_model extends privilegios_model{
 			$response['info']->cliente = $prov['info'];
 
       $res = $this->db
-        ->select('fp.id_venta, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
-                fp.importe, fp.unidad, cl.cuenta_cpi')
-        ->from('facturacion_ventas_remision_productos as fp')
-        	->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->where('fp.id_venta = ' . $id)
+        ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
+                  fp.importe, fp.iva, fp.unidad, fp.retencion_iva, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets, cl.cuenta_cpi')
+        ->from('facturacion_productos as fp')
+        ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
+        ->where('fp.id_factura = ' . $id)
         ->get();
 
       $response['productos'] = $res->result();
@@ -122,8 +126,9 @@ class Ventas_model extends privilegios_model{
 	public function getFolio($empresa)
   {
 		$res = $this->db->select('folio')->
-                      from('facturacion_ventas_remision')->
+                      from('facturacion')->
                       where("id_empresa = {$empresa}")->
+                      where("is_factura = 'f'")->
                       order_by('folio', 'DESC')->
                       limit(1)->get()->row();
 
@@ -136,7 +141,7 @@ class Ventas_model extends privilegios_model{
 	}
 
 	/**
-	 * Agrega una notas remison a la bd
+	 * Agrega una nota remison a la bd
 	 */
 	public function addNotaVenta()
   {
@@ -149,26 +154,38 @@ class Ventas_model extends privilegios_model{
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
+      'version'             => $this->input->post('dversion'),
+      'serie'               => '',
       'folio'               => $this->input->post('dfolio'),
       'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
-      'subtotal'            => $this->input->post('total_importe'),
+      'subtotal'            => floatval($_POST['total_subtotal']) - floatval($_POST['total_iva']),
+      'importe_iva'          => $this->input->post('total_iva'),
       'total'               => $this->input->post('total_totfac'),
       'total_letra'         => $this->input->post('dttotal_letra'),
+      'no_aprobacion'       => 0,
+      'ano_aprobacion'      => '',
       'forma_pago'          => $formaPago,
       'metodo_pago'         => $this->input->post('dmetodo_pago'),
+      'no_certificado'      => $this->input->post('dno_certificado'),
+      'cadena_original'      => '',
+      'sello'                => '',
+      'certificado'          => '',
       'condicion_pago'      => $this->input->post('dcondicion_pago'),
       'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
       'observaciones'       => $this->input->post('dobservaciones'),
       'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+      'status_timbrado'     => 'p',
+      'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
+      'is_factura'          => 'f'
     );
 
-    $this->db->insert('facturacion_ventas_remision', $datosFactura);
-    $id_venta = $this->db->insert_id('facturacion_ventas_remision', 'id_venta');
+    $this->db->insert('facturacion', $datosFactura);
+    $id_venta = $this->db->insert_id();
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
     $dataCliente = array(
-      'id_venta'    => $id_venta,
+      'id_factura'    => $id_venta,
       'nombre'      => $cliente['info']->nombre_fiscal,
       'rfc'         => $cliente['info']->rfc,
       'calle'       => $cliente['info']->calle,
@@ -181,36 +198,59 @@ class Ventas_model extends privilegios_model{
       'cp'          => $cliente['info']->cp,
       'pais'        => 'MEXICO',
     );
-    $this->db->insert('facturacion_ventas_remision_cliente', $dataCliente);
+    $this->db->insert('facturacion_cliente', $dataCliente);
 
     // Productos
-    $productosFactura   = array(); // Productos para la Factura
+    $productosFactura   = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
     {
       if ($_POST['prod_importe'][$key] != 0)
       {
         $productosFactura[] = array(
-          'id_venta'         => $id_venta,
+          'id_factura'       => $id_venta,
           'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
           'num_row'          => intval($key),
           'cantidad'         => $_POST['prod_dcantidad'][$key],
           'descripcion'      => $descripcion,
           'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-          'importe'          => $_POST['prod_importe'][$key],
+          'importe'          => floatval($_POST['prod_importe'][$key]) - floatval($_POST['prod_diva_total'][$key]),
+          'iva'              => $_POST['prod_diva_total'][$key],
           'unidad'           => $_POST['prod_dmedida'][$key],
+          // 'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+          'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
+          // 'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+          'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
         );
       }
     }
-    $this->db->insert_batch('facturacion_ventas_remision_productos', $productosFactura);
+    $this->db->insert_batch('facturacion_productos', $productosFactura);
 
-		return array(true, $status, $id_venta);
+    if (isset($_POST['palletsIds']))
+    {
+      $pallets = array(); // Ids de los pallets cargados en la factura.
+      // Crea el array de los pallets a insertar.
+      foreach ($_POST['palletsIds'] as $palletId)
+      {
+        $pallets[] = array(
+          'id_factura' => $id_venta,
+          'id_pallet'  => $palletId
+        );
+      }
+
+      if (count($pallets) > 0)
+      {
+        $this->db->insert_batch('facturacion_pallets', $pallets);
+      }
+    }
+
+		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 
 	/**
 	 * Cancela una nota, la elimina
 	 */
 	public function cancelaNotaRemison($id_venta){
-		$this->db->update('facturacion_ventas_remision', array('status' => 'ca'), "id_venta = '{$id_venta}'");
+		$this->db->update('facturacion', array('status' => 'ca'), "id_factura = '{$id_venta}'");
 		return array(true, '');
 	}
 
@@ -218,14 +258,13 @@ class Ventas_model extends privilegios_model{
    * Paga una nota
    */
   public function pagaNotaRemison($id_venta){
-    $this->db->update('facturacion_ventas_remision', array('status' => 'pa'), "id_venta = '{$id_venta}'");
+    $this->db->update('facturacion', array('status' => 'pa'), "id_factura = '{$id_venta}'");
     return array(true, '');
   }
 
 	public function generaNotaRemisionPdf($id_venta, $path = null)
 	{
-    include(APPPATH.'libraries/phpqrcode/qrlib.php');
-
+    // include(APPPATH.'libraries/phpqrcode/qrlib.php');
     $venta = $this->getInfoVenta($id_venta);
 
     // echo "<pre>";
@@ -393,10 +432,10 @@ class Ventas_model extends privilegios_model{
         $item->unidad,
         $item->descripcion,
         String::formatoNumero($item->precio_unitario, 3),
-        String::formatoNumero($item->importe, 3),
+        String::formatoNumero(floatval($item->importe) + floatval($item->iva), 3),
       ), false);
     }
-    
+
     /////////////
     // Totales //
     /////////////
@@ -428,15 +467,14 @@ class Ventas_model extends privilegios_model{
     $pdf->SetXY(78, $pdf->GetY());
     $pdf->Cell(78, 5, "Pago en {$venta['info']->metodo_pago}", 0, 0, 'L', 0);
 
+    // $pdf->SetFont('helvetica','B', 10);
+    // $pdf->SetXY(156, $pdf->GetY() - 23);
+    // $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
 
-    $pdf->SetFont('helvetica','B', 10);
+    // $pdf->SetXY(186, $pdf->GetY());
+    // $pdf->Cell(30, 6, String::formatoNumero($venta['info']->subtotal), 1, 0, 'C', 1);
+
     $pdf->SetXY(156, $pdf->GetY() - 23);
-    $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
-
-    $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 6, String::formatoNumero($venta['info']->subtotal), 1, 0, 'C', 1);
-
-    $pdf->SetXY(156, $pdf->GetY() + 6);
     $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
@@ -455,7 +493,7 @@ class Ventas_model extends privilegios_model{
 
     if ( ! empty($venta['info']->observaciones))
     {
-        $pdf->SetX(0);
+        $pdf->SetXY(0, $pdf->GetY() + 3);
         $pdf->SetFont('helvetica','B', 10);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));

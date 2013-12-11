@@ -21,6 +21,7 @@
     // Chofer Foto Firma Manifiesto
     doc_cffm.btnSnapshot();
     doc_cffm.btnSnapshotSave();
+    doc_cffm.btnDelCaptura();
 
     // Acomodo de Embarque
     doc_acoemb.init();
@@ -294,7 +295,7 @@
     return {
       'loadTicket': loadTicket,
       'btnSave': btnSave
-    }
+    };
 
   })(window.jQuery, window);
 
@@ -352,9 +353,30 @@
       });
     }
 
+    function btnDelCaptura () {
+      $('#btn-del-captura').on('click', function(event) {
+        if ($('#imgCapture').attr('src') !== '') {
+          $('#imgCapture').attr('src', '');
+          $('#inputImgCapture').val('');
+
+          var json = {};
+
+          // Id de la factura y documento a actualizar.
+          json.factura_id   = $('#facturaId').val();
+          json.documento_id = $('#documentoId').val();
+          json.url    = '';
+
+          $.post(base_url + 'panel/documentos/ajax_del_snaptshot/', json, function(data) {
+            $('#btn-show-captura').remove();
+          }, 'json');
+        }
+      });
+    }
+
     return {
       'btnSnapshot': btnSnapshot,
-      'btnSnapshotSave': btnSnapshotSave
+      'btnSnapshotSave': btnSnapshotSave,
+      'btnDelCaptura': btnDelCaptura,
     };
 
   })(window.jQuery, window);

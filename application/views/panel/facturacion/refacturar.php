@@ -49,13 +49,14 @@
                             <?php // echo $ser->serie.($ser->leyenda!=''? '-'.$ser->leyenda: ''); ?></option>
                       <?php // } ?>
                   </select>
+                  <input type="hidden" id="serie-selected" value="<?php echo set_value('dserie', $factura['info']->serie) ?>">
                 </div>
               </div>
 
               <div class="control-group">
                 <label class="control-label" for="dfolio">Folio</label>
                 <div class="controls">
-                  <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo set_value('dfolio', (isset($folio)? $folio[0]: '')); ?>" size="15" readonly>
+                  <input type="number" name="dfolio" class="span9" id="dfolio" value="<?php echo isset($_POST['dfolio']) ? $_POST['dfolio'] : ''; ?>" size="15" readonly>
 
                   <input type="hidden" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
                   <!-- <input type="hidden" name="dimg_cbb" id="dimg_cbb" value="<?php //echo set_value('dimg_cbb'); ?>"> -->

@@ -35,7 +35,7 @@ class documentos_model extends CI_Model {
     * @param  string $idDocumento
     * @return boolean
     */
-  private function updateDocumento($data, $idFactura, $idDocumento, $status = 't')
+  public function updateDocumento($data, $idFactura, $idDocumento, $status = 't')
   {
     // Convierte los datos del documento a json.
     if (is_array($data))

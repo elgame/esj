@@ -46,6 +46,8 @@ class ventas extends MY_Controller {
 
     $params['datos_s'] = $this->ventas_model->getVentas();
 
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -60,20 +62,79 @@ class ventas extends MY_Controller {
    *
    * @return void
    */
+  // public function agregar()
+  // {
+  //   $this->carabiner->js(array(
+  //       array('libs/jquery.numeric.js'),
+  //       array('general/keyjump.js'),
+  //       array('general/util.js'),
+  //       array('panel/ventas_remision/frm_addmod.js'),
+  //   ));
+
+  //   $params['info_empleado']  = $this->info_empleado['info']; //info empleado
+  //   $params['seo']            = array('titulo' => 'Agregar Nota remisión');
+  //   $params['pagar_ordent']   = false;
+
+  //   $this->load->model('ventas_model');
+
+  //   $this->configAddModFactura();
+  //   if($this->form_validation->run() == FALSE)
+  //   {
+  //     $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+  //   }
+  //   else
+  //   {
+  //     $respons = $this->ventas_model->addNotaVenta();
+
+  //     if($respons[0])
+  //       redirect(base_url('panel/ventas/agregar/?msg=4&id='.$respons[2]));
+  //   }
+
+  //   $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+  //   if (isset($_GET['id']))
+  //   {
+  //     $params['id'] = $_GET['id'];
+  //   }
+
+  //   // Obtiene los datos de la empresa predeterminada.
+  //   $params['empresa_default'] = $this->db
+  //     ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+  //     ->from("empresas AS e")
+  //     ->where("e.predeterminado", "t")
+  //     ->get()
+  //     ->row();
+
+  //   if(isset($_GET['msg']{0}))
+  //     $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+  //   $this->load->view('panel/header', $params);
+  //   $this->load->view('panel/general/menu', $params);
+  //   $this->load->view('panel/ventas_remision/agregar', $params);
+  //   $this->load->view('panel/footer');
+  // }
+
+  /**
+   * Agrega una venta de remision a la bd
+   *
+   * @return void
+   */
   public function agregar()
   {
     $this->carabiner->js(array(
-        array('libs/jquery.numeric.js'),
-        array('general/keyjump.js'),
-        array('general/util.js'),
-        array('panel/ventas_remision/frm_addmod.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/ventas_remision/frm_addmod.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
-    $params['seo']            = array('titulo' => 'Agregar Nota remisión');
+    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
+    $params['seo']            = array('titulo' => 'Agregar remision');
     $params['pagar_ordent']   = false;
 
-    $this->load->model('ventas_model');
+    $this->load->library('cfdi');
+    $this->load->model('facturacion_model');
 
     $this->configAddModFactura();
     if($this->form_validation->run() == FALSE)
@@ -82,19 +143,22 @@ class ventas extends MY_Controller {
     }
     else
     {
+      $this->load->model('ventas_model');
       $respons = $this->ventas_model->addNotaVenta();
 
-      if($respons[0])
-        redirect(base_url('panel/ventas/agregar/?msg=4&id='.$respons[2]));
+      if($respons['passes'])
+      {
+        redirect(base_url('panel/ventas/agregar/?msg=4'));
+      }
     }
 
+    // Parametros por default.
+    $params['series'] = $this->facturacion_model->getSeriesFolios(100);
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
-    if (isset($_GET['id']))
-    {
-      $params['id'] = $_GET['id'];
-    }
-    
+    $params['getId'] = '';
+
+    // Parametros por default.
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->db
       ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
@@ -102,6 +166,15 @@ class ventas extends MY_Controller {
       ->where("e.predeterminado", "t")
       ->get()
       ->row();
+
+    // Obtiene el numero de certificado de la empresa predeterminada.
+    $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
+
+    $params['unidades'] = $this->db->select('*')
+      ->from('unidades')
+      ->where('status', 't')
+      ->order_by('nombre')
+      ->get()->result();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -136,32 +209,70 @@ class ventas extends MY_Controller {
 
   /**
    * Configura los metodos de agregar y modificar
+   *
+   * @return void
    */
-  private function configAddModFactura()
+  private function configAddModFactura($borrador = false)
   {
+    $required = 'required';
+
+    // $callback_seriefolio_check = 'callback_seriefolio_check';
+    $callback_isValidDate      = 'callback_isValidDate';
+    $callback_val_total        = 'callback_val_total';
+    $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
+    // if ($borrador)
+    // {
+    //   // $callback_seriefolio_check = '';
+    //   $callback_isValidDate      = '';
+    //   $callback_val_total        = '';
+    //   $callback_chk_cer_caduca   = '';
+    // }
+
     $this->load->library('form_validation');
     $rules = array(
 
         array('field'   => 'did_empresa',
               'label'   => 'Empresa',
-              'rules'   => 'required|numeric'),
+              'rules'   => 'required|max_length[25]'),
         array('field'   => 'did_cliente',
               'label'   => 'Cliente',
-              'rules'   => 'required|numeric'),
+              'rules'   => 'required|max_length[25]'),
+        array('field'   => 'dserie',
+              'label'   => 'Serie',
+              'rules'   => 'max_length[25]'),
         array('field'   => 'dfolio',
               'label'   => 'Folio',
               'rules'   => 'required|numeric|callback_seriefolio_check'),
+        // array('field'   => 'dno_aprobacion',
+        //       'label'   => 'Numero de aprobacion',
+        //       'rules'   => 'required|numeric'),
+        // array('field'   => 'dano_aprobacion',
+        //       'label'   => 'Fecha de aprobacion',
+        //       'rules'   => 'required|max_length[10]|'.$callback_isValidDate),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
               'rules'   => 'required|max_length[25]'), //|callback_isValidDate
 
-        array('field'   => 'total_importe',
+        // array('field'   => 'total_importe',
+        //       'label'   => 'SubTotal1',
+        //       'rules'   => 'numeric'),
+        array('field'   => 'total_subtotal',
               'label'   => 'SubTotal',
-              'rules'   => 'required|numeric'),
+              'rules'   => 'numeric'),
+
+        // array('field'   => 'total_descuento',
+        //       'label'   => 'Descuento',
+        //       'rules'   => $required.'|numeric'),
+        array('field'   => 'total_iva',
+              'label'   => 'IVA',
+              'rules'   => 'numeric'),
+        // array('field'   => 'total_retiva',
+        //       'label'   => 'Retencion IVA',
+        //       'rules'   => $required.'|numeric'),
         array('field'   => 'total_totfac',
               'label'   => 'Total',
-              'rules'   => 'required|numeric|callback_val_total'),
+              'rules'   => 'required|numeric|'.$callback_val_total),
 
         array('field'   => 'dforma_pago',
               'label'   => 'Forma de pago',
@@ -169,12 +280,16 @@ class ventas extends MY_Controller {
         array('field'   => 'dmetodo_pago',
               'label'   => 'Metodo de pago',
               'rules'   => 'required|max_length[40]'),
+        array('field'   => 'dmetodo_pago_digitos',
+              'label'   => 'Ultimos 4 digitos',
+              'rules'   => 'max_length[20]'),
         array('field'   => 'dcondicion_pago',
               'label'   => 'Condición de pago',
               'rules'   => 'required|max_length[2]'),
+
         array('field'   => 'dplazo_credito',
-              'label'   => 'Plazo de crédito',
-              'rules'   => 'numeric'),
+            'label'   => 'Plazo de crédito',
+            'rules'   => 'numeric'),
 
         array('field'   => 'dempresa',
               'label'   => 'Empresa',
@@ -207,18 +322,139 @@ class ventas extends MY_Controller {
         array('field'   => 'prod_ddescripcion[]',
               'label'   => 'prod_ddescripcion',
               'rules'   => ''),
+        array('field'   => 'prod_ddescuento[]',
+              'label'   => 'prod_ddescuento',
+              'rules'   => ''),
+        array('field'   => 'prod_ddescuento_porcent[]',
+              'label'   => 'prod_ddescuento_porcent',
+              'rules'   => ''),
         array('field'   => 'prod_dpreciou[]',
               'label'   => 'prod_dpreciou',
               'rules'   => ''),
         array('field'   => 'prod_importe[]',
               'label'   => 'prod_importe',
               'rules'   => ''),
+        array('field'   => 'prod_diva_total[]',
+              'label'   => 'prod_diva_total',
+              'rules'   => ''),
+        array('field'   => 'prod_dreten_iva_total[]',
+              'label'   => 'prod_dreten_iva_total',
+              'rules'   => ''),
+        array('field'   => 'prod_dreten_iva_porcent[]',
+              'label'   => 'prod_dreten_iva_porcent',
+              'rules'   => ''),
+        array('field'   => 'prod_diva_porcent[]',
+              'label'   => 'prod_diva_porcent',
+              'rules'   => ''),
         array('field'   => 'prod_dmedida[]',
               'label'   => 'prod_dmedida',
+              'rules'   => ''),
+
+        array('field'   => 'dversion',
+              'label'   => '',
+              'rules'   => ''),
+        array('field'   => 'dcer_caduca',
+              'label'   => 'Empresa',
+              'rules'   => $callback_chk_cer_caduca),
+
+        array('field'   => 'dno_certificado',
+              'label'   => 'No. Certificado',
+              'rules'   => 'required'),
+        array('field'   => 'dtipo_comprobante',
+              'label'   => 'Tipo comproante',
+              'rules'   => 'required'),
+        array('field'   => 'dobservaciones',
+              'label'   => 'Observaciones',
               'rules'   => ''),
     );
     $this->form_validation->set_rules($rules);
   }
+
+  /**
+   * Configura los metodos de agregar y modificar
+   */
+  // private function configAddModFactura()
+  // {
+  //   $this->load->library('form_validation');
+  //   $rules = array(
+
+  //       array('field'   => 'did_empresa',
+  //             'label'   => 'Empresa',
+  //             'rules'   => 'required|numeric'),
+  //       array('field'   => 'did_cliente',
+  //             'label'   => 'Cliente',
+  //             'rules'   => 'required|numeric'),
+  //       array('field'   => 'dfolio',
+  //             'label'   => 'Folio',
+  //             'rules'   => 'required|numeric|callback_seriefolio_check'),
+
+  //       array('field'   => 'dfecha',
+  //             'label'   => 'Fecha',
+  //             'rules'   => 'required|max_length[25]'), //|callback_isValidDate
+
+  //       array('field'   => 'total_importe',
+  //             'label'   => 'SubTotal',
+  //             'rules'   => 'required|numeric'),
+  //       array('field'   => 'total_totfac',
+  //             'label'   => 'Total',
+  //             'rules'   => 'required|numeric|callback_val_total'),
+
+  //       array('field'   => 'dforma_pago',
+  //             'label'   => 'Forma de pago',
+  //             'rules'   => 'required|max_length[80]'),
+  //       array('field'   => 'dmetodo_pago',
+  //             'label'   => 'Metodo de pago',
+  //             'rules'   => 'required|max_length[40]'),
+  //       array('field'   => 'dcondicion_pago',
+  //             'label'   => 'Condición de pago',
+  //             'rules'   => 'required|max_length[2]'),
+  //       array('field'   => 'dplazo_credito',
+  //             'label'   => 'Plazo de crédito',
+  //             'rules'   => 'numeric'),
+
+  //       array('field'   => 'dempresa',
+  //             'label'   => 'Empresa',
+  //             'rules'   => ''),
+  //       array('field'   => 'dcliente',
+  //             'label'   => 'Cliente',
+  //             'rules'   => ''),
+  //       array('field'   => 'dcliente_rfc',
+  //             'label'   => 'Cliente',
+  //             'rules'   => ''),
+  //       array('field'   => 'dcliente_domici',
+  //             'label'   => 'Cliente',
+  //             'rules'   => ''),
+  //       array('field'   => 'dcliente_ciudad',
+  //             'label'   => 'Cliente',
+  //             'rules'   => ''),
+  //       array('field'   => 'dttotal_letra',
+  //             'label'   => 'letra',
+  //             'rules'   => ''),
+  //       array('field'   => 'dreten_iva',
+  //             'label'   => 'Retecion IVA',
+  //             'rules'   => ''),
+
+  //       array('field'   => 'prod_did_prod[]',
+  //             'label'   => 'prod_did_prod',
+  //             'rules'   => ''),
+  //       array('field'   => 'prod_dcantidad[]',
+  //             'label'   => 'prod_dcantidad',
+  //             'rules'   => ''),
+  //       array('field'   => 'prod_ddescripcion[]',
+  //             'label'   => 'prod_ddescripcion',
+  //             'rules'   => ''),
+  //       array('field'   => 'prod_dpreciou[]',
+  //             'label'   => 'prod_dpreciou',
+  //             'rules'   => ''),
+  //       array('field'   => 'prod_importe[]',
+  //             'label'   => 'prod_importe',
+  //             'rules'   => ''),
+  //       array('field'   => 'prod_dmedida[]',
+  //             'label'   => 'prod_dmedida',
+  //             'rules'   => ''),
+  //   );
+  //   $this->form_validation->set_rules($rules);
+  // }
 
   /**
    * Verifica que la serie y folio enviados del form no esten asignados a una
@@ -231,9 +467,9 @@ class ventas extends MY_Controller {
     if($str != ''){
       $sql = $ms = '';
 
-      $res = $this->db->select('Count(id_venta) AS num')
-        ->from('facturacion_ventas_remision')
-        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa'))
+      $res = $this->db->select('Count(id_factura) AS num')
+        ->from('facturacion')
+        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f'")
         ->get();
       $data = $res->row();
       if($data->num > 0){
