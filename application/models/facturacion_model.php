@@ -378,7 +378,7 @@ class facturacion_model extends privilegios_model{
 
         if (count($productosFactura) > 0)
         {
-          if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+          if ((isset($_GET['idb']) && ! $borrador) || $borrador)
           {
             $this->db->delete('facturacion_productos', array('id_factura' => $idFactura));
           }
@@ -655,6 +655,10 @@ class facturacion_model extends privilegios_model{
 
         // Realiza el timbrado usando la libreria.
         $timbrado = $this->facturartebarato_api->timbrar();
+
+        // echo "<pre>";
+        //   var_dump($timbrado);
+        // echo "</pre>";exit;
 
         $result = array(
           'id_factura' => $idFactura,
