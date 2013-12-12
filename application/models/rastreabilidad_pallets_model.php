@@ -69,8 +69,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 			if(!$basic_info)
 			{
-				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
-						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size
+				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
+						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size, 
+						rpr.kilos
 					FROM rastria_pallets_rendimiento AS rpr
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
@@ -241,6 +242,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'id_etiqueta'      => $_POST['idetiqueta'][$key],
 						'id_size'          => $_POST['idsize'][$key],
 						'cajas'            => $cajas,
+						'kilos'            => $_POST['dkilos'][$key],
 						);
 				}
 			}
@@ -414,7 +416,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		foreach ($data['rendimientos'] as $key => $value) {
 			$fecha = strtotime($value->fecha);
 			$pdf->SetX(26);
-			$pdf->Row(array(date("Ww", $fecha).'-'.$value->lote, $value->cajas), false);
+			$pdf->Row(array(date("Ww", $fecha).'-'.$value->lote_ext, $value->cajas), false);
 			$filas--;
 		}
 		for ($i = $filas; $i > 0; $i--)

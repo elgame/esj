@@ -11,6 +11,7 @@ class banco extends MY_Controller {
 		'banco/cambia_entransito/',
 		'banco/conciliacion/',
 		'banco/cheque/',
+		'banco/cuenta_banamex/',
 
 		'banco/cuenta_pdf/',
 		'banco/cuenta_xls/',
@@ -120,6 +121,12 @@ class banco extends MY_Controller {
 	{
 		$this->load->model('banco_cuentas_model');
     	$this->banco_cuentas_model->showConciliacion();
+	}
+
+	public function cuenta_banamex()
+	{
+		$this->load->model('banco_layout_model');
+    	$this->banco_layout_model->get();
 	}
 
 

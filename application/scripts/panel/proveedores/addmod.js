@@ -32,7 +32,7 @@ var cuentas = (function($){
 	}
 
 	function onKeypressAddRow(event){
-		// event.preventDefault();
+		event.preventDefault();
 
 		if (event.which === 13) {
 		  var $tr = $(this).parent().parent();
@@ -51,12 +51,17 @@ var cuentas = (function($){
 
 	function addRowCuenta(){
 		var $tbody = $("#tableCuentas"),
-		indexJump = jumpIndex + 1
+		indexJump = jumpIndex + 1,
 		trhtml = '<tr>'+
 				    '<td><input type="checkbox" class="chk_banamex jump'+(++jumpIndex)+'" value="si" checked data-uniform="false" data-next="jump'+(++jumpIndex)+'">'+
 				    '	<input type="hidden" name="cuentas_banamex[]" value="true" class="cuentas_banamex">'+
 				    '	<input type="hidden" name="cuentas_id[]" value="" class="cuentas_id">'+
 				    '</td>'+
+				    '<td><select name="fbanco[]" class="fbanco">';
+                    $(".fbanco:first option").each(function(index, val) {
+                    	trhtml += '<option value="'+$(val).attr('value')+'">'+$(val).text()+'</option>';
+                    });
+        trhtml +=   '</select></td>'+
 				    '<td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 				    '<td><input type="text" name="cuentas_sucursal[]" value="" class="cuentas_sucursal vpos-int jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 				    '<td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int jump'+jumpIndex+'"></td>'+

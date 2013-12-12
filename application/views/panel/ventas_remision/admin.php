@@ -100,14 +100,14 @@
                   <td class="center">
                     <?php
 
-                      if ($fact->status === 'p')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('ventas/pagar/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota de remisión?', 'Notas de Remisión', this); return false;"))
-                        );
-                      }
+                      // if ($fact->status === 'p')
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('ventas/pagar/', array(
+                      //     'params'   => 'id='.$fact->id_factura,
+                      //     'btn_type' => 'btn-success',
+                      //     'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota de remisión?', 'Notas de Remisión', this); return false;"))
+                      //   );
+                      // }
 
                       echo $this->usuarios_model->getLinkPrivSm('ventas/imprimir/', array(
                         'params'   => 'id='.$fact->id_factura,

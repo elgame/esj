@@ -1,7 +1,6 @@
     <div id="content" class="span10">
       <!-- content starts -->
 
-
       <div>
         <ul class="breadcrumb">
           <li>
@@ -33,6 +32,11 @@
               <i class="icon-table"></i> Excel</a>
             <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
               <i class="icon-archive"></i> Conciliacion</a>
+        <?php if($data['cuenta']['info']->banco == 'Afirme'){ ?>
+               | 
+            <a href="<?php echo base_url('panel/banco/cuenta_banamex/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
+              <i class="icon-file-text"></i> Banamex</a>
+        <?php } ?>
 
             <form action="<?php echo base_url('panel/banco/cuenta/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
@@ -63,6 +67,13 @@
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
+
+                | <label for="toperacion">Retiros:</label>
+                <select name="toperacion" id="toperacion" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('toperacion', ''); ?>>Todas</option>
+                  <option value="in" <?php echo set_select_get('toperacion', 'in'); ?>>Interbancarios</option>
+                  <option value="ba" <?php echo set_select_get('toperacion', 'ba'); ?>>Banamex</option>
+                </select>
 
                 <button type="submit" class="btn">Enviar</button>
               </div>
@@ -133,7 +144,7 @@
             	</tr>
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
-                  <td style="text-align: right" colspan="5">Total:</td>
+                  <td style="text-align: right" colspan="6">Total:</td>
                   <td><?php echo String::formatoNumero($data['total_retiro']); ?></td>
                   <td><?php echo String::formatoNumero($data['total_deposito']); ?></td>
                   <td id="total_saldo"><?php echo String::formatoNumero($data['total_saldos']); ?></td>

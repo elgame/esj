@@ -88,6 +88,8 @@ class proveedores extends MY_Controller {
 			'titulo' => 'Agregar Proveedor'
 		);
 
+		$this->load->model('banco_cuentas_model');
+
 		$this->configAddModProveedor();
 		if ($this->form_validation->run() == FALSE)
 		{
@@ -102,6 +104,8 @@ class proveedores extends MY_Controller {
 				redirect(base_url('panel/proveedores/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
 
+		//bancos
+    	$params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -133,6 +137,7 @@ class proveedores extends MY_Controller {
 			));
 
 			$this->load->model('proveedores_model');
+			$this->load->model('banco_cuentas_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
@@ -155,6 +160,8 @@ class proveedores extends MY_Controller {
 			$params['data'] = $this->proveedores_model->getProveedorInfo();
 			//Cuentas del proeveedor
     		$params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_GET['id']);
+    		//bancos
+    		$params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -297,6 +304,9 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'cuentas_cuenta[]',
 					'label'	=> 'CUENTA/CLABE',
 					'rules'	=> 'max_length[18]'),
+			array('field'	=> 'fbanco[]',
+					'label'	=> 'Banco',
+					'rules'	=> 'max_length[5]'),
 		);
 
 		$this->form_validation->set_rules($rules);

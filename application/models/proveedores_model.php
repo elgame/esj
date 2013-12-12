@@ -316,7 +316,9 @@ class proveedores_model extends CI_Model {
 								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'),
 								'alias'      => $_POST['cuentas_alias'][$key],
 								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]),
-								'cuenta'     => $_POST['cuentas_cuenta'][$key], );
+								'cuenta'     => $_POST['cuentas_cuenta'][$key], 
+								'id_banco'   => $_POST['fbanco'][$key],
+							);
 				if (is_numeric($_POST['cuentas_id'][$key]))  //update
 				{
 					if($_POST['cuentas_delte'][$key] == 'true')
@@ -335,12 +337,14 @@ class proveedores_model extends CI_Model {
 	 * Obtiene el listado de proveedores
 	 * @return [type] [description]
 	 */
-	public function getCuentas($id_proveedor){
-		$sql = '';
+	public function getCuentas($id_proveedor, $id_cuenta=null){
+		$sql = ($id_cuenta==null? '': ' AND pc.id_cuenta = '.$id_cuenta);
 		$res = $this->db->query("
-				SELECT id_cuenta, id_proveedor, is_banamex, alias, sucursal, cuenta, status, (alias || ' *' || substring(cuenta from '....$')) AS full_alias
-				FROM proveedores_cuentas
-				WHERE status = 't' AND id_proveedor = {$id_proveedor}
+				SELECT pc.id_cuenta, pc.id_proveedor, pc.is_banamex, pc.alias, pc.sucursal, pc.cuenta, pc.status, 
+					(pc.alias || ' *' || substring(pc.cuenta from '....$')) AS full_alias, bb.id_banco, bb.nombre AS banco, bb.codigo
+				FROM proveedores_cuentas AS pc 
+					LEFT JOIN banco_bancos AS bb ON pc.id_banco = bb.id_banco
+				WHERE pc.status = 't' AND pc.id_proveedor = {$id_proveedor} {$sql}
 				ORDER BY full_alias ASC");
 
 		$response = array();

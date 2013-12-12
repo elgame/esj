@@ -26,7 +26,7 @@
 
               <form action="<?php echo base_url('panel/rastreabilidad/rendimiento_lote?'.String::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
-                <div class="control-group span6">
+                <div class="control-group span7">
                   <table class="table">
                     <thead>
                       <tr class="center">
@@ -34,6 +34,7 @@
                         <th style="background-color: #FFF; text-align: center;" class="center">Semana</th>
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
+                        <th style="background-color: #FFF; text-align: center;">Actualizar</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -48,26 +49,35 @@
                           <select name="glote" id="glote" class="span12" style="margin: -7px auto 0 auto;">
                             <option value=""></option>
                             <?php foreach ($lotes as $key => $lote) { ?>
-                              <option value="<?php echo $lote->id_rendimiento ?>" <?php echo set_select_get('glote', $lote->id_rendimiento, false); ?>><?php echo $lote->lote ?></option>
+                              <option value="<?php echo $lote->id_rendimiento ?>" <?php echo set_select_get('glote', $lote->id_rendimiento, false); ?>><?php echo $lote->lote_ext ?></option>
                             <?php } ?>
                           </select>
                         </td>
+
+                        <td style="text-align: center;">
+                          <span class="input-append" style="max-width: 100px;">
+                            <input class="span5 vpositive" id="txtActualizaLote" type="text" value="<?php echo $lote_actual_ext; ?>" data-lote="<?php echo $lote_actual_ext; ?>">
+                            <button class="btn" type="button" id="btnActualizaLote">Ok</button>
+                            <input type="hidden" id="id_lote_actual" value="<?php echo $id_lote_actual; ?>">
+                          </span>
+                        </td>
+
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                <div class="span2">
+                <div class="span2 nomarg">
 
                   <?php if ($ant_lote >= 1) { ?>
                     <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha); ?>">Anterior Lote</a>
                   <?php } ?>
 
                 </div>
-                <div class="span2">
+                <div class="span2 nomarg">
                   <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha); ?>">Siguiente Lote</a>
                 </div>
-                <div class="span2">
+                <div class="span1 nomarg">
                   <?php if (count($clasificaciones['clasificaciones']) > 0) { ?>
                     <a class="btn btn-danger" href="<?php echo base_url('panel/rastreabilidad/rpl_pdf/?glote='.$_GET['glote']); ?>" target="_BLANK">Imprimir</a>
                   <?php } ?>
@@ -80,9 +90,9 @@
                 <thead>
                   <tr>
                     <th>CLASIFICACIÓN</th>
-                    <th style="width:110px;">UNIDAD</th>
-                    <th style="width:55px;">CALIBRE</th>
-                    <th style="width:55px;">SIZE</th>
+                    <th style="width:110px;">CAJA</th>
+                    <th style="width:55px;">TAMAÑO</th>
+                    <th style="width:55px;">PRET</th>
                     <th style="width:110px;">ETIQUETA</th>
                     <th style="width:55px;">KILOS</th>
                     <th style="width:55px;">EXISTENTE</th>
