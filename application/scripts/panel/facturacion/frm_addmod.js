@@ -36,7 +36,7 @@ $(function(){
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
 
-        loadSerieFolio(ui.item.id);
+        loadSerieFolio(ui.item.id, true);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -49,6 +49,7 @@ $(function(){
         $('#dversion').val('');
         $('#dcer_caduca').val('');
         $('#dno_certificado').val('');
+        $('#serie-selected').val('');
       }
   });
 
@@ -61,23 +62,28 @@ $(function(){
 
   //Carga el folio para la serie seleccionada
   $("#dserie").on('change', function(){
-    loader.create();
-    $.getJSON(base_url+'panel/facturacion/get_folio/?serie='+$(this).val()+'&ide='+$('#did_empresa').val(),
-    function(res){
-      if(res.msg == 'ok'){
-        $("#dfolio").val(res.data.folio);
-        $("#dno_aprobacion").val(res.data.no_aprobacion);
-        $("#dano_aprobacion").val(res.data.ano_aprobacion);
-        $("#dimg_cbb").val(res.data.imagen);
-      }else{
-        $("#dfolio").val('');
-        $("#dno_aprobacion").val('');
-        $("#dano_aprobacion").val('');
-        $("#dimg_cbb").val('');
-        noty({"text":res.msg, "layout":"topRight", "type":res.ico});
-      }
-      loader.close();
-    });
+    var $serie = $(this),
+        $empresa = $('#did_empresa');
+
+    loadFolioAjax($serie.val(), $empresa.val(), true);
+
+    // loader.create();
+    // $.getJSON(base_url+'panel/facturacion/get_folio/?serie='+$(this).val()+'&ide='+$('#did_empresa').val(),
+    // function(res){
+    //   if(res.msg == 'ok'){
+    //     $("#dfolio").val(res.data.folio);
+    //     $("#dno_aprobacion").val(res.data.no_aprobacion);
+    //     $("#dano_aprobacion").val(res.data.ano_aprobacion);
+    //     $("#dimg_cbb").val(res.data.imagen);
+    //   }else{
+    //     $("#dfolio").val('');
+    //     $("#dno_aprobacion").val('');
+    //     $("#dano_aprobacion").val('');
+    //     $("#dimg_cbb").val('');
+    //     noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+    //   }
+    //   loader.close();
+    // });
   });
 
   // $('#addProducto').on('click', function(event) {
@@ -432,7 +438,7 @@ function addProducto(unidades, prod) {
     var $cantidadInput = $tr.find('#prod_dcantidad'); // input cantidad.
 
     // Le suma la cantidad de cajas a la clasificacion.
-    console.log($cantidadInput.val(), prod.cajas);
+    // console.log($cantidadInput.val(), prod.cajas);
     $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
     calculaTotalProducto($tr);
 
@@ -597,28 +603,76 @@ function calculaTotal () {
   $('#totfac-format').html(util.darFormatoNum(total_factura));
   $('#total_totfac').val(total_factura);
 
-  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()))
+  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()));
 }
 
-function loadSerieFolio (ide) {
+function loadSerieFolio (ide, forceLoad) {
   var objselect = $('#dserie');
   loader.create();
     $.getJSON(base_url+'panel/facturacion/get_series/?ide='+ide,
       function(res){
-          if(res.msg === 'ok') {
-            var html_option = '<option value=""></option>';
-            for (var i in res.data){
-              html_option += '<option value="'+res.data[i].serie+'">'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
-            }
-            objselect.html(html_option);
+        if(res.msg === 'ok') {
+          var html_option = '<option value="void"></option>',
+              selected = '', serieSelected = 'void',
+              loadDefault = false;
 
-            $("#dfolio").val("");
-            $("#dno_aprobacion").val("");
-          } else {
-            noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+          for (var i in res.data){
+            selected = '';
+            if ($('#serie-selected').val() !== 'void') {
+              if (res.data[i].serie === $('#serie-selected').val()) {
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            } else {
+              if (res.data[i].serie === '') {
+                loadDefault = true;
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            }
+
+            html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
           }
-          loader.close();
+          objselect.html(html_option);
+
+          if (serieSelected !== 'void' || forceLoad) {
+            loadFolioAjax(serieSelected, ide, forceLoad);
+          } else {
+            // if ($('#serie-selected').val() === 'void') {
+              // $("#dfolio").val("");
+              // $("#dno_aprobacion").val("");
+            // }
+          }
+        } else {
+          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+        }
+        loader.close();
       });
+}
+
+// Carga el folio siguiente de la empresa y serie seleccionadas.
+function loadFolioAjax(serie, ide, forceLoad) {
+  loader.create();
+  $.getJSON(base_url+'panel/facturacion/get_folio/?serie='+serie+'&ide='+ide,
+  function(res){
+    if(res.msg == 'ok'){
+
+      if ($('#dfolio').val() === '' || forceLoad) {
+        $("#dfolio").val(res.data.folio);
+      }
+
+      $("#dno_aprobacion").val(res.data.no_aprobacion);
+      $("#dano_aprobacion").val(res.data.ano_aprobacion);
+      // $("#dimg_cbb").val(res.data.imagen);
+    }else{
+      $("#dfolio").val('');
+      $("#dno_aprobacion").val('');
+      $("#dano_aprobacion").val('');
+      // $("#dimg_cbb").val('');
+      noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+    }
+    loader.close();
+  });
 }
 
 /**

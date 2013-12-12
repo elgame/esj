@@ -25,21 +25,22 @@
             <form action="<?php echo base_url('panel/ventas/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
-                <input type="text" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
+                <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
 
                 <label for="dempresa">Empresa</label>
-                <input type="text" name="dempresa" class="input-medium search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
+                <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa'); ?>">
 
 
                 <label for="dcliente">Cliente</label>
-                <input type="text" name="dcliente" class="input-medium search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
+                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
                 <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>">
+
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="text" name="ffecha1" class="input-small search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
+                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', $fecha); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="text" name="ffecha2" class="input-small search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10">
+                <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
                 <label for="fstatus">Estado</label>
                 <select name="fstatus" class="input-medium" id="fstatus">
@@ -69,45 +70,69 @@
                   <th>Empresa</th>
                   <th>Forma de Pago</th>
                   <th>Estado</th>
-                  <th>Opc</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
                   <td><?php echo $fact->fecha; ?></td>
-                  <td><?php echo $fact->folio; ?></td>
+                  <td>
+                    <span class="label"><?php echo $fact->folio; ?></span>
+                  </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><span class="label label-info"><?php echo $fact->condicion_pago==='cr' ? 'Credito' : 'Contado'; ?></span></td>
-                  <td><?php $sstado = ($fact->status === 'p') ? array('Pendiente', '') : (($fact->status === 'pa') ? array('Pagada', 'success') : array('Cancelada', 'important') ); ?>
-                    <span class="label label-<?php echo $sstado[1] ?>"><?php echo $sstado[0] ?></span>
+                  <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
+                      <span class="label label-info"><?php echo $texto ?></span>
+                  </td>
+                  <td><?php
+                            $texto = 'Cancelada';
+                            $label = 'important';
+                            if ($fact->status === 'p') {
+                              $texto = 'Pendiente';
+                              $label = 'warning';
+                            } else if ($fact->status === 'pa') {
+                              $texto = 'Pagada';
+                              $label = 'success';
+                            }?>
+                      <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td class="center">
                     <?php
+
                       if ($fact->status === 'p')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('ventas/pagar/', array(
-                          'params'   => 'id='.$fact->id_venta,
+                          'params'   => 'id='.$fact->id_factura,
                           'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota?', 'Facturas', this); return false;"))
-                        );
-                      }
-
-                      if ($fact->status !== 'ca')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('ventas/cancelar/', array(
-                          'params'   => 'id='.$fact->id_venta,
-                          'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la nota?', 'Facturas', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota de remisión?', 'Notas de Remisión', this); return false;"))
                         );
                       }
 
                       echo $this->usuarios_model->getLinkPrivSm('ventas/imprimir/', array(
-                          'params'   => 'id='.$fact->id_venta,
-                          'btn_type' => 'btn-info',
-                          'attrs' => array('target' => "_BLANK"))
+                        'params'   => 'id='.$fact->id_factura,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => "_blank"))
                       );
+
+                      if ($fact->status !== 'ca')
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('ventas/cancelar/', array(
+                          'params'   => 'id='.$fact->id_factura,
+                          'btn_type' => 'btn-danger',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la nota de remisión?', 'Notas de Remisión', this); return false;"))
+                        );
+                      }
+
+                      if ($fact->status === 'ca')
+                      {
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
+                          'params'   => 'id_nr='.$fact->id_factura,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de agregar una factura con los datos de la nota de remisión?', 'Notas de Remisión', this); return false;"))
+                        );
+                      }
+
                     ?>
                   </td>
                 </tr>
@@ -138,12 +163,8 @@
 
       </div><!--/row-->
 
-
-
-
           <!-- content ends -->
     </div><!--/#content.span10-->
-
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

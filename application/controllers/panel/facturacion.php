@@ -95,7 +95,6 @@ class facturacion extends MY_Controller {
     if ( ! isset($_POST['borrador']))
     {
       $this->configAddModFactura();
-
       if($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -112,18 +111,27 @@ class facturacion extends MY_Controller {
 
     }
     else
+    {
       $params['frm_errors'] = $this->procesaBorrador();
 
+      if (isset($_POST['dfolio2']))
+      {
+        $_POST['dfolio'] = $_POST['dfolio2'];
+      }
+    }
+
     // Parametros por default.
-    $params['series'] = $this->facturacion_model->getSeriesFolios(100);
+    // $params['series'] = $this->facturacion_model->getSeriesFolios(100);
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     $params['getId'] = '';
-
-    // Parametros por default.
+    // Si existe el parametro get idb entonces se esta cargando un borrador de
+    // factura o prefactura.
     if (isset($_GET['idb']))
     {
       $params['getId'] = 'idb='.$_GET['idb'];
+      // carga los datos de la prefactura
+      $params['borrador'] = $this->facturacion_model->getInfoFactura($_GET['idb']);
     }
     else // Parametros por default.
     {
@@ -139,18 +147,13 @@ class facturacion extends MY_Controller {
       $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
     }
 
-    // Verifica si existe un borrador y carga sus datos.
-    $idBorrador = $this->facturacion_model->getBorradorFactura();
-    if ( ! is_null($idBorrador))
+    // Si es una nota de remision la que se quiere facturar carga sus datos.
+    if (isset($_GET['id_nr']))
     {
-      $params['getId'] = 'idb='.$idBorrador;
-
-      $params['borrador'] = $this->facturacion_model->getInfoFactura($idBorrador);
+      $params['borrador'] = $this->facturacion_model->getInfoFactura($_GET['id_nr']);
+      $params['borrador']['info']->serie = '';
+      $params['borrador']['info']->folio = '';
     }
-
-    // echo "<pre>";
-    //   var_dump($params['borrador']);
-    // echo "</pre>";exit;
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
@@ -168,7 +171,6 @@ class facturacion extends MY_Controller {
     $this->load->model('facturacion_model');
 
     $this->configAddModFactura(true);
-
     if($this->form_validation->run() == FALSE)
     {
       return $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
@@ -180,12 +182,8 @@ class facturacion extends MY_Controller {
       else
         $this->facturacion_model->addFacturaBorrador();
 
-      if($respons['passes'])
-        redirect(base_url('panel/documentos/agregar/?msg=3&idb='.$respons['id_factura']));
-      else
-        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
+      redirect(base_url('panel/facturacion/agregar/?&msg=11'));
     }
-    redirect(base_url('panel/facturacion/agregar/?&msg=11'));
   }
 
   /**
@@ -326,6 +324,10 @@ class facturacion extends MY_Controller {
     if ($cliente['info']->email !== '')
       $params['emails_default'] = explode(',', $cliente['info']->email);
 
+    // echo "<pre>";
+    //   var_dump($params['emails_default']);
+    // echo "</pre>";exit;
+
     if(isset($_GET['msg']{0}))
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -334,7 +336,6 @@ class facturacion extends MY_Controller {
       {
         $params['close'] = 1;
       }
-
     }
 
     $this->load->view('panel/facturacion/email',$params);
@@ -594,14 +595,35 @@ class facturacion extends MY_Controller {
     if($str != ''){
       $sql = $ms = '';
 
-      $res = $this->db->select('Count(id_factura) AS num')
+      $res = $this->db->select('id_factura')
         ->from('facturacion')
-        ->where("serie = '".$this->input->post('dserie')."' AND folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa').' AND status != \'b\'')
+        ->where("serie = '".$this->input->post('dserie')."' AND folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa')." AND is_factura = 't'")
         ->get();
+
       $data = $res->row();
-      if($data->num > 0){
-        $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya esta utilizado por otra Factura.');
-        return false;
+
+      if($res->num_rows() > 0){
+
+        if (isset($_GET['idb']))
+        {
+          if ($_GET['idb'] != $data->id_factura)
+          {
+            $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya esta utilizado por otra Factura.');
+            $folio = $this->facturacion_model->getFolioSerie($_POST['dserie'], $_POST['did_empresa'], "es_nota_credito = 'f'");
+            $_POST['dfolio2'] = $folio[0]->folio;
+
+            return false;
+          }
+        }
+        else
+        {
+          $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya esta utilizado por otra Factura.');
+
+          $folio = $this->facturacion_model->getFolioSerie($_POST['dserie'], $_POST['did_empresa'], "es_nota_credito = 'f'");
+          $_POST['dfolio2'] = $folio[0]->folio;
+          return false;
+        }
+
       } else {
         $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
 

@@ -19,6 +19,7 @@ class documentos extends MY_Controller {
     'documentos/ajax_update_doc/',
     'documentos/ajax_get_snapshot/',
     'documentos/ajax_save_snaptshot/',
+    'documentos/ajax_del_snaptshot/',
     'documentos/ajax_check_ctrl/',
 
     'documentos/imprime_manifiesto_chofer/',
@@ -381,11 +382,6 @@ class documentos extends MY_Controller {
    */
   public function ajax_save_snaptshot()
   {
-
-    // echo "<pre>";
-    //   var_dump($_POST);
-    // echo "</pre>";exit;
-
     $this->load->model('facturacion_model');
     $this->load->model('documentos_model');
 
@@ -408,6 +404,27 @@ class documentos extends MY_Controller {
     $_POST['url'] = $path.$filename.'.jpg';
 
     $this->ajax_update_doc();
+  }
+
+  /**
+   * elimina el snapshot.
+   */
+  public function ajax_del_snaptshot()
+  {
+    $this->load->model('facturacion_model');
+    $this->load->model('documentos_model');
+
+    $idFactura = $_POST['factura_id'];
+
+    // Obtiene la informacion de la factura.
+    $factura = $this->facturacion_model->getInfoFactura($idFactura);
+
+    // Obtiene la ruta donde se guardan los documentos del cliente.
+    $path = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+
+    $filename = 'CHOFER FOTO FIRMA MANIFIESTO';
+    unlink($path.$filename.'.jpg');
+    echo json_encode($this->documentos_model->updateDocumento($_POST, $_POST['factura_id'], $_POST['documento_id'], 'f'));
   }
 
   public function ajax_check_ctrl()

@@ -50,6 +50,7 @@
                   <option value="pa" <?php echo set_select_get('fstatus', 'pa'); ?>>PAGADAS</option>
                   <option value="p" <?php echo set_select_get('fstatus', 'p'); ?>>PENDIENTE</option>
                   <option value="ca" <?php echo set_select_get('fstatus', 'ca'); ?>>CANCELADAS</option>
+                  <option value="b" <?php echo set_select_get('fstatus', 'b'); ?>>PREFACTURAS</option>
                 </select>
 
                 <input type="submit" name="enviar" value="Enviar" class="btn">
@@ -82,7 +83,7 @@
                 <tr>
                   <td><?php echo $fact->fecha; ?></td>
                   <td>
-                    <span class="label"><?php echo $fact->serie.' - '.$fact->folio; ?></span>
+                    <span class="label"><?php echo ($fact->serie ? $fact->serie.' - ' : '').$fact->folio; ?></span>
 
                     <?php if ($fact->id_nc !== null){ ?>
                       <br><span class="label label-warning">Nota de Crédito</span>
@@ -96,98 +97,115 @@
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>
                   <td><?php
-                            $texto = 'Cancelada';
-                            $label = 'important';
-                            if ($fact->status === 'p') {
-                              $texto = 'Pendiente';
-                              $label = 'warning';
-                            } else if ($fact->status === 'pa') {
-                              $texto = 'Pagada';
-                              $label = 'success';
-                            }?>
+                        if ($fact->status === 'b')
+                      {
+                        $texto = 'Prefactura';
+                        $label = 'Inverse';
+                      } else {
+                        $texto = 'Cancelada';
+                        $label = 'important';
+                        if ($fact->status === 'p') {
+                          $texto = 'Pendiente';
+                          $label = 'warning';
+                        } else if ($fact->status === 'pa') {
+                          $texto = 'Pagada';
+                          $label = 'success';
+                        }
+                      }?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td><?php
-                            $texto = 'Cancelado';
-                            $label = 'Inverse';
-                            if ($fact->status_timbrado === 'p') {
-                              $texto = 'Pendiente';
-                              $label = 'warning';
-                            } else if ($fact->status_timbrado === 't') {
-                              $texto = 'Timbrado';
-                              $label = 'success';
-                            }?>
+                      if ($fact->status === 'b')
+                      {
+                        $texto = 'No Timbrado';
+                        $label = 'Inverse';
+                      } else {
+                        $texto = 'Cancelado';
+                        $label = 'Inverse';
+                        if ($fact->status_timbrado === 'p') {
+                          $texto = 'Pendiente';
+                          $label = 'warning';
+                        } else if ($fact->status_timbrado === 't') {
+                          $texto = 'Timbrado';
+                          $label = 'success';
+                        }
+                      }?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td class="center">
                     <?php
 
-                      echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
-                        'params'   => 'id='.$fact->id_factura,
-                        'btn_type' => 'btn-info',
-                        'attrs' => array('target' => "_blank"))
-                      );
-
-                      if ($fact->status !== 'ca')
+                      if ($fact->status !== 'b')
                       {
-                         echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/imprimir/', array(
+                          'params'   => 'id='.$fact->id_factura,
+                          'btn_type' => 'btn-info',
+                          'attrs' => array('target' => "_blank"))
+                        );
+
+                        if ($fact->status !== 'ca')
+                        {
+                           echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => 'btn-success',
+                              'attrs'    => array())
+                          );
+
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
+                            'params'   => 'id='.$fact->id_factura,
+                            'btn_type' => 'btn-danger',
+                            'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
+                          );
+                        }
+
+                        if ($fact->id_nc === null && $fact->status !== 'ca') {
+                          echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => '',
+                              'attrs' => array('target' => "_blank"))
+                          );
+                        }
+
+                        if ($fact->status_timbrado === 'p') {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/timbre_pending/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => 'btn-warning',
+                              'attrs'    => array('onclick' => "msb.confirm('Esta acción realizara el timbrado de la factura, deses continuar?', 'Facturas', this); return false;"))
+                          );
+                        }
+
+                        if ($fact->status === 'p')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                              'params'   => 'id='.$fact->id_factura.'&tipo=f',
+                              'btn_type' => 'btn btn-success',
+                              'attrs'    => array('rel' => 'superbox-50x500'))
+                          );
+                        }
+
+                        if ($fact->status_timbrado === 't')
+                        {
+                          echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                        }
+
+                        if ($fact->id_nc === null)
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
                             'params'   => 'id='.$fact->id_factura,
                             'btn_type' => 'btn-success',
-                            'attrs'    => array())
-                        );
+                            'attrs' => array('rel' => 'superbox-50x450'))
+                          );
+                        }
 
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
-                        );
-                      }
-
-                      if ($fact->id_nc === null && $fact->status !== 'ca') {
-                        echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => '',
-                            'attrs' => array('target' => "_blank"))
-                        );
-                      }
-
-                      if ($fact->status_timbrado === 'p') {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/timbre_pending/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-warning',
-                            'attrs'    => array('onclick' => "msb.confirm('Esta acción realizara el timbrado de la factura, deses continuar?', 'Facturas', this); return false;"))
-                        );
-                      }
-
-                      if ($fact->status === 'p')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
-                            'params'   => 'id='.$fact->id_factura.'&tipo=f',
-                            'btn_type' => 'btn btn-success',
-                            'attrs'    => array('rel' => 'superbox-50x500'))
-                        );
-                      }
-
-                      if ($fact->status_timbrado === 't')
-                      {
-                        echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
-                      }
-
-                      if ($fact->id_nc === null)
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
-                          'params'   => 'id='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('rel' => 'superbox-50x450'))
-                        );
-                      }
-
-                      if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
-                          'params'   => 'idr='.$fact->id_factura,
-                          'btn_type' => 'btn-success')
-                        );
+                        if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
+                            'params'   => 'idr='.$fact->id_factura,
+                            'btn_type' => 'btn-success')
+                          );
+                        }
+                      } else {
+                        echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
                       }
                     ?>
                   </td>

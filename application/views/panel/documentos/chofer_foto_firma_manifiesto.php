@@ -14,12 +14,14 @@
     </fieldset><!--/span4 -->
 
     <fieldset class="span4" style="border-bottom: none;">
-      <legend style="margin-bottom: 3px;">Captura</legend>
+      <legend style="margin-bottom: 3px;">Captura<button class="btn btn-danger pull-right" type="button" id="btn-del-captura" data-name=""><i class="icon-remove-circle icon-2x"></i></button></legend>
       <div class="row-fluid">
         <div class="span12">
-          <?php $url = isset($dataDocumento->url) ? str_replace('\\', '', base_url($dataDocumento->url)) : ''; ?>
+          <?php
+            $url = isset($dataDocumento->url) && $dataDocumento->url !== '' ? str_replace('\\', '', base_url($dataDocumento->url)) : '';
+          ?>
           <img src="<?php echo $url ?>" width="320" id="imgCapture">
-          <input type="hidden"  value="" id="inputImgCapture">
+          <input type="text"  value="" id="inputImgCapture">
         </div>
       </div>
     </fieldset><!--/span4 -->
@@ -33,9 +35,9 @@
               <button type="button" class="btn btn-success btn-large span12" id="btnSnapshotSave">Guardar</button>
             </div>
           <?php } ?>
-          <?php if (isset($dataDocumento->url)) { ?>
+          <?php if (isset($dataDocumento->url) && $dataDocumento->url !== '') { ?>
             <br>
-            <div class="row-fluid">
+            <div class="row-fluid" id="btn-show-captura">
               <a href="<?php echo str_replace('\\', '', base_url($dataDocumento->url)) ?>" class="btn btn-success btn-large span12" rel="superbox-80x600">Ver</a>
             </div>
           <?php } ?>

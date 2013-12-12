@@ -50,12 +50,16 @@
          <div class="control-group">
           <label class="control-label">Emails Default</label>
           <div class="controls">
-            <ul class="unstyled">
-              <li><input type="checkbox" id="check-emails" checked>Todos</li>
-              <?php foreach ($emails_default as $key => $email) { ?>
-                <li style="margin-left: 15px;"><input type="checkbox" name="emails[]" class="email-default" value="<?php echo trim($email) ?>" checked> <?php echo trim($email) ?></li>
-              <?php } ?>
-            </ul>
+            <?php if (count($emails_default) > 0){ ?>
+              <ul class="unstyled">
+                <li><input type="checkbox" id="check-emails" checked>Todos</li>
+                <?php foreach ($emails_default as $key => $email) { ?>
+                  <li style="margin-left: 15px;"><input type="checkbox" name="emails[]" class="email-default" value="<?php echo trim($email) ?>" checked> <?php echo trim($email) ?></li>
+                <?php } ?>
+              </ul>
+            <?php } else { ?>
+              <div style="font-size: 1.1em;color:red;">El cliente no cuenta con emails.</div>
+            <?php } ?>
           </div>
         </div>
 
@@ -74,7 +78,7 @@
 <script type="text/javascript" charset="UTF-8">
   $(document).ready(function(){
 
-    <?php if ($close) {?>
+    <?php if (isset($close)) {?>
         setInterval(function() {
           window.parent.$('#supermodal').modal('hide');
       }, 1000);

@@ -56,9 +56,9 @@ class facturacion_model extends privilegios_model{
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-				WHERE 1 = 1 AND f.status != 'b' ".$sql.$sql2."
+				WHERE 1 = 1 AND f.is_factura = 't'".$sql.$sql2."
 				ORDER BY (f.fecha, f.folio) DESC
-				", $params, true);
+				", $params, true); //AND f.status != 'b'
 		$res = $this->db->query($query['query']);
 
 		$response = array(
@@ -137,10 +137,11 @@ class facturacion_model extends privilegios_model{
      * @param string $empresa
 	 */
 	public function getFolioSerie($serie, $empresa, $sqlX = null)
-    {
+  {
 		$res = $this->db->select('folio')
       ->from('facturacion')
-      ->where("serie = '".$serie."' AND id_empresa = ".$empresa." AND status != 'b'")
+      ->where("serie = '".$serie."' AND id_empresa = ".$empresa."") // AND status != 'b'
+      ->where('is_factura', 't')
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
@@ -310,9 +311,20 @@ class facturacion_model extends privilegios_model{
         if ($_POST['dtipo_comprobante'] === 'egreso')
           $datosFactura['id_nc'] = $_GET['id'];
 
-        // Inserta los datos de la factura y obtiene el Id.
-        $this->db->insert('facturacion', $datosFactura);
-        $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+        // Inserta los datos de la factura y obtiene el Id. Este en caso
+        // de que se este timbrando una factura que no sea un borrador.
+        if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
+        {
+          $this->db->insert('facturacion', $datosFactura);
+          $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+        }
+
+        // Si es un borrador que se esta timbrando entonces actualiza sus datos.
+        else
+        {
+          $idFactura = $_GET['idb'];
+          $this->db->update('facturacion', $datosFactura, array('id_factura' => $idFactura));
+        }
 
         // Productos e Impuestos
         $productosCadOri    = array(); // Productos para la CadOriginal
@@ -365,20 +377,37 @@ class facturacion_model extends privilegios_model{
         }
 
         if (count($productosFactura) > 0)
-          $this->db->insert_batch('facturacion_productos', $productosFactura);
-
-        $pallets = array(); // Ids de los pallets cargados en la factura.
-        // Crea el array de los pallets a insertar.
-        foreach ($_POST['palletsIds'] as $palletId)
         {
-          $pallets[] = array(
-            'id_factura' => $idFactura,
-            'id_pallet'  => $palletId
-          );
+          if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+          {
+            $this->db->delete('facturacion_productos', array('id_factura' => $idFactura));
+          }
+
+          $this->db->insert_batch('facturacion_productos', $productosFactura);
         }
 
-        if (count($pallets) > 0)
-          $this->db->insert_batch('facturacion_pallets', $pallets);
+        if (isset($_POST['palletsIds']))
+        {
+          $pallets = array(); // Ids de los pallets cargados en la factura.
+          // Crea el array de los pallets a insertar.
+          foreach ($_POST['palletsIds'] as $palletId)
+          {
+            $pallets[] = array(
+              'id_factura' => $idFactura,
+              'id_pallet'  => $palletId
+            );
+          }
+
+          if (count($pallets) > 0)
+          {
+            if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+            {
+              $this->db->delete('facturacion_pallets', array('id_factura' => $idFactura));
+            }
+
+            $this->db->insert_batch('facturacion_pallets', $pallets);
+          }
+        }
 
         // Si es un borrador
         if ($borrador) return true;
@@ -535,8 +564,8 @@ class facturacion_model extends privilegios_model{
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
 
           // Elimina el borrador.
-          if (isset($_GET['idb']))
-            $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
+          // if (isset($_GET['idb']))
+          //   $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
 
           // Procesa la salida
           $this->load->model('unidades_model');
@@ -870,7 +899,7 @@ class facturacion_model extends privilegios_model{
         $factura = $this->getInfoFactura($idFactura);
 
         // El cliente necesita tener un email para poderle enviar los documentos.
-        if ( ! is_null($factura['info']->cliente->email) && ! empty($factura['info']->cliente->email))
+        if ( (! is_null($factura['info']->cliente->email) && ! empty($factura['info']->cliente->email)) || $_POST['pextras'] !== '')
         {
           //////////////////
           // Datos Correo //
@@ -1121,31 +1150,31 @@ class facturacion_model extends privilegios_model{
             'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
             'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
             'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-            'id_pallet'       => $_POST['pallet_id'][$key] !== '' ? $_POST['pallet_id'][$key] : null,
+            'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
           );
-
-          if ($_POST['pallet_id'][$key] != '')
-          {
-            if ($_POST['pallet_id'][$key] != $lastPalletId)
-            {
-              $pallets[] = array(
-                'id_factura' => $idBorrador,
-                'id_pallet'  => $_POST['pallet_id'][$key]
-              );
-              $lastPalletId = $_POST['pallet_id'][$key];
-            }
-          }
         }
       }
-
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
 
       if (count($productosFactura) > 0)
         $this->db->insert_batch('facturacion_productos', $productosFactura);
 
-      if (count($pallets) > 0)
-        $this->db->insert_batch('facturacion_pallets', $pallets);
+      if (isset($_POST['palletsIds']))
+      {
+        $pallets = array(); // Ids de los pallets cargados en la factura.
+        // Crea el array de los pallets a insertar.
+        foreach ($_POST['palletsIds'] as $palletId)
+        {
+          $pallets[] = array(
+            'id_factura' => $idBorrador,
+            'id_pallet'  => $palletId
+          );
+        }
+
+        if (count($pallets) > 0)
+          $this->db->insert_batch('facturacion_pallets', $pallets);
+      }
     }
 
     /**
@@ -1271,18 +1300,19 @@ class facturacion_model extends privilegios_model{
 				'result_items_per_page' => $per_pag,
 				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
 		);
+
 		if($params['result_page'] % $params['result_items_per_page'] == 0)
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		$sql = '';
-        if($this->input->get('fserie') != '')
-            $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
+    if($this->input->get('fserie') != '')
+        $sql .= "WHERE lower(serie) LIKE '".mb_strtolower($this->input->get('fserie'), 'UTF-8')."'";
 
 		$query = BDUtil::pagination("SELECT fsf.id_serie_folio, fsf.id_empresa, fsf.serie, fsf.no_aprobacion, fsf.folio_inicio,
 					fsf.folio_fin, fsf.leyenda, fsf.leyenda1, fsf.leyenda2, fsf.ano_aprobacion, e.nombre_fiscal AS empresa
 				FROM facturacion_series_folios AS fsf
 				INNER JOIN empresas AS e ON e.id_empresa = fsf.id_empresa
-                {$sql}
+        {$sql}
 				ORDER BY fsf.serie", $params, true);
 
         $res = $this->db->query($query['query']);
