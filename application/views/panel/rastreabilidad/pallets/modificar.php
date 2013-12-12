@@ -101,9 +101,10 @@
 											  <tr>
 											  	<th>Fecha</th>
 												<th>Lote</th>
-												<th>Unidad</th>
-												<th>Calibre</th>
+												<th>Caja</th>
+												<th>Tamaño</th>
 												<th>Etiqueta</th>
+												<th>Kilos</th>
 												<th>Cajas libres</th>
 												<th>Opciones</th>
 											  </tr>
@@ -131,7 +132,8 @@
 										 $total_cajas_sel = 0;
 										 if(isset($info['rendimientos'])){
 										 	foreach ($info['rendimientos'] as $key => $value) {
-										 		$idrow = $value->id_rendimiento.'_'.$value->id_unidad.'_'.$value->id_calibre.'_'.$value->id_etiqueta.'_'.$value->id_clasificacion.'_'.$value->id_size;
+										 		$idrow = $value->id_rendimiento.'_'.$value->id_unidad.'_'.$value->id_calibre.'_'.$value->id_etiqueta.'_'.
+										 				$value->id_clasificacion.'_'.$value->id_size.'_'.str_replace('.', '-', $value->kilos);
 										 ?>
 										 	<tr id="row_rendsel<?php echo $idrow; ?>">
 												<td class="fecha"><?php echo $value->fecha; ?></td>
@@ -145,6 +147,7 @@
 													<input type="hidden" name="idcalibre[]" value="<?php echo $value->id_calibre; ?>">
 													<input type="hidden" name="idetiqueta[]" value="<?php echo $value->id_etiqueta; ?>">
 													<input type="hidden" name="idsize[]" value="<?php echo $value->id_size; ?>">
+													<input type="hidden" name="dkilos[]" value="<?php echo $value->kilos; ?>">
 
 													 <buttom class="btn btn-danger remove_cajassel" data-idrow="<?php echo $idrow; ?>"><i class="icon-remove"></i></buttom></td>
 											</tr>

@@ -21,6 +21,26 @@
 
     $('#box-content').keyJump();
 
+    $("#btnActualizaLote").on('click', function(event) {
+      msb.confirm('Estas seguro actualizar el No de Lote?', 'Rastreabilidad', $(this),
+      function($obj, $otro)
+      {
+        // si
+        $.post(base_url + 'panel/rastreabilidad/ajax_actualiza_lote/', 
+          {
+            'id_rendimiento': $("#id_lote_actual").val(),
+            'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote"))}, 
+          function(data) {
+              window.location.reload(true);
+        }, "json");
+      },
+      function()
+      {
+        // no
+      });
+      
+    });
+
     // Asigna evento click a los botones "Guardar"
     $('#tableClasif').on('click', '#btnAddClasif', function(event) {
       var $this = $(this),
@@ -82,6 +102,13 @@
       }
     });
 
+    $('#tableClasif').on('focusout', '#fkilos', function(event) {
+      var $this = $(this),
+          $tr =  $this.parent().parent();
+
+        ajaxGetExistente($('#glote').find('option:selected').val(), $tr);
+    });
+
     //Para guardar 
     $('#tableClasif').live('keypress', 'input#funidad, input#fcalibre, input#fetiqueta', function(event) {
       var $this = $(this),
@@ -128,7 +155,8 @@
 
         // Si la clasificacion que se esta agregando no existe
         // idUnidad, idCalibre, idEtiqueta
-        if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val() )) {
+        if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
 
           $tr.find("#fidclasificacion").val(ui.item.id); // Asigna el id al input
           $tr.find("#fclasificacion").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -167,7 +195,8 @@
 
             // Si la clasificacion que se esta agregando no existe
             // idUnidad, idCalibre, idEtiqueta
-            if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val() )) {
+            if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+                $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
 
               $tr.find("#fidclasificacion").val(ui.item.id); // Asigna el id al input
               $tr.find("#fclasificacion").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -238,7 +267,8 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), ui.item.id, $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val() )) {
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), ui.item.id, $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidunidad").val(ui.item.id); // Asigna el id al input
       $tr.find("#funidad").val(ui.item.label).css({'background-color': '#99FF99'});
 
@@ -286,7 +316,8 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val() )) {
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidcalibre").val(ui.item.id); // Asigna el id al input
       $tr.find("#fcalibre").val(ui.item.label).css({'background-color': '#99FF99'});
 
@@ -334,7 +365,8 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val() )) {
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidsize").val(ui.item.id); // Asigna el id al input
       $tr.find("#fsize").val(ui.item.label).css({'background-color': '#99FF99'});
     } else {
@@ -380,7 +412,8 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), ui.item.id )) {
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), ui.item.id, 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidetiqueta").val(ui.item.id); // Asigna el id al input
       $tr.find("#fetiqueta").val(ui.item.label).css({'background-color': '#99FF99'});
 
@@ -411,10 +444,15 @@
       'id_unidad': $tr.find('#fidunidad').val(),
       'id_calibre': $tr.find('#fidcalibre').val(),
       'id_etiqueta': $tr.find('#fidetiqueta').val(),
+      'id_size': $tr.find('#fidsize').val(),
+      'kilos': $tr.find('#fkilos').val(),
+      'fcalibre': $tr.find('#fcalibre').val(),
+      'fsize': $tr.find('#fsize').val(),
     }, enviar = true;
 
     $.each(dataPost, function(index, val) {
-      if (val == '') enviar = false;
+      if(index != 'id_calibre' && index != 'id_size')
+        if (val == '') enviar = false;
     });
 
     if (enviar) 
@@ -447,21 +485,39 @@
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
 
-    if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
-       && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
-      $.post(base_url + 'panel/rastreabilidad/ajax_save_clasifi/', postData, function(data) {
-        $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
 
-        $tr.attr('id', $tr.find('#fidclasificacion').val());
+        if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
+           && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
+          $.post(base_url + 'panel/rastreabilidad/ajax_save_clasifi/', postData, function(data) {
 
-        $tr.find('#ftotal').attr('data-valor', postData.total);
+            if (data.passess) {
+              if(data.id_calibre != '')
+                $tr.find('#fidcalibre').val(data.id_calibre);
+              if(data.id_size != '')
+                $tr.find('#fidsize').val(data.id_size);
 
-        addNewTr();
-      });
-    } else {
-      $tr.find('#fclasificacion').focus();
-      noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
-    }
+              $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+
+              $tr.attr('id', $tr.find('#fidclasificacion').val());
+
+              $tr.find('#ftotal').attr('data-valor', postData.total);
+            }else{
+              noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
+              $tr.remove();
+              //$tr.find('#fclasificacion').focus();
+            }
+
+            addNewTr();
+          }, "json");
+        } else {
+          $tr.find('#fclasificacion').focus();
+          noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
+        }
+
+    }else
+      noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
   };
 
   var ajaxEditClasifi = function ($tr) {
@@ -484,22 +540,37 @@
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
 
-    if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
-       && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
-      $.post(base_url + 'panel/rastreabilidad/ajax_edit_clasifi/', postData, function(data) {
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+           $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
 
-        noty({"text": 'La clasificacion se modifico correctamente!', "layout":"topRight", "type": 'success'});
+        if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
+           && postData.id_etiqueta != '' && (postData.id_size != '' || postData.fsize != '')) {
+          $.post(base_url + 'panel/rastreabilidad/ajax_edit_clasifi/', postData, function(data) {
 
-        $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+            if (data.passess) {
+              if(data.id_calibre != '')
+                $tr.find('#fidcalibre').val(data.id_calibre);
+              if(data.id_size != '')
+                $tr.find('#fidsize').val(data.id_size);
 
-        $tr.find('#ftotal').attr('data-valor', postData.total);
+              noty({"text": 'La clasificacion se modifico correctamente!', "layout":"topRight", "type": 'success'});
 
-        $tr.next().find('#fclasificacion').focus();
-      });
-      // console.log($tr.next().find('#fclasificacion').focus());
-    } else {
-      noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
-    }
+              $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+
+              $tr.find('#ftotal').attr('data-valor', postData.total);
+
+              $tr.next().find('#fclasificacion').focus();
+            }else{
+              noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
+              $tr.find('#fclasificacion').focus();
+            }
+          }, "json");
+          // console.log($tr.next().find('#fclasificacion').focus());
+        } else {
+          noty({"text": 'Seleccione una clasificación, unidad, calibre, size y etiqueta', "layout":"topRight", "type": 'error'});
+        }
+    }else
+      noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
   };
 
   var ajaxDelClasifi = function ($tr) {
@@ -510,6 +581,15 @@
     function($tr, $obj)
     {
       // si
+      postData = {
+        'id_rendimiento': $('#glote').find('option:selected').val(), 
+        'id_clasificacion': $tr.find('#fidclasificacion').val(), 
+        'id_unidad': $tr.find('#fidunidad').val(),
+        'id_calibre': $tr.find('#fidcalibre').val(),
+        'id_etiqueta': $tr.find('#fidetiqueta').val(),
+        'id_size': $tr.find('#fidsize').val(),
+        'kilos': $tr.find('#fkilos').val(),
+      };
       postData.id_rendimiento   = $('#glote').find('option:selected').val();
       postData.id_clasificacion = $tr.find('#fidclasificacion').val();
       $.post(base_url + 'panel/rastreabilidad/ajax_del_clasifi/', postData, function(data) {
@@ -523,19 +603,24 @@
     });
   };
 
-  var validExisClasifi = function (idClasifi, idUnidad, idCalibre, idEtiqueta) {
-    var isValid = true;
+  var validExisClasifi = function (idClasifi, idUnidad, idCalibre, idEtiqueta, idSize, idKilos, $trdata) {
+    var isValid = true, $trdata = $trdata? $trdata: undefined;
     $('input#fidclasificacion').each(function (e, i) {
       $this = $(this), $tr = $this.parent().parent();
+      
+      if($tr.is($trdata) == false)
+      {
+        if (parseInt($this.val(), 10) === parseInt(idClasifi, 10) && 
+            parseInt($tr.find('input#fidunidad').val(), 10) === parseInt(idUnidad, 10) && 
+            parseInt($tr.find('input#fidcalibre').val(), 10) === parseInt(idCalibre, 10) && 
+            parseInt($tr.find('input#fidetiqueta').val(), 10) === parseInt(idEtiqueta, 10) && 
+            parseInt($tr.find('input#fidsize').val(), 10) === parseInt(idSize, 10) && 
+            parseFloat($tr.find('input#fkilos').val(), 10) === parseFloat(idKilos, 10)
+          ) {
+          isValid = false;
 
-      if (parseInt($this.val(), 10) === parseInt(idClasifi, 10) && 
-          parseInt($tr.find('input#fidunidad').val(), 10) === parseInt(idUnidad, 10) && 
-          parseInt($tr.find('input#fidcalibre').val(), 10) === parseInt(idCalibre, 10) && 
-          parseInt($tr.find('input#fidetiqueta').val(), 10) === parseInt(idEtiqueta, 10)
-        ) {
-        isValid = false;
-
-        return false;
+          return false;
+        }
       }
     });
     return isValid;

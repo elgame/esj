@@ -18,6 +18,7 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_get_unidades/',
     'rastreabilidad/ajax_get_calibres/',
     'rastreabilidad/ajax_get_etiquetas/',
+    'rastreabilidad/ajax_actualiza_lote/',
 
     'rastreabilidad/rpl_pdf/',
 
@@ -105,6 +106,8 @@ class rastreabilidad extends MY_Controller {
       $params['clasificaciones'] = $this->rastreabilidad_model->getLoteInfo($_GET['glote']);
 
       $params['lote_actual'] = intval($params['clasificaciones']['info']->lote);
+      $params['lote_actual_ext'] = intval($params['clasificaciones']['info']->lote_ext);
+      $params['id_lote_actual'] = intval($params['clasificaciones']['info']->id_rendimiento);
 
       $params['ant_lote'] = $params['lote_actual'] - 1;
       $params['sig_lote'] = $params['lote_actual'] + 1;
@@ -117,15 +120,20 @@ class rastreabilidad extends MY_Controller {
       //
       // Si no existe lote para la fecha indicada entonces crea el primer lote
       if (count($params['lotes']) > 0)
+      {
         $params['clasificaciones'] = $this->rastreabilidad_model->getLoteInfo($params['lotes'][0]->id_rendimiento);
-      else
+        $params['id_lote_actual'] = intval($params['clasificaciones']['info']->id_rendimiento);
+        $params['lote_actual_ext'] = intval($params['clasificaciones']['info']->lote_ext);
+      }else
       {
         // Crea el primer lote para la fecha indicada
         // $this->rastreabilidad_model->createFirstLote($fecha->format('Y-m-d'));
-       $id = $this->rastreabilidad_model->createLote($fecha->format('Y-m-d'), 1);
+       $params['id_lote_actual'] = $this->rastreabilidad_model->createLote($fecha->format('Y-m-d'), 1, 1);
 
         // Obtiene los lotes de la fecha.
         $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'));
+
+        $params['lote_actual_ext'] = 1;
       }
 
       //
@@ -166,7 +174,8 @@ class rastreabilidad extends MY_Controller {
           redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$lote->id_rendimiento));
 
       // Si no existe entonces crea el lote.
-      $id_rendimiento = $this->rastreabilidad_model->createLote($_GET['gfecha'], $_GET['glote']);
+      $lote_ext = $this->rastreabilidad_model->getLoteExt($_GET['gfecha'], intval($_GET['glote'])-1 );
+      $id_rendimiento = $this->rastreabilidad_model->createLote($_GET['gfecha'], $_GET['glote'], $lote_ext);
 
       // Redirecciona con el nuevo lote.
       redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$id_rendimiento));
@@ -235,7 +244,14 @@ class rastreabilidad extends MY_Controller {
   {
     $this->load->model('rastreabilidad_model');
     echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], 
-      $_GET['id_clasificacion'], $_GET['loteActual'], $_GET['id_unidad'], $_GET['id_calibre'], $_GET['id_etiqueta']));
+      $_GET['id_clasificacion'], $_GET['loteActual'], $_GET['id_unidad'], $_GET['id_calibre'], 
+      $_GET['id_etiqueta'], $_GET['id_size'], $_GET['kilos']));
+  }
+
+  public function ajax_actualiza_lote()
+  {
+    $this->load->model('rastreabilidad_model');
+    echo json_encode($this->rastreabilidad_model->actualizaLoteExt($_POST['id_rendimiento'], $_POST['lote_ext']) );
   }
 
 

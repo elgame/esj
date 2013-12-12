@@ -189,11 +189,15 @@ class banco_cuentas_model extends banco_model {
 		}
 		
 		$_GET['vertodos'] = $this->input->get('vertodos')!=''? $this->input->get('vertodos'): 'all';
-		$sql = $sql_todos = '';
+		$sql = $sql_todos = $sqloperacion = '';
 		if($_GET['vertodos'] == 'tran')
 			$sql_todos = " AND entransito = 't'";
 		elseif($_GET['vertodos'] == 'notran')
 			$sql_todos = " AND entransito = 'f'";
+
+		if(isset($_GET['toperacion']{0})){
+			$sqloperacion .= " AND m.metodo_pago = 'transferencia' AND m.tipo = 'f'";
+		}
 
 		/*if(isset($_GET['fid_banco']{0}))
 			$sql .= " AND bb.id_banco = {$this->input->get('fid_banco')}";
@@ -241,6 +245,7 @@ class banco_cuentas_model extends banco_model {
 				m.numero_ref,
 				m.concepto,
 				Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+				Coalesce(c.id_cliente, p.id_proveedor, 0) AS id_cli_pro,
 				m.monto,
 				'' AS retiro,
 				'' AS deposito,
@@ -248,13 +253,15 @@ class banco_cuentas_model extends banco_model {
 				m.tipo,
 				m.status,
 				m.entransito,
-				m.metodo_pago
+				m.metodo_pago,
+				m.id_cuenta_proveedor
 			FROM banco_movimientos AS m 
 				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente 
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
 			WHERE m.id_cuenta = {$this->input->get('id_cuenta')} 
 				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}' 
-				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
+				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos})) 
+				{$sqloperacion}
 			ORDER BY m.fecha ASC");
 
 		if($res->num_rows() > 0)
@@ -818,6 +825,7 @@ class banco_cuentas_model extends banco_model {
 						'numero'     => $this->input->post('fnumero'),
 						'alias'      => $this->input->post('falias'),
 						'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
+						'sucursal'   => $this->input->post('fsucursal'),
 						);
 		}
 
@@ -844,6 +852,7 @@ class banco_cuentas_model extends banco_model {
 						'numero'     => $this->input->post('fnumero'),
 						'alias'      => $this->input->post('falias'),
 						'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
+						'sucursal'   => $this->input->post('fsucursal'),
 						);
 		}
 
@@ -864,7 +873,7 @@ class banco_cuentas_model extends banco_model {
 
 		$sql_res = $this->db->query(
 								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, 
-										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, 
+										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, bc.numero AS cuenta, bc.sucursal, 
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) - 
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)

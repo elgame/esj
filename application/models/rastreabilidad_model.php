@@ -21,7 +21,7 @@ class rastreabilidad_model extends CI_Model {
     {
       $this->load->model('calibres_model');
       $data_size        = $this->calibres_model->addCalibre($_POST['fsize']);
-      $_POST['id_size'] = $data_calibre['id'];
+      $_POST['id_size'] = $data_size['id'];
     }
 
     $data = array(
@@ -38,23 +38,53 @@ class rastreabilidad_model extends CI_Model {
       'total'            => $_POST['total'],
       'rendimiento'      => $_POST['rendimiento'],
     );
-    $this->db->insert('rastria_rendimiento_clasif', $data);
 
-    $info = $this->getLoteInfo($_POST['id_rendimiento']);
+    $passess = false;
+    if( ! $this->existeRendimiento($data))
+    {
+      $this->db->insert('rastria_rendimiento_clasif', $data);
 
-    // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
-    $sql = $this->db->query(
-      "SELECT id_rendimiento, lote
-        FROM rastria_rendimiento
-        WHERE fecha = '{$info['info']->fecha}' AND lote > {$info['info']->lote}
-        ORDER BY lote ASC
-      ");
+      $info = $this->getLoteInfo($_POST['id_rendimiento']);
 
-    // Si existen lotes siguientes
-    if ($sql->num_rows() > 0)
-      $this->updateMasivoClasifi($sql->result(), $data['total']);
+      // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
+      $sql = $this->db->query(
+        "SELECT id_rendimiento, lote, lote_ext
+          FROM rastria_rendimiento
+          WHERE fecha = '{$info['info']->fecha}' AND lote > {$info['info']->lote}
+          ORDER BY lote ASC
+        ");
 
-    return array('passess' => true);
+      // Si existen lotes siguientes
+      if ($sql->num_rows() > 0)
+        $this->updateMasivoClasifi($sql->result(), $data['total']);
+      $passess = true;
+    }
+
+    return array('passess' => $passess, 
+            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''), 
+            'id_size' => (isset($data_size['id'])? $data_size['id']: '') );
+  }
+
+  public function existeRendimiento($data, $tipo='add')
+  {
+    $data = $this->db->query(
+      "SELECT Count(*) AS num
+        FROM rastria_rendimiento_clasif
+        WHERE id_rendimiento = {$data['id_rendimiento']} 
+          AND id_clasificacion = {$data['id_clasificacion']} 
+          AND id_unidad = {$data['id_unidad']} 
+          AND id_calibre = {$data['id_calibre']} 
+          AND id_etiqueta = {$data['id_etiqueta']} 
+          AND id_size = {$data['id_size']} 
+          AND kilos = {$data['kilos']}
+      ")->row();
+    if($tipo=='add')
+      return ($data->num>0? true: false);
+
+    //si se actualiza
+    if($data->num <= 1) 
+      return false;
+    return true;
   }
 
   /**
@@ -94,40 +124,52 @@ class rastreabilidad_model extends CI_Model {
       'rendimiento'      => $_POST['rendimiento'],
     );
 
-    // Actualiza los datos de la clasificacion
-    $this->db->update('rastria_rendimiento_clasif',$data, array(
-      'id_rendimiento'   => $_POST['id_rendimiento'],
-      'id_clasificacion' => $_POST['id_clasificacion'],
-      'id_unidad'        => $_POST['id_unidad'],
-      'id_calibre'       => $_POST['id_calibre'],
-      'id_etiqueta'      => $_POST['id_etiqueta'])
-    );
+    $passess = false;
+    $dataval = $data;
+    $dataval['id_rendimiento']   = $_POST['id_rendimiento'];
+    $dataval['id_clasificacion'] = $_POST['id_clasificacion'];
+    if( ! $this->existeRendimiento($dataval, 'edit'))
+    {
+      // Actualiza los datos de la clasificacion
+      $this->db->update('rastria_rendimiento_clasif',$data, array(
+        'id_rendimiento'   => $_POST['id_rendimiento'],
+        'id_clasificacion' => $_POST['id_clasificacion'],
+        'id_unidad'        => $_POST['id_unidad'],
+        'id_calibre'       => $_POST['id_calibre'],
+        'id_etiqueta'      => $_POST['id_etiqueta'],
+        'id_size'          => $_POST['id_size'],
+        'kilos'            => $_POST['kilos'])
+      );
 
-    // Elimina la clasificacion de los pallets
-    $this->db->delete('rastria_pallets_rendimiento', array(
-      'id_rendimiento'   => $_POST['id_rendimiento'],
-      'id_clasificacion' => $_POST['id_clasificacion']
-    ));
+      // Elimina la clasificacion de los pallets
+      $this->db->delete('rastria_pallets_rendimiento', array(
+        'id_rendimiento'   => $_POST['id_rendimiento'],
+        'id_clasificacion' => $_POST['id_clasificacion']
+      ));
 
-    // Obtiene la fecha y el lote de la clasificacion que se modifico.
-    $res = $this->db->select("DATE(fecha) AS fecha, lote")
-      ->from("rastria_rendimiento")
-      ->where("id_rendimiento", $_POST['id_rendimiento'])
-      ->get()->row();
+      // Obtiene la fecha y el lote de la clasificacion que se modifico.
+      $res = $this->db->select("DATE(fecha) AS fecha, lote, lote_ext")
+        ->from("rastria_rendimiento")
+        ->where("id_rendimiento", $_POST['id_rendimiento'])
+        ->get()->row();
 
-    // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
-    $sql = $this->db->query(
-      "SELECT id_rendimiento, lote
-        FROM rastria_rendimiento
-        WHERE fecha = '{$res->fecha}' AND lote > {$res->lote}
-        ORDER BY lote ASC
-      ");
+      // Obtiene los lotes siguientes al lote de la clasificacion que se modifico
+      $sql = $this->db->query(
+        "SELECT id_rendimiento, lote, lote_ext
+          FROM rastria_rendimiento
+          WHERE fecha = '{$res->fecha}' AND lote > {$res->lote}
+          ORDER BY lote ASC
+        ");
 
-    // Si existen lotes siguientes
-    if ($sql->num_rows() > 0)
-      $this->updateMasivoClasifi($sql->result(), $data['total']);
+      // Si existen lotes siguientes
+      if ($sql->num_rows() > 0)
+        $this->updateMasivoClasifi($sql->result(), $data['total']);
+      $passess = true;
+    }
 
-    return array('passess' => true);
+    return array('passess' => $passess, 
+            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''), 
+            'id_size' => (isset($data_size['id'])? $data_size['id']: '') );
   }
 
   /**
@@ -138,7 +180,7 @@ class rastreabilidad_model extends CI_Model {
   public function delClasificacion()
   {
     // Obtiene la fecha y el lote de la clasificacion que se elimino.
-    $res = $this->db->select("DATE(fecha) AS fecha, lote")
+    $res = $this->db->select("DATE(fecha) AS fecha, lote, lote_ext")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $_POST['id_rendimiento'])
       ->get()->row();
@@ -147,13 +189,19 @@ class rastreabilidad_model extends CI_Model {
     $tables = array('rastria_rendimiento_clasif', 'rastria_pallets_rendimiento');
     $this->db->where(array(
       'id_rendimiento'   => $_POST['id_rendimiento'],
-      'id_clasificacion' => $_POST['id_clasificacion'])
+      'id_clasificacion' => $_POST['id_clasificacion'],
+      'id_unidad'        => $_POST['id_unidad'],
+      'id_calibre'       => $_POST['id_calibre'],
+      'id_etiqueta'      => $_POST['id_etiqueta'],
+      'id_size'          => $_POST['id_size'],
+      'kilos'            => $_POST['kilos'],
+      )
     );
     $this->db->delete($tables);
 
     // Obtiene los lotes anteriores al lote de la clasificacion que se elimino
     $sql = $this->db->query(
-      "SELECT id_rendimiento, lote
+      "SELECT id_rendimiento, lote, lote_ext
         FROM rastria_rendimiento
         WHERE fecha = '{$res->fecha}' AND lote < {$res->lote}
         ORDER BY lote DESC
@@ -173,7 +221,10 @@ class rastreabilidad_model extends CI_Model {
           "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                   total, rendimiento
             FROM rastria_rendimiento_clasif
-            WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento}
+            WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento} 
+              AND id_unidad = {$_POST['id_unidad']} AND id_calibre = {$_POST['id_calibre']} 
+              AND id_etiqueta = {$_POST['id_etiqueta']} AND id_size = {$_POST['id_size']}
+              AND kilos = {$_POST['kilos']}
         ");
 
         if ($sql2->num_rows() > 0)
@@ -190,7 +241,7 @@ class rastreabilidad_model extends CI_Model {
     // Obtiene los lotes siguientes apartir del lote de la clasificacion
     // que se elimino.
     $sql3 = $this->db->query(
-      "SELECT id_rendimiento, lote
+      "SELECT id_rendimiento, lote, lote_ext
         FROM rastria_rendimiento
         WHERE fecha = '{$res->fecha}' AND lote > {$res->lote}
         ORDER BY lote ASC
@@ -214,7 +265,10 @@ class rastreabilidad_model extends CI_Model {
         "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                 total, rendimiento
         FROM rastria_rendimiento_clasif
-        WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento}
+        WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento} 
+            AND id_unidad = {$_POST['id_unidad']} AND id_calibre = {$_POST['id_calibre']} 
+            AND id_etiqueta = {$_POST['id_etiqueta']} AND id_size = {$_POST['id_size']}
+            AND kilos = {$_POST['kilos']}
       ");
 
       if ($sql2->num_rows() > 0)
@@ -246,11 +300,12 @@ class rastreabilidad_model extends CI_Model {
     }
   }
 
-  public function createLote($fecha, $lote)
+  public function createLote($fecha, $lote, $lote_ext)
   {
     $this->db->insert('rastria_rendimiento', array(
-      'lote'  => $lote,
-      'fecha' => $fecha,
+      'lote'     => $lote,
+      'fecha'    => $fecha,
+      'lote_ext' => $lote_ext,
     ));
 
     $id = $this->db->insert_id();
@@ -261,7 +316,7 @@ class rastreabilidad_model extends CI_Model {
   public function getLotesByFecha($fecha)
   {
     $sql = $this->db->query(
-      "SELECT id_rendimiento, lote, fecha, status
+      "SELECT id_rendimiento, lote, fecha, status, lote_ext
       FROM rastria_rendimiento
       WHERE
         DATE(fecha) = '{$fecha}' AND
@@ -278,7 +333,7 @@ class rastreabilidad_model extends CI_Model {
 
   public function getLoteInfo($id_rendimiento, $full_info = true)
   {
-    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status")
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $id_rendimiento)
       ->get();
@@ -320,6 +375,27 @@ class rastreabilidad_model extends CI_Model {
     return $data;
   }
 
+  public function getLoteExt($fecha, $lote)
+  {
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext")
+      ->from("rastria_rendimiento")
+      ->where("DATE(fecha)", $fecha)
+      ->where("lote", $lote)
+      ->get();
+    if ($sql->num_rows() > 0)
+    {
+      $data = $sql->row();
+      return intval($data->lote_ext!=''? $data->lote_ext: $lote)+1;
+    }
+    return intval($lote)+1;
+  }
+
+  public function actualizaLoteExt($id_rendimiento, $lote_ext)
+  {
+    $this->db->update('rastria_rendimiento', array('lote_ext' => $lote_ext), "id_rendimiento = {$id_rendimiento}");
+    return array('passess' => true);
+  }
+
   /**
    * Obtiene los existentes de una clasificacion
    *
@@ -328,8 +404,24 @@ class rastreabilidad_model extends CI_Model {
    * @return array
    */
   public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote, 
-                                        $id_unidad, $id_calibre, $id_etiqueta)
+                                        $id_unidad, $id_calibre, $id_etiqueta, 
+                                        $id_size, $kilos)
   {
+
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($id_calibre))
+    {
+      $this->load->model('calibres_model');
+      $data_calibre = $this->calibres_model->addCalibre($_GET['fcalibre']);
+      $id_calibre   = $data_calibre['id'];
+    }
+    //Si no es un id, se inserta o se obtiene el calibre
+    if ( ! is_numeric($id_size))
+    {
+      $this->load->model('calibres_model');
+      $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
+      $id_size   = $data_calibre['id'];
+    }
 
     $info = $this->getLoteInfo($id_rendimiento, false);
 
@@ -342,6 +434,8 @@ class rastreabilidad_model extends CI_Model {
         ->where('rcl.id_unidad', $id_unidad)
         ->where('rcl.id_calibre', $id_calibre)
         ->where('rcl.id_etiqueta', $id_etiqueta)
+        ->where('rcl.id_size', $id_size)
+        ->where('rcl.kilos', $kilos)
         ->where('DATE(rd.fecha) <', $info['info']->fecha)
         ->get();
     }
@@ -371,7 +465,7 @@ class rastreabilidad_model extends CI_Model {
               FROM rastria_rendimiento_clasif
               WHERE id_clasificacion = {$id_clasificacion} AND id_rendimiento = {$lotee->id_rendimiento} 
                     AND id_unidad = {$id_unidad} AND id_calibre = {$id_calibre}
-                    AND id_etiqueta = {$id_etiqueta}
+                    AND id_etiqueta = {$id_etiqueta} AND id_size = {$id_size} AND kilos = {$kilos}
           ");
 
           if ($sql->num_rows() > 0)
@@ -393,6 +487,8 @@ class rastreabilidad_model extends CI_Model {
           ->where('rcl.id_unidad', $id_unidad)
           ->where('rcl.id_calibre', $id_calibre)
           ->where('rcl.id_etiqueta', $id_etiqueta)
+          ->where('rcl.id_size', $id_size)
+          ->where('rcl.kilos', $kilos)
           ->where('DATE(rd.fecha) <', $info['info']->fecha)
           ->get();
       }
@@ -824,7 +920,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(107));
         $pdf->SetFillColor(200,200,200);
-        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '-' . $lote['info']->lote), true);
+        $pdf->Row(array('Fecha: ' . $fecha->format('d/m/Y') . '   Lote ' .  $fecha->format("W") . (String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1) . '-' . $lote['info']->lote_ext), true);
         $pdf->SetX($x);
         $pdf->SetAligns(array('L', 'C', 'C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 11, 12, 12, 12, 10));

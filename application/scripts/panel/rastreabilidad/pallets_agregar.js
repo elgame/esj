@@ -162,6 +162,7 @@ var addpallets = (function($){
             '   <input type="hidden" name="idcalibre[]" value="'+ids[2]+'">'+
             '   <input type="hidden" name="idetiqueta[]" value="'+ids[3]+'">'+
             '   <input type="hidden" name="idsize[]" value="'+ids[5]+'">'+
+            '   <input type="hidden" name="dkilos[]" value="'+(ids[6].replace('-', '.'))+'">'+
 
             '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'"><i class="icon-remove"></i></buttom></td>'+
           '</tr>';
@@ -169,9 +170,9 @@ var addpallets = (function($){
         row_rendsel = $('#row_rendsel'+vthis.attr("data-id"), tbodysel);
       }else{
           var cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + parseInt($(idrow+" .libres").text());
+          cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + calcRestaCajasSel(cajas_agregadas);
           if( cajas_agregadas > parseInt(vthis.attr("data-totales")) )
             cajas_agregadas = parseInt(vthis.attr("data-totales"));
-          cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + calcRestaCajasSel(cajas_agregadas);
 
           $(".cajasel", row_rendsel).val( cajas_agregadas ).attr('max', cajas_agregadas);;
       }
@@ -209,7 +210,8 @@ var addpallets = (function($){
       var html = '', idrow;
       if (resp.rendimientos.length > 0) {
         for (var i = 0; i < resp.rendimientos.length; i++) {
-          idrow = resp.rendimientos[i].id_rendimiento+'_'+resp.rendimientos[i].id_unidad+'_'+resp.rendimientos[i].id_calibre+'_'+resp.rendimientos[i].id_etiqueta+'_'+resp.rendimientos[i].id_clasificacion+'_'+resp.rendimientos[i].id_size;
+          idrow = resp.rendimientos[i].id_rendimiento+'_'+resp.rendimientos[i].id_unidad+'_'+resp.rendimientos[i].id_calibre+'_'+resp.rendimientos[i].id_etiqueta+'_'+
+                  resp.rendimientos[i].id_clasificacion+'_'+resp.rendimientos[i].id_size+'_'+resp.rendimientos[i].kilos.replace('.', '-');
           html += '<tr id="row_rend'+idrow+'">'+
             '<td class="fecha">'+resp.rendimientos[i].fecha+'</td>'+
             '<td class="lote">'+resp.rendimientos[i].lote+'</td>'+
@@ -217,6 +219,7 @@ var addpallets = (function($){
             '<td class="unidad">'+resp.rendimientos[i].unidad+'</td>'+
             '<td class="calibre">'+resp.rendimientos[i].calibre+'</td>'+
             '<td class="etiqueta">'+resp.rendimientos[i].etiqueta+'</td>'+
+            '<td class="etiqueta">'+resp.rendimientos[i].kilos+'</td>'+
 
             '<td class="libres">'+resp.rendimientos[i].libres+'</td>'+
             '<td><buttom class="btn rendimientos cajasdisponibles"'+ 

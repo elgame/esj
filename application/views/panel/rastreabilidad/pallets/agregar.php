@@ -99,9 +99,10 @@
 											  <tr>
 											  	<th>Fecha</th>
 												<th>Lote</th>
-												<th>Unidad</th>
-												<th>Calibre</th>
+												<th>Caja</th>
+												<th>Tamaño</th>
 												<th>Etiqueta</th>
+												<th>Kilos</th>
 												<th>Cajas libres</th>
 												<th>Opciones</th>
 											  </tr>

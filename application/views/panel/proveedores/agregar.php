@@ -205,6 +205,7 @@
 										<thead>
 										  <tr>
 										    <th>Banamex</th>
+										    <th>BANCO</th>
 										    <th>ALIAS</th>
 										    <th>SUCURSAL</th>
 										    <th>CUENTA/CLABE</th>
@@ -222,6 +223,15 @@
 											    	<input type="hidden" name="cuentas_banamex[]" value="<?php echo $_POST['cuentas_banamex'][$key]; ?>" class="cuentas_banamex">
 											    	<input type="hidden" name="cuentas_id[]" value="<?php echo $_POST['cuentas_id'][$key]; ?>" class="cuentas_id">
 											    </td>
+											    <td>
+						                            <select name="fbanco[]" class="fbanco">
+						                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+						                            ?>
+						                                <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco); ?>><?php echo $valueb->nombre; ?></option>
+						                            <?php
+						                            }?>
+						                            </select>
+						                        </td>
 											    <td><input type="text" name="cuentas_alias[]" value="<?php echo $_POST['cuentas_alias'][$key]; ?>" class="cuentas_alias"></td>
 											    <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $_POST['cuentas_sucursal'][$key]; ?>" class="cuentas_sucursal vpos-int" <?php echo ($_POST['cuentas_banamex'][$key]=='true'? '': 'readonly'); ?>></td>
 											    <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $_POST['cuentas_cuenta'][$key]; ?>" class="cuentas_cuenta vpos-int"></td>
@@ -235,6 +245,15 @@
 											    	<input type="hidden" name="cuentas_banamex[]" value="true" class="cuentas_banamex">
 											    	<input type="hidden" name="cuentas_id[]" value="" class="cuentas_id">
 											    </td>
+											    <td>
+									                <select name="fbanco[]" class="fbanco">
+									                <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+									                ?>
+									                    <option value="<?php echo $valueb->id_banco ?>"><?php echo $valueb->nombre; ?></option>
+									                <?php
+									                }?>
+									                </select>
+									            </td>
 											    <td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias"></td>
 											    <td><input type="text" name="cuentas_sucursal[]" value="" class="cuentas_sucursal vpos-int"></td>
 											    <td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int"></td>
