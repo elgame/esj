@@ -550,6 +550,16 @@ class facturacion extends MY_Controller {
               'label'   => 'Observaciones',
               'rules'   => ''),
     );
+
+    if (isset($_POST['palletsIds']) && isset($_POST['timbrar']))
+    {
+      $rules[] = array(
+        'field'   => 'palletsIds[]',
+        'label'   => 'Pallets',
+        'rules'   => 'callback_check_existen_pallets'
+      );
+    }
+
     $this->form_validation->set_rules($rules);
   }
 
@@ -660,6 +670,36 @@ class facturacion extends MY_Controller {
       $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
       return false;
     }
+    return true;
+  }
+
+  public function check_existen_pallets($str)
+  {
+    $error = false;
+    $palletsYaFacturados = array();
+    foreach ($_POST['palletsIds'] as $palletId)
+    {
+      $query = $this->db->query("SELECT f.id_factura, rp.folio
+                                 FROM facturacion_pallets fp
+                                 INNER JOIN facturacion f ON f.id_factura = fp.id_factura
+                                 INNER JOIN rastria_pallets rp ON rp.id_pallet = fp.id_pallet
+                                 WHERE fp.id_pallet = {$palletId} AND f.status_timbrado != 'ca' AND f.status in ('p', 'pa')");
+
+      if ($query->num_rows() > 0)
+      {
+        $error = true;
+        $pallet = $query->result();
+        $palletsYaFacturados[] = $pallet[0]->folio;
+      }
+
+    }
+
+    if ($error)
+    {
+      $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
+      return false;
+    }
+
     return true;
   }
 
