@@ -463,9 +463,9 @@ class rastreabilidad_model extends CI_Model {
           $sql = $this->db->query(
             "SELECT total AS existentes
               FROM rastria_rendimiento_clasif
-              WHERE id_clasificacion = {$id_clasificacion} AND id_rendimiento = {$lotee->id_rendimiento} 
-                    AND id_unidad = {$id_unidad} AND id_calibre = {$id_calibre}
-                    AND id_etiqueta = {$id_etiqueta} AND id_size = {$id_size} AND kilos = {$kilos}
+              WHERE id_clasificacion = '{$id_clasificacion}' AND id_rendimiento = '{$lotee->id_rendimiento}' 
+                    AND id_unidad = '{$id_unidad}' AND id_calibre = '{$id_calibre}'
+                    AND id_etiqueta = '{$id_etiqueta}' AND id_size = '{$id_size}' AND kilos = '{$kilos}'
           ");
 
           if ($sql->num_rows() > 0)

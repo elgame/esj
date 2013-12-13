@@ -160,7 +160,7 @@
 										<div class="control-group">
 											<label class="control-label" for="dpass">Clave:</label>
 											<div class="controls">
-												<input type="text" name="dpass" id="dpass" class="span12" 
+												<input type="password" name="dpass" id="dpass" class="span12" 
 													value="<?php echo set_value('dpass'); ?>" maxlength="20">
 											</div>
 										</div>

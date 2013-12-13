@@ -94,6 +94,14 @@
                         maxlength="45" placeholder="Colima, Jalisco">
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fpais">Pais </label>
+                    <div class="controls">
+                      <input type="text" name="fpais" id="fpais" class="span10" value="<?php echo isset($data->pais)?$data->pais:''; ?>"
+                        maxlength="45" placeholder="MEXICO">
+                    </div>
+                  </div>
                 </div> <!--/span-->
 
                 <div class="span5">
