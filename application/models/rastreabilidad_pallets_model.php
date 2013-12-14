@@ -24,7 +24,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		}
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(c.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' 
+			$sql = "WHERE ( lower(c.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%'
 								".(is_numeric($this->input->get('fnombre'))? " OR rp.folio = '".$this->input->get('fnombre')."'": '')." )";
 
 		if($this->input->get('ffecha') != '')
@@ -70,8 +70,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			if(!$basic_info)
 			{
 				$result = $this->db->query("SELECT rpr.id_pallet, rr.id_rendimiento, c.id_clasificacion, c.nombre, rr.lote, rr.lote_ext, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rpr.cajas,
-						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size, 
-						rpr.kilos
+						u.id_unidad, u.nombre AS unidad, cal.id_calibre, cal.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta, sz.id_calibre AS id_size, sz.nombre AS size,
+						rpr.kilos, c.iva as iva_clasificacion, c.id_unidad as id_unidad_clasificacion
 					FROM rastria_pallets_rendimiento AS rpr
 						INNER JOIN rastria_rendimiento AS rr ON rpr.id_rendimiento = rr.id_rendimiento
 						INNER JOIN clasificaciones AS c ON c.id_clasificacion = rpr.id_clasificacion
@@ -144,7 +144,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$sql .= $idetiqueta!=''? ' AND rcl.id_etiqueta = '.$idetiqueta: '';
  		$result = $this->db->query("SELECT rr.id_rendimiento, rr.lote, to_char(rr.fecha, 'DD-MM-YYYY') AS fecha, rcl.rendimiento, rcl.cajas, rcl.libres,
  										rcl.kilos, u.id_unidad, u.nombre AS unidad, c.id_calibre, c.nombre AS calibre, e.id_etiqueta, e.nombre AS etiqueta,
- 										rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size 
+ 										rcl.id_clasificacion, sz.id_calibre AS id_size, sz.nombre AS size
  		                           FROM rastria_rendimiento AS rr
 									INNER JOIN rastria_cajas_libres AS rcl ON rr.id_rendimiento = rcl.id_rendimiento
 									LEFT JOIN unidades AS u ON rcl.id_unidad = u.id_unidad
@@ -260,7 +260,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		{
 			if(is_array($this->input->post('idcalibre')))
 			{
-				foreach ($this->input->post('idcalibre') as $key => $calibre) 
+				foreach ($this->input->post('idcalibre') as $key => $calibre)
 				{
 					if (!array_key_exists($calibre, $data))
 					{

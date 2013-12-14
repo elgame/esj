@@ -446,6 +446,8 @@ class areas extends MY_Controller {
 					redirect(base_url('panel/areas/modificar/?id='.$this->input->get('id').'&msg=14'));
 			}
 
+      $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -497,8 +499,12 @@ class areas extends MY_Controller {
 			}
 
 			$params['data'] = $this->clasificaciones_model->getClasificacionInfo($_GET['id']);
-
 			$params['areas'] = $this->areas_model->getAreas(false);
+      $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
+      // echo "<pre>";
+      //   var_dump($params['data']);
+      // echo "</pre>";exit;
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -634,6 +640,12 @@ class areas extends MY_Controller {
             'rules' => ''),
       array('field' => 'fcalibre_nombre[]',
             'label' => '',
+            'rules' => ''),
+      array('field' => 'diva',
+            'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'dunidad',
+            'label' => 'Unidad / Medida',
             'rules' => ''),
 		);
 

@@ -38,6 +38,28 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="fnombre">IVA </label>
+                <div class="controls">
+                  <select name="diva" id="diva" class="span3">
+                    <option value="0" <?php echo set_select('diva', '0', $data['info']->iva == '0' ? true : false); ?>>0%</option>
+                    <option value="11" <?php echo set_select('diva', '11', $data['info']->iva == '11' ? true : false); ?>>11%</option>
+                    <option value="16" <?php echo set_select('diva', '16', $data['info']->iva == '16' ? true : false); ?>>16%</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fnombre">Unidad / Medida </label>
+                <div class="controls">
+                  <select name="dunidad" id="dunidad" class="span3">
+                    <?php foreach ($unidades as $key => $u) { ?>
+                      <option value="<?php echo $u->id_unidad ?>" <?php echo set_select('dunidad', $u->id_unidad, $data['info']->id_unidad == $u->id_unidad ? true : false); ?>><?php echo $u->nombre ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+
               <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">

@@ -108,7 +108,7 @@ class facturacion_model extends privilegios_model{
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad')
+                u.id_unidad, fp.kilos, fp.cajas')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
@@ -117,12 +117,46 @@ class facturacion_model extends privilegios_model{
 
       $response['productos'] = $res->result();
 
+      // Obtiene los pallets que tiene la factura.
       $response['pallets'] = array();
-      $res = $this->db
-        ->select('id_pallet')
-        ->from('facturacion_pallets')
-        ->where('id_factura = ' . $idFactura)
-        ->get();
+      $res = $this->db->query(
+        "SELECT fp.id_pallet, rp.folio, rp.no_cajas, rp.kilos_pallet, string_agg(clasi.nombre::text, ', '::text) AS clasificaciones, cali.calibres,
+          (
+            SELECT string_agg(etiq.nombre::text, ', '::text) AS etiquetas
+            FROM rastria_pallets rp2
+            JOIN (
+            SELECT rpr.id_pallet, et.nombre
+            FROM rastria_pallets_rendimiento rpr
+            JOIN etiquetas et ON rpr.id_etiqueta = et.id_etiqueta
+            GROUP BY rpr.id_pallet, rpr.id_etiqueta, et.nombre
+            ORDER BY rpr.id_pallet
+            ) etiq ON etiq.id_pallet = rp2.id_pallet
+            WHERE etiq.id_pallet = fp.id_pallet
+          ) AS etiquetas
+
+        FROM facturacion_pallets fp
+        INNER JOIN rastria_pallets rp ON rp.id_pallet = fp.id_pallet
+
+        INNER JOIN (
+          SELECT rpr.id_pallet, cl.nombre
+          FROM rastria_pallets_rendimiento rpr
+          JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+          GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+          ORDER BY rpr.id_pallet
+        ) clasi ON clasi.id_pallet = fp.id_pallet
+
+        LEFT JOIN (
+          SELECT rpc.id_pallet, string_agg(cal.nombre::text, ', '::text) AS calibres
+          FROM rastria_pallets_calibres rpc
+          JOIN calibres cal ON rpc.id_calibre = cal.id_calibre
+          GROUP BY rpc.id_pallet
+          ORDER BY rpc.id_pallet
+        ) cali ON cali.id_pallet = fp.id_pallet
+
+        WHERE id_factura = {$idFactura}
+        GROUP BY fp.id_pallet, rp.folio, rp.no_cajas, rp.kilos_pallet, cali.calibres
+        ORDER BY fp.id_pallet ASC;");
+
       $response['pallets'] = $res->result();
 
 			return $response;
@@ -372,6 +406,8 @@ class facturacion_model extends privilegios_model{
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
               'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+              'kilos'             => $_POST['prod_dkilos'][$key],
+              'cajas'             => $_POST['prod_dcajas'][$key],
             );
           }
         }
@@ -1139,8 +1175,8 @@ class facturacion_model extends privilegios_model{
 
       foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
       {
-        if ($_POST['prod_importe'][$key] != 0)
-        {
+        // if ($_POST['prod_importe'][$key] != 0)
+        // {
           $productosFactura[] = array(
             'id_factura'       => $idBorrador,
             'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -1155,8 +1191,10 @@ class facturacion_model extends privilegios_model{
             'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
             'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
             'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+            'kilos'             => $_POST['prod_dkilos'][$key],
+            'cajas'             => $_POST['prod_dcajas'][$key],
           );
-        }
+        // }
       }
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
@@ -2288,8 +2326,10 @@ class facturacion_model extends privilegios_model{
                INNER JOIN facturacion_pallets AS fp ON fp.id_factura = f.id_factura
                WHERE f.status != 'ca' AND f.status != 'b' AND fp.id_pallet = rp.id_pallet) AS existe
        FROM rastria_pallets AS rp
-       WHERE id_cliente = {$_GET['id']} AND (SELECT count(f.id_factura) FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON fp.id_factura = f.id_factura WHERE f.status != 'ca' AND f.status != 'b' AND fp.id_pallet = rp.id_pallet) = 0"
-    );
+       WHERE id_cliente = {$_GET['id']} AND
+             no_cajas > 0 AND
+             (SELECT count(f.id_factura) FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON fp.id_factura = f.id_factura WHERE f.status != 'ca' AND f.status != 'b' AND fp.id_pallet = rp.id_pallet) = 0
+      ");
 
     $palletsInfo = array();
     if ($query->num_rows() > 0)

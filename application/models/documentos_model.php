@@ -338,14 +338,11 @@ class documentos_model extends CI_Model {
 
       if ($sql->num_rows() > 0)
         $data['pallets'] = $sql->result();
-
-
     }
 
     // Obtiene los kilos de la pesada segun el ticket seleccionado en el documento
     // manifiesto de chofer.
     $infoManifiesto = $this->getJsonDataDocus($idFactura, 1);
-
     $data['kilos_pesada'] = 'Ticket no asignado';
     if ($infoManifiesto && $infoManifiesto->no_ticket !== '')
     {

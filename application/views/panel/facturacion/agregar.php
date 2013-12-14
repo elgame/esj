@@ -260,6 +260,7 @@
                     <th>Medida</th>
                     <th>Cant.</th>
                     <th>P Unitario</th>
+                    <th>IVA%</th>
                     <th>IVA</th>
                     <th>Retención</th>
                     <th>Importe</th>
@@ -281,14 +282,17 @@
                             $_POST['prod_diva_total'][$key]         = $p->iva;
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
-                            $_POST['pallets_id'][$key]               = $p->ids_pallets;
-                            $_POST['prod_dmedida_id'][$key]        = $p->id_unidad;
+                            $_POST['pallets_id'][$key]      = $p->ids_pallets;
+                            $_POST['prod_dkilos'][$key]     = $p->kilos;
+                            $_POST['prod_dcajas'][$key]     = $p->cajas;
+                            $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
                           }
                         } ?>
 
                         <?php if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
-                            if ($_POST['prod_importe'][$k] != 0) { ?>
+                            // if ($_POST['prod_importe'][$k] != 0) {
+                            ?>
                               <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
@@ -305,6 +309,8 @@
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
+                                    <input type="hidden" name="prod_dcajas[]" value="<?php echo $_POST['prod_dcajas'][$k] ?>" id="prod_dcajas" class="span12 vpositive">
+                                    <input type="hidden" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span12 vpositive">
                                 </td>
                                 <td>
                                   <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
@@ -316,8 +322,11 @@
                                       <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
                                     </select>
 
-                                    <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total">
+                                    <!-- <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php //echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total"> -->
                                     <input type="hidden" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]; ?>" id="prod_diva_porcent">
+                                </td>
+                                <td style="width: 80px;">
+                                  <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total" readonly>
                                 </td>
                                 <td>
                                   <select name="dreten_iva" id="dreten_iva" class="span12 prod">
@@ -337,7 +346,8 @@
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                 </td>
                               </tr>
-                        <?php }}} ?>
+                        <?php }}
+                      // } ?>
                   <tr data-pallets="">
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
@@ -357,6 +367,8 @@
                     </td>
                     <td>
                         <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
+                        <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
+                        <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
                     </td>
                     <td>
                       <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive">
@@ -368,8 +380,11 @@
                           <option value="16">16%</option>
                         </select>
 
-                        <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">
+                        <!-- <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12"> -->
                         <input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
+                    </td>
+                    <td style="width: 80px;">
+                      <input type="text" name="prod_diva_total[]" class="span12" value="0" id="prod_diva_total" readonly>
                     </td>
                     <td>
                       <select name="dreten_iva" id="dreten_iva" class="span12 prod">

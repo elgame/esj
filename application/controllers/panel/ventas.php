@@ -147,9 +147,9 @@ class ventas extends MY_Controller {
       $respons = $this->ventas_model->addNotaVenta();
 
       if($respons['passes'])
-      {
-        redirect(base_url('panel/ventas/agregar/?msg=4'));
-      }
+        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
+      else
+        $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }
 
     // Parametros por default.
@@ -243,37 +243,36 @@ class ventas extends MY_Controller {
         array('field'   => 'dfolio',
               'label'   => 'Folio',
               'rules'   => 'required|numeric|callback_seriefolio_check'),
-        // array('field'   => 'dno_aprobacion',
-        //       'label'   => 'Numero de aprobacion',
-        //       'rules'   => 'required|numeric'),
-        // array('field'   => 'dano_aprobacion',
-        //       'label'   => 'Fecha de aprobacion',
-        //       'rules'   => 'required|max_length[10]|'.$callback_isValidDate),
+        array('field'   => 'dno_aprobacion',
+              'label'   => 'Numero de aprobacion',
+              'rules'   => 'required|numeric'),
+        array('field'   => 'dano_aprobacion',
+              'label'   => 'Fecha de aprobacion',
+              'rules'   => 'required|max_length[10]|'.$callback_isValidDate),
 
         array('field'   => 'dfecha',
               'label'   => 'Fecha',
               'rules'   => 'required|max_length[25]'), //|callback_isValidDate
 
-        // array('field'   => 'total_importe',
-        //       'label'   => 'SubTotal1',
-        //       'rules'   => 'numeric'),
+        array('field'   => 'total_importe',
+              'label'   => 'SubTotal1',
+              'rules'   => 'numeric'),
         array('field'   => 'total_subtotal',
               'label'   => 'SubTotal',
               'rules'   => 'numeric'),
 
-        // array('field'   => 'total_descuento',
-        //       'label'   => 'Descuento',
-        //       'rules'   => $required.'|numeric'),
+        array('field'   => 'total_descuento',
+              'label'   => 'Descuento',
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_iva',
               'label'   => 'IVA',
               'rules'   => 'numeric'),
-        // array('field'   => 'total_retiva',
-        //       'label'   => 'Retencion IVA',
-        //       'rules'   => $required.'|numeric'),
+        array('field'   => 'total_retiva',
+              'label'   => 'Retencion IVA',
+              'rules'   => $required.'|numeric'),
         array('field'   => 'total_totfac',
               'label'   => 'Total',
               'rules'   => 'required|numeric|'.$callback_val_total),
-
         array('field'   => 'dforma_pago',
               'label'   => 'Forma de pago',
               'rules'   => 'required|max_length[80]'),
@@ -319,6 +318,12 @@ class ventas extends MY_Controller {
         array('field'   => 'prod_dcantidad[]',
               'label'   => 'prod_dcantidad',
               'rules'   => ''),
+        array('field'   => 'prod_dkilos[]',
+              'label'   => 'prod_dkilos',
+              'rules'   => ''),
+        array('field'   => 'prod_dcajas[]',
+              'label'   => 'prod_dcajas',
+              'rules'   => ''),
         array('field'   => 'prod_ddescripcion[]',
               'label'   => 'prod_ddescripcion',
               'rules'   => ''),
@@ -332,8 +337,8 @@ class ventas extends MY_Controller {
               'label'   => 'prod_dpreciou',
               'rules'   => ''),
         array('field'   => 'prod_importe[]',
-              'label'   => 'prod_importe',
-              'rules'   => ''),
+              'label'   => 'Importe de los productos',
+              'rules'   => 'greater_than[0]'),
         array('field'   => 'prod_diva_total[]',
               'label'   => 'prod_diva_total',
               'rules'   => ''),
@@ -367,94 +372,18 @@ class ventas extends MY_Controller {
               'label'   => 'Observaciones',
               'rules'   => ''),
     );
+
+    if (isset($_POST['palletsIds']))
+    {
+      $rules[] = array(
+        'field'   => 'palletsIds[]',
+        'label'   => 'Pallets',
+        'rules'   => 'callback_check_existen_pallets'
+      );
+    }
+
     $this->form_validation->set_rules($rules);
   }
-
-  /**
-   * Configura los metodos de agregar y modificar
-   */
-  // private function configAddModFactura()
-  // {
-  //   $this->load->library('form_validation');
-  //   $rules = array(
-
-  //       array('field'   => 'did_empresa',
-  //             'label'   => 'Empresa',
-  //             'rules'   => 'required|numeric'),
-  //       array('field'   => 'did_cliente',
-  //             'label'   => 'Cliente',
-  //             'rules'   => 'required|numeric'),
-  //       array('field'   => 'dfolio',
-  //             'label'   => 'Folio',
-  //             'rules'   => 'required|numeric|callback_seriefolio_check'),
-
-  //       array('field'   => 'dfecha',
-  //             'label'   => 'Fecha',
-  //             'rules'   => 'required|max_length[25]'), //|callback_isValidDate
-
-  //       array('field'   => 'total_importe',
-  //             'label'   => 'SubTotal',
-  //             'rules'   => 'required|numeric'),
-  //       array('field'   => 'total_totfac',
-  //             'label'   => 'Total',
-  //             'rules'   => 'required|numeric|callback_val_total'),
-
-  //       array('field'   => 'dforma_pago',
-  //             'label'   => 'Forma de pago',
-  //             'rules'   => 'required|max_length[80]'),
-  //       array('field'   => 'dmetodo_pago',
-  //             'label'   => 'Metodo de pago',
-  //             'rules'   => 'required|max_length[40]'),
-  //       array('field'   => 'dcondicion_pago',
-  //             'label'   => 'Condición de pago',
-  //             'rules'   => 'required|max_length[2]'),
-  //       array('field'   => 'dplazo_credito',
-  //             'label'   => 'Plazo de crédito',
-  //             'rules'   => 'numeric'),
-
-  //       array('field'   => 'dempresa',
-  //             'label'   => 'Empresa',
-  //             'rules'   => ''),
-  //       array('field'   => 'dcliente',
-  //             'label'   => 'Cliente',
-  //             'rules'   => ''),
-  //       array('field'   => 'dcliente_rfc',
-  //             'label'   => 'Cliente',
-  //             'rules'   => ''),
-  //       array('field'   => 'dcliente_domici',
-  //             'label'   => 'Cliente',
-  //             'rules'   => ''),
-  //       array('field'   => 'dcliente_ciudad',
-  //             'label'   => 'Cliente',
-  //             'rules'   => ''),
-  //       array('field'   => 'dttotal_letra',
-  //             'label'   => 'letra',
-  //             'rules'   => ''),
-  //       array('field'   => 'dreten_iva',
-  //             'label'   => 'Retecion IVA',
-  //             'rules'   => ''),
-
-  //       array('field'   => 'prod_did_prod[]',
-  //             'label'   => 'prod_did_prod',
-  //             'rules'   => ''),
-  //       array('field'   => 'prod_dcantidad[]',
-  //             'label'   => 'prod_dcantidad',
-  //             'rules'   => ''),
-  //       array('field'   => 'prod_ddescripcion[]',
-  //             'label'   => 'prod_ddescripcion',
-  //             'rules'   => ''),
-  //       array('field'   => 'prod_dpreciou[]',
-  //             'label'   => 'prod_dpreciou',
-  //             'rules'   => ''),
-  //       array('field'   => 'prod_importe[]',
-  //             'label'   => 'prod_importe',
-  //             'rules'   => ''),
-  //       array('field'   => 'prod_dmedida[]',
-  //             'label'   => 'prod_dmedida',
-  //             'rules'   => ''),
-  //   );
-  //   $this->form_validation->set_rules($rules);
-  // }
 
   /**
    * Verifica que la serie y folio enviados del form no esten asignados a una
@@ -469,7 +398,7 @@ class ventas extends MY_Controller {
 
       $res = $this->db->select('Count(id_factura) AS num')
         ->from('facturacion')
-        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f'")
+        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f' AND status != 'ca'")
         ->get();
       $data = $res->row();
       if($data->num > 0){
@@ -485,6 +414,36 @@ class ventas extends MY_Controller {
       $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
       return false;
     }
+    return true;
+  }
+
+  public function check_existen_pallets($str)
+  {
+    $error = false;
+    $palletsYaFacturados = array();
+    foreach ($_POST['palletsIds'] as $palletId)
+    {
+      $query = $this->db->query("SELECT f.id_factura, rp.folio
+                                 FROM facturacion_pallets fp
+                                 INNER JOIN facturacion f ON f.id_factura = fp.id_factura
+                                 INNER JOIN rastria_pallets rp ON rp.id_pallet = fp.id_pallet
+                                 WHERE fp.id_pallet = {$palletId} AND f.status_timbrado != 'ca' AND f.status in ('p', 'pa')");
+
+      if ($query->num_rows() > 0)
+      {
+        $error = true;
+        $pallet = $query->result();
+        $palletsYaFacturados[] = $pallet[0]->folio;
+      }
+
+    }
+
+    if ($error)
+    {
+      $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
+      return false;
+    }
+
     return true;
   }
 
@@ -514,7 +473,7 @@ class ventas extends MY_Controller {
     if(isset($_GET['ide']))
     {
       $this->load->model('ventas_model');
-      $res = $this->ventas_model->getFolio($_GET['ide']);
+      $res = $this->ventas_model->getFolio($_GET['ide'], $_GET['serie']);
 
       $param =  $this->showMsgs(2, $res[1]);
       $param['data'] = $res[0];

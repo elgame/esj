@@ -123,19 +123,39 @@ class Ventas_model extends privilegios_model{
 	/**
 	 * Obtiene el folio de acuerdo a la serie seleccionada
 	 */
-	public function getFolio($empresa)
+	public function getFolio($empresa, $serie)
   {
 		$res = $this->db->select('folio')->
                       from('facturacion')->
                       where("id_empresa = {$empresa}")->
+                      where("serie = '{$serie}'")->
                       where("is_factura = 'f'")->
                       order_by('folio', 'DESC')->
                       limit(1)->get()->row();
 
     $folio      = (isset($res->folio)? $res->folio: 0)+1;
-    $res = new stdClass();
-    $res->folio = $folio;
-    $msg        = 'ok';
+    // $res = new stdClass();
+    // $res->folio = $folio;
+    // $msg        = 'ok';
+
+    $res = $this->db->select('*')
+      ->from('facturacion_series_folios')
+      ->where("serie = '".$serie."' AND id_empresa = ".$empresa)
+      ->limit(1)->get()->row();
+
+    if(is_object($res)){
+      if($folio < $res->folio_inicio)
+        $folio = $res->folio_inicio;
+
+      $res->folio = $folio;
+      $msg = 'ok';
+
+      if($folio > $res->folio_fin || $folio < $res->folio_inicio)
+        $msg = "El folio ".$folio." está fuera del rango de folios para la serie ".$serie.". <br>
+          Verifique las configuraciones para asignar un nuevo rango de folios";
+    }else
+      $msg = 'La serie no existe.';
+
 
 		return array($res, $msg);
 	}
@@ -155,7 +175,7 @@ class Ventas_model extends privilegios_model{
       'id_cliente'          => $this->input->post('did_cliente'),
       'id_empresa'          => $this->input->post('did_empresa'),
       'version'             => $this->input->post('dversion'),
-      'serie'               => '',
+      'serie'               => $this->input->post('dserie'),
       'folio'               => $this->input->post('dfolio'),
       'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
       'subtotal'            => floatval($_POST['total_subtotal']) - floatval($_POST['total_iva']),
@@ -220,6 +240,8 @@ class Ventas_model extends privilegios_model{
           'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
           // 'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
           'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+          'kilos'             => $_POST['prod_dkilos'][$key],
+          'cajas'             => $_POST['prod_dcajas'][$key],
         );
       }
     }
@@ -242,6 +264,19 @@ class Ventas_model extends privilegios_model{
         $this->db->insert_batch('facturacion_pallets', $pallets);
       }
     }
+
+    $this->load->model('documentos_model');
+    $this->load->model('facturacion_model');
+
+    // Obtiene los documentos que el cliente tiene asignados.
+    $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
+    $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+
+    // Inserta los documentos del cliente con un status false.
+    if ($docsCliente)
+      $this->db->insert_batch('facturacion_documentos', $docsCliente);
+    else
+      $datosFactura['docs_finalizados'] = 't';
 
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}

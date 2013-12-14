@@ -351,6 +351,29 @@ class Usuarios_model extends privilegios_model {
 
     return $response;
   }
+
+  /**
+   * Obtiene los puestos de los usuarios.
+   *
+   * @return array
+   */
+  public function puestos()
+  {
+    $query = $this->db->query("SELECT id_puesto, nombre, abreviatura
+                               FROM usuarios_puestos
+                               WHERE status = 't'
+                               ORDER BY nombre ASC");
+
+    $puestos = array();
+
+    if ($query->num_rows() > 0)
+    {
+      $puestos = $query->result();
+    }
+
+    return $puestos;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */
