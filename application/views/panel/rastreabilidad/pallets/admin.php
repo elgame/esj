@@ -96,6 +96,11 @@
 												'btn_type' => 'btn-info', 
 												'attrs' => array('target' => '_BLANCK') )
 										);
+										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/eliminar/', array(
+												'params'   => 'id='.$pallet->id_pallet,
+												'btn_type' => 'btn-danger',
+												'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el pallet?', 'pallet', this); return false;"))
+										);
 										
 										?>
 								</td>

@@ -279,6 +279,21 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return true;
 	}
 
+	public function deletePallet($id_pallet)
+	{
+		$data = $this->db->query("SELECT Count(f.id_factura) AS num 
+				FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura 
+				WHERE fp.id_pallet = {$id_pallet} AND f.status <> 'ca' AND f.status <> 'b'")->row();
+		$response = array('passes' => false, 'msg' => '8');
+		if ($data->num == 0)
+		{
+			$this->db->delete('rastria_pallets', array('id_pallet' => $id_pallet));
+			$response = array('passes' => true, 'msg' => '7');
+		}
+		return $response;
+	}
+
+
 	public function pallet_pdf($id_pallet){
 		// Obtiene los datos del reporte.
 		$data = $this->getInfoPallet($id_pallet, false, false);

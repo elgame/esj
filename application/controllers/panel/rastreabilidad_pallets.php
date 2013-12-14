@@ -167,6 +167,18 @@ class rastreabilidad_pallets extends MY_Controller {
     $this->rastreabilidad_pallets_model->palletBig_pdf($this->input->get('id'));
   }
 
+  public function eliminar()
+  {
+    if (isset($_GET['id']))
+    {
+      $this->load->model('rastreabilidad_pallets_model');
+      $res_mdl = $this->rastreabilidad_pallets_model->deletePallet( $this->input->get('id') );
+      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+    }
+    else
+      redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=1'));
+  }
+
   /**
    * Obtiene la lista de rendimientos de una clasificacion, ajax
    */
@@ -274,6 +286,14 @@ class rastreabilidad_pallets extends MY_Controller {
       case 6:
         $txt = 'El camión se activó correctamente.';
         $icono = 'success';
+        break;
+      case 7:
+        $txt = 'El pallet se elimino correctamente.';
+        $icono = 'success';
+        break;
+      case 8:
+        $txt = 'El pallet se encuentra facturado, para eliminarlo primero tiene que cancelar la factura.';
+        $icono = 'error';
         break;
     }
 
