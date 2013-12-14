@@ -201,7 +201,7 @@ class compras_ordenes_model extends CI_Model {
         'id_empresa'      => $_POST['empresaId'],
         'id_proveedor'    => $_POST['proveedorId'],
         'id_departamento' => $_POST['departamento'],
-        'id_autorizo'     => null,
+        // 'id_autorizo'     => null,
         'id_empleado'     => $this->session->userdata('id_usuario'),
         // 'folio'           => $_POST['folio'],
         'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
@@ -594,7 +594,7 @@ class compras_ordenes_model extends CI_Model {
           'correoDestino'  => array($proveedor['info']->email),
           'nombreDestino'  => $proveedor['info']->nombre_fiscal,
           'cc'             => '',
-          'adjuntos'       => array('ORDEN COMPRA' => $file)
+          'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
         );
 
         $result = $this->my_email->setData($datosEmail)->send();
@@ -1080,7 +1080,7 @@ class compras_ordenes_model extends CI_Model {
         'correoDestino'  => array($proveedor['info']->email),
         'nombreDestino'  => $proveedor['info']->nombre_fiscal,
         'cc'             => '',
-        'adjuntos'       => array('ORDEN COMPRA' => $file)
+        'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
       );
 
       $result = $this->my_email->setData($datosEmail)->send();

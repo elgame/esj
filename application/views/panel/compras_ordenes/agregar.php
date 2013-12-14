@@ -6,10 +6,14 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'c'){ ?>
-          <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
-        <?php } else { ?>
+        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'r'){ 
+                  $titulo = 'Agregar orden de requisición';
+        ?>
           <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
+        <?php } else { 
+                  $titulo = 'Agregar orden de compra';
+          ?>
+          <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
         <?php } ?>
       </li>
       <li>Agregar</li>
@@ -19,7 +23,7 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> Agregar orden de compra</h2>
+        <h2><i class="icon-plus"></i> <?php echo $titulo; ?></h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>

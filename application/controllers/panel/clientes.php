@@ -41,34 +41,34 @@ class clientes extends MY_Controller {
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 
-		/*$gestor = @fopen("Todos los Clientes.txt", "r");
-		if ($gestor) {
-		    while (($bufer = fgets($gestor, 4096)) !== false) {
-		    	$bufer = utf8_encode($bufer);
-		    	echo "INSERT INTO clientes (
-nombre_fiscal, calle, no_exterior, colonia, municipio, cp, rfc, cuenta_cpi, pais)
-VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
-'".trim(substr($bufer, 177, 7))."', '".trim(substr($bufer, 243, 62))."', 
-'".trim(substr($bufer, 432, 35))."', '".trim(substr($bufer, 663, 8))."', 
-'".trim(substr($bufer, 986, 20))."', '".trim(substr($bufer, 1470, 11))."', 
-'".trim(substr($bufer, 306, 12))."' );\n";
-
-		        // echo trim(substr($bufer, 33, 62))."<br>"; //nombre
-		        // echo trim(substr($bufer, 114, 59))."<br>"; //calle
-		        // echo trim(substr($bufer, 177, 7))."<br>"; //numero
-		        // echo trim(substr($bufer, 243, 62))."<br>"; //colonia
-		        // echo trim(substr($bufer, 432, 35))."<br>"; //municipio
-		        // echo trim(substr($bufer, 306, 12))."<br>"; //pais
-		        // echo trim(substr($bufer, 663, 8))."<br>"; //cp
-		        // echo trim(substr($bufer, 986, 20))."<br>"; //rfc
-		        // echo trim(substr($bufer, 1470, 11))."<br>"; //cuenta contpaqi
-		        // echo "--------------------------------------------------------------------------<br>";
-		    }
-		    if (!feof($gestor)) {
-		        echo "Error: fallo inesperado de fgets()\n";
-		    }
-		    fclose($gestor);
-		}*/
+		// $fila = 1;
+		// //C¢digo Cliente,Raz¢n Social,R.F.C.,Estatus,Calle,N£mero Exterior,N£mero Interior,Colonia,C¢digo Postal,eMail,Pa¡s,Estado,Ciudad,Municipio
+		// if (($gestor = fopen("Clientes_Activos.csv", "r")) !== FALSE) {
+		//     while (($datos = fgetcsv($gestor, 1000, ",")) !== FALSE) {
+		//         $numero = count($datos);
+		//         $res = $this->db->query("SELECT * FROM clientes WHERE rfc like '".trim($datos[2])."' AND rfc <> ''");
+		//         if ($res->num_rows() > 0)
+		//         {
+		//         	// $datos[11] = trim($datos[11]);
+		//         	// $datos[9] = trim($datos[9]);
+		//         	// $datos[2] = trim($datos[2]);
+		//         	// if($datos[2] != '')
+		//         	// 	echo "UPDATE clientes SET estado='{$datos[11]}', email='{$datos[9]}' WHERE rfc like '{$datos[2]}'; <br>";
+		//         }else{
+		//         	if($datos[2] != '')
+		//         		echo "INSERT INTO clientes (
+		// 				nombre_fiscal, calle, no_exterior, no_interior, 
+		// 				colonia, cp, email, pais, 
+		// 				estado, localidad, municipio, rfc, cuenta_cpi) VALUES 
+		// 				('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."', 
+		// 				'".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."', 
+		// 				'".utf8_encode(trim($datos[11]))."', '".utf8_encode(trim($datos[12]))."', '".utf8_encode(trim($datos[13]))."', '".trim($datos[2])."', '".trim($datos[0])."'  ); <br>";
+		// 			// echo "'".trim($datos[2])."',";
+		//         }
+		//         $res->free_result();
+		//     }
+		//     fclose($gestor);
+		// }
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);

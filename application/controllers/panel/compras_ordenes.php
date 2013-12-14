@@ -123,7 +123,7 @@ class compras_ordenes extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar orden de compra'
+      'titulo' => 'Agregar orden de requisición'
     );
 
     $params['next_folio']    = $this->compras_ordenes_model->folio();
@@ -189,7 +189,7 @@ class compras_ordenes extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Orden de compra'
+      'titulo' => (isset($_GET['w'])? ($_GET['w']=='c'? 'Orden de compra': 'Orden de requisición'): 'Orden de compra')
     );
 
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));

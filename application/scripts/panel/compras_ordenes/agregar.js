@@ -356,10 +356,10 @@
       }
 
       // Valida si el campo precio es 0.
-      if ($fprecio.val() === '0') {
-        $fprecio.css({'background-color': '#FDFC9A'})
-        error = true;
-      }
+      // if ($fprecio.val() === '0') {
+      //   $fprecio.css({'background-color': '#FDFC9A'})
+      //   error = true;
+      // }
 
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.

@@ -88,7 +88,7 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-shopping-cart"></i> Orden de compra <span class="badge badge<?php echo $badgeStyle ?>"><?php echo $badgeTitle ?></span></h2>
+        <h2><i class="icon-shopping-cart"></i> <?php echo $seo['titulo']; ?> <span class="badge badge<?php echo $badgeStyle ?>"><?php echo $badgeTitle ?></span></h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
