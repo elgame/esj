@@ -166,8 +166,12 @@ class documentos extends MY_Controller {
     // Obtiene la informacion de la factura.
     $params['factura'] = $this->facturacion_model->getInfoFactura($idFactura);
 
+
     // Obtiene los documentos del cliente.
     $params['documentos'] = $this->documentos_model->getClienteDocs($idFactura);
+    // echo "<pre>";
+    //   var_dump($params['documentos']);
+    // echo "</pre>";exit;
 
     // Obtiene los documentos de las areas.
     $params['areas'] = $this->areas_model->getAreas();
@@ -178,7 +182,7 @@ class documentos extends MY_Controller {
       ->where('id_factura', $idFactura)
       ->get()->row()->docs_finalizados;
 
-    // Obtiene los documentos de las areas.
+    // Obtiene los pallets libres.
     $params['pallets'] = $this->db
       ->select('*')
       ->from("embarque_pallets_libres")

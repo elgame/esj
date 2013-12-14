@@ -138,7 +138,7 @@
 
         </thead>
         <tbody>
-          <?php foreach ($pallets as $key => $pallet) { ?>
+          <?php foreach ($factura['pallets'] as $key => $pallet) { ?>
               <tr>
                 <td><?php echo $pallet->folio ?></td>
                 <td>

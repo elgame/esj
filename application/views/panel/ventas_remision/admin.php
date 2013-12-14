@@ -122,6 +122,12 @@
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la nota de remisión?', 'Notas de Remisión', this); return false;"))
                         );
+
+                        echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                              'params'   => 'id='.$fact->id_factura,
+                              'btn_type' => 'btn-success',
+                              'attrs'    => array())
+                          );
                       }
 
                       if ($fact->status === 'ca')

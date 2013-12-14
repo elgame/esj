@@ -36,8 +36,7 @@ $(function(){
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
 
-        // loadSerieFolio(ui.item.id);
-        loadFolio(ui.item.id);
+        loadSerieFolio(ui.item.id, true);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -50,6 +49,7 @@ $(function(){
         $('#dversion').val('');
         $('#dcer_caduca').val('');
         $('#dno_certificado').val('');
+        $('#serie-selected').val('void');
       }
   });
 
@@ -57,29 +57,33 @@ $(function(){
   autocompleteClasifiLive();
 
   if ($('#did_empresa').val() !== '') {
-    // loadSerieFolio($('#did_empresa').val());
-    loadFolio();
+    loadSerieFolio($('#did_empresa').val());
   }
 
   //Carga el folio para la serie seleccionada
   $("#dserie").on('change', function(){
-    loader.create();
-    $.getJSON(base_url+'panel/facturacion/get_folio/?serie='+$(this).val()+'&ide='+$('#did_empresa').val(),
-    function(res){
-      if(res.msg == 'ok'){
-        $("#dfolio").val(res.data.folio);
-        $("#dno_aprobacion").val(res.data.no_aprobacion);
-        $("#dano_aprobacion").val(res.data.ano_aprobacion);
-        $("#dimg_cbb").val(res.data.imagen);
-      }else{
-        $("#dfolio").val('');
-        $("#dno_aprobacion").val('');
-        $("#dano_aprobacion").val('');
-        $("#dimg_cbb").val('');
-        noty({"text":res.msg, "layout":"topRight", "type":res.ico});
-      }
-      loader.close();
-    });
+    var $serie = $(this),
+        $empresa = $('#did_empresa');
+
+    loadFolioAjax($serie.val(), $empresa.val(), true);
+
+    // loader.create();
+    // $.getJSON(base_url+'panel/facturacion/get_folio/?serie='+$(this).val()+'&ide='+$('#did_empresa').val(),
+    // function(res){
+    //   if(res.msg == 'ok'){
+    //     $("#dfolio").val(res.data.folio);
+    //     $("#dno_aprobacion").val(res.data.no_aprobacion);
+    //     $("#dano_aprobacion").val(res.data.ano_aprobacion);
+    //     $("#dimg_cbb").val(res.data.imagen);
+    //   }else{
+    //     $("#dfolio").val('');
+    //     $("#dno_aprobacion").val('');
+    //     $("#dano_aprobacion").val('');
+    //     $("#dimg_cbb").val('');
+    //     noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+    //   }
+    //   loader.close();
+    // });
   });
 
   // $('#addProducto').on('click', function(event) {
@@ -271,6 +275,9 @@ $(function(){
               'id_pallet': $chkPallet.val(),
               'id_unidad': jsonObj[i]['id_unidad'],
               'unidad': jsonObj[i]['unidad'],
+              'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
+              'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
+              'kilos': jsonObj[i]['kilos'],
             });
           }
         });
@@ -309,7 +316,7 @@ function loadPalletByFolio() {
 
       $.get(base_url + 'panel/facturacion/ajax_get_pallet_folio/?folio='+$folio.val(), function(data) {
         if (data) {
-
+          // console.log(data);
           var existe = false;
           $('.pallet-selected').each(function(index, el) {
             if ($(this).val() == data['info']['id_pallet']) {
@@ -334,6 +341,9 @@ function loadPalletByFolio() {
                     'id_pallet': data['info']['id_pallet'],
                     'id_unidad': data['rendimientos'][i]['id_unidad'],
                     'unidad': data['rendimientos'][i]['unidad'],
+                    'id_unidad_clasificacion': data['rendimientos'][i]['id_unidad_clasificacion'],
+                    'iva_clasificacion': data['rendimientos'][i]['iva_clasificacion'],
+                    'kilos': data['rendimientos'][i]['kilos'],
                   });
                 }
               }, 'json');
@@ -358,9 +368,24 @@ var EventOnChangeMedida = function () {
   $('#table_prod').on('change', 'select#prod_dmedida', function(event) {
     var $select = $(this),
         $parent = $select.parents('tr'),
-        $medidaId = $parent.find('#prod_dmedida_id');
+        $medidaId = $parent.find('#prod_dmedida_id'),
+        $cantidad = $parent.find('#prod_dcantidad'),
+        $kilosInput = $parent.find('#prod_dkilos'),
+        $cajasInput = $parent.find('#prod_dcajas');
 
     $medidaId.val($select.find('option:selected').attr('data-id'));
+
+    // Si el id de medida es el 9 de los kilos entonces en el input de cantidad
+    // carga el valor del input oculto de los kilos, si es cualquier otra
+    // medida entonces carga las cajas.
+    if ($medidaId.val() == '9') {
+      $cantidad.val($kilosInput.val());
+    } else {
+      $cantidad.val($cajasInput.val());
+    }
+
+    calculaTotalProducto($parent);
+
   });
 };
 
@@ -381,7 +406,7 @@ function calculaTotalProducto ($tr) {
 
   $totalIva.val(totalIva);
   $totalRetencion.val(totalRetencion);
-  $importe.val(totalImporte + totalIva);
+  $importe.val(totalImporte);
 
   calculaTotal();
   // var importe   = trunc2Dec(parseFloat($('#dcantidad').val() * parseFloat($('#dpreciou').val()))),
@@ -401,7 +426,9 @@ function addProducto(unidades, prod) {
       existe    = false,
       $tr, addInputPalletId = true;
 
-  var prod_nombre = prod_id = pallet = '', prod_cajas = 0;
+  var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
+      ivaSelected = '0', prod_kilos = 0, cantidad = 0;
+
   if (prod) {
     // Verificar si existe la clasificacion...
     $tabla.find('input#prod_did_prod').each(function(index, el) {
@@ -412,7 +439,7 @@ function addProducto(unidades, prod) {
       $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
 
       // console.log($prodIdInput.val(), prod.id, $medidaInput.val(), prod.id_unidad);
-      if ($prodIdInput.val() == prod.id && $medidaInput.val() == prod.id_unidad) {
+      if ($prodIdInput.val() == prod.id && $medidaInput.val() == prod.id_unidad_clasificacion) {
         existe = true;
         return false;
       }
@@ -421,9 +448,14 @@ function addProducto(unidades, prod) {
     prod_nombre = prod.nombre;
     prod_id     = prod.id;
     prod_cajas  = prod.cajas;
+    prod_kilos  = prod.kilos;
     pallet      = prod.id_pallet;
-    idUnidad    = prod.id_unidad ? prod.id_unidad : '';
+    // idUnidad    = prod.id_unidad ? prod.id_unidad : '';
     unidad      = prod.unidad ? prod.unidad : '';
+    prod_nombre += ' ' + unidad; // le concatena la unidad del rendmiento al la descripcion.
+
+    idUnidad = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
+    ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
@@ -431,11 +463,26 @@ function addProducto(unidades, prod) {
 
   // Si el producto existe en el listado.
   if (existe) {
-    var $cantidadInput = $tr.find('#prod_dcantidad'); // input cantidad.
+    var $cantidadInput = $tr.find('#prod_dcantidad'), // input cantidad.
+        $medidaInput = $tr.find('#prod_dmedida_id'), // input hidde medida.
+        $kilosInput = $tr.find('#prod_dkilos'),
+        $cajasInput = $tr.find('#prod_dcajas');
 
     // Le suma la cantidad de cajas a la clasificacion.
-    console.log($cantidadInput.val(), prod.cajas);
-    $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
+
+    // Si la unidad de medida de la clasificacion del rendimiento es la 9
+    // Cambiar el id de los kilos por el q este en la bdd.
+    if ($medidaInput.val() == '9') {
+      $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.kilos));
+    } else {
+      $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
+    }
+
+    // Le suma los kilos y las cajas a las que ya existen, para si switchea de
+    // medida entonces cargue los kilos o las cajas.
+    $kilosInput.val(parseFloat($kilosInput.val()) + parseFloat(prod.kilos));
+    $cajasInput.val(parseFloat($cajasInput.val()) + parseFloat(prod.cajas));
+
     calculaTotalProducto($tr);
 
     var existe2 = false,
@@ -457,7 +504,14 @@ function addProducto(unidades, prod) {
   } else {
     var unidadesHtml = '';
     for (var i in unidades) {
-      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].nombre == unidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
+      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].id_unidad == idUnidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
+    }
+
+    // Si el id de unidad es la 9 osea de kilos entonces en cantidad coloca
+    // los kilos en vez de las cajas.
+    // Cambiar el id que le corresponda a los KILOS en las unidades.
+    if (idUnidad == '9') {
+      cantidad = prod_kilos;
     }
 
     trHtml = '<tr data-pallets="'+pallet+'">' +
@@ -477,30 +531,35 @@ function addProducto(unidades, prod) {
                   '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidad+'" id="prod_dmedida_id" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
-                    '<input type="text" name="prod_dcantidad[]" value="'+prod_cajas+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<input type="text" name="prod_dcantidad[]" value="'+cantidad+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<input type="hidden" name="prod_dkilos[]" value="'+prod_kilos+'" id="prod_dkilos" class="span12 vpositive">' +
+                    '<input type="hidden" name="prod_dcajas[]" value="'+prod_cajas+'" id="prod_dcajas" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
                   '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                 '</td>' +
                 '<td>' +
                     '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                      '<option value="0">0%</option>' +
-                      '<option value="11">11%</option>' +
-                      '<option value="16">16%</option>' +
+                      '<option value="0"'+(ivaSelected == '0' ? 'selected' : '')+'>0%</option>' +
+                      '<option value="11"'+(ivaSelected == '11' ? 'selected' : '')+'>11%</option>' +
+                      '<option value="16"'+(ivaSelected == '16' ? 'selected' : '')+'>16%</option>' +
                     '</select>' +
-                    '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
-                    '<input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">' +
+                    // '<input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12">' +
+                    '<input type="hidden" name="prod_diva_porcent[]" value="'+ivaSelected+'" id="prod_diva_porcent" class="span12">' +
                 '</td>' +
-                // '<td>' +
-                //   '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                //     '<option value="0">No retener</option>' +
-                //     '<option value="0.04">4%</option>' +
-                //     '<option value="0.10667">2 Terceras</option>' +
-                //     '<option value="0.16">100 %</option>' +
-                //   '</select>' +
-                //   '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
-                //   '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
-                // '</td>' +
+                '<td style="width: 80px;">' +
+                    '<input type="text" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12" readonly>' +
+                '</td>' +
+                '<td>' +
+                  '<select name="dreten_iva" id="dreten_iva" class="span12 prod jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<option value="0">No retener</option>' +
+                    '<option value="0.04">4%</option>' +
+                    '<option value="0.10667">2 Terceras</option>' +
+                    '<option value="0.16">100 %</option>' +
+                  '</select>' +
+                  '<input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">' +
+                  '<input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">' +
+                '</td>' +
                 '<td>' +
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
@@ -579,8 +638,7 @@ function calculaTotal () {
     }
   });
 
-  // total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
-  total_factura = trunc2Dec(parseFloat(total_subtotal));
+  total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
 
   $('#importe-format').html(util.darFormatoNum(total_importes));
   $('#total_importe').val(total_importes);
@@ -600,49 +658,79 @@ function calculaTotal () {
   $('#totfac-format').html(util.darFormatoNum(total_factura));
   $('#total_totfac').val(total_factura);
 
-  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()))
+  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()));
 }
 
-function loadFolio(){
+function loadSerieFolio (ide, forceLoad) {
+  var objselect = $('#dserie');
   loader.create();
-  $.getJSON(base_url+'panel/ventas/get_folio/?ide='+$('#did_empresa').val(),
+    $.getJSON(base_url+'panel/facturacion/get_series/?ide='+ide,
+      function(res){
+        if(res.msg === 'ok') {
+          var html_option = '<option value="void"></option>',
+              selected = '', serieSelected = 'void',
+              loadDefault = false;
+
+          for (var i in res.data){
+            selected = '';
+            if ($('#serie-selected').val() !== 'void') {
+              if (res.data[i].serie === $('#serie-selected').val()) {
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            } else {
+              if (res.data[i].serie === 'R') {
+                loadDefault = true;
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+              }
+            }
+
+            html_option += '<option value="'+res.data[i].serie+'" '+selected+'>'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
+          }
+          objselect.html(html_option);
+
+          if (serieSelected !== 'void' || forceLoad) {
+            loadFolioAjax(serieSelected, ide, forceLoad);
+          } else {
+            // if ($('#serie-selected').val() === 'void') {
+              // $("#dfolio").val("");
+              // $("#dno_aprobacion").val("");
+            // }
+          }
+        } else {
+          noty({"text":res.msg, "layout":"topRight", "type":res.ico});
+        }
+        loader.close();
+      });
+}
+
+// Carga el folio siguiente de la empresa y serie seleccionadas.
+function loadFolioAjax(serie, ide, forceLoad) {
+  loader.create();
+  $.getJSON(base_url+'panel/ventas/get_folio/?serie='+serie+'&ide='+ide,
   function(res){
     if(res.msg == 'ok'){
-      $("#dfolio").val(res.data.folio);
+
+      console.log(res);
+
+      if ($('#dfolio').val() === '' || forceLoad) {
+        $("#dfolio").val(res.data.folio);
+      }
+
       $("#dno_aprobacion").val(res.data.no_aprobacion);
       $("#dano_aprobacion").val(res.data.ano_aprobacion);
-      $("#dimg_cbb").val(res.data.imagen);
+      // $("#dimg_cbb").val(res.data.imagen);
     }else{
       $("#dfolio").val('');
       $("#dno_aprobacion").val('');
       $("#dano_aprobacion").val('');
-      $("#dimg_cbb").val('');
+      // $("#dimg_cbb").val('');
       noty({"text":res.msg, "layout":"topRight", "type":res.ico});
     }
     loader.close();
   });
 }
-
-// function loadSerieFolio (ide) {
-//   var objselect = $('#dserie');
-//   loader.create();
-//     $.getJSON(base_url+'panel/facturacion/get_series/?ide='+ide,
-//       function(res){
-//           if(res.msg === 'ok') {
-//             var html_option = '<option value=""></option>';
-//             for (var i in res.data){
-//               html_option += '<option value="'+res.data[i].serie+'">'+res.data[i].serie+' - '+(res.data[i].leyenda || '')+'</option>';
-//             }
-//             objselect.html(html_option);
-
-//             $("#dfolio").val("");
-//             $("#dno_aprobacion").val("");
-//           } else {
-//             noty({"text":res.msg, "layout":"topRight", "type":res.ico});
-//           }
-//           loader.close();
-//       });
-// }
 
 /**
  * Crea una cadena con la informacion del cliente para mostrarla
@@ -679,10 +767,12 @@ function autocompleteClasifi () {
           $tr = $this.parent().parent();
 
       $this.css("background-color", "#B0FFB0");
-
       $tr.find('#prod_did_prod').val(ui.item.id);
       // $tr.find('#prod_dpreciou').val(ui.item.item.precio);
 
+      $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
+      $tr.find('#prod_dmedida_id').val(ui.item.item.id_unidad);
+      $tr.find('#diva').val(ui.item.item.iva).trigger('change');
     }
   }).keydown(function(event){
       if(event.which == 8 || event == 46){
@@ -708,6 +798,9 @@ function autocompleteClasifiLive () {
 
         $tr.find('#prod_did_prod').val(ui.item.id);
         // $tr.find('#prod_dpreciou').val(ui.item.item.precio);
+
+        $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
+        $tr.find('#diva').val(ui.item.item.iva).trigger('change');
       }
     }).keydown(function(event){
       if(event.which == 8 || event == 46) {

@@ -34,7 +34,29 @@
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
                   <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40"
-                  value="<?php echo set_value('fnombre'); ?>" required autofocus placeholder="Limon verde 500, Limon verde 300">
+                  value="<?php echo set_value('fnombre'); ?>" autofocus required placeholder="Limon verde 500, Limon verde 300">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fnombre">IVA </label>
+                <div class="controls">
+                  <select name="diva" id="diva" class="span3">
+                    <option value="0" <?php echo set_select('diva', '0'); ?>>0%</option>
+                    <option value="11" <?php echo set_select('diva', '11'); ?>>11%</option>
+                    <option value="16" <?php echo set_select('diva', '16'); ?>>16%</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fnombre">Unidad / Medida </label>
+                <div class="controls">
+                  <select name="dunidad" id="dunidad" class="span3">
+                    <?php foreach ($unidades as $key => $u) { ?>
+                      <option value="<?php echo $u->id_unidad ?>" <?php echo set_select('dunidad', $u->id_unidad); ?>><?php echo $u->nombre ?></option>
+                    <?php } ?>
+                  </select>
                 </div>
               </div>
 
