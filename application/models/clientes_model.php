@@ -92,6 +92,7 @@ class clientes_model extends CI_Model {
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'pais'           => $this->input->post('fpais'),
 						'dias_credito'   => (is_numeric($this->input->post('fdias_credito'))? $this->input->post('fdias_credito'): 0),
 						);
 		}
@@ -130,6 +131,7 @@ class clientes_model extends CI_Model {
 						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
+						'pais'           => $this->input->post('fpais'),
 						'dias_credito'   => $this->input->post('fdias_credito'),
 						);
 		}

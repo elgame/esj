@@ -175,7 +175,7 @@
 										<div class="control-group">
 											<label class="control-label" for="dpass">Clave:</label>
 											<div class="controls">
-												<input type="text" name="dpass" id="dpass" class="span12" 
+												<input type="password" name="dpass" id="dpass" class="span12" 
 													value="<?php echo (isset($info['info']->pass)? $info['info']->pass: ''); ?>" maxlength="20">
 											</div>
 										</div>

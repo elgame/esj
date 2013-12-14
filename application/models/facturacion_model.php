@@ -1884,9 +1884,9 @@ class facturacion_model extends privilegios_model{
         // $pdf->SetXY(0, 0);
         // $pdf->Cell(108, 15, "Factura Electrónica (CFDI)", 0, 0, 'C', 1);
 
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY());
-        $pdf->Cell(108, 4, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
+        // $pdf->SetTextColor(0, 0, 0);
+        // $pdf->SetXY(0, $pdf->GetY());
+        // $pdf->Cell(108, 4, "RFC: {$xml->Emisor[0]['rfc']}", 0, 0, 'C', 0);
 
         // $pdf->SetFont('helvetica','B', 12);
         $pdf->SetFillColor(242, 242, 242);
@@ -1894,10 +1894,28 @@ class facturacion_model extends privilegios_model{
         $pdf->SetXY(0, $pdf->GetY() + 4);
         $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 9);
+        $pdf->SetFont('helvetica','', 8);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(0, $pdf->GetY() + 4);
-        $pdf->MultiCell(108, 4, $xml->Emisor[0]['nombre'], 0, 'L', 0);
+
+        $pdf->SetX(0);
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(19, 93));
+        $pdf->Row(array('RFC:', $xml->Emisor[0]['rfc']), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 196));
+        $pdf->SetX(0);
+        $pdf->Row(array('NOMBRE:', $xml->Emisor[0]['nombre']), false, false, null, 2, 1);
+        $pdf->SetX(0);
+        $pdf->Row(array('DOMICILIO:', $xml->Emisor->DomicilioFiscal[0]['calle'].' No. '.$xml->Emisor->DomicilioFiscal[0]['noExterior'].
+                                              ((isset($xml->Emisor->DomicilioFiscal[0]['noInterior'])) ? ' Int. '.$xml->Emisor->DomicilioFiscal[0]['noInterior'] : '') ), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 83, 19, 83));
+        $pdf->SetX(0);
+        $pdf->Row(array('COLONIA:', $xml->Emisor->DomicilioFiscal[0]['colonia'], 'LOCALIDAD:', $xml->Emisor->DomicilioFiscal[0]['localidad']), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
+        $pdf->SetX(0);
+        $pdf->Row(array('ESTADO:', $xml->Emisor->DomicilioFiscal[0]['estado'], 'PAIS:', $xml->Emisor->DomicilioFiscal[0]['pais'], 'CP:', $xml->Emisor->DomicilioFiscal[0]['codigoPostal']), false, false, null, 2, 1);
+        
+        $end_y = $pdf->GetY();
 
         /////////////////////////////////////
         // Folio Fisca, CSD, Lugar y Fecha //
@@ -1954,37 +1972,38 @@ class facturacion_model extends privilegios_model{
         // domicilioEmisor //
         //////////////////
 
-        $domicilioEmisor = '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['calle'])) ? $xml->Emisor->DomicilioFiscal[0]['calle'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noExterior'])) ? ' #'.$xml->Emisor->DomicilioFiscal[0]['noExterior'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noInterior'])) ? ' Int. '.$xml->Emisor->DomicilioFiscal[0]['noInterior'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['colonia'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['colonia'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['localidad'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['localidad'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['municipio'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['municipio'] : '';
-        $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['estado'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['estado'] : '';
+        // $domicilioEmisor = '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['calle'])) ? $xml->Emisor->DomicilioFiscal[0]['calle'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noExterior'])) ? ' #'.$xml->Emisor->DomicilioFiscal[0]['noExterior'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['noInterior'])) ? ' Int. '.$xml->Emisor->DomicilioFiscal[0]['noInterior'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['colonia'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['colonia'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['localidad'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['localidad'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['municipio'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['municipio'] : '';
+        // $domicilioEmisor .= (isset($xml->Emisor->DomicilioFiscal[0]['estado'])) ? ', '.$xml->Emisor->DomicilioFiscal[0]['estado'] : '';
 
-        $pdf->SetFont('helvetica','B', 9);
-        $pdf->SetFillColor(242, 242, 242);
-        $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(0, $pdf->GetY() + 4);
-        $pdf->Cell(216, 4, "Domicilio:", 0, 0, 'L', 1);
+        // $pdf->SetFont('helvetica','B', 9);
+        // $pdf->SetFillColor(242, 242, 242);
+        // $pdf->SetTextColor(0, 171, 72);
+        // $pdf->SetXY(0, $pdf->GetY() + 4);
+        // $pdf->Cell(216, 4, "Domicilio:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 9);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 4);
-        $pdf->Cell(216, 4, $domicilioEmisor, 0, 0, 'C', 0);
+        // $pdf->SetFont('helvetica','', 9);
+        // $pdf->SetTextColor(0, 0, 0);
+        // $pdf->SetXY(0, $pdf->GetY() + 4);
+        // $pdf->Cell(216, 4, $domicilioEmisor, 0, 0, 'C', 0);
 
         //////////////////
         // Datos Receptor //
         //////////////////
+        $pdf->setY($end_y);
         $domicilioReceptor = '';
-        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['calle'])) ? $xml->Receptor->Domicilio[0]['calle'] : '';
-        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['noExterior'])) ? ' #'.$xml->Receptor->Domicilio[0]['noExterior'] : '';
+        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['calle']) ? $xml->Receptor->Domicilio[0]['calle'] : '');
+        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['noExterior']) ? ' #'.$xml->Receptor->Domicilio[0]['noExterior'] : '');
         $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['noInterior'])) ? ' Int. '.$xml->Receptor->Domicilio[0]['noInterior'] : '';
-        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['colonia'])) ? ', '.$xml->Receptor->Domicilio[0]['colonia'] : '';
-        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['localidad'])) ? ', '.$xml->Receptor->Domicilio[0]['localidad'] : '';
+        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['colonia']) ? ', '.$xml->Receptor->Domicilio[0]['colonia'] : '');
+        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['localidad']) ? ', '.$xml->Receptor->Domicilio[0]['localidad'] : '');
         $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['municipio'])) ? ', '.$xml->Receptor->Domicilio[0]['municipio'] : '';
-        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['estado'])) ? ', '.$xml->Receptor->Domicilio[0]['estado'] : '';
+        $domicilioReceptor .= (isset($xml->Receptor->Domicilio[0]['estado']) ? ', '.$xml->Receptor->Domicilio[0]['estado'] : '');
 
         $pdf->SetFillColor(0, 171, 72);
         $pdf->SetXY(0, $pdf->GetY() + 4);
@@ -1996,15 +2015,39 @@ class facturacion_model extends privilegios_model{
         $pdf->SetXY(0, $pdf->GetY() + 1);
         $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
 
-        $pdf->SetFont('helvetica','', 9);
+        $pdf->SetFont('helvetica','', 8);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(0, $pdf->GetY() + 4);
-        $pdf->Cell(216, 4, "Nombre: {$xml->Receptor[0]['nombre']} RFC: {$xml->Receptor[0]['rfc']}", 0, 0, 'L', 0);
 
-        $pdf->SetFont('helvetica','', 9);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(0, $pdf->GetY() + 4);
-        $pdf->Cell(216, 4, "Domicilio: {$domicilioReceptor}", 0, 0, 'L', 0);
+        
+        $pdf->SetX(0);
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(19, 93));
+        $pdf->Row(array('RFC:', $xml->Receptor[0]['rfc']), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 196));
+        $pdf->SetX(0);
+        $pdf->Row(array('NOMBRE:', $xml->Receptor[0]['nombre']), false, false, null, 2, 1);
+        $pdf->SetX(0);
+        $pdf->Row(array('DOMICILIO:', (isset($xml->Receptor->Domicilio[0]['calle']) ? $xml->Receptor->Domicilio[0]['calle'] : '').
+                  ' No. '.(isset($xml->Receptor->Domicilio[0]['noExterior']) ? $xml->Receptor->Domicilio[0]['noExterior'] : '').
+                  ((isset($xml->Receptor->Domicilio[0]['noInterior'])) ? ' Int. '.$xml->Receptor->Domicilio[0]['noInterior'] : '') ), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 83, 19, 83));
+        $pdf->SetX(0);
+        $pdf->Row(array('COLONIA:', (isset($xml->Receptor->Domicilio[0]['colonia']) ? $xml->Receptor->Domicilio[0]['colonia'] : ''), 
+                  'LOCALIDAD:', (isset($xml->Receptor->Domicilio[0]['localidad']) ? $xml->Receptor->Domicilio[0]['localidad'] : '')), false, false, null, 2, 1);
+        $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
+        $pdf->SetX(0);
+        $pdf->Row(array('ESTADO:', (isset($xml->Receptor->Domicilio[0]['estado']) ? $xml->Receptor->Domicilio[0]['estado'] : ''), 
+                'PAIS:', (isset($xml->Receptor->Domicilio[0]['pais']) ? $xml->Receptor->Domicilio[0]['pais'] : ''), 
+                'CP:', (isset($xml->Receptor->Domicilio[0]['codigoPostal']) ? $xml->Receptor->Domicilio[0]['codigoPostal'] : '') ), false, false, null, 2, 1);
+
+
+        // $pdf->Cell(216, 4, "Nombre: {$xml->Receptor[0]['nombre']} RFC: {$xml->Receptor[0]['rfc']}", 0, 0, 'L', 0);
+
+        // $pdf->SetFont('helvetica','', 9);
+        // $pdf->SetTextColor(0, 0, 0);
+        // $pdf->SetXY(0, $pdf->GetY() + 4);
+        // $pdf->Cell(216, 4, "Domicilio: {$domicilioReceptor}", 0, 0, 'L', 0);
 
         ///////////////
         // Productos //
@@ -2016,6 +2059,7 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetXY(0, $pdf->GetY());
         $aligns = array('C', 'C', 'C', 'C','C');
+        $aligns2 = array('C', 'C', 'C', 'R','R');
         $widths = array(30, 35, 91, 30, 30);
         $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Precio Unitario', 'Importe');
 
@@ -2055,14 +2099,14 @@ class facturacion_model extends privilegios_model{
           $pdf->SetTextColor(0,0,0);
 
           $pdf->SetX(0);
-          $pdf->SetAligns($aligns);
+          $pdf->SetAligns($aligns2);
           $pdf->SetWidths($widths);
           $pdf->Row(array(
             $item[0]['cantidad'],
             $item[0]['unidad'],
             $item[0]['descripcion'],
-            String::formatoNumero($item[0]['valorUnitario'], 3),
-            String::formatoNumero($item[0]['importe'], 3),
+            String::formatoNumero($item[0]['valorUnitario'], 2, '$', false),
+            String::formatoNumero($item[0]['importe'], 2, '$', false),
           ), false, true, null, 2, 1);
         }
 
@@ -2123,7 +2167,7 @@ class facturacion_model extends privilegios_model{
         $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 5, String::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5, String::formatoNumero($xml[0]['subTotal'], 2, '$', false), 1, 0, 'R', 1);
 
         // Pinta traslados, retenciones
 
@@ -2133,14 +2177,14 @@ class facturacion_model extends privilegios_model{
           $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
 
           $pdf->SetXY(186, $pdf->GetY());
-          $pdf->Cell(30, 5,String::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
+          $pdf->Cell(30, 5,String::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
         }
 
         $pdf->SetXY(156, $pdf->GetY() + 5);
         $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 5,String::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5,String::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
 
         if ($xml->Impuestos->Retenciones->Retencion[0]['importe'] != 0)
         {
@@ -2148,14 +2192,14 @@ class facturacion_model extends privilegios_model{
           $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
           $pdf->SetXY(186, $pdf->GetY());
-          $pdf->Cell(30, 5,String::formatoNumero($xml->Impuestos->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
+          $pdf->Cell(30, 5,String::formatoNumero($xml->Impuestos->Retenciones->Retencion[0]['importe'], 2, '$', false), 1, 0, 'R', 1);
         }
 
         $pdf->SetXY(156, $pdf->GetY() + 5);
         $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 5,String::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 5,String::formatoNumero($xml[0]['total'], 2, '$', false), 1, 0, 'R', 1);
 
         ///////////////////
         // Observaciones //
@@ -2264,7 +2308,7 @@ class facturacion_model extends privilegios_model{
             $pdf->AddPage();
 
         $pdf->SetXY(0, $pdf->GetY());
-        $pdf->Image(APPPATH.'media/qrtemp.png');
+        $pdf->Image(APPPATH.'media/qrtemp.png', null, null, 40);
 
         // Elimina el QR generado temporalmente.
         unlink(APPPATH.'media/qrtemp.png');
@@ -2274,7 +2318,7 @@ class facturacion_model extends privilegios_model{
         ////////////////////
 
         $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->SetXY(45, $pdf->GetY() - 44);
+        $pdf->SetXY(45, $pdf->GetY() - 39);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(160));
         $pdf->Row(array('Cadena Original del complemento de certificación digital del SAT:'), false, 0);
