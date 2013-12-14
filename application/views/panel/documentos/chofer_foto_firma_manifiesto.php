@@ -21,7 +21,7 @@
             $url = isset($dataDocumento->url) && $dataDocumento->url !== '' ? str_replace('\\', '', base_url($dataDocumento->url)) : '';
           ?>
           <img src="<?php echo $url ?>" width="320" id="imgCapture">
-          <input type="text"  value="" id="inputImgCapture">
+          <input type="hidden"  value="" id="inputImgCapture">
         </div>
       </div>
     </fieldset><!--/span4 -->

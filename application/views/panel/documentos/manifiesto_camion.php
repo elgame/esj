@@ -34,7 +34,7 @@
       <div class="control-group">
         <label class="control-label" for="dfecha_embarque">Fecha de Embarque</label>
         <div class="controls">
-          <input type="date" name="dfecha_embarque" class="span6" id="dfecha_embarque" value="<?php echo set_value('dfecha_embarque', isset($dataDocumento->fecha_embarque) ? $dataDocumento->fecha_embarque : isset($dataEmbarque['info'][0]->fecha_embarque) ? $dataEmbarque['info'][0]->fecha_embarque : date('Y-m-d') ); ?>">
+          <input type="date" name="dfecha_embarque" class="span6" id="dfecha_embarque" value="<?php echo set_value('dfecha_embarque', isset($dataDocumento->fecha_embarque) ? $dataDocumento->fecha_embarque : (isset($dataEmbarque['info'][0]->fecha_embarque) ? $dataEmbarque['info'][0]->fecha_embarque : date('Y-m-d')) ); ?>">
         </div>
       </div><!--/control-group -->
 

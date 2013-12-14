@@ -229,7 +229,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveChoferCopiaIfe($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -247,7 +247,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveChoferCopiaLicencia($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
    }
@@ -265,7 +265,7 @@ class documentos extends MY_Controller {
       $this->load->model('documentos_model');
       $this->documentos_model->saveSeguroCamion($_POST['embIdFac'], $_POST['embIdDoc']);
 
-      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+      redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -284,7 +284,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeEmbarque();
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -303,7 +303,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeCertificadoTlc($_POST['embIdFac'], $_POST['embIdDoc']);
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }
@@ -322,7 +322,7 @@ class documentos extends MY_Controller {
       $res = $this->documentos_model->storeManifiestoCamion($_POST['embIdFac'], $_POST['embIdDoc']);
 
       if ($res['passes'])
-        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&msg=4'));
+        redirect(base_url('panel/documentos/agregar/?id='.$_GET['id'].'&ds='.$_POST['embIdDoc'].'&msg=4'));
     }
     else redirect(base_url('panel/facturacion/?msg=1'));
   }

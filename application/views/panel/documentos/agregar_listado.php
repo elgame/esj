@@ -25,7 +25,17 @@
             $params['doc'] = $doc;
 
             $active = '';
-            if ($key === 0)
+
+            if (isset($_GET['ds']))
+            {
+              if ($_GET['ds'] == $doc->id_documento)
+              {
+                $active = 'active';
+
+                echo '<input type="hidden" id="documentoId" value="'.$doc->id_documento.'">';
+              }
+            }
+            else if ($key === 0)
             {
               $active = 'active';
 

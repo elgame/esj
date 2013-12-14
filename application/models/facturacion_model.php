@@ -108,7 +108,7 @@ class facturacion_model extends privilegios_model{
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad, fp.kilos, fp.cajas')
+                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
@@ -408,6 +408,7 @@ class facturacion_model extends privilegios_model{
               'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
               'kilos'             => $_POST['prod_dkilos'][$key],
               'cajas'             => $_POST['prod_dcajas'][$key],
+              'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
             );
           }
         }
@@ -1175,8 +1176,8 @@ class facturacion_model extends privilegios_model{
 
       foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
       {
-        // if ($_POST['prod_importe'][$key] != 0)
-        // {
+        if ($_POST['prod_importe'][$key] != 0)
+        {
           $productosFactura[] = array(
             'id_factura'       => $idBorrador,
             'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -1193,8 +1194,9 @@ class facturacion_model extends privilegios_model{
             'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
             'kilos'             => $_POST['prod_dkilos'][$key],
             'cajas'             => $_POST['prod_dcajas'][$key],
+            'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           );
-        // }
+        }
       }
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
@@ -1914,7 +1916,7 @@ class facturacion_model extends privilegios_model{
         $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
         $pdf->SetX(0);
         $pdf->Row(array('ESTADO:', $xml->Emisor->DomicilioFiscal[0]['estado'], 'PAIS:', $xml->Emisor->DomicilioFiscal[0]['pais'], 'CP:', $xml->Emisor->DomicilioFiscal[0]['codigoPostal']), false, false, null, 2, 1);
-        
+
         $end_y = $pdf->GetY();
 
         /////////////////////////////////////
@@ -2019,7 +2021,7 @@ class facturacion_model extends privilegios_model{
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(0, $pdf->GetY() + 4);
 
-        
+
         $pdf->SetX(0);
         $pdf->SetAligns(array('L', 'L'));
         $pdf->SetWidths(array(19, 93));
@@ -2033,12 +2035,12 @@ class facturacion_model extends privilegios_model{
                   ((isset($xml->Receptor->Domicilio[0]['noInterior'])) ? ' Int. '.$xml->Receptor->Domicilio[0]['noInterior'] : '') ), false, false, null, 2, 1);
         $pdf->SetWidths(array(19, 83, 19, 83));
         $pdf->SetX(0);
-        $pdf->Row(array('COLONIA:', (isset($xml->Receptor->Domicilio[0]['colonia']) ? $xml->Receptor->Domicilio[0]['colonia'] : ''), 
+        $pdf->Row(array('COLONIA:', (isset($xml->Receptor->Domicilio[0]['colonia']) ? $xml->Receptor->Domicilio[0]['colonia'] : ''),
                   'LOCALIDAD:', (isset($xml->Receptor->Domicilio[0]['localidad']) ? $xml->Receptor->Domicilio[0]['localidad'] : '')), false, false, null, 2, 1);
         $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
         $pdf->SetX(0);
-        $pdf->Row(array('ESTADO:', (isset($xml->Receptor->Domicilio[0]['estado']) ? $xml->Receptor->Domicilio[0]['estado'] : ''), 
-                'PAIS:', (isset($xml->Receptor->Domicilio[0]['pais']) ? $xml->Receptor->Domicilio[0]['pais'] : ''), 
+        $pdf->Row(array('ESTADO:', (isset($xml->Receptor->Domicilio[0]['estado']) ? $xml->Receptor->Domicilio[0]['estado'] : ''),
+                'PAIS:', (isset($xml->Receptor->Domicilio[0]['pais']) ? $xml->Receptor->Domicilio[0]['pais'] : ''),
                 'CP:', (isset($xml->Receptor->Domicilio[0]['codigoPostal']) ? $xml->Receptor->Domicilio[0]['codigoPostal'] : '') ), false, false, null, 2, 1);
 
 

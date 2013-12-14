@@ -285,19 +285,21 @@
                             $_POST['pallets_id'][$key]      = $p->ids_pallets;
                             $_POST['prod_dkilos'][$key]     = $p->kilos;
                             $_POST['prod_dcajas'][$key]     = $p->cajas;
+                            $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
                             $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
                           }
                         } ?>
 
                         <?php if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
-                            // if ($_POST['prod_importe'][$k] != 0) {
+                            if ($_POST['prod_importe'][$k] != 0) {
                             ?>
                               <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                   <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
+                                  <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
                                 </td>
                                 <td>
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
@@ -346,13 +348,13 @@
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                 </td>
                               </tr>
-                        <?php }}
-                      // } ?>
+                        <?php }}} ?>
                   <tr data-pallets="">
                     <td>
                       <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                       <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
+                      <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
                     </td>
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
