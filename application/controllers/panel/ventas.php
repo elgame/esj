@@ -35,6 +35,7 @@ class ventas extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
+      array('general/supermodal.js'),
       array('panel/ventas_remision/admin.js'),
     ));
 
@@ -56,64 +57,6 @@ class ventas extends MY_Controller {
     $this->load->view('panel/ventas_remision/admin',$params);
     $this->load->view('panel/footer',$params);
   }
-
-  /**
-   * Agrega una nota de remision a la bd
-   *
-   * @return void
-   */
-  // public function agregar()
-  // {
-  //   $this->carabiner->js(array(
-  //       array('libs/jquery.numeric.js'),
-  //       array('general/keyjump.js'),
-  //       array('general/util.js'),
-  //       array('panel/ventas_remision/frm_addmod.js'),
-  //   ));
-
-  //   $params['info_empleado']  = $this->info_empleado['info']; //info empleado
-  //   $params['seo']            = array('titulo' => 'Agregar Nota remisión');
-  //   $params['pagar_ordent']   = false;
-
-  //   $this->load->model('ventas_model');
-
-  //   $this->configAddModFactura();
-  //   if($this->form_validation->run() == FALSE)
-  //   {
-  //     $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-  //   }
-  //   else
-  //   {
-  //     $respons = $this->ventas_model->addNotaVenta();
-
-  //     if($respons[0])
-  //       redirect(base_url('panel/ventas/agregar/?msg=4&id='.$respons[2]));
-  //   }
-
-  //   $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
-
-  //   if (isset($_GET['id']))
-  //   {
-  //     $params['id'] = $_GET['id'];
-  //   }
-
-  //   // Obtiene los datos de la empresa predeterminada.
-  //   $params['empresa_default'] = $this->db
-  //     ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-  //     ->from("empresas AS e")
-  //     ->where("e.predeterminado", "t")
-  //     ->get()
-  //     ->row();
-
-  //   if(isset($_GET['msg']{0}))
-  //     $params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
-  //   $this->load->view('panel/header', $params);
-  //   $this->load->view('panel/general/menu', $params);
-  //   $this->load->view('panel/ventas_remision/agregar', $params);
-  //   $this->load->view('panel/footer');
-  // }
-
   /**
    * Agrega una venta de remision a la bd
    *
@@ -338,7 +281,7 @@ class ventas extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_importe[]',
               'label'   => 'Importe de los productos',
-              'rules'   => 'greater_than[0]'),
+              'rules'   => ''), //greater_than[0]
         array('field'   => 'prod_diva_total[]',
               'label'   => 'prod_diva_total',
               'rules'   => ''),
@@ -462,8 +405,47 @@ class ventas extends MY_Controller {
       redirect(base_url('panel/ventas/?msg=1'));
   }
 
+  /**
+   * Muestra la vista par el envio de los correo.
+   *
+   * @return void
+   */
+  public function enviar_documentos()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/email.js'),
+    ));
 
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Facturas');
 
+    $this->load->model('facturacion_model');
+    $this->load->model('clientes_model');
+
+    $factura = $this->facturacion_model->getInfoFactura($_GET['id']);
+    $cliente = $this->clientes_model->getClienteInfo($factura['info']->id_cliente);
+
+    $params['emails_default'] = array();
+    if ($cliente['info']->email !== '')
+      $params['emails_default'] = explode(',', $cliente['info']->email);
+
+    // echo "<pre>";
+    //   var_dump($params['emails_default']);
+    // echo "</pre>";exit;
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] == 10)
+      {
+        $params['close'] = 1;
+      }
+    }
+
+    $this->load->view('panel/facturacion/email',$params);
+  }
 
   /**
    * obtiene el folio siguiente de la serie seleccionada

@@ -280,8 +280,9 @@
           if (data.passes) {
             noty({"text": 'El documento se actualizo correctamente', "layout":"topRight", "type": 'success'});
 
-            setTimeout("location.reload(true);", 500);
+            // setTimeout("location.reload(true);", 500);
 
+            refreshWithDoc();
 
             // Actualiza el listado de los documentos.
             // $('#listadoDocs').html(data.htmlDocs)
@@ -341,7 +342,8 @@
               // Actualiza el listado de los documentos.
               // $('#listadoDocs').html(data.htmlDocs)
 
-              setTimeout("location.reload(true);", 1000);
+              // setTimeout("location.reload(true);", 1000);
+              refreshWithDoc();
             }
 
           }, 'json');
@@ -653,5 +655,11 @@
 
     return domicilio.join(' ', domicilio);
   }
+
+  var refreshWithDoc = function () {
+    setTimeout(function () {
+      window.location.href = base_url + 'panel/documentos/agregar/?id='+$('#facturaId').val()+'&ds='+$('#documentoId').val();
+    }, 500);
+  };
 
 });

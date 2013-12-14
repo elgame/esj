@@ -522,7 +522,7 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_importe[]',
               'label'   => 'Importe de los productos',
-              'rules'   => 'greater_than[0]'),
+              'rules'   => ''), //greater_than[0]
         array('field'   => 'prod_diva_total[]',
               'label'   => 'prod_diva_total',
               'rules'   => ''),

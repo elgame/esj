@@ -78,7 +78,7 @@
                 <tr>
                   <td><?php echo $fact->fecha; ?></td>
                   <td>
-                    <span class="label"><?php echo $fact->folio; ?></span>
+                    <span class="label"><?php echo ($fact->serie !== '' ? $fact->serie.'-' : '').$fact->folio; ?></span>
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
@@ -138,6 +138,12 @@
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de agregar una factura con los datos de la nota de remisión?', 'Notas de Remisión', this); return false;"))
                         );
                       }
+
+                      echo $this->usuarios_model->getLinkPrivSm('ventas/enviar_documentos/', array(
+                        'params'   => 'id='.$fact->id_factura,
+                        'btn_type' => 'btn-success',
+                        'attrs' => array('rel' => 'superbox-50x450'))
+                      );
 
                     ?>
                   </td>

@@ -437,9 +437,10 @@ function addProducto(unidades, prod) {
 
       $tr = $prodIdInput.parents('tr'); // tr parent.
       $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
+      $idUnidadRendimiento = $tr.find('#id_unidad_rendimiento');
 
       // console.log($prodIdInput.val(), prod.id, $medidaInput.val(), prod.id_unidad);
-      if ($prodIdInput.val() == prod.id && $medidaInput.val() == prod.id_unidad_clasificacion) {
+      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad) {
         existe = true;
         return false;
       }
@@ -450,11 +451,11 @@ function addProducto(unidades, prod) {
     prod_cajas  = prod.cajas;
     prod_kilos  = prod.kilos;
     pallet      = prod.id_pallet;
-    // idUnidad    = prod.id_unidad ? prod.id_unidad : '';
-    unidad      = prod.unidad ? prod.unidad : '';
-    prod_nombre += ' ' + unidad; // le concatena la unidad del rendmiento al la descripcion.
+    idUnidad    = prod.id_unidad ? prod.id_unidad : ''; // id_unidad del rendimiento.
+    unidad      = prod.unidad ? prod.unidad : ''; // nombre de la unidad del rendimiento.
+    prod_nombre += ' ' + unidad; // le concatena la unidad del rendmiento a la descripcion.
 
-    idUnidad = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
+    idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
   } else {
     idUnidad = unidades[0].id_unidad;
@@ -504,14 +505,16 @@ function addProducto(unidades, prod) {
   } else {
     var unidadesHtml = '';
     for (var i in unidades) {
-      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].id_unidad == idUnidad ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
+      unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].id_unidad == idUnidadClasificacion ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
     }
 
     // Si el id de unidad es la 9 osea de kilos entonces en cantidad coloca
     // los kilos en vez de las cajas.
     // Cambiar el id que le corresponda a los KILOS en las unidades.
-    if (idUnidad == '9') {
+    if (idUnidadClasificacion == '9') {
       cantidad = prod_kilos;
+    } else {
+      cantidad = prod_cajas;
     }
 
     trHtml = '<tr data-pallets="'+pallet+'">' +
@@ -519,6 +522,7 @@ function addProducto(unidades, prod) {
                   '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
+                  '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
                 '</td>' +
                 '<td>' +
                   '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -528,7 +532,7 @@ function addProducto(unidades, prod) {
                     // '<option value="Kilos">Kilos</option>' +
                     // '<option value="No aplica">No aplica</option>' +
                   '</select>' +
-                  '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidad+'" id="prod_dmedida_id" class="span12 vpositive">' +
+                  '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidadClasificacion+'" id="prod_dmedida_id" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
                     '<input type="text" name="prod_dcantidad[]" value="'+cantidad+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
