@@ -24,6 +24,13 @@ class rastreabilidad_model extends CI_Model {
       $_POST['id_size'] = $data_size['id'];
     }
 
+    $_POST['id_clasificacion_old'] = 0;
+    $_POST['id_unidad_old']        = 0;
+    $_POST['id_calibre_old']       = 0;
+    $_POST['id_etiqueta_old']      = 0;
+    $_POST['id_size_old']          = 0;
+    $_POST['kilos_old']            = 0;
+
     $data = array(
       'id_rendimiento'   => $_POST['id_rendimiento'],
       'id_clasificacion' => $_POST['id_clasificacion'],
@@ -70,13 +77,13 @@ class rastreabilidad_model extends CI_Model {
     $data = $this->db->query(
       "SELECT Count(*) AS num
         FROM rastria_rendimiento_clasif
-        WHERE id_rendimiento = {$data['id_rendimiento']} 
-          AND id_clasificacion = {$data['id_clasificacion']} 
-          AND id_unidad = {$data['id_unidad']} 
-          AND id_calibre = {$data['id_calibre']} 
-          AND id_etiqueta = {$data['id_etiqueta']} 
-          AND id_size = {$data['id_size']} 
-          AND kilos = {$data['kilos']}
+        WHERE id_rendimiento = '{$data['id_rendimiento']}' 
+          AND id_clasificacion = '{$data['id_clasificacion']}' 
+          AND id_unidad = '{$data['id_unidad']}' 
+          AND id_calibre = '{$data['id_calibre']}' 
+          AND id_etiqueta = '{$data['id_etiqueta']}' 
+          AND id_size = '{$data['id_size']}' 
+          AND kilos = '{$data['kilos']}'
       ")->row();
     if($tipo=='add')
       return ($data->num>0? true: false);
@@ -107,10 +114,11 @@ class rastreabilidad_model extends CI_Model {
     {
       $this->load->model('calibres_model');
       $data_size        = $this->calibres_model->addCalibre($_POST['fsize']);
-      $_POST['id_size'] = $data_calibre['id'];
+      $_POST['id_size'] = $data_size['id'];
     }
 
     $data = array(
+      'id_clasificacion' => $_POST['id_clasificacion'],
       'id_unidad'        => $_POST['id_unidad'],
       'id_calibre'       => $_POST['id_calibre'],
       'id_size'          => $_POST['id_size'],
@@ -127,25 +135,45 @@ class rastreabilidad_model extends CI_Model {
     $passess = false;
     $dataval = $data;
     $dataval['id_rendimiento']   = $_POST['id_rendimiento'];
-    $dataval['id_clasificacion'] = $_POST['id_clasificacion'];
+    // $dataval['id_clasificacion'] = $_POST['id_clasificacion'];
     if( ! $this->existeRendimiento($dataval, 'edit'))
     {
       // Actualiza los datos de la clasificacion
       $this->db->update('rastria_rendimiento_clasif',$data, array(
         'id_rendimiento'   => $_POST['id_rendimiento'],
-        'id_clasificacion' => $_POST['id_clasificacion'],
-        'id_unidad'        => $_POST['id_unidad'],
-        'id_calibre'       => $_POST['id_calibre'],
-        'id_etiqueta'      => $_POST['id_etiqueta'],
-        'id_size'          => $_POST['id_size'],
-        'kilos'            => $_POST['kilos'])
+        'id_clasificacion' => $_POST['id_clasificacion_old'],
+        'id_unidad'        => $_POST['id_unidad_old'],
+        'id_calibre'       => $_POST['id_calibre_old'],
+        'id_etiqueta'      => $_POST['id_etiqueta_old'],
+        'id_size'          => $_POST['id_size_old'],
+        'kilos'            => $_POST['kilos_old'])
+      );
+      //Actualiza los rendimientos asignados al pallet
+      $this->db->update('rastria_pallets_rendimiento',
+        array(
+          'id_clasificacion' => $_POST['id_clasificacion'],
+          'id_unidad'        => $_POST['id_unidad'],
+          'id_calibre'       => $_POST['id_calibre'],
+          'id_etiqueta'      => $_POST['id_etiqueta'],
+          'id_size'          => $_POST['id_size'],
+          'kilos'            => $_POST['kilos'],
+        ),
+        array(
+          'id_rendimiento'   => $_POST['id_rendimiento'],
+          'id_clasificacion' => $_POST['id_clasificacion_old'],
+          'id_unidad'        => $_POST['id_unidad_old'],
+          'id_calibre'       => $_POST['id_calibre_old'],
+          'id_etiqueta'      => $_POST['id_etiqueta_old'],
+          'id_size'          => $_POST['id_size_old'],
+          'kilos'            => $_POST['kilos_old'],
+        )
       );
 
-      // Elimina la clasificacion de los pallets
-      $this->db->delete('rastria_pallets_rendimiento', array(
-        'id_rendimiento'   => $_POST['id_rendimiento'],
-        'id_clasificacion' => $_POST['id_clasificacion']
-      ));
+      // // Elimina la clasificacion de los pallets
+      // $this->db->delete('rastria_pallets_rendimiento', array(
+      //   'id_rendimiento'   => $_POST['id_rendimiento'],
+      //   'id_clasificacion' => $_POST['id_clasificacion']
+      // ));
 
       // Obtiene la fecha y el lote de la clasificacion que se modifico.
       $res = $this->db->select("DATE(fecha) AS fecha, lote, lote_ext")
@@ -221,10 +249,10 @@ class rastreabilidad_model extends CI_Model {
           "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                   total, rendimiento
             FROM rastria_rendimiento_clasif
-            WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento} 
-              AND id_unidad = {$_POST['id_unidad']} AND id_calibre = {$_POST['id_calibre']} 
-              AND id_etiqueta = {$_POST['id_etiqueta']} AND id_size = {$_POST['id_size']}
-              AND kilos = {$_POST['kilos']}
+            WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
+              AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}' 
+              AND id_etiqueta = '{$_POST['id_etiqueta']}' AND id_size = '{$_POST['id_size']}'
+              AND kilos = '{$_POST['kilos']}'
         ");
 
         if ($sql2->num_rows() > 0)
@@ -261,42 +289,164 @@ class rastreabilidad_model extends CI_Model {
     // modifico y si tienen entonces recalculan sus datos.
     foreach ($lotes as $key => $lote)
     {
+      //Se obtienen los rendimientos nuevos
+      $sql_news = $this->db->query(
+        "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
+                total, rendimiento
+        FROM rastria_rendimiento_clasif
+        WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
+            AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}' 
+            AND id_etiqueta = '{$_POST['id_etiqueta']}' AND id_size = '{$_POST['id_size']}'
+            AND kilos = '{$_POST['kilos']}'
+      ");
+      //se obtienen los rendimientos antiguos
       $sql2 = $this->db->query(
         "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                 total, rendimiento
         FROM rastria_rendimiento_clasif
-        WHERE id_clasificacion = {$_POST['id_clasificacion']} AND id_rendimiento = {$lote->id_rendimiento} 
-            AND id_unidad = {$_POST['id_unidad']} AND id_calibre = {$_POST['id_calibre']} 
-            AND id_etiqueta = {$_POST['id_etiqueta']} AND id_size = {$_POST['id_size']}
-            AND kilos = {$_POST['kilos']}
+        WHERE id_clasificacion = '{$_POST['id_clasificacion_old']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
+            AND id_unidad = '{$_POST['id_unidad_old']}' AND id_calibre = '{$_POST['id_calibre_old']}' 
+            AND id_etiqueta = '{$_POST['id_etiqueta_old']}' AND id_size = '{$_POST['id_size_old']}'
+            AND kilos = '{$_POST['kilos_old']}'
       ");
 
-      if ($sql2->num_rows() > 0)
+      if ($sql_news->num_rows() > 0) //ya existe uno con los valores nuevos
       {
-        $clasifi = $sql2->result();
+        $clasifi = $sql_news->row();
+
+        $campos = array(
+            'existente' => $existente,
+            'total'     => floatval($existente) + floatval($clasifi->linea1) + floatval($clasifi->linea2)
+          );
+
+        if ($sql2->num_rows() > 0)
+        {
+          $clasifi2 = $sql2->row();
+          
+          // $campos['existente']        = $_POST['existente'];
+          $campos['linea1']      = $clasifi->linea1+$clasifi2->linea1;
+          $campos['linea2']      = $clasifi->linea2+$clasifi2->linea2;
+          $campos['total']       += $clasifi2->linea1+$clasifi2->linea2;
+          $campos['rendimiento'] = $campos['linea1']+$campos['linea2'];
+
+          if (
+            $_POST['id_clasificacion'] != $_POST['id_clasificacion_old'] || 
+            $_POST['id_unidad'] != $_POST['id_unidad_old'] || 
+            $_POST['id_calibre'] != $_POST['id_calibre_old'] || 
+            $_POST['id_etiqueta'] != $_POST['id_etiqueta_old'] || 
+            $_POST['id_size'] != $_POST['id_size_old'] || 
+            $_POST['kilos'] != $_POST['kilos_old'] )
+          {
+            //Elimina el rendimiento viejo
+            $this->db->delete('rastria_rendimiento_clasif', array(
+                'id_rendimiento'   => $clasifi2->id_rendimiento,
+                'id_clasificacion' => $_POST['id_clasificacion_old'],
+                'id_unidad'        => $_POST['id_unidad_old'],
+                'id_calibre'       => $_POST['id_calibre_old'],
+                'id_etiqueta'      => $_POST['id_etiqueta_old'],
+                'id_size'          => $_POST['id_size_old'],
+                'kilos'            => $_POST['kilos_old'],
+            ));
+            $this->db->delete('rastria_pallets_rendimiento' , array(
+                'id_rendimiento'   => $clasifi2->id_rendimiento,
+                'id_clasificacion' => $_POST['id_clasificacion_old'],
+                'id_unidad'        => $_POST['id_unidad_old'],
+                'id_calibre'       => $_POST['id_calibre_old'],
+                'id_etiqueta'      => $_POST['id_etiqueta_old'],
+                'id_size'          => $_POST['id_size_old'],
+                'kilos'            => $_POST['kilos_old'],
+            ));
+          }
+        }
+
+        // Actualiza los datos de la clasificacion.
+        $this->db->update('rastria_rendimiento_clasif',
+          $campos,
+          array(
+            'id_rendimiento'   => $clasifi->id_rendimiento,
+            'id_clasificacion' => $_POST['id_clasificacion'],
+            'id_unidad'        => $_POST['id_unidad'],
+            'id_calibre'       => $_POST['id_calibre'],
+            'id_etiqueta'      => $_POST['id_etiqueta'],
+            'id_size'          => $_POST['id_size'],
+            'kilos'            => $_POST['kilos'],
+          )
+        );
+        //Actualiza los rendimientos asignados al pallet
+        $this->db->update('rastria_pallets_rendimiento',
+          array(
+            'id_clasificacion' => $_POST['id_clasificacion'],
+            'id_unidad'        => $_POST['id_unidad'],
+            'id_calibre'       => $_POST['id_calibre'],
+            'id_etiqueta'      => $_POST['id_etiqueta'],
+            'id_size'          => $_POST['id_size'],
+            'kilos'            => $_POST['kilos'],
+          ),
+          array(
+            'id_rendimiento'   => $clasifi->id_rendimiento,
+            'id_clasificacion' => $_POST['id_clasificacion_old'],
+            'id_unidad'        => $_POST['id_unidad_old'],
+            'id_calibre'       => $_POST['id_calibre_old'],
+            'id_etiqueta'      => $_POST['id_etiqueta_old'],
+            'id_size'          => $_POST['id_size_old'],
+            'kilos'            => $_POST['kilos_old'],
+          )
+        );
+
+        $existente = $campos['total'];
+
+      }elseif ($sql2->num_rows() > 0) //si hay con los valores viejos
+      {
+        $clasifi2 = $sql2->row();
 
         // Actualiza los datos de la clasificacion.
         $this->db->update('rastria_rendimiento_clasif',
           array(
-            'existente' => $existente,
-            'total'     => floatval($existente) + floatval($clasifi[0]->linea1) + floatval($clasifi[0]->linea2)
+            'existente'        => $existente,
+            'total'            => floatval($existente) + floatval($clasifi2->linea1) + floatval($clasifi2->linea2),
+            'id_clasificacion' => $_POST['id_clasificacion'],
+            'id_unidad'        => $_POST['id_unidad'],
+            'id_calibre'       => $_POST['id_calibre'],
+            'id_etiqueta'      => $_POST['id_etiqueta'],
+            'id_size'          => $_POST['id_size'],
+            'kilos'            => $_POST['kilos'],
           ),
           array(
-            'id_rendimiento'   => $clasifi[0]->id_rendimiento,
-            'id_clasificacion' => $clasifi[0]->id_clasificacion
+            'id_rendimiento'   => $clasifi2->id_rendimiento,
+            'id_clasificacion' => $_POST['id_clasificacion_old'],
+            'id_unidad'        => $_POST['id_unidad_old'],
+            'id_calibre'       => $_POST['id_calibre_old'],
+            'id_etiqueta'      => $_POST['id_etiqueta_old'],
+            'id_size'          => $_POST['id_size_old'],
+            'kilos'            => $_POST['kilos_old'],
+          )
+        );
+        //Actualiza los rendimientos asignados al pallet
+        $this->db->update('rastria_pallets_rendimiento',
+          array(
+            'id_clasificacion' => $_POST['id_clasificacion'],
+            'id_unidad'        => $_POST['id_unidad'],
+            'id_calibre'       => $_POST['id_calibre'],
+            'id_etiqueta'      => $_POST['id_etiqueta'],
+            'id_size'          => $_POST['id_size'],
+            'kilos'            => $_POST['kilos'],
+          ),
+          array(
+            'id_rendimiento'   => $clasifi2->id_rendimiento,
+            'id_clasificacion' => $_POST['id_clasificacion_old'],
+            'id_unidad'        => $_POST['id_unidad_old'],
+            'id_calibre'       => $_POST['id_calibre_old'],
+            'id_etiqueta'      => $_POST['id_etiqueta_old'],
+            'id_size'          => $_POST['id_size_old'],
+            'kilos'            => $_POST['kilos_old'],
           )
         );
 
-        // Elimina la clasificacion de la tabla de los pallets.
-        $this->db->delete('rastria_pallets_rendimiento', array(
-            'id_rendimiento'   => $clasifi[0]->id_rendimiento,
-            'id_clasificacion' => $clasifi[0]->id_clasificacion
-        ));
-
-        $existente = floatval($existente) + floatval($clasifi[0]->linea1) + floatval($clasifi[0]->linea2);
+        $existente = floatval($existente) + floatval($clasifi2->linea1) + floatval($clasifi2->linea2);
       }
 
       $sql2->free_result();
+      $sql_news->free_result();
     }
   }
 
@@ -420,7 +570,7 @@ class rastreabilidad_model extends CI_Model {
     {
       $this->load->model('calibres_model');
       $data_size = $this->calibres_model->addCalibre($_GET['fsize']);
-      $id_size   = $data_calibre['id'];
+      $id_size   = $data_size['id'];
     }
 
     $info = $this->getLoteInfo($id_rendimiento, false);

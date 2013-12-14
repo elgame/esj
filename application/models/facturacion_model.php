@@ -1930,7 +1930,7 @@ class facturacion_model extends privilegios_model{
         $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
 
         $pdf->SetXY(109, 0);
-        $pdf->Cell(50, 4, $factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito', 0, 0, 'L', 1);
+        $pdf->Cell(50, 4, ($factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito').': '.($factura['info']->serie.$factura['info']->folio) , 0, 0, 'L', 1);
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetXY(109, 6);

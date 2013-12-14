@@ -484,6 +484,13 @@
     
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
+    //campos del Pk
+    postData.id_clasificacion_old = $tr.find('#fidclasificacion_old').val();
+    postData.id_unidad_old        = $tr.find('#fidunidad_old').val();
+    postData.id_calibre_old       = $tr.find('#fidcalibre_old').val();
+    postData.id_size_old          = $tr.find('#fidsize_old').val();
+    postData.id_etiqueta_old      = $tr.find('#fidetiqueta_old').val();
+    postData.kilos_old            = $tr.find('#fkilos_old').val();
 
     if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
@@ -503,6 +510,8 @@
               $tr.attr('id', $tr.find('#fidclasificacion').val());
 
               $tr.find('#ftotal').attr('data-valor', postData.total);
+
+              asignaValoresOld($tr); //actualiza los campos del pk 
             }else{
               noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
               $tr.remove();
@@ -539,6 +548,13 @@
 
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
+    //campos del Pk
+    postData.id_clasificacion_old = $tr.find('#fidclasificacion_old').val();
+    postData.id_unidad_old        = $tr.find('#fidunidad_old').val();
+    postData.id_calibre_old       = $tr.find('#fidcalibre_old').val();
+    postData.id_size_old          = $tr.find('#fidsize_old').val();
+    postData.id_etiqueta_old      = $tr.find('#fidetiqueta_old').val();
+    postData.kilos_old            = $tr.find('#fkilos_old').val();
 
     if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
@@ -560,6 +576,8 @@
               $tr.find('#ftotal').attr('data-valor', postData.total);
 
               $tr.next().find('#fclasificacion').focus();
+
+              asignaValoresOld($tr); //actualiza los campos del pk 
             }else{
               noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
               $tr.find('#fclasificacion').focus();
@@ -603,6 +621,15 @@
     });
   };
 
+  var asignaValoresOld = function ($tr) {
+    $tr.find('fidclasificacion_old').val($tr.find('fidclasificacion').val());
+    $tr.find('fidunidad_old').val($tr.find('fidunidad').val());
+    $tr.find('fidcalibre_old').val($tr.find('fidcalibre').val());
+    $tr.find('fidsize_old').val($tr.find('fidsize').val());
+    $tr.find('fidetiqueta_old').val($tr.find('fidetiqueta').val());
+    $tr.find('fkilos_old').val($tr.find('fkilos').val());
+  }
+
   var validExisClasifi = function (idClasifi, idUnidad, idCalibre, idEtiqueta, idSize, idKilos, $trdata) {
     var isValid = true, $trdata = $trdata? $trdata: undefined;
     $('input#fidclasificacion').each(function (e, i) {
@@ -639,25 +666,31 @@
                 '<td>' +
                   '<input type="text" id="fclasificacion" value="" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidclasificacion" value="" class="span12">' +
+                  '<input type="hidden" id="fidclasificacion_old" value="" class="span12">' +
                 '</td>' +
                 '<td>'+
                   '<input type="text" id="funidad" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidunidad" value="" class="span12">'+
+                  '<input type="hidden" id="fidunidad_old" value="" class="span12">'+
                 '</td>'+
                 '<td>'+
                   '<input type="text" id="fcalibre" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidcalibre" value="" class="span12">'+
+                  '<input type="hidden" id="fidcalibre_old" value="" class="span12">'+
                 '</td>'+
                 '<td>'+
                   '<input type="text" id="fsize" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidsize" value="" class="span12">'+
+                  '<input type="hidden" id="fidsize_old" value="" class="span12">'+
                 '</td>'+
                 '<td>'+
                   '<input type="text" id="fetiqueta" value="" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" id="fidetiqueta" value="" class="span12">'+
+                  '<input type="hidden" id="fidetiqueta_old" value="" class="span12">'+
                 '</td>'+
                 '<td>' +
                   '<input type="text" id="fkilos" value="0" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="hidden" id="fkilos_old" value="0" class="span12">' +
                 '</td>' +
                 '<td>' +
                   '<input type="text" id="fexistente" value="0" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

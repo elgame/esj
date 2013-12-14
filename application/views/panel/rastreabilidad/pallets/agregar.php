@@ -78,13 +78,13 @@
 
 											<div class="span2">
 												<input type="text" name="funidad" id="funidad" class="span12" value="<?php echo set_value('funidad'); ?>" 
-													maxlength="100" placeholder="Unidad" data-next="fcalibre">
+													maxlength="100" placeholder="Caja" data-next="fcalibre">
 												<input type="hidden" name="fidunidad" id="fidunidad" value="<?php echo set_value('fidunidad'); ?>">
 											</div>
 
 											<div class="span2">
 												<input type="text" name="fcalibre" id="fcalibre" class="span12" value="<?php echo set_value('fcalibre'); ?>" 
-													maxlength="100" placeholder="Calibre" data-next="fetiqueta">
+													maxlength="100" placeholder="Tamaño" data-next="fetiqueta">
 												<input type="hidden" name="fidcalibre" id="fidcalibre" value="<?php echo set_value('fidcalibre'); ?>">
 											</div>
 
