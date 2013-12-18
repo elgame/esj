@@ -486,6 +486,13 @@ class compras_ordenes extends MY_Controller {
             'label' => 'Departamento',
             'rules' => 'required'),
 
+      array('field' => 'clienteId',
+            'label' => 'Cliente',
+            'rules' => ''),
+      array('field' => 'cliente',
+            'label' => 'Cliente',
+            'rules' => ''),
+
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
@@ -544,6 +551,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'total[]',
             'label' => '',
             'rules' => ''),
+      array('field' => 'observacion[]',
+            'label' => '',
+            'rules' => 'max_length[200]'),
 
       array('field' => 'totalImporte',
             'label' => 'Subtotal',

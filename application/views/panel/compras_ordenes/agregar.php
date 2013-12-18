@@ -46,7 +46,7 @@
               </div><!--/control-group -->
 
               <div class="control-group">
-                <label class="control-label" for="dserie">Proveedor</label>
+                <label class="control-label" for="proveedor">Proveedor</label>
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="proveedor" class="span11" id="proveedor" value="<?php echo set_value('proveedor') ?>" placeholder=""><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
@@ -56,7 +56,7 @@
               </div>
 
               <div class="control-group">
-                <label class="control-label" for="dserie">Solicito</label>
+                <label class="control-label" for="solicito">Solicito</label>
                 <div class="controls">
                   <div class="input-append span12">
                     <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="">
@@ -76,6 +76,17 @@
                   </select>
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="cliente">Cliente</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="cliente" class="span11" id="cliente" value="<?php echo set_value('cliente') ?>" placeholder="">
+                  </div>
+                </div>
+                  <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId') ?>">
+              </div>
+
             </div>
 
             <div class="span6">
@@ -200,6 +211,7 @@
                           <th>IVA</th>
                           <th>RET 4%</th>
                           <th>IMPORTE</th>
+                          <th>DESCRIP</th>
                           <th></th>
                         </tr>
                       </thead>
@@ -256,6 +268,9 @@
                                   <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
+                              </td>
+                              <td>
+                                  <input type="text" name="observacion[]" value="<?php echo $_POST['observacion'][$key] ?>" id="observacion" class="span12">
                               </td>
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>

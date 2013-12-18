@@ -375,10 +375,10 @@ var EventOnChangeMedida = function () {
 
     $medidaId.val($select.find('option:selected').attr('data-id'));
 
-    // Si el id de medida es el 9 de los kilos entonces en el input de cantidad
+    // Si el id de medida es el 19 de los kilos entonces en el input de cantidad
     // carga el valor del input oculto de los kilos, si es cualquier otra
     // medida entonces carga las cajas.
-    if ($medidaId.val() == '9') {
+    if ($medidaId.val() == '19') {
       $cantidad.val($kilosInput.val());
     } else {
       $cantidad.val($cajasInput.val());

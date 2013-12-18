@@ -8,7 +8,7 @@ $file2 = 's_'.$file.'.pem';
 $file3 = $file.'.pem';
 
 $response = array($path.$file3);
-$command1 = escapeshellcmd("openssl pkcs8 -inform DER -in {$file} -out {$file2} -passin pass:{$pass}");
+$command1 = escapeshellcmd("openssl pkcs8 -inform DER -in {$file} -out {$file2} -passin pass:".escapeshellarg($pass)."");
 $command2 = escapeshellcmd("openssl rsa -in {$file2} -des3 -out {$file3} -passout pass:{$new_pass}");
 shell_exec($command1);
 shell_exec($command2);
