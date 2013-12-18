@@ -7,21 +7,21 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $user = 'sanjorge';
+  protected $user = 'admin'; //sanjorge
 
   /**
    * Password.
    *
    * @var string
    */
-  protected $password = 'S4nj0rg3';
+  protected $password = 'A12345678'; //S4nj0rg3
 
   /**
    * URL base de la api.
    *
    * @var string
    */
-  protected $apiURL = 'facturartebarato.com/api/v1/';
+  protected $apiURL = 'development.facturartebarato.com/api/v1/'; //facturartebarato.com/api/v1/
 
   /**
    * Almacena la informacion de la peticion por curl.
