@@ -64,9 +64,16 @@ class String{
 	public static function limpiarTexto($txt, $remove_q=true){
 		$ci =& get_instance();
 		if(is_array($txt)){
-			foreach($txt as $key => $item){
-				$txt[$key] = addslashes(self::quitComillas(strip_tags(stripslashes(trim($item)))));
-				$txt[$key] = $ci->security->xss_clean(preg_replace("/select (.+) from|update (.+) set|delete from|drop table|where (.+)=(.+)/","", $txt[$key]));
+      foreach($txt as $key => $item){
+        if (is_array($item))
+        {
+          self::limpiarTexto($item);
+        }
+        else
+        {
+          $txt[$key] = addslashes(self::quitComillas(strip_tags(stripslashes(trim($item)))));
+  				$txt[$key] = $ci->security->xss_clean(preg_replace("/select (.+) from|update (.+) set|delete from|drop table|where (.+)=(.+)/","", $txt[$key]));
+        }
 			}
 			return $txt;
 		}else{
@@ -443,6 +450,7 @@ class String{
 			return $dataAux;
 		}
 	}
+
 	public static function obtenerPrimeraSemanaDelAnio($anio = 0, $dias_defasados=false){
 		if(intval($anio)==0 && $dias_defasados==false)
 			$anio = date('Y');
@@ -493,7 +501,80 @@ class String{
 	   }
 	}
 
+  /**
+   * Obtiene las semanas del año.
+   *
+   * @param  string  $anio | Año del q se obtendra las semanas.
+   * @param  mixed $mes | Mes del que se obtendran las semanas. 0:todos los meses
+   * @param  mixed $diaEmpieza | Dia donde se empezaran a calcular las semanas 0:domingo, 1:lunes etc
+   * @param  boolean $todas | true: todas las semanas del año. false: obtiene hasta la semana actual del año.
+   * @param  mixed $semana | numero de semana a obtener.
+   * @return array
+   */
+  public static function obtenerSemanasDelAnioV2($anio, $mes = 0, $diaEmpieza = 1, $todas = false, $semana = false)
+  {
+    $diasNombres = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
+
+    $mesInicial = intval($mes) === 0 ? 1 : $mes;
+
+    $primerDiaSemana = mktime(0, 0, 0, $mesInicial, $diaEmpieza, $anio);
+    $nombrePrimerDia = $diasNombres[$diaEmpieza];
+    $nombreUltimoDia = $diasNombres[($diaEmpieza != 0 ? $diaEmpieza - 1 : 6)];
+
+    $siguientePrimerDia = strtotime($nombrePrimerDia, $primerDiaSemana);
+    $siguienteUltimoDia = strtotime($nombreUltimoDia, $siguientePrimerDia);
+
+    $semanas = array();
+    $numeroSemana = 1;
+    while (date('Y', $siguientePrimerDia) == $anio)
+    {
+      if ($semana && intval($semana) === $numeroSemana)
+      {
+        return array(
+          'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
+          'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
+          'anio'         => $anio,
+          'semana'       => $numeroSemana,
+        );
+      }
+
+      $semanas[] = array(
+        'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
+        'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
+        'anio'         => $anio,
+        'semana'       => $numeroSemana,
+      );
+
+      if ($todas === false && (strtotime(date('Y-m-d')) >= $siguientePrimerDia && strtotime(date('Y-m-d')) <= $siguienteUltimoDia))
+        break;
+
+      $siguientePrimerDia = strtotime('+1 week', $siguientePrimerDia);
+      $siguienteUltimoDia = strtotime('+1 week', $siguienteUltimoDia);
+      $numeroSemana++;
+    }
+
+    return $semanas;
+  }
+
+
+  /**
+   * Obtiene las fechas de X cantidad de dias apartir de la fecha
+   * especificada.
+   *
+   * @param  string $fecha
+   * @param  int $xdias | cantidad de dias a obtener contando $fecha
+   * @return array
+   */
+  public static function obtenerSiguientesXDias($fecha, $xdias)
+  {
+    $dias = array();
+    for ($i = 0; $i < $xdias; $i++)
+    {
+      $dias[] = date("Y-m-d", strtotime($fecha) + 86400 * $i);
+    }
+
+    return $dias;
+  }
+
 }
-
-
 ?>

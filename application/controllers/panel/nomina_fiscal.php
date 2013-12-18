@@ -6,9 +6,9 @@ class nomina_fiscal extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'facturacion/get_folio/',
-    'facturacion/get_series/',
-    'facturacion/email/',
+    'nomina_fiscal/addAsistencias/',
+    'nomina_fiscal/show_otros/',
+    'nomina_fiscal/bonos_otros/',
   );
 
   public function _remap($method)
@@ -62,42 +62,41 @@ class nomina_fiscal extends MY_Controller {
   public function asistencia()
   {
     $this->carabiner->js(array(
-        array('libs/jquery.numeric.js'),
-        array('general/keyjump.js'),
-        array('general/util.js'),
+        array('general/supermodal.js'),
         array('panel/nomina_fiscal/asistencia.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
     $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
-    $params['seo']            = array('titulo' => 'Agregar factura');
+    $params['seo']            = array('titulo' => 'Nomina Fiscal - Asistencia');
     $params['pagar_ordent']   = false;
 
     $this->load->model('nomina_fiscal_model');
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
 
-    // $this->configAddModFactura();
-    // if($this->form_validation->run() == FALSE)
-    // {
-    //   $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
-    // }
-    // else
-    // {
-    //   $respons = $this->facturacion_model->addFactura();
+    $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
-    //   if($respons['passes'])
-    //     redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
-    //   else
-    //     $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
-    // }
+    $filtros = array(
+      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+    );
 
-    $filtros = array('semana' => '1');
-
-    $params['listadoAsistencias'] = $this->nomina_fiscal_model->listadoAsistencias($filtros);
+    // Datos para la vista.
+    $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleados($filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
+    // Determina cual es la semana que dejara seleccionada en la vista.
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+
+    // Obtiene los rangos de fecha de la semana seleccionada para obtener
+    // las fechas de los 7 dias siguientes.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected']);
+    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -108,183 +107,58 @@ class nomina_fiscal extends MY_Controller {
     $this->load->view('panel/footer');
   }
 
-
-  /*
-   |------------------------------------------------------------------------
-   | Validacion form
-   |------------------------------------------------------------------------
-   */
-
-  /**
-   * Configura los metodos de agregar y modificar
-   *
-   * @return void
-   */
-  private function configAddModFactura($borrador = false)
+  public function addAsistencias()
   {
-    $required = $borrador ? '' : 'required';
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana']);
 
-    // $callback_seriefolio_check = 'callback_seriefolio_check';
-    $callback_isValidDate      = 'callback_isValidDate';
-    $callback_val_total        = 'callback_val_total';
-    $callback_chk_cer_caduca   = 'callback_chk_cer_caduca';
-    if ($borrador)
+    redirect(base_url('panel/nomina_fiscal/asistencia/?'.String::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function show_otros()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Fiscal - Abonos y Otros');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('usuarios_model');
+
+    // Obtiene la informacion del empleado.
+    $params['empleado'] = $this->usuarios_model->get_usuario_info($_GET['eid']);
+
+    // Obtiene los dias de la semana.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem']);
+    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['nombresDias'] = array('Viernes', 'Sabado', 'Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves');
+
+    // Obtiene los bonos y otros que ya tiene el empleado de la semana.
+    $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem']);
+
+    if(isset($_GET['msg']{0}))
     {
-      // $callback_seriefolio_check = '';
-      $callback_isValidDate      = '';
-      $callback_val_total        = '';
-      $callback_chk_cer_caduca   = '';
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '3')
+      {
+        $params['close'] = true;
+      }
     }
 
-    $this->load->library('form_validation');
-    $rules = array(
+    $this->load->view('panel/nomina_fiscal/bonos_otros', $params);
+  }
 
-        array('field'   => 'did_empresa',
-              'label'   => 'Empresa',
-              'rules'   => 'required|max_length[25]'),
-        array('field'   => 'did_cliente',
-              'label'   => 'Cliente',
-              'rules'   => 'required|max_length[25]'),
-        array('field'   => 'dserie',
-              'label'   => 'Serie',
-              'rules'   => 'max_length[25]'),
-        array('field'   => 'dfolio',
-              'label'   => 'Folio',
-              'rules'   => 'required|numeric|callback_seriefolio_check'),
-        array('field'   => 'dno_aprobacion',
-              'label'   => 'Numero de aprobacion',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'dano_aprobacion',
-              'label'   => 'Fecha de aprobacion',
-              'rules'   => $required.'|max_length[10]|'.$callback_isValidDate),
+  public function bonos_otros()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addBonosOtros($_GET['eid'], $_POST, $_GET['sem']);
 
-        array('field'   => 'dfecha',
-              'label'   => 'Fecha',
-              'rules'   => $required.'|max_length[25]'), //|callback_isValidDate
-
-        array('field'   => 'total_importe',
-              'label'   => 'SubTotal1',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_subtotal',
-              'label'   => 'SubTotal',
-              'rules'   => $required.'|numeric'),
-
-        array('field'   => 'total_descuento',
-              'label'   => 'Descuento',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_iva',
-              'label'   => 'IVA',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_retiva',
-              'label'   => 'Retencion IVA',
-              'rules'   => $required.'|numeric'),
-        array('field'   => 'total_totfac',
-              'label'   => 'Total',
-              'rules'   => $required.'|numeric|'.$callback_val_total),
-        array('field'   => 'dforma_pago',
-              'label'   => 'Forma de pago',
-              'rules'   => $required.'|max_length[80]'),
-        array('field'   => 'dmetodo_pago',
-              'label'   => 'Metodo de pago',
-              'rules'   => $required.'|max_length[40]'),
-        array('field'   => 'dmetodo_pago_digitos',
-              'label'   => 'Ultimos 4 digitos',
-              'rules'   => 'max_length[20]'),
-        array('field'   => 'dcondicion_pago',
-              'label'   => 'Condición de pago',
-              'rules'   => $required.'|max_length[2]'),
-
-        array('field'   => 'dplazo_credito',
-            'label'   => 'Plazo de crédito',
-            'rules'   => 'numeric'),
-
-        array('field'   => 'dempresa',
-              'label'   => 'Empresa',
-              'rules'   => ''),
-        array('field'   => 'dcliente',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_rfc',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_domici',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dcliente_ciudad',
-              'label'   => 'Cliente',
-              'rules'   => ''),
-        array('field'   => 'dttotal_letra',
-              'label'   => 'letra',
-              'rules'   => ''),
-        array('field'   => 'dreten_iva',
-              'label'   => 'Retecion IVA',
-              'rules'   => ''),
-
-        array('field'   => 'prod_did_prod[]',
-              'label'   => 'prod_did_prod',
-              'rules'   => ''),
-        array('field'   => 'prod_dcantidad[]',
-              'label'   => 'prod_dcantidad',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescripcion[]',
-              'label'   => 'prod_ddescripcion',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescuento[]',
-              'label'   => 'prod_ddescuento',
-              'rules'   => ''),
-        array('field'   => 'prod_ddescuento_porcent[]',
-              'label'   => 'prod_ddescuento_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_dpreciou[]',
-              'label'   => 'prod_dpreciou',
-              'rules'   => ''),
-        array('field'   => 'prod_importe[]',
-              'label'   => 'prod_importe',
-              'rules'   => ''),
-        array('field'   => 'prod_diva_total[]',
-              'label'   => 'prod_diva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_total[]',
-              'label'   => 'prod_dreten_iva_total',
-              'rules'   => ''),
-        array('field'   => 'prod_dreten_iva_porcent[]',
-              'label'   => 'prod_dreten_iva_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_diva_porcent[]',
-              'label'   => 'prod_diva_porcent',
-              'rules'   => ''),
-        array('field'   => 'prod_dmedida[]',
-              'label'   => 'prod_dmedida',
-              'rules'   => ''),
-
-        array('field'   => 'dversion',
-              'label'   => '',
-              'rules'   => ''),
-        array('field'   => 'dcer_caduca',
-              'label'   => 'Empresa',
-              'rules'   => $callback_chk_cer_caduca),
-
-        array('field'   => 'dno_certificado',
-              'label'   => 'No. Certificado',
-              'rules'   => $required),
-        array('field'   => 'dtipo_comprobante',
-              'label'   => 'Tipo comproante',
-              'rules'   => $required),
-        array('field'   => 'dobservaciones',
-              'label'   => 'Observaciones',
-              'rules'   => ''),
-    );
-
-    if (isset($_POST['palletsIds']) && isset($_POST['timbrar']))
-    {
-      $rules[] = array(
-        'field'   => 'palletsIds[]',
-        'label'   => 'Pallets',
-        'rules'   => 'callback_check_existen_pallets'
-      );
-    }
-
-    $this->form_validation->set_rules($rules);
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }
 
   /**
@@ -303,37 +177,6 @@ class nomina_fiscal extends MY_Controller {
       redirect(base_url('panel/facturacion/?msg=1'));
   }
 
-  public function chk_cer_caduca($date)
-  {
-    $hoy = date('Y-m-d');
-
-    if (strtotime($hoy) > strtotime($date))
-    {
-      $this->form_validation->set_message('chk_cer_caduca', 'El certificado de la empresa caducó, actualize la información de la misma.');
-      return false;
-    }
-
-    return true;
-  }
-
-  /*
-   |-------------------------------------------------------------------------
-   |  AJAX
-   |-------------------------------------------------------------------------
-   */
-
-   /**
-    * Obtiene las clasificaciones por ajax.
-    *
-    * @return JSON
-    */
-   public function ajax_get_clasificaciones()
-   {
-      $this->load->model('clasificaciones_model');
-
-      echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
-   }
-
   /*
    |-------------------------------------------------------------------------
    |  MESAJES ALERTAS
@@ -346,7 +189,7 @@ class nomina_fiscal extends MY_Controller {
    * @param unknown_type $msg
    * @param unknown_type $title
    */
-  private function showMsgs($tipo, $msg='', $title='Facturacion!'){
+  private function showMsgs($tipo, $msg='', $title='Nomina Fiscal!'){
     switch($tipo){
       case 1:
         $txt = 'El campo ID es requerido.';
@@ -357,7 +200,7 @@ class nomina_fiscal extends MY_Controller {
         $icono = 'error';
         break;
       case 3:
-        $txt = 'La Factura se agrego correctamente.';
+        $txt = 'Los datos se guardaron correctamente.';
         $icono = 'success';
         break;
     }
