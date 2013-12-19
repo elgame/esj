@@ -36,6 +36,10 @@
         <h3>Bonos y Otros - <?php echo $empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_materno.' '.$empleado['info'][0]->nombre ?><button type="button" class="btn btn-info" title="Recargar" id="btn-refresh" style="float: right;"><i class="icon-refresh"></i></button></h3>
       </div><!--/modal-header -->
 
+      <?php if (count($bonosOtros) > 0) { ?>
+        <input type="hidden" name="existentes" value="1" id="existentes">
+      <?php } ?>
+
       <div class="modal-body">
           <div class="row-fluid" style="text-align: center;">
             <div class="span12">

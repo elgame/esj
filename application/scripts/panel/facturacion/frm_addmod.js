@@ -460,6 +460,7 @@ function addProducto(unidades, prod) {
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
+    idUnidadClasificacion = unidades[0].id_unidad;
   }
 
   // Si el producto existe en el listado.

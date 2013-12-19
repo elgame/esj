@@ -42,7 +42,7 @@
         }
       });
 
-      if ($cantidades.length === 0) {
+      if ($cantidades.length === 0 && $('#existentes').length === 0) {
         noty({"text": 'Agregue algun bono u otro!', "layout":"topRight", "type": 'error'});
       } else if (error) {
         noty({"text": 'Los campos cantidad son requeridos!', "layout":"topRight", "type": 'error'});

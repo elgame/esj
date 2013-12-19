@@ -214,9 +214,13 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function addBonosOtros($empleadoId, array $datos, $numSemana)
   {
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana);
-    $this->db->where("id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
-    $this->db->delete('nomina_percepciones_ext');
+
+    if (isset($datos['existentes']))
+    {
+      $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana);
+      $this->db->where("id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
+      $this->db->delete('nomina_percepciones_ext');
+    }
 
     $insertData = array();
     foreach ($datos['tipo'] as $key => $tipo)
@@ -242,7 +246,10 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
 
-    $this->db->insert_batch('nomina_percepciones_ext', $insertData);
+    if (count($insertData) > 0)
+    {
+      $this->db->insert_batch('nomina_percepciones_ext', $insertData);
+    }
 
     return array('passes' => true);
   }
