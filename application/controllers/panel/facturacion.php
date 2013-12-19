@@ -1213,7 +1213,7 @@ class facturacion extends MY_Controller {
         $icono = 'error';
         break;
       case 708:
-        $txt = 'No se pudo cancelar la factura debido a un error del servicio, vuelva a intentarlo en unos minutos.';
+        $txt = 'No se pudo conectar al SAT para realizar la cancelación de la factura, intentelo mas tarde.';
         $icono = 'error';
         break;
     }

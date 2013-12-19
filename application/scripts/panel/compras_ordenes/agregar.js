@@ -10,6 +10,7 @@
     autocompleteSolicito();
     // autocompleteCodigo();
     autocompleteConcepto();
+    autocompleteClientes();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -96,6 +97,27 @@
       if(event.which == 8 || event.which == 46) {
         $("#proveedor").css("background-color", "#FFD071");
         $("#proveedorId").val('');
+      }
+    });
+  };
+
+  // Autocomplete para los Clientes.
+  var autocompleteClientes = function () {
+    $("#cliente").autocomplete({
+      source: base_url + 'panel/clientes/ajax_get_proveedores/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $cliente =  $(this);
+
+        $cliente.val(ui.item.id);
+        $("#clienteId").val(ui.item.id);
+        $cliente.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#cliente").css("background-color", "#FFD071");
+        $("#clienteId").val('');
       }
     });
   };
@@ -356,10 +378,10 @@
       }
 
       // Valida si el campo precio es 0.
-      if ($fprecio.val() === '0') {
-        $fprecio.css({'background-color': '#FDFC9A'})
-        error = true;
-      }
+      // if ($fprecio.val() === '0') {
+      //   $fprecio.css({'background-color': '#FDFC9A'})
+      //   error = true;
+      // }
 
       // Si no hubo un error, es decir que no halla faltado algun campo de
       // completar.
@@ -603,6 +625,9 @@
                     '<span>'+util.darFormatoNum('0')+'</span>' +
                     '<input type="hidden" name="importe[]" value="0" id="importe" class="span12 vpositive">' +
                     '<input type="hidden" name="total[]" value="0" id="total" class="span12 vpositive">' +
+                  '</td>' +
+                  '<td>' +
+                    '<input type="text" name="observacion[]" value="" id="observacion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +
                 '</tr>');

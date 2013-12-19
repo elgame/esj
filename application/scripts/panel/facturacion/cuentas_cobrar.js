@@ -85,6 +85,7 @@ var modalAbonos = (function($){
     if ($("#abonomasivo").length > 0) 
     { 
       $("#abonomasivo .monto_factura").on('change', calculaMonto);
+      $("#form").on('submit', sendFormMasivo);
     }
   }
 
@@ -95,6 +96,11 @@ var modalAbonos = (function($){
       monto += parseFloat($(this).val());
     });
     $("#dmonto").val(monto);
+  }
+
+  function sendFormMasivo(){
+    alert("dasdas");
+    return false;
   }
 
   objs.init = init;

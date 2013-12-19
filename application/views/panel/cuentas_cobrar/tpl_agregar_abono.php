@@ -51,10 +51,10 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group" style="display: <?php echo (isset($_GET['total']{0})? 'none': 'block'); ?>">
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
-                  <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
+                  <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" data-max="<?php echo $data['saldo'] ?>">
                 </div>
               </div>
 
@@ -97,7 +97,7 @@
                     <input type="hidden" name="tipos[]" value="<?php echo $value['cobro'][0]->tipo; ?>">
                   </td>
                   <td><?php echo $value['saldo']; ?></td>
-                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="1" max="<?php echo $value['saldo'] ?>"></td>
+                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="1" data-max="<?php echo $value['saldo'] ?>"></td>
                 </tr>
               <?php
               }

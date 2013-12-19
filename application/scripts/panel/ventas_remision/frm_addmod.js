@@ -375,10 +375,10 @@ var EventOnChangeMedida = function () {
 
     $medidaId.val($select.find('option:selected').attr('data-id'));
 
-    // Si el id de medida es el 9 de los kilos entonces en el input de cantidad
+    // Si el id de medida es el 19 de los kilos entonces en el input de cantidad
     // carga el valor del input oculto de los kilos, si es cualquier otra
     // medida entonces carga las cajas.
-    if ($medidaId.val() == '9') {
+    if ($medidaId.val() == '19') {
       $cantidad.val($kilosInput.val());
     } else {
       $cantidad.val($cajasInput.val());
@@ -472,9 +472,9 @@ function addProducto(unidades, prod) {
 
     // Le suma la cantidad de cajas a la clasificacion.
 
-    // Si la unidad de medida de la clasificacion del rendimiento es la 9
+    // Si la unidad de medida de la clasificacion del rendimiento es la 19
     // Cambiar el id de los kilos por el q este en la bdd.
-    if ($medidaInput.val() == '9') {
+    if ($medidaInput.val() == '19') {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.kilos));
     } else {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));

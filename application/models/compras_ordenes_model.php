@@ -107,6 +107,7 @@ class compras_ordenes_model extends CI_Model {
       'tipo_pago'       => $_POST['tipoPago'],
       'tipo_orden'      => $_POST['tipoOrden'],
       'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
+      'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
     );
 
     $this->db->insert('compras_ordenes', $data);
@@ -141,6 +142,7 @@ class compras_ordenes_model extends CI_Model {
         'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
         'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
         'faltantes'            => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
+        'observacion'          => $_POST['observacion'][$key],
       );
     }
 
@@ -201,13 +203,14 @@ class compras_ordenes_model extends CI_Model {
         'id_empresa'      => $_POST['empresaId'],
         'id_proveedor'    => $_POST['proveedorId'],
         'id_departamento' => $_POST['departamento'],
-        'id_autorizo'     => null,
+        // 'id_autorizo'     => null,
         'id_empleado'     => $this->session->userdata('id_usuario'),
         // 'folio'           => $_POST['folio'],
         'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
         'tipo_pago'       => $_POST['tipoPago'],
         'tipo_orden'      => $_POST['tipoOrden'],
         'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
+        'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       );
 
       if (isset($_POST['autorizar']) && $status === 'p')
@@ -258,6 +261,7 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
           'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
           'faltantes' => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
+          'observacion'     => $_POST['observacion'][$key],
           'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p'
         );
       }
@@ -411,6 +415,7 @@ class compras_ordenes_model extends CI_Model {
               co.id_departamento, cd.nombre AS departamento,
               co.id_empleado, u.nombre AS empleado,
               co.id_autorizo, us.nombre AS autorizo,
+              co.id_cliente, cl.nombre_fiscal AS cliente,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
@@ -422,6 +427,7 @@ class compras_ordenes_model extends CI_Model {
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN usuarios AS uss ON uss.id = co.id_solicito
+       LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -438,7 +444,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.status, cp.faltantes
+                  cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion 
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -594,7 +600,7 @@ class compras_ordenes_model extends CI_Model {
           'correoDestino'  => array($proveedor['info']->email),
           'nombreDestino'  => $proveedor['info']->nombre_fiscal,
           'cc'             => '',
-          'adjuntos'       => array('ORDEN COMPRA' => $file)
+          'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
         );
 
         $result = $this->my_email->setData($datosEmail)->send();
@@ -771,11 +777,11 @@ class compras_ordenes_model extends CI_Model {
       // $pdf->AddPage();
       $pdf->SetFont('helvetica','', 8);
 
-      $aligns = array('C', 'C', 'C', 'C', 'C');
+      $aligns = array('C', 'C', 'L', 'R', 'R');
       $widths = array(25, 25, 104, 25, 25);
       $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
 
-      $subtotal = $iva = $total = 0;
+      $subtotal = $iva = $total = $retencion = 0;
       foreach ($orden['info'][0]->productos as $key => $prod)
       {
         $band_head = false;
@@ -796,9 +802,9 @@ class compras_ordenes_model extends CI_Model {
         $datos = array(
           $prod->cantidad,
           $prod->codigo,
-          $prod->descripcion,
-          String::formatoNumero($prod->precio_unitario),
-          String::formatoNumero($prod->importe),
+          $prod->descripcion." ({$prod->observacion})",
+          String::formatoNumero($prod->precio_unitario, 2, '$', false),
+          String::formatoNumero($prod->importe, 2, '$', false),
         );
 
         $pdf->SetX(6);
@@ -807,29 +813,40 @@ class compras_ordenes_model extends CI_Model {
         $subtotal += floatval($prod->importe);
         $iva      += floatval($prod->iva);
         $total    += floatval($prod->total);
+        $retencion += floatval($prod->retencion_iva);
       }
 
       $pdf->SetX(6);
-      $pdf->SetAligns(array('L', 'L', 'C'));
+      $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(154, 25, 25));
       $pdf->Row(array(
         'AREA DE APLICACION: ' . $orden['info'][0]->departamento,
         'SUB-TOTAL',
-        String::formatoNumero($subtotal),
+        String::formatoNumero($subtotal, 2, '$', false),
       ), false, false);
 
       $pdf->SetX(6);
       $pdf->Row(array(
-        '',
+        'CLIENTE: '.$orden['info'][0]->cliente,
         'IVA',
-        String::formatoNumero($iva),
+        String::formatoNumero($iva, 2, '$', false),
       ), false, false);
+
+      if ($retencion > 0)
+      {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          '',
+          'Ret. IVA',
+          String::formatoNumero($retencion, 2, '$', false),
+        ), false, false);
+      }
 
       $pdf->SetX(6);
       $pdf->Row(array(
         '',
         'TOTAL',
-        String::formatoNumero($total),
+        String::formatoNumero($total, 2, '$', false),
       ), false, false);
 
       $x = $pdf->GetX();
@@ -1080,7 +1097,7 @@ class compras_ordenes_model extends CI_Model {
         'correoDestino'  => array($proveedor['info']->email),
         'nombreDestino'  => $proveedor['info']->nombre_fiscal,
         'cc'             => '',
-        'adjuntos'       => array('ORDEN COMPRA' => $file)
+        'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
       );
 
       $result = $this->my_email->setData($datosEmail)->send();

@@ -23,6 +23,12 @@ class clientes extends MY_Controller {
 			redirect(base_url('panel/home'));
 	}
 
+public function fecha($fecha)
+{
+	$meses = array('ENE' => '01', 'FEB' => '02', 'MAR' => '03', 'ABR' => '04', 'MAY' => '05', 'JUN' => '06', 'JUL' => '07', 'AGO' => '08', 'SEP' => '09', 'OCT' => '10', 'NOV' => '11', 'DIC' => '12' );
+	$fecha = explode('/', $fecha);
+	return $fecha[2].'-'.$meses[strtoupper($fecha[1])].'-'.$fecha[0];
+}
   public function index()
   {
 		$this->carabiner->js(array(
@@ -41,34 +47,96 @@ class clientes extends MY_Controller {
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 
-		/*$gestor = @fopen("Todos los Clientes.txt", "r");
-		if ($gestor) {
-		    while (($bufer = fgets($gestor, 4096)) !== false) {
-		    	$bufer = utf8_encode($bufer);
-		    	echo "INSERT INTO clientes (
-nombre_fiscal, calle, no_exterior, colonia, municipio, cp, rfc, cuenta_cpi, pais)
-VALUES ('".trim(substr($bufer, 33, 62))."', '".trim(substr($bufer, 114, 59))."',
-'".trim(substr($bufer, 177, 7))."', '".trim(substr($bufer, 243, 62))."', 
-'".trim(substr($bufer, 432, 35))."', '".trim(substr($bufer, 663, 8))."', 
-'".trim(substr($bufer, 986, 20))."', '".trim(substr($bufer, 1470, 11))."', 
-'".trim(substr($bufer, 306, 12))."' );\n";
+		$fila = 0;
+		//C¢digo Cliente,Raz¢n Social,R.F.C.,Estatus,Calle,N£mero Exterior,N£mero Interior,Colonia,C¢digo Postal,eMail,Pa¡s,Estado,Ciudad,Municipio
+		if (($gestor = fopen("Clientes_Activos.csv", "r")) !== FALSE) {
+		    while (($datos = fgetcsv($gestor, 1000, ",")) !== FALSE) {
+		        $numero = count($datos);
 
-		        // echo trim(substr($bufer, 33, 62))."<br>"; //nombre
-		        // echo trim(substr($bufer, 114, 59))."<br>"; //calle
-		        // echo trim(substr($bufer, 177, 7))."<br>"; //numero
-		        // echo trim(substr($bufer, 243, 62))."<br>"; //colonia
-		        // echo trim(substr($bufer, 432, 35))."<br>"; //municipio
-		        // echo trim(substr($bufer, 306, 12))."<br>"; //pais
-		        // echo trim(substr($bufer, 663, 8))."<br>"; //cp
-		        // echo trim(substr($bufer, 986, 20))."<br>"; //rfc
-		        // echo trim(substr($bufer, 1470, 11))."<br>"; //cuenta contpaqi
-		        // echo "--------------------------------------------------------------------------<br>";
-		    }
-		    if (!feof($gestor)) {
-		        echo "Error: fallo inesperado de fgets()\n";
+		     //    if ($datos[0] == 'new')
+		     //    {
+		     //    	$id_cliente = 0;
+		     //    	$res = $this->db->query("SELECT id_cliente FROM clientes WHERE cuenta_cpi like '".trim($datos[1])."'");
+		     //    	if($res->num_rows() > 0)
+		     //    		$id_cliente = $res->row()->id_cliente;
+		     //    	else
+		     //    		echo "No Registrado: ".$datos[1]." <==> ".$datos[2]."<br>";
+		     //    }elseif($id_cliente > 0)
+		     //    {
+		     //    	if (substr($datos[0], 0, 3) == '   ') //abono
+		     //    	{
+		     //    		$data_abono = array(
+							// 'id_factura'     => $id_factura,
+							// 'fecha'          => $this->fecha(trim($datos[0])),
+							// 'concepto'       => trim($datos[3]),
+							// 'total'          => String::float(trim($datos[5])),
+							// 'poliza_ingreso' => 't',
+		     //    		);
+		     //    		$this->db->insert('facturacion_abonos', $data_abono);
+		     //    	}else //factura
+		     //    	{
+		     //    		$data_factura = array(
+							// 'id_cliente'       => $id_cliente,
+							// 'id_empresa'       => '1',
+							// 'version'          => '3.2',
+							// 'serie'            => ''.trim($datos[1]),
+							// 'folio'            => ''.trim($datos[2]),
+							// 'fecha'            => $this->fecha(trim($datos[0])),
+							// 'subtotal'         => String::float(trim($datos[4])),
+							// 'total'            => String::float(trim($datos[4])),
+							// 'total_letra'      => String::num2letras( String::float(trim($datos[4])) ),
+							// 'no_aprobacion'    => 0,
+							// 'ano_aprobacion'   => '',
+							// 'no_certificado'   => '',
+							// 'cadena_original'  => '',
+							// 'sello'            => '',
+							// 'certificado'      => '',
+							// 'condicion_pago'   => 'cr',
+							// 'status'           => 'P',
+							// 'docs_finalizados' => 't',
+							// 'poliza_diario'    => 't',
+							// 'is_factura'       => 'f',
+		     //    		);
+		     //    		$this->db->insert('facturacion', $data_factura);
+		     //    		$id_factura = $this->db->insert_id('facturacion', 'id_factura');
+		     //    	}
+		     //    }
+
+
+
+
+
+				$res = $this->db->query("SELECT * FROM clientes WHERE rfc like '".trim($datos[2])."' AND rfc <> ''");
+				if ($res->num_rows() > 0)
+				{
+					$fila++;
+					var_dump($res->row());
+					echo "<br>";
+					var_dump($datos);
+					echo "<br><br>";
+					$datos[11] = trim($datos[11]);
+					$datos[9] = trim($datos[9]);
+					$datos[2] = trim($datos[2]);
+					if($datos[2] != '')
+					{
+						echo "UPDATE clientes SET estado='{$datos[11]}', email='{$datos[9]}' WHERE rfc like '{$datos[2]}'; <br>";
+					}
+				}else{
+					// if($datos[2] != '')
+						// echo "INSERT INTO clientes (
+						// nombre_fiscal, calle, no_exterior, no_interior, 
+						// colonia, cp, email, pais, 
+						// estado, localidad, municipio, rfc, cuenta_cpi) VALUES 
+						// ('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."', 
+						// '".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."', 
+						// '".utf8_encode(trim($datos[11]))."', '".utf8_encode(trim($datos[12]))."', '".utf8_encode(trim($datos[13]))."', '".trim($datos[2])."', '".trim($datos[0])."'  ); <br>";
+					// echo "'".trim($datos[2])."',";
+				}
+				$res->free_result();
 		    }
 		    fclose($gestor);
-		}*/
+		}
+		echo $fila;
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);

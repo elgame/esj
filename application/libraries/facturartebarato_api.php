@@ -7,21 +7,21 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $user = 'admin';
+  protected $user = 'admin'; //sanjorge
 
   /**
    * Password.
    *
    * @var string
    */
-  protected $password = 'A12345678';
+  protected $password = 'A12345678'; //S4nj0rg3
 
   /**
    * URL base de la api.
    *
    * @var string
    */
-  protected $apiURL = 'development.facturartebarato.com/api/v1/';
+  protected $apiURL = 'development.facturartebarato.com/api/v1/'; //facturartebarato.com/api/v1/
 
   /**
    * Almacena la informacion de la peticion por curl.
@@ -211,7 +211,7 @@ class facturartebarato_api {
   public function cancelar(Array $params)
   {
     $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}cancel";
-
+    
     $resultAPI = $this->post($apiURL, $params);
 
     return $resultAPI;

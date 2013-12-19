@@ -6,6 +6,8 @@ class inventario extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'inventario/cproveedor_pdf/',
+
     'inventario/epu_pdf/',
     'inventario/epc_pdf/',
     'inventario/promedio_pdf/',
@@ -34,6 +36,47 @@ class inventario extends MY_Controller {
   {
     # code...
   }
+
+  /*-------------------------------------------
+   --------------- Rpt Compras -------------
+   -------------------------------------------*/
+
+  public function cproveedor()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Compras por Proveedor');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/cproveedor',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cproveedor_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProveedorPdf();
+
+  }
+  public function cproveedor_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuentasPagarExcel();
+  }
+
+
+  /*-------------------------------------------
+   ----------- Rpt Inventario -------------
+   -------------------------------------------*/
 
   public function epu()
   {

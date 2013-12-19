@@ -123,7 +123,7 @@ class compras_ordenes extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Agregar orden de compra'
+      'titulo' => 'Agregar orden de requisición'
     );
 
     $params['next_folio']    = $this->compras_ordenes_model->folio();
@@ -189,7 +189,7 @@ class compras_ordenes extends MY_Controller {
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
-      'titulo' => 'Orden de compra'
+      'titulo' => (isset($_GET['w'])? ($_GET['w']=='c'? 'Orden de compra': 'Orden de requisición'): 'Orden de compra')
     );
 
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
@@ -486,6 +486,13 @@ class compras_ordenes extends MY_Controller {
             'label' => 'Departamento',
             'rules' => 'required'),
 
+      array('field' => 'clienteId',
+            'label' => 'Cliente',
+            'rules' => ''),
+      array('field' => 'cliente',
+            'label' => 'Cliente',
+            'rules' => ''),
+
       array('field' => 'fecha',
             'label' => 'Fecha',
             'rules' => 'required'),
@@ -544,6 +551,9 @@ class compras_ordenes extends MY_Controller {
       array('field' => 'total[]',
             'label' => '',
             'rules' => ''),
+      array('field' => 'observacion[]',
+            'label' => '',
+            'rules' => 'max_length[200]'),
 
       array('field' => 'totalImporte',
             'label' => 'Subtotal',
