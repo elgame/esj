@@ -460,6 +460,7 @@ function addProducto(unidades, prod) {
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
+    idUnidadClasificacion = unidades[0].id_unidad;
   }
 
   // Si el producto existe en el listado.
@@ -471,9 +472,9 @@ function addProducto(unidades, prod) {
 
     // Le suma la cantidad de cajas a la clasificacion.
 
-    // Si la unidad de medida de la clasificacion del rendimiento es la 9
+    // Si la unidad de medida de la clasificacion del rendimiento es la 19
     // Cambiar el id de los kilos por el q este en la bdd.
-    if ($medidaInput.val() == '9') {
+    if ($medidaInput.val() == '19') {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.kilos));
     } else {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));

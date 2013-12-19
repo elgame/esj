@@ -460,6 +460,7 @@ function addProducto(unidades, prod) {
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
+    idUnidadClasificacion = unidades[0].id_unidad;
   }
 
   // Si el producto existe en el listado.
@@ -471,9 +472,9 @@ function addProducto(unidades, prod) {
 
     // Le suma la cantidad de cajas a la clasificacion.
 
-    // Si la unidad de medida de la clasificacion del rendimiento es la 9
+    // Si la unidad de medida de la clasificacion del rendimiento es la 19
     // Cambiar el id de los kilos por el q este en la bdd.
-    if ($medidaInput.val() == '9') {
+    if ($medidaInput.val() == '19') {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.kilos));
     } else {
       $cantidadInput.val(parseFloat($cantidadInput.val()) + parseFloat(prod.cajas));
@@ -508,10 +509,10 @@ function addProducto(unidades, prod) {
       unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].id_unidad == idUnidadClasificacion ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
     }
 
-    // Si el id de unidad es la 9 osea de kilos entonces en cantidad coloca
+    // Si el id de unidad es la 19 osea de kilos entonces en cantidad coloca
     // los kilos en vez de las cajas.
     // Cambiar el id que le corresponda a los KILOS en las unidades.
-    if (idUnidadClasificacion == '9') {
+    if (idUnidadClasificacion == '19') {
       cantidad = prod_kilos;
     } else {
       cantidad = prod_cajas;
