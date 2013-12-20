@@ -48,7 +48,7 @@
     switch(tipo) {
       case 'a': return 'green'; // Asistencia
       case 'f': return 'red'; // Falta
-      case 'in': return 'yellow'; // Incapacidad
+      default: return 'yellow'; // Incapacidad
     }
   };
 
