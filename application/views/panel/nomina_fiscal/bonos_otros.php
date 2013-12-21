@@ -34,7 +34,7 @@
       <h3><?php echo $empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_materno.' '.$empleado['info'][0]->nombre ?><button type="button" class="btn btn-info" title="Recargar" id="btn-refresh" style="float: right;"><i class="icon-refresh"></i></button></h3>
     </div><!--/modal-header -->
 
-    <div class="modal-body">
+    <div class="modal-body" style="max-height: none;">
       <ul class="nav nav-tabs" id="myTab">
         <li class="active"><a href="#tab-bonos-otros">Bonos y Otros</a></li>
         <?php if ($this->usuarios_model->tienePrivilegioDe('', 'nomina_fiscal/add_prestamos/')){ ?>
@@ -51,7 +51,7 @@
                 <div class="row-fluid" style="text-align: center;">
                   <div class="span12">
                     Dia
-                    <select class="input-xlarge" id="fecha">
+                    <select id="fecha">
                       <?php foreach ($dias as $key => $dia) { ?>
                         <option value="<?php echo $dia ?>"><?php echo (new DateTime)->createFromFormat('Y-m-d', $dia)->format('d-m-Y')." | {$nombresDias[$key]}" ?></option>
                       <?php } ?>
@@ -75,10 +75,10 @@
                       <tbody>
                         <?php foreach ($bonosOtros as $key => $item) { ?>
                           <tr>
-                            <td><input type="text" name="fecha[]" value="<?php echo $item->fecha ?>" readonly> </td>
-                            <td><input type="text" name="cantidad[]" value="<?php echo $item->bono !== '0' ? $item->bono : $item->otro ?>" class="vpositive cantidad" required></td>
-                            <td>
-                              <select name="tipo[]">
+                            <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $item->fecha ?>" class="span12" readonly> </td>
+                            <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $item->bono !== '0' ? $item->bono : $item->otro ?>" class="span12 vpositive cantidad" required></td>
+                            <td style="width: 200px;">
+                              <select name="tipo[]" class="span12">
                                 <option value="bono" <?php echo $item->bono !== '0' ? 'selected' : '' ?>>Bono</option>
                                 <option value="otro" <?php echo $item->otro !== '0' ? 'selected' : '' ?>>Otro</option>
                               </select>
@@ -106,7 +106,7 @@
                 <div class="row-fluid" style="text-align: center;">
                   <div class="span12">
                     Dia
-                    <select class="input-xlarge" id="fecha-prestamos">
+                    <select id="fecha-prestamos">
                       <?php foreach ($dias as $key => $dia) { ?>
                         <option value="<?php echo $dia ?>"><?php echo (new DateTime)->createFromFormat('Y-m-d', $dia)->format('d-m-Y')." | {$nombresDias[$key]}" ?></option>
                       <?php } ?>

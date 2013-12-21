@@ -75,10 +75,10 @@
         $fecha = $('#fecha');
 
     htmlTr = '<tr>' +
-              '<td><input type="text" name="fecha[]" value="'+$fecha.find('option:selected').val()+'" readonly> </td>' +
-              '<td><input type="text" name="cantidad[]" value="0" class="vpositive cantidad" required></td>' +
-              '<td>' +
-                '<select name="tipo[]">' +
+              '<td style="width: 200px;"><input type="text" name="fecha[]" value="'+$fecha.find('option:selected').val()+'" class="span12" readonly> </td>' +
+              '<td style="width: 100px;"><input type="text" name="cantidad[]" value="0" class="span12 vpositive cantidad" required></td>' +
+              '<td style="width: 200px;">' +
+                '<select name="tipo[]" class="span12">' +
                   '<option value="bono" '+selectedBono+'>Bono</option>' +
                   '<option value="otro" '+selectedOtro+'>Otro</option>' +
                 '</select>' +

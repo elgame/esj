@@ -391,18 +391,19 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function semanasDelAno()
   {
-    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 5);
+    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 4);
   }
 
   /**
    * Obtiene las semanas que van del mes actual.
+   * corregirla
    *
    * @return array
    */
-  public function semanasDelMesActual()
-  {
-    return String::obtenerSemanasDelAnioV2(date('Y'), date('m'), 5);
-  }
+  // public function semanasDelMesActual()
+  // {
+  //   return array_slice(String::obtenerSemanasDelAnioV2(date('Y'), 6, 0, true), 0, 4);
+  // }
 
   /**
    * Obtiene la semana actual del mes actual.
@@ -411,7 +412,7 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function semanaActualDelMes()
   {
-    return end(String::obtenerSemanasDelAnioV2(date('Y'), 0, 5));
+    return end(String::obtenerSemanasDelAnioV2(date('Y'), 0, 4));
   }
 
   /**
@@ -422,7 +423,7 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function fechasDeUnaSemana($semanaABuscar)
   {
-    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 5, false, $semanaABuscar);
+    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 4, false, $semanaABuscar);
   }
 
 }
