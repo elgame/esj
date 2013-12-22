@@ -90,6 +90,7 @@ class facturartebarato_api {
 
     $is_xml = simplexml_load_string($this->xml);
 
+
     // Verifica si es un XML valido.
     if ($is_xml)
     {

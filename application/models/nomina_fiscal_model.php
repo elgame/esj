@@ -2,7 +2,7 @@
 
 class nomina_fiscal_model extends CI_Model {
 
-  public function listadoEmpleados($filtros = array())
+  public function listadoEmpleadosAsistencias($filtros = array())
   {
     // GET semana
     $filtros = array_merge(array(
@@ -43,7 +43,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Query para obtener las faltas o incapacidades de la semana.
     $query = $this->db->query(
-      "SELECT id_usuario, DATE(fecha_ini) as fecha_ini, DATE(fecha_fin) as fecha_fin, tipo
+      "SELECT id_usuario, DATE(fecha_ini) as fecha_ini, DATE(fecha_fin) as fecha_fin, tipo, id_clave
        FROM nomina_asistencia
        WHERE DATE(fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}'
        ORDER BY id_usuario, DATE(fecha_ini) ASC
@@ -68,14 +68,14 @@ class nomina_fiscal_model extends CI_Model {
             if ($fi->tipo === 'f')
             {
               // Agrega la falta al array.
-              $empleado->dias_faltantes[] = array('fecha' => $fi->fecha_ini, 'tipo' => 'f');
+              $empleado->dias_faltantes[] = array('fecha' => $fi->fecha_ini, 'tipo' => 'f', 'id_clave' => false);
             }
 
             // Si es una incapacidad.
             else
             {
               // Agrega el primer dia de la incapacidad al array.
-              $empleado->dias_faltantes[] = array('fecha' => $fi->fecha_ini, 'tipo' => 'in');
+              $empleado->dias_faltantes[] = array('fecha' => $fi->fecha_ini, 'tipo' => 'in', 'id_clave' => $fi->id_clave);
 
               // Si son mas de 1 dia de incapacidad entra.
               if (strtotime($fi->fecha_ini) !== strtotime($fi->fecha_fin))
@@ -90,7 +90,7 @@ class nomina_fiscal_model extends CI_Model {
                 // Agrega los dias faltantes al array.
                 foreach ($diasSiguientes as $fechaDia)
                 {
-                  $empleado->dias_faltantes[] = array('fecha' => $fechaDia, 'tipo' => 'in');
+                  $empleado->dias_faltantes[] = array('fecha' => $fechaDia, 'tipo' => 'in', 'id_clave' => $fi->id_clave);
                 }
               }
             }
@@ -119,7 +119,6 @@ class nomina_fiscal_model extends CI_Model {
     $fechaFinIncapacidadOk = true; // Indica si la fecha fin de la incapacidad ya fue establecida.
     $auxLastFechaIncapacidad = false;
 
-
     foreach ($datos as $empleadoId => $dias)
     {
       // Elimina las faltas e incapacidades de la semana a agregar del usuario.
@@ -128,6 +127,9 @@ class nomina_fiscal_model extends CI_Model {
         DATE(fecha_fin) <= '{$semana['fecha_final']}'"
       );
       $this->db->delete('nomina_asistencia');
+
+      $fechaFinIncapacidadOk = true;
+      $auxLastFechaIncapacidad = false;
 
       foreach ($dias as $fecha => $tipo)
       {
@@ -145,20 +147,39 @@ class nomina_fiscal_model extends CI_Model {
             'fecha_fin'  => $fecha,
             'id_usuario' => $empleadoId,
             'tipo'       => $tipo,
+            'id_clave'   => null
           );
 
           $key++; // Incrementa el key.
         }
-        else if ($tipo === 'in')
+
+        // Si es una Asistencia entra.
+        else if ($tipo === 'a')
+        {
+          // Si hay una incapacidad "abierta" le agrega la fecha fin.
+          if ($fechaFinIncapacidadOk === false)
+          {
+            $nominaAsistencia[$keyIncapacidad]['fecha_fin'] = $fechaFinIncapacidad;
+            $fechaFinIncapacidadOk = true; // Cierra la incapacidad.
+          }
+        }
+
+        // Si es una incapacidad.
+        else
         {
           // Si no existe ninguna incapacidad por cerrar entonces agrega una nueva.
           if ($fechaFinIncapacidadOk)
           {
+            // Explode para separar el tipo y el Id de la incapacidad
+            // ej. "in-52" => [in, 52]
+            $tipoIncapacidad = explode('-', $tipo);
+
             $nominaAsistencia[] = array(
               'fecha_ini'  => $fecha,
               'fecha_fin'  => $fecha,
               'id_usuario' => $empleadoId,
-              'tipo'       => $tipo,
+              'tipo'       => $tipoIncapacidad[0],
+              'id_clave'   => $tipoIncapacidad[1]
             );
 
             // Cambia a false para saber que hay una incapacidad "abierta".
@@ -179,17 +200,13 @@ class nomina_fiscal_model extends CI_Model {
           else
           {
             $fechaFinIncapacidad = $fecha;
-          }
-        }
 
-        // Si es una Asistencia entra.
-        else
-        {
-          // Si hay una incapacidad "abierta" le agrega la fecha fin.
-          if ($fechaFinIncapacidadOk === false)
-          {
-            $nominaAsistencia[$keyIncapacidad]['fecha_fin'] = $fechaFinIncapacidad;
-            $fechaFinIncapacidadOk = true; // Cierra la incapacidad.
+            // Si la fecha es la ultima de la semana.
+            if (strtotime($fecha) === strtotime($semana['fecha_final']))
+            {
+              $nominaAsistencia[$keyIncapacidad]['fecha_fin'] = $fechaFinIncapacidad;
+              $fechaFinIncapacidadOk = true; // Cierra la incapacidad.
+            }
           }
         }
       }
@@ -214,9 +231,12 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function addBonosOtros($empleadoId, array $datos, $numSemana)
   {
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana);
-    $this->db->where("id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
-    $this->db->delete('nomina_percepciones_ext');
+    if (isset($datos['existentes']))
+    {
+      $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana);
+      $this->db->where("id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
+      $this->db->delete('nomina_percepciones_ext');
+    }
 
     $insertData = array();
     foreach ($datos['tipo'] as $key => $tipo)
@@ -242,7 +262,10 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
 
-    $this->db->insert_batch('nomina_percepciones_ext', $insertData);
+    if (count($insertData) > 0)
+    {
+      $this->db->insert_batch('nomina_percepciones_ext', $insertData);
+    }
 
     return array('passes' => true);
   }
@@ -273,6 +296,87 @@ class nomina_fiscal_model extends CI_Model {
     return $bonosOtros;
   }
 
+  /**
+   * Agrega los prestamos.
+   *
+   * @param string $empleadoId
+   * @param array  $datos
+   * @param string $numSemana
+   * @return array
+   */
+  public function addPrestamos($empleadoId, array $datos, $numSemana)
+  {
+    if (isset($datos['prestamos_existentes']))
+    {
+      $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana);
+      $this->db->where("id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'");
+      $this->db->delete('nomina_prestamos');
+    }
+
+    $insertData = array();
+    foreach ($datos['cantidad'] as $key => $cantidad)
+    {
+      $insertData[] = array(
+        'id_usuario'  => $empleadoId,
+        'prestado'    => $datos['cantidad'][$key],
+        'pago_semana' => $datos['pago_semana'][$key],
+        'fecha'       => $datos['fecha'][$key],
+        'inicio_pago' => $datos['fecha_inicia_pagar'][$key],
+      );
+    }
+
+    if (count($insertData) > 0)
+    {
+      $this->db->insert_batch('nomina_prestamos', $insertData);
+    }
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Obtiene los prestamos de un empleado en dicha semana.
+   *
+   * @param  string $empleadoId
+   * @param  string $numSemana
+   * @return array
+   */
+  public function getPrestamosEmpleado($empleadoId, $numSemana)
+  {
+    $semana = $this->fechasDeUnaSemana($numSemana);
+    $query = $this->db->query("SELECT prestado, pago_semana, status, DATE(fecha) as fecha, DATE(inicio_pago) as inicio_pago
+                               FROM nomina_prestamos
+                               WHERE id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'
+                               ORDER BY DATE(fecha) ASC");
+
+    $prestamos = array();
+    if ($query->num_rows() > 0)
+    {
+      $prestamos = $query->result();
+    }
+
+    return $prestamos;
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | Catalos del SAT
+   |------------------------------------------------------------------------
+   */
+  /**
+   * Obtien los tipos de incapacidades del catalogo del SAT.
+   *
+   * @return array
+   */
+  public function satCatalogoIncapacidades()
+  {
+    $query = $this->db->query("SELECT id_clave, clave, nombre, tipo
+                               FROM nomina_sat_claves
+                               WHERE tipo = 'in'
+                               ORDER BY id_clave ASC");
+
+    return $query->result();
+  }
+
 
   /*
    |------------------------------------------------------------------------
@@ -287,18 +391,19 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function semanasDelAno()
   {
-    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 5);
+    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 4);
   }
 
   /**
    * Obtiene las semanas que van del mes actual.
+   * corregirla
    *
    * @return array
    */
-  public function semanasDelMesActual()
-  {
-    return String::obtenerSemanasDelAnioV2(date('Y'), date('m'), 5);
-  }
+  // public function semanasDelMesActual()
+  // {
+  //   return array_slice(String::obtenerSemanasDelAnioV2(date('Y'), 6, 0, true), 0, 4);
+  // }
 
   /**
    * Obtiene la semana actual del mes actual.
@@ -307,7 +412,7 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function semanaActualDelMes()
   {
-    return end(String::obtenerSemanasDelAnioV2(date('Y'), 0, 5));
+    return end(String::obtenerSemanasDelAnioV2(date('Y'), 0, 4));
   }
 
   /**
@@ -318,7 +423,7 @@ class nomina_fiscal_model extends CI_Model {
    */
   public function fechasDeUnaSemana($semanaABuscar)
   {
-    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 5, false, $semanaABuscar);
+    return String::obtenerSemanasDelAnioV2(date('Y'), 0, 4, false, $semanaABuscar);
   }
 
 }

@@ -116,7 +116,7 @@
                                         }
                                         else if ($fi['tipo'] === 'in' && $fi['fecha'] == $fecha)
                                         {
-                                          $selected_in = 'selected';
+                                          $selected_in = $fi['id_clave'];
                                           $select_color = 'yellow';
                                         }
                                      }
@@ -126,7 +126,11 @@
                                 <select name="empleados[<?php echo $e->id ?>][<?php echo $fecha ?>]" class="span12 select-tipo" style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;" title="<?php echo $fecha ?>">
                                   <option value="a" style="background-color: green;" <?php echo $selected_a ?>></option>
                                   <option value="f" style="background-color: red;" <?php echo $selected_f ?> <?php echo $dia === 2 ? 'disabled' : '' ?>></option>
-                                  <option value="in" style="background-color: yellow;" <?php echo $selected_in ?> <?php echo $dia === 2 ? 'disabled' : '' ?>></option>
+
+                                  <?php foreach ($sat_incapacidades as $key => $tipo) { ?>
+                                    <option value="in-<?php echo $tipo->id_clave ?>" style="background-color: yellow;" <?php echo $tipo->id_clave == $selected_in ? 'selected' : '' ?> <?php echo $dia === 2 ? 'disabled' : '' ?>><?php echo $tipo->nombre ?></option>
+                                  <?php } ?>
+
                                 </select>
                               </td>
                             <?php } ?>

@@ -174,10 +174,14 @@ class cfdi{
     // $datos['comprobante']['noAprobacion']         = $data['noAprobacion'];
     // $datos['comprobante']['anoAprobacion']        = $data['anoAprobacion'];
     $datos['comprobante']['tipoDeComprobante']    = $data['tipoDeComprobante'];
+    // $datos['comprobante']['tipoDeComprobante']    = 'egreso';
     $datos['comprobante']['formaDePago']          = $data['formaDePago'];
     $datos['comprobante']['condicionesDePago']    = $data['condicionesDePago'];
     $datos['comprobante']['subTotal']             = (float)$data['subTotal'];
-    // $datos['comprobante']['descuento']            = $data['descuento'];
+
+    // Nomina
+    // $datos['comprobante']['descuento']            = '16.67';
+
     // $datos['comprobante']['TipoCambio']           = $data['TipoCambio'];
     // $datos['comprobante']['Moneda']               = $data['Moneda'];
     $datos['comprobante']['total']                = (float)$data['total'];
@@ -355,6 +359,12 @@ class cfdi{
     }
     $datos['traslado'][] = (float)$data['totalImpuestosTrasladados'];
 
+    // ----------> Nodo Nomina Si es una nomina la que se facturara.
+    // $datos['nomina'] = $this->nodoNomina();
+    // echo "<pre>";
+    //   var_dump($datos['nomina']);
+    // echo "</pre>";exit;
+
     $mergeDatos = array_merge(
       array_values($datos['comprobante']),
       array_values($datos['emisor']),
@@ -366,13 +376,112 @@ class cfdi{
       array_values($datos['concepto']),
       array_values($datos['retencion']),
       array_values($datos['traslado'])
+      // ,array_values($datos['nomina'])
     );
+
+    // echo "<pre>";
+    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))));
+    // echo "</pre>";exit;
 
     return array(
       'cadenaOriginal' => ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))),
       'datos' => $datos
     );
   }
+
+  public function nodoNomina()
+  {
+    $nominaDatos = array(
+      'Version'                => '1.1',
+      // 'RegistroPatronal'       => '', // opcional
+      'NumEmpleado'            => '0001',
+      'CURP'                   => 'OOAG791212MCMCPD03',
+      'TipoRegimen'            => '1',
+      // 'NumSeguridadSocial'     => '123456789', // opcional
+      'FechaPago'              => '2013-12-15',
+      'FechaInicialPago'       => '2013-12-01',
+      'FechaFinalPago'         => '2013-12-15',
+      'NumDiasPagados'         => '15',
+      'Departamento'           => 'Sistemas',
+      // 'CLABE'                  => '', // opcional
+      // 'Banco'                  => '', // opcional
+      'FechaInicioRelLaboral'  => '2013-04-22', // opcional
+      'Antiguedad'             => '30', // opcional
+      'Puesto'                 => 'Desarrollador de Software', // opcional
+      'TipoContrato'           => 'Base', // opcional
+      'TipoJornada'            => 'continuada', // opcional
+      'PeriodicidadPago'       => 'quincenal',
+      // 'SalarioBaseCotApor'     => '', // opcional
+      // 'RiesgoPuesto'           => '', // opcional
+      // 'SalarioDiarioIntegrado' => '', // opcional
+    );
+
+    $nominaPercepciones = array(
+      '1029.15', // TotalGravado
+      '0', // TotalExento
+    );
+
+    $percepciones = array();
+    $percepciones[] = array(
+      'TipoPercepcion' => '001',
+      'Clave'          => 'AAA',
+      'Concepto'       => 'Sueldos, Salarios Rayas y Jornales',
+      'ImporteGravado' => '1029.15',
+      'ImporteExento'  => '0',
+    );
+
+    foreach ($percepciones as $key => $percepcion)
+    {
+      $nominaPercepciones = array_merge($nominaPercepciones, array_values($percepcion));
+    }
+
+    $nominaDeducciones = array(
+      '16.67', // TotalGravado
+      '0', // TotalExento
+    );
+
+    $deducciones = array();
+    $deducciones[] = array(
+      'TipoDeduccion' => '001',
+      'Clave'          => 'BBB',
+      'Concepto'       => 'Seguridad social',
+      'ImporteGravado' => '16.67',
+      'ImporteExento'  => '0',
+    );
+
+    $deducciones[] = array(
+      'TipoDeduccion' => '002',
+      'Clave'          => 'CCC',
+      'Concepto'       => 'ISR',
+      'ImporteGravado' => '0',
+      'ImporteExento'  => '0',
+    );
+
+    foreach ($deducciones as $key => $deduccion)
+    {
+      $nominaDeducciones = array_merge($nominaDeducciones, array_values($deduccion));
+    }
+
+    // echo "<pre>";
+    //   var_dump(array_merge(array_values($nominaDatos), array_values($nominaPercepciones),  array_values($nominaDeducciones)));
+    // echo "</pre>";exit;
+
+    return array_merge(
+      array_values($nominaDatos),
+      array_values($nominaPercepciones),
+      array_values($nominaDeducciones)
+    );
+
+    // 'DiasIncapacidad' => '0',
+    // 'TipoIncapacidad' => '0',
+    // 'Descuento'       => '0',
+
+    // 'Dias'          => '0',
+    // 'TipoHoras'     => '0',
+    // 'HorasExtra'    => '0',
+    // 'ImportePagado' => '0',
+  }
+
 
   /**
    * Carga los datos fiscales de la empresa|proveedor que emitira la factura.
@@ -666,7 +775,7 @@ class cfdi{
   {
 		$xml = '';
 		$xml .= '<?xml version="1.0" encoding="UTF-8"?> ';
-		$xml .= '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd" ';
+		$xml .= '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:nomina="http://www.sat.gob.mx/nomina" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd http://www.sat.gob.mx/nomina http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina11.xsd" ';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬version="'.$this->replaceSpecialChars($data['comprobante']['version']).'" ';
     if(isset($data['comprobante']['serie']) && $data['comprobante']['serie'] !== '')
 		  $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬serie="'.$data['comprobante']['serie'].'" ';
@@ -678,8 +787,14 @@ class cfdi{
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬certificado="'.$data['comprobante']['certificado'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬condicionesDePago="'.$data['comprobante']['condicionesDePago'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬subTotal="'.(float)$data['comprobante']['subTotal'].'" ';
+
+    // Nomina ---
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬descuento="16.67" ';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬motivoDescuento="Deducciones nómina" ';
+
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.(float)$data['comprobante']['total'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬tipoDeComprobante="'.$data['comprobante']['tipoDeComprobante'].'" ';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬tipoDeComprobante="egreso" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬metodoDePago="'.$data['comprobante']['metodoDePago'].'" ';
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬LugarExpedicion="'.$this->municipio.', '.$this->estado.'" ';
     if($data['comprobante']['NumCtaPago'] !== '')
@@ -798,9 +913,38 @@ class cfdi{
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Traslados>';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Impuestos>';
 
+    // Nodo Complemento
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Complemento>';
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Nomina Version="1.1" RegistroPatronal=""  NumEmpleado="00001" CURP="AASO870618HCMLS02" TipoRegimen="Regimen" NumSeguridadSocial="123456789" FechaPago="2013-12-15" FechaInicialPago="2013-12-01" FechaFinalPago="2013-12-15" NumDiasPagados="15" Departamento="Sistemas" CLABE="" Banco="" FechaInicioRelLaboral="2013-04-22" Antiguedad="30" Puesto="Desarrollador de Software" TipoContrato="Base" TipoJornada="continuada" PeriodicidadPago="quincenal" SalarioBaseCotApor="" RiesgoPuesto="" SalarioDiarioIntegrado="">';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Nomina Version="1.1" NumEmpleado="0001" CURP="OOAG791212MCMCPD03" TipoRegimen="1" FechaPago="2013-12-15" FechaInicialPago="2013-12-01" FechaFinalPago="2013-12-15" NumDiasPagados="15" Departamento="Sistemas" FechaInicioRelLaboral="2013-04-22" Antiguedad="30" Puesto="Desarrollador de Software" TipoContrato="Base" TipoJornada="continuada" PeriodicidadPago="quincenal">';
+
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepciones TotalGravado="1029.15" TotalExento="0">';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepcion TipoPercepcion="001" Clave="AAA" Concepto="Sueldos, Salarios Rayas y Jornales" ImporteGravado="1029.15" ImporteExento="0" />';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Percepciones>';
+
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deducciones TotalGravado="16.67" TotalExento="0">';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deduccion TipoDeduccion="001" Clave="BBB" Concepto="Seguridad social" ImporteGravado="16.67" ImporteExento="0" />';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deduccion TipoDeduccion="002" Clave="CCC" Concepto="ISR" ImporteGravado="0" ImporteExento="0" />';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Deducciones>';
+
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Incapacidades>';
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Incapacidad DiasIncapacidad="" TipoIncapacidad="" Descuento="" />';
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Incapacidades>';
+
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:HorasExtras>';
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:HorasExtra Dias="" TipoHoras="" HorasExtra="" ImportePagado="" />';
+    // // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:HorasExtras>';
+
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Nomina>';
+    // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Complemento>';
+
 		$xml .= '</cfdi:Comprobante>';
 
 		$xml = str_replace('¬','',$xml);
+
+    // echo "<pre>";
+    //   var_dump($xml);
+    // echo "</pre>";exit;
 
 		return $xml;
 	}

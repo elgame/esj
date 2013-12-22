@@ -84,7 +84,7 @@ class nomina_fiscal extends MY_Controller {
     );
 
     // Datos para la vista.
-    $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleados($filtros);
+    $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleadosAsistencias($filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
@@ -97,6 +97,8 @@ class nomina_fiscal extends MY_Controller {
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected']);
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+
+    $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -140,6 +142,9 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los bonos y otros que ya tiene el empleado de la semana.
     $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem']);
 
+    // Obtiene los prestamos que se hicieron en la semana cargada.
+    $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem']);
+
     if(isset($_GET['msg']{0}))
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -157,6 +162,14 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addBonosOtros($_GET['eid'], $_POST, $_GET['sem']);
+
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function add_prestamos()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addPrestamos($_GET['eid'], $_POST, $_GET['sem']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }

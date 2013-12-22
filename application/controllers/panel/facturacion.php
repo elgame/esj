@@ -21,7 +21,8 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_unidades/',
     'facturacion/ajax_get_pallets_cliente/',
 
-    'facturacion/xml/'
+    'facturacion/xml/',
+    'facturacion/nomina/'
   );
 
   public function _remap($method)
@@ -1223,6 +1224,98 @@ class facturacion extends MY_Controller {
         'ico' => $icono);
   }
 
-}
+  public function nomina()
+  {
+    $_POST = array(
+      "dempresa"=> "ASOCIACION DE AGRICULTORES DEL DISTRITO DE RIEGO 004 DON MARTIN",
+      "did_empresa"=> "2",
+      "dversion"=> "3.2",
+      "dcer_caduca"=> "2017-10-26",
+      "dno_certificado"=> "20001000000200000293",
+      "dserie"=> "G",
+      "dfolio"=> "4",
+      "dano_aprobacion"=> "2013-07-02",
+      "dcliente"=> "MARIA GUADALUPE OCHOA APARICIO",
+      "did_cliente"=> "179",
+      "dcliente_rfc"=> "OOAG791212H41",
+      "dcliente_domici"=> "SAN ANGEL S/N E/ CALZADA H COLEGIO MILITAR Y LAZARO CARDENA #., SAN BENITO",
+      "dcliente_ciudad"=> "CULIACAN, CP: 80246",
+      "dobservaciones"=> "",
+      "dfecha"=> "2013-12-18T16:39",
+      "dno_aprobacion"=> "123456",
+      "dtipo_comprobante"=> "ingreso",
+      "dforma_pago"=> "Pago en una sola exhibición",
+      "dforma_pago_parcialidad"=> "Parcialidad 1 de X",
+      "dmetodo_pago"=> "no identificado",
+      "dmetodo_pago_digitos"=> "No identificado",
+      "dcondicion_pago"=> "co",
+      "dplazo_credito"=> "15",
+      "timbrar"=> "",
+      "prod_ddescripcion" => array(
+        "Pago de nomina"
+      ),
+      "prod_did_prod"=> array(
+        ""
+      ),
+      "pallets_id" => array(
+        ""
+      ),
+      "id_unidad_rendimiento"=> array(
+        ""
+      ),
+      "prod_dmedida"=>array(
+        "Servicio"
+      ),
+      "prod_dmedida_id"=>array(
+        "10"
+      ),
+      "prod_dcantidad"=>array(
+        "1"
+      ),
+      "prod_dcajas"=>array(
+        "0"
+      ),
+      "prod_dkilos"=>array(
+        "0"
+      ),
+      "prod_dpreciou"=>array(
+        "1029.15"
+      ),
+      "diva"=> "0",
+      "prod_diva_porcent"=>array(
+        "0"
+      ),
+      "prod_diva_total"=>array(
+        "0"
+      ),
+      "dreten_iva"=> "0",
+      "prod_dreten_iva_total"=>array(
+        "0"
+      ),
+      "prod_dreten_iva_porcent"=>array(
+        "0"
+      ),
+      "prod_importe"=>array(
+        "1029.15"
+      ),
+      "dttotal_letra"=> "TRES MIL PESOS 00/100 M.N.",
+      "total_importe"=> "1029.15",
+      "total_descuento"=> "16.67",
+      "total_subtotal"=> "1029.15",
+      "total_iva"=> "0",
+      "total_retiva"=> "0",
+      "total_totfac"=> "1012.48",
+    );
+    // echo "<pre>";
+    //   var_dump($_POST);
+    // echo "</pre>";exit;
 
+    $this->load->model('facturacion_model');
+    $respons = $this->facturacion_model->addFactura();
+
+    echo "<pre>";
+      var_dump($respons);
+    echo "</pre>";exit;
+  }
+}
 ?>
