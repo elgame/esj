@@ -703,8 +703,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 	
 		$sql_nc = '';
-		if ($_GET['tipo'] == 'f')
-		{
+		// if ($_GET['tipo'] == 'f')
+		// {
 			$data['info'] = $this->db->query(
 											"SELECT id_factura AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
 												plazo_credito, id_cliente, 'f' AS tipo 
@@ -723,19 +723,19 @@ class cuentas_cobrar_model extends privilegios_model{
 						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
 							AND id_nc = {$_GET['id']} 
 							AND Date(fecha) <= '{$fecha2}' ";
-		}
-		else
-		{
-			$data['info'] = $this->db->query(
-											"SELECT id_venta AS id, fecha, '' as serie, folio, 	
-												condicion_pago,
-												status, total, 
-												plazo_credito, id_cliente, 'v' AS tipo
-											FROM facturacion_ventas_remision
-											WHERE id_venta={$_GET['id']}")->result();
-			$sql = array('tabla' => 'facturacion_ventas_remision_abonos', 
-										'where_field' => 'id_venta');
-		}
+		// }
+		// else
+		// {
+		// 	$data['info'] = $this->db->query(
+		// 									"SELECT id_venta AS id, fecha, '' as serie, folio, 	
+		// 										condicion_pago,
+		// 										status, total, 
+		// 										plazo_credito, id_cliente, 'v' AS tipo
+		// 									FROM facturacion_ventas_remision
+		// 									WHERE id_venta={$_GET['id']}")->result();
+		// 	$sql = array('tabla' => 'facturacion_ventas_remision_abonos', 
+		// 								'where_field' => 'id_venta');
+		// }
 
 			//Obtenemos los abonos de la factura o ticket
 			$res = $this->db->query(
@@ -765,11 +765,11 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 	
 		$response = array(
-				'abonos' 			=> array(),
-				'saldo'       => '',
-				'cobro'			  => $data['info'],
-				'cliente' 		=> $prov['info'],
-				'fecha1' 			=> $fecha1
+				'abonos'  => array(),
+				'saldo'   => '',
+				'cobro'   => $data['info'],
+				'cliente' => $prov['info'],
+				'fecha1'  => $fecha1
 		);
 		$abonos = 0;
 		if($res->num_rows() > 0){
@@ -789,10 +789,20 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Abonos de facturas y ventas
 	 * ************************************
 	 */
+	public function getCuentaPagoAdicional()
+	{
+	  return '0225311';
+	}
+
+	public function getCuentaPagoMenor()
+	{
+	  return '556633';
+	}
+
 	public function addAbonoMasivo()
 	{
-		$ids   = explode(',', substr($_GET['id'], 1));
-		$tipos = explode(',', substr($_GET['tipo'], 1));
+		$ids   = explode(',', $_GET['id']);
+		$tipos = explode(',', $_GET['tipo']);
 		$total = 0; //$this->input->post('dmonto');
 		$desc  = '';
 
@@ -802,7 +812,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		$data_cuenta  = $data_cuenta['info'];
 		$_GET['id']   = $ids[0];
 		$_GET['tipo'] = $tipos[0];
-		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id']);
+		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo']);
 		//Registra deposito
 		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value) 
 		{
@@ -828,11 +838,12 @@ class cuentas_cobrar_model extends privilegios_model{
 		{
 			$_GET['id']   = $value;
 			$_GET['tipo'] = $_POST['tipos'][$key];
-			$data = array('fecha'          => $this->input->post('dfecha'),
-										'concepto'       => $this->input->post('dconcepto'),
-										'total'          => $_POST['montofv'][$key], //$total,
-										'id_cuenta'      => $this->input->post('dcuenta'),
-										'ref_movimiento' => $this->input->post('dreferencia') );
+			$data = array('fecha'        => $this->input->post('dfecha'),
+						'concepto'       => $this->input->post('dconcepto'),
+						'total'          => $_POST['montofv'][$key], //$total,
+						'id_cuenta'      => $this->input->post('dcuenta'),
+						'ref_movimiento' => $this->input->post('dreferencia'),
+						'saldar'         => $_POST['saldar'][$key] );
 			$resa = $this->addAbono($data, null, true);
 			$total -= $resa['total'];
 
@@ -842,7 +853,8 @@ class cuentas_cobrar_model extends privilegios_model{
 				if($_POST['tipos'][$key] == 'f') //factura
 					$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $resa['id_abono']));
 				else //remision
-					$this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $resa['id_abono']));
+					$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $resa['id_abono']));
+					// $this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $resa['id_abono']));
 			}
 		}
 
@@ -856,21 +868,29 @@ class cuentas_cobrar_model extends privilegios_model{
 		if ($this->input->get('tipo') == 'f') {
 			$camps = array('id_factura', 'facturacion_abonos', 'facturacion');
 		}else{
-			$camps = array('id_venta', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision');
+			$camps = array('id_factura', 'facturacion_abonos', 'facturacion');
+			// $camps = array('id_venta', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision');
 		}
 
 		if ($data == null) {
-			$data = array('fecha'          => $this->input->post('dfecha'),
-										'concepto'       => $this->input->post('dconcepto'),
-										'total'          => $this->input->post('dmonto'),
-										'id_cuenta'      => $this->input->post('dcuenta'),
-										'ref_movimiento' => $this->input->post('dreferencia') );
+			$data = array('fecha'        => $this->input->post('dfecha'),
+						'concepto'       => $this->input->post('dconcepto'),
+						'total'          => $this->input->post('dmonto'),
+						'id_cuenta'      => $this->input->post('dcuenta'),
+						'ref_movimiento' => $this->input->post('dreferencia'),
+						'saldar' => 'no' );
 		}
 
 		$pagada = false;
-		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($id);
+		$pago_mayor = 0;//valor cuando pagan de mas en una factura se carga a pagos adicionales
+		$pago_saldar = 0;//valor cuando pagan de menos y aun asi saldan la cuenta
+		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($id, $this->input->get('tipo'));
 		if ($inf_factura['saldo'] <= $data['total']){ //se ajusta
-			$data['total'] -= $data['total']-$inf_factura['saldo'];
+			$pago_mayor = $data['total']-$inf_factura['saldo'];
+			$data['total'] -= $pago_mayor;
+			$pagada = true;
+		}elseif($data['saldar'] == 'si'){
+			$pago_saldar = $inf_factura['saldo']-$data['total'];
 			$pagada = true;
 		}
 
@@ -888,7 +908,7 @@ class cuentas_cobrar_model extends privilegios_model{
 						'fecha'       => $data['fecha'].':'.date("s"),
 						'numero_ref'  => $data['ref_movimiento'],
 						'concepto'    => $data['concepto'],
-						'monto'       => $data['total'],
+						'monto'       => $data['total']+$pago_mayor,
 						'tipo'        => 't',
 						'entransito'  => 't',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
@@ -901,7 +921,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$camps[0]        => $id, 
 			'fecha'          => $data['fecha'],
 			'concepto'       => $data['concepto'],
-			'total'          => $data['total'],
+			'total'          => $data['total']+$pago_saldar,
 			'id_cuenta'      => $data['id_cuenta'],
 			'ref_movimiento' => $data['ref_movimiento'], );
 		//se inserta el abono
@@ -913,13 +933,34 @@ class cuentas_cobrar_model extends privilegios_model{
 			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
 		}
 
+		//Si se hiso un pago mayor se registra a la factura
+		if ($pago_mayor > 0)
+		{
+			$data_mayor               = $data;
+			$data_mayor['concepto']   = 'Pago adicional';
+			$data_mayor['total']      = $pago_mayor;
+			$data_mayor['cuenta_cpi'] = $this->getCuentaPagoAdicional();
+			$data_mayor['tipo']       = 'm';
+			unset($data_mayor['id_cuenta'], $data_mayor['ref_movimiento']);
+			$this->db->insert($camps[1].'_otros', $data_mayor);
+		}elseif($pago_saldar > 0){
+			$data_mayor               = $data;
+			$data_mayor['concepto']   = 'Pago menor';
+			$data_mayor['total']      = $pago_saldar;
+			$data_mayor['cuenta_cpi'] = $this->getCuentaPagoMenor();
+			$data_mayor['tipo']       = 's';
+			unset($data_mayor['id_cuenta'], $data_mayor['ref_movimiento']);
+			$this->db->insert($camps[1].'_otros', $data_mayor);
+		}
+
 		//Registra el rastro de la factura o remision que se abono en bancos (si no es masivo)
 		if(isset($resp['id_movimiento']))
 		{
 			if($camps[0] == 'id_factura') //factura
 				$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $data['id_abono']));
 			else //remision
-				$this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $data['id_abono']));
+				$this->db->insert('banco_movimientos_facturas', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_factura' => $data['id_abono']));
+				// $this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $data['id_abono']));
 		}
 
 		if($masivo)
@@ -943,10 +984,12 @@ class cuentas_cobrar_model extends privilegios_model{
 			if ($tipo == 'f') {
 				$camps = array('id_abono', 'facturacion_abonos', 'facturacion', 'id_factura');
 			}else{
-				$camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
+				$camps = array('id_abono', 'facturacion_abonos', 'facturacion', 'id_factura');
+				// $camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
 			}
 
 			$this->db->delete($camps[1], "{$camps[0]} = {$ida}");
+			$this->db->delete($camps[1].'_otros', "{$camps[0]} = {$ida}"); //elimina los pagos adicionales
 		}
 		//Se cambia el estado de la factura
 		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$id}");

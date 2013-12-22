@@ -78,7 +78,8 @@ var abonom = (function($){
 //Modal Abonos
 var modalAbonos = (function($){
   var objs = {},
-  btn_abonos_masivo;
+  btn_abonos_masivo,
+  $enviar = false;
 
   function init()
   {
@@ -99,8 +100,26 @@ var modalAbonos = (function($){
   }
 
   function sendFormMasivo(){
-    alert("dasdas");
-    return false;
+    var pass=false;
+    if($enviar == false){
+      $(".monto_factura").each(function(index, val) {
+        var $this = $(this);
+        if(parseFloat($this.val()) > parseFloat($this.attr('data-max')) )
+          pass = true;
+      });
+      if(pass){ //es mayor el cargo a pagar
+        msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'dd', this, function(){
+          $enviar = true;
+          $("#form").submit();
+        });
+        return false;
+      }else{ //es igual o menor el cargo
+        return true;
+      }
+    }else{
+      $enviar = false;
+      return true;
+    }
   }
 
   objs.init = init;

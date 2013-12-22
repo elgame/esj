@@ -177,6 +177,8 @@ class cuentas_cobrar extends MY_Controller {
         {
           $params['data']['facturas'][] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
         }
+        $_GET['id'] = implode(',', $ids);
+        $_GET['tipo'] = implode(',', $tipos);
       }else  
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
       //Cuentas de banco

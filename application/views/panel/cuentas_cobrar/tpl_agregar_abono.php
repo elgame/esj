@@ -83,6 +83,7 @@
                   <th>Factura</th>
                   <th>Saldo</th>
                   <th>Monto</th>
+                  <th>Saldar</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,6 +99,12 @@
                   </td>
                   <td><?php echo $value['saldo']; ?></td>
                   <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="1" data-max="<?php echo $value['saldo'] ?>"></td>
+                  <td>
+                    <select name="saldar[]">
+                      <option value="no">No</option>
+                      <option value="si">Si</option>
+                    </select>
+                  </td>
                 </tr>
               <?php
               }

@@ -167,7 +167,7 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT id_factura
        FROM facturacion AS f
-      WHERE status <> 'ca' AND status <> 'b' 
+      WHERE status <> 'ca' AND status <> 'b' AND is_factura = 't' 
           AND poliza_diario = 'f' AND id_nc IS NULL 
          {$sql}
       ORDER BY id_factura ASC
@@ -593,6 +593,17 @@ class polizas_model extends CI_Model {
       //Contenido de la Poliza
       foreach ($data as $key => $value) 
       {
+        //Se obtiene un registro del abono si es que se pago de mas
+        $query_mayor = $this->db->query(
+        "SELECT id_abono_otro, fecha, concepto, total, cuenta_cpi
+        FROM facturacion_abonos_otros
+        WHERE tipo = 'm' AND id_factura = {$value->id_factura} AND id_abono = {$value->id_abono}")->row();
+        //Se obtiene un registro del abono si es que se pago de menos
+        $query_saldar = $this->db->query(
+        "SELECT id_abono_otro, fecha, concepto, total, cuenta_cpi
+        FROM facturacion_abonos_otros
+        WHERE tipo = 's' AND id_factura = {$value->id_factura} AND id_abono = {$value->id_abono}")->row();
+
         $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
         $impuestos['iva_retener']['importe']    = $factor*$value->retencion_iva/100;
         $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
@@ -606,7 +617,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
                           $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                           $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
-                          $this->setEspacios( $this->numero($subtotal) , 20).  //importe movimiento
+                          $this->setEspacios( $this->numero($subtotal+( isset($query_mayor->id_abono_otro)? $query_mayor->total: 0)-( isset($query_saldar->id_abono_otro)? $query_saldar->total: 0) ) , 20).  //importe movimiento
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
@@ -621,6 +632,29 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
                           $this->setEspacios('',4)."\n"; //segmento de negocio
+        //Si hay abonos de mas se agregan a los mov
+        if (isset($query_mayor->id_abono_otro))
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($query_mayor->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
+                          $this->setEspacios( $this->numero($query_mayor->total), 20).  //importe movimiento
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios($query_mayor->concepto,100). //concepto
+                          $this->setEspacios('',4)."\n"; //segmento de negocio
+        //Si hay abonos de mas se agregan a los mov
+        if (isset($query_saldar->id_abono_otro))
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($query_saldar->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                          $this->setEspacios('0',1).  //tipo movimiento, Cliente es un abono = 1
+                          $this->setEspacios( $this->numero($query_saldar->total), 20).  //importe movimiento
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios($query_saldar->concepto,100). //concepto
+                          $this->setEspacios('',4)."\n"; //segmento de negocio
+
         
         //Colocamos los impuestos de la factura
         foreach ($impuestos as $key => $impuesto) 
