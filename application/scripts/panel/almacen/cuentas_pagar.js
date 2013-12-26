@@ -45,6 +45,7 @@ var abonom = (function($){
   function init(){
     $(".sel_abonom").on('click', selabono);
     btn_abonos_masivo = $(".btn_abonos_masivo");
+    $("#fmetodo_pago").on('change', changeMetodoPago);
   }
 
   function selabono(){
@@ -69,6 +70,14 @@ var abonom = (function($){
       btn_abonos_masivo.show();
     else
       btn_abonos_masivo.hide();
+  }
+
+  function changeMetodoPago(event) {
+    var $this = $(this);
+    if($this.val() != 'transferencia')
+      $("#group_metodo_pago").hide();
+    else
+      $("#group_metodo_pago").show();
   }
 
   function openCheque($id_movimiento) {

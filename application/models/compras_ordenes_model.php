@@ -268,6 +268,11 @@ class compras_ordenes_model extends CI_Model {
 
       $this->db->delete('compras_productos', array('id_orden' => $idOrden));
       $this->db->insert_batch('compras_productos', $productos);
+
+      //envia el email al momento de autorizar la orden
+      if(isset($data['autorizado']))
+        if($data['autorizado'] == 't')
+          $this->sendEmail($idOrden, $_POST['proveedorId']);
     }
 
     return array('passes' => true, 'msg' => 7);
@@ -486,7 +491,49 @@ class compras_ordenes_model extends CI_Model {
 
     $this->actualizar($idOrden, $data);
 
+    $this->sendEmail($idOrden, $_POST['proveedorId']);
+
     return array('status' => true, 'msg' => 4);
+  }
+
+  public function sendEmail($idOrden, $proveedorId)
+  {
+    // Si la orden no esta rechazada verifica si el proveedor tiene el email
+    // asignado para enviarle la orden de compra.
+    $this->load->model('proveedores_model');
+    $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+
+    if ($proveedor['info']->email !== '')
+    {
+      // Si el proveedor tiene email asigando le envia la orden.
+      $this->load->library('my_email');
+
+      $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+      $nombreEmisor   = 'Empaque San Jorge';
+      $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
+      $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
+
+      $path = APPPATH . 'media/temp/';
+
+      $file = $this->print_orden_compra($idOrden, $path);
+
+      $datosEmail = array(
+        'correoEmisorEm' => $correoEmisorEm,
+        'correoEmisor'   => $correoEmisor,
+        'nombreEmisor'   => $nombreEmisor,
+        'contrasena'     => $contrasena,
+        'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
+        'altBody'        => 'Nueva orden de compra.',
+        'body'           => 'Nueva orden de compra.',
+        'correoDestino'  => array($proveedor['info']->email),
+        'nombreDestino'  => $proveedor['info']->nombre_fiscal,
+        'cc'             => '',
+        'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
+      );
+
+      $result = $this->my_email->setData($datosEmail)->send();
+      unlink($file);
+    }
   }
 
   public function entrada($idOrden)
@@ -568,45 +615,45 @@ class compras_ordenes_model extends CI_Model {
 
     $this->actualizar($idOrden, $data, $productos);
 
-    // Si la orden no esta rechazada verifica si el proveedor tiene el email
-    // asignado para enviarle la orden de compra.
-    if ( ! $ordenRechazada)
-    {
-      $this->load->model('proveedores_model');
-      $proveedor = $this->proveedores_model->getProveedorInfo($_POST['proveedorId']);
+    // // Si la orden no esta rechazada verifica si el proveedor tiene el email
+    // // asignado para enviarle la orden de compra.
+    // if ( ! $ordenRechazada)
+    // {
+    //   $this->load->model('proveedores_model');
+    //   $proveedor = $this->proveedores_model->getProveedorInfo($_POST['proveedorId']);
 
-      if ($proveedor['info']->email !== '')
-      {
-        // Si el proveedor tiene email asigando le envia la orden.
-        $this->load->library('my_email');
+    //   if ($proveedor['info']->email !== '')
+    //   {
+    //     // Si el proveedor tiene email asigando le envia la orden.
+    //     $this->load->library('my_email');
 
-        $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
-        $nombreEmisor   = 'Empaque San Jorge';
-        $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
-        $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
+    //     $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+    //     $nombreEmisor   = 'Empaque San Jorge';
+    //     $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
+    //     $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
 
-        $path = APPPATH . 'media/temp/';
+    //     $path = APPPATH . 'media/temp/';
 
-        $file = $this->print_orden_compra($idOrden, $path);
+    //     $file = $this->print_orden_compra($idOrden, $path);
 
-        $datosEmail = array(
-          'correoEmisorEm' => $correoEmisorEm,
-          'correoEmisor'   => $correoEmisor,
-          'nombreEmisor'   => $nombreEmisor,
-          'contrasena'     => $contrasena,
-          'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
-          'altBody'        => 'Nueva orden de compra.',
-          'body'           => 'Nueva orden de compra.',
-          'correoDestino'  => array($proveedor['info']->email),
-          'nombreDestino'  => $proveedor['info']->nombre_fiscal,
-          'cc'             => '',
-          'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
-        );
+    //     $datosEmail = array(
+    //       'correoEmisorEm' => $correoEmisorEm,
+    //       'correoEmisor'   => $correoEmisor,
+    //       'nombreEmisor'   => $nombreEmisor,
+    //       'contrasena'     => $contrasena,
+    //       'asunto'         => 'Nueva orden de compra ' . date('Y-m-d H:m'),
+    //       'altBody'        => 'Nueva orden de compra.',
+    //       'body'           => 'Nueva orden de compra.',
+    //       'correoDestino'  => array($proveedor['info']->email),
+    //       'nombreDestino'  => $proveedor['info']->nombre_fiscal,
+    //       'cc'             => '',
+    //       'adjuntos'       => array('ORDEN_COMPRA_'.$orden['info'][0]->folio.'.pdf' => $file)
+    //     );
 
-        $result = $this->my_email->setData($datosEmail)->send();
-        unlink($file);
-      }
-    }
+    //     $result = $this->my_email->setData($datosEmail)->send();
+    //     unlink($file);
+    //   }
+    // }
 
     return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes);
   }
@@ -802,7 +849,7 @@ class compras_ordenes_model extends CI_Model {
         $datos = array(
           $prod->cantidad,
           $prod->codigo,
-          $prod->descripcion." ({$prod->observacion})",
+          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
           String::formatoNumero($prod->precio_unitario, 2, '$', false),
           String::formatoNumero($prod->importe, 2, '$', false),
         );

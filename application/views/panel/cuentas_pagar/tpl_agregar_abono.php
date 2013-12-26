@@ -51,7 +51,7 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group" style="display: <?php echo (isset($_GET['total']{0})? 'none': 'block'); ?>">
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
                   <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
@@ -67,6 +67,19 @@
                     <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
               <?php
               }?>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group" id="group_metodo_pago">
+                <label class="control-label" for="fmetodo_pago">Cuenta Proveedor </label>
+                <div class="controls">
+                  <select name="fcuentas_proveedor" class="span6" id="fcuentas_proveedor">
+                  <?php  foreach ($cuentas_proveedor as $key => $value) {
+                  ?>
+                      <option value="<?php echo $value->id_cuenta; ?>"><?php echo $value->full_alias; ?></option>
+                  <?php
+                  }?>
                   </select>
                 </div>
               </div>

@@ -182,8 +182,12 @@ class cuentas_pagar extends MY_Controller {
         {
           $params['data']['facturas'][] = $this->cuentas_pagar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
         }
-      }else  
+        $proveedor = $params['data']['facturas'][0]['proveedor'];
+      }else
+      {
         $params['data'] = $this->cuentas_pagar_model->getDetalleVentaFacturaData();
+        $proveedor = $params['data']['proveedor'];
+      }
 
       //Cuentas de banco
       $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
@@ -194,6 +198,8 @@ class cuentas_pagar extends MY_Controller {
         array('nombre' => 'Efectivo', 'value' => 'efectivo'),
         array('nombre' => 'Deposito', 'value' => 'deposito'),
       );
+      //Cuentas del proeveedor
+      $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($proveedor->id_proveedor);
 
       $params['template'] = $this->load->view('panel/cuentas_pagar/tpl_agregar_abono', $params, true);;
     }else

@@ -32,10 +32,10 @@ var cuentas = (function($){
 	}
 
 	function onKeypressAddRow(event){
-		event.preventDefault();
 
 		if (event.which === 13) {
 		  var $tr = $(this).parent().parent();
+			event.preventDefault();
 
 		  if (valida_agregar_cuenta($tr)) {
 		    $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);

@@ -582,6 +582,7 @@ class banco_cuentas_model extends banco_model {
 						'entransito'  => 't',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dproveedor'),
+						'clasificacion' => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
 						);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
