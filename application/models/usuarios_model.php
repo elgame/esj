@@ -63,8 +63,8 @@ class Usuarios_model extends privilegios_model {
 						'nombre'           => $this->input->post('fnombre'),
 						'apellido_paterno' => $this->input->post('fapellido_paterno'),
 						'apellido_materno' => $this->input->post('fapellido_paterno'),
-						'usuario'          => $this->input->post('fusuario'),
-						'password'         => $this->input->post('fpass'),
+						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
+						'password'         => trim($this->input->post('fpass'))?$this->input->post('fpass'): NULL,
 
 						'calle'            => $this->input->post('fcalle'),
 						'numero'           => $this->input->post('fnumero'),
@@ -73,6 +73,7 @@ class Usuarios_model extends privilegios_model {
 						'estado'           => $this->input->post('festado'),
 						'cp'               => $this->input->post('fcp'),
 
+						'curp'             => $this->input->post('fcurp'),
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
 						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
@@ -80,6 +81,15 @@ class Usuarios_model extends privilegios_model {
 						'sexo'             => $this->input->post('fsexo'),
 						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
 						'email'            => $this->input->post('femail'),
+
+						'id_empresa'           => $this->input->post('did_empresa'),
+						'id_puesto'            => $this->input->post('fpuesto'),
+						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
+						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
+						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
+						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
+						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
+						'rfc'                  => $this->input->post('frfc'),
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -113,8 +123,8 @@ class Usuarios_model extends privilegios_model {
 						'nombre'           => $this->input->post('fnombre'),
 						'apellido_paterno' => $this->input->post('fapellido_paterno'),
 						'apellido_materno' => $this->input->post('fapellido_paterno'),
-						'usuario'          => $this->input->post('fusuario'),
-						'password'         => $this->input->post('fpass'),
+						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
+						'password'         => trim($this->input->post('fpass')),
 
 						'calle'            => $this->input->post('fcalle'),
 						'numero'           => $this->input->post('fnumero'),
@@ -123,6 +133,7 @@ class Usuarios_model extends privilegios_model {
 						'estado'           => $this->input->post('festado'),
 						'cp'               => $this->input->post('fcp'),
 
+						'curp'             => $this->input->post('fcurp'),
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
 						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'fecha_salida'     => ($this->input->post('ffecha_salida')!=''? $this->input->post('ffecha_salida'): NULL),
@@ -131,13 +142,21 @@ class Usuarios_model extends privilegios_model {
 						'sexo'             => $this->input->post('fsexo'),
 						'cuenta_cpi'       => $this->input->post('fcuenta_cpi'),
 						'email'            => $this->input->post('femail'),
+
+						'id_empresa'           => $this->input->post('did_empresa'),
+						'id_puesto'            => $this->input->post('fpuesto'),
+						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
+						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
+						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
+						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
+						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
+						'rfc'                  => $this->input->post('frfc'),
 					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
-		if ($data['password'] == '') {
+		if ($data['password'] == '')
 			unset($data['password']);
-		}
 
 		$this->db->update('usuarios', $data, array('id'=>$id_usuario));
 
@@ -164,8 +183,11 @@ class Usuarios_model extends privilegios_model {
 		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
-						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi" )
+						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi, 
+						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
+						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc" )
  												->from("usuarios u")
+ 												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
 												->where("id", $id_usuario)
 												->get();
 		$data['info'] = array();
