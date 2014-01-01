@@ -98,7 +98,7 @@
 
                 <div class="span12 nomarg">
                   
-                  <table class="table table-striped table-bordered bootstrap-datatable">
+                  <table class="table table-condensed table-bordered bootstrap-datatable">
                     <caption>Dias de Vacaciones por años trabajados</caption>
                     <tbody>
                       <?php 
@@ -121,6 +121,128 @@
                   </table>
 
                 </div> <!--/span-->
+
+                <div class="clearfix"></div>
+
+                <div class="row-fluid">
+                  <div class="span6">
+                    <fieldset>
+                      <legend>Tablas ISR</legend>
+
+                        <table class="table table-condensed table-bordered bootstrap-datatable">
+                          <caption>Semanal</caption>
+                          <thead>
+                            <tr>
+                              <th>Límite Inferior</th>
+                              <th>Límite Superior</th>
+                              <th>Cuota Fija</th>
+                              <th>%</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php 
+                            foreach($data['semanal_art113'] as $art){ 
+                            ?>
+                            <tr>
+                              <td style="width:40px;">
+                                <input type="hidden" name="sem_id[]" value="<?php echo $art->id_art_113 ?>">
+                                <input type="text" name="sem_lim_inferior[]" value="<?php echo $art->lim_inferior ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sem_lim_superior[]" value="<?php echo $art->lim_superior ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sem_cuota_fija[]" value="<?php echo $art->cuota_fija ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sem_porcentaje[]" value="<?php echo $art->porcentaje ?>" class="span12 vpositive"></td>
+                            </tr>
+                            <?php
+                            } ?>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-condensed table-bordered bootstrap-datatable">
+                          <caption>Diaria</caption>
+                          <thead>
+                            <tr>
+                              <th>Límite Inferior</th>
+                              <th>Límite Superior</th>
+                              <th>Cuota Fija</th>
+                              <th>%</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php 
+                            foreach($data['diaria_art113'] as $art){ 
+                            ?>
+                            <tr>
+                              <td style="width:40px;">
+                                <input type="hidden" name="dia_id[]" value="<?php echo $art->id_art_113 ?>">
+                                <input type="text" name="dia_lim_inferior[]" value="<?php echo $art->lim_inferior ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="dia_lim_superior[]" value="<?php echo $art->lim_superior ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="dia_cuota_fija[]" value="<?php echo $art->cuota_fija ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="dia_porcentaje[]" value="<?php echo $art->porcentaje ?>" class="span12 vpositive"></td>
+                            </tr>
+                            <?php
+                            } ?>
+                          </tbody>
+                        </table>
+
+                    </fieldset>
+                  </div>
+
+                  <div class="span6">
+                    <fieldset>
+                      <legend>Tablas Subsidios</legend>
+
+                        <table class="table table-condensed table-bordered bootstrap-datatable">
+                          <caption>Semanal</caption>
+                          <thead>
+                            <tr>
+                              <th>Límite Inferior</th>
+                              <th>Límite Superior</th>
+                              <th>Subsidio</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php 
+                            foreach($data['semanal_subsidios'] as $art){ 
+                            ?>
+                            <tr>
+                              <td style="width:40px;">
+                                <input type="hidden" name="sub_sem_id[]" value="<?php echo $art->id_subsidio ?>">
+                                <input type="text" name="sub_sem_lim_inferior[]" value="<?php echo $art->de ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sub_sem_lim_superior[]" value="<?php echo $art->hasta ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sub_sem_subsidio[]" value="<?php echo $art->subsidio ?>" class="span12 vpositive"></td>
+                            </tr>
+                            <?php
+                            } ?>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-condensed table-bordered bootstrap-datatable">
+                          <caption>Diarios</caption>
+                          <thead>
+                            <tr>
+                              <th>Límite Inferior</th>
+                              <th>Límite Superior</th>
+                              <th>Subsidio</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php 
+                            foreach($data['diaria_subsidios'] as $art){ 
+                            ?>
+                            <tr>
+                              <td style="width:40px;">
+                                <input type="hidden" name="sub_dia_id[]" value="<?php echo $art->id_subsidio ?>">
+                                <input type="text" name="sub_dia_lim_inferior[]" value="<?php echo $art->de ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sub_dia_lim_superior[]" value="<?php echo $art->hasta ?>" class="span12 vpositive"></td>
+                              <td style="width:40px;"><input type="text" name="sub_dia_subsidio[]" value="<?php echo $art->subsidio ?>" class="span12 vpositive"></td>
+                            </tr>
+                            <?php
+                            } ?>
+                          </tbody>
+                        </table>
+
+                    </fieldset>
+                  </div>
+                </div>
 
                 <div class="clearfix"></div>
 

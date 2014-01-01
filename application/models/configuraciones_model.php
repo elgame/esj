@@ -38,6 +38,34 @@ class configuraciones_model extends CI_Model {
 			);
 		$this->db->update('nomina_salarios_minimos', $data, array('id' => '1'));
 
+		//Tablas de ISR
+		foreach ($this->input->post('sem_id') as $key => $sem_id)
+		{
+			$data = array('lim_inferior' => $_POST['sem_lim_inferior'][$key], 'lim_superior' => $_POST['sem_lim_superior'][$key],
+						'cuota_fija' => $_POST['sem_cuota_fija'][$key], 'porcentaje' => $_POST['sem_porcentaje'][$key]);
+			$this->db->update('nomina_semanal_art_113', $data, array('id_art_113' => $sem_id));
+		}
+		foreach ($this->input->post('dia_id') as $key => $dia_id)
+		{
+			$data = array('lim_inferior' => $_POST['dia_lim_inferior'][$key], 'lim_superior' => $_POST['dia_lim_superior'][$key],
+						'cuota_fija' => $_POST['dia_cuota_fija'][$key], 'porcentaje' => $_POST['dia_porcentaje'][$key]);
+			$this->db->update('nomina_diaria_art_113', $data, array('id_art_113' => $dia_id));
+		}
+
+		//Tablas de Subsidios
+		foreach ($this->input->post('sub_sem_id') as $key => $sub_sem_id)
+		{
+			$data = array('de' => $_POST['sub_sem_lim_inferior'][$key], 'hasta' => $_POST['sub_sem_lim_superior'][$key],
+						'subsidio' => $_POST['sub_sem_subsidio'][$key]);
+			$this->db->update('nomina_semanal_subsidios', $data, array('id_subsidio' => $sub_sem_id));
+		}
+		foreach ($this->input->post('sub_dia_id') as $key => $sub_dia_id)
+		{
+			$data = array('de' => $_POST['sub_dia_lim_inferior'][$key], 'hasta' => $_POST['sub_dia_lim_superior'][$key],
+						'subsidio' => $_POST['sub_dia_subsidio'][$key]);
+			$this->db->update('nomina_diaria_subsidios', $data, array('id_subsidio' => $sub_dia_id));
+		}
+
 		return array('error' => FALSE);
 	}
 
@@ -49,9 +77,13 @@ class configuraciones_model extends CI_Model {
 	 */
 	public function getConfiguraciones()
 	{
-		$data['conf'] = array();
-		$data['conf_vacaciones'] = array();
-		$data['salarios_minimos'] = array();
+		$data['conf']              = array();
+		$data['conf_vacaciones']   = array();
+		$data['salarios_minimos']  = array();
+		$data['semanal_art113']    = array();
+		$data['semanal_subsidios'] = array();
+		$data['diaria_art113']     = array();
+		$data['diaria_subsidios']  = array();
 
 		$sql_res = $this->db->select("id_configuracion, aguinaldo, prima_vacacional, puntualidad, asistencia, despensa" )
 							->from("nomina_configuracion")
@@ -72,6 +104,31 @@ class configuraciones_model extends CI_Model {
 							->where("id", '1')->get();
 		if ($sql_res->num_rows() > 0)
 			$data['salarios_minimos']	= $sql_res->row();
+		$sql_res->free_result();
+
+
+		$sql_res = $this->db->select("id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje" )
+							->from("nomina_semanal_art_113")->get();
+		if ($sql_res->num_rows() > 0)
+			$data['semanal_art113']	= $sql_res->result();
+		$sql_res->free_result();
+
+		$sql_res = $this->db->select("id_subsidio, de, hasta, subsidio" )
+							->from("nomina_semanal_subsidios")->get();
+		if ($sql_res->num_rows() > 0)
+			$data['semanal_subsidios']	= $sql_res->result();
+		$sql_res->free_result();
+
+		$sql_res = $this->db->select("id_art_113, lim_inferior, lim_superior, cuota_fija, porcentaje" )
+							->from("nomina_diaria_art_113")->get();
+		if ($sql_res->num_rows() > 0)
+			$data['diaria_art113']	= $sql_res->result();
+		$sql_res->free_result();
+
+		$sql_res = $this->db->select("id_subsidio, de, hasta, subsidio" )
+							->from("nomina_diaria_subsidios")->get();
+		if ($sql_res->num_rows() > 0)
+			$data['diaria_subsidios']	= $sql_res->result();
 		$sql_res->free_result();
 
 
