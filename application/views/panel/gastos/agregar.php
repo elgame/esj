@@ -229,6 +229,24 @@
             </div>
           </div><!--/row-fluid -->
 
+          <div class="span7">
+            <a href="<?php echo base_url('panel/gastos/ligar'); ?>" class="btn btn-info pull-left" id="btnLigarOrdenes" rel="superbox-70x550" data-supermodal-callback="validaParamsGasto" data-supermodal-autoshow="false">Ligar Ordenes</a>
+            <div id="ordenesSeleccionadas" class="pull-left" style="margin-left: 5px;">
+          <?php  
+          if(isset($_POST['ordenes']))
+          foreach ($_POST['ordenes'] as $key => $value)
+          {
+          ?>
+            <span class="label" style="margin-left:4px"><?php echo $_POST['ordenes_folio'][$key] ?> <i class="icon-remove ordenremove" style="cursor: pointer"></i>
+              <input type="hidden" name="ordenes[]" value="<?php echo $value ?>" id="ordenes<?php echo $value ?>">
+              <input type="hidden" name="ordenes_folio[]" value="<?php echo $_POST['ordenes_folio'][$key] ?>">
+            </span>
+          <?php
+          }
+          ?>
+            </div>
+          </div>
+
           <div class="span4 pull-right">
             <div class="control-group">
               <div class="controls span9">

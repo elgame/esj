@@ -17,6 +17,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
+    'facturacion/ajax_get_clientes_vr/',
     'facturacion/ajax_get_pallet_folio/',
     'facturacion/ajax_get_unidades/',
     'facturacion/ajax_get_pallets_cliente/',
@@ -976,6 +977,16 @@ class facturacion extends MY_Controller {
   public function ajax_get_clientes(){
     $this->load->model('clientes_model');
     $params = $this->clientes_model->getClientesAjax(" AND rfc != ''");
+
+    echo json_encode($params);
+  }
+
+  /**
+    * Obtiene listado de los clientes que tienen RFC por ajax.
+    */
+  public function ajax_get_clientes_vr(){
+    $this->load->model('clientes_model');
+    $params = $this->clientes_model->getClientesAjax();
 
     echo json_encode($params);
   }

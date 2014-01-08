@@ -106,12 +106,12 @@
 									<td></td>
 									<td></td>
 									<td>Saldo anterior a <?php echo $data['fecha1']; ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0) ); ?></td>
-									<td><?php echo String::formatoNumero(
-											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0) ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0), 2, '$', false ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0), 2, '$', false ); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero(
+											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0), 2, '$', false ); ?></td>
 									<td></td>
 									<td></td>
 									<td></td>
@@ -143,9 +143,9 @@
 										<a href="<?php echo base_url('panel/cuentas_cobrar/detalle/').'?id='.$cuenta->id_factura.'&tipo='.$cuenta->tipo.
 													'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
 									</td>
-									<td><?php echo String::formatoNumero($cuenta->cargo); ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td class="sel_abonom" data-id="<?php echo $cuenta->id_factura; ?>" data-tipo="<?php echo $cuenta->tipo ?>"><?php echo String::formatoNumero($cuenta->saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->cargo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
+									<td style="text-align: right;" class="sel_abonom" data-id="<?php echo $cuenta->id_factura; ?>" data-tipo="<?php echo $cuenta->tipo ?>"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
 									<td><?php echo $cuenta->estado; ?></td>
 									<td><?php echo $cuenta->fecha_vencimiento; ?></td>
 									<td><?php echo $cuenta->dias_transc; ?></td>
@@ -154,9 +154,9 @@
 						} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="4" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_cargo); ?></td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td colspan="3"></td>
 								</tr>
               </tbody>

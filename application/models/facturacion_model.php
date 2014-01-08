@@ -2061,11 +2061,17 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetXY(0, $pdf->GetY());
         $aligns = array('C', 'C', 'C', 'C','C');
-        $aligns2 = array('C', 'C', 'C', 'R','R');
+        $aligns2 = array('C', 'C', 'L', 'R','R');
         $widths = array(30, 35, 91, 30, 30);
         $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Precio Unitario', 'Importe');
 
         $conceptos = current($xml->Conceptos);
+        if(count($conceptos) == 0)
+          $conceptos = array($conceptos);
+        elseif(count($conceptos) == 1){
+          $conceptos = current($conceptos);
+          $conceptos = array($conceptos);
+        }
 
         // for ($i=0; $i < 30; $i++)
         //   $conceptos[] = $conceptos[$i];
@@ -2121,6 +2127,8 @@ class facturacion_model extends privilegios_model{
 
         // Traslados | IVA
         $ivas = current($xml->Impuestos->Traslados);
+        if(count($ivas) == 1)
+          $ivas = current($ivas);
 
         if ( ! is_array($ivas))
         {
@@ -2143,6 +2151,7 @@ class facturacion_model extends privilegios_model{
 
         $h = 25 - ($traslado11 == 0 ? 5 : 0);
         $h = $h - ($xml->Impuestos->Retenciones->Retencion[0]['importe'] == 0 ? 5 : 0);
+        $h += 6;
 
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetXY(0, $pdf->GetY() + 1);
@@ -2158,14 +2167,22 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(1, $pdf->GetY());
-        $pdf->Cell(78, 4, $xml[0]['formaDePago'], 0, 0, 'L', 1);
+        $pdf->Cell(78, 4, 'Forma de Pago: '.$xml[0]['formaDePago'], 0, 0, 'L', 1);
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(78, $pdf->GetY());
-        $pdf->Cell(78, 4, "Pago en {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
+        $pdf->Cell(78, 4, 'Condicion de Pago: '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito'), 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(1, $pdf->GetY()+5);
+        $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(78, $pdf->GetY());
+        $pdf->Cell(76, 4, "Cuenta de Pago: {$factura['info']->metodo_pago_digitos}", 0, 0, 'L', 1);
 
         $pdf->SetFont('helvetica','B', 10);
-        $pdf->SetXY(156, $pdf->GetY() - 11);
+        $pdf->SetXY(156, $pdf->GetY() - 16);
         $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
@@ -2237,7 +2254,7 @@ class facturacion_model extends privilegios_model{
             $pdf->AddPage();
 
         $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->SetXY(10, $pdf->GetY() - 1);
+        $pdf->SetXY(10, $pdf->GetY() + 5);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
         $pdf->Row(array('Sello Digital del CFDI:'), false, 0);

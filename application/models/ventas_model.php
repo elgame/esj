@@ -330,6 +330,132 @@ class Ventas_model extends privilegios_model{
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 
+  public function updateNotaVenta($id_venta)
+  {
+    $this->load->model('clientes_model');
+
+    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+
+    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+    // pago son las parcialidades "Parcialidad 1 de X".
+    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    $datosFactura = array(
+      'id_cliente'          => $this->input->post('did_cliente'),
+      'id_empresa'          => $this->input->post('did_empresa'),
+      'version'             => $this->input->post('dversion'),
+      'serie'               => $this->input->post('dserie'),
+      'folio'               => $this->input->post('dfolio'),
+      'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
+      'subtotal'            => $this->input->post('total_subtotal'),
+      'importe_iva'         => $this->input->post('total_iva'),
+      'total'               => $this->input->post('total_totfac'),
+      'total_letra'         => $this->input->post('dttotal_letra'),
+      'no_aprobacion'       => $this->input->post('dno_aprobacion'),
+      'ano_aprobacion'      => $anoAprobacion[0],
+      'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
+      'forma_pago'          => $formaPago,
+      'metodo_pago'         => $this->input->post('dmetodo_pago'),
+      'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
+      'no_certificado'      => $this->input->post('dno_certificado'),
+      'cadena_original'      => '',
+      'sello'                => '',
+      'certificado'          => '',
+      'condicion_pago'      => $this->input->post('dcondicion_pago'),
+      'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
+      'observaciones'       => $this->input->post('dobservaciones'),
+      'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+      'status_timbrado'     => 'p',
+      'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
+      'is_factura'          => 'f'
+    );
+
+    $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
+    // $id_venta = $this->db->insert_id();
+
+    // Obtiene los datos del cliente.
+    $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
+    $dataCliente = array(
+      'nombre'      => $cliente['info']->nombre_fiscal,
+      'rfc'         => $cliente['info']->rfc,
+      'calle'       => $cliente['info']->calle,
+      'no_exterior' => $cliente['info']->no_exterior,
+      'no_interior' => $cliente['info']->no_interior,
+      'colonia'     => $cliente['info']->colonia,
+      'localidad'   => $cliente['info']->localidad,
+      'municipio'   => $cliente['info']->municipio,
+      'estado'      => $cliente['info']->estado,
+      'cp'          => $cliente['info']->cp,
+      'pais'        => 'MEXICO',
+    );
+    $this->db->update('facturacion_cliente', $dataCliente, "id_factura = {$id_venta}");
+
+    // Productos
+    $productosFactura   = array();
+    foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+    {
+      if ($_POST['prod_importe'][$key] != 0)
+      {
+        $productosFactura[] = array(
+          'id_factura'       => $id_venta,
+          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          'num_row'          => intval($key),
+          'cantidad'         => $_POST['prod_dcantidad'][$key],
+          'descripcion'      => $descripcion,
+          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
+          'importe'          => $_POST['prod_importe'][$key],
+          'iva'              => $_POST['prod_diva_total'][$key],
+          'unidad'           => $_POST['prod_dmedida'][$key],
+          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+          'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+          'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+          'kilos'             => $_POST['prod_dkilos'][$key],
+          'cajas'             => $_POST['prod_dcajas'][$key],
+          'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
+        );
+      }
+    }
+    $this->db->delete('facturacion_productos', "id_factura = {$id_venta}");
+    $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+    if (isset($_POST['palletsIds']))
+    {
+      $pallets = array(); // Ids de los pallets cargados en la factura.
+      // Crea el array de los pallets a insertar.
+      foreach ($_POST['palletsIds'] as $palletId)
+      {
+        $pallets[] = array(
+          'id_factura' => $id_venta,
+          'id_pallet'  => $palletId
+        );
+      }
+
+      $this->db->delete('facturacion_pallets', "id_factura = {$id_venta}");
+      if (count($pallets) > 0)
+      {
+        $this->db->insert_batch('facturacion_pallets', $pallets);
+      }
+    }
+
+    $this->load->model('documentos_model');
+    // $this->load->model('facturacion_model');
+
+    // // Obtiene los documentos que el cliente tiene asignados.
+    // $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+
+    // // Inserta los documentos del cliente con un status false.
+    // if ($docsCliente)
+    //   $this->db->insert_batch('facturacion_documentos', $docsCliente);
+    // else
+    //   $datosFactura['docs_finalizados'] = 't';
+
+    $this->generaNotaRemisionPdf($id_venta, $pathDocs);
+
+    return array('passes' => true, 'id_venta' => $id_venta);
+  }
+
 	/**
 	 * Cancela una nota, la elimina
 	 */

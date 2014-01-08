@@ -29,7 +29,7 @@ class gastos_model extends privilegios_model{
       'total'          => $data['total'],
       'concepto'       => $data['concepto'],
       'isgasto'        => 't',
-      // 'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
     );
 
     //si se registra a un vehiculo
@@ -107,6 +107,19 @@ class gastos_model extends privilegios_model{
           'litros'     => $data['dlitros'],
           'precio'     => $data['dprecio'],
           ));
+      }
+    }
+
+    //Si el gasto trae ordenes logadas
+    if (isset($data['ordenes']))
+    {
+      foreach ($data['ordenes'] as $key => $orden)
+      {
+        $this->db->insert('compras_facturas', array(
+          'id_compra'  => $compraId,
+          'id_orden' => $orden,
+          ));
+        $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $orden));
       }
     }
 

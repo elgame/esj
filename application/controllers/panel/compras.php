@@ -154,6 +154,10 @@ class compras extends MY_Controller {
         $txt = 'EL XML se actualizo correctamente.';
         $icono = 'success';
       break;
+      case 30:
+        $txt = 'La cuenta no tiene saldo suficiente.';
+        $icono = 'error';
+        break;
     }
 
     return array(

@@ -3,7 +3,7 @@ $(function(){
   $('#form').keyJump();
 
   $("#dcliente").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clientes/',
+      source: base_url+'panel/facturacion/ajax_get_clientes_vr/',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -399,11 +399,11 @@ function calculaTotalProducto ($tr) {
       $totalIva       = $tr.find('#prod_diva_total'),
       $totalRetencion = $tr.find('#prod_dreten_iva_total'),
 
-      totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
+      totalImporte   = trunc2Dec(parseFloat($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0) ),
       totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
       totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
-
+      
   $totalIva.val(totalIva);
   $totalRetencion.val(totalRetencion);
   $importe.val(totalImporte);
@@ -847,8 +847,25 @@ $.widget( "custom.catcomplete", $.ui.autocomplete, {
   }
 });
 
-function trunc2Dec(num) {
-  return Math.floor(num * 100) / 100;
+function trunc2Dec(num, digits) {
+  digits = digits? digits: 2;
+  var result = Math.round(num*Math.pow(10,digits))/Math.pow(10,digits);
+  return result;
+   
+  var numS = num.toString(),
+      decPos = numS.indexOf('.'),
+      result;
+  if(decPos > -1)
+    result = numS.substr(0, 1 + decPos + digits);
+  else
+    result = numS;
+
+  if (isNaN(result)) {
+    result = 0;
+  }
+
+  return parseFloat(result);
+  // return Math.floor(num * 100) / 100;
 }
 
 function round2Dec(val) {

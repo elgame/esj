@@ -72,7 +72,7 @@ class compras_ordenes_model extends CI_Model {
         INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
         INNER JOIN usuarios AS u ON u.id = co.id_empleado
         LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
-        WHERE 1 = 1 {$sql}
+        WHERE co.status <> 'n'  {$sql}
         ORDER BY (co.fecha_creacion, co.folio) DESC
         ", $params, true);
 

@@ -893,7 +893,7 @@ class inventario_model extends privilegios_model{
 	{
 		$this->load->library('pagination');
 		$params = array(
-				'result_items_per_page' => '2',
+				'result_items_per_page' => '50',
 				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
 		);
 		if($params['result_page'] % $params['result_items_per_page'] == 0)
@@ -1003,7 +1003,9 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('compras_ordenes_model');
 
-			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden WHERE cs.status = 'n' AND Date(fecha_aceptacion) = Date(now()) GROUP BY cs.id_orden")->row();
+			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs 
+				LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden 
+				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = Date(now()) GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
 			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia
@@ -1030,7 +1032,7 @@ class inventario_model extends privilegios_model{
 			{
 				$rows_compras++;
 				$compra[$key]['id_orden'] = $id_orden;
-				$compra[$key]['num_row']   = $rows_compras;
+				$compra[$key]['num_row']  = $rows_compras;
 			}
 			$this->compras_ordenes_model->agregarProductosData($compra);
 		}

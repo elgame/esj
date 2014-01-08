@@ -566,7 +566,7 @@ class compras_ordenes extends MY_Controller {
             'rules' => ''),
       array('field' => 'totalOrden',
             'label' => 'Total',
-            'rules' => 'greater_than[0]'),
+            'rules' => 'greater_than[-1]'),
     );
 
     $this->form_validation->set_rules($rules);

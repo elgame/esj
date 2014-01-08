@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
