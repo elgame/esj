@@ -416,6 +416,7 @@ class compras_ordenes_model extends CI_Model {
     $query = $this->db->query(
       "SELECT co.id_orden,
               co.id_empresa, e.nombre_fiscal AS empresa,
+              e.logo,
               co.id_proveedor, p.nombre_fiscal AS proveedor,
               co.id_departamento, cd.nombre AS departamento,
               co.id_empleado, u.nombre AS empleado,
@@ -577,6 +578,7 @@ class compras_ordenes_model extends CI_Model {
         'status'          => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r',
         'fecha_aceptacion' => date('Y-m-d H:i:s'),
         'faltantes'       => $faltantesProd,
+        'observacion'     => $_POST['observacion'][$key],
       );
 
       if ($faltantesProd !== '0')
@@ -817,8 +819,11 @@ class compras_ordenes_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
       // $pdf->show_head = true;
+      $pdf->titulo1 = $orden['info'][0]->empresa;
       $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
       $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->id_orden;
+
+      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
 
       $pdf->AliasNbPages();
       // $pdf->AddPage();

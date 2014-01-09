@@ -700,7 +700,7 @@ class polizas_model extends CI_Model {
         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
-      WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
+      WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
          {$sql}
       ORDER BY fa.id_abono ASC
       ");
