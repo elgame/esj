@@ -319,7 +319,7 @@ class compras_ordenes extends MY_Controller {
       if ($res_mdl['passes'])
       {
         $params['frm_errors'] = $this->showMsgs(9);
-        $params['id_movimiento'] = ($res_mdl['ver_cheque'] ? $res_mdl['id_movimiento'] : '');
+        $params['id_movimiento'] = (isset($res_mdl['ver_cheque']) ? $res_mdl['id_movimiento'] : '');
         $params['reload'] = true;
       }
       else
@@ -475,16 +475,24 @@ class compras_ordenes extends MY_Controller {
             'label' => '',
             'rules' => ''),
 
-      array('field' => 'solicitoId',
-            'label' => 'Solicito',
-            'rules' => ''),
       array('field' => 'solicito',
             'label' => '',
             'rules' => ''),
 
+      // array('field' => 'autorizoId',
+      //       'label' => 'Autorizo',
+      //       'rules' => 'required'),
+      // array('field' => 'autorizo',
+      //       'label' => 'Autorizo',
+      //       'rules' => 'required'),
+
       array('field' => 'departamento',
             'label' => 'Departamento',
             'rules' => 'required'),
+
+      array('field' => 'descripcion',
+            'label' => 'Observacion',
+            'rules' => ''),
 
       array('field' => 'clienteId',
             'label' => 'Cliente',
@@ -619,7 +627,7 @@ class compras_ordenes extends MY_Controller {
             'rules' => ''),
       array('field' => 'valorUnitario[]',
             'label' => 'Precio Unitario',
-            'rules' => 'greater_than[0]'),
+            'rules' => 'greater_than[-1]'),
       array('field' => 'trasladoTotal[]',
             'label' => '',
             'rules' => ''),
@@ -644,7 +652,7 @@ class compras_ordenes extends MY_Controller {
             'rules' => '')  ,
       array('field' => 'totalOrden',
             'label' => 'Total',
-            'rules' => 'greater_than[0]'),
+            'rules' => 'greater_than[-1]'),
       array('field' => 'xml',
             'label' => 'XML',
             'rules' => 'callback_xml_check'),

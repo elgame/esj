@@ -18,7 +18,7 @@
               <div class="control-group">
                 <label class="control-label" for="dfecha">Fecha</label>
                 <div class="controls">
-                  <input type="datetime-local" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d\TH:i")); ?>" autofocus required>
+                  <input type="date" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d")); ?>" autofocus required>
                 </div>
               </div>
 
@@ -100,8 +100,11 @@
               </thead>
               <tbody>
               <?php  
+              $suma_saldo = $suma_monto = 0;
               foreach ($data['facturas'] as $key => $value)
               {
+                $suma_saldo += $value['saldo'];
+                $suma_monto += $value['saldo'];
               ?>
                 <tr>
                   <td><?php echo $value['cobro'][0]->serie.$value['cobro'][0]->folio; ?>
@@ -110,11 +113,16 @@
                     <input type="hidden" name="tipos[]" value="<?php echo $value['cobro'][0]->tipo; ?>">
                   </td>
                   <td><?php echo $value['saldo']; ?></td>
-                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="1" max="<?php echo $value['saldo'] ?>"></td>
+                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="0.001" max="<?php echo $value['saldo'] ?>"></td>
                 </tr>
               <?php
               }
               ?>
+                <tr style="font-weight:bold;">
+                  <td>Totales</td>
+                  <td><?php echo String::formatoNumero($suma_saldo, 2, '$', false); ?></td>
+                  <td id="suma_monto"><?php echo String::formatoNumero($suma_monto, 2, '$', false); ?></td>
+                </tr>
               </tbody>
               </table>
             </div>

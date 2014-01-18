@@ -259,6 +259,7 @@ class gastos extends MY_Controller {
     $rules[] = array('field' => 'vehiculoId',
                     'label' => 'Vehiculos',
                     'rules' => '');
+    
     if ($this->input->post('es_vehiculo') == 'si')
     {
       $rules[count($rules)-1]['rules'] = 'required|numeric';

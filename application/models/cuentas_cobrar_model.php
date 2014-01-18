@@ -394,7 +394,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento, 
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
-				('Factura ' || f.serie || f.folio) AS concepto,
+				( (CASE WHEN f.is_factura='t' THEN 'FACTURA ' ELSE 'REMISION ' END) || f.serie || f.folio) AS concepto,
 				'f' as tipo
 			FROM
 				facturacion AS f
@@ -682,6 +682,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	{
 		$_GET['id'] = $id_factura==null? $_GET['id']: $id_factura;
 		$_GET['tipo'] = $tipo==null? $_GET['tipo']: $tipo;
+		$id_factura_aux = $_GET['id']; 
 		$sql = '';
 	
 		//Filtros para buscar
@@ -780,6 +781,8 @@ class cuentas_cobrar_model extends privilegios_model{
 			}
 		}
 		$response['saldo'] = $response['cobro'][0]->total - $abonos;
+
+		$_GET['id'] = $id_factura_aux;
 	
 		return $response;
 	}
@@ -791,18 +794,18 @@ class cuentas_cobrar_model extends privilegios_model{
 	 */
 	public function getCuentaPagoAdicional()
 	{
-	  return '0225311';
+	  return '42200400';
 	}
 
 	public function getCuentaPagoMenor()
 	{
-	  return '556633';
+	  return '00800000';
 	}
 
 	public function addAbonoMasivo()
 	{
-		$ids   = explode(',', $_GET['id']);
-		$tipos = explode(',', $_GET['tipo']);
+		$ids   = $_POST['ids']; //explode(',', substr($_GET['id'], 1));
+		$tipos = $_POST['tipos']; //explode(',', substr($_GET['tipo'], 1));
 		$total = 0; //$this->input->post('dmonto');
 		$desc  = '';
 
@@ -823,7 +826,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		$resp = $this->banco_cuentas_model->addDeposito(array(
 					'id_cuenta'   => $this->input->post('dcuenta'),
 					'id_banco'    => $data_cuenta->id_banco,
-					'fecha'       => $this->input->post('dfecha').':'.date("s"),
+					'fecha'       => $this->input->post('dfecha'),
 					'numero_ref'  => $this->input->post('dreferencia'),
 					'concepto'    => $this->input->post('dconcepto').$desc,
 					'monto'       => $total,
@@ -905,7 +908,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$resp = $this->banco_cuentas_model->addDeposito(array(
 						'id_cuenta'   => $data['id_cuenta'],
 						'id_banco'    => $data_cuenta->id_banco,
-						'fecha'       => $data['fecha'].':'.date("s"),
+						'fecha'       => $data['fecha'],
 						'numero_ref'  => $data['ref_movimiento'],
 						'concepto'    => $data['concepto'],
 						'monto'       => $data['total']+$pago_mayor,

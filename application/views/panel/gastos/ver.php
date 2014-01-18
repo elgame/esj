@@ -137,14 +137,14 @@
                     </div>
                   </div>
 
-                  <?php if ( ! $gasto['info']->xml){ ?>
+                  <?php //if ( ! $gasto['info']->xml){ ?>
                     <div class="control-group">
                       <label class="control-label" for="xml">XML</label>
                       <div class="controls">
                         <input type="file" name="xml" class="span9" id="xml" data-uniform="false" accept="text/xml">
                       </div>
                     </div>
-                  <?php } ?>
+                  <?php //} ?>
 
                   <div class="control-group">
                     <label class="control-label" for="concepto">Concepto</label>
@@ -184,21 +184,21 @@
               <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
-                    Subtotal <input type="text" name="subtotal" class="span12 vpositive" id="subtotal" value="<?php echo set_value('subtotal', $gasto['info']->subtotal); ?>" readonly>
+                    Subtotal <input type="text" name="subtotal" class="span12 vpositive" id="subtotal" value="<?php echo set_value('subtotal', $gasto['info']->subtotal); ?>">
                   </div>
                 </div>
               </div>
               <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
-                    IVA <input type="text" name="iva" class="span12 vpositive" id="iva" value="<?php echo set_value('iva', $gasto['info']->importe_iva); ?>" readonly>
+                    IVA <input type="text" name="iva" class="span12 vpositive" id="iva" value="<?php echo set_value('iva', $gasto['info']->importe_iva); ?>">
                   </div>
                 </div>
               </div>
               <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
-                    TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', $gasto['info']->total); ?>" readonly>
+                    TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', $gasto['info']->total); ?>">
                   </div>
                 </div>
               </div>

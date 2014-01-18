@@ -62,7 +62,7 @@ class Usuarios_model extends privilegios_model {
 			$data = array(
 						'nombre'           => $this->input->post('fnombre'),
 						'apellido_paterno' => $this->input->post('fapellido_paterno'),
-						'apellido_materno' => $this->input->post('fapellido_paterno'),
+						'apellido_materno' => $this->input->post('fapellido_materno'),
 						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
 						'password'         => trim($this->input->post('fpass'))?$this->input->post('fpass'): NULL,
 
@@ -122,7 +122,7 @@ class Usuarios_model extends privilegios_model {
 			$data = array(
 						'nombre'           => $this->input->post('fnombre'),
 						'apellido_paterno' => $this->input->post('fapellido_paterno'),
-						'apellido_materno' => $this->input->post('fapellido_paterno'),
+						'apellido_materno' => $this->input->post('fapellido_materno'),
 						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
 						'password'         => trim($this->input->post('fpass')),
 

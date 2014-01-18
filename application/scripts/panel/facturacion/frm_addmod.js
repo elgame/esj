@@ -217,13 +217,14 @@ $(function(){
             htmlTd = '',
             disabled = '',
             bgcolor = '',
-            jsonStr = '';
+            jsonStr = '',rnd_txt;
 
         if (pallets.length > 0) {
           for (var i in pallets) {
             if (pallets[i].info.status === 't') {
               // console.log(jQuery.parseJSON(JSON.stringify(pallets[i].rendimientos)));
 
+              rnd_txt = '';
               disabled = '';
               bgcolor = '';
               $('.pallet-selected').each(function(index, el) {
@@ -233,12 +234,17 @@ $(function(){
                 }
               });
 
+              for (var rnd in pallets[i].rendimientos) {
+                rnd_txt += pallets[i].rendimientos[rnd].nombre+';'+pallets[i].rendimientos[rnd].size+' | ';
+              };
+
               jsonStr = JSON.stringify(pallets[i].rendimientos).replace(/\"/g,'&quot;');
               htmlTd += '<tr style="'+bgcolor+'">'+
-                            '<th><input type="checkbox" value="'+pallets[i].info.id_pallet+'" class="chk-cli-pallets" '+disabled+'><input type="hidden" id="jsonData" value="'+jsonStr+'" ></th>'+
-                            '<th>'+pallets[i].info.folio+'</th>'+
-                            '<th>'+pallets[i].info.cajas+'</th>'+
-                            '<th>'+pallets[i].info.fecha+'</th>'+
+                            '<td><input type="checkbox" value="'+pallets[i].info.id_pallet+'" class="chk-cli-pallets" '+disabled+'><input type="hidden" id="jsonData" value="'+jsonStr+'" ></td>'+
+                            '<td>'+pallets[i].info.folio+'</td>'+
+                            '<td>'+pallets[i].info.cajas+'</td>'+
+                            '<td>'+pallets[i].info.fecha+'</td>'+
+                            '<td>'+rnd_txt+'</td>'+
                           '</tr>';
             }
           }

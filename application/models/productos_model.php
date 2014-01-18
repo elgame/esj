@@ -41,6 +41,7 @@ class productos_model extends CI_Model {
 				".$sql."
 				ORDER BY nombre ASC
 				";
+		
 		if($paginados){
 			$query = BDUtil::pagination($str_query, $params, true);
 			$res = $this->db->query($query['query']);
@@ -352,6 +353,15 @@ class productos_model extends CI_Model {
 	{
 		$this->db->update('productos', array('status' => $status), "id_producto = {$id_producto}");
 		return true;
+	}
+
+	public function getFolioNext($id_familia)
+	{
+		$codigo = 1;
+		$res = $this->db->query("SELECT codigo FROM productos WHERE id_familia = {$id_familia} ORDER BY codigo::integer DESC")->row();
+		if(isset($res->codigo))
+			$codigo = intval($res->codigo) + 1;
+		return $codigo;
 	}
 
 

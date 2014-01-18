@@ -9,6 +9,7 @@ class productos extends MY_Controller {
 	private $excepcion_privilegio = array(
 			'productos/ajax_get_familias/',
 			'productos/ajax_get_productos/',
+			'productos/acomoda_codigos/',
 		);
 
 	public function _remap($method){
@@ -183,6 +184,31 @@ class productos extends MY_Controller {
 	}
 
 
+	public function acomoda_codigos()
+	{
+		$this->load->model('productos_model');
+		$this->load->model('empresas_model');
+		$empresas = $this->empresas_model->getEmpresas();
+		foreach ($empresas['empresas'] as $key => $empresa)
+		{
+			echo "<br>".$empresa->nombre_fiscal."<br>";
+			$_GET['fid_empresa'] = $empresa->id_empresa;
+			$_GET['fstatus'] = 'ac';
+			$familias = $this->productos_model->getFamilias();
+			foreach ($familias['familias'] as $key => $familia)
+			{
+				echo $familia->nombre."<br>";
+				$_GET['fid_familia'] = $familia->id_familia;
+				$productos = $this->productos_model->getProductos(false);
+				foreach ($productos['productos'] as $key => $producto)
+				{
+					$codigo = $key+1;
+					echo "{$producto->nombre} => {$codigo}<br>";
+					$this->db->update('productos', array('codigo' => "{$codigo}"), "id_producto = {$producto->id_producto}");
+				}
+			}
+		}
+	}
 	/**
 	 * Agregar productos supermodal
 	 * @return [type] [description]
@@ -221,6 +247,7 @@ class productos extends MY_Controller {
 		}
 
 		$params['unidades'] = $this->productos_model->getUnidades(false);
+		$params['folio'] = $this->productos_model->getFolioNext($this->input->get('fid_familia'));
 
 
 		if (isset($_GET['msg']))
@@ -366,7 +393,7 @@ class productos extends MY_Controller {
 		$rules = array(
 			array('field' => 'fcodigo',
 						'label' => 'Codigo',
-						'rules' => 'required|max_length[25]|is_unique[productos.codigo]'),
+						'rules' => 'required|max_length[25]|callback_val_codigo['.$accion.']'),
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
 						'rules' => 'required|max_length[90]'),
@@ -391,19 +418,23 @@ class productos extends MY_Controller {
 						'rules' => ''),
 		);
 
-		if ($accion == 'modificar')
-		{
-			$rules[0]['rules'] = 'required|max_length[25]|callback_val_codigo';
-		}
+		// if ($accion == 'modificar')
+		// {
+		// 	$rules[0]['rules'] = 'required|max_length[25]|callback_val_codigo['.$accion.']';
+		// }
 
 		$this->form_validation->set_rules($rules);
 	}
 
-	public function val_codigo($str)
+	public function val_codigo($str, $tipo)
 	{
+		$sql = '';
+		if($tipo == 'modificar')
+			$sql = " AND id_producto <> ".$this->input->get('id')."";
+
 		$res = $this->db->select('Count(id_producto) AS num')
 			->from('productos')
-			->where("id_producto <> ".$this->input->get('id')." AND codigo = '".$str."'")->get()->row();
+			->where("id_familia = ".$this->input->get('fid_familia')." AND codigo = '".$str."'".$sql)->get()->row();
 		if($res->num == '0')
 			return true;
 

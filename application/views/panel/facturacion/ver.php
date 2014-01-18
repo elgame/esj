@@ -195,6 +195,7 @@
                     <th>IVA</th>
                     <th>Retención</th>
                     <th>Importe</th>
+                    <th>Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -224,6 +225,9 @@
                               </td>
                                <td>
                                 <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe, 2, '', false); ?>" id="prod_importe" readonly>
+                              </td>
+                              <td>
+                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe+$concepto->iva, 2, '', false); ?>" id="prod_total" readonly>
                               </td>
                             </tr>
                   <?php } else {
@@ -256,6 +260,9 @@
                              <td>
                               <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe, 2, '', false); ?>" id="prod_importe" readonly>
                             </td>
+                            <td>
+                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe+$concepto->iva, 2, '', false); ?>" id="prod_total" readonly>
+                              </td>
                           </tr>
 
                 <?php } }}} ?>

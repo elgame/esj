@@ -93,17 +93,18 @@
                   </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group" style="display: none;">
                   <label class="control-label" for="condicionPago">Condición de Pago</label>
                   <div class="controls">
-                    <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
+                    <input type="text" name="condicionPago" class="span9" id="condicionPago" value="<?php echo set_value('condicionPago', '0'); ?>">
+                    <!-- <select name="condicionPago" class="span9" id="condicionPago" data-next="plazoCredito|concepto">
                       <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                       <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
-                    </select>
+                    </select> -->
                   </div>
                 </div>
 
-                <div class="control-group" id="grup_plazo_credito" style="display: <?php echo isset($_POST['condicionPago']) ? ($_POST['condicionPago'] === 'co' ? 'none' : 'block') : 'none' ?>;">
+                <div class="control-group" id="grup_plazo_credito" style="display: none;">
                   <label class="control-label" for="plazoCredito">Plazo de Crédito</label>
                   <div class="controls">
                     <input type="text" name="plazoCredito" class="span9" id="plazoCredito" value="<?php echo set_value('plazoCredito', '0'); ?>">
@@ -151,7 +152,7 @@
               </div>
             </div>
 
-          <div class="row-fluid" id="group_pago_contado" style="display: <?php echo isset($_POST['condicionPago']) ? ($_POST['condicionPago'] === 'cr' ? 'none' : 'block') : '' ?>;">
+          <div class="row-fluid" id="group_pago_contado" style="display: none;">
             <div class="span3">
               <div class="control-group">
                 <div class="controls span9">

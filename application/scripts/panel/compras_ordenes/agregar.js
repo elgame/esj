@@ -7,7 +7,7 @@
 
     autocompleteEmpresas();
     autocompleteProveedores();
-    autocompleteSolicito();
+    autocompleteAutorizo();
     // autocompleteCodigo();
     autocompleteConcepto();
     autocompleteClientes();
@@ -122,20 +122,20 @@
     });
   };
 
-  var autocompleteSolicito= function () {
-    $("#solicito").autocomplete({
+  var autocompleteAutorizo= function () {
+    $("#autorizo").autocomplete({
       source: base_url + 'panel/usuarios/ajax_get_usuarios/',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
-        var $solicito =  $(this);
+        var $autorizo =  $(this);
 
-        $solicito.css("background-color", "#A1F57A");
-        $("#solicitoId").val(ui.item.id);
+        $autorizo.css("background-color", "#A1F57A");
+        $("#autorizoId").val(ui.item.id);
       }
     }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {$("#solicito").css("background-color", "#FFD071");
-        $("#solicitoId").val('');
+      if(event.which == 8 || event.which == 46) {$("#autorizo").css("background-color", "#FFD071");
+        $("#autorizoId").val('');
       }
     });
   };
@@ -251,7 +251,7 @@
         $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
         $fcantidad.val('1');
-        $fprecio.val('0');
+        $fprecio.val(ui.item.item.precio_unitario);
         $funidad.val(ui.item.item.id_unidad);
 
         var presentaciones = ui.item.item.presentaciones,
@@ -601,7 +601,7 @@
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
                   '</td>' +
                   '<td style="width: 65px;">' +
-                      '<input type="number" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="1" data-next="jump'+(++jumpIndex)+'">' +
+                      '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 65px;">' +
                       '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +

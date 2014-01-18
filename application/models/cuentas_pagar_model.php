@@ -675,7 +675,7 @@ class cuentas_pagar_model extends privilegios_model{
 		$resp = $this->banco_cuentas_model->addRetiro(array(
 					'id_cuenta'    => $this->input->post('dcuenta'),
 					'id_banco'     => $data_cuenta->id_banco,
-					'fecha'        => $this->input->post('dfecha').':'.date("s"),
+					'fecha'        => $this->input->post('dfecha'),
 					'numero_ref'   => $this->input->post('dreferencia'),
 					'concepto'     => $this->input->post('dconcepto').$desc,
 					'monto'        => $total,
@@ -751,7 +751,7 @@ class cuentas_pagar_model extends privilegios_model{
 			$resp = $this->banco_cuentas_model->addRetiro(array(
 						'id_cuenta'    => $data['id_cuenta'],
 						'id_banco'     => $data_cuenta->id_banco,
-						'fecha'        => $data['fecha'].':'.date("s"),
+						'fecha'        => $data['fecha'],
 						'numero_ref'   => $data['ref_movimiento'],
 						'concepto'     => $data['concepto'],
 						'monto'        => $data['total'],

@@ -106,8 +106,9 @@ class compras_ordenes_model extends CI_Model {
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
       'tipo_pago'       => $_POST['tipoPago'],
       'tipo_orden'      => $_POST['tipoOrden'],
-      'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
+      'solicito'        => $_POST['solicito'],
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
+      'descripcion'     => $_POST['descripcion'],
     );
 
     $this->db->insert('compras_ordenes', $data);
@@ -209,13 +210,15 @@ class compras_ordenes_model extends CI_Model {
         'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
         'tipo_pago'       => $_POST['tipoPago'],
         'tipo_orden'      => $_POST['tipoOrden'],
-        'id_solicito'     => $_POST['solicitoId'] !== '' ? $_POST['solicitoId'] : null,
+        'solicito'        => $_POST['solicito'],
         'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
+        'descripcion'     => $_POST['descripcion'],
+        'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
       );
 
       if (isset($_POST['autorizar']) && $status === 'p')
       {
-        $data['id_autorizo']        = $this->session->userdata('id_usuario');
+        $data['id_autorizo']        = $_POST['autorizoId']; //$this->session->userdata('id_usuario');
         $data['fecha_autorizacion'] = date('Y-m-d H:i:s');
         $data['autorizado']         = 't';
       }
@@ -309,14 +312,14 @@ class compras_ordenes_model extends CI_Model {
       'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
     );
 
-    //si es contado, se verifica que la cuenta tenga saldo
-    if ($data['condicion_pago'] == 'co')
-    {
-      $this->load->model('banco_cuentas_model');
-      $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
-      if ($cuenta['cuentas'][0]->saldo < $data['total'])
-        return array('passes' => false, 'msg' => 30);
-    }
+    // //si es contado, se verifica que la cuenta tenga saldo
+    // if ($data['condicion_pago'] == 'co')
+    // {
+    //   $this->load->model('banco_cuentas_model');
+    //   $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
+    //   if ($cuenta['cuentas'][0]->saldo < $data['total'])
+    //     return array('passes' => false, 'msg' => 30);
+    // }
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
@@ -350,19 +353,19 @@ class compras_ordenes_model extends CI_Model {
     // obtiene el id de la compra insertada.
     $compraId = $this->db->insert_id();
 
-    //si es contado, se registra el abono y el retiro del banco
-    if ($data['condicion_pago'] == 'co')
-    {
-      $this->load->model('cuentas_pagar_model');
-      $data_abono = array('fecha'             => $data['fecha'],
-                        'concepto'            => 'Pago de contado',
-                        'total'               => $data['total'],
-                        'id_cuenta'           => $this->input->post('dcuenta'),
-                        'ref_movimiento'      => $this->input->post('dreferencia'),
-                        'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
-      $_GET['tipo'] = 'f';
-      $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
-    }
+    // //si es contado, se registra el abono y el retiro del banco
+    // if ($data['condicion_pago'] == 'co')
+    // {
+    //   $this->load->model('cuentas_pagar_model');
+    //   $data_abono = array('fecha'             => $data['fecha'],
+    //                     'concepto'            => 'Pago de contado',
+    //                     'total'               => $data['total'],
+    //                     'id_cuenta'           => $this->input->post('dcuenta'),
+    //                     'ref_movimiento'      => $this->input->post('dreferencia'),
+    //                     'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
+    //   $_GET['tipo'] = 'f';
+    //   $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
+    // }
 
     // construye el array de las ordenes a ligar con la compra.
     $ordenes = array();
@@ -420,19 +423,18 @@ class compras_ordenes_model extends CI_Model {
               co.id_proveedor, p.nombre_fiscal AS proveedor,
               co.id_departamento, cd.nombre AS departamento,
               co.id_empleado, u.nombre AS empleado,
-              co.id_autorizo, us.nombre AS autorizo,
+              co.id_autorizo, (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) AS autorizo,
               co.id_cliente, cl.nombre_fiscal AS cliente,
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
-              co.id_solicito, (uss.nombre || ' ' || uss.apellido_paterno || ' ' || uss.apellido_materno) as empleado_solicito
+              co.solicito as empleado_solicito, co.descripcion
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
-       LEFT JOIN usuarios AS uss ON uss.id = co.id_solicito
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        WHERE co.id_orden = {$idOrden}");
 
@@ -485,7 +487,7 @@ class compras_ordenes_model extends CI_Model {
   public function autorizar($idOrden)
   {
     $data = array(
-      'id_autorizo'        => $this->session->userdata('id_usuario'),
+      'id_autorizo'        => $_POST['autorizoId'], //$this->session->userdata('id_usuario'),
       'fecha_autorizacion' => date('Y-m-d H:i:s'),
       'autorizado'         => 't',
     );
@@ -708,8 +710,9 @@ class compras_ordenes_model extends CI_Model {
     $res = $this->db->query(
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia,
-              pu.nombre as unidad, pu.abreviatura as unidad_abreviatura
-        FROM productos as p
+              pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
+              (SELECT precio_unitario FROM compras_productos WHERE id_producto = p.id_producto ORDER BY id_orden DESC LIMIT 1) AS precio_unitario
+        FROM productos AS p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
         WHERE p.status = 'ac' AND
@@ -821,7 +824,7 @@ class compras_ordenes_model extends CI_Model {
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
       $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
-      $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->id_orden;
+      $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->folio;
 
       $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
 
@@ -877,9 +880,12 @@ class compras_ordenes_model extends CI_Model {
         String::formatoNumero($subtotal, 2, '$', false),
       ), false, false);
 
+      $dato_cliente = '';
+      if($orden['info'][0]->tipo_orden == 'f')
+        $dato_cliente = 'CLIENTE: '.$orden['info'][0]->cliente;
       $pdf->SetX(6);
       $pdf->Row(array(
-        'CLIENTE: '.$orden['info'][0]->cliente,
+        $dato_cliente,
         'IVA',
         String::formatoNumero($iva, 2, '$', false),
       ), false, false);
@@ -896,7 +902,7 @@ class compras_ordenes_model extends CI_Model {
 
       $pdf->SetX(6);
       $pdf->Row(array(
-        '',
+        'OBSERVACIONES: '.$orden['info'][0]->descripcion,
         'TOTAL',
         String::formatoNumero($total, 2, '$', false),
       ), false, false);
@@ -905,7 +911,7 @@ class compras_ordenes_model extends CI_Model {
       $y = $pdf->GetY();
 
       $pdf->SetXY($x - 4, $y + 5);
-      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PAR QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
+      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
 
       $pdf->SetAligns(array('C', 'C', 'C'));
       $pdf->SetWidths(array(65, 65, 65));

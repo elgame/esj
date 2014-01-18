@@ -122,6 +122,8 @@ class proveedores_model extends CI_Model {
 						'key_path'       => $dkey_path,
 						'pass'           => $this->input->post('dpass'),
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
+						'condicion_pago' => $this->input->post('condicionPago'),
+						'dias_credito'   => intval($this->input->post('plazoCredito')),
 						);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
@@ -200,6 +202,8 @@ class proveedores_model extends CI_Model {
 						'key_path'       => $dkey_path,
 						'pass'           => $this->input->post('dpass'),
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
+						'condicion_pago' => $this->input->post('condicionPago'),
+						'dias_credito'   => intval($this->input->post('plazoCredito')),
 						);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
@@ -223,7 +227,7 @@ class proveedores_model extends CI_Model {
 
 		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
 							estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
-                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal" )
+                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal, condicion_pago, dias_credito" )
 												->from("proveedores")
 												->where("id_proveedor", $id_proveedor)
 												->get();
@@ -252,7 +256,8 @@ class proveedores_model extends CI_Model {
 		// if($this->input->get('type') !== false)
 		// 	$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
+				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, 
+					condicion_pago, dias_credito
 				FROM proveedores
 				WHERE status = 'ac' ".$sql."
 				ORDER BY nombre_fiscal ASC

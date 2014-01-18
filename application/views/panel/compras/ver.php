@@ -95,7 +95,7 @@
                       </div>
                     </div>
 
-                    <?php if ( ! $compra['info']->xml){ ?>
+                    <?php //if ( ! $compra['info']->xml){ ?>
                       <div class="span4">
                         <div class="control-group">
                           <div class="controls span9">
@@ -105,7 +105,7 @@
                           </div>
                         </div>
                       </div>
-                    <?php } ?>
+                    <?php //} ?>
                   </div>
 
                   <div class="row-fluid">  <!-- Box Productos -->

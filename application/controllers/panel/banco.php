@@ -215,7 +215,7 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addRetiro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=7'.
+				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=8'.
 						($res_mdl['ver_cheque'] ? "&id_movimiento={$res_mdl['id_movimiento']}" : '') ));
 			else
 				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));

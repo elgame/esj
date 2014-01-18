@@ -39,14 +39,14 @@ class gastos_model extends privilegios_model{
       $datos['id_vehiculo'] = $data['vehiculoId'];
     }
 
-    //si es contado, se verifica que la cuenta tenga saldo
-    if ($datos['condicion_pago'] == 'co')
-    {
-      $this->load->model('banco_cuentas_model');
-      $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
-      if ($cuenta['cuentas'][0]->saldo < $datos['total'])
-        return array('passes' => false, 'msg' => 30);
-    }
+    // //si es contado, se verifica que la cuenta tenga saldo
+    // if ($datos['condicion_pago'] == 'co')
+    // {
+    //   $this->load->model('banco_cuentas_model');
+    //   $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
+    //   if ($cuenta['cuentas'][0]->saldo < $datos['total'])
+    //     return array('passes' => false, 'msg' => 30);
+    // }
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
@@ -80,20 +80,20 @@ class gastos_model extends privilegios_model{
     // obtiene el id de la compra insertada.
     $compraId = $this->db->insert_id();
 
-    //si es contado, se registra el abono y el retiro del banco
     $respons = array();
-    if ($datos['condicion_pago'] == 'co')
-    {
-      $this->load->model('cuentas_pagar_model');
-      $data_abono = array('fecha'             => $data['fecha'],
-                        'concepto'            => substr($data['concepto'], 0, 119),
-                        'total'               => $data['total'],
-                        'id_cuenta'           => $this->input->post('dcuenta'),
-                        'ref_movimiento'      => $this->input->post('dreferencia'),
-                        'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
-      $_GET['tipo'] = 'f';
-      $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
-    }
+    // //si es contado, se registra el abono y el retiro del banco
+    // if ($datos['condicion_pago'] == 'co')
+    // {
+    //   $this->load->model('cuentas_pagar_model');
+    //   $data_abono = array('fecha'             => $data['fecha'],
+    //                     'concepto'            => substr($data['concepto'], 0, 119),
+    //                     'total'               => $data['total'],
+    //                     'id_cuenta'           => $this->input->post('dcuenta'),
+    //                     'ref_movimiento'      => $this->input->post('dreferencia'),
+    //                     'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
+    //   $_GET['tipo'] = 'f';
+    //   $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
+    // }
 
     //si se registra a un vehiculo
     if (isset($data['es_vehiculo']))
@@ -146,6 +146,12 @@ class gastos_model extends privilegios_model{
 
   public function updateXml($compraId, $proveedorId, $xml)
   {
+    $compra = array(
+      'subtotal'      => String::float($this->input->post('subtotal')),
+      'importe_iva'   => String::float($this->input->post('iva')),
+      'total'         => String::float($this->input->post('total')),
+    );
+
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
     {
@@ -170,8 +176,9 @@ class gastos_model extends privilegios_model{
 
       $xmlFile     = explode('application', $xmlData['full_path']);
 
-      $this->db->update('compras', array('xml' => 'application'.$xmlFile[1]), array('id_compra' => $compraId));
+      $compra['xml'] = 'application'.$xmlFile[1];
     }
+    $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
 
   /*

@@ -137,6 +137,7 @@ class cuentas_pagar extends MY_Controller {
       array('general/msgbox.js'),
       array('general/supermodal.js'),
       array('general/keyjump.js'),
+      array('general/util.js'),
       array('panel/almacen/cuentas_pagar.js'),
     ));
 
@@ -152,6 +153,9 @@ class cuentas_pagar extends MY_Controller {
 
     if (isset($_GET['id']{0}) && isset($_GET['tipo']{0})) 
     {
+      $ids_aux = $_GET['id'];
+      $tipos_aux = $_GET['tipo'];
+
       $this->configAddAbono();
       if($this->form_validation->run() == FALSE)
       {
@@ -176,13 +180,15 @@ class cuentas_pagar extends MY_Controller {
       if(isset($_GET['total']{0})) //si es masivo
       {
         $params['data'] = array('saldo' => $_GET['total'], 'facturas' => array() );
-        $ids   = explode(',', substr($_GET['id'], 1));
-        $tipos = explode(',', substr($_GET['tipo'], 1));
+        $ids   = explode(',', substr($ids_aux, 1));
+        $tipos = explode(',', substr($tipos_aux, 1));
         foreach ($ids as $key => $value) 
         {
           $params['data']['facturas'][] = $this->cuentas_pagar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
         }
         $proveedor = $params['data']['facturas'][0]['proveedor'];
+        $_GET['id'] = $ids_aux;
+        $_GET['tipo'] = $tipos_aux;
       }else
       {
         $params['data'] = $this->cuentas_pagar_model->getDetalleVentaFacturaData();

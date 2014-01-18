@@ -57,6 +57,9 @@
         $proveedor.val(ui.item.id);
         $("#proveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
+        
+        $("#condicionPago").val(ui.item.item.condicion_pago);
+        $("#plazoCredito").val(ui.item.item.dias_credito);
 
         $.get(base_url + 'panel/gastos/ajax_get_cuentas_proveedor/?idp=' + ui.item.id, function(data) {
           var htmlOptions = '';
@@ -66,6 +69,7 @@
 
           $('#fcuentas_proveedor').html(htmlOptions);
         }, 'json');
+
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {

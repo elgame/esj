@@ -57,7 +57,7 @@ class Ventas_model extends privilegios_model{
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
         WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
-        ORDER BY (f.fecha, f.folio) DESC
+        ORDER BY  f.folio ASC, f.fecha DESC, f.serie DESC
         ", $params, true);
     $res = $this->db->query($query['query']);
 
@@ -270,7 +270,7 @@ class Ventas_model extends privilegios_model{
     $productosFactura   = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
     {
-      if ($_POST['prod_importe'][$key] != 0)
+      if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $productosFactura[] = array(
           'id_factura'       => $id_venta,
@@ -826,6 +826,21 @@ class Ventas_model extends privilegios_model{
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(109, 6);
       $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
+
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 171, 72);
+      $pdf->SetXY(109, $pdf->GetY() + 4);
+      $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+
+      $pdf->SetFont('helvetica','', 9);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(109, $pdf->GetY() + 4);
+
+      $municipio   = strtoupper($factura['info']->empresa->municipio);
+      $estado = strtoupper($factura['info']->empresa->estado);
+      $fecha = String::fechaATexto($factura['info']->fecha);
+
+      $pdf->Cell(108, 4, "{$municipio}, {$estado} | {$fecha}", 0, 0, 'R', 0);
 
       //////////////////
       // domicilioEmisor //

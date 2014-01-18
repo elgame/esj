@@ -65,10 +65,13 @@ var abonom = (function($){
     url = btn_abonos_masivo.attr("href").split("?");
     url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total;
     btn_abonos_masivo.attr("href", url);
-    if($(".sel_abonom.active").length > 0)
+    if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
-    else
+      $("#sumaRowsSel").text(util.darFormatoNum(total)).show();
+    }else{
       btn_abonos_masivo.hide();
+      $("#sumaRowsSel").hide();
+    }
   }
 
   objs.init = init;
@@ -97,6 +100,7 @@ var modalAbonos = (function($){
       monto += parseFloat($(this).val());
     });
     $("#dmonto").val(monto);
+    $("#suma_monto").text(util.darFormatoNum(monto));
   }
 
   function sendFormMasivo(){

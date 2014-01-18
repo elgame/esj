@@ -18,7 +18,7 @@
               <div class="control-group">
                 <label class="control-label" for="dfecha">Fecha</label>
                 <div class="controls">
-                  <input type="datetime-local" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d\TH:i")); ?>" autofocus required>
+                  <input type="date" name="dfecha" class="span6" id="dfecha" value="<?php echo set_value('dfecha', date("Y-m-d")); ?>" autofocus required>
                 </div>
               </div>
 
@@ -58,7 +58,7 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group" style="display: none;">
                 <label class="control-label" for="fmetodo_pago">Metodo de pago </label>
                 <div class="controls">
                   <select name="fmetodo_pago" id="fmetodo_pago" required>
@@ -88,8 +88,11 @@
               </thead>
               <tbody>
               <?php  
+              $suma_saldo = $suma_monto = 0;
               foreach ($data['facturas'] as $key => $value)
               {
+                $suma_saldo += $value['saldo'];
+                $suma_monto += $value['saldo'];
               ?>
                 <tr>
                   <td><?php echo $value['cobro'][0]->serie.$value['cobro'][0]->folio; ?>
@@ -109,6 +112,11 @@
               <?php
               }
               ?>
+                <tr style="font-weight:bold;">
+                  <td>Totales</td>
+                  <td><?php echo String::formatoNumero($suma_saldo, 2, '$', false); ?></td>
+                  <td id="suma_monto"><?php echo String::formatoNumero($suma_monto, 2, '$', false); ?></td>
+                </tr>
               </tbody>
               </table>
             </div>

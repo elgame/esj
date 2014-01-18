@@ -76,7 +76,7 @@
               <tbody>
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
-                  <td><?php echo $fact->fecha; ?></td>
+                  <td style="width:70px;"><?php echo $fact->fecha; ?></td>
                   <td>
                     <span class="label"><?php echo ($fact->serie !== '' ? $fact->serie.'-' : '').$fact->folio; ?></span>
                   </td>

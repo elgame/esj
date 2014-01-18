@@ -509,10 +509,10 @@ function addProducto(unidades, prod) {
       unidadesHtml += '<option value="'+unidades[i].nombre+'" '+(unidades[i].id_unidad == idUnidadClasificacion ? 'selected' : '')+' data-id="'+unidades[i].id_unidad+'">'+unidades[i].nombre+'</option>';
     }
 
-    // Si el id de unidad es la 9 osea de kilos entonces en cantidad coloca
+    // Si el id de unidad es la 19 osea de kilos entonces en cantidad coloca
     // los kilos en vez de las cajas.
     // Cambiar el id que le corresponda a los KILOS en las unidades.
-    if (idUnidadClasificacion == '9') {
+    if (idUnidadClasificacion == '19') {
       cantidad = prod_kilos;
     } else {
       cantidad = prod_cajas;
@@ -822,7 +822,7 @@ function valida_agregar ($tr) {
   // $tr.find("#prod_did_prod").val() === '' ||
 
   if ($tr.find("#prod_dmedida").val() === '' || $tr.find("#prod_dcantidad").val() == 0 ||
-      $tr.find("#prod_dpreciou").val() == 0) {
+      $tr.find("#prod_dpreciou").val() < 0) {
     return false;
   }
   else return true;

@@ -307,6 +307,13 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'fbanco[]',
 					'label'	=> 'Banco',
 					'rules'	=> 'max_length[5]'),
+
+			array('field'	=> 'condicionPago',
+					'label'	=> 'Condición de Pago',
+					'rules'	=> 'max_length[2]'),
+			array('field'	=> 'plazoCredito',
+					'label'	=> 'Plazo de Crédito',
+					'rules'	=> 'max_length[3]'),
 		);
 
 		$this->form_validation->set_rules($rules);
