@@ -298,7 +298,7 @@
     // var importe   = trunc2Dec(parseFloat($('#dcantidad').val() * parseFloat($('#dpreciou').val()))),
     //     iva       = trunc2Dec(((importe - descuento) * parseFloat($('#diva option:selected').val())) / 100),
     //     retencion = trunc2Dec(iva * parseFloat($('#dreten_iva option:selected').val()));
-  }
+  };
 
   // Calcula el total de la nota de credito.
   var calculaTotal = function ($tr) {

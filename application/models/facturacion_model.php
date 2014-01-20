@@ -405,10 +405,10 @@ class facturacion_model extends privilegios_model{
               'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-              'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-              'kilos'             => $_POST['prod_dkilos'][$key],
-              'cajas'             => $_POST['prod_dcajas'][$key],
-              'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
+              'ids_pallets'       => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+              'kilos'             => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
+              'cajas'             => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
+              'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
             );
           }
         }
@@ -628,7 +628,7 @@ class facturacion_model extends privilegios_model{
           {
             if ($_POST['prod_importe'][$key] != 0)
             {
-              if ($_POST['prod_dmedida_id'][$key] !== '')
+              if (isset($_POST['prod_dmedida_id'][$key]) && $_POST['prod_dmedida_id'][$key] !== '')
               {
                 $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
 

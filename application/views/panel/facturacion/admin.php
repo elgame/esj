@@ -143,7 +143,7 @@
                           'attrs' => array('target' => "_blank"))
                         );
 
-                        if ($fact->status !== 'ca')
+                        if ($fact->status !== 'ca' && $fact->id_nc === null)
                         {
                            echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
                               'params'   => 'id='.$fact->id_factura,
@@ -174,7 +174,7 @@
                           );
                         }
 
-                        if ($fact->status === 'p')
+                        if ($fact->status === 'p' && $fact->id_nc === null)
                         {
                           echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
                               'params'   => 'id='.$fact->id_factura.'&tipo=f',
@@ -188,14 +188,11 @@
                           echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
                         }
 
-                        if ($fact->id_nc === null)
-                        {
-                          echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
-                            'params'   => 'id='.$fact->id_factura,
-                            'btn_type' => 'btn-success',
-                            'attrs' => array('rel' => 'superbox-50x450'))
-                          );
-                        }
+                        echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
+                          'params'   => 'id='.$fact->id_factura,
+                          'btn_type' => 'btn-success',
+                          'attrs' => array('rel' => 'superbox-50x450'))
+                        );
 
                         if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
                         {

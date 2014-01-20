@@ -509,9 +509,9 @@ class String{
    * @param  mixed $diaEmpieza | Dia donde se empezaran a calcular las semanas 0:lunes, 1:martes etc
    * @param  boolean $todas | true: todas las semanas del año. false: obtiene hasta la semana actual del año.
    * @param  mixed $semana | numero de semana a obtener.
-   * @return array
+   * @return array 2014-01-01  | 2014
    */
-  public static function obtenerSemanasDelAnioV2($anio, $mes = 0, $diaEmpieza = 0, $todas = false, $semana = false)
+  public static function obtenerSemanasDelAnioV2($anio, $mes = 0, $diaEmpieza = 0, $todas = false, $semanaFecha = false)
   {
     $mesInicial = intval($mes) === 0 ? 1 : intval($mes);
     $diasNombres = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
@@ -523,9 +523,25 @@ class String{
     // Obtiene el primer dia de la primera semana del año.
     $primerDiaPrimeraSemanaDelAnio = self::primerDiaPrimeraSemanaDelAnio($anio);
 
-    // Obtiene los el primer y ultimo dia segun el dia donde se empezaran
-    // a contar las semanas.
+    // Obtiene el primer dia donde se empezaran a contar las semanas.
     $siguientePrimerDia = strtotime($nombrePrimerDia, $primerDiaPrimeraSemanaDelAnio);
+
+    // Si el dia actual es menor al primer dia de la primera semana del año que se
+    // estan calculando las semanas, entonces quiere decir que no pertenece
+    // al año que se estan calculado las semanas.
+    if (strtotime(date('Y-m-d')) < $siguientePrimerDia)
+    {
+      // Al año se le resta 1.
+      $anio = intval($anio) - 1;
+
+      // Recalcula la primera semana del año.
+      $primerDiaPrimeraSemanaDelAnio = self::primerDiaPrimeraSemanaDelAnio($anio);
+
+      // Recalcula el siguiente primer dia.
+      $siguientePrimerDia = strtotime($nombrePrimerDia, $primerDiaPrimeraSemanaDelAnio);
+    }
+
+    // Obtiene los el ultimo dia donde se empezaran a contar las semanas.
     $siguienteUltimoDia = strtotime($nombreUltimoDia, $siguientePrimerDia);
 
     // Numero de semana por default.
@@ -543,18 +559,28 @@ class String{
     //   $numeroSemana += 1;
     // }
 
+    // si no se estan obteniendo todas las semanas, este auxiliar ayudara a
+    // saber si ya se obtiene la ultima semana actual.
+    $aux = false;
+
     // Almacena las semanas.
     $semanas = array();
-    while ($numeroSemana <= 52)
+
+    $semanasDefault = 52;
+
+    while ($numeroSemana <= $semanasDefault)
     {
-      if ($semana && intval($semana) === $numeroSemana)
+      if ($semanaFecha)
       {
-        return array(
-          'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
-          'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
-          'anio'         => $anio,
-          'semana'       => $numeroSemana,
-        );
+        if ((intval($semanaFecha) === $numeroSemana) || ($siguientePrimerDia <= strtotime($semanaFecha) && $siguienteUltimoDia >= strtotime($semanaFecha)))
+        {
+          return array(
+            'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
+            'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
+            'anio'         => $anio,
+            'semana'       => $numeroSemana,
+          );
+        }
       }
 
       $semanas[] = array(
@@ -570,36 +596,10 @@ class String{
       $siguientePrimerDia = strtotime('+1 week', $siguientePrimerDia);
       $siguienteUltimoDia = strtotime('+1 week', $siguienteUltimoDia);
       $numeroSemana++;
-    }
 
-    // Si se estan obteniendo todas las semanas del año y no se esta obteniendo
-    // ninguna semana en especfico entonces entra para verificar si el año
-    // tiene la semana 53.
-    if ($todas === true && $semana === false)
-    {
-      $siguientePrimerDiaAux = $siguientePrimerDia;
-
-      // Obtiene el primer dia de la primera semana del siguiente año.
-      $primerDiaPrimeraSemanaDelAnioSiguiente = self::primerDiaPrimeraSemanaDelAnio(intval($anio) + 1);
-
-      // Si el dia del que se esta empezando a contar las semans no es el lunes
-      // entonces obtiene un lunes anterior del $siguientePrimerDia
-      if (intval($diaEmpieza) !== 0)
+      if ($numeroSemana === 53)
       {
-        $siguientePrimerDiaAux  = strtotime(date("Y-m-d", $siguientePrimerDia) . " - {$diaEmpieza} days");
-      }
-
-      // Si el primer dia de la primera semana del siguiente año no es igual
-      // al siguiente primer dia entonces significa que esa semana es la 53 del
-      // año.
-      if ($primerDiaPrimeraSemanaDelAnioSiguiente !== $siguientePrimerDiaAux)
-      {
-        $semanas[] = array(
-          'fecha_inicio' => date('Y-m-d', $siguientePrimerDia),
-          'fecha_final'  => date('Y-m-d', $siguienteUltimoDia),
-          'anio'         => $anio,
-          'semana'       => $numeroSemana,
-        );
+        $semanasDefault++;
       }
     }
 
@@ -641,6 +641,16 @@ class String{
     $primerDiaPrimeraSemanaDelAnio = strtotime(date("Y-m-d", $primerJuevesDelAnio) . " - 3 days");
 
     return $primerDiaPrimeraSemanaDelAnio;
+  }
+
+  /**
+   * Obtiene el numero de dia del año. Va del 1 al 365.
+   *
+   * @return int
+   */
+  public function obtenerNumeroDeDiaDelAnio($fecha)
+  {
+    return date("z", strtotime($fecha)) + 1;
   }
 
 }

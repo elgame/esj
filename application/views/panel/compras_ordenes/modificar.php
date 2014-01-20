@@ -57,9 +57,9 @@
       {
         $badgeTitle = 'ACEPTADA';
         $badgeStyle = '-success';
-        $readonly = 'readonly';
-        $disabled = 'disabled';
-        $showButton = false;
+        $readonly = '';
+        $disabled = '';
+        $showButton = true;
       }
       else if ($orden['info'][0]->status === 'f' AND $orden['info'][0]->autorizado === 't')
       {
@@ -372,8 +372,8 @@
                                     $pu       = $prod->precio_unitario;
                                   }
 
-                                  $readonly = $prod->status === 'a' ? 'readonly' : '';
-                                  $disabled = $prod->status === 'a' ? 'disabled' : '';
+                                  $readonly = $prod->status === 'a' ? '' : '';
+                                  $disabled = $prod->status === 'a' ? '' : '';
 
                                   $redBg    = $prod->status === 'r' ? 'background-color: #FFE5E5;' : '';
 
