@@ -90,7 +90,6 @@ class facturartebarato_api {
 
     $is_xml = simplexml_load_string($this->xml);
 
-
     // Verifica si es un XML valido.
     if ($is_xml)
     {
@@ -211,7 +210,7 @@ class facturartebarato_api {
   public function cancelar(Array $params)
   {
     $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}cancel";
-    
+
     $resultAPI = $this->post($apiURL, $params);
 
     return $resultAPI;
