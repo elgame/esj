@@ -154,6 +154,7 @@
                   <label class="control-label" for="dmetodo_pago">Metodo de pago</label>
                   <div class="controls">
                     <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
+                      <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado', false, $factura['info']->metodo_pago); ?>>No identificado</option>
                       <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo', false, $factura['info']->metodo_pago); ?>>Efectivo</option>
                       <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque', false, $factura['info']->metodo_pago); ?>>Cheque</option>
                       <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', false, $factura['info']->metodo_pago); ?>>Tarjeta</option>

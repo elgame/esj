@@ -14,6 +14,8 @@ class cuentas_cobrar extends MY_Controller {
 
     'cuentas_cobrar/saldos_pdf/',
     'cuentas_cobrar/saldos_xls/',
+
+    'cuentas_cobrar/imprimir_abono/'
   );
 
 
@@ -215,6 +217,20 @@ class cuentas_cobrar extends MY_Controller {
       redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=5'));
     }else
       redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+  }
+
+  public function imprimir_abono()
+  {
+    $this->load->model('cuentas_cobrar_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->cuentas_cobrar_model->imprimir_abono($_GET['p']);
+    }
+    else
+    {
+      $this->load->view('panel/cuentas_cobrar/print_orden_compra');
+    }
   }
 
 

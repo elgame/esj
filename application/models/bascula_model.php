@@ -199,7 +199,7 @@ class Bascula_model extends CI_Model {
 
         $data2['cajas_prestadas'] = empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'];
 
-        if (isset($_POST['pstatus'])) $data2['accion'] = 'p';
+        if (isset($_POST['pstatus'])) $data2['accion'] = $info_boleta['info'][0]->accion;
       }
 
       $cajas = null;
