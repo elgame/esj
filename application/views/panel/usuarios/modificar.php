@@ -66,6 +66,14 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="festa_asegurado">Esta asegurado? </label>
+                    <div class="controls">
+                      <input type="checkbox" name="festa_asegurado" id="festa_asegurado" value="t" data-uniform="false" 
+                        <?php echo set_checkbox('festa_asegurado', 't', isset($data['info'][0]->esta_asegurado)?($data['info'][0]->esta_asegurado=='t'?true:false): false); ?>>
+                    </div>
+                  </div>
+
                   <fieldset>
                     <legend>Domicilio</legend>
                     <div class="control-group">
@@ -207,6 +215,82 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="frfc">RFC </label>
+                    <div class="controls">
+                      <input type="text" name="frfc" id="frfc" class="span6" 
+                        value="<?php echo isset($data['info'][0]->rfc)?$data['info'][0]->rfc:''; ?>" pattern=".{12,13}" placeholder="RFC">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fcurp">CURP </label>
+                    <div class="controls">
+                      <input type="text" name="fcurp" id="fcurp" class="span6" 
+                        value="<?php echo isset($data['info'][0]->curp)?$data['info'][0]->curp:''; ?>" maxlength="30" placeholder="CURP">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fempresa">Empresa </label>
+                    <div class="controls">
+                    <input type="text" name="fempresa" id="fempresa" class="span12" value="<?php echo isset($data['info'][0]->nombre_fiscal)?$data['info'][0]->nombre_fiscal:''; ?>" placeholder="Nombre" required>
+                    <input type="hidden" name="did_empresa" value="<?php echo isset($data['info'][0]->id_empresa)?$data['info'][0]->id_empresa:''; ?>" id="did_empresa" required>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fpuesto">Puesto </label>
+                    <div class="controls">
+                    <select name="fpuesto" id="fpuesto">
+                    <?php foreach ($puestos['puestos'] as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->id_puesto ?>" 
+                        <?php echo set_select('fpuesto', $value->id_puesto, false, (isset($data['info'][0]->id_puesto)?$data['info'][0]->id_puesto:'')); ?>><?php echo $value->nombre." ({$value->abreviatura})" ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fsalario_diario">Salario diario </label>
+                    <div class="controls">
+                      <input type="text" name="fsalario_diario" id="fsalario_diario" class="span12 vpositive" 
+                        value="<?php echo isset($data['info'][0]->salario_diario)?$data['info'][0]->salario_diario:''; ?>" maxlength="12" placeholder="Salario de nomina fiscal">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fsalario_diario_real">Salario diario real </label>
+                    <div class="controls">
+                      <input type="text" name="fsalario_diario_real" id="fsalario_diario_real" class="span12 vpositive" 
+                        value="<?php echo isset($data['info'][0]->salario_diario_real)?$data['info'][0]->salario_diario_real:''; ?>" maxlength="12" placeholder="Salario de nomina real">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="finfonavit">Infonavit </label>
+                    <div class="controls">
+                      <input type="text" name="finfonavit" id="finfonavit" class="span12 vpositive" 
+                        value="<?php echo isset($data['info'][0]->infonavit)?$data['info'][0]->infonavit:''; ?>" maxlength="12" placeholder="Infonavit">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
+                    <div class="controls">
+                    <select name="fregimen_contratacion" id="fregimen_contratacion">
+                      <option value="1" <?php echo set_select('fregimen_contratacion', '1', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Asimilados a salarios</option>
+                      <option value="2" <?php echo set_select('fregimen_contratacion', '2', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Sueldos y salarios</option>
+                      <option value="3" <?php echo set_select('fregimen_contratacion', '3', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Jubilados</option>
+                      <option value="4" <?php echo set_select('fregimen_contratacion', '4', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Pensionados</option>
+                    </select>
+                    </div>
+                  </div>
+
                 </div> <!--/span-->
 
                 <div class="clearfix"></div>

@@ -293,7 +293,7 @@ class documentos_model extends CI_Model {
              id_documento = {$idDocumento}"
     );
 
-    $data = array();
+    $data = array('info' => array(), 'pallets' => array());
     if ($sql->num_rows() > 0)
     {
       $data['info'] = $sql->result();
@@ -452,7 +452,7 @@ class documentos_model extends CI_Model {
    * @param  string $idEmbarque
    * @return array
    */
-  public function getEmbarqueClasifi($idEmbarque)
+  public function getEmbarqueClasifi($idEmbarque, $id_factura=null)
   {
     $query = $this->db->query(
       "SELECT rpr.id_clasificacion, SUM(rpr.cajas) AS cajas, cl.nombre AS clasificacion
@@ -463,9 +463,20 @@ class documentos_model extends CI_Model {
         GROUP BY rpr.id_clasificacion, cl.nombre"
     );
 
-    $data = array();
+    $data['clasificaciones'] = array();
     if ($query->num_rows() > 0)
       $data['clasificaciones'] = $query->result();
+    elseif($id_factura != null)
+    {
+      $query = $this->db->query(
+        "SELECT fep.id_clasificacion, SUM(fep.cantidad) AS cajas, fep.descripcion AS clasificacion
+          FROM facturacion_productos fep
+          WHERE fep.id_factura = {$id_factura}
+          GROUP BY fep.id_clasificacion, fep.descripcion"
+      );
+      if ($query->num_rows() > 0)
+        $data['clasificaciones'] = $query->result();
+    }
 
     return $data;
   }
@@ -1948,7 +1959,7 @@ class documentos_model extends CI_Model {
       ->where('id_factura', $idFactura)
       ->get()->row()->id_embarque;
 
-    $clasificaciones = $this->getEmbarqueClasifi($idEmbarque);
+    $clasificaciones = $this->getEmbarqueClasifi($idEmbarque, $idFactura);
 
     $pdf->SetXY(110, $pdf->GetY() + 27);
     $pdf->SetFillColor(184, 78, 78);

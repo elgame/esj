@@ -41,6 +41,7 @@
                       <option value="v">Ventas</option>
                       <option value="vnc">Ventas Notas Credito</option>
                       <option value="g">Gastos</option>
+                      <option value="no">Nomina</option>
                     </select>
                   </div>
                 </div>
@@ -58,7 +59,7 @@
                 <div class="control-group">
                   <label class="control-label" for="ffolio">Folio</label>
                   <div class="controls">
-                    <input type="text" name="ffolio" id="ffolio" value="<?php echo (isset($folio['folio'])? $folio['folio']: '') ?>" class="span12" placeholder="Folio" readonly required>
+                    <input type="text" name="ffolio" id="ffolio" value="<?php echo (isset($folio['folio'])? $folio['folio']: '') ?>" class="span12" placeholder="Folio" required>
                   </div>
                 </div>
 

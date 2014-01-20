@@ -45,6 +45,7 @@ var abonom = (function($){
   function init(){
     $(".sel_abonom").on('click', selabono);
     btn_abonos_masivo = $(".btn_abonos_masivo");
+    $("#fmetodo_pago").on('change', changeMetodoPago);
   }
 
   function selabono(){
@@ -65,10 +66,21 @@ var abonom = (function($){
     url = btn_abonos_masivo.attr("href").split("?");
     url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total;
     btn_abonos_masivo.attr("href", url);
-    if($(".sel_abonom.active").length > 0)
+    if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
-    else
+      $("#sumaRowsSel").text(util.darFormatoNum(total)).show();
+    }else{
       btn_abonos_masivo.hide();
+      $("#sumaRowsSel").hide();
+    }
+  }
+
+  function changeMetodoPago(event) {
+    var $this = $(this);
+    if($this.val() != 'transferencia')
+      $("#group_metodo_pago").hide();
+    else
+      $("#group_metodo_pago").show();
   }
 
   function openCheque($id_movimiento) {
@@ -100,6 +112,7 @@ var modalAbonos = (function($){
       monto += parseFloat($(this).val());
     });
     $("#dmonto").val(monto);
+    $("#suma_monto").text(util.darFormatoNum(monto));
   }
 
   objs.init = init;

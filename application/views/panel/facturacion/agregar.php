@@ -490,7 +490,8 @@
               <th></th>
               <th># Folio</th>
               <th>Cajas</th>
-              <th>Fecha</th>
+              <th style="width:70px;">Fecha</th>
+              <th>Clasificacion</th>
             </tr>
           </thead>
           <tbody>

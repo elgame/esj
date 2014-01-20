@@ -101,8 +101,8 @@ function changeBanco(cuenta, vthis){
 }
 
 function chageValMonto(){
-	if($("#did_proveedor").length > 0)
-		$("#fmonto").attr("max", $("#fcuenta option:selected").attr("data-saldo"));
+	// if($("#did_proveedor").length > 0)
+	// 	$("#fmonto").attr("max", $("#fcuenta option:selected").attr("data-saldo"));
 }
 
 /**

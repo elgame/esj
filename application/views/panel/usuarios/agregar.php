@@ -63,6 +63,13 @@
 									  </div>
 									</div>
 
+									<div class="control-group">
+									  <label class="control-label" for="festa_asegurado">Esta asegurado? </label>
+									  <div class="controls">
+									  	<input type="checkbox" name="festa_asegurado" id="festa_asegurado" value="t" data-uniform="false" <?php echo set_checkbox('festa_asegurado', 't'); ?>>
+									  </div>
+									</div>
+
 									<fieldset>
 										<legend>Domicilio</legend>
 										<div class="control-group">
@@ -181,19 +188,89 @@
 								</div> <!--/span-->
 
 								<div class="span4">
-	                <div class="control-group">
-	                  <label class="control-label" style="width: 100px;">Privilegios </label>
-	                  <div class="controls" style="margin-left: 120px;">
-	                  	<div id="list_privilegios" style="height: 500px; overflow-y: auto; border:1px #ddd solid;">
-	                  		<?php
-													if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){
-														echo $this->usuarios_model->getFrmPrivilegios(0, true);
-													}
-												?>
-	                    </div>
-	                  </div>
-	                </div>
-	              </div> <!--/span-->
+									<div class="control-group">
+									  <label class="control-label" style="width: 100px;">Privilegios </label>
+									  <div class="controls" style="margin-left: 120px;">
+									  	<div id="list_privilegios" style="height: 500px; overflow-y: auto; border:1px #ddd solid;">
+									  		<?php
+												if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){
+													echo $this->usuarios_model->getFrmPrivilegios(0, true);
+												}
+											?>
+									    </div>
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="frfc">RFC </label>
+									  <div class="controls">
+											<input type="text" name="frfc" id="frfc" class="span6" value="<?php echo set_value('frfc'); ?>" pattern=".{12,13}" title="12 o 13 caracteres" placeholder="RFC">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fcurp">CURP </label>
+									  <div class="controls">
+											<input type="text" name="fcurp" id="fcurp" class="span6" value="<?php echo set_value('fcurp'); ?>" maxlength="30" placeholder="CURP">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fempresa">Empresa </label>
+									  <div class="controls">
+										<input type="text" name="fempresa" id="fempresa" class="span12" value="<?php echo set_value('fempresa'); ?>" placeholder="Nombre" required>
+										<input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa'); ?>" id="did_empresa" required>
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fpuesto">Puesto </label>
+									  <div class="controls">
+										<select name="fpuesto" id="fpuesto">
+										<?php foreach ($puestos['puestos'] as $key => $value)
+										{
+										?>
+											<option value="<?php echo $value->id_puesto ?>" <?php echo set_select('fpuesto', $value->id_puesto, false, $this->input->post('fpuesto')); ?>><?php echo $value->nombre." ({$value->abreviatura})" ?></option>
+										<?php
+										} ?>
+										</select>
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fsalario_diario">Salario diario </label>
+									  <div class="controls">
+											<input type="text" name="fsalario_diario" id="fsalario_diario" class="span12 vpositive" value="<?php echo set_value('fsalario_diario'); ?>" maxlength="12" placeholder="Salario de nomina fiscal">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fsalario_diario_real">Salario diario real </label>
+									  <div class="controls">
+											<input type="text" name="fsalario_diario_real" id="fsalario_diario_real" class="span12 vpositive" value="<?php echo set_value('fsalario_diario_real'); ?>" maxlength="12" placeholder="Salario de nomina real">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="finfonavit">Infonavit </label>
+									  <div class="controls">
+											<input type="text" name="finfonavit" id="finfonavit" class="span12 vpositive" value="<?php echo set_value('finfonavit'); ?>" maxlength="12" placeholder="Infonavit">
+									  </div>
+									</div>
+
+									<div class="control-group">
+									  <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
+									  <div class="controls">
+										<select name="fregimen_contratacion" id="fregimen_contratacion">
+											<option value="1" <?php echo set_select('fregimen_contratacion', '1', false, $this->input->post('fregimen_contratacion')); ?>>Asimilados a salarios</option>
+											<option value="2" <?php echo set_select('fregimen_contratacion', '2', false, $this->input->post('fregimen_contratacion')); ?>>Sueldos y salarios</option>
+											<option value="3" <?php echo set_select('fregimen_contratacion', '3', false, $this->input->post('fregimen_contratacion')); ?>>Jubilados</option>
+											<option value="4" <?php echo set_select('fregimen_contratacion', '4', false, $this->input->post('fregimen_contratacion')); ?>>Pensionados</option>
+										</select>
+									  </div>
+									</div>
+
+								</div> <!--/span-->
 
 	              <div class="clearfix"></div>
 

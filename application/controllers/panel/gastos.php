@@ -7,7 +7,8 @@ class gastos extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
-    'gastos/ajax_get_cuentas_proveedor/'
+    'gastos/ajax_get_cuentas_proveedor/',
+    'gastos/ligar/',
   );
 
   public function _remap($method){
@@ -38,7 +39,7 @@ class gastos extends MY_Controller {
       array('general/util.js'),
       array('general/keyjump.js'),
       array('general/msgbox.js'),
-      // array('general/supermodal.js'),
+      array('general/supermodal.js'),
       // array('panel/compras_ordenes/agregar.js'),
       array('panel/gastos/agregar.js')
     ));
@@ -155,6 +156,23 @@ class gastos extends MY_Controller {
     redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
   }
 
+
+  public function ligar()
+  {
+     $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('general/msgbox.js'),
+      array('panel/gastos/agregar.js')
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('compras_ordenes_model');
+
+    $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
+
+    $this->load->view('panel/gastos/ligar', $params);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -241,6 +259,7 @@ class gastos extends MY_Controller {
     $rules[] = array('field' => 'vehiculoId',
                     'label' => 'Vehiculos',
                     'rules' => '');
+    
     if ($this->input->post('es_vehiculo') == 'si')
     {
       $rules[count($rules)-1]['rules'] = 'required|numeric';
@@ -261,6 +280,13 @@ class gastos extends MY_Controller {
                         'rules' => 'required|numeric');
       }
     }
+
+    $rules[] = array('field' => 'ordenes[]',
+                    'label' => 'Ordenes',
+                    'rules' => '');
+    $rules[] = array('field' => 'ordenes_folio[]',
+                    'label' => 'Ordenes',
+                    'rules' => '');
 
     $this->form_validation->set_rules($rules);
   }
@@ -318,6 +344,10 @@ class gastos extends MY_Controller {
         $txt = 'El XML se actualizo correctamente.';
         $icono = 'success';
       break;
+      case 30:
+        $txt = 'La cuenta no tiene saldo suficiente.';
+        $icono = 'error';
+        break;
     }
 
     return array(

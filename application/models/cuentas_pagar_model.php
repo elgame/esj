@@ -675,7 +675,7 @@ class cuentas_pagar_model extends privilegios_model{
 		$resp = $this->banco_cuentas_model->addRetiro(array(
 					'id_cuenta'    => $this->input->post('dcuenta'),
 					'id_banco'     => $data_cuenta->id_banco,
-					'fecha'        => $this->input->post('dfecha').':'.date("s"),
+					'fecha'        => $this->input->post('dfecha'),
 					'numero_ref'   => $this->input->post('dreferencia'),
 					'concepto'     => $this->input->post('dconcepto').$desc,
 					'monto'        => $total,
@@ -684,6 +684,8 @@ class cuentas_pagar_model extends privilegios_model{
 					'metodo_pago'  => $this->input->post('fmetodo_pago'),
 					'id_proveedor' => $inf_factura['proveedor']->id_proveedor,
 					'a_nombre_de'  => $inf_factura['proveedor']->nombre_fiscal,
+					'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL),
+					'clasificacion'       => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
 					));
 
 		if ($resp['error'] == false)
@@ -727,7 +729,8 @@ class cuentas_pagar_model extends privilegios_model{
 						'concepto'       => $this->input->post('dconcepto'),
 						'total'          => $this->input->post('dmonto'),
 						'id_cuenta'      => $this->input->post('dcuenta'),
-						'ref_movimiento' => $this->input->post('dreferencia') );
+						'ref_movimiento' => $this->input->post('dreferencia'),
+						'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL) );
 		}
 
 		$pagada = false;
@@ -748,7 +751,7 @@ class cuentas_pagar_model extends privilegios_model{
 			$resp = $this->banco_cuentas_model->addRetiro(array(
 						'id_cuenta'    => $data['id_cuenta'],
 						'id_banco'     => $data_cuenta->id_banco,
-						'fecha'        => $data['fecha'].':'.date("s"),
+						'fecha'        => $data['fecha'],
 						'numero_ref'   => $data['ref_movimiento'],
 						'concepto'     => $data['concepto'],
 						'monto'        => $data['total'],
@@ -757,6 +760,8 @@ class cuentas_pagar_model extends privilegios_model{
 						'metodo_pago'  => $this->input->post('fmetodo_pago'),
 						'id_proveedor' => $inf_factura['proveedor']->id_proveedor,
 						'a_nombre_de'  => $inf_factura['proveedor']->nombre_fiscal,
+						'id_cuenta_proveedor' => ($data['id_cuenta_proveedor']!=''? $data['id_cuenta_proveedor']: NULL),
+						'clasificacion'       => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
 						));
 			//No hay saldo
 			if($resp['error'])

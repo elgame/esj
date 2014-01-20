@@ -60,7 +60,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fcodigo">Codigo </label>
                   <div class="controls">
-                    <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo') ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required autofocus>
+                    <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', $folio) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required>
                   </div>
                 </div>
 
@@ -68,7 +68,7 @@
                   <label class="control-label" for="fnombre">Nombre </label>
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90" 
-                    value="<?php echo set_value('fnombre'); ?>" required placeholder="Nombre del producto">
+                    value="<?php echo set_value('fnombre'); ?>" required placeholder="Nombre del producto" autofocus>
                   </div>
                 </div>
 

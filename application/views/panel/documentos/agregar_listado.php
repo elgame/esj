@@ -66,8 +66,9 @@
               $params['dataEmbarque'] = $this->documentos_model->getEmbarqueData($factura['info']->id_factura, 2);
 
               $params['dataClasificaciones'] = array('clasificaciones' => array());
-              if(isset($params['dataEmbarque']['info']))
-                $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque);
+              // var_dump($params['dataEmbarque']['info']);
+              if(isset($params['dataEmbarque']['info'][0]->id_embarque))
+                $params['dataClasificaciones'] = $this->documentos_model->getEmbarqueClasifi($params['dataEmbarque']['info'][0]->id_embarque, $factura['info']->id_factura);
             }
 
             // Carga la vista del documento.

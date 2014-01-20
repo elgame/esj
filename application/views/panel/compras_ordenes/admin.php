@@ -143,6 +143,12 @@
                           'btn_type' => 'btn-warning',
                           'attrs' => array())
                         );
+
+                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/email/', array(
+                          'params'   => 'id='.$orden->id_orden,
+                          'btn_type' => '',
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar el email al proveedor?', 'Ordenes de Compras', this); return false;"))
+                        );
                       }
 
                       if ($orden->status === 'r')
@@ -169,12 +175,6 @@
                           'params'   => 'id='.$orden->id_orden.'&p=true',
                           'btn_type' => 'btn-success',
                           'attrs' => array('target' => '_BLANK'))
-                        );
-
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/email/', array(
-                          'params'   => 'id='.$orden->id_orden,
-                          'btn_type' => '',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar el email al proveedor?', 'Ordenes de Compras', this); return false;"))
                         );
                       }
 

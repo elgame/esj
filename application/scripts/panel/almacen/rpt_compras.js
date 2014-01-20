@@ -79,6 +79,46 @@ $(function(){
     }
   });
 
+  /****************
+  * Reporte compras x producto
+  *****************/
+  //Autocomplete productos
+  $("#fproductor").autocomplete({
+    source: function (request, response) {
+      if ($('#did_empresa').val()!='') {
+        $.ajax({
+          url: base_url + 'panel/compras_ordenes/ajax_producto/',
+          dataType: 'json',
+          data: {
+            term : request.term,
+            ide: $('#did_empresa').val(),
+            tipo: 'p'
+          },
+          success: function (data) {
+            response(data)
+          }
+        });
+      } else {
+        noty({"text": 'Seleccione un empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+      }
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#fid_producto").val(ui.item.id);
+      $("#fproductor").val(ui.item.label).css({'background-color': '#99FF99'});
+      setTimeout(addProducto, 200);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $(this).css("background-color", "#FDFC9A");
+      $("#fid_producto").val("");
+    }
+  });
+
+  $("#btnAddProducto").on('click', addProducto);
+  $(document).on('click', '.remove_producto', removeProducto);
+
 });
 
 
@@ -97,5 +137,27 @@ function addProveedor(event){
 }
 
 function removeProveedor(event){
+  $(this).parent('li').remove();
+}
+
+
+/*********************
+Reporte compras x producto
+*********************/
+function addProducto(event){
+  var $this = $(this), fid_producto = $("#fid_producto"), fproductor = $("#fproductor");
+  if (fid_producto.val() != '') {
+    if ( $('#liprovee'+fid_producto.val()).length == 0) {
+      $("#lista_proveedores").append('<li id="liprovee'+fid_producto.val()+'"><a class="btn btn-link remove_producto" style="padding: 2px 5px;"><i class="icon-minus-sign"></i></a>'+
+              '<input type="hidden" name="ids_productos[]" class="ids_productos" value="'+fid_producto.val()+'"> '+fproductor.val()+'</li>');
+    }else
+      noty({"text":"El Proveedor ya esta seleccionado", "layout":"topRight", "type":"error"});
+    fid_producto.val("");
+    fproductor.val("").css({'background-color': '#fff'}).focus();
+  }else
+    noty({"text":"Selecciona un Producto", "layout":"topRight", "type":"error"});
+}
+
+function removeProducto(event){
   $(this).parent('li').remove();
 }

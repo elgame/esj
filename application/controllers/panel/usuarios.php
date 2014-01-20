@@ -60,6 +60,7 @@ class usuarios extends MY_Controller {
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.treeview.js'),
+			array('libs/jquery.numeric.js'),
 			array('panel/usuarios/add_mod_frm.js')
 		));
 
@@ -81,6 +82,9 @@ class usuarios extends MY_Controller {
 			if(!$res_mdl['error'])
 				redirect(base_url('panel/usuarios/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
+
+		$this->load->model('usuarios_puestos_model');
+		$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
 
 
 		if (isset($_GET['msg']))
@@ -130,6 +134,8 @@ class usuarios extends MY_Controller {
 			}
 
 			$params['data'] = $this->usuarios_model->get_usuario_info();
+			$this->load->model('usuarios_puestos_model');
+			$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -252,25 +258,70 @@ class usuarios extends MY_Controller {
 							array('field' => 'fcuenta_cpi',
 										'label' => 'Cuenta contpaqi',
 										'rules' => 'max_length[12]'),
+							
+							array('field' => 'did_empresa',
+										'label' => 'Empresa',
+										'rules' => 'required|numeric'),
+							array('field' => 'fempresa',
+										'label' => 'Empresa',
+										'rules' => 'required'),
+							array('field' => 'finfonavit',
+										'label' => 'Infonavit',
+										'rules' => 'numeric'),
+							array('field' => 'festa_asegurado',
+										'label' => 'Asegurado',
+										'rules' => ''),
 		);
 
 		if ($accion == 'agregar')
 		{
 			$rules[] = 	array('field' => 'fpass',
 												'label' => 'Password',
-												'rules' => 'required|max_length[32]');
+												'rules' => 'max_length[32]');
 			$rules[] = 	array('field' => 'fusuario',
 												'label' => 'Usuario',
-												'rules' => 'required|max_length[30]|is_unique[usuarios.usuario]');
+												'rules' => 'max_length[30]|is_unique[usuarios.usuario]');
 		}
 		else
 		{
 			$rules[] = 	array('field' => 'fpass',
-												'label' => 'Password',
-												'rules' => 'max_length[32]');
+								'label' => 'Password',
+								'rules' => 'max_length[32]');
 			$rules[] = 	array('field' => 'fusuario',
-												'label' => 'Usuario',
-												'rules' => 'required|max_length[30]|callback_valida_email');
+								'label' => 'Usuario',
+								'rules' => 'max_length[30]|callback_valida_email');
+		}
+
+		if (isset($_POST['festa_asegurado']))
+		{
+			$rules[] = array('field' => 'fcurp',
+							'label' => 'CURP',
+							'rules' => 'required|max_length[30]');
+			$rules[11] = array('field' => 'ffecha_entrada',
+							'label' => 'Fecha de entrada',
+							'rules' => 'required|max_length[25]');
+			$rules[] = array('field' => 'fsalario_diario',
+							'label' => 'Salario diario',
+							'rules' => 'required|numeric');
+			$rules[] = array('field' => 'fsalario_diario_real',
+							'label' => 'Salario diario real',
+							'rules' => 'required|numeric');
+			$rules[] = array('field' => 'fregimen_contratacion',
+							'label' => 'Regimen contratacion',
+							'rules' => 'required|numeric');
+		}else{
+			$rules[] = array('field' => 'fcurp',
+							'label' => 'CURP',
+							'rules' => 'max_length[30]');
+			$rules[] = array('field' => 'fsalario_diario',
+							'label' => 'Salario diario',
+							'rules' => 'numeric');
+			$rules[] = array('field' => 'fsalario_diario_real',
+							'label' => 'Salario diario real',
+							'rules' => 'numeric');
+			$rules[] = array('field' => 'fregimen_contratacion',
+							'label' => 'Regimen contratacion',
+							'rules' => 'numeric');
 		}
 
 		$this->form_validation->set_rules($rules);
@@ -279,10 +330,11 @@ class usuarios extends MY_Controller {
 
 	public function valida_email($email)
 	{
-		if ($this->usuarios_model->valida_email('usuarios', array('id !='=>$_GET['id'], 'usuario'=>$email))) {
-			$this->form_validation->set_message('valida_email', 'El %s no esta disponible, intenta con otro.');
-			return FALSE;
-		}
+		if(trim($email) != '')
+			if ($this->usuarios_model->valida_email('usuarios', array('id !='=>$_GET['id'], 'usuario'=>$email))) {
+				$this->form_validation->set_message('valida_email', 'El %s no esta disponible, intenta con otro.');
+				return FALSE;
+			}
 		return TRUE;
 	}
 

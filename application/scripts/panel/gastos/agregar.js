@@ -57,6 +57,9 @@
         $proveedor.val(ui.item.id);
         $("#proveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
+        
+        $("#condicionPago").val(ui.item.item.condicion_pago);
+        $("#plazoCredito").val(ui.item.item.dias_credito);
 
         $.get(base_url + 'panel/gastos/ajax_get_cuentas_proveedor/?idp=' + ui.item.id, function(data) {
           var htmlOptions = '';
@@ -66,6 +69,7 @@
 
           $('#fcuentas_proveedor').html(htmlOptions);
         }, 'json');
+
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -128,6 +132,13 @@
       }
     });
 
+
+    /**
+     * Ligar ordenes
+     */
+    $("#btnCargarOrdenesGasto").on('click', cargarOrdenesGasto);
+    $("#ordenesSeleccionadas").on('click', '.ordenremove', quitarOrdenGasto);
+
   });
 
   var total = function () {
@@ -138,4 +149,59 @@
     $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) + parseFloat($iva.val()||0)) );
   };
 
+
+
+  /**
+   * Licar ordenes
+   */
+  var cargarOrdenesGasto = function (){
+    event.preventDefault();
+    var selecteds = false, data=[];
+    $(".addToFactura:checked").each(function(index, val) {
+      data.push({
+        'id': $(this).val(),
+        'folio': $(this).attr('data-folio')
+      });
+       selecteds = true;
+    });
+
+    if (selecteds) {
+      parent.setOrdenesGastos(data);
+    }else
+      noty({"text":"Selecciona al menos una orden", "layout":"topRight", "type":"error"});  
+  };
+
+  var quitarOrdenGasto = function(event) {
+      event.preventDefault();
+      $(this).parent("span.label").remove();
+    }
+
 });
+
+
+function setOrdenesGastos(data){
+  var html = '';
+  for (var i in data) {
+    if($('#ordenes'+data[i].id).length == 0)
+      html += '<span class="label" style="margin-left:4px">'+data[i].folio+' <i class="icon-remove ordenremove" style="cursor: pointer"></i>'+
+              '  <input type="hidden" name="ordenes[]" value="'+data[i].id+'" id="ordenes'+data[i].id+'">'+
+              '  <input type="hidden" name="ordenes_folio[]" value="'+data[i].folio+'">'+
+              '</span>';
+  };
+  $("#ordenesSeleccionadas").append(html);
+  $("#supermodal").modal('hide');
+}
+
+function validaParamsGasto ($button, $modal) {
+  var idp   = $('#proveedorId').val(),
+      ide   = $('#empresaId').val(),
+      exist = false,
+      ids   = [];
+
+  if(idp != '' && ide != '') {
+    $button.attr('href', base_url + 'panel/gastos/ligar/?fstatus=a&did_proveedor='+idp+'&did_empresa='+ide );
+    $modal.modal('show');
+  } else {
+    noty({"text":"Seleccione una Empresa y un Proveedor", "layout":"topRight", "type":"error"});
+  }
+}

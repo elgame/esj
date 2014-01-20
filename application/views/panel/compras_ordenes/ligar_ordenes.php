@@ -62,7 +62,7 @@
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        Serie <input type="text" name="serie" class="span12" id="serie" value="<?php echo set_value('serie'); ?>">
+                        Serie <input type="text" name="serie" class="span12" id="serie" value="<?php echo set_value('serie'); ?>" autofocus>
                       </div>
                     </div>
                   </div>
@@ -82,21 +82,22 @@
                   </div>
                 </div>
                 <div class="row-fluid">
-                  <div class="span4">
+                  <div class="span4" style="display:none;">
                     <div class="control-group">
                       <div class="controls span9">
                         Condicion de Pago
-                        <select name="condicionPago" class="span12" id="condicionPago" data-next="plazoCredito|dcuenta">
+                        <input type="text" name="condicionPago" class="span12" id="condicionPago" value="<?php echo $proveedor['info']->condicion_pago ?>">
+                        <!-- <select name="condicionPago" class="span12" id="condicionPago" data-next="plazoCredito|dcuenta">
                           <option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
                           <option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
-                        </select>
+                        </select> -->
                       </div>
                     </div>
                   </div>
                   <div class="span4" id="grup_plazo_credito" style="display: none;">
                     <div class="control-group">
                       <div class="controls span9">
-                        Plazo de Crédito<input type="text" name="plazoCredito" class="span12" id="plazoCredito" value="<?php echo set_value('plazoCredito', '0'); ?>">
+                        Plazo de Crédito<input type="text" name="plazoCredito" class="span12" id="plazoCredito" value="<?php echo $proveedor['info']->dias_credito ?>">
                       </div>
                     </div>
                   </div>
@@ -108,7 +109,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="row-fluid" id="group_pago_contado">
+                <div class="row-fluid" id="group_pago_contado" style="display: none;">
                   <div class="span3">
                     <div class="control-group">
                       <div class="controls span9">

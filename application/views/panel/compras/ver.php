@@ -95,7 +95,7 @@
                       </div>
                     </div>
 
-                    <?php if ( ! $compra['info']->xml){ ?>
+                    <?php //if ( ! $compra['info']->xml){ ?>
                       <div class="span4">
                         <div class="control-group">
                           <div class="controls span9">
@@ -105,7 +105,7 @@
                           </div>
                         </div>
                       </div>
-                    <?php } ?>
+                    <?php //} ?>
                   </div>
 
                   <div class="row-fluid">  <!-- Box Productos -->
@@ -133,11 +133,12 @@
                               <tbody>
                                     <?php
                                           $subtotal = $iva = $total = $retencion = 0;
+                                          
+                                          $subtotal  += $compra['info']->subtotal;
+                                          $iva       += $compra['info']->importe_iva;
+                                          $retencion += $compra['info']->retencion_iva;
+                                          $total     += $compra['info']->total;
                                          foreach ($productos as $key => $prod) {
-                                            $subtotal += $prod->importe;
-                                            $iva      += $prod->iva;
-                                            $retencion+= $prod->retencion_iva;
-                                            $total    += $prod->total;
 
                                             $cantidad = $prod->cantidad;
                                             $pu       = $prod->precio_unitario;
@@ -171,7 +172,7 @@
                                                <input type="text" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                            </td>
                                            <td style="">
-                                               <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe) ?></span>
+                                               <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe, 2, '$', false) ?></span>
                                                <input type="hidden" name="importe[]" value="<?php echo set_value('importe[]', $prod->importe) ?>" id="importe" class="span12 vpositive">
                                                <input type="hidden" name="total[]" value="<?php echo set_value('total[]', $prod->total) ?>" id="total" class="span12 vpositive">
                                            </td>
@@ -204,23 +205,27 @@
                           </tr>
                           <tr>
                             <td><em>Subtotal</em></td>
-                            <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte', $subtotal))?></td>
-                            <input type="hidden" name="totalImporte" id="totalImporte" value="<?php echo set_value('totalImporte', $subtotal); ?>">
+                            <td id="importe-format">
+                              <input type="text" name="totalImporte" id="totalImporte" value="<?php echo String::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
+                            </td>
                           </tr>
                           <tr>
                             <td>IVA</td>
-                            <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
-                            <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', $iva); ?>">
+                            <td id="traslado-format">
+                              <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
+                            </td>
                           </tr>
                           <tr>
                             <td>RET.</td>
-                            <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', $retencion))?></td>
-                            <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', $retencion); ?>">
+                            <td id="retencion-format">
+                              <input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo String::formatoNumero(set_value('totalRetencion', $retencion), 2, '$', false)?>">
+                            </td>
                           </tr>
                           <tr style="font-weight:bold;font-size:1.2em;">
                             <td>TOTAL</td>
-                            <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden', $total))?></td>
-                            <input type="hidden" name="totalOrden" id="totalOrden" value="<?php echo set_value('totalOrden', $total); ?>">
+                            <td id="total-format">
+                              <input type="text" name="totalOrden" id="totalOrden" value="<?php echo String::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
+                            </td>
                           </tr>
                         </tbody>
                       </table>

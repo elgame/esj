@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Facturación
+            Notas de credito
           </li>
         </ul>
       </div>
@@ -16,13 +16,13 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Facturas</h2>
+            <h2><i class="icon-file"></i> Notas de credito</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/facturacion/notas_credito'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
@@ -58,7 +58,7 @@
             </form>
 
             <?php
-            echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
+            echo $this->usuarios_model->getLinkPrivSm('facturacion/', array(
                     'params'   => '',
                     'btn_type' => 'btn-success pull-right',
                     'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -143,7 +143,7 @@
                           'attrs' => array('target' => "_blank"))
                         );
 
-                        if ($fact->status !== 'ca' && $fact->id_nc === null)
+                        if ($fact->status !== 'ca')
                         {
                            echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
                               'params'   => 'id='.$fact->id_factura,

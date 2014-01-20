@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -56,7 +56,7 @@
               <div class="control-group">
                 <label class="control-label" for="dfolio">Folio</label>
                 <div class="controls">
-                  <input type="number" name="dfolio" class="span9 nokey" id="dfolio" value="<?php echo isset($_POST['dfolio']) ? $_POST['dfolio'] : (isset($borrador)? $borrador['info']->folio: ''); ?>" size="15" readonly>
+                  <input type="number" name="dfolio" class="span9 nokey" id="dfolio" value="<?php echo isset($_POST['dfolio']) ? $_POST['dfolio'] : (isset($borrador)? $borrador['info']->folio: ''); ?>" size="15" >
                   <input type="hidden" name="dano_aprobacion" id="dano_aprobacion" value="<?php echo set_value('dano_aprobacion'); ?>">
                 </div>
               </div>
@@ -292,7 +292,7 @@
 
                         <?php if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
-                            if ($_POST['prod_importe'][$k] != 0) {
+                            if ($_POST['prod_dcantidad'][$k] != 0) {
                             ?>
                               <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
                                 <td>

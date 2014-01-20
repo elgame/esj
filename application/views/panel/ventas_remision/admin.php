@@ -76,7 +76,7 @@
               <tbody>
             <?php foreach($datos_s['fact'] as $fact) {?>
                 <tr>
-                  <td><?php echo $fact->fecha; ?></td>
+                  <td style="width:70px;"><?php echo $fact->fecha; ?></td>
                   <td>
                     <span class="label"><?php echo ($fact->serie !== '' ? $fact->serie.'-' : '').$fact->folio; ?></span>
                   </td>
@@ -100,14 +100,9 @@
                   <td class="center">
                     <?php
 
-                      // if ($fact->status === 'p')
-                      // {
-                      //   echo $this->usuarios_model->getLinkPrivSm('ventas/pagar/', array(
-                      //     'params'   => 'id='.$fact->id_factura,
-                      //     'btn_type' => 'btn-success',
-                      //     'attrs' => array('onclick' => "msb.confirm('Estas seguro de Pagar la nota de remisión?', 'Notas de Remisión', this); return false;"))
-                      //   );
-                      // }
+                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/modificar/'))
+                        echo '<a class="btn btn-success" href="'.base_url().'panel/ventas/agregar/?id_nr='.$fact->id_factura.'" title="Modificar">
+                              <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Modificar</span></a>';
 
                       echo $this->usuarios_model->getLinkPrivSm('ventas/imprimir/', array(
                         'params'   => 'id='.$fact->id_factura,

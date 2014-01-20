@@ -99,7 +99,7 @@
 									  <label class="control-label" for="fmonto">Monto </label>
 									  <div class="controls">
 											<input type="number" step="any" name="fmonto" id="fmonto" class="span12" value="<?php echo set_value('fmonto'); ?>"
-												maxlength="12" min="0.1" max="<?php echo $cuenta_saldo; ?>" placeholder="1052" required>
+												maxlength="12" min="0.1" placeholder="1052" required>
 									  </div>
 									</div>
 

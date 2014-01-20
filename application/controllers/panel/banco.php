@@ -215,8 +215,10 @@ class banco extends MY_Controller {
 			$res_mdl = $this->banco_cuentas_model->addRetiro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=7'.
+				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg=8'.
 						($res_mdl['ver_cheque'] ? "&id_movimiento={$res_mdl['id_movimiento']}" : '') ));
+			else
+				redirect(base_url('panel/banco/retirar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
 		}
 
 		$params['bancos']       = $this->banco_cuentas_model->getBancos(false);
@@ -580,6 +582,10 @@ class banco extends MY_Controller {
 			case 11:
 				$txt = 'La operacion cambio de estado correctamente.';
 				$icono = 'success';
+				break;
+			case 30:
+				$txt = 'La cuenta no tiene saldo suficiente.';
+				$icono = 'error';
 				break;
 		}
 

@@ -149,6 +149,52 @@ class home extends MY_Controller {
 
 
 
+	/**
+	 * CONFIGURACIONES DE NOMINA IMPUESTOS Y ESO
+	 * @return [type] [description]
+	 */
+	public function configuraciones()
+	{
+		$this->carabiner->css(array(
+			array('libs/jquery.uniform.css', 'screen'),
+		));
+		$this->carabiner->js(array(
+			array('libs/jquery.uniform.min.js'),
+			array('libs/jquery.numeric.js'),
+		));
+
+		$this->load->model('configuraciones_model');
+
+		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
+		$params['seo'] = array(
+			'titulo' => 'Modificar usuario'
+		);
+
+		$this->config_configs('modificar');
+		if ($this->form_validation->run() == FALSE)
+		{
+			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+		}
+		else
+		{
+			$res_mdl = $this->configuraciones_model->modificarConfiguracion();
+
+			if($res_mdl['error'] == FALSE)
+				redirect(base_url('panel/home/configuraciones/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+		}
+
+		$params['data'] = $this->configuraciones_model->getConfiguraciones();
+
+		if (isset($_GET['msg']))
+			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+		$this->load->view('panel/header', $params);
+		$this->load->view('panel/general/menu', $params);
+		$this->load->view('panel/configuraciones/modificar', $params);
+		$this->load->view('panel/footer');
+	}
+
+
 
 	/**
 	 * carga el login para entrar al panel
@@ -223,6 +269,84 @@ class home extends MY_Controller {
 	public function logout(){
 		$this->session->sess_destroy();
 		redirect(base_url('panel/home'));
+	}
+
+
+
+	public function config_configs($accion='agregar')
+	{
+		$this->load->library('form_validation');
+		$rules = array(
+			array('field' => 'daguinaldo',
+						'label' => 'Aguinaldo',
+						'rules' => 'required|numeric'),
+			array('field' => 'dprima_vacacional',
+						'label' => 'Prima Vacacional',
+						'rules' => 'required|numeric'),
+			array('field' => 'dpuntualidad',
+						'label' => 'Puntualidad',
+						'rules' => 'required|numeric'),
+			array('field' => 'dasistencia',
+						'label' => 'Asistencia',
+						'rules' => 'required|numeric'),
+			array('field' => 'ddespensa',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+
+			array('field' => 'anio1[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'anio2[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'dias[]',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+
+			array('field' => 'dzona_a',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+			array('field' => 'dzona_b',
+						'label' => 'Despensa',
+						'rules' => 'required|numeric'),
+		);
+
+		$this->form_validation->set_rules($rules);
+	}
+
+	private function showMsgs($tipo, $msg='', $title='Usuarios')
+	{
+		switch($tipo){
+			case 1:
+				$txt = 'El campo ID es requerido.';
+				$icono = 'error';
+				break;
+			case 2: //Cuendo se valida con form_validation
+				$txt = $msg;
+				$icono = 'error';
+				break;
+			case 3:
+				$txt = 'El usuario se agregó correctamente.';
+				$icono = 'success';
+				break;
+			case 4:
+				$txt = 'Se actualizaron correctamente.';
+				$icono = 'success';
+				break;
+			case 5:
+				$txt = 'El usuario se eliminó correctamente.';
+				$icono = 'success';
+				break;
+			case 6:
+				$txt = 'El usuario se activó correctamente.';
+				$icono = 'success';
+				break;
+		}
+
+		return array(
+				'title' => $title,
+				'msg' => $txt,
+				'ico' => $icono);
 	}
 }
 

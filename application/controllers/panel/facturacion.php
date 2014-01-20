@@ -17,6 +17,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
     'facturacion/ajax_get_clientes/',
+    'facturacion/ajax_get_clientes_vr/',
     'facturacion/ajax_get_pallet_folio/',
     'facturacion/ajax_get_unidades/',
     'facturacion/ajax_get_pallets_cliente/',
@@ -50,12 +51,13 @@ class facturacion extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('facturacion_model');
+    $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo'] = array('titulo' => 'Facturas');
 
-    $params['datos_s'] = $this->facturacion_model->getFacturas();
+    $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_nc IS NULL");
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 
@@ -65,6 +67,36 @@ class facturacion extends MY_Controller {
     $this->load->view('panel/header',$params);
     $this->load->view('panel/general/menu',$params);
     $this->load->view('panel/facturacion/admin',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function notas_credito()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('panel/facturacion/admin.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('facturacion_model');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Facturas');
+
+    //obtenemos las notas de credito
+    $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_nc IS NOT NULL");
+
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/facturacion/admin_nc',$params);
     $this->load->view('panel/footer',$params);
   }
 
@@ -976,6 +1008,16 @@ class facturacion extends MY_Controller {
   public function ajax_get_clientes(){
     $this->load->model('clientes_model');
     $params = $this->clientes_model->getClientesAjax(" AND rfc != ''");
+
+    echo json_encode($params);
+  }
+
+  /**
+    * Obtiene listado de los clientes que tienen RFC por ajax.
+    */
+  public function ajax_get_clientes_vr(){
+    $this->load->model('clientes_model');
+    $params = $this->clientes_model->getClientesAjax();
 
     echo json_encode($params);
   }

@@ -87,7 +87,12 @@ class ventas extends MY_Controller {
     else
     {
       $this->load->model('ventas_model');
-      $respons = $this->ventas_model->addNotaVenta();
+
+      if (isset($_GET['id_nr']))
+        $respons = $this->ventas_model->updateNotaVenta($_GET['id_nr']);
+      else
+        $respons = $this->ventas_model->addNotaVenta();
+
 
       if($respons['passes'])
         redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
@@ -118,6 +123,13 @@ class ventas extends MY_Controller {
       ->where('status', 't')
       ->order_by('nombre')
       ->get()->result();
+
+    if (isset($_GET['id_nr']))
+    {
+      $params['borrador']                = $this->facturacion_model->getInfoFactura($_GET['id_nr']);
+      // $params['borrador']['info']->serie = '';
+      // $params['borrador']['info']->folio = '';
+    }
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -339,9 +351,11 @@ class ventas extends MY_Controller {
     if($str != ''){
       $sql = $ms = '';
 
+      $sql = (isset($_GET['id_nr'])? " AND id_factura <> {$_GET['id_nr']}": '');
+
       $res = $this->db->select('Count(id_factura) AS num')
         ->from('facturacion')
-        ->where("folio = ".$str." AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f' AND status != 'ca'")
+        ->where("folio = ".$str." AND serie = '".$this->input->post('dserie')."' AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f' AND status != 'ca' ".$sql)
         ->get();
       $data = $res->row();
       if($data->num > 0){
@@ -353,8 +367,8 @@ class ventas extends MY_Controller {
   }
 
   public function val_total($str){
-    if($str <= 0){
-      $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
+    if($str <= -1){
+      $this->form_validation->set_message('val_total', 'El Total no puede ser menor que -1, verifica los datos ingresados.');
       return false;
     }
     return true;

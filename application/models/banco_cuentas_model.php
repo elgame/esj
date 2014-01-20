@@ -558,6 +558,7 @@ class banco_cuentas_model extends banco_model {
 			if(is_numeric($_POST['did_cliente']))
 				$data['id_cliente'] = $this->input->post('did_cliente');
 		}
+		$data['concepto'] = substr($data['concepto'], 0, 120);
 
 		$this->db->insert('banco_movimientos', $data);
 		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
@@ -582,15 +583,17 @@ class banco_cuentas_model extends banco_model {
 						'entransito'  => 't',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dproveedor'),
+						'clasificacion' => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
 						);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
 		}
+		$data['concepto'] = substr($data['concepto'], 0, 120);
 
 		//Valida que tenga saldo disponible
-		$cuenta = $this->getCuentas(false, $data['id_cuenta']);
-		if ($cuenta['cuentas'][0]->saldo < $data['monto']+$comision)
-			return array('error' => true, 'msg' => 30);
+		// $cuenta = $this->getCuentas(false, $data['id_cuenta']);
+		// if ($cuenta['cuentas'][0]->saldo < $data['monto']+$comision)
+		// 	return array('error' => true, 'msg' => 30);
 
 		$this->db->insert('banco_movimientos', $data);
 		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');

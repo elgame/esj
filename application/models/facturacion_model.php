@@ -43,11 +43,26 @@ class facturacion_model extends privilegios_model{
 			$sql .= " AND f.status = '".$this->input->get('fstatus')."'";
 		if($this->input->get('fid_cliente') != '')
 			$sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
-    if($this->input->get('did_empresa') != '')
+
+    $empresa = $this->empresas_model->getDefaultEmpresa();
+    if( ! $this->input->get('did_empresa') != '')
+    {
+      $_GET['did_empresa'] = $empresa->id_empresa;
+      $_GET['dempresa'] = $empresa->nombre_fiscal;
+    }
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 
     if($this->input->get('dobserv') != '')
       $sql .= " AND lower(f.Observaciones) LIKE '%".$this->input->get('dobserv')."%'";
+
+    // $data_series = $this->db->query("SELECT serie FROM facturacion_series_folios WHERE id_empresa = '".$this->input->get('did_empresa')."' AND es_nota_credito = '".($tipo == 'facturas'? 'f': 't')."'")->result();
+    // $seriess = '';
+    // foreach ($data_series as $key => $value)
+    // {
+    //   $seriess .= ",'".$value->serie."'";
+    // }
+    // if($seriess != '')
+    //   $sql .= " AND f.serie IN(".(substr($seriess, 1)).")";
 
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
@@ -56,8 +71,8 @@ class facturacion_model extends privilegios_model{
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-				WHERE 1 = 1 AND f.is_factura = 't'".$sql.$sql2."
-				ORDER BY (f.fecha, f.folio) DESC
+				WHERE f.is_factura = 't'".$sql.$sql2."
+				ORDER BY Date(f.fecha) DESC, f.serie ASC, f.folio DESC
 				", $params, true); //AND f.status != 'b'
 		$res = $this->db->query($query['query']);
 
@@ -405,9 +420,9 @@ class facturacion_model extends privilegios_model{
               'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-              'ids_pallets'       => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-              'kilos'             => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
-              'cajas'             => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
+              'ids_pallets' => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+              'kilos' => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
+              'cajas' => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
               'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
             );
           }
@@ -1850,7 +1865,8 @@ class facturacion_model extends privilegios_model{
         $factura = $this->getInfoFactura($idFactura);
 
         $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $factura['info']->xml));
-
+        if($xml === false)
+          return false;
         // echo "<pre>";
         //   var_dump($factura, $xml);
         // echo "</pre>";exit;
@@ -1865,14 +1881,52 @@ class facturacion_model extends privilegios_model{
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
-        //////////
-        // Logo //
-        //////////
+        
 
         $pdf->SetXY(0, 0);
+        /////////////////////////////////////
+        // Folio Fisca, CSD, Lugar y Fecha //
+        /////////////////////////////////////
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 2);
+        $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
+
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Cell(50, 4, ($factura['info']->id_nc === null ? '                 Factura' : '                 Nota de Crédito').':  '.($factura['info']->serie.$factura['info']->folio) , 0, 0, 'L', 1);
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 6);
+        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
+
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetTextColor(0, 171, 72);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+
+        $pdf->SetFont('helvetica','', 9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+
+        $municipio   = strtoupper($xml->Emisor->DomicilioFiscal[0]['municipio']);
+        $estado = strtoupper($xml->Emisor->DomicilioFiscal[0]['estado']);
+        $fecha = explode('T', $xml[0]['fecha']);
+        $fecha = String::fechaATexto($fecha[0]);
+
+        $pdf->Cell(108, 4, "{$municipio}, {$estado} | {$fecha}", 0, 0, 'R', 0);
+
+
         // $pdf->SetXY(30, 2);
-        $logo = (file_exists($factura['info']->empresa->logo)) ? $factura['info']->empresa->logo : 'application/images/logo2.png' ;
-        $pdf->Image($logo, 10, null, 0, 21);
 
         //////////////////////////
         // Rfc y Regimen Fiscal //
@@ -1919,45 +1973,14 @@ class facturacion_model extends privilegios_model{
 
         $end_y = $pdf->GetY();
 
-        /////////////////////////////////////
-        // Folio Fisca, CSD, Lugar y Fecha //
-        /////////////////////////////////////
+        //////////
+        // Logo //
+        //////////
+        $logo = (file_exists($factura['info']->empresa->logo)) ? $factura['info']->empresa->logo : '' ;
+        if($logo != '')
+          $pdf->Image($logo, 115, 2, 0, 21);
+        $pdf->SetXY(0, 25);
 
-        $pdf->SetFont('helvetica','B', 9);
-        $pdf->SetFillColor(242, 242, 242);
-        $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, 0);
-        $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
-
-        $pdf->SetXY(109, 0);
-        $pdf->Cell(50, 4, ($factura['info']->id_nc === null ? 'Factura' : 'Nota de Crédito').': '.($factura['info']->serie.$factura['info']->folio) , 0, 0, 'L', 1);
-
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, 6);
-        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
-
-        $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, $pdf->GetY() + 4);
-        $pdf->Cell(108, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
-
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, $pdf->GetY() + 4);
-        $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
-
-        $pdf->SetFillColor(242, 242, 242);
-        $pdf->SetTextColor(0, 171, 72);
-        $pdf->SetXY(109, $pdf->GetY() + 4);
-        $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
-
-        $pdf->SetFont('helvetica','', 9);
-        $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetXY(109, $pdf->GetY() + 4);
-
-        $pais   = strtoupper($xml->Emisor->DomicilioFiscal[0]['pais']);
-        $estado = strtoupper($xml->Emisor->DomicilioFiscal[0]['estado']);
-        $fecha = $xml[0]['fecha'];
-
-        $pdf->Cell(108, 4, "{$pais} {$estado} {$fecha}", 0, 0, 'R', 0);
 
         $pdf->SetFont('helvetica','b', 9);
         $pdf->SetFillColor(242, 242, 242);
@@ -2061,11 +2084,17 @@ class facturacion_model extends privilegios_model{
 
         $pdf->SetXY(0, $pdf->GetY());
         $aligns = array('C', 'C', 'C', 'C','C');
-        $aligns2 = array('C', 'C', 'C', 'R','R');
+        $aligns2 = array('C', 'C', 'L', 'R','R');
         $widths = array(30, 35, 91, 30, 30);
         $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Precio Unitario', 'Importe');
 
         $conceptos = current($xml->Conceptos);
+        if(count($conceptos) == 0)
+          $conceptos = array($conceptos);
+        elseif(count($conceptos) == 1){
+          $conceptos = current($conceptos);
+          $conceptos = array($conceptos);
+        }
 
         // for ($i=0; $i < 30; $i++)
         //   $conceptos[] = $conceptos[$i];
@@ -2121,6 +2150,8 @@ class facturacion_model extends privilegios_model{
 
         // Traslados | IVA
         $ivas = current($xml->Impuestos->Traslados);
+        if(count($ivas) == 1)
+          $ivas = current($ivas);
 
         if ( ! is_array($ivas))
         {
@@ -2143,6 +2174,7 @@ class facturacion_model extends privilegios_model{
 
         $h = 25 - ($traslado11 == 0 ? 5 : 0);
         $h = $h - ($xml->Impuestos->Retenciones->Retencion[0]['importe'] == 0 ? 5 : 0);
+        $h += 6;
 
         $pdf->SetFillColor(242, 242, 242);
         $pdf->SetXY(0, $pdf->GetY() + 1);
@@ -2156,16 +2188,26 @@ class facturacion_model extends privilegios_model{
         $pdf->SetXY(0, $pdf->GetY() + 4);
         $pdf->MultiCell(156, 6, $factura['info']->total_letra, 0, 'C', 0);
 
+        $pdf->Line(1, $pdf->GetY(), 200, $pdf->GetY());
+
         $pdf->SetFont('helvetica','B', 9);
-        $pdf->SetXY(1, $pdf->GetY());
-        $pdf->Cell(78, 4, $xml[0]['formaDePago'], 0, 0, 'L', 1);
+        $pdf->SetXY(1, $pdf->GetY()+1);
+        $pdf->Cell(78, 4, 'Forma de Pago: '.$xml[0]['formaDePago'], 0, 0, 'L', 1);
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(78, $pdf->GetY());
-        $pdf->Cell(78, 4, "Pago en {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
+        $pdf->Cell(78, 4, 'Condicion de Pago: '.($factura['info']->condicion_pago=='co'? 'Contado': 'Credito'), 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(1, $pdf->GetY()+5);
+        $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 1);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(78, $pdf->GetY());
+        $pdf->Cell(76, 4, "Cuenta de Pago: {$factura['info']->metodo_pago_digitos}", 0, 0, 'L', 1);
 
         $pdf->SetFont('helvetica','B', 10);
-        $pdf->SetXY(156, $pdf->GetY() - 11);
+        $pdf->SetXY(156, $pdf->GetY() - 16);
         $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
@@ -2237,7 +2279,7 @@ class facturacion_model extends privilegios_model{
             $pdf->AddPage();
 
         $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->SetXY(10, $pdf->GetY() - 1);
+        $pdf->SetXY(10, $pdf->GetY() + 5);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
         $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
@@ -2350,6 +2392,10 @@ class facturacion_model extends privilegios_model{
         $pdf->SetTextColor(0, 0, 0);
         $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
 
+        $pdf->SetXY(0, $pdf->GetY()+13);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
 
         //------------ IMAGEN CANDELADO --------------------
 

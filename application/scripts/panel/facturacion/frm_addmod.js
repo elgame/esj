@@ -217,13 +217,14 @@ $(function(){
             htmlTd = '',
             disabled = '',
             bgcolor = '',
-            jsonStr = '';
+            jsonStr = '',rnd_txt;
 
         if (pallets.length > 0) {
           for (var i in pallets) {
             if (pallets[i].info.status === 't') {
               // console.log(jQuery.parseJSON(JSON.stringify(pallets[i].rendimientos)));
 
+              rnd_txt = '';
               disabled = '';
               bgcolor = '';
               $('.pallet-selected').each(function(index, el) {
@@ -233,12 +234,17 @@ $(function(){
                 }
               });
 
+              for (var rnd in pallets[i].rendimientos) {
+                rnd_txt += pallets[i].rendimientos[rnd].nombre+';'+pallets[i].rendimientos[rnd].size+' | ';
+              };
+
               jsonStr = JSON.stringify(pallets[i].rendimientos).replace(/\"/g,'&quot;');
               htmlTd += '<tr style="'+bgcolor+'">'+
-                            '<th><input type="checkbox" value="'+pallets[i].info.id_pallet+'" class="chk-cli-pallets" '+disabled+'><input type="hidden" id="jsonData" value="'+jsonStr+'" ></th>'+
-                            '<th>'+pallets[i].info.folio+'</th>'+
-                            '<th>'+pallets[i].info.cajas+'</th>'+
-                            '<th>'+pallets[i].info.fecha+'</th>'+
+                            '<td><input type="checkbox" value="'+pallets[i].info.id_pallet+'" class="chk-cli-pallets" '+disabled+'><input type="hidden" id="jsonData" value="'+jsonStr+'" ></td>'+
+                            '<td>'+pallets[i].info.folio+'</td>'+
+                            '<td>'+pallets[i].info.cajas+'</td>'+
+                            '<td>'+pallets[i].info.fecha+'</td>'+
+                            '<td>'+rnd_txt+'</td>'+
                           '</tr>';
             }
           }
@@ -399,7 +405,7 @@ function calculaTotalProducto ($tr) {
       $totalIva       = $tr.find('#prod_diva_total'),
       $totalRetencion = $tr.find('#prod_dreten_iva_total'),
 
-      totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
+      totalImporte   = trunc2Dec(parseFloat(($cantidad.val() || 0)) * parseFloat($precio_uni.val() || 0)),
       totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
       totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
@@ -845,8 +851,25 @@ $.widget( "custom.catcomplete", $.ui.autocomplete, {
   }
 });
 
-function trunc2Dec(num) {
-  return Math.floor(num * 100) / 100;
+function trunc2Dec(num, digits) {
+  digits = digits? digits: 2;
+  var result = Math.round(num*Math.pow(10,digits))/Math.pow(10,digits);
+  return result;
+  
+  var numS = num.toString(),
+      decPos = numS.indexOf('.'),
+      result;
+  if(decPos > -1)
+    result = numS.substr(0, 1 + decPos + digits);
+  else
+    result = numS;
+
+  if (isNaN(result)) {
+    result = 0;
+  }
+
+  return parseFloat(result);
+  // return Math.floor(num * 100) / 100;
 }
 
 function round2Dec(val) {

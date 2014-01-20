@@ -65,10 +65,13 @@ var abonom = (function($){
     url = btn_abonos_masivo.attr("href").split("?");
     url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total;
     btn_abonos_masivo.attr("href", url);
-    if($(".sel_abonom.active").length > 0)
+    if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
-    else
+      $("#sumaRowsSel").text(util.darFormatoNum(total)).show();
+    }else{
       btn_abonos_masivo.hide();
+      $("#sumaRowsSel").hide();
+    }
   }
 
   objs.init = init;
@@ -78,7 +81,8 @@ var abonom = (function($){
 //Modal Abonos
 var modalAbonos = (function($){
   var objs = {},
-  btn_abonos_masivo;
+  btn_abonos_masivo,
+  $enviar = false;
 
   function init()
   {
@@ -96,11 +100,30 @@ var modalAbonos = (function($){
       monto += parseFloat($(this).val());
     });
     $("#dmonto").val(monto);
+    $("#suma_monto").text(util.darFormatoNum(monto));
   }
 
   function sendFormMasivo(){
-    alert("dasdas");
-    return false;
+    var pass=false;
+    if($enviar == false){
+      $(".monto_factura").each(function(index, val) {
+        var $this = $(this);
+        if(parseFloat($this.val()) > parseFloat($this.attr('data-max')) )
+          pass = true;
+      });
+      if(pass){ //es mayor el cargo a pagar
+        msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'dd', this, function(){
+          $enviar = true;
+          $("#form").submit();
+        });
+        return false;
+      }else{ //es igual o menor el cargo
+        return true;
+      }
+    }else{
+      $enviar = false;
+      return true;
+    }
   }
 
   objs.init = init;

@@ -81,8 +81,8 @@
 								<tr>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->concepto; ?></td>
-									<td><?php echo String::formatoNumero($cuenta->abono); ?></td>
-									<td><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td class="">
 									<?php
 									if ($_GET['tipo'] == 'v')
@@ -108,8 +108,8 @@
 								} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="2" class="a-r">Totales:</td>
-									<td><?php echo String::formatoNumero($total_abono); ?></td>
-									<td id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
+									<td style="text-align: right;" id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td></td>
 								</tr>
               </tbody>

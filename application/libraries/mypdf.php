@@ -5,6 +5,7 @@ class MYpdf extends FPDF {
 	var $titulo1 = "EMPAQUE SAN JORGE S.A. DE C.V.";
 	var $titulo2 = '';
 	var $titulo3 = '';
+    var $logo = '/images/logo.png';
 
 	var $hheader = '';
 
@@ -29,7 +30,8 @@ class MYpdf extends FPDF {
     public function Header() {
     	if($this->show_head){
 	        // Logo
-		    $this->Image(APPPATH.'/images/logo.png', 6, 5, 20);
+            if($this->logo != '')
+		      $this->Image(APPPATH.(str_replace(APPPATH, '', $this->logo)), 6, 5, 20);
 		    $this->SetFont('Arial','',5);
 		    //$this->Text(6, 15, 'EXTINTORES Y SISTEMAS CONTRA INCENDIOS');
 
@@ -51,15 +53,15 @@ class MYpdf extends FPDF {
     	// Título
     	$this->SetFont('Arial','B',14);
     	$this->SetXY(46, 6);
-    	$this->Cell(141, 6, $this->titulo1, 0, 0, 'C');
+    	$this->MultiCell(141, 6, $this->titulo1, 0, 'C', false);
 
     	$this->SetFont('Arial','B',11);
-    	$this->SetXY(46, 11);
-    	$this->Cell(141, 6, $this->titulo2, 0, 0, 'C');
+    	$this->SetX(46);
+    	$this->MultiCell(141, 6, $this->titulo2, 0, 'C', false);
 
     	if($this->titulo3 != ''){
     		$this->SetFont('Arial','B',8);
-    		$this->SetXY(46, 17);
+    		$this->SetX(46);
     		$this->MultiCell(141, 4, $this->titulo3, 0, 'C', false);
     	}
 
@@ -70,7 +72,7 @@ class MYpdf extends FPDF {
     	$this->SetXY(194, 8);
     	$this->Cell(16, 5, date("d/m/Y H:i:s"), 0, 0, 'R');
 
-    	$this->Line(6, 26, 210, 26);
+    	// $this->Line(6, 26, 210, 26);
 
     	$this->limiteY = 235; //limite de alto
     }

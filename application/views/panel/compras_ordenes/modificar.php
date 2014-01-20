@@ -127,7 +127,6 @@
                     <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito', $orden['info'][0]->empleado_solicito) ?>" placeholder="">
                   </div>
                 </div>
-                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId', $orden['info'][0]->id_solicito) ?>">
               </div>
 
               <div class="control-group">
@@ -150,6 +149,25 @@
                   </div>
                 </div>
                   <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId', $orden['info'][0]->id_cliente) ?>">
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="descripcion">Observaciones</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <textarea name="descripcion" class="span11" id="descripcion"><?php echo set_value('descripcion', $orden['info'][0]->descripcion) ?></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="autorizo">Autoriza</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>" placeholder="" required>
+                  </div>
+                </div>
+                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId', $orden['info'][0]->id_autorizo) ?>" required>
               </div>
 
             </div>
@@ -323,10 +341,10 @@
                                 </select>
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $_POST['cantidad'][$key] ?>" id="cantidad" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
+                                  <input type="number" step="any" name="faltantes[]" value="<?php echo $_POST['faltantes'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
                               </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $_POST['valorUnitario'][$key] ?>" id="valorUnitario" class="span12 vpositive">
@@ -438,10 +456,10 @@
                                    </select>
                                  </td>
                                  <td style="width: 65px;<?php echo $redBg ?>">
-                                     <input type="number" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $readonly ?>>
+                                     <input type="number" step="any" name="cantidad[]" value="<?php echo $cantidad ?>" id="cantidad" class="span12 vpositive" min="0" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 65px;<?php echo $redBg ?>">
-                                     <input type="number" name="faltantes[]" value="<?php echo $prod->faltantes ?>" id="faltantes" class="span12 vpositive" min="0" <?php echo $readonly ?>>
+                                     <input type="number" step="any" name="faltantes[]" value="<?php echo $prod->faltantes ?>" id="faltantes" class="span12 vpositive" min="0" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 90px;<?php echo $redBg ?>">
                                      <input type="text" name="valorUnitario[]" value="<?php echo $pu ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>

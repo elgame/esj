@@ -62,13 +62,22 @@
                     <input type="text" name="solicito" class="span11" id="solicito" value="<?php echo set_value('solicito') ?>" placeholder="">
                   </div>
                 </div>
-                  <input type="hidden" name="solicitoId" id="solicitoId" value="<?php echo set_value('solicitoId') ?>">
               </div>
+
+              <!-- <div class="control-group">
+                <label class="control-label" for="autorizo">Autorizo</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo') ?>" placeholder="" required>
+                  </div>
+                </div>
+                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId') ?>" required>
+              </div> -->
 
               <div class="control-group">
                 <label class="control-label" for="departamento">Departamento</label>
                 <div class="controls">
-                  <select name="departamento" class="span12" id="departamento">
+                  <select name="departamento" class="span11" id="departamento">
                     <option></option>
                     <?php foreach ($departamentos as $key => $depa) { ?>
                       <option value="<?php echo $depa->id_departamento ?>" <?php echo set_select('departamento', $depa->id_departamento); ?>><?php echo $depa->nombre ?></option>
@@ -85,6 +94,15 @@
                   </div>
                 </div>
                   <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId') ?>">
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="descripcion">Observaciones</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <textarea name="descripcion" class="span11" id="descripcion"><?php echo set_value('descripcion') ?></textarea>
+                  </div>
+                </div>
               </div>
 
             </div>

@@ -85,6 +85,8 @@
 							</div>
             </div>
 
+            <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 100px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:14px;font-weight:bold;"></div>
+
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>

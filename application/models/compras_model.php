@@ -177,6 +177,13 @@ class compras_model extends privilegios_model{
 
   public function updateXml($compraId, $proveedorId, $xml)
   {
+    $compra = array(
+      'subtotal'      => String::float($this->input->post('totalImporte')),
+      'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
+      'retencion_iva' => String::float($this->input->post('totalRetencion')),
+      'total'         => String::float($this->input->post('totalOrden')),
+    );
+
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
     {
@@ -201,8 +208,9 @@ class compras_model extends privilegios_model{
 
       $xmlFile     = explode('application', $xmlData['full_path']);
 
-      $this->db->update('compras', array('xml' => 'application'.$xmlFile[1]), array('id_compra' => $compraId));
+      $compra['xml'] = 'application'.$xmlFile[1];
     }
+    $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
 
   /*
