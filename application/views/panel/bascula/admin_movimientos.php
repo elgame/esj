@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/bascula/'); ?>" method="get" class="form-search">
+            <form action="<?php echo base_url('panel/bascula/admin_movimientos'); ?>" method="get" class="form-search">
               <fieldset>
                 <legend>Filtros</legend>
 

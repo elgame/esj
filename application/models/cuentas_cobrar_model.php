@@ -1000,4 +1000,217 @@ class cuentas_cobrar_model extends privilegios_model{
 		return true;
 	}
 
+	public function getAbonosData($movimientoId=null)
+	{
+		$response = array();
+		$sql = $sql2 = '';
+
+		if($movimientoId!=null)
+			$sql .= " AND bmf.id_movimiento = {$movimientoId}";
+		else{
+			if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+			  $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+			  $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+			}
+			if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+			  $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+			  $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+			}
+
+			if ($this->input->get('fid_empresa') != '')
+			  $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+		}
+
+
+		$query = $this->db->query(
+		  "SELECT 
+		    bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
+		    bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
+		    Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal, 
+		    c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
+		  FROM facturacion AS f 
+		    INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+		    INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
+		    INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
+		    INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa 
+		    INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
+		  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
+		     {$sql}
+		  GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto, 
+		    bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), 
+		    e.nombre_fiscal, e.logo
+		  ORDER BY bmf.id_movimiento ASC
+		  ");
+
+		if($query->num_rows() > 0)
+		{
+		  $response['abonos'] = $query->result();
+		  $query->free_result();
+
+
+		  if($movimientoId!=null)
+		  {
+		  	$query = $this->db->query(
+			  "SELECT 
+			    fa.id_abono, f.serie, f.folio, fa.ref_movimiento, fa.concepto, fa.total, Date(fa.fecha) AS fecha
+			  FROM facturacion AS f 
+			    INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+			    INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
+			  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
+			     {$sql}
+			  ORDER BY fa.id_abono ASC
+			  ");
+		  	$response['facturas'] = $query->result();
+		  	$query->free_result();
+		  }
+		}
+		var_dump($response);
+		exit();
+
+		return $response;
+	}
+
+  /**
+    * Visualiza/Descarga el PDF del abono.
+    *
+    * @return void
+    */
+   public function imprimir_abono($movimientoId, $path = null)
+   {
+      $orden = $this->getAbonosData($movimientoId);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      // $pdf->show_head = true;
+      $pdf->titulo1 = $orden['abonos'][0]->empresa;
+      $pdf->titulo2 = 'Cliente: ' . $orden['info'][0]->nombre_fiscal;
+      $pdf->titulo3 = " Fecha: ". date('Y-m-d');
+
+      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'L', 'R', 'R');
+      $widths = array(25, 25, 104, 25, 25);
+      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+
+      $subtotal = $iva = $total = $retencion = 0;
+      foreach ($orden['info'][0]->productos as $key => $prod)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array(
+          $prod->cantidad,
+          $prod->codigo,
+          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+          String::formatoNumero($prod->precio_unitario, 2, '$', false),
+          String::formatoNumero($prod->importe, 2, '$', false),
+        );
+
+        $pdf->SetX(6);
+        $pdf->Row($datos, false);
+
+        $subtotal += floatval($prod->importe);
+        $iva      += floatval($prod->iva);
+        $total    += floatval($prod->total);
+        $retencion += floatval($prod->retencion_iva);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(154, 25, 25));
+      $pdf->Row(array(
+        'AREA DE APLICACION: ' . $orden['info'][0]->departamento,
+        'SUB-TOTAL',
+        String::formatoNumero($subtotal, 2, '$', false),
+      ), false, false);
+
+      $dato_cliente = '';
+      if($orden['info'][0]->tipo_orden == 'f')
+        $dato_cliente = 'CLIENTE: '.$orden['info'][0]->cliente;
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $dato_cliente,
+        'IVA',
+        String::formatoNumero($iva, 2, '$', false),
+      ), false, false);
+
+      if ($retencion > 0)
+      {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          '',
+          'Ret. IVA',
+          String::formatoNumero($retencion, 2, '$', false),
+        ), false, false);
+      }
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        'OBSERVACIONES: '.$orden['info'][0]->descripcion,
+        'TOTAL',
+        String::formatoNumero($total, 2, '$', false),
+      ), false, false);
+
+      $x = $pdf->GetX();
+      $y = $pdf->GetY();
+
+      $pdf->SetXY($x - 4, $y + 5);
+      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
+
+      $pdf->SetAligns(array('C', 'C', 'C'));
+      $pdf->SetWidths(array(65, 65, 65));
+      $pdf->SetX(6);
+      $pdf->SetY($y + 11);
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->Row(array(
+        'SOLICITA',
+        'AUTORIZA',
+        'REGISTRO',
+      ), false, false);
+
+      $pdf->SetY($y + 20);
+      $pdf->Row(array(
+        '____________________________________',
+        '____________________________________',
+        '____________________________________',
+      ), false, false);
+
+      $pdf->SetY($y + 30);
+      $pdf->Row(array(
+        strtoupper($orden['info'][0]->empleado_solicito),
+        strtoupper($orden['info'][0]->autorizo),
+        strtoupper($orden['info'][0]->empleado),
+      ), false, false);
+
+      // $pdf->AutoPrint(true);
+
+      if ($path)
+      {
+        $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+        $pdf->Output($file, 'F');
+        return $file;
+      }
+      else
+      {
+        $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+      }
+   }
+
 }
