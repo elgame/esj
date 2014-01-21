@@ -62,7 +62,8 @@ class compras_model extends privilegios_model{
                 co.id_empresa, e.nombre_fiscal as empresa,
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
-                co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto
+                co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
+                co.tipo
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -139,7 +140,7 @@ class compras_model extends privilegios_model{
 
       $response['productos'] = $res->result();
 
-      //gasolina 
+      //gasolina
       $res = $this->db->query(
           "SELECT id_compra, kilometros, litros, precio
            FROM compras_vehiculos_gasolina
@@ -290,5 +291,342 @@ class compras_model extends privilegios_model{
       case 11: return 'NOVIEMBRE'; break;
       case 12: return 'DICIEMBRE'; break;
     }
+  }
+
+    /**
+     * Obtiene la informacion de una compra
+     */
+    public function getInfoNotaCredito($notaCreditoId, $info_basic=false)
+    {
+      $res = $this->db
+              ->select("*")
+              ->from('compras')
+              ->where("id_compra = {$notaCreditoId}")
+              ->get();
+
+      if($res->num_rows() > 0)
+      {
+        $response['info'] = $res->row();
+        // $response['info']->fechaT = str_replace(' ', 'T', substr($response['info']->fecha, 0, 16));
+        // $response['info']->fecha = substr($response['info']->fecha, 0, 10);
+
+        $res->free_result();
+
+        if($info_basic)
+          return $response;
+
+        // Carga la info de la empresa.
+        // $this->load->model('empresas_model');
+        // $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
+        // $response['info']->empresa = $empresa['info'];
+
+        // Carga la info de la empresa.
+        $this->load->model('empresas_model');
+        $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
+        $response['info']->empresa = $empresa['info'];
+
+        // Carga la info del proveedor.
+        $this->load->model('proveedores_model');
+        $prov = $this->proveedores_model->getProveedorInfo($response['info']->id_proveedor);
+        $response['info']->proveedor = $prov['info'];
+
+        //Productos
+        $res = $this->db->query(
+          "SELECT cnc.id_compra, cnc.num_row,
+                  cnc.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
+                  cnc.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
+                  cnc.descripcion, cnc.cantidad, cnc.precio_unitario, cnc.importe,
+                  cnc.iva, cnc.retencion_iva, cnc.total, cnc.porcentaje_iva,
+                  cnc.porcentaje_retencion, cnc.observacion, pr.cuenta_cpi
+           FROM compras_notas_credito_productos AS cnc
+             LEFT JOIN productos AS pr ON pr.id_producto = cnc.id_producto
+             LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cnc.id_presentacion
+             LEFT JOIN productos_unidades AS pu ON pu.id_unidad = cnc.id_unidad
+           WHERE cnc.id_compra = {$notaCreditoId}");
+
+        $response['productos'] = $res->result();
+
+        return $response;
+      }else
+        return false;
+    }
+
+  public function agregarNotaCredito($compraId, $data, $xml)
+  {
+    $compra = $this->compras_model->getInfoCompra($compraId);
+
+    $datos = array(
+      'id_proveedor' => $compra['info']->id_proveedor,
+      'id_empleado' => $this->session->userdata('id_usuario'),
+      'serie' => $data['serie'],
+      'folio' => $data['folio'],
+      // 'condicion_pago' => $data['asdasdasd'],
+      // 'plazo_credito' => $data['asdasdasd'],
+      // 'tipo_documento' => $data['asdasdasd'],
+      // 'fecha' => $data['asdasdasd'],
+      'subtotal' => $data['totalImporte'],
+      'importe_iva' => $data['totalImpuestosTrasladados'],
+      'retencion_iva' => $data['totalRetencion'],
+      'total' => $data['totalOrden'],
+      'concepto' => 'Nota de Credito Compra ' . $compraId,
+      // 'isgasto' => $data['asdasdasd'],
+      // 'status' => $data['asdasdasd'],
+      // 'poliza_diario' => $data['asdasdasd'],
+      'id_empresa' => $compra['info']->id_empresa,
+      // 'id_vehiculo' => $data['asdasdasd'],
+      // 'id_departamento' => $data['asdasdasd'],
+      // 'tipo_vehiculo' => $data['asdasdasd'],
+      'tipo' => 'nc',
+      'id_nc' => $compraId,
+    );
+
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($compra['info']->id_proveedor);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = 'nc-'.($data['serie'] !== '' ? $data['serie'].'-' : '') . $data['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+      $datos['xml'] = 'application'.$xmlFile[1];
+    }
+
+    $this->db->insert('compras', $datos);
+    $id = $this->db->insert_id();
+
+    $productos = array();
+    foreach ($data['concepto'] as $key => $concepto)
+    {
+      $productos[] = array(
+        'id_compra' => $id,
+        'num_row' => $key,
+        'id_producto' => $data['productoId'][$key],
+        'id_presentacion' => $data['asdasd'][$key],
+        'descripcion' => $concepto,
+        'cantidad' => $data['cantidad'][$key],
+        'precio_unitario' => $data['valorUnitario'][$key],
+        'importe' => $data['importe'][$key],
+        'iva' => $data['trasladoTotal'][$key],
+        'retencion_iva' => $data['retTotal'][$key],
+        'total' => $data['total'][$key],
+        'porcentaje_iva' => $data['trasladoPorcent'][$key],
+        'porcentaje_retencion' => 0,
+        'observacion' => $data['observacion'][$key],
+        'id_unidad' => $data['unidad'][$key],
+      );
+    }
+
+    if (count($productos) > 0)
+    {
+      $this->db->insert_batch('compras_notas_credito_productos', $productos);
+    }
+
+    return array('passes' => true, 'msg' => '5');
+  }
+
+  public function actualizarNotaCredito($notaCreditoId, $data, $xml)
+  {
+    $notaCredito = $this->compras_model->getInfoNotaCredito($notaCreditoId);
+
+    $datos = array(
+      // 'id_proveedor' => $compra['info']->id_proveedor,
+      // 'id_empleado' => $this->session->userdata('id_usuario'),
+      'serie' => $data['serie'],
+      'folio' => $data['folio'],
+      // 'condicion_pago' => $data['asdasdasd'],
+      // 'plazo_credito' => $data['asdasdasd'],
+      // 'tipo_documento' => $data['asdasdasd'],
+      // 'fecha' => $data['asdasdasd'],
+      'subtotal' => $data['totalImporte'],
+      'importe_iva' => $data['totalImpuestosTrasladados'],
+      'retencion_iva' => $data['totalRetencion'],
+      'total' => $data['totalOrden'],
+      // 'concepto' => 'Nota de Credito Compra ' . $compraId,
+      // 'isgasto' => $data['asdasdasd'],
+      // 'status' => $data['asdasdasd'],
+      // 'poliza_diario' => $data['asdasdasd'],
+      // 'id_empresa' => $compra['info']->id_empresa,
+      // 'id_vehiculo' => $data['asdasdasd'],
+      // 'id_departamento' => $data['asdasdasd'],
+      // 'tipo_vehiculo' => $data['asdasdasd'],
+      // 'tipo' => 'nc',
+      // 'id_nc' => $compraId,
+    );
+
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      unlink($notaCredito['info']->xml);
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($notaCredito['info']->id_proveedor);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = 'nc-'.($data['serie'] !== '' ? $data['serie'].'-' : '') . $data['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+      $datos['xml'] = 'application'.$xmlFile[1];
+    }
+
+    $this->db->update('compras', $datos, array('id_compra' => $notaCreditoId));
+
+    $this->db->delete('compras_notas_credito_productos', array('id_compra' => $notaCreditoId));
+
+    $productos = array();
+    foreach ($data['concepto'] as $key => $concepto)
+    {
+      $productos[] = array(
+        'id_compra' => $notaCreditoId,
+        'num_row' => $key,
+        'id_producto' => $data['productoId'][$key],
+        // 'id_presentacion' => $data['asdasd'][$key],
+        'descripcion' => $concepto,
+        'cantidad' => $data['cantidad'][$key],
+        'precio_unitario' => $data['valorUnitario'][$key],
+        'importe' => $data['importe'][$key],
+        'iva' => $data['trasladoTotal'][$key],
+        'retencion_iva' => $data['retTotal'][$key],
+        'total' => $data['total'][$key],
+        'porcentaje_iva' => $data['trasladoPorcent'][$key],
+        'porcentaje_retencion' => 0,
+        'observacion' => $data['observacion'][$key],
+        'id_unidad' => $data['unidad'][$key],
+      );
+    }
+
+    if (count($productos) > 0)
+    {
+      $this->db->insert_batch('compras_notas_credito_productos', $productos);
+    }
+
+    return array('passes' => true, 'msg' => '6');
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+
+  public function getProductoAjax($term, $def = 'codigo'){
+    $sql = '';
+
+    $res = $this->db->query(
+       "SELECT p.*,
+              pf.nombre as familia, pf.codigo as codigo_familia,
+              pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
+              (SELECT precio_unitario FROM compras_productos WHERE id_producto = p.id_producto ORDER BY id_orden DESC LIMIT 1) AS precio_unitario
+        FROM productos AS p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        WHERE p.status = 'ac' AND
+              {$term}
+              pf.status = 'ac'
+        ORDER BY p.nombre ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0)
+    {
+      foreach($res->result() as $itm)
+      {
+        $query = $this->db->select('*')
+          ->from("productos_presentaciones")
+          ->where("id_producto", $itm->id_producto)
+          ->where("status", "ac")
+          ->get();
+
+        $itm->presentaciones = array();
+        if ($query->num_rows() > 0)
+        {
+          $itm->presentaciones = $query->result();
+        }
+
+        if ($def == 'codigo')
+        {
+          $labelValue = $itm->codigo;
+        }
+        else
+        {
+          $labelValue = $itm->nombre;
+        }
+
+        $response[] = array(
+            'id' => $itm->id_producto,
+            'label' => $labelValue,
+            'value' => $labelValue,
+            'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function getProductoByCodigoAjax($codigo)
+  {
+    $sql = '';
+
+    $term = "lower(p.codigo) = '".mb_strtolower($codigo, 'UTF-8')."'";
+
+    $res = $this->db->query(
+       "SELECT p.*,
+              pf.nombre as familia, pf.codigo as codigo_familia,
+              pu.nombre as unidad, pu.abreviatura as unidad_abreviatura
+        FROM productos as p
+        INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        WHERE p.status = 'ac' AND
+              {$term} AND
+              pf.status = 'ac'
+        ORDER BY p.nombre ASC
+        LIMIT 20");
+
+    $prod = array();
+    if($res->num_rows() > 0)
+    {
+      $prod = $res->result();
+
+      $query = $this->db->select('*')
+        ->from("productos_presentaciones")
+        ->where("id_producto", $prod[0]->id_producto)
+        ->where("status", "ac")
+        ->get();
+
+      $prod[0]->presentaciones = array();
+      if ($query->num_rows() > 0)
+      {
+        $prod[0]->presentaciones = $query->result();
+      }
+    }
+
+    return $prod;
   }
 }

@@ -138,7 +138,7 @@ class nomina_fiscal_model extends CI_Model {
         FROM nomina_prestamos np
         LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
         WHERE np.status = 't' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
-        GROUP BY np.id_usuario, np.id_prestamo, np.prestado, np.pago_semana, 
+        GROUP BY np.id_usuario, np.id_prestamo, np.prestado, np.pago_semana,
           np.status, DATE(np.fecha), DATE(np.inicio_pago)
     ");
 
@@ -714,9 +714,9 @@ class nomina_fiscal_model extends CI_Model {
         $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana);
 
         $result = $this->timbrar($archivo['pathXML']);
-        echo "<pre>";
-          var_dump($archivo, $result, $cadenaOriginal);
-        echo "</pre>";exit;
+        // echo "<pre>";
+        //   var_dump($archivo, $result, $cadenaOriginal);
+        // echo "</pre>";exit;
 
         // Si la nomina se timbro entonces agrega al array nominas la nomina del
         // empleado para despues insertarla en la bdd.
@@ -910,7 +910,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // fecha en la que se inciaran a calcular los dias transcurrido del año
     // a la fecha de renuncia.
-    $fechaInicio = date('2013-01-01');
+    $fechaInicio = date('Y-01-01');
     if (strtotime($fechaInicio) < strtotime($fechaEntrada))
     {
       $fechaInicio = date($fechaEntrada);

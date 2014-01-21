@@ -64,7 +64,7 @@
               <thead>
                 <tr>
                   <th>Fecha</th>
-                  <th>Folio</th>
+                  <th>Serie-Folio</th>
                   <th>Proveedor</th>
                   <th>Empresa</th>
                   <th>Tipo</th>
@@ -77,7 +77,12 @@
             <?php foreach($compras['compras'] as $compra) {?>
                 <tr>
                   <td><?php echo substr($compra->fecha, 0, 10); ?></td>
-                  <td><span class="label"><?php echo $compra->folio; ?></span></td>
+                  <td>
+                    <span class="label"><?php echo ($compra->serie !== '' ? $compra->serie.'-' : '').$compra->folio; ?></span>
+                    <?php if ($compra->tipo === 'nc'){ ?>
+                      <span class="label label-warning">Nota de Crédito</span>
+                    <?php } ?>
+                  </td>
                   <td><?php echo $compra->proveedor; ?></td>
                   <td><?php echo $compra->empresa; ?></td>
                   <td>
@@ -129,11 +134,26 @@
                       }
                       else
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('compras/ver/', array(
-                          'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('rel' => 'superbox-80x550'))
-                        );
+                        if ($compra->tipo === 'c')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('compras/ver/', array(
+                            'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
+                            'btn_type' => 'btn-success',
+                            'attrs' => array('rel' => 'superbox-80x550'))
+                          );
+
+                          echo $this->usuarios_model->getLinkPrivSm('compras/agregar_nota_credito/', array(
+                            'params'   => 'id='.$compra->id_compra,
+                            'btn_type' => '')
+                          );
+                        }
+                        else
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('compras/ver_nota_credito/', array(
+                            'params'   => 'id='.$compra->id_compra,
+                            'btn_type' => 'btn-success')
+                          );
+                        }
                       }
                     ?>
                   </td>

@@ -629,32 +629,32 @@ class finiquito
     $sueldoSemana = round($this->empleado->dias_trabajados_semana * $this->empleado->salario_diario, 2);
     // Recorre los rangos de la tabla semanal de ISR para determinar en que
     // limites se encuentra el sueldo que obtuvo de la semana que se va.
-    $isrAntesSubsidio = 0;
+    $isrSemana = 0;
     foreach ($this->tablasIsr['semanal']['art113'] as $rango)
     {
       if ($sueldoSemana >= floatval($rango->lim_inferior) && $sueldoSemana <= floatval($rango->lim_superior))
       {
         // 46.08
-        $isrAntesSubsidio = round((($sueldoSemana - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
+        $isrSemana = round((($sueldoSemana - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
         break;
       }
     }
 
     // Recorre los rangos de la tabla semanal de los subsidios para determinar en que
     // limites se encuentra la suma de los importes gravados.
-    $isrSemana = 0;
-    foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
-    {
-      if ($sueldoSemana >= floatval($rango->de) && $sueldoSemana <= floatval($rango->hasta))
-      {
-        // −44.36
-        $isrSemana = $isrAntesSubsidio - floatval($rango->subsidio);
-        break;
-      }
-    }
+    // $isrSemana = 0;
+    // foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
+    // {
+    //   if ($sueldoSemana >= floatval($rango->de) && $sueldoSemana <= floatval($rango->hasta))
+    //   {
+    //     // −44.36
+    //     $isrSemana = $isrAntesSubsidio - floatval($rango->subsidio);
+    //     break;
+    //   }
+    // }
 
-    // Suma todos los gravados diarios con salario diario. 200.23
-    $sumaImporteGravadosDiariosConOtros = $salarioDiario + $aguinaldoGravadoDiario + $primaVacacionalGravadoDiario + $vacacionesGravadoDiario;
+    // Suma todos los gravados diarios con salario diario. 200.23 $salarioDiario +
+    $sumaImporteGravadosDiariosConOtros = $aguinaldoGravadoDiario + $primaVacacionalGravadoDiario + $vacacionesGravadoDiario;
 
     // Recorre los rangos de la tabla diaria de ISR para determinar en que
     // limites se encuentra la suma de los importes gravados diarios con
@@ -673,6 +673,7 @@ class finiquito
 
     $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
     $isr = round(($isrAuxConOtros - $isrUltimaSemana) * 365, 2);
+    $isr += floatval($isrSemana);
 
     // echo "<pre>";
     //   var_dump($aguinaldoGravadoDiario,
