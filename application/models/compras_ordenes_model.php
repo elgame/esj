@@ -111,7 +111,29 @@ class compras_ordenes_model extends CI_Model {
       'descripcion'     => $_POST['descripcion'],
     );
 
+    //si se registra a un vehiculo
+    if (isset($_POST['es_vehiculo']))
+    {
+      $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
+      $data['id_vehiculo'] = $_POST['vehiculoId'];
+    }
     $this->db->insert('compras_ordenes', $data);
+    $ordenId = $this->db->insert_id();
+
+    //si se registra a un vehiculo
+    if (isset($_POST['es_vehiculo']))
+    {
+      //si es de tipo gasolina o diesel se registra los litros
+      if($_POST['tipo_vehiculo'] !== 'ot')
+      {
+        $this->db->insert('compras_vehiculos_gasolina', array(
+          'id_orden'  => $ordenId,
+          'kilometros' => $_POST['dkilometros'],
+          'litros'     => $_POST['dlitros'],
+          'precio'     => $_POST['dprecio'],
+          ));
+      }
+    }
 
     $productos = array();
     foreach ($_POST['concepto'] as $key => $concepto)
@@ -129,7 +151,7 @@ class compras_ordenes_model extends CI_Model {
       }
 
       $productos[] = array(
-        'id_orden'             => $this->db->insert_id(),
+        'id_orden'             => $ordenId,
         'num_row'              => $key,
         'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
         'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
@@ -232,7 +254,38 @@ class compras_ordenes_model extends CI_Model {
       //   $data['autorizado']  = 'f';
       }
 
+      //si se registra a un vehiculo
+      if (isset($_POST['es_vehiculo']))
+      {
+        $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
+        $data['id_vehiculo'] = $_POST['vehiculoId'];
+      }
+      else
+      {
+        $data['tipo_vehiculo'] = 'ot';
+        $data['id_vehiculo'] = null;
+      }
       $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
+
+      //si se registra a un vehiculo
+      if (isset($_POST['es_vehiculo']))
+      {
+        //si es de tipo gasolina o diesel se registra los litros
+        if($_POST['tipo_vehiculo'] !== 'ot')
+        {
+          $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
+          $this->db->insert('compras_vehiculos_gasolina', array(
+            'id_orden'   => $idOrden,
+            'kilometros' => $_POST['dkilometros'],
+            'litros'     => $_POST['dlitros'],
+            'precio'     => $_POST['dprecio'],
+            ));
+        }
+      }
+      else
+      {
+        $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
+      }
 
       $productos = array();
       foreach ($_POST['concepto'] as $key => $concepto)
@@ -428,7 +481,13 @@ class compras_ordenes_model extends CI_Model {
               co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
               co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
               co.autorizado,
-              co.solicito as empleado_solicito, co.descripcion
+              co.solicito as empleado_solicito, co.descripcion,
+              co.id_vehiculo,
+              co.tipo_vehiculo,
+              COALESCE(cv.placa, null) as placa,
+              COALESCE(cv.modelo, null) as modelo,
+              COALESCE(cv.marca, null) as marca,
+              COALESCE(cv.color, null) as color
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -436,6 +495,7 @@ class compras_ordenes_model extends CI_Model {
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
+       LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -452,7 +512,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion 
+                  cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -464,10 +524,25 @@ class compras_ordenes_model extends CI_Model {
         {
           $data['info'][0]->productos = $query->result();
         }
+
+        $query->free_result();
+
+        $data['info'][0]->gasolina = array();
+        if ($data['info'][0]->id_vehiculo)
+        {
+          // Vehiculo
+          $query = $this->db->query(
+            "SELECT cvg.id_orden, cvg.kilometros, cvg.litros, cvg.precio
+             FROM compras_vehiculos_gasolina AS cvg
+             WHERE cvg.id_orden = {$data['info'][0]->id_orden}");
+
+          if ($query->num_rows() > 0)
+          {
+            $data['info'][0]->gasolina = $query->result();
+          }
+        }
       }
-
     }
-
     return $data;
   }
 

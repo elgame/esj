@@ -141,17 +141,17 @@ class compras_model extends privilegios_model{
       $response['productos'] = $res->result();
 
       //gasolina
-      $res = $this->db->query(
-          "SELECT id_compra, kilometros, litros, precio
-           FROM compras_vehiculos_gasolina
-           WHERE id_compra = {$id_compra}");
+      // $res = $this->db->query(
+      //     "SELECT id_compra, kilometros, litros, precio
+      //      FROM compras_vehiculos_gasolina
+      //      WHERE id_compra = {$id_compra}");
 
-      $response['gasolina'] = $res->row();
+      // $response['gasolina'] = $res->row();
 
       //veiculo
-      $this->load->model('vehiculos_model');
-      $prov = $this->vehiculos_model->getVehiculoInfo(floatval($response['info']->id_vehiculo));
-      $response['vehiculo'] = $prov['info'];
+      // $this->load->model('vehiculos_model');
+      // $prov = $this->vehiculos_model->getVehiculoInfo(floatval($response['info']->id_vehiculo));
+      // $response['vehiculo'] = $prov['info'];
 
 			return $response;
 		}else

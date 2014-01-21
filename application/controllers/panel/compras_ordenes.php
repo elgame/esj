@@ -577,6 +577,37 @@ class compras_ordenes extends MY_Controller {
             'rules' => 'greater_than[-1]'),
     );
 
+    $rules[] = array('field' => 'es_vehiculo',
+                    'label' => 'Vehiculo',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculo',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+    $rules[] = array('field' => 'vehiculoId',
+                    'label' => 'Vehiculos',
+                    'rules' => '');
+
+    if ($this->input->post('es_vehiculo') == 'si')
+    {
+      $rules[count($rules)-1]['rules'] = 'required|numeric';
+
+      $rules[] = array('field' => 'tipo_vehiculo',
+                      'label' => 'Tipo vehiculo',
+                      'rules' => '');
+      if ($this->input->post('tipo_vehiculo') == 'g')
+      {
+        $rules[] = array('field' => 'dkilometros',
+                        'label' => 'Kilometros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dlitros',
+                        'label' => 'Litros',
+                        'rules' => 'required|numeric');
+        $rules[] = array('field' => 'dprecio',
+                        'label' => 'Precio',
+                        'rules' => 'required|numeric');
+      }
+    }
+
     $this->form_validation->set_rules($rules);
   }
 

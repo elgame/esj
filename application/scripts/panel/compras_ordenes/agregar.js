@@ -24,6 +24,45 @@
     //Ligar ordenes
     eventOnChangeCondicionPago();
     eventOnChangeMetodoPago();
+
+    // Autocomplete para los Vehiculos.
+    $("#vehiculo").autocomplete({
+      source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $vehiculo =  $(this);
+
+        $vehiculo.val(ui.item.id);
+        $("#vehiculoId").val(ui.item.id);
+        $vehiculo.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#vehiculo").css("background-color", "#FFD071");
+        $("#vehiculoId").val('');
+      }
+    });
+
+    $("#es_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.is(":checked")){
+        $("#groupVehiculo").show();
+        if($("#tipo_vehiculo").val() != 'ot')
+          $("#group_gasolina").show();
+      }else{
+        $("#groupVehiculo").hide();
+        $("#group_gasolina").hide();
+      }
+    });
+
+    $("#tipo_vehiculo").on('change', function(event) {
+      var $this = $(this);
+      if($this.val() !== 'ot')
+        $("#group_gasolina").show();
+      else
+        $("#group_gasolina").hide();
+    });
   });
 
   /*

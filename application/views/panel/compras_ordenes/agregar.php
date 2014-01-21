@@ -6,11 +6,11 @@
         <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
       </li>
       <li>
-        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'r'){ 
+        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'r'){
                   $titulo = 'Agregar orden de requisición';
         ?>
           <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
-        <?php } else { 
+        <?php } else {
                   $titulo = 'Agregar orden de compra';
           ?>
           <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
@@ -105,6 +105,14 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="descripcion">Vehiculo</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="fecha" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="span6">
@@ -152,6 +160,61 @@
               </div>
             </div>
           </div>
+
+          <div class="row-fluid" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">  <!-- Box Productos -->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Vehículos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span12 mquit">
+                    <div class="control-group">
+                      <label class="control-label" for="vehiculo">Vehiculos</label>
+                      <div class="controls">
+                        <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo set_value('vehiculo') ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" style="float: left;">
+
+                        <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="dkilometros">
+                          <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot') ?>>REFACCIONES Y OTROS</option>
+                          <option value="g" <?php echo set_select('tipo_vehiculo', 'g') ?>>GASOLINA</option>
+                          <option value="d" <?php echo set_select('tipo_vehiculo', 'd') ?>>DIESEL</option>
+                        </select>
+                      </div>
+                        <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo set_value('vehiculoId') ?>">
+                    </div>
+                  </div>
+                </div><!--/row-fluid -->
+
+                <div class="row-fluid" id="group_gasolina" style="display: <?php echo isset($_POST['tipo_vehiculo']) ? ($_POST['tipo_vehiculo'] === 'ot' ? 'none' : 'block') : 'none' ?>;">
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Kilometros <input type="text" name="dkilometros" class="span12 sikey vpos-int" id="dkilometros" value="<?php echo set_value('dkilometros', ''); ?>" maxlength="10" data-next="dlitros">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Litros <input type="text" name="dlitros" class="span12 sikey vpositive" id="dlitros" value="<?php echo set_value('dlitros', ''); ?>" maxlength="10" data-next="dprecio">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="span4">
+                    <div class="control-group">
+                      <div class="controls span9">
+                        Precio <input type="text" name="dprecio" class="span12 sikey vpositive" id="dprecio" value="<?php echo set_value('dprecio', ''); ?>" maxlength="10" data-next="fconcepto">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
 
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">
