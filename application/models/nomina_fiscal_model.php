@@ -2121,6 +2121,12 @@ class nomina_fiscal_model extends CI_Model {
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
+      $pdf->SetFont('Helvetica', '', 9);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Cell(200, 2, "-----------------------------------------------------------------------------------------------", 0, 0, 'L', 0);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
     }
     $pdf->Output('Nomina.pdf', 'I');
   }
