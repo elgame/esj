@@ -5,12 +5,12 @@
   $(function(){
     $('#form').keyJump();
 
-    autocompleteEmpresas();
-    autocompleteProveedores();
-    autocompleteAutorizo();
+    // autocompleteEmpresas();
+    // autocompleteProveedores();
+    // autocompleteAutorizo();
     // autocompleteCodigo();
     autocompleteConcepto();
-    autocompleteClientes();
+    // autocompleteClientes();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -25,44 +25,7 @@
     eventOnChangeCondicionPago();
     eventOnChangeMetodoPago();
 
-    // Autocomplete para los Vehiculos.
-    $("#vehiculo").autocomplete({
-      source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $vehiculo =  $(this);
-
-        $vehiculo.val(ui.item.id);
-        $("#vehiculoId").val(ui.item.id);
-        $vehiculo.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#vehiculo").css("background-color", "#FFD071");
-        $("#vehiculoId").val('');
-      }
-    });
-
-    $("#es_vehiculo").on('change', function(event) {
-      var $this = $(this);
-      if($this.is(":checked")){
-        $("#groupVehiculo").show();
-        if($("#tipo_vehiculo").val() != 'ot')
-          $("#group_gasolina").show();
-      }else{
-        $("#groupVehiculo").hide();
-        $("#group_gasolina").hide();
-      }
-    });
-
-    $("#tipo_vehiculo").on('change', function(event) {
-      var $this = $(this);
-      if($this.val() !== 'ot')
-        $("#group_gasolina").show();
-      else
-        $("#group_gasolina").hide();
-    });
+    calculaTotal();
   });
 
   /*
@@ -86,7 +49,7 @@
       } else {
         $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
           $folio.val(folio);
-          tipoOrderActual = $this.find('option:selected').val()
+          tipoOrderActual = $this.find('option:selected').val();
         });
       }
     });
@@ -98,106 +61,20 @@
    |------------------------------------------------------------------------
    */
 
-  // Autocomplete para las empresas.
-  var autocompleteEmpresas = function () {
-    $("#empresa").autocomplete({
-      source: base_url + 'panel/empresas/ajax_get_empresas/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $empresa =  $(this);
-
-        $empresa.val(ui.item.id);
-        $("#empresaId").val(ui.item.id);
-        $empresa.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#empresa").css("background-color", "#FFD071");
-        $("#empresaId").val('');
-      }
-    });
-  };
-
-  // Autocomplete para los Proveedores.
-  var autocompleteProveedores = function () {
-    $("#proveedor").autocomplete({
-      source: base_url + 'panel/proveedores/ajax_get_proveedores/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $proveedor =  $(this);
-
-        $proveedor.val(ui.item.id);
-        $("#proveedorId").val(ui.item.id);
-        $proveedor.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#proveedor").css("background-color", "#FFD071");
-        $("#proveedorId").val('');
-      }
-    });
-  };
-
-  // Autocomplete para los Clientes.
-  var autocompleteClientes = function () {
-    $("#cliente").autocomplete({
-      source: base_url + 'panel/clientes/ajax_get_proveedores/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $cliente =  $(this);
-
-        $cliente.val(ui.item.id);
-        $("#clienteId").val(ui.item.id);
-        $cliente.css("background-color", "#A1F57A");
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {
-        $("#cliente").css("background-color", "#FFD071");
-        $("#clienteId").val('');
-      }
-    });
-  };
-
-  var autocompleteAutorizo= function () {
-    $("#autorizo").autocomplete({
-      source: base_url + 'panel/usuarios/ajax_get_usuarios/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $autorizo =  $(this);
-
-        $autorizo.css("background-color", "#A1F57A");
-        $("#autorizoId").val(ui.item.id);
-      }
-    }).on("keydown", function(event) {
-      if(event.which == 8 || event.which == 46) {$("#autorizo").css("background-color", "#FFD071");
-        $("#autorizoId").val('');
-      }
-    });
-  };
   // Autocomplete para el codigo.
   var autocompleteCodigo = function () {
     $("#fcodigo").autocomplete({
       source: function (request, response) {
-        if (isEmpresaSelected()) {
-          $.ajax({
-            url: base_url + 'panel/compras_ordenes/ajax_producto_by_codigo/',
-            dataType: 'json',
-            data: {
-              term : request.term,
-              ide: $('#empresaId').val(),
-              tipo: $('#tipoOrden').find('option:selected').val()
-            },
-            success: function (data) {
-              response(data)
-            }
-          });
-        } else {
-          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-        }
+        $.ajax({
+          url: base_url + 'panel/compras/ajax_producto_by_codigo/',
+          dataType: 'json',
+          data: {
+            cod : request.term,
+          },
+          success: function (data) {
+            response(data);
+          }
+        });
       },
       minLength: 1,
       selectFirst: true,
@@ -253,26 +130,20 @@
     });
   };
 
-  // Autocomplete para el codigo.
+  // Autocomplete para el concepto.
   var autocompleteConcepto = function () {
     $("#fconcepto").autocomplete({
       source: function (request, response) {
-        if (isEmpresaSelected()) {
-          $.ajax({
-            url: base_url + 'panel/compras_ordenes/ajax_producto/',
-            dataType: 'json',
-            data: {
-              term : request.term,
-              ide: $('#empresaId').val(),
-              tipo: $('#tipoOrden').find('option:selected').val()
-            },
-            success: function (data) {
-              response(data)
-            }
-          });
-        } else {
-          noty({"text": 'Seleccione una empresa para mostrar sus productos.', "layout":"topRight", "type": 'error'});
-        }
+        $.ajax({
+          url: base_url + 'panel/compras/ajax_producto/',
+          dataType: 'json',
+          data: {
+            term : request.term,
+          },
+          success: function (data) {
+            response(data);
+          }
+        });
       },
       minLength: 1,
       selectFirst: true,
@@ -327,7 +198,7 @@
       var $codigo = $(this);
       if (isEmpresaSelected()) {
         if (event.which === 13 && $codigo.val() !== '') {
-          $.get(base_url + 'panel/compras_ordenes/ajax_producto_by_codigo/?ide=' + $('#empresaId').val() + '&cod=' + $codigo.val() + '&tipo=' + $('#tipoOrden').find('option:selected').val(), function(data) {
+          $.get(base_url + 'panel/compras/ajax_producto_by_codigo/?cod=' + $codigo.val(), function(data) {
             if (data.length > 0) {
               var presentaciones = data[0].presentaciones,
                   selectHtml = '<select name="presentacion[]" id="presentacion"><option value=""></option>';
@@ -363,7 +234,7 @@
         noty({"text": 'Favor de Seleccionar una empresa.', "layout":"topRight", "type": 'error'});
       }
     });
-  }
+  };
 
   var eventIvaKeypress = function () {
     $('#ftraslado').on('keypress', function(event) {
@@ -631,20 +502,20 @@
                     '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
-                  '<td style="width: 160px;">' +
-                    $(producto.presentacion).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
-                    '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
-                    '<input type="hidden" name="presentacionText[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
-                  '</td>' +
+                  // '<td style="width: 160px;">' +
+                  //   $(producto.presentacion).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
+                  //   '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
+                  //   '<input type="hidden" name="presentacionText[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
+                  // '</td>' +
                   '<td style="width: 150px;">' +
                     $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
                   '</td>' +
                   '<td style="width: 65px;">' +
                       '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
-                  '<td style="width: 65px;">' +
-                      '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
+                  // '<td style="width: 65px;">' +
+                  //     '<input type="number" name="faltantes[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
+                  // '</td>' +
                   '<td style="width: 90px;">' +
                     '<input type="text" name="valorUnitario[]" value="'+producto.precio_unitario+'" id="valorUnitario" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +

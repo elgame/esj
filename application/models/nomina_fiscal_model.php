@@ -138,7 +138,7 @@ class nomina_fiscal_model extends CI_Model {
         FROM nomina_prestamos np
         LEFT JOIN nomina_fiscal_prestamos nfp ON nfp.id_prestamo = np.id_prestamo
         WHERE np.status = 't' AND DATE(np.inicio_pago) <= '{$diaUltimoDeLaSemana}'
-        GROUP BY np.id_usuario, np.id_prestamo, np.prestado, np.pago_semana, 
+        GROUP BY np.id_usuario, np.id_prestamo, np.prestado, np.pago_semana,
           np.status, DATE(np.fecha), DATE(np.inicio_pago)
     ");
 
@@ -910,7 +910,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // fecha en la que se inciaran a calcular los dias transcurrido del año
     // a la fecha de renuncia.
-    $fechaInicio = date('2013-01-01');
+    $fechaInicio = date('Y-01-01');
     if (strtotime($fechaInicio) < strtotime($fechaEntrada))
     {
       $fechaInicio = date($fechaEntrada);
@@ -2120,6 +2120,12 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica', '', 9);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Cell(200, 2, "-----------------------------------------------------------------------------------------------", 0, 0, 'L', 0);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
 
     }
     $pdf->Output('Nomina.pdf', 'I');

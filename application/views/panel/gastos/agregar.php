@@ -50,23 +50,23 @@
                       <option value="fa" <?php echo set_select('tipo_documento', 'fa') ?>>FACTURA</option>
                       <option value="nv" <?php echo set_select('tipo_documento', 'nv') ?>>NOTA DE VENTA</option>
                     </select>
-                    <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo 
-                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="vehiculo|serie" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label>
+                    <!-- <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo
+                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="vehiculo|serie" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label> -->
                   </div>
                 </div>
 
-                <div class="control-group" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">
+                <!-- <div class="control-group" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">
                   <label class="control-label" for="vehiculo">Vehiculos</label>
                   <div class="controls">
                     <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo set_value('vehiculo') ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" style="float: left;">
-                    
+
                     <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="serie">
                       <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot') ?>>OTRO</option>
                       <option value="g" <?php echo set_select('tipo_vehiculo', 'g') ?>>GASOLINA</option>
                     </select>
                   </div>
                     <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo set_value('vehiculoId') ?>">
-                </div>
+                </div> -->
 
                 <div class="control-group">
                   <label class="control-label" for="serie">Serie</label>
@@ -128,7 +128,7 @@
               </div><!--/span6 -->
             </div><!--/row-fluid -->
 
-            <div class="row-fluid" id="group_gasolina" style="display: <?php echo isset($_POST['tipo_vehiculo']) ? ($_POST['tipo_vehiculo'] === 'ot' ? 'none' : 'block') : 'none' ?>;">
+            <!-- <div class="row-fluid" id="group_gasolina" style="display: <?php echo isset($_POST['tipo_vehiculo']) ? ($_POST['tipo_vehiculo'] === 'ot' ? 'none' : 'block') : 'none' ?>;">
               <div class="span4">
                 <div class="control-group">
                   <div class="controls span9">
@@ -150,7 +150,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
 
           <div class="row-fluid" id="group_pago_contado" style="display: none;">
             <div class="span3">
@@ -233,7 +233,7 @@
           <div class="span7">
             <a href="<?php echo base_url('panel/gastos/ligar'); ?>" class="btn btn-info pull-left" id="btnLigarOrdenes" rel="superbox-70x550" data-supermodal-callback="validaParamsGasto" data-supermodal-autoshow="false">Ligar Ordenes</a>
             <div id="ordenesSeleccionadas" class="pull-left" style="margin-left: 5px;">
-          <?php  
+          <?php
           if(isset($_POST['ordenes']))
           foreach ($_POST['ordenes'] as $key => $value)
           {

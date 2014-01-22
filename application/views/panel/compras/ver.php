@@ -133,7 +133,7 @@
                               <tbody>
                                     <?php
                                           $subtotal = $iva = $total = $retencion = 0;
-                                          
+
                                           $subtotal  += $compra['info']->subtotal;
                                           $iva       += $compra['info']->importe_iva;
                                           $retencion += $compra['info']->retencion_iva;

@@ -77,23 +77,23 @@
                         <option value="fa" <?php echo set_select('tipo_documento', 'fa', false, $gasto['info']->tipo_documento) ?>>FACTURA</option>
                         <option value="nv" <?php echo set_select('tipo_documento', 'nv', false, $gasto['info']->tipo_documento) ?>>NOTA DE VENTA</option>
                       </select>
-                      <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo 
-                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" readonly <?php echo ($gasto['info']->id_vehiculo != '' ? 'checked' : ''); ?>></label>
+                      <!-- <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo
+                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" readonly <?php echo ($gasto['info']->id_vehiculo != '' ? 'checked' : ''); ?>></label> -->
                     </div>
                   </div>
 
-                  <div class="control-group" id="groupVehiculo" style="display: <?php echo ($gasto['info']->id_vehiculo != '' ? 'block' : 'none'); ?>;">
+                  <!-- <div class="control-group" id="groupVehiculo" style="display: <?php echo ($gasto['info']->id_vehiculo != '' ? 'block' : 'none'); ?>;">
                     <label class="control-label" for="vehiculo">Vehiculos</label>
                     <div class="controls">
                       <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo (isset($gasto['vehiculo']->nombre)? $gasto['vehiculo']->nombre: ''); ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" readonly style="float: left;">
-                      
+
                       <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="serie" readonly>
                         <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot', false, $gasto['info']->tipo_vehiculo) ?>>OTRO</option>
                         <option value="g" <?php echo set_select('tipo_vehiculo', 'g', false, $gasto['info']->tipo_vehiculo) ?>>GASOLINA</option>
                       </select>
                     </div>
                       <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo $gasto['info']->id_vehiculo; ?>">
-                  </div>
+                  </div> -->
 
                   <div class="control-group">
                     <label class="control-label" for="serie">Serie</label>
@@ -156,7 +156,7 @@
                 </div><!--/span6 -->
               </div><!--/row-fluid -->
 
-              <div class="row-fluid" id="group_gasolina" style="display: <?php echo ($gasto['info']->tipo_vehiculo === 'ot' ? 'none' : 'block') ?>;">
+              <!-- <div class="row-fluid" id="group_gasolina" style="display: <?php echo ($gasto['info']->tipo_vehiculo === 'ot' ? 'none' : 'block') ?>;">
                 <div class="span4">
                   <div class="control-group">
                     <div class="controls span9">
@@ -178,7 +178,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> -->
 
             <div class="row-fluid">
               <div class="span4">
