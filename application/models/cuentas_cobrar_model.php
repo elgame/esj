@@ -1300,7 +1300,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 			/** Facturas ***/
 			$facturas = $this->db->query("SELECT id_factura, Date(fecha) AS fecha, serie, folio, 
-					(CASE WHEN id_nc IS NULL THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, total, 
+					(CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, total, 
 					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento
 				FROM facturacion 
 				WHERE id_cliente = {$cliente->id_cliente} 
