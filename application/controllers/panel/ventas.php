@@ -47,7 +47,7 @@ class ventas extends MY_Controller {
 
     $params['datos_s'] = $this->ventas_model->getVentas();
 
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha']  = date("Y-m-d");
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -127,6 +127,7 @@ class ventas extends MY_Controller {
     if (isset($_GET['id_nr']))
     {
       $params['borrador']                = $this->facturacion_model->getInfoFactura($_GET['id_nr']);
+      $params['fecha']  = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
       // $params['borrador']['info']->serie = '';
       // $params['borrador']['info']->folio = '';
     }
@@ -319,7 +320,7 @@ class ventas extends MY_Controller {
 
         array('field'   => 'dno_certificado',
               'label'   => 'No. Certificado',
-              'rules'   => 'required'),
+              'rules'   => ''),
         array('field'   => 'dtipo_comprobante',
               'label'   => 'Tipo comproante',
               'rules'   => 'required'),

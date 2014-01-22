@@ -34,6 +34,10 @@
                 }
                 ?>
                   </select>
+
+                  <label for="imprimir" style="float: right;">Imprimir recibo?
+                    <input type="checkbox" name="imprimir" id="imprimir" value="si">
+                  </label>
                 </div>
               </div>
 
@@ -122,6 +126,7 @@
             </div>
             <div class="clearfix"></div>
             <?php } ?>
+
             <button type="submit" class="btn btn-success btn-large">Guardar</button>
           </div><!--/row-->
 

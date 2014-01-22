@@ -714,9 +714,9 @@ class nomina_fiscal_model extends CI_Model {
         $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana);
 
         $result = $this->timbrar($archivo['pathXML']);
-        echo "<pre>";
-          var_dump($archivo, $result, $cadenaOriginal);
-        echo "</pre>";exit;
+        // echo "<pre>";
+        //   var_dump($archivo, $result, $cadenaOriginal);
+        // echo "</pre>";exit;
 
         // Si la nomina se timbro entonces agrega al array nominas la nomina del
         // empleado para despues insertarla en la bdd.

@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Cuentas por Cobrar
+            Lista de Pagos
           </li>
         </ul>
       </div>
@@ -16,36 +16,23 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Cuentas por Cobrar</h2>
+            <h2><i class="icon-file"></i> Lista de Pagos</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <!-- <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> | 
             <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Excel</a> | 
-            <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Estado cuenta</a>
+              <i class="icon-table"></i> Excel</a> -->
 
-            <form action="<?php echo base_url('panel/cuentas_cobrar/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/cuentas_cobrar/lista_pagos/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
                 <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
-                
-                <label for="ftipo">Pagos:</label>
-                <select name="ftipo" id="ftipo" class="input-large search-query">
-                  <option value="to" <?php echo set_select_get('ftipo', 'to'); ?>>Todas</option>
-                  <option value="pp" <?php echo set_select_get('ftipo', 'pp'); ?>>Pendientes por pagar</option>
-                  <option value="pv" <?php echo set_select_get('ftipo', 'pv'); ?>>Plazo vencido</option>
-                </select><br>
-
-                <label for="dcliente">Cliente</label>
-                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> | 
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
@@ -58,40 +45,38 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-                  <th>Cliente</th>
-                  <th>Cargos</th>
-                  <th>Abonos</th>
-                  <th>Saldo</th>
+                  <th>FECHA</th>
+                  <th>CLIENTE</th>
+                  <th>EMPRESA</th>
+                  <th>CONCEPTO</th>
+                  <th>IMPORTE</th>
+                  <th>OPCIONES</th>
                 </tr>
               </thead>
               <tbody>
             <?php
             $total_saldo = $total_abono = $total_cargo = 0; 
-            foreach($data['cuentas'] as $cuenta){
-              $total_cargo += $cuenta->total;
-              $total_abono += $cuenta->abonos;
-              $total_saldo += $cuenta->saldo;
+            foreach($data['abonos'] as $cuenta){
             ?>
                 <tr>
-                  <td><a href="<?php echo base_url('panel/cuentas_cobrar/cuenta').'?id_cliente='.$cuenta->id_cliente.'&'.
-                    String::getVarsLink(array('id_cliente', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->nombre; ?></a></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->total, 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abonos, 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
+                  <td><?php echo $cuenta->fecha; ?></td>
+                  <td><?php echo $cuenta->nombre_fiscal; ?></td>
+                  <td><?php echo $cuenta->empresa; ?></td>
+                  <td><?php echo $cuenta->concepto; ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->total_abono, 2, '$', false); ?></td>
+                  <td>
+                  	<a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_abono/?p='.$cuenta->id_movimiento); ?>" target="_blank" title="Imprimir">
+          						<i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
+          					<?php  
+          					echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_movimiento/', array(
+          							'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+          							'btn_type' => 'btn-danger',
+          							'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
+          						);
+          					?>
+                  </td>
                 </tr>
             <?php }?>
-                <tr style="background-color:#ccc;font-weight: bold;">
-                  <td class="a-r">Total x Página:</td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
-                </tr>
-                <tr style="background-color:#ccc;font-weight: bold;">
-                  <td class="a-r">Total:</td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_cargos'], 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_abonos'], 2, '$', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_saldo'], 2, '$', false); ?></td>
-                </tr>
               </tbody>
             </table>
 
