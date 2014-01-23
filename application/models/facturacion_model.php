@@ -1852,6 +1852,250 @@ class facturacion_model extends privilegios_model{
       }
     }
 
+    /**
+     * Reporte compras x cliente
+     *
+     * @return
+     */
+    public function getRVentascData()
+    {
+      $sql = '';
+
+      //Filtros para buscar
+      $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+      $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+      $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+      if($this->input->get('fid_producto') != ''){
+        $sql .= " AND cp.id_producto = ".$this->input->get('fid_producto');
+      }
+      $this->load->model('empresas_model');
+      $client_default = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+      $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
+
+      $sql_clientes = '';
+      if(is_array($this->input->get('ids_clientes')))
+        $sql_clientes = " AND id_cliente IN(".implode(',', $this->input->get('ids_clientes')).")";
+
+      $this->load->model('cuentas_cobrar_model');
+      $response = $this->cuentas_cobrar_model->getEstadoCuentaData($sql_clientes, true, true);
+      
+
+      return $response;
+    }
+    /**
+    * Reporte compras x cliente pdf
+    */
+    public function getRVentascPdf(){
+      $res = $this->getRVentascData();
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = 'Ventas por Cliente';
+      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('Arial','',8);
+    
+      $aligns = array('L', 'L', 'R', 'L', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(20, 11, 15, 40, 23, 23, 23, 23, 23);
+      $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cantidad', 'Neto', 'Impuesto', 'Total', 'Saldo');
+      $links = array('', '', '', '', '', '', '', '', '');
+      
+      $total_saldo_cliente = 0;
+      foreach($res as $key => $item){
+        $total_subtotal = 0;
+        $total_impuesto = 0;
+        $total_total = 0;
+        $total_cantidad = 0;
+        $total_saldo = 0;
+        
+        if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+          $pdf->AddPage();
+    
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(20, 170));
+        $pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
+        $pdf->SetXY(6, $pdf->GetY()-2);
+        $pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
+
+        $pdf->SetXY(6, $pdf->GetY()+3);
+
+        foreach ($item->facturas as $keyf => $factura)
+        {
+          $total_subtotal += $factura->subtotal;
+          $total_saldo += $factura->saldo;
+          $total_cantidad += $factura->cantidad_productos;
+          $total_impuesto += $factura->importe_iva;
+          $total_total += $factura->total;
+
+          $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura);
+          $datos = array(String::fechaATexto($factura->fecha, '/c'), 
+                  $factura->serie, 
+                  $factura->folio, 
+                  $factura->concepto, 
+                  String::formatoNumero($factura->cantidad_productos, 2, '', false), 
+                  String::formatoNumero($factura->subtotal, 2, '', false), 
+                  String::formatoNumero($factura->importe_iva, 2, '', false), 
+                  String::formatoNumero($factura->total, 2, '', false), 
+                  String::formatoNumero( ($factura->saldo) , 2, '', false), 
+                  // String::fechaATexto($factura->fecha_vencimiento, '/c'),
+                );
+            
+          $pdf->SetXY(6, $pdf->GetY()-1);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->SetMyLinks($links);
+          $pdf->Row($datos, false, false);
+        }
+        $pdf->SetMyLinks(array());
+        
+        $pdf->SetX(93);
+        $pdf->SetFont('Arial','B',8);
+        // $pdf->SetTextColor(255,255,255);
+        $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+        $pdf->SetWidths(array(23, 23, 23, 23, 23));
+        $pdf->Row(array(
+            String::formatoNumero($total_cantidad, 2, '', false),
+            String::formatoNumero($total_subtotal, 2, '', false),
+            String::formatoNumero($total_impuesto, 2, '', false),
+            String::formatoNumero($total_total, 2, '', false),
+            String::formatoNumero($total_saldo, 2, '', false)), false);
+
+        // $total_saldo_cliente += $saldo_cliente;
+      }
+
+      // $pdf->SetXY(66, $pdf->GetY()+4);
+      // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+    
+    
+      $pdf->Output('reporte_ventas.pdf', 'I');
+    }
+
+    /**
+     * Reporte compras x cliente
+     *
+     * @return
+     */
+    public function getRVentasDetalleData()
+    {
+      $sql = '';
+
+      //Filtros para buscar
+      $response['factura'] = $this->db->query("SELECT * 
+        FROM facturacion AS f INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+        WHERE f.id_factura = ".floatval($this->input->get('venta')))->row();
+      $response['productos'] = $this->db->query("SELECT * FROM facturacion_productos WHERE id_factura = ".floatval($this->input->get('venta')))->result();
+
+      return $response;
+    }
+    /**
+    * Reporte compras x cliente pdf
+    */
+    public function getRVentasDetallePdf(){
+      $res = $this->getRVentasDetalleData();
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = 'Detalle de venta';
+      // $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+      $pdf->SetFont('Arial','',8);
+    
+      $aligns = array('L', 'R', 'C', 'L', 'L');
+      $widths = array(25, 25, 25, 50, 70);
+      $header = array('Serie', 'Folio', 'Fecha', 'Concepto', 'Cliente');
+
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(255,255,255);
+      $pdf->SetFillColor(160,160,160);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($header, true);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->Row(array(
+          $res['factura']->serie,
+          $res['factura']->folio,
+          String::fechaATexto($res['factura']->fecha, '/c'),
+          ($res['factura']->is_factura=='t'? 'FACTURA ELECTRONICA': 'REMISION'),
+          $res['factura']->nombre_fiscal,
+          ), false);
+
+      $aligns = array('L', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(70, 25, 25, 25, 25, 25);
+      $header = array('Nombre', 'Cantidad', 'Precio', 'Neto', 'Impuesto', 'Total');
+      
+      $total_cantidad = 0;
+      foreach($res['productos'] as $key => $item){
+        
+        if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+    
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $item->descripcion,
+            String::formatoNumero($item->cantidad, 2, '', false),
+            String::formatoNumero($item->precio_unitario, 2, '', false),
+            String::formatoNumero($item->importe, 2, '', false),
+            String::formatoNumero($item->iva, 2, '', false),
+            String::formatoNumero(($item->importe+$item->iva), 2, '', false)), false);
+        $total_cantidad += $item->cantidad;
+      }
+
+      $pdf->SetX(80);
+      $pdf->SetFont('Arial','B',8);
+      // $pdf->SetTextColor(255,255,255);
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(25, 25, 25, 25, 25));
+      $pdf->Row(array(
+          String::formatoNumero($total_cantidad, 2, '', false),
+          '',
+          String::formatoNumero($res['factura']->subtotal, 2, '', false),
+          String::formatoNumero($res['factura']->importe_iva, 2, '', false),
+          String::formatoNumero($res['factura']->total, 2, '', false)), false);
+    
+    
+      $pdf->Output('reporte_ventas.pdf', 'I');
+    }
+
+
     /*
     |------------------------------------------------------------------------
     | FACTURA PDF

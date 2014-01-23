@@ -24,7 +24,7 @@ class polizas_model extends CI_Model {
     return $basic? $data->cuenta: $data;
   }
   public function getCuentaNCVenta($basic=true){
-    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'")->row();
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'")->row();
     return $basic? $data->cuenta: $data;
   }
   public function getCuentaIvaXAcreditar($basic=true){
@@ -278,6 +278,8 @@ class polizas_model extends CI_Model {
     }
     $response['folio'] = $folio-1;
 
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
     return $response;
   }
 
@@ -397,6 +399,8 @@ class polizas_model extends CI_Model {
       $fecha = String::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
+
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
   }
@@ -573,6 +577,8 @@ class polizas_model extends CI_Model {
     }
     $response['folio'] = $folio-1;
 
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
     return $response;
   }
 
@@ -706,6 +712,8 @@ class polizas_model extends CI_Model {
         unset($inf_factura);
       }
     }
+
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
   }
@@ -867,6 +875,8 @@ class polizas_model extends CI_Model {
       $response['folio'] = $folio-1;
     }
 
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
     return $response;
   }
 
@@ -988,6 +998,8 @@ class polizas_model extends CI_Model {
         // }
       }
     }
+
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
   }
@@ -1114,6 +1126,8 @@ class polizas_model extends CI_Model {
       }
       $response['folio'] = $folio-1;
     }
+
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
   }

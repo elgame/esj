@@ -13,6 +13,8 @@ class facturacion extends MY_Controller {
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
     'facturacion/prodfact_pdf/',
+    'facturacion/rventasc_pdf/',
+    'facturacion/rventasc_detalle_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -1157,6 +1159,44 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
     $this->facturacion_model->prodfact_pdf();
+  }
+
+  public function rventasc()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas por Cliente');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/facturacion/rventasc',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rventasc_pdf(){
+    $this->load->model('facturacion_model');
+    $this->facturacion_model->getRVentascPdf();
+
+  }
+  public function rventasc_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->cuentasPagarExcel();
+  }
+
+  public function rventasc_detalle_pdf()
+  {
+    $this->load->model('facturacion_model');
+    $this->facturacion_model->getRVentasDetallePdf();
   }
 
   /*

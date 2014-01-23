@@ -1096,8 +1096,8 @@ class cuentas_cobrar_model extends privilegios_model{
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('P', 'mm', 'Letter');
-      // $pdf->show_head = true;
+      $pdf = new MYpdf('L', 'mm', array(70, 215.9));
+      $pdf->show_head = false;
       $pdf->titulo1 = $orden['abonos'][0]->empresa;
       $pdf->titulo2 = 'Cliente: ' . $orden['abonos'][0]->nombre_fiscal;
       $pdf->titulo3 = 'RECIBO DE PAGO';
@@ -1111,47 +1111,75 @@ class cuentas_cobrar_model extends privilegios_model{
 
       $y = $pdf->GetY();
 
-      $pdf->SetX(10);
-      $pdf->SetAligns(array('L', 'L'));
-      $pdf->SetWidths(array(25, 100));
-      $pdf->Row(array('FECHA:', String::fechaATexto($orden['abonos'][0]->fecha) ), false, false);
-      $pdf->Row(array('CONCEPTO:', $orden['abonos'][0]->concepto), false, false);
-      // $pdf->Row(array('PAGO:', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ));
-
-      $pdf->SetXY(10, $y);
-      $aligns = array('C', 'R');
-      $widths = array(25, 40);
-      $header = array('FOLIO', 'TOTAL');
-
+      $facturas_txt = array();
       foreach ($orden['facturas'] as $key => $prod)
       {
-        $band_head = false;
-        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-          // $pdf->AddPage();
-
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetTextColor(0,0,0);
-          $pdf->SetFillColor(255,255,255);
-          $pdf->SetXY(142, $pdf->GetY()-2);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true, false);
-        }
-
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetTextColor(0,0,0);
-        $datos = array(
-          $prod->serie.$prod->folio,
-          String::formatoNumero($prod->total, 2, '$', false),
-        );
-
-        $pdf->SetXY(142, $pdf->GetY()-2);
-        $pdf->Row($datos, false, false);
+      	$facturas_txt[] = $prod->serie.$prod->folio;
       }
 
-      $pdf->SetFont('Arial','B',8);
-      $pdf->SetXY(142, $pdf->GetY()-2);
-      $pdf->Row(array('TOTAL', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ), false, false);
+      $pdf->MultiCell(60,4, String::fechaATexto($orden['abonos'][0]->fecha));
+      $pdf->SetY($pdf->GetY()+1);
+      $pdf->MultiCell(60,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
+      $pdf->MultiCell(60,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+      $pdf->MultiCell(60,4, 'A cuenta de: '.implode('-', $facturas_txt));
+
+      $pdf->SetFont('helvetica','B', 10);
+      $pdf->SetXY(85, $y);
+      $pdf->MultiCell(115,4, String::fechaATexto($orden['abonos'][0]->fecha));
+      $pdf->SetXY(85, $pdf->GetY()+1);
+      $pdf->MultiCell(115,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
+      $pdf->SetX(85);
+      $pdf->MultiCell(115,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+      $pdf->SetX(85);
+      $pdf->MultiCell(115,4, 'A cuenta de: '.implode('-', $facturas_txt));
+      $pdf->SetX(85);
+      $pdf->MultiCell(115,4, 'A orden de: '.$orden['abonos'][0]->empresa);
+
+      $pdf->Text(15, 53, 'Firma ______________________');
+      $pdf->Text(100, 53, 'Firma _____________________________');
+
+      // $pdf->SetAligns(array('L', 'L'));
+      // $pdf->SetWidths(array(25, 100));
+      // $pdf->Row(array('FECHA:', String::fechaATexto($orden['abonos'][0]->fecha) ), false, false);
+      // $pdf->Row(array('CONCEPTO:', $orden['abonos'][0]->concepto), false, false);
+      // $pdf->Row(array('PAGO:', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ));
+
+      // $pdf->SetXY(10, $y);
+      // $aligns = array('C', 'R');
+      // $widths = array(25, 40);
+      // $header = array('FOLIO', 'TOTAL');
+
+      // foreach ($orden['facturas'] as $key => $prod)
+      // {
+      //   $band_head = false;
+      //   if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+      //     // $pdf->AddPage();
+
+      //     $pdf->SetFont('Arial','B',8);
+      //     $pdf->SetTextColor(0,0,0);
+      //     $pdf->SetFillColor(255,255,255);
+      //     $pdf->SetXY(142, $pdf->GetY()-2);
+      //     $pdf->SetAligns($aligns);
+      //     $pdf->SetWidths($widths);
+      //     $pdf->Row($header, true, false);
+      //   }
+
+      //   $pdf->SetFont('Arial','',8);
+      //   $pdf->SetTextColor(0,0,0);
+      //   $datos = array(
+      //     $prod->serie.$prod->folio,
+      //     String::formatoNumero($prod->total, 2, '$', false),
+      //   );
+
+      //   $pdf->SetXY(142, $pdf->GetY()-2);
+      //   $pdf->Row($datos, false, false);
+      // }
+
+      // $pdf->SetFont('Arial','B',8);
+      // $pdf->SetXY(142, $pdf->GetY()-2);
+      // $pdf->Row(array('TOTAL', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ), false, false);
 
       if ($path)
       {
@@ -1171,7 +1199,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Saldo de un cliente seleccionado
 	 * @return [type] [description]
 	 */
-	public function getEstadoCuentaData()
+	public function getEstadoCuentaData($sql_clientes='', $all_clientes=false, $all_facturas=false)
 	{
 		$sql = '';
 		
@@ -1200,7 +1228,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	    }
 
 
-	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi FROM clientes WHERE status = 'ac' ORDER BY cuenta_cpi ASC ");
+	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi FROM clientes WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
 	    $response = array();
 	    foreach ($clientes->result() as $keyc => $cliente)
 	    {
@@ -1299,9 +1327,12 @@ class cuentas_cobrar_model extends privilegios_model{
 				$cliente->saldo = $cliente->saldo_anterior->saldo;
 
 			/** Facturas ***/
+			$sql_field_cantidad = '';
+			if($all_clientes && $all_facturas)
+				$sql_field_cantidad = ", (SELECT Sum(cantidad) FROM facturacion_productos WHERE id_factura = facturacion.id_factura) AS cantidad_productos";
 			$facturas = $this->db->query("SELECT id_factura, Date(fecha) AS fecha, serie, folio, 
-					(CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, total, 
-					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento
+					(CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, subtotal, importe_iva, total, 
+					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
 				FROM facturacion 
 				WHERE id_cliente = {$cliente->id_cliente} 
 					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
@@ -1357,12 +1388,17 @@ class cuentas_cobrar_model extends privilegios_model{
 				$cliente->saldo -= $cliente->facturas[$key]->abonos_total;
 				$cliente->facturas[$key]->saldo -= $cliente->facturas[$key]->abonos_total;
 
-				if($cliente->facturas[$key]->saldo <= 0)
+				if($cliente->facturas[$key]->saldo <= 0 && $all_facturas == false)
 					unset($cliente->facturas[$key]);
 			}
 			
-			if( $cliente->saldo > 0 )
-				$response[] = $cliente;
+			if( $cliente->saldo > 0 || $all_clientes)
+			{
+				if($cliente->saldo > 0 && $all_clientes == false)
+					$response[] = $cliente;
+				elseif($all_clientes && count($cliente->facturas) > 0)
+					$response[] = $cliente;
+			}
 	    }
 	    $clientes->free_result();
 

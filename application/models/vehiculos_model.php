@@ -185,28 +185,48 @@ class vehiculos_model extends CI_Model {
 	    //   $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
 	    // }
 
+		//Gasolina
 		$res = $this->db->query(
-			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha) AS fecha, c.total
-			FROM compras AS c 
-				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_compra = cvg.id_compra
+			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha, 
+				(cvg.litros * cvg.precio) AS total
+			FROM compras_ordenes AS c 
+				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 			WHERE c.status<>'ca' AND c.tipo_vehiculo='g' {$sql}
-			ORDER BY c.fecha ASC
+			ORDER BY c.fecha_aceptacion ASC
 			");
-		
-		$response = array('gasolina' => array(), 'gastos' => array());
+		$response = array('gasolina' => array(), 'disel' => array(), 'gastos' => array());
 		if($res->num_rows() > 0)
 		{
 			$response['gasolina'] = $res->result();
 		}
 		$res->free_result();
 
+		//Disel
 		$res = $this->db->query(
-			"SELECT c.id_compra, (c.serie || c.folio) AS folio, Date(c.fecha) AS fecha, c.total, c.concepto, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre
-			FROM compras AS c 
+			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha, 
+				(cvg.litros * cvg.precio) AS total
+			FROM compras_ordenes AS c 
+				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+			WHERE c.status<>'ca' AND c.tipo_vehiculo='d' {$sql}
+			ORDER BY c.fecha_aceptacion ASC
+			");
+		if($res->num_rows() > 0)
+		{
+			$response['disel'] = $res->result();
+		}
+		$res->free_result();
+
+		//Gastos
+		$res = $this->db->query(
+			"SELECT c.id_orden, (c.folio) AS folio, Date(c.fecha_aceptacion) AS fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre, 
+				(SELECT Sum(total) FROM compras_productos WHERE id_orden = c.id_orden) AS total,
+				array_to_string(Array(SELECT descripcion FROM compras_productos WHERE id_orden = c.id_orden), ', ') AS concepto
+			FROM compras_ordenes AS c 
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 			WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql}
-			ORDER BY c.fecha ASC
+			ORDER BY c.fecha_aceptacion ASC
 			");
 		if($res->num_rows() > 0)
 			$response['gastos'] = $res->result();
@@ -236,69 +256,141 @@ class vehiculos_model extends CI_Model {
 		$header = array('Fecha', 'Kilometros', 'Litros', 'Km/L', 'L/100Km', 'Importe');
 
 		$total_gasolina = $total_kilometros = $total_litros = 0;
-		foreach($res['gasolina'] as $key => $item){
-			$band_head = false;
-			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-				$pdf->AddPage();
+		if(count($res['gasolina']) > 0)
+		{
+			foreach($res['gasolina'] as $key => $item){
+				$band_head = false;
+				if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+					$pdf->AddPage();
 
-				if ($key == 0)
-				{
-					$pdf->SetFont('Arial','B',11);
+					if ($key == 0)
+					{
+						$pdf->SetFont('Arial','B',11);
+						$pdf->SetX(6);
+						$pdf->SetAligns(array('L'));
+						$pdf->SetWidths(array(120));
+						$pdf->Row(array('Bitácora de Rendimiento de Combustible'), false, false);
+					}
+					
+					$pdf->SetFont('Arial','B',8);
+					$pdf->SetTextColor(255,255,255);
+					$pdf->SetFillColor(160,160,160);
 					$pdf->SetX(6);
-					$pdf->SetAligns(array('L'));
-					$pdf->SetWidths(array(120));
-					$pdf->Row(array('Bitácora de Rendimiento de Combustible'), false, false);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->Row($header, true);
 				}
 				
-				$pdf->SetFont('Arial','B',8);
-				$pdf->SetTextColor(255,255,255);
-				$pdf->SetFillColor(160,160,160);
+				$pdf->SetFont('Arial','',8);
+				$pdf->SetTextColor(0,0,0);
+				$precio = $item->total / ($item->litros>0? $item->litros: 1);
+				$datos = array($item->fecha, 
+					String::formatoNumero($item->kilometros, 2, ''),
+					String::formatoNumero($item->litros, 2, ''),
+					// String::formatoNumero($precio, 2, ''),
+					'', '',
+					String::formatoNumero($item->total, 2, '$', false),
+					);
+				if ($key > 0)
+				{
+					$rendimiento = ($item->kilometros - $res['gasolina'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
+					$datos[3] = String::formatoNumero( $rendimiento , 2, '');
+					$datos[4] = String::formatoNumero( (100/$rendimiento) , 2, '');
+
+					$total_kilometros += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
+					$total_litros     += $item->litros;
+				}
+				$total_gasolina += $item->total;
+				
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->Row($header, true);
+				$pdf->Row($datos, false);
 			}
-			
-			$pdf->SetFont('Arial','',8);
-			$pdf->SetTextColor(0,0,0);
-			$precio = $item->total / ($item->litros>0? $item->litros: 1);
-			$datos = array($item->fecha, 
-				String::formatoNumero($item->kilometros, 2, ''),
-				String::formatoNumero($item->litros, 2, ''),
-				// String::formatoNumero($precio, 2, ''),
-				'', '',
-				String::formatoNumero($item->total, 2, '$', false),
-				);
-			if ($key > 0)
-			{
-				$rendimiento = ($item->kilometros - $res['gasolina'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
-				$datos[3] = String::formatoNumero( $rendimiento , 2, '');
-				$datos[4] = String::formatoNumero( (100/$rendimiento) , 2, '');
 
-				$total_kilometros += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
-				$total_litros     += $item->litros;
-			}
-			$total_gasolina += $item->total;
-			
+			$pdf->SetFont('Arial','B',8);
+			$pdf->SetTextColor(255,255,255);
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
-			$pdf->Row($datos, false);
+			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
+			$pdf->Row(array('', 
+						String::formatoNumero( $total_kilometros , 2, ''), 
+						String::formatoNumero( $total_litros , 2, ''), 
+						String::formatoNumero( $total_rendimiento , 2, ''), 
+						String::formatoNumero( (100/($total_rendimiento>0? $total_rendimiento: 1)) , 2, ''), 
+						String::formatoNumero($total_gasolina, 2, '$', false),
+					), true);
 		}
 
-		$pdf->SetFont('Arial','B',8);
-		$pdf->SetTextColor(255,255,255);
-		$pdf->SetX(6);
-		$pdf->SetAligns($aligns);
-		$pdf->SetWidths($widths);
-		$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
-		$pdf->Row(array('', 
-					String::formatoNumero( $total_kilometros , 2, ''), 
-					String::formatoNumero( $total_litros , 2, ''), 
-					String::formatoNumero( $total_rendimiento , 2, ''), 
-					String::formatoNumero( (100/($total_rendimiento>0? $total_rendimiento: 1)) , 2, ''), 
-					String::formatoNumero($total_gasolina, 2, '$', false),
-				), true);
+		$total_disel = $total_kilometros = $total_litros = 0;
+		if(count($res['disel']) > 0)
+		{
+			foreach($res['disel'] as $key => $item){
+				$band_head = false;
+				if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+					if($pdf->GetY() >= $pdf->limiteY)
+						$pdf->AddPage();
+
+					if ($key == 0)
+					{
+						$pdf->SetFont('Arial','B',11);
+						$pdf->SetX(6);
+						$pdf->SetAligns(array('L'));
+						$pdf->SetWidths(array(120));
+						$pdf->Row(array('Bitácora de Rendimiento de Combustible'), false, false);
+					}
+					
+					$pdf->SetFont('Arial','B',8);
+					$pdf->SetTextColor(255,255,255);
+					$pdf->SetFillColor(160,160,160);
+					$pdf->SetX(6);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->Row($header, true);
+				}
+				
+				$pdf->SetFont('Arial','',8);
+				$pdf->SetTextColor(0,0,0);
+				$precio = $item->total / ($item->litros>0? $item->litros: 1);
+				$datos = array($item->fecha, 
+					String::formatoNumero($item->kilometros, 2, ''),
+					String::formatoNumero($item->litros, 2, ''),
+					// String::formatoNumero($precio, 2, ''),
+					'', '',
+					String::formatoNumero($item->total, 2, '$', false),
+					);
+				if ($key > 0)
+				{
+					$rendimiento = ($item->kilometros - $res['disel'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
+					$datos[3] = String::formatoNumero( $rendimiento , 2, '');
+					$datos[4] = String::formatoNumero( (100/$rendimiento) , 2, '');
+
+					$total_kilometros += $item->kilometros - $res['disel'][$key-1]->kilometros;
+					$total_litros     += $item->litros;
+				}
+				$total_disel += $item->total;
+				
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($datos, false);
+			}
+
+			$pdf->SetFont('Arial','B',8);
+			$pdf->SetTextColor(255,255,255);
+			$pdf->SetX(6);
+			$pdf->SetAligns($aligns);
+			$pdf->SetWidths($widths);
+			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
+			$pdf->Row(array('', 
+						String::formatoNumero( $total_kilometros , 2, ''), 
+						String::formatoNumero( $total_litros , 2, ''), 
+						String::formatoNumero( $total_rendimiento , 2, ''), 
+						String::formatoNumero( (100/($total_rendimiento>0? $total_rendimiento: 1)) , 2, ''), 
+						String::formatoNumero($total_disel, 2, '$', false),
+					), true);
+		}
 
 
 		//Otros gastos asignados al vehiculo
@@ -366,10 +458,11 @@ class vehiculos_model extends CI_Model {
 		$pdf->SetTextColor(255,255,255);
 		$pdf->SetXY(6, $pdf->GetY()+5);
 		$pdf->SetAligns($aligns);
-		$pdf->SetWidths(array(20, 40, 20, 40, 20, 40));
+		$pdf->SetWidths(array(20, 30, 20, 30, 20, 30, 20, 30));
 		$pdf->Row(array('Gasolina', String::formatoNumero($total_gasolina, 2, '$', false), 
+						'Disel', String::formatoNumero($total_disel, 2, '$', false), 
 						'Otros', String::formatoNumero($total_gasto, 2, '$', false), 
-						'Total', String::formatoNumero($total_gasolina+$total_gasto, 2, '$', false) 
+						'Total', String::formatoNumero($total_gasolina+$total_disel+$total_gasto, 2, '$', false) 
 						), true);
 		
 		$pdf->Output('vehiculo.pdf', 'I');
