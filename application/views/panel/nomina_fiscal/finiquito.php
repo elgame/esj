@@ -21,7 +21,7 @@
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
-          <div class="box-content">
+          <div class="box-content" style="overflow-x: auto;">
             <form action="<?php echo base_url('panel/nomina_fiscal/finiquito'); ?>" method="GET" class="form-search" id="form" target="">
               <div class="form-actions form-filters">
                 <label for="empleado">Empleado</label>
