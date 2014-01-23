@@ -692,7 +692,7 @@ class finiquito
 
     return array(
       'TipoDeduccion' => '002',
-      'Clave'          => $this->clavesPatron['otros'],
+      'Clave'          => $this->clavesPatron['isr'],
       'Concepto'       => 'ISR',
       'ImporteGravado' => 0,
       'ImporteExcento' => (float)$isr,

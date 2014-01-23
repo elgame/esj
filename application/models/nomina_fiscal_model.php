@@ -14,10 +14,12 @@ class nomina_fiscal_model extends CI_Model {
       'prima_vacacional' => $this->getPrimaVacacionalCuentaContpaq(),
       'aguinaldo'        => $this->getAguinaldoCuentaContpaq(),
       'ptu'              => $this->getPtuCuentaContpaq(),
-      'imss'             => $this->getInfonavitCuentaContpaq(),
+      'imss'             => $this->getImssCuentaContpaq(),
       'rcv'              => $this->getRcvCuentaContpaq(),
       'infonavit'        => $this->getInfonavitCuentaContpaq(),
-      'otros'            => $this->getInfonavitCuentaContpaq(),
+      'otros'            => $this->getOtrosGastosCuentaContpaq(),
+      'subsidio'         => $this->getSubsidioCuentaContpaq(),
+      'isr'              => $this->getIsrCuentaContpaq(),
     );
     $configuraciones['tablas_isr'] = $this->getTablasIsr();
 
@@ -959,16 +961,18 @@ class nomina_fiscal_model extends CI_Model {
     $salariosZonas = $this->getConfigSalariosZonas();
 
     $cuentasContpaq = array(
-      'sueldo' => $this->getSueldoCuentaContpaq(),
-      'horas_extras' => $this->getHorasExtrasCuentaContpaq(),
-      'vacaciones' => $this->getVacacionesCuentaContpaq(),
+      'sueldo'           => $this->getSueldoCuentaContpaq(),
+      'horas_extras'     => $this->getHorasExtrasCuentaContpaq(),
+      'vacaciones'       => $this->getVacacionesCuentaContpaq(),
       'prima_vacacional' => $this->getPrimaVacacionalCuentaContpaq(),
-      'aguinaldo' => $this->getAguinaldoCuentaContpaq(),
-      'ptu' => $this->getPtuCuentaContpaq(),
-      'imss' => $this->getInfonavitCuentaContpaq(),
-      'rcv' => $this->getRcvCuentaContpaq(),
-      'infonavit' => $this->getInfonavitCuentaContpaq(),
-      'otros' => $this->getInfonavitCuentaContpaq(),
+      'aguinaldo'        => $this->getAguinaldoCuentaContpaq(),
+      'ptu'              => $this->getPtuCuentaContpaq(),
+      'imss'             => $this->getImssCuentaContpaq(),
+      'rcv'              => $this->getRcvCuentaContpaq(),
+      'infonavit'        => $this->getInfonavitCuentaContpaq(),
+      'otros'            => $this->getOtrosGastosCuentaContpaq(),
+      'subsidio'         => $this->getSubsidioCuentaContpaq(),
+      'isr'              => $this->getIsrCuentaContpaq(),
     );
 
     $tablas = $this->getTablasIsr();
@@ -1000,7 +1004,9 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene los calculos del finiquito.
     $empleadoFiniquito = $this->finiquito($empleadoId, $fechaSalida);
-
+    // echo "<pre>";
+    //   var_dump($empleadoFiniquito);
+    // echo "</pre>";exit;
     // Obtiene la informacion de la empresa.
     $empresa = $this->empresas_model->getInfoEmpresa($empleadoFiniquito[0]->id_empresa, true);
 
@@ -1022,6 +1028,8 @@ class nomina_fiscal_model extends CI_Model {
 
     // Descuento seria 0 pq no hay otra deducciones aparte del isr.
     $descuento = 0;
+    $isr = $empleadoFiniquito[0]->nomina->deducciones['isr']['total'];
+    unset($empleadoFiniquito[0]->nomina->deducciones['isr']['total']);
 
     // Obtiene los datos para la cadena original.
     $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
@@ -1029,7 +1037,7 @@ class nomina_fiscal_model extends CI_Model {
     $datosCadenaOriginal['descuento'] = $descuento;
     $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
     $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-    $datosCadenaOriginal['total'] = $valorUnitario - $descuento; //- $isr
+    $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
 
     // Concepto de la nomina.
     $concepto = array(array(
@@ -1053,7 +1061,7 @@ class nomina_fiscal_model extends CI_Model {
     $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
     $datosXML['concepto'] = $concepto;
 
-    $archivo = $this->cfdi->generaArchivos($datosXML, false, null, 'media/cfdi/FiniquitosXML/'.date('Y'));
+    $archivo = $this->cfdi->generaArchivos($datosXML, false, null, 'media/cfdi/FiniquitosXML/');
     $result = $this->timbrar($archivo['pathXML']);
     // echo "<pre>";
     //   var_dump($archivo, $result, $cadenaOriginal);
@@ -1696,7 +1704,7 @@ class nomina_fiscal_model extends CI_Model {
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%cuotas infonavit%' AND id_padre = '1296'")->result();
+       WHERE LOWER(nombre) LIKE '%credito infonavit%' AND id_padre = '1191'")->result();
 
     return $query[0]->cuenta;
   }
@@ -1720,6 +1728,49 @@ class nomina_fiscal_model extends CI_Model {
 
     return $query[0]->cuenta;
   }
+
+  private function getImssCuentaContpaq()
+  {
+    $query = $this->db->query(
+      "SELECT *
+       FROM cuentas_contpaq
+       WHERE LOWER(nombre) LIKE '%imss retenido%' AND id_padre = '1191'")->result();
+
+    return $query[0]->cuenta;
+  }
+
+  private function getOtrosGastosCuentaContpaq()
+  {
+    $query = $this->db->query(
+      "SELECT *
+       FROM cuentas_contpaq
+       WHERE LOWER(nombre) LIKE '%otros gastos%' AND id_padre = '1296'")->result();
+
+    return $query[0]->cuenta;
+  }
+
+  private function getSubsidioCuentaContpaq()
+  {
+    $query = $this->db->query(
+      "SELECT *
+       FROM cuentas_contpaq
+       WHERE LOWER(nombre) LIKE '%subsidio%' AND id_padre = '28'")->result();
+
+    return $query[0]->cuenta;
+  }
+
+  private function getIsrCuentaContpaq()
+  {
+    $query = $this->db->query(
+      "SELECT *
+       FROM cuentas_contpaq
+       WHERE LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'")->result();
+
+    return $query[0]->cuenta;
+  }
+
+
+
 
   /*
    |------------------------------------------------------------------------

@@ -628,7 +628,7 @@ class nomina
     {
       $this->empleado->nomina->percepciones['subsidio'] = array(
         'TipoPercepcion' => '017',
-        'Clave'          => $this->clavesPatron['otros'],
+        'Clave'          => $this->clavesPatron['subsidio'],
         'Concepto'       => 'Subsidio para el empleo',
         'ImporteGravado' => 0,
         'ImporteExcento' => (float)$this->subsidio,
@@ -637,7 +637,7 @@ class nomina
 
       return array(
         'TipoDeduccion' => '002',
-        'Clave'          => $this->clavesPatron['otros'],
+        'Clave'          => $this->clavesPatron['isr'],
         'Concepto'       => 'ISR',
         'ImporteGravado' => 0,
         'ImporteExcento' => (float)$this->isr,
@@ -717,7 +717,7 @@ class nomina
       // Agrega la percepcion subsidio a la nomina.
       $this->empleado->nomina->percepciones['subsidio'] = array(
         'TipoPercepcion' => '017',
-        'Clave'          => $this->clavesPatron['otros'],
+        'Clave'          => $this->clavesPatron['subsidio'],
         'Concepto'       => 'Subsidio para el empleo',
         'ImporteGravado' => 0,
         'ImporteExcento' => (float)$rango->subsidio,
@@ -754,7 +754,7 @@ class nomina
 
       return array(
         'TipoDeduccion' => '002',
-        'Clave'          => $this->clavesPatron['otros'],
+        'Clave'          => $this->clavesPatron['isr'],
         'Concepto'       => 'ISR',
         'ImporteGravado' => 0,
         'ImporteExcento' => (float)$isr + $isrAguinaldoPrimaPtu,
