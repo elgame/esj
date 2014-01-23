@@ -270,7 +270,7 @@ class cuentas_pagar_model extends privilegios_model{
 						Sum(f.importe_iva) AS iva, 
 						COALESCE(Sum(faa.abonos),0) as abonos, 
 						COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-						'f' as tipo
+						'f'::text as tipo
 					FROM
 						proveedores AS c
 						INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
@@ -313,7 +313,7 @@ class cuentas_pagar_model extends privilegios_model{
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento, 
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto,
-				'f' as tipo
+				'f'::text as tipo
 			FROM
 				compras AS f
 				LEFT JOIN (
@@ -581,7 +581,7 @@ class cuentas_pagar_model extends privilegios_model{
 		// {
 			$data['info'] = $this->db->query(
 											"SELECT id_compra AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito, id_proveedor, 'f' AS tipo 
+												plazo_credito, id_proveedor, 'f'::text AS tipo 
 												FROM compras
 												WHERE id_compra={$_GET['id']}")->result();
 			$sql = array('tabla' => 'compras_abonos', 
@@ -610,7 +610,7 @@ class cuentas_pagar_model extends privilegios_model{
 							fecha, 
 							total AS abono, 
 							concepto,
-							'ab' AS tipo
+							'ab'::text AS tipo
 						FROM {$sql['tabla']}
 						WHERE {$sql['where_field']} = {$_GET['id']}
 							AND Date(fecha) <= '{$fecha2}' 

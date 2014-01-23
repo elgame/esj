@@ -15,7 +15,9 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/saldos_pdf/',
     'cuentas_cobrar/saldos_xls/',
 
-    'cuentas_cobrar/imprimir_abono/'
+    'cuentas_cobrar/imprimir_abono/',
+
+    'cuentas_cobrar/estado_cuenta_pdf/',
   );
 
 
@@ -66,6 +68,15 @@ class cuentas_cobrar extends MY_Controller {
   public function saldos_xls(){
     $this->load->model('cuentas_cobrar_model');
     $this->cuentas_cobrar_model->cuentasCobrarExcel();
+  }
+
+  public function estado_cuenta_pdf(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->estadoCuentaPdf();
+  }
+  public function estado_cuenta_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->cuentaClienteExcel();
   }
 
   public function cuenta()
@@ -170,6 +181,9 @@ class cuentas_cobrar extends MY_Controller {
         else
           $respons = $this->cuentas_cobrar_model->addAbono();
 
+        if($this->input->post('imprimir') == 'si')
+          $params['print_recibo'] = $respons['id_movimiento'];
+
         $params['closeModal'] = true;
         $params['frm_errors'] = $this->showMsgs(4);
       }
@@ -227,12 +241,43 @@ class cuentas_cobrar extends MY_Controller {
     {
       $this->cuentas_cobrar_model->imprimir_abono($_GET['p']);
     }
-    else
-    {
-      $this->load->view('panel/cuentas_cobrar/print_orden_compra');
-    }
   }
 
+  public function lista_pagos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_cobrar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por cobrar');
+
+    $params['data'] = $this->cuentas_cobrar_model->getAbonosData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_cobrar/lista_pagos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function eliminar_movimiento()
+  {
+    if (isset($_GET['id_movimiento']{0}) ) 
+    {
+      $this->load->model('banco_cuentas_model');
+      $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+    }else
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+  }
 
 
 
@@ -303,6 +348,10 @@ class cuentas_cobrar extends MY_Controller {
         break;
       case 9:
         $txt = 'El abono se pagó correctamente.';
+        $icono = 'success';
+        break;
+      case 10:
+        $txt = 'Los abonos se eliminaron correctamente.';
         $icono = 'success';
         break;
     }

@@ -335,13 +335,17 @@ class String{
 	 * @param   int mes (entero entre 1 y 12)
 	 * @return  string  nombre_del_mes
 	 */
-	public static function mes($num){
+	public static function mes($num, $formato='l'){
 		/**
 		 * Creamos un array con los meses disponibles.
 		 * Agregamos un valor cualquiera al comienzo del array para que los números coincidan
 		 * con el valor tradicional del mes. El valor "Error" resultará útil
 		 **/
-		$meses = array('Error', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+		if($formato == 'c')
+			$meses = array('Error', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+				'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic');
+		else
+			$meses = array('Error', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
 				'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre');
 
 		/**
@@ -369,13 +373,17 @@ class String{
 			// $partes[1] contiene el año
 			// $partes[2] contiene el número de mes
 			// $partes[3] contiene el número del día
-			$mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
-			if ($formato == 'u') {
-				$mes = strtoupper($mes);
-			} elseif ($formato == 'l') {
-				$mes = strtolower($mes);
+			if($formato == '/c')
+				return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1];
+			else{
+				$mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
+				if ($formato == 'u') {
+					$mes = strtoupper($mes);
+				} elseif ($formato == 'l') {
+					$mes = strtolower($mes);
+				}
+				return $partes[3] . $mes . $partes[1];
 			}
-			return $partes[3] . $mes . $partes[1];
 
 		} else {
 			// Si hubo problemas en la validación, devolvemos false

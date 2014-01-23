@@ -40,10 +40,10 @@ class cuentas_cobrar_model extends privilegios_model{
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-    if($this->input->get('did_empresa') != ''){
-      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
-    }
+	    if($this->input->get('did_empresa') != ''){
+	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+	    }
 
 		$query = BDUtil::pagination(
 			"SELECT 
@@ -1002,6 +1002,14 @@ class cuentas_cobrar_model extends privilegios_model{
 
 	public function getAbonosData($movimientoId=null)
 	{
+		//paginacion
+		$params = array(
+				'result_items_per_page' => '60',
+				'result_page' 			=> (isset($_GET['pag'])? $_GET['pag']: 0)
+		);
+		if($params['result_page'] % $params['result_items_per_page'] == 0)
+			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
 		$response = array();
 		$sql = $sql2 = '';
 
@@ -1009,7 +1017,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$sql .= " AND bmf.id_movimiento = {$movimientoId}";
 		else{
 			if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
-			  $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+			  $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m").'-01';
 			  $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
 			}
 			if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
@@ -1017,55 +1025,62 @@ class cuentas_cobrar_model extends privilegios_model{
 			  $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
 			}
 
-			if ($this->input->get('fid_empresa') != '')
-			  $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+			if ($this->input->get('did_empresa') != '')
+			  $sql .= " AND f.id_empresa = '".$_GET['did_empresa']."'";
 		}
 
 
-		$query = $this->db->query(
-		  "SELECT 
-		    bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
-		    bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
-		    Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal, 
-		    c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
-		  FROM facturacion AS f 
-		    INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-		    INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
-		    INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
-		    INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa 
-		    INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
-		  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
-		     {$sql}
-		  GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto, 
-		    bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), 
-		    e.nombre_fiscal, e.logo
-		  ORDER BY bmf.id_movimiento ASC
-		  ");
+		$query = BDUtil::pagination(
+			"SELECT 
+			    bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
+			    bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
+			    Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal, 
+			    c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
+			  FROM facturacion AS f 
+			    INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+			    INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
+			    INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
+			    INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa 
+			    INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
+			  WHERE f.status <> 'ca' AND f.status <> 'b' 
+			     {$sql}
+			  GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto, 
+			    bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha), 
+			    e.nombre_fiscal, e.logo
+			  ORDER BY Date(fa.fecha) DESC
+			  ", $params, true);
+		$res = $this->db->query($query['query']);
+		
+		$response = array(
+			'abonos'         => array(),
+			'facturas'       => array(),
+			'total_rows'     => $query['total_rows'],
+			'items_per_page' => $params['result_items_per_page'],
+			'result_page'    => $params['result_page'],
+		);
 
-		if($query->num_rows() > 0)
+		if($res->num_rows() > 0)
 		{
-		  $response['abonos'] = $query->result();
-		  $query->free_result();
+		  $response['abonos'] = $res->result();
+		  $res->free_result();
 
 
 		  if($movimientoId!=null)
 		  {
-		  	$query = $this->db->query(
+		  	$res = $this->db->query(
 			  "SELECT 
 			    fa.id_abono, f.serie, f.folio, fa.ref_movimiento, fa.concepto, fa.total, Date(fa.fecha) AS fecha
 			  FROM facturacion AS f 
 			    INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
 			    INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
-			  WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
+			  WHERE f.status <> 'ca' AND f.status <> 'b' 
 			     {$sql}
 			  ORDER BY fa.id_abono ASC
 			  ");
-		  	$response['facturas'] = $query->result();
-		  	$query->free_result();
+		  	$response['facturas'] = $res->result();
+		  	$res->free_result();
 		  }
 		}
-		var_dump($response);
-		exit();
 
 		return $response;
 	}
@@ -1084,133 +1099,409 @@ class cuentas_cobrar_model extends privilegios_model{
       $pdf = new MYpdf('P', 'mm', 'Letter');
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['abonos'][0]->empresa;
-      $pdf->titulo2 = 'Cliente: ' . $orden['info'][0]->nombre_fiscal;
-      $pdf->titulo3 = " Fecha: ". date('Y-m-d');
+      $pdf->titulo2 = 'Cliente: ' . $orden['abonos'][0]->nombre_fiscal;
+      $pdf->titulo3 = 'RECIBO DE PAGO';
 
-      $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
+      $pdf->logo = $orden['abonos'][0]->logo!=''? (file_exists($orden['abonos'][0]->logo)? $orden['abonos'][0]->logo: '') : '';
 
       $pdf->AliasNbPages();
-      // $pdf->AddPage();
-      $pdf->SetFont('helvetica','', 8);
+      $pdf->AddPage();
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetTextColor(0,0,0);
 
-      $aligns = array('C', 'C', 'L', 'R', 'R');
-      $widths = array(25, 25, 104, 25, 25);
-      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+      $y = $pdf->GetY();
 
-      $subtotal = $iva = $total = $retencion = 0;
-      foreach ($orden['info'][0]->productos as $key => $prod)
+      $pdf->SetX(10);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(25, 100));
+      $pdf->Row(array('FECHA:', String::fechaATexto($orden['abonos'][0]->fecha) ), false, false);
+      $pdf->Row(array('CONCEPTO:', $orden['abonos'][0]->concepto), false, false);
+      // $pdf->Row(array('PAGO:', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ));
+
+      $pdf->SetXY(10, $y);
+      $aligns = array('C', 'R');
+      $widths = array(25, 40);
+      $header = array('FOLIO', 'TOTAL');
+
+      foreach ($orden['facturas'] as $key => $prod)
       {
         $band_head = false;
         if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-          $pdf->AddPage();
+          // $pdf->AddPage();
 
           $pdf->SetFont('Arial','B',8);
-          $pdf->SetTextColor(255,255,255);
-          $pdf->SetFillColor(160,160,160);
-          $pdf->SetX(6);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(255,255,255);
+          $pdf->SetXY(142, $pdf->GetY()-2);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
+          $pdf->Row($header, true, false);
         }
 
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
         $datos = array(
-          $prod->cantidad,
-          $prod->codigo,
-          $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          String::formatoNumero($prod->precio_unitario, 2, '$', false),
-          String::formatoNumero($prod->importe, 2, '$', false),
+          $prod->serie.$prod->folio,
+          String::formatoNumero($prod->total, 2, '$', false),
         );
 
-        $pdf->SetX(6);
-        $pdf->Row($datos, false);
-
-        $subtotal += floatval($prod->importe);
-        $iva      += floatval($prod->iva);
-        $total    += floatval($prod->total);
-        $retencion += floatval($prod->retencion_iva);
+        $pdf->SetXY(142, $pdf->GetY()-2);
+        $pdf->Row($datos, false, false);
       }
 
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L', 'L', 'R'));
-      $pdf->SetWidths(array(154, 25, 25));
-      $pdf->Row(array(
-        'AREA DE APLICACION: ' . $orden['info'][0]->departamento,
-        'SUB-TOTAL',
-        String::formatoNumero($subtotal, 2, '$', false),
-      ), false, false);
-
-      $dato_cliente = '';
-      if($orden['info'][0]->tipo_orden == 'f')
-        $dato_cliente = 'CLIENTE: '.$orden['info'][0]->cliente;
-      $pdf->SetX(6);
-      $pdf->Row(array(
-        $dato_cliente,
-        'IVA',
-        String::formatoNumero($iva, 2, '$', false),
-      ), false, false);
-
-      if ($retencion > 0)
-      {
-        $pdf->SetX(6);
-        $pdf->Row(array(
-          '',
-          'Ret. IVA',
-          String::formatoNumero($retencion, 2, '$', false),
-        ), false, false);
-      }
-
-      $pdf->SetX(6);
-      $pdf->Row(array(
-        'OBSERVACIONES: '.$orden['info'][0]->descripcion,
-        'TOTAL',
-        String::formatoNumero($total, 2, '$', false),
-      ), false, false);
-
-      $x = $pdf->GetX();
-      $y = $pdf->GetY();
-
-      $pdf->SetXY($x - 4, $y + 5);
-      $pdf->cell(203, 6, '"PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO, GRACIAS"', false, false, 'L');
-
-      $pdf->SetAligns(array('C', 'C', 'C'));
-      $pdf->SetWidths(array(65, 65, 65));
-      $pdf->SetX(6);
-      $pdf->SetY($y + 11);
-      $pdf->SetFont('helvetica', 'B', 8);
-      $pdf->Row(array(
-        'SOLICITA',
-        'AUTORIZA',
-        'REGISTRO',
-      ), false, false);
-
-      $pdf->SetY($y + 20);
-      $pdf->Row(array(
-        '____________________________________',
-        '____________________________________',
-        '____________________________________',
-      ), false, false);
-
-      $pdf->SetY($y + 30);
-      $pdf->Row(array(
-        strtoupper($orden['info'][0]->empleado_solicito),
-        strtoupper($orden['info'][0]->autorizo),
-        strtoupper($orden['info'][0]->empleado),
-      ), false, false);
-
-      // $pdf->AutoPrint(true);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetXY(142, $pdf->GetY()-2);
+      $pdf->Row(array('TOTAL', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ), false, false);
 
       if ($path)
       {
-        $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';
+        $file = $path.'recibo_pago.pdf';
         $pdf->Output($file, 'F');
         return $file;
       }
       else
       {
-        $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
+        $pdf->Output('recibo_pago.pdf', 'I');
       }
    }
+
+   /**
+	 * 	ESTADO DE CUENTAS
+	 * ***************************************
+	 * Saldo de un cliente seleccionado
+	 * @return [type] [description]
+	 */
+	public function getEstadoCuentaData()
+	{
+		$sql = '';
+		
+		//Filtros para buscar
+		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+		$fecha1 = $fecha2 = '';
+		if($_GET['ffecha1'] > $_GET['ffecha2']){
+			$fecha2 = $_GET['ffecha1'];
+			$fecha1 = $_GET['ffecha2'];
+		}else{
+			$fecha2 = $_GET['ffecha2'];
+			$fecha1 = $_GET['ffecha1'];
+		}
+		
+		$sql = $sqlt = $sql2 = '';
+		if($this->input->get('ftipo')=='pv'){
+			$sql = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
+			$sqlt = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
+			$sql2 = 'WHERE saldo > 0';
+		}
+
+	    if($this->input->get('did_empresa') != ''){
+	      $sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sqlt .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+	    }
+
+
+	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi FROM clientes WHERE status = 'ac' ORDER BY cuenta_cpi ASC ");
+	    $response = array();
+	    foreach ($clientes->result() as $keyc => $cliente)
+	    {
+	    	$cliente->saldo = 0;
+
+	    	/*** Saldo anterior ***/
+			$saldo_anterior = $this->db->query(
+				"SELECT 
+					id_cliente,
+					Sum(total) AS total,
+					Sum(iva) AS iva, 
+					Sum(abonos) AS abonos, 
+					Sum(saldo)::numeric(12, 2) AS saldo
+				FROM 
+					(
+						SELECT 
+							c.id_cliente,
+							c.nombre_fiscal,
+							Sum(f.total) AS total,
+							Sum(f.importe_iva) AS iva, 
+							COALESCE(Sum(faa.abonos),0) as abonos, 
+							COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+							'f'::text as tipo
+						FROM
+							clientes AS c
+							INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+							LEFT JOIN (
+								(
+									SELECT 
+										f.id_cliente,
+										f.id_factura,
+										Sum(fa.total) AS abonos
+									FROM
+										facturacion AS f 
+											INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+									WHERE f.status <> 'ca' AND f.status <> 'b'
+										AND f.id_cliente = '{$cliente->id_cliente}' 
+										AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+									GROUP BY f.id_cliente, f.id_factura
+								)
+								UNION
+								(
+									SELECT 
+										f.id_cliente,
+										f.id_factura,
+										Sum(f.total) AS abonos
+									FROM
+										facturacion AS f
+									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+										AND f.id_cliente = '{$cliente->id_cliente}' 
+										AND Date(f.fecha) <= '{$fecha2}'{$sql}
+									GROUP BY f.id_cliente, f.id_factura
+								)
+							) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+						WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
+							AND Date(f.fecha) < '{$fecha1}'{$sql}
+						GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
+
+						UNION ALL
+
+						SELECT 
+							c.id_cliente,
+							c.nombre_fiscal,
+							Sum(f.total) AS total,
+							0 AS iva,
+							COALESCE(Sum(taa.abonos), 0) as abonos,
+							COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
+							'nv'::text as tipo
+						FROM 
+							clientes AS c
+							INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
+							LEFT JOIN (
+								SELECT 
+									f.id_cliente,
+									f.id_venta,
+									Sum(fa.total) AS abonos
+								FROM
+									facturacion_ventas_remision AS f 
+										INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
+								WHERE f.id_cliente = '{$cliente->id_cliente}' 
+									AND f.status <> 'ca'
+									AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
+								GROUP BY f.id_cliente, f.id_venta
+							) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
+						WHERE c.id_cliente = '{$cliente->id_cliente}' 
+									AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
+						GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
+
+					) AS sal
+				{$sql2}
+				GROUP BY id_cliente
+			");
+			$cliente->saldo_anterior = $saldo_anterior->row();
+			$saldo_anterior->free_result();
+			if( isset($cliente->saldo_anterior->saldo) )
+				$cliente->saldo = $cliente->saldo_anterior->saldo;
+
+			/** Facturas ***/
+			$facturas = $this->db->query("SELECT id_factura, Date(fecha) AS fecha, serie, folio, 
+					(CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, total, 
+					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento
+				FROM facturacion 
+				WHERE id_cliente = {$cliente->id_cliente} 
+					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
+					AND (Date(fecha) >= '{$fecha1}' AND Date(fecha) <= '{$fecha2}')
+					{$sql}
+				ORDER BY fecha ASC");
+			$cliente->facturas = $facturas->result();
+			$facturas->free_result();
+			foreach ($cliente->facturas as $key => $factura)
+			{
+				$cliente->saldo += $factura->total;
+				$cliente->facturas[$key]->saldo = $factura->total;
+
+				/** abonos **/
+				$abonos = $this->db->query("SELECT id_abono, serie, folio, fecha, concepto, abono
+					FROM (
+						(
+							SELECT 
+								id_abono,
+								''::text AS serie,
+								id_abono AS folio,
+								Date(fecha) AS fecha,
+								'Pago del cliente'::text AS concepto,
+								total AS abono
+							FROM
+								facturacion_abonos as fa
+							WHERE id_factura = {$factura->id_factura} AND Date(fecha) <= '{$fecha2}'
+						)
+						UNION
+						(
+							SELECT 
+								id_factura AS id_abono,
+								serie,
+								folio,
+								Date(fecha) AS fecha,
+								'NOTA CREDITO DIGITAL'::text AS concepto,
+								total AS abono
+							FROM
+								facturacion
+							WHERE status <> 'ca' AND status <> 'b' AND id_nc = {$factura->id_factura}
+								AND Date(fecha) <= '{$fecha2}'
+						)
+					) AS ffs
+					ORDER BY id_abono");
+				$cliente->facturas[$key]->abonos = $abonos->result();
+				$abonos->free_result();
+
+				$cliente->facturas[$key]->abonos_total = 0;
+				foreach ($cliente->facturas[$key]->abonos as $keyab => $abono)
+				{
+					$cliente->facturas[$key]->abonos_total += $abono->abono;
+				}
+				$cliente->saldo -= $cliente->facturas[$key]->abonos_total;
+				$cliente->facturas[$key]->saldo -= $cliente->facturas[$key]->abonos_total;
+
+				if($cliente->facturas[$key]->saldo <= 0)
+					unset($cliente->facturas[$key]);
+			}
+			
+			if( $cliente->saldo > 0 )
+				$response[] = $cliente;
+	    }
+	    $clientes->free_result();
+
+		return $response;
+	}
+
+	/**
+	 * Descarga el listado de cuentas por pagar en formato pdf
+	 */
+	public function estadoCuentaPdf(){
+		$res = $this->getEstadoCuentaData();
+		
+		// var_dump($res);
+
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm', 'Letter');
+		$pdf->titulo2 = 'ESTADO DE CUENTA DE CLIENTES';
+		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		// $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+		$pdf->AliasNbPages();
+		// $pdf->AddPage();
+		$pdf->SetFont('Arial','',8);
+	
+		$aligns = array('L', 'L', 'R', 'L', 'R', 'R', 'R', 'L');
+		$widths = array(28, 11, 20, 50, 23, 23, 23, 23);
+		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargos', 'Abonos', 'Saldo', 'F. Ven.');
+		
+		$total_saldo_cliente = 0;
+		foreach($res as $key => $item){
+			$total_cargo = 0;
+			$total_abono = 0;
+			$total_saldo = 0;
+			
+			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+				$pdf->AddPage();
+	
+				$pdf->SetFont('Arial','B',8);
+				$pdf->SetTextColor(255,255,255);
+				$pdf->SetFillColor(160,160,160);
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($header, true);
+			}
+
+			$pdf->SetFont('Arial','',8);
+			$pdf->SetTextColor(0,0,0);
+
+			$pdf->SetXY(6, $pdf->GetY());
+			$pdf->SetAligns(array('L', 'L'));
+			$pdf->SetWidths(array(20, 170));
+			$pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
+			$pdf->SetXY(6, $pdf->GetY()-2);
+			$pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
+
+			$pdf->SetXY(6, $pdf->GetY()+3);
+
+			foreach ($item->facturas as $keyf => $factura)
+			{
+				$total_cargo += $factura->total;
+				$total_saldo += $factura->saldo;
+
+				if($keyf == 0 && isset($item->saldo_anterior->saldo) ){
+					$datos = array('', '', '', 
+							'Saldo Inicial', 
+							String::formatoNumero($item->saldo_anterior->saldo, 2, '', false), 
+							'', '', '',
+						);
+					$pdf->SetXY(6, $pdf->GetY()-2);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->Row($datos, false, false);
+				}
+
+				$datos = array(String::fechaATexto($factura->fecha, '/c'), 
+								$factura->serie, 
+								$factura->folio, 
+								$factura->concepto, 
+								String::formatoNumero($factura->total, 2, '', false), 
+								'', 
+								String::formatoNumero( ($factura->saldo) , 2, '', false), 
+								String::fechaATexto($factura->fecha_vencimiento, '/c'),
+							);
+					
+				$pdf->SetXY(6, $pdf->GetY()-1);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($datos, false, false);
+
+				foreach ($factura->abonos as $keya => $abono)
+				{
+					$total_abono += $abono->abono;
+					$datos = array('   '.String::fechaATexto($abono->fecha, '/c'), 
+								$abono->serie, 
+								$abono->folio, 
+								$abono->concepto, 
+								'', 
+								'('.String::formatoNumero($abono->abono, 2, '', false).')', 
+								'', '',
+							);
+					
+					$pdf->SetXY(6, $pdf->GetY()-2);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->Row($datos, false, false);
+				}
+			}
+			
+			$pdf->SetX(116);
+			$pdf->SetFont('Arial','B',8);
+			// $pdf->SetTextColor(255,255,255);
+			$pdf->SetAligns(array('R', 'R', 'R', 'R'));
+			$pdf->SetWidths(array(23, 23, 23));
+			$pdf->Row(array(
+					String::formatoNumero($total_cargo, 2, '', false),
+					String::formatoNumero($total_abono, 2, '', false),
+					String::formatoNumero($total_saldo, 2, '', false)), false);
+
+			$saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
+			$pdf->SetAligns(array('R', 'R', 'R', 'R'));
+			$pdf->SetWidths(array(50, 23, 23));
+			$pdf->SetX(66);
+			$pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false)), false);
+			$pdf->SetX(66);
+			$pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false)), false);
+			$pdf->SetX(66);
+			$pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
+			$pdf->SetX(66);
+			$pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false)), false);
+
+			$total_saldo_cliente += $saldo_cliente;
+		}
+
+		$pdf->SetXY(66, $pdf->GetY()+4);
+		$pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+	
+	
+		$pdf->Output('estado_cuenta.pdf', 'I');
+	}
 
 }

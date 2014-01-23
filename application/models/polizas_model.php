@@ -742,8 +742,8 @@ class polizas_model extends CI_Model {
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
         INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
-      WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = 't' AND fa.poliza_ingreso = 'f'
-         {$sql}
+      WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f' 
+         {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
       GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto, 
         bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
       ORDER BY bmf.id_movimiento ASC
