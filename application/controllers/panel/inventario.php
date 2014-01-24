@@ -9,6 +9,7 @@ class inventario extends MY_Controller {
     'inventario/cproveedor_pdf/',
     'inventario/cproductos_pdf/',
     'inventario/cproducto_pdf/',
+    'inventario/cseguimiento_pdf/',
 
     'inventario/epu_pdf/',
     'inventario/epc_pdf/',
@@ -109,6 +110,11 @@ class inventario extends MY_Controller {
   {
     $this->load->model('inventario_model');
     $this->inventario_model->getCProductoPdf();
+  }
+  public function cseguimiento_pdf()
+  {
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCSeguimientoPdf();
   }
 
 

@@ -298,12 +298,12 @@ class inventario_model extends privilegios_model{
 	    $idsproveedores = $this->input->get('id_producto');
 
 	    $response = array();
-    	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, 
+    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, 
 				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
-				cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo
+				cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
 			FROM 
 				productos AS p LEFT JOIN (
-					SELECT cp.id_producto, Date(c.fecha) AS fecha, c.serie, c.folio, Date(co.fecha_autorizacion) AS fechao, co.folio AS folioo, 
+					SELECT cp.id_producto, c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, co.id_orden, Date(co.fecha_autorizacion) AS fechao, co.folio AS folioo, 
 						cp.cantidad, cp.importe, (cp.iva - cp.retencion_iva) AS impuestos, cp.total
 					FROM compras AS c 
 						INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
@@ -338,13 +338,24 @@ class inventario_model extends privilegios_model{
 		$widths = array(25, 20, 25, 65, 35, 35);
 		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Ordenado', 'Comprado');
 
+		// var_dump($res);
+
 		$familia = '';
 		$proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
 		foreach($res as $key => $producto){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-				
+
 				$pdf->SetFont('Arial','B',8);
+				if($key == 0){
+					$pdf->SetX(6);
+					$pdf->SetAligns(array('L', 'L'));
+					$pdf->SetWidths(array(30, 100));
+					$pdf->Row(array('Producto: ', $producto->codigo), false, false);
+					$pdf->SetXY(6, $pdf->GetY()-2);
+					$pdf->Row(array('Nombre: ', $producto->nombre), false, false);
+				}
+				
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
 				$pdf->SetX(6);
@@ -359,6 +370,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
+			$pdf->SetMyLinks(array());
 			$pdf->Row(array($producto->fechao, 
 				'',
 				String::formatoNumero($producto->folioo, 0, '', false),
@@ -366,7 +378,10 @@ class inventario_model extends privilegios_model{
 				String::formatoNumero($producto->cantidad, 2, '', false),
 				String::formatoNumero(0, 2, '', false),
 				), false, false);
+
 			$pdf->SetXY(6, $pdf->GetY()-2);
+			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_producto.
+							'&id_orden='.$producto->id_orden.'&'.String::getVarsLink(array('id_orden', 'id_compra'))) ));
 			$pdf->Row(array($producto->fecha, 
 				$producto->serie,
 				String::formatoNumero($producto->folio, 0, '', false),
@@ -388,6 +403,125 @@ class inventario_model extends privilegios_model{
 		$pdf->SetWidths($widths);
 		$pdf->SetMyLinks(array());
 		$pdf->Row($datos, false);
+		
+		$pdf->Output('compras_proveedor.pdf', 'I');
+	}
+
+	/**
+	 * Reporte existencias por unidad
+	 *
+	 * @return
+	 */
+	public function getCSeguimientoData()
+  	{
+		$sql = '';
+
+		// //Filtros para buscar
+		// $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+		// $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+		// $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+		// $this->load->model('empresas_model');
+		// $client_default = $this->empresas_model->getDefaultEmpresa();
+		// $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+		// $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+	 //    if($this->input->get('did_empresa') != ''){
+	 //      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+	 //    }
+
+	 //    $idsproveedores = $this->input->get('id_producto');
+
+	    $this->load->model('compras_ordenes_model');
+	    $this->load->model('compras_model');
+	    $compra = $this->compras_model->getInfoCompra($_GET['id_compra'], true);
+	    $orden = $this->compras_ordenes_model->info($_GET['id_orden'], true);
+	    $response['orden'] = $orden['info'][0];
+	    $response['compra'] = $compra['info'];
+
+		return $response;
+	}
+	/**
+	 * Reporte existencias por unidad pdf
+	 */
+	public function getCSeguimientoPdf(){
+		$res = $this->getCSeguimientoData();
+
+		$this->load->library('mypdf');
+		// Creación del objeto de la clase heredada
+		$pdf = new MYpdf('P', 'mm', 'Letter');
+		$pdf->titulo2 = 'Reporte Seguimiento de Operaciones de Compra';
+		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->AliasNbPages();
+		$pdf->SetFont('Arial','',8);
+		$pdf->AddPage();
+
+		$aligns = array('L', 'L', 'R', 'L', 'L', 'L');
+		$widths = array(25, 20, 25, 35, 70, 30);
+		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Proveedor', 'Recepción');
+		$pdf->SetFont('Arial','B',8);
+		$pdf->SetX(6);
+		$pdf->SetAligns($aligns);
+		$pdf->SetWidths($widths);
+		$pdf->Row($header, false, false);
+		$pdf->Line(6, $pdf->GetY(), 200, $pdf->GetY());
+
+		$pdf->SetTextColor(0,0,0);
+		$pdf->SetFont('Arial','',8);
+		$pdf->SetXY(6, $pdf->GetY());
+		$pdf->SetAligns($aligns);
+		$pdf->SetWidths($widths);
+		$pdf->Row(array(
+			String::fechaATexto(substr($res['compra']->fecha, 0, 10), '/c'), 
+			$res['compra']->serie,
+			$res['compra']->folio,
+			'Compra',
+			$res['orden']->proveedor,
+			String::fechaATexto(substr($res['orden']->fecha_aceptacion, 0, 10), '/c'), 
+			), false, false);
+		
+		$aligns = array('L', 'L', 'R', 'R', 'R');
+		$widths = array(25, 65, 35, 35, 35);
+		$header = array('Codigo', 'Nombre', 'Cantidad', 'Surtido', 'Total');
+		$pdf->SetFont('Arial','B',8);
+		$pdf->SetX(6);
+		$pdf->SetAligns($aligns);
+		$pdf->SetWidths($widths);
+		$pdf->Row($header, false, false);
+		$pdf->Line(6, $pdf->GetY(), 200, $pdf->GetY());
+
+		$pdf->SetTextColor(0,0,0);
+		$pdf->SetFont('Arial','',8);
+
+		$cantidad = $surtido = $total = 0;
+		foreach ($res['orden']->productos as $key => $value)
+		{
+			if($_GET['id_producto'] == $value->id_producto){
+				$pdf->SetXY(6, $pdf->GetY()-1);
+				$pdf->Row(array(
+					$value->codigo, 
+					$value->producto,
+					String::formatoNumero($value->cantidad, 2, '', false),
+					String::formatoNumero($value->cantidad, 2, '', false),
+					String::formatoNumero($value->importe+$value->iva, 2, '', false),
+					), false, false);
+				$cantidad += $value->cantidad;
+				$surtido += $value->cantidad;
+				$total += $value->importe+$value->iva;
+			}
+		}
+
+		$pdf->SetX(96);
+		$pdf->SetAligns(array('R', 'R', 'R'));
+		$pdf->SetWidths(array(35, 35, 35));
+
+		$pdf->SetTextColor(0,0,0);
+		$pdf->SetFont('Arial','',8);
+		$pdf->Row(array(
+					String::formatoNumero($cantidad, 2, '', false),
+					String::formatoNumero($cantidad, 2, '', false),
+					String::formatoNumero($total, 2, '', false),
+					), false);
+		$pdf->Text($pdf->GetX(), $pdf->GetY(), "Orde de Compra {$res['orden']->folio}");
 		
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
