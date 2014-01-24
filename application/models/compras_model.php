@@ -227,9 +227,11 @@ class compras_model extends privilegios_model{
    * @param  string $folioFactura
    * @return string
    */
-  public function creaDirectorioProveedorCfdi($proveedor)
+  public function creaDirectorioProveedorCfdi($proveedor, $isGasto = false)
   {
-    $path = APPPATH.'media/compras/cfdi/';
+    $folder = $isGasto ? 'gastos' : 'compras';
+
+    $path = APPPATH.'media/'.$folder.'/cfdi/';
 
     if ( ! file_exists($path))
     {
@@ -351,7 +353,7 @@ class compras_model extends privilegios_model{
         return false;
     }
 
-  public function agregarNotaCredito($compraId, $data, $xml)
+  public function agregarNotaCredito($compraId, $data, $xml, $deGasto = false)
   {
     $compra = $this->compras_model->getInfoCompra($compraId);
 
@@ -368,7 +370,7 @@ class compras_model extends privilegios_model{
       'importe_iva' => $data['totalImpuestosTrasladados'],
       'retencion_iva' => $data['totalRetencion'],
       'total' => $data['totalOrden'],
-      'concepto' => 'Nota de Credito Compra ' . $compraId,
+      'concepto' => 'Nota de Credito '. ($deGasto ? 'Gasto ' : 'Compra ') . $compraId,
       // 'isgasto' => $data['asdasdasd'],
       // 'status' => $data['asdasdasd'],
       // 'poliza_diario' => $data['asdasdasd'],
@@ -380,6 +382,21 @@ class compras_model extends privilegios_model{
       'id_nc' => $compraId,
     );
 
+    if ($deGasto)
+    {
+      $datos['isgasto'] = 't';
+    }
+
+    if (isset($data['totalRetencionIsr']))
+    {
+      $datos['retencion_isr'] = $data['totalRetencionIsr'];
+    }
+
+    if (isset($data['observaciones']) && $data['observaciones'] !== '')
+    {
+      $datos['observaciones'] = $data['observaciones'];
+    }
+
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
     {
@@ -387,7 +404,7 @@ class compras_model extends privilegios_model{
       $this->load->model('proveedores_model');
 
       $proveedor = $this->proveedores_model->getProveedorInfo($compra['info']->id_proveedor);
-      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal, $deGasto);
 
       $xmlName   = 'nc-'.($data['serie'] !== '' ? $data['serie'].'-' : '') . $data['folio'].'.xml';
 
@@ -439,7 +456,7 @@ class compras_model extends privilegios_model{
     return array('passes' => true, 'msg' => '5');
   }
 
-  public function actualizarNotaCredito($notaCreditoId, $data, $xml)
+  public function actualizarNotaCredito($notaCreditoId, $data, $xml, $deGasto = false)
   {
     $notaCredito = $this->compras_model->getInfoNotaCredito($notaCreditoId);
 
@@ -468,6 +485,16 @@ class compras_model extends privilegios_model{
       // 'id_nc' => $compraId,
     );
 
+    if (isset($data['totalRetencionIsr']))
+    {
+      $datos['retencion_isr'] = $data['totalRetencionIsr'];
+    }
+
+    if (isset($data['observaciones']) && $data['observaciones'] !== '')
+    {
+      $datos['observaciones'] = $data['observaciones'];
+    }
+
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')
     {
@@ -476,7 +503,7 @@ class compras_model extends privilegios_model{
       $this->load->model('proveedores_model');
 
       $proveedor = $this->proveedores_model->getProveedorInfo($notaCredito['info']->id_proveedor);
-      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal, $deGasto);
 
       $xmlName   = 'nc-'.($data['serie'] !== '' ? $data['serie'].'-' : '') . $data['folio'].'.xml';
 

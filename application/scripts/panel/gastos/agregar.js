@@ -20,6 +20,20 @@
       }
     });
 
+    $('#ret_iva').on('keyup', function(event) {
+      var key = event.which;
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        total();
+      }
+    });
+
+    $('#ret_isr').on('keyup', function(event) {
+      var key = event.which;
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        total();
+      }
+    });
+
     $("#dlitros, #dprecio").on('keyup', function(event) {
       var key = event.which;
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
@@ -57,14 +71,14 @@
         $proveedor.val(ui.item.id);
         $("#proveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
-        
+
         $("#condicionPago").val(ui.item.item.condicion_pago);
         $("#plazoCredito").val(ui.item.item.dias_credito);
 
         $.get(base_url + 'panel/gastos/ajax_get_cuentas_proveedor/?idp=' + ui.item.id, function(data) {
           var htmlOptions = '';
           for (var i in data) {
-            htmlOptions += '<option value="' + data[i].id_cuenta + '">' + data[i].full_alias + '</option>'
+            htmlOptions += '<option value="' + data[i].id_cuenta + '">' + data[i].full_alias + '</option>';
           }
 
           $('#fcuentas_proveedor').html(htmlOptions);
@@ -144,9 +158,15 @@
   var total = function () {
     var $total = $('#total'),
         $subtotal = $('#subtotal'),
+        $ret_iva = $('#ret_iva'),
+        $ret_isr = $('#ret_isr'),
         $iva = $('#iva');
 
-    $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) + parseFloat($iva.val()||0)) );
+    $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) +
+                               parseFloat($iva.val()||0) +
+                               parseFloat($ret_iva.val()||0) +
+                               parseFloat($ret_isr.val()||0))
+    );
   };
 
 
@@ -168,7 +188,7 @@
     if (selecteds) {
       parent.setOrdenesGastos(data);
     }else
-      noty({"text":"Selecciona al menos una orden", "layout":"topRight", "type":"error"});  
+      noty({"text":"Selecciona al menos una orden", "layout":"topRight", "type":"error"});
   };
 
   var quitarOrdenGasto = function(event) {

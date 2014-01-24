@@ -84,7 +84,7 @@
                   </thead>
                   <tbody>
                     <?php if (isset($empleado)) {
-                        $sueldoSemana = $empleado[0]->dias_trabajados_semana * $empleado[0]->salario_diario;
+                        $sueldoSemana = $empleado[0]->nomina->percepciones['sueldo']['total'];
                         $totalPercepciones = $sueldoSemana +
                                              $empleado[0]->nomina->vacaciones +
                                              $empleado[0]->nomina->prima_vacacional +

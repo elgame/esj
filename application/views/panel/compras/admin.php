@@ -126,11 +126,29 @@
 
                       if ($compra->isgasto === 't')
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('gastos/ver/', array(
-                          'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('rel' => 'superbox-80x550'))
-                        );
+                        if ($compra->tipo === 'c')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('gastos/ver/', array(
+                            'params'   => 'id='.$compra->id_compra.'&idp='.$compra->id_proveedor,
+                            'btn_type' => 'btn-success',
+                            'attrs' => array('rel' => 'superbox-80x550'))
+                          );
+
+                          echo $this->usuarios_model->getLinkPrivSm('gastos/agregar_nota_credito/', array(
+                            'params'   => 'id='.$compra->id_compra,
+                            'btn_type' => '',
+                            'attrs' => array(''))
+                          );
+                        }
+                        else
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('gastos/ver_nota_credito/', array(
+                            'params'   => 'id='.$compra->id_compra,
+                            'btn_type' => 'btn-success',
+                            'attrs' => array(''))
+                          );
+                        }
+
                       }
                       else
                       {

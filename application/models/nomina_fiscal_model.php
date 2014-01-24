@@ -718,7 +718,7 @@ class nomina_fiscal_model extends CI_Model {
         $result = $this->timbrar($archivo['pathXML']);
         // echo "<pre>";
         //   var_dump($archivo, $result, $cadenaOriginal);
-        // echo "</pre>";exit;
+        // echo "</pre>";
 
         // Si la nomina se timbro entonces agrega al array nominas la nomina del
         // empleado para despues insertarla en la bdd.
@@ -864,13 +864,13 @@ class nomina_fiscal_model extends CI_Model {
     // Inserta las nominas.
     if (count($nominasEmpleados) > 0)
     {
-      $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
+      // $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
     }
 
     // Inserta los abonos de los prestamos.
     if (count($prestamosEmpleados) > 0)
     {
-      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+      // $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 
     // $endTime = new DateTime(date('Y-m-d H:i:s'));
@@ -1004,9 +1004,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Obtiene los calculos del finiquito.
     $empleadoFiniquito = $this->finiquito($empleadoId, $fechaSalida);
-    // echo "<pre>";
-    //   var_dump($empleadoFiniquito);
-    // echo "</pre>";exit;
+
     // Obtiene la informacion de la empresa.
     $empresa = $this->empresas_model->getInfoEmpresa($empleadoFiniquito[0]->id_empresa, true);
 
@@ -1067,17 +1065,20 @@ class nomina_fiscal_model extends CI_Model {
     //   var_dump($archivo, $result, $cadenaOriginal);
     // echo "</pre>";exit;
 
-    if ( ! $result['result']->status)
+    if ($result['result']->status)
     {
       $errorTimbrar = false;
+
+      $sueldoSemana = $empleadoFiniquito[0]->nomina->percepciones['sueldo']['ImporteGravado'] +
+                      $empleadoFiniquito[0]->nomina->percepciones['sueldo']['ImporteExcento'];
 
       $primaVacacional = $empleadoFiniquito[0]->nomina->percepciones['prima_vacacional']['ImporteGravado'] +
                          $empleadoFiniquito[0]->nomina->percepciones['prima_vacacional']['ImporteExcento'];
 
       $aguinaldo = $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteGravado'] +
-                         $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'];
+                   $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'];
 
-      $totalPercepciones = $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo;
+      $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo;
 
       $totalNeto = $totalPercepciones - $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'];
 
@@ -1097,10 +1098,12 @@ class nomina_fiscal_model extends CI_Model {
         'aguinaldo' => $aguinaldo,
         'total_percepcion' => $totalPercepciones,
         'isr' => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
-        'total_deduccion' => 0,
+        'total_deduccion' => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
         'total_neto' => $totalNeto,
-        'xml' => 'xml',
-        'uuid' => 'uuid',
+        'sueldo_semanal' => $sueldoSemana,
+        'dias_trabajados' => $empleadoFiniquito[0]->dias_trabajados_semana,
+        'xml' => $result['xml'],
+        'uuid' => $result['uuid'],
       );
 
       $this->db->update('usuarios', array('status' => 'f'), array('id' => $empleadoFiniquito[0]->id));

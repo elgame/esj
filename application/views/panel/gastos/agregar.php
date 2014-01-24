@@ -224,6 +224,22 @@
             <div class="span4">
               <div class="control-group">
                 <div class="controls span9">
+                  Ret. IVA <input type="text" name="ret_iva" class="span12 vpositive" id="ret_iva" value="<?php echo set_value('ret_iva', '0'); ?>">
+                </div>
+              </div>
+            </div>
+          </div><!--/row-fluid -->
+          <div>
+            <div class="span4">
+              <div class="control-group">
+                <div class="controls span9">
+                  Ret. ISR <input type="text" name="ret_isr" class="span12 vpositive" id="ret_isr" value="<?php echo set_value('ret_isr', '0'); ?>">
+                </div>
+              </div>
+            </div>
+            <div class="span4">
+              <div class="control-group">
+                <div class="controls span9">
                   TOTAL <input type="text" name="total" class="span12 vpositive" id="total" value="<?php echo set_value('total', '0'); ?>" readonly>
                 </div>
               </div>

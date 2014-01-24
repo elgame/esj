@@ -30,6 +30,8 @@ class gastos_model extends privilegios_model{
       'concepto'       => $data['concepto'],
       'isgasto'        => 't',
       'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'retencion_iva'  => $data['ret_iva'],
+      'retencion_isr'  => $data['ret_isr'],
     );
 
     //si se registra a un vehiculo
@@ -149,6 +151,8 @@ class gastos_model extends privilegios_model{
     $compra = array(
       'subtotal'      => String::float($this->input->post('subtotal')),
       'importe_iva'   => String::float($this->input->post('iva')),
+      'retencion_iva' => String::float($this->input->post('ret_iva')),
+      'retencion_isr' => String::float($this->input->post('ret_isr')),
       'total'         => String::float($this->input->post('total')),
     );
 

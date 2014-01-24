@@ -603,7 +603,7 @@
      $('#total-format').html(util.darFormatoNum(total_orden));
      $('#totalOrden').val(total_orden);
 
-     $('#totalLetra').val(util.numeroToLetra.covertirNumLetras(total_orden.toString()))
+     $('#totalLetra').val(util.numeroToLetra.covertirNumLetras(total_orden.toString()));
   }
 
   // Realiza los calculos del producto: iva, importe total.
