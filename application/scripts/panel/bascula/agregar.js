@@ -654,7 +654,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
         importe  = 0,
         precio   = parseFloat($tr.find('#pprecio').val());
 
-    kilos = Math.floor( ((cajas * kilosNeto) / totalCajasP).toFixed(2) );
+    kilos = Math.round( ((cajas * kilosNeto) / totalCajasP).toFixed(2) );
     $tr.find('#pkilos').val(kilos);
     $tr.find('#tdkilos').html(kilos);
 

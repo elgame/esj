@@ -219,7 +219,7 @@
                   <div class="control-group">
                     <label class="control-label" for="frfc">RFC </label>
                     <div class="controls">
-                      <input type="text" name="frfc" id="frfc" class="span6" 
+                      <input type="text" name="frfc" id="frfc" class="span12" 
                         value="<?php echo isset($data['info'][0]->rfc)?$data['info'][0]->rfc:''; ?>" pattern=".{12,13}" placeholder="RFC">
                     </div>
                   </div>
@@ -227,7 +227,7 @@
                   <div class="control-group">
                     <label class="control-label" for="fcurp">CURP </label>
                     <div class="controls">
-                      <input type="text" name="fcurp" id="fcurp" class="span6" 
+                      <input type="text" name="fcurp" id="fcurp" class="span12" 
                         value="<?php echo isset($data['info'][0]->curp)?$data['info'][0]->curp:''; ?>" maxlength="30" placeholder="CURP">
                     </div>
                   </div>
@@ -283,7 +283,6 @@
                     <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
                     <div class="controls">
                     <select name="fregimen_contratacion" id="fregimen_contratacion">
-                      <option value="1" <?php echo set_select('fregimen_contratacion', '1', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Asimilados a salarios</option>
                       <option value="2" <?php echo set_select('fregimen_contratacion', '2', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Sueldos y salarios</option>
                       <option value="3" <?php echo set_select('fregimen_contratacion', '3', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Jubilados</option>
                       <option value="4" <?php echo set_select('fregimen_contratacion', '4', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Pensionados</option>

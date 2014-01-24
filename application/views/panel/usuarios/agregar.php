@@ -204,14 +204,14 @@
 									<div class="control-group">
 									  <label class="control-label" for="frfc">RFC </label>
 									  <div class="controls">
-											<input type="text" name="frfc" id="frfc" class="span6" value="<?php echo set_value('frfc'); ?>" pattern=".{12,13}" title="12 o 13 caracteres" placeholder="RFC">
+											<input type="text" name="frfc" id="frfc" class="span12" value="<?php echo set_value('frfc'); ?>" pattern=".{12,13}" title="12 o 13 caracteres" placeholder="RFC">
 									  </div>
 									</div>
 
 									<div class="control-group">
 									  <label class="control-label" for="fcurp">CURP </label>
 									  <div class="controls">
-											<input type="text" name="fcurp" id="fcurp" class="span6" value="<?php echo set_value('fcurp'); ?>" maxlength="30" placeholder="CURP">
+											<input type="text" name="fcurp" id="fcurp" class="span12" value="<?php echo set_value('fcurp'); ?>" maxlength="30" placeholder="CURP">
 									  </div>
 									</div>
 
@@ -262,7 +262,6 @@
 									  <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
 									  <div class="controls">
 										<select name="fregimen_contratacion" id="fregimen_contratacion">
-											<option value="1" <?php echo set_select('fregimen_contratacion', '1', false, $this->input->post('fregimen_contratacion')); ?>>Asimilados a salarios</option>
 											<option value="2" <?php echo set_select('fregimen_contratacion', '2', false, $this->input->post('fregimen_contratacion')); ?>>Sueldos y salarios</option>
 											<option value="3" <?php echo set_select('fregimen_contratacion', '3', false, $this->input->post('fregimen_contratacion')); ?>>Jubilados</option>
 											<option value="4" <?php echo set_select('fregimen_contratacion', '4', false, $this->input->post('fregimen_contratacion')); ?>>Pensionados</option>
