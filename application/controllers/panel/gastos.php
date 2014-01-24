@@ -97,6 +97,7 @@ class gastos extends MY_Controller {
 
     //Cuentas de banco
     $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
+
     //metodos de pago
     $params['metods_pago']  = array(
       array('nombre' => 'Transferencia', 'value' => 'transferencia'),
@@ -105,7 +106,7 @@ class gastos extends MY_Controller {
       array('nombre' => 'Deposito', 'value' => 'deposito'),
     );
 
-    if (isset($_POST['proveedorId']))
+    if (isset($_POST['proveedorId']) && $_POST['proveedorId'] !== '')
     {
       $params['cuentas_proveedor'] = $this->proveedores_model->getCuentas($_POST['proveedorId']);
     }
@@ -171,6 +172,167 @@ class gastos extends MY_Controller {
     $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
 
     $this->load->view('panel/gastos/ligar', $params);
+  }
+
+  public function agregar_nota_credito()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      // array('general/buttons.toggle.js'),
+      array('general/keyjump.js'),
+      array('panel/gastos/agregar_nota_credito.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Nota de Crédito'
+    );
+
+    $this->load->model('proveedores_model');
+    $this->load->model('compras_model');
+    $this->load->model('compras_ordenes_model');
+
+    $this->configAddNotaCredito();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->compras_model->agregarNotaCredito($_GET['id'], $_POST, $_FILES['xml'], true);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/gastos/agregar_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
+    $params['unidades']      = $this->compras_ordenes_model->unidades();
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['compra'] = $this->compras_model->getInfoCompra($_GET['id']);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/gastos/nota_credito', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function ver_nota_credito()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
+      // array('general/buttons.toggle.js'),
+      array('general/keyjump.js'),
+      array('panel/gastos/agregar_nota_credito.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Nota de Crédito'
+    );
+
+    $this->load->model('proveedores_model');
+    $this->load->model('compras_model');
+    $this->load->model('compras_ordenes_model');
+
+    $this->configAddNotaCredito();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->compras_model->actualizarNotaCredito($_GET['id'], $_POST, $_FILES['xml'], true);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/gastos/ver_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
+    $params['unidades']      = $this->compras_ordenes_model->unidades();
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['nota_credito'] = $this->compras_model->getInfoNotaCredito($_GET['id']);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/gastos/ver_nota_credito', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function configAddNotaCredito()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      // array('field' => 'proveedorId',
+      //       'label' => 'Proveedor',
+      //       'rules' => 'required'),
+
+      array('field' => 'serie',
+            'label' => 'Serie',
+            'rules' => ''),
+      array('field' => 'folio',
+            'label' => 'Folio',
+            'rules' => 'required'),
+
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
+      array('field' => 'observaciones',
+            'label' => 'Observaciones',
+            'rules' => ''),
+
+      // array('field' => 'condicionPago',
+      //       'label' => 'Condicion de Pago',
+      //       'rules' => 'required'),
+      // array('field' => 'plazoCredito',
+      //       'label' => 'Plazo Credito',
+      //       'rules' => ''),
+
+      array('field' => 'totalLetra',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'totalImporte',
+            'label' => 'Subtotal',
+            'rules' => ''),
+      array('field' => 'totalImpuestosTrasladados',
+            'label' => 'IVA',
+            'rules' => ''),
+      array('field' => 'totalRetencion',
+            'label' => 'IVA',
+            'rules' => '')  ,
+      array('field' => 'totalOrden',
+            'label' => 'Total',
+            'rules' => 'greater_than[-1]'),
+      array('field' => 'xml',
+            'label' => 'XML',
+            'rules' => 'callback_xml_check'),
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
   /*
@@ -242,6 +404,12 @@ class gastos extends MY_Controller {
       array('field' => 'iva',
             'label' => 'IVA',
             'rules' => 'required'),
+      array('field' => 'ret_iva',
+            'label' => 'Ret. IVA',
+            'rules' => 'required'),
+      array('field' => 'ret_isr',
+            'label' => 'Ret. ISR',
+            'rules' => 'required'),
       array('field' => 'total',
             'label' => 'Total',
             'rules' => 'required|greater_than[0]'),
@@ -259,7 +427,7 @@ class gastos extends MY_Controller {
     $rules[] = array('field' => 'vehiculoId',
                     'label' => 'Vehiculos',
                     'rules' => '');
-    
+
     if ($this->input->post('es_vehiculo') == 'si')
     {
       $rules[count($rules)-1]['rules'] = 'required|numeric';
@@ -342,6 +510,14 @@ class gastos extends MY_Controller {
       break;
       case 4:
         $txt = 'El XML se actualizo correctamente.';
+        $icono = 'success';
+      break;
+      case 5:
+        $txt = 'Nota de Crédito agregada correctamente!';
+        $icono = 'success';
+      break;
+      case 6:
+        $txt = 'Nota de Crédito actualizada correctamente!';
         $icono = 'success';
       break;
       case 30:

@@ -174,7 +174,7 @@ class finiquito
 
     // Percepciones
     $this->empleado->nomina->percepciones = array();
-    // $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
+    $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
     // $this->empleado->nomina->percepciones['premio_puntualidad'] = $this->pPremioPuntualidad();
     // $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
     // $this->empleado->nomina->percepciones['despensa'] = $this->pDespensa();
@@ -278,7 +278,7 @@ class finiquito
    */
   public function pSueldo()
   {
-    $this->empleado->nomina->sueldo = $this->empleado->salario_diario * $this->empleado->dias_trabajados;
+    $this->empleado->nomina->sueldo = $this->empleado->salario_diario * $this->empleado->dias_trabajados_semana;
 
     return array(
       'TipoPercepcion' => '001',
