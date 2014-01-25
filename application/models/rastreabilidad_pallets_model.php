@@ -279,15 +279,33 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return true;
 	}
 
-	public function deletePallet($id_pallet)
+	public function deletePallet($id_pallet, $delRendimientos = false)
 	{
-		$data = $this->db->query("SELECT Count(f.id_factura) AS num 
-				FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura 
+		$data = $this->db->query("SELECT Count(f.id_factura) AS num
+				FROM facturacion AS f INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura
 				WHERE fp.id_pallet = {$id_pallet} AND f.status <> 'ca' AND f.status <> 'b'")->row();
 		$response = array('passes' => false, 'msg' => '8');
 		if ($data->num == 0)
 		{
+      if ($delRendimientos)
+      {
+        $sql = $this->db->select('id_rendimiento')
+                       ->from('rastria_pallets_rendimiento')
+                       ->where('id_pallet', $id_pallet)
+                       ->get();
+
+        if ($sql->num_rows() > 0)
+        {
+          $rendimientos = $sql->result();
+          foreach ($rendimientos as $r)
+          {
+            $this->db->delete('rastria_rendimiento', array('id_rendimiento' => $r->id_rendimiento));
+          }
+        }
+      }
+
 			$this->db->delete('rastria_pallets', array('id_pallet' => $id_pallet));
+
 			$response = array('passes' => true, 'msg' => '7');
 		}
 		return $response;
@@ -347,7 +365,6 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		// Obtiene los datos del reporte.
 		$data = $this->getInfoPallet($id_pallet, false, false);
 
-
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm');
@@ -406,7 +423,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$pdf->SetXY(109, 70);
 		$pdf->Cell(90, 10, 'CLIENTE', 0);
 		$pdf->SetXY(109, 80);
-		$pdf->Row(array($data['cliente']->nombre_fiscal), false, false);
+
+    $nombreFiscal = isset($data['cliente']->nombre_fiscal) ? $data['cliente']->nombre_fiscal : '';
+		$pdf->Row(array($nombreFiscal), false, false);
 
 		$pdf->Rect(106, 108, 100, 40, '');
 		$pdf->SetXY(109, 110);

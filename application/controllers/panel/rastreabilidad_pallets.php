@@ -30,6 +30,7 @@ class rastreabilidad_pallets extends MY_Controller {
   {
     $this->carabiner->js(array(
         array('general/msgbox.js'),
+        array('panel/rastreabilidad/admin.js'),
     ));
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -84,7 +85,7 @@ class rastreabilidad_pallets extends MY_Controller {
     else
     {
       $res_mdl = $this->rastreabilidad_pallets_model->addPallet();
-      
+
       redirect(base_url('panel/rastreabilidad_pallets/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
 
@@ -138,7 +139,7 @@ class rastreabilidad_pallets extends MY_Controller {
       else
       {
         $res_mdl = $this->rastreabilidad_pallets_model->updatePallet($_GET['id']);
-        
+
         redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg=5'));
       }
 
@@ -172,7 +173,8 @@ class rastreabilidad_pallets extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('rastreabilidad_pallets_model');
-      $res_mdl = $this->rastreabilidad_pallets_model->deletePallet( $this->input->get('id') );
+      $delAll = isset($_GET['d']) ? true : false;
+      $res_mdl = $this->rastreabilidad_pallets_model->deletePallet( $this->input->get('id'), $delAll );
       redirect(base_url('panel/rastreabilidad_pallets/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
     else
@@ -185,7 +187,7 @@ class rastreabilidad_pallets extends MY_Controller {
   public function ajax_get_rendimientos(){
     $this->load->model('rastreabilidad_pallets_model');
     $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
-                $this->input->get('id'), $this->input->get('idunidad'), 
+                $this->input->get('id'), $this->input->get('idunidad'),
                 $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
 
     echo json_encode($params);
