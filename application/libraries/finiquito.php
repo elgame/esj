@@ -785,7 +785,7 @@ class finiquito
     }
 
     // Saca el proporcional de dias de vacaciones.
-    $diasVacaciones = round(($this->empleado->dias_trabajados / 365 ) * $diasVacaciones , 4);
+    $diasVacaciones = round(($this->empleado->dias_anio_vacaciones / 365 ) * $diasVacaciones , 4);
 
     return $diasVacaciones;
   }

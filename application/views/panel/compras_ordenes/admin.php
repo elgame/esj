@@ -69,6 +69,8 @@
               );
              ?>
 
+             <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 130px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:16px;font-weight:bold;"></div>
+
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
@@ -77,6 +79,7 @@
                   <th>Folio</th>
                   <th>Proveedor</th>
                   <th>Empresa</th>
+                  <th>Importe</th>
                   <th>Autorizada</th>
                   <th>Estado</th>
                   <th>Opc</th>
@@ -88,13 +91,14 @@
                   <td>
                     <?php if ($orden->status === 'a' && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== '' &&
                               isset($_GET['did_empresa']) && $_GET['did_empresa'] !== ''){ ?>
-                      <input type="checkbox" class="addToFactura" value="<?php echo $orden->id_orden ?>">
+                      <input type="checkbox" class="addToFactura" value="<?php echo $orden->id_orden ?>" data-total="<?php echo $orden->total; ?>">
                     <?php } ?>
                   </td>
                   <td><?php echo substr($orden->fecha, 0, 10); ?></td>
                   <td><span class="label"><?php echo $orden->folio; ?></span></td>
                   <td><?php echo $orden->proveedor; ?></td>
                   <td><?php echo $orden->empresa; ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($orden->total, 2, '', false); ?></td>
                   <td><span class="label label-info"><?php echo $orden->autorizado === 't' ? 'SI' : 'NO'?></span></td>
                   <td><?php
                           $texto = 'CANCELADA';

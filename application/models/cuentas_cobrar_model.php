@@ -1106,80 +1106,60 @@ class cuentas_cobrar_model extends privilegios_model{
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
-      $pdf->SetFont('helvetica','B', 8);
-      $pdf->SetTextColor(0,0,0);
+      
 
       $y = $pdf->GetY();
 
-      $facturas_txt = array();
-      foreach ($orden['facturas'] as $key => $prod)
-      {
-      	$facturas_txt[] = $prod->serie.$prod->folio;
-      }
-
-      $pdf->MultiCell(60,4, String::fechaATexto($orden['abonos'][0]->fecha));
-      $pdf->SetY($pdf->GetY()+1);
-      $pdf->MultiCell(60,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
-      $pdf->MultiCell(60,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
-      			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
-      $pdf->MultiCell(60,4, 'A cuenta de: '.implode('-', $facturas_txt));
+      $pdf->SetFont('helvetica','B', 13);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetXY(80, $y);
+      $pdf->MultiCell(60,4, 'RECIBO DE PAGO');
+      // $pdf->SetY($pdf->GetY()+1);
+      // $pdf->MultiCell(60,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
+      // $pdf->MultiCell(60,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      // 			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+      // $pdf->MultiCell(60,4, 'A cuenta de: '.implode('-', $facturas_txt));
 
       $pdf->SetFont('helvetica','B', 10);
-      $pdf->SetXY(85, $y);
-      $pdf->MultiCell(115,4, String::fechaATexto($orden['abonos'][0]->fecha));
-      $pdf->SetXY(85, $pdf->GetY()+1);
+      $pdf->SetXY(10, $pdf->GetY()+6);
+      $pdf->MultiCell(115,4, "FECHA: ".String::fechaATexto($orden['abonos'][0]->fecha));
+      $pdf->SetXY(10, $pdf->GetY()+1);
       $pdf->MultiCell(115,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
-      $pdf->SetX(85);
+      $pdf->SetX(10);
       $pdf->MultiCell(115,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
       			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
-      $pdf->SetX(85);
-      $pdf->MultiCell(115,4, 'A cuenta de: '.implode('-', $facturas_txt));
-      $pdf->SetX(85);
+      $pdf->SetX(10);
       $pdf->MultiCell(115,4, 'A orden de: '.$orden['abonos'][0]->empresa);
 
-      $pdf->Text(15, 53, 'Firma ______________________');
-      $pdf->Text(100, 53, 'Firma _____________________________');
+      $pdf->Text(60, 53, 'Firma ____________________________________');
 
-      // $pdf->SetAligns(array('L', 'L'));
-      // $pdf->SetWidths(array(25, 100));
-      // $pdf->Row(array('FECHA:', String::fechaATexto($orden['abonos'][0]->fecha) ), false, false);
-      // $pdf->Row(array('CONCEPTO:', $orden['abonos'][0]->concepto), false, false);
-      // $pdf->Row(array('PAGO:', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ));
 
-      // $pdf->SetXY(10, $y);
-      // $aligns = array('C', 'R');
-      // $widths = array(25, 40);
-      // $header = array('FOLIO', 'TOTAL');
+      $pdf->SetXY(140, $y+6);
+      $pdf->MultiCell(115,4, 'A cuenta de: ');
 
-      // foreach ($orden['facturas'] as $key => $prod)
-      // {
-      //   $band_head = false;
-      //   if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-      //     // $pdf->AddPage();
+      $aligns = array('C', 'R');
+      $widths = array(25, 40);
+      $header = array('FOLIO', 'TOTAL');
 
-      //     $pdf->SetFont('Arial','B',8);
-      //     $pdf->SetTextColor(0,0,0);
-      //     $pdf->SetFillColor(255,255,255);
-      //     $pdf->SetXY(142, $pdf->GetY()-2);
-      //     $pdf->SetAligns($aligns);
-      //     $pdf->SetWidths($widths);
-      //     $pdf->Row($header, true, false);
-      //   }
-
-      //   $pdf->SetFont('Arial','',8);
-      //   $pdf->SetTextColor(0,0,0);
-      //   $datos = array(
-      //     $prod->serie.$prod->folio,
-      //     String::formatoNumero($prod->total, 2, '$', false),
-      //   );
-
-      //   $pdf->SetXY(142, $pdf->GetY()-2);
-      //   $pdf->Row($datos, false, false);
-      // }
-
-      // $pdf->SetFont('Arial','B',8);
-      // $pdf->SetXY(142, $pdf->GetY()-2);
-      // $pdf->Row(array('TOTAL', String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false) ), false, false);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFillColor(255,255,255);
+      $pdf->SetXY(140, $pdf->GetY());
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($header, true, false);
+      $pdf->Line(140, $pdf->GetY()-1, 205, $pdf->GetY()-1);
+      foreach ($orden['facturas'] as $key => $prod)
+      {
+      	$pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array(
+          $prod->serie.$prod->folio,
+          String::formatoNumero($prod->total, 2, '$', false),
+        );
+        $pdf->SetXY(140, $pdf->GetY()-2);
+        $pdf->Row($datos, false, false);
+      }
 
       if ($path)
       {

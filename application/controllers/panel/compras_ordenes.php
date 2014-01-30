@@ -36,6 +36,7 @@ class compras_ordenes extends MY_Controller {
     $this->carabiner->js(array(
       array('general/supermodal.js'),
       array('general/msgbox.js'),
+      array('general/util.js'),
       array('panel/compras_ordenes/admin.js'),
     ));
 

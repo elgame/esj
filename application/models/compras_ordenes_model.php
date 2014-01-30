@@ -65,7 +65,8 @@ class compras_ordenes_model extends CI_Model {
                 co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
                 co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
                 co.autorizado,
-                (SELECT SUM(faltantes) FROM compras_productos WHERE id_orden = co.id_orden) as faltantes
+                (SELECT SUM(faltantes) FROM compras_productos WHERE id_orden = co.id_orden) as faltantes,
+                (SELECT SUM(total) FROM compras_productos WHERE id_orden = co.id_orden) as total
         FROM compras_ordenes AS co
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor

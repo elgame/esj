@@ -63,6 +63,13 @@
           </div>
         </div>
 
+        <div class="control-group">
+          <label class="control-label" for="dcomentario">Comentario</label>
+          <div class="controls">
+            <textarea id="dcomentario" name="dcomentario" class="span6"></textarea>
+          </div>
+        </div>
+
       </div><!--/modal-body -->
 
       <div class="modal-footer">

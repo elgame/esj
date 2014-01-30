@@ -296,7 +296,7 @@ class gastos extends MY_Controller {
             'rules' => ''),
       array('field' => 'folio',
             'label' => 'Folio',
-            'rules' => 'required'),
+            'rules' => 'required|numeric'),
 
       array('field' => 'fecha',
             'label' => 'Fecha',
@@ -377,7 +377,7 @@ class gastos extends MY_Controller {
             'rules' => ''),
       array('field' => 'folio',
             'label' => 'Folio',
-            'rules' => 'required'),
+            'rules' => 'required|numeric'),
 
       array('field' => 'fecha',
             'label' => 'Fecha',

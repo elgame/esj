@@ -5,6 +5,7 @@
   $(function(){
     autocompleteProveedores();
     autocompleteEmpresas();
+    marcaChecksLigar();
   });
 
   /*
@@ -54,6 +55,24 @@
       }
     });
   };
+
+  var marcaChecksLigar = function () {
+    $('.addToFactura').on('click', function(event) {
+        var total = 0;
+        $("#sumaRowsSel").hide();
+
+        $('.addToFactura').each(function(index, el) {
+          var $check = $(this);
+          if ($check.is(':checked')) {
+            total += parseFloat($(this).attr("data-total"));
+          }
+        });
+
+        if(total > 0)
+          $("#sumaRowsSel").text(util.darFormatoNum(total, '')).show();
+    });
+  };
+
 });
 
 function getOrdenesIds ($button, $modal) {

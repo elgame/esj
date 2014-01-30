@@ -140,6 +140,16 @@ class compras_model extends privilegios_model{
 
       $response['productos'] = $res->result();
 
+      if($response['info']->isgasto == 't')
+      {
+        $response['productos'][] = new stdClass;
+        $response['productos'][count($response['productos'])-1]->iva           = $response['info']->importe_iva;
+        $response['productos'][count($response['productos'])-1]->retencion_iva = $response['info']->retencion_iva;
+        $response['productos'][count($response['productos'])-1]->importe       = $response['info']->total;
+        $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
+        $response['productos'][count($response['productos'])-1]->cuenta_cpi    = '';
+      }
+
       //gasolina
       // $res = $this->db->query(
       //     "SELECT id_compra, kilometros, litros, precio
@@ -347,6 +357,15 @@ class compras_model extends privilegios_model{
            WHERE cnc.id_compra = {$notaCreditoId}");
 
         $response['productos'] = $res->result();
+
+        if($response['info']->isgasto == 't')
+        {
+          $response['productos'][] = new stdClass;
+          $response['productos'][count($response['productos'])-1]->iva           = $response['info']->importe_iva;
+          $response['productos'][count($response['productos'])-1]->retencion_iva = $response['info']->retencion_iva;
+          $response['productos'][count($response['productos'])-1]->importe       = $response['info']->total;
+          $response['productos'][count($response['productos'])-1]->retencion_isr = $response['info']->retencion_isr;
+        }
 
         return $response;
       }else

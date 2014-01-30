@@ -605,7 +605,8 @@ class nomina
    */
   public function dInfonavit()
   {
-    $infonavit = round(($this->empleado->infonavit / 30.4) * ($this->salariosZonasConfig->zona_a * $this->empleado->dias_trabajados), 2);
+    // $infonavit = round(($this->empleado->infonavit / 30.4) * ($this->salariosZonasConfig->zona_a * $this->empleado->dias_trabajados), 2);
+    $infonavit = $this->empleado->infonavit;
 
     return array(
       'TipoDeduccion' => '010',
@@ -815,7 +816,6 @@ class nomina
   {
     // Dias de vacaciones son cero por si no tiene almenos 1 año de antigüedad.
     $diasVacaciones = 0;
-
     // Si tiene 1 año o mas.
     if (intval($this->empleado->anios_trabajados) > 0)
     {
@@ -831,7 +831,7 @@ class nomina
       }
     }
 
-    $diasVacaciones = round(($this->empleado->dias_trabajados / 365) * $diasVacaciones, 4);
+    $diasVacaciones = round(($this->empleado->dias_anio_vacaciones / 365) * $diasVacaciones, 4);
 
     return $diasVacaciones;
   }

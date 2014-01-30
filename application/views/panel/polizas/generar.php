@@ -41,6 +41,7 @@
                       <option value="v">Ventas</option>
                       <option value="vnc">Ventas Notas Credito</option>
                       <option value="g">Gastos</option>
+                      <option value="gnc">Gastos Notas Credito</option>
                       <option value="no">Nomina</option>
                     </select>
                   </div>

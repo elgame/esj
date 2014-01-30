@@ -60,19 +60,37 @@ class home extends MY_Controller {
 		//     }
 		//     fclose($gestor);
 		// }
-		// $gestor = @fopen("Todos los Productos2.txt", "r");
-		// if ($gestor) {
-		//     while (($bufer = fgets($gestor, 4096)) !== false) {
-		//     	// $bufer = utf8_encode($bufer);
-		//     	$nombre = utf8_encode( trim(substr($bufer, 33, 57)) );
-		//     	$cuenta_cpi = trim(substr($bufer, 242, 10));
-		//     	if(!(strpos($nombre, 'PIÑA') !== FALSE) && !(strpos($nombre, 'LIMON') !== FALSE) && $cuenta_cpi!='')
-		//     		echo "INSERT INTO cuentas_contpaq (id_area, nombre, cuenta_cpi) VALUES (1, '".$nombre."', '".$cuenta_cpi."' );\n";
-		//     }
-		//     if (!feof($gestor)) {
-		//         echo "Error: fallo inesperado de fgets()\n";
+		// $departamento = array('ADMINISTRACION' => 1, 'EMPAQUE' => 2, 'MANTENIMIENTO INDUSTRIAL' => 3, 'RANCHOS' => 4);
+		// $puestos = array('AUXILIAR CONTABLE' => 5, 'RECEPCION DE FRUTA' => 6, 'GERENTE GENERAL' => 7, 'GERENTE ADMINISTRATIVO' => 8, 'RECEPCIONISTA' => 9, 'CONTADORA' => 10, 'AUXILIAR ADMINISTRATIVO' => 11, 'MENSAJERO' => 12, 'ASISTENTE INOCUIDAD' => 13, 'EMPACADOR' => 14, 'CAJONERA' => 15, 'ALMACENISTA' => 16, 'MONTACARGUISTA' => 17, 'CONTROL DE PRODUCCION' => 18, 'GERENTE DE PRODUCCION' => 19, 'SELECCIONADORA' => 20, 'SUPERVISOR DE PRODUCCION' => 21, 'JEFE DE PERSONAL' => 22, 'INTENDENTE' => 23, 'VIGILANTE' => 24, 'EMPAPELADORA' => 25, 'CAJONERO' => 26, 'SUPERVISOR DE MANTENIMIENTO' => 27, 'JEFE DE PROYECTOS' => 28, 'AUXILIAR MECANICO' => 29, 'SOLDADOR' => 30, 'REGADOR' => 31, 'MAYORDOMO' => 32, 'TRACTORISTA' => 33, 'JARDINERO' => 34);
+		// if (($gestor = fopen("CATALOGO DE EMPLEADOS EMPAQUE.csv", "r")) !== FALSE) {
+		//     while (($datos = fgetcsv($gestor, 1000, ",")) !== FALSE) {
+		//     	$datos[2] = utf8_encode($datos[2]);
+		//     	$nombre = explode(" ", $datos[2]);
+		//     	$appe1 = $nombre[0];
+		//     	$appe2 = $nombre[1];
+		//     	unset($nombre[0], $nombre[1]);
+		//     	$nombre = implode(' ', $nombre);
+
+		//     	// if(array_search($datos[3], $puestos) === false)
+		//     	// 	$puestos[] = $datos[3];
+		    	
+		//     	echo "UPDATE usuarios SET salario_diario='{$datos[9]}', salario_diario_real='{$datos[10]}', rfc='{$datos[5]}' WHERE no_seguro = '{$datos[0]}';<br>";
+		//       //   echo "INSERT INTO usuarios(nombre, apellido_paterno, apellido_materno, curp, fecha_nacimiento, fecha_entrada, nacionalidad, 
+		//       //   	estado_civil, id_empresa, id_puesto, esta_asegurado, regimen_contratacion, rfc, cuenta_banco, user_nomina, no_seguro, email, id_departamente)
+  //   				// VALUES ('{$nombre}', '{$appe1}', '{$appe2}', '{$datos[4]}', '".date("Y-m-d", strtotime(str_replace('/', '-', $datos[6])))."', 
+  //   				// 	'".date("Y-m-d", strtotime(str_replace('/', '-', $datos[7])))."', 'MEXICANA', 'soltero', 1, ".(isset($puestos[$datos[3]])? $puestos[$datos[3]]: 'NULL').", 't', '2', '', 
+  //   				// 	'{$datos[8]}', 't', '$datos[0]', '', ".$departamento[$datos[1]].");<br><br>";
 		//     }
 		//     fclose($gestor);
+
+		//     // $cont = 5;
+		//     // foreach ($puestos as $key => $value)
+		//     // {
+		//     // 	if($value != ''){
+		//     // 		echo "'{$value}' => {$cont}, ";
+		//     // 		$cont++;
+		//     // 	}
+		//     // }
 		// }
 
 		$params['cuentas'] = ''; //$this->getArbolCuenta();

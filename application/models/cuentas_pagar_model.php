@@ -79,10 +79,22 @@ class cuentas_pagar_model extends privilegios_model{
 										AND Date(fa.fecha) <= '{$fecha}'{$sql}
 									GROUP BY f.id_proveedor
 								)
+								UNION
+								(
+									SELECT 
+										f.id_proveedor,
+										Sum(f.total) AS abonos
+									FROM
+										compras AS f
+									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+										AND Date(f.fecha) <= '{$fecha}'{$sql}
+									GROUP BY f.id_proveedor
+								)
 							) AS ffaa
 							GROUP BY ffaa.id_proveedor
 						) AS faa ON c.id_proveedor = faa.id_proveedor
-					WHERE  f.status <> 'ca' AND f.status <> 'b' AND Date(f.fecha) <= '{$fecha}'{$sql}
+					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL 
+						AND Date(f.fecha) <= '{$fecha}'{$sql}
 					GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos
 				)
 			) AS tsaldos
@@ -288,6 +300,19 @@ class cuentas_pagar_model extends privilegios_model{
 									AND Date(fa.fecha) <= '{$fecha2}'{$sql}
 								GROUP BY f.id_proveedor, f.id_compra
 							)
+							UNION
+							(
+								SELECT 
+									f.id_proveedor,
+									f.id_compra,
+									Sum(f.total) AS abonos
+								FROM
+									compras AS f
+								WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+									AND f.id_proveedor = '{$_GET['id_proveedor']}' 
+									AND Date(f.fecha) <= '{$fecha2}'{$sql}
+								GROUP BY f.id_proveedor, f.id_compra
+							)
 						) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
 					WHERE c.id_proveedor = '{$_GET['id_proveedor']}' AND f.status <> 'ca' AND f.status <> 'b'
 						AND Date(f.fecha) < '{$fecha1}'{$sql}
@@ -328,11 +353,23 @@ class cuentas_pagar_model extends privilegios_model{
 							WHERE Date(fecha) <= '{$fecha2}'
 							GROUP BY id_compra
 						)
+						UNION
+						(
+							SELECT 
+								id_nc AS id_compra,
+								Sum(total) AS abonos
+							FROM
+								compras
+							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+								AND id_proveedor = {$_GET['id_proveedor']} 
+								AND Date(fecha) <= '{$fecha2}'
+							GROUP BY id_nc
+						)
 					) AS ffs
 					GROUP BY id_compra
 				) AS ac ON f.id_compra = ac.id_compra {$sql}
 			WHERE f.id_proveedor = {$_GET['id_proveedor']} 
-				AND f.status <> 'ca' 
+				AND f.status <> 'ca' AND f.id_nc IS NULL 
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
 
@@ -586,6 +623,17 @@ class cuentas_pagar_model extends privilegios_model{
 												WHERE id_compra={$_GET['id']}")->result();
 			$sql = array('tabla' => 'compras_abonos', 
 										'where_field' => 'id_compra');
+			$sql_nc = "UNION 
+						SELECT
+							id_compra AS id_abono, 
+							fecha, 
+							total AS abono, 
+							('Nota de credito ' || serie || folio) AS concepto,
+							'nc' AS tipo
+						FROM compras
+						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+							AND id_nc = {$_GET['id']} 
+							AND Date(fecha) <= '{$fecha2}' ";
 		// }
 		// else
 		// {
@@ -614,6 +662,7 @@ class cuentas_pagar_model extends privilegios_model{
 						FROM {$sql['tabla']}
 						WHERE {$sql['where_field']} = {$_GET['id']}
 							AND Date(fecha) <= '{$fecha2}' 
+					{$sql_nc}
 				) AS tt
 					ORDER BY fecha ASC
 			");	

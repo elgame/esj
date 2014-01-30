@@ -106,7 +106,7 @@ class nomina_fiscal_model extends CI_Model {
        FROM usuarios u
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-       WHERE u.esta_asegurado = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
+       WHERE u.esta_asegurado = 't' AND user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
        ORDER BY u.apellido_paterno ASC
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -167,6 +167,11 @@ class nomina_fiscal_model extends CI_Model {
       {
         $empleado->incapacidades = array();
         $empleado->prestamos = array();
+
+        //Dias trabajados en el año en que entro
+        $fecha_entrada = explode('-', $empleado->fecha_entrada);
+        $anio_anterior = date("Y", strtotime("-1 year")).'-'.$fecha_entrada[1].'-'.$fecha_entrada[2];
+        $empleado->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, date("Y-m-d")));
 
         if (count($faltasOIncapacidades) > 0)
         {
@@ -717,7 +722,7 @@ class nomina_fiscal_model extends CI_Model {
 
         $result = $this->timbrar($archivo['pathXML']);
         // echo "<pre>";
-        //   var_dump($archivo, $result, $cadenaOriginal);
+        //   var_dump($archivo, $result, base64_encode($result['xml']), $cadenaOriginal);
         // echo "</pre>";
 
         // Si la nomina se timbro entonces agrega al array nominas la nomina del
@@ -864,13 +869,13 @@ class nomina_fiscal_model extends CI_Model {
     // Inserta las nominas.
     if (count($nominasEmpleados) > 0)
     {
-      // $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
+      $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
     }
 
     // Inserta los abonos de los prestamos.
     if (count($prestamosEmpleados) > 0)
     {
-      // $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 
     // $endTime = new DateTime(date('Y-m-d H:i:s'));
@@ -976,6 +981,11 @@ class nomina_fiscal_model extends CI_Model {
     );
 
     $tablas = $this->getTablasIsr();
+
+    //Dias trabajados en el año en que entro
+    $fecha_entrada = explode('-', $empleado[0]->fecha_entrada);
+    $anio_anterior = date("Y", strtotime("-1 year")).'-'.$fecha_entrada[1].'-'.$fecha_entrada[2];
+    $empleado[0]->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, date("Y-m-d")));
 
     $finiquito = $this->finiquito
       ->setEmpleado($empleado[0])

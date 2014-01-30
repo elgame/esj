@@ -984,6 +984,11 @@ class facturacion_model extends privilegios_model{
                 ";
             }
 
+            if(isset($_POST['dcomentario']{0}))
+            {
+               $body .= "<strong>COMENTARIO: </strong> ".$_POST['dcomentario'];
+            }
+
             /*<p>Si por algun motivo, desea obtener nuevamente su factura puede descargarla directamente de nuestra pagina en la seccion Facturación.<br>
                 <a href="http://www.chonitabananas.com/es/facturacion/">www.chonitabananas.com</a></p>*/
             $body .= '
