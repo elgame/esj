@@ -27,11 +27,11 @@
 								<legend>Filtros</legend>
 
 								<label for="fnombre">Buscar</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
 									class="input-large search-query" placeholder="Cliente, Folio" autofocus> |
 
 								<label for="ffecha">Buscar</label>
-								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> | 
+								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> |
 
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">
@@ -44,7 +44,7 @@
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 							echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/agregar/', array(
 											'params'   => '',
 											'btn_type' => 'btn-success pull-right',
@@ -86,22 +86,22 @@
 									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 								</td>
 								<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/modificar/', array(
 												'params'   => 'id='.$pallet->id_pallet,
 												'btn_type' => 'btn-success')
 										);
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/imprimir/', array(
 												'params'   => 'id='.$pallet->id_pallet,
-												'btn_type' => 'btn-info', 
+												'btn_type' => 'btn-info',
 												'attrs' => array('target' => '_BLANCK') )
 										);
 										echo $this->usuarios_model->getLinkPrivSm('rastreabilidad_pallets/eliminar/', array(
 												'params'   => 'id='.$pallet->id_pallet,
 												'btn_type' => 'btn-danger',
-												'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el pallet?', 'pallet', this); return false;"))
+												'attrs' => array('id' => 'pallet'.$pallet->id_pallet, 'onclick' => "msb.confirm('Estas seguro de eliminar el pallet? <br> <p><input type=&quot;checkbox&quot; class=&quot;del-all&quot; data-pallet=&quot;".$pallet->id_pallet."&quot;>Eliminar los rendimiento ligados al pallet</p>', 'pallet', this); return false;"))
 										);
-										
+
 										?>
 								</td>
 							</tr>
