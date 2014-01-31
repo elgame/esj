@@ -864,13 +864,13 @@ class nomina_fiscal_model extends CI_Model {
     // Inserta las nominas.
     if (count($nominasEmpleados) > 0)
     {
-      // $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
+      $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
     }
 
     // Inserta los abonos de los prestamos.
     if (count($prestamosEmpleados) > 0)
     {
-      // $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 
     // $endTime = new DateTime(date('Y-m-d H:i:s'));
@@ -1902,6 +1902,79 @@ class nomina_fiscal_model extends CI_Model {
     readfile(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
 
     unlink(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
+  }
+
+  public function descargarTxtBanco($semana, $empresaId)
+  {
+    $configuraciones = $this->configuraciones();
+    $semana = $this->fechasDeUnaSemana($semana);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId);
+    $empleados = $this->nomina($configuraciones, $filtros);
+    $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
+
+    // echo "<pre>";
+    //   var_dump($empleados);
+    // echo "</pre>";exit;
+
+    $content = array();
+    foreach ($empleados as $key => $empleado)
+    {
+      $content[] = $this->formatoBanco($key + 1, '0', 9, 'I') .
+                  $this->formatoBanco($empleado->rfc, ' ', 16, 'D') .
+                  $this->formatoBanco('99'.'2906220193', ' ', 22, 'D') .
+                  $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
+                  $this->formatoBanco($empleado->nombre, ' ', 40, 'D') .
+                  "001001";
+    }
+    $content = implode("\n", $content);
+
+    $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
+    fwrite($fp,$content);
+    fclose($fp);
+
+    header('Content-Type: text/plain');
+    header("Content-disposition: attachment; filename={$nombre}");
+    readfile(APPPATH."media/temp/{$nombre}");
+    unlink(APPPATH."media/temp/{$nombre}");
+  }
+
+  public function formatoBanco($valor, $relleno = ' ', $cantidad = 0, $lado = 'I', $decimal = false)
+  {
+    if ($cantidad != intval(0) && $valor)
+    {
+      $valor = (string)$valor;
+
+      if ($decimal)
+      {
+        if (strpos($valor, '.'))
+        {
+          $valor = explode('.', $valor);
+
+          if (strlen($valor[1]) > 2)
+          {
+            $valor[1] = substr($valor[1], 0, 2);
+          }
+
+          $valor = $valor[0].$valor[1];
+        }
+        else
+        {
+          $valor .= '00';
+        }
+      }
+
+      $longitudValor = strlen($valor);
+      for ($i = $longitudValor;  $i < $cantidad; $i++)
+      {
+        $valor = strtoupper($lado) === 'I' ? $relleno . $valor : $valor . $relleno;
+      }
+
+      return $valor;
+
+      // echo "<pre>";
+      //   var_dump($valor, $relleno, $cantidad, $lado, $decimal, $longitudValor);
+      // echo "</pre>";exit;
+    }
   }
 
   /*

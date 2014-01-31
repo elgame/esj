@@ -17,6 +17,7 @@ class nomina_fiscal extends MY_Controller {
 
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
+    'nomina_fiscal/nomina_fiscal_banco/',
   );
 
   public function _remap($method)
@@ -361,6 +362,12 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->descargarZipNomina($_GET['semana'], $_GET['empresaId']);
+  }
+
+  public function nomina_fiscal_banco()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId']);
   }
 
   /*
