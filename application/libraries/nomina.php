@@ -838,20 +838,21 @@ class nomina
 
   private function diasAnioVacaciones()
   {
-
     //Dias trabajados en el año en que entro
     $fecha_entrada = explode('-', $this->empleado->fecha_entrada);
     $anio_anterior = date("Y", strtotime("-1 year")).'-'.$fecha_entrada[1].'-'.$fecha_entrada[2];
-    $this->empleado->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, date("Y-m-d")));
-    if($this->empleado->dias_anio_vacaciones > 365)
-      $this->empleado->dias_anio_vacaciones = 365;
-    var_dump($this->aniosTrabajadosEmpleado());
-    var_dump($anio_anterior);
-    var_dump($this->empleado->dias_anio_vacaciones);
     
     $fechaActual = new DateTime(date('Y-m-d'));
     $fechaInicioTrabajar = new DateTime($anio_anterior);
-    echo intval($fechaInicioTrabajar->diff($fechaActual)->y);
+    if(intval($fechaInicioTrabajar->diff($fechaActual)->y) == 0 && $this->aniosTrabajadosEmpleado() > 0 );
+      $anio_anterior = date("Y", strtotime("-2 year")).'-'.$fecha_entrada[1].'-'.$fecha_entrada[2];
+
+    $dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, date("Y-m-d")));
+
+    if($dias_anio_vacaciones > 365)
+      $dias_anio_vacaciones = 365;
+
+    return $dias_anio_vacaciones;
   }
 
 }
