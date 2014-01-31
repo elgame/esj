@@ -694,8 +694,8 @@ class Bascula_model extends CI_Model {
       $sql = $sql2 = '';
 
       $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
-      $sql .= " AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
-      $sql2 .= " AND DATE(b.fecha_bruto) = '".$_GET['ffecha1']."' ";
+      $sql .= " AND DATE(b.fecha_tara) = '".$_GET['ffecha1']."' ";
+      $sql2 .= " AND DATE(b.fecha_tara) = '".$_GET['ffecha1']."' ";
 
       $this->load->model('areas_model');
       $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();

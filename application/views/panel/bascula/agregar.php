@@ -2,7 +2,6 @@
       <!-- content starts -->
       <?php
         $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? 'disabled' : '';
-        var_dump( $e);
 
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';

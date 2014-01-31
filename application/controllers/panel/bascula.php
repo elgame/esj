@@ -223,6 +223,8 @@ class bascula extends MY_Controller {
         $params['next_folio'] = $info['info'][0]->folio;
         if($info['info'][0]->fecha_tara != '')
           $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
+        // if($info['info'][0]->fecha_bruto != '')
+        //   $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
         else
           $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i:s"), 0, 16));
 
