@@ -96,7 +96,7 @@
                   <div class="control-group">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
-                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?> data-next="pfolio">
+                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
                         <option value=""></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
                           <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
@@ -184,9 +184,9 @@
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
                       <input type="text" name="pfolio" value="<?php echo set_value('pfolio', $next_folio) ?>"
-                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha">
+                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha"<?php echo ($e === true? ' disabled': ''); ?>>
                       <span class="help-inline">
-                        <button class="btn" type="button" id="loadFolio">Cargar</button>
+                        <button class="btn" type="button" id="loadFolio" style="<?php echo ($e === true? 'display:none': ''); ?>">Cargar</button>
                       </span>
                     </div>
                   </div>

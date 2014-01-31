@@ -45,7 +45,7 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-                  <th>FECHA</th>
+                  <th style="width:68px;">FECHA</th>
                   <th>CLIENTE</th>
                   <th>EMPRESA</th>
                   <th>CONCEPTO</th>

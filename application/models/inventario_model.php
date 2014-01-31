@@ -664,17 +664,31 @@ class inventario_model extends privilegios_model{
 			
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
-				String::formatoNumero($item->saldo_anterior, 2, '', false),
-				String::formatoNumero($item->entradas, 2, '', false),
-				String::formatoNumero($item->salidas, 2, '', false),
-				String::formatoNumero(($item->saldo_anterior+$item->entradas-$item->salidas), 2, '', false),
-				);
 			
-			$pdf->SetX(6);
-			$pdf->SetAligns($aligns);
-			$pdf->SetWidths($widths);
-			$pdf->Row($datos, false);
+			$imprimir = true;
+			$existencia = $item->saldo_anterior+$item->entradas-$item->salidas;
+			if($this->input->get('con_existencia') == 'si')
+				if($existencia <= 0)
+					$imprimir = false;
+			if($this->input->get('con_movimiento') == 'si')
+				if($item->entradas <= 0 && $item->salidas <= 0)
+					$imprimir = false;
+
+
+			if($imprimir)
+			{
+				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
+					String::formatoNumero($item->saldo_anterior, 2, '', false),
+					String::formatoNumero($item->entradas, 2, '', false),
+					String::formatoNumero($item->salidas, 2, '', false),
+					String::formatoNumero($existencia, 2, '', false),
+					);
+				
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($datos, false);
+			}
 		}
 		
 		$pdf->Output('epu.pdf', 'I');
@@ -832,19 +846,32 @@ class inventario_model extends privilegios_model{
 			
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
-				String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
-				String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
-				String::formatoNumero($item->data['salida'][2], 2, '$', false),
-				String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
-				);
-			
-			$pdf->SetX(6);
-			$pdf->SetAligns($aligns);
-			$pdf->SetWidths($widths);
-			$pdf->SetMyLinks(array(base_url('panel/inventario/promedio_pdf?id_producto='.$item->id_producto.'&ffecha1='.
-								$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
-			$pdf->Row($datos, false);
+
+			$imprimir = true;
+			if($this->input->get('con_existencia') == 'si')
+				if($item->data['saldo'][2] <= 0)
+					$imprimir = false;
+			if($this->input->get('con_movimiento') == 'si')
+				if($item->data['salida'][2] <= 0 && ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) <= 0)
+					$imprimir = false;
+
+
+			if($imprimir)
+			{
+				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
+					String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
+					String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
+					String::formatoNumero($item->data['salida'][2], 2, '$', false),
+					String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
+					);
+				
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->SetMyLinks(array(base_url('panel/inventario/promedio_pdf?id_producto='.$item->id_producto.'&ffecha1='.
+									$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
+				$pdf->Row($datos, false);
+			}
 
 			$pdf->SetMyLinks(array());
 		}
@@ -930,11 +957,14 @@ class inventario_model extends privilegios_model{
 						'saldo' => $result[$valkey+1]['saldo'] );
 		}
 
-		$keyconta = $entrada_cantidad = $entrada_importe = $salida_cantidad = $salida_importe = 0;
+		$keyconta = $entrada_cantidad = $entrada_importe = $salida_cantidad = $salida_importe = $entrada_cantidadt1 = $entrada_importet1 = 0;
 		foreach ($result as $key => $value)
 		{
 			$entrada_cantidad += $value['entrada'][0];
 			$entrada_importe += $value['entrada'][2];
+
+			$entrada_cantidadt1 += $value['entrada'][0];
+			$entrada_importet1 += $value['entrada'][2];
 			if ($keyconta > 0)
 			{
 				$salida_cantidad += $value['salida'][0];
@@ -946,7 +976,10 @@ class inventario_model extends privilegios_model{
 			}
 			$keyconta++;
 		}
-		$result[] = array('fecha' => 'Totales', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe), 
+		$result[] = array('fecha' => 'Total', 'entrada' => array($entrada_cantidadt1, '', $entrada_importet1), 'salida' => array($salida_cantidad, '', $salida_importe), 
+						'saldo' => array('', '', '') );
+
+		$result[] = array('fecha' => 'Total General', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe), 
 						'saldo' => array(($entrada_cantidad-$salida_cantidad), '',($entrada_importe-$salida_importe)) );
 		
 		return $result;
@@ -995,7 +1028,11 @@ class inventario_model extends privilegios_model{
 			
 			$keyconta++;
 
-			$pdf->SetFont('Arial','',8);
+			if(strpos($item['fecha'], 'Total') !== false)
+			{
+				$pdf->SetFont('Arial','B',8);
+			}else
+				$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 			$datos = array(
 				$item['fecha'],

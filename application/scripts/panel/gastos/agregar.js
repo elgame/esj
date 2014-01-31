@@ -163,8 +163,8 @@
         $iva = $('#iva');
 
     $total.val( util.trunc2Dec(parseFloat($subtotal.val()||0) +
-                               parseFloat($iva.val()||0) +
-                               parseFloat($ret_iva.val()||0) +
+                               parseFloat($iva.val()||0) -
+                               parseFloat($ret_iva.val()||0) -
                                parseFloat($ret_isr.val()||0))
     );
   };

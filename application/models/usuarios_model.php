@@ -8,7 +8,7 @@ class Usuarios_model extends privilegios_model {
 		parent::__construct();
 	}
 
-	public function get_usuarios($paginados = true)
+	public function get_usuarios($paginados = true, $tipo='f')
 	{
 		$sql = '';
 		//paginacion
@@ -22,17 +22,20 @@ class Usuarios_model extends privilegios_model {
 			if($params['result_page'] % $params['result_items_per_page'] == 0)
 				$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 		}
+
+		$sql = "WHERE user_nomina = '{$tipo}'";
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+			$sql .= " AND ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(u.usuario) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(u.email) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%')";
 
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
-			$sql .= ($sql==''? 'WHERE': ' AND')." u.status='".$this->input->get('fstatus')."'";
+			$sql .= ($sql==''? ' AND': ' AND')." u.status='".$this->input->get('fstatus')."'";
 
 		$query = BDUtil::pagination("
-				SELECT u.id AS id_usuario, u.nombre, u.usuario, u.email, u.tipo, u.status
+				SELECT u.id AS id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.usuario, u.email, u.tipo, 
+					u.status, u.rfc, u.cuenta_banco, u.no_seguro
 				FROM usuarios u
 				".$sql."
 				ORDER BY u.usuario ASC
@@ -60,20 +63,20 @@ class Usuarios_model extends privilegios_model {
 		if ($data == NULL)
 		{
 			$data = array(
-						'nombre'           => $this->input->post('fnombre'),
-						'apellido_paterno' => $this->input->post('fapellido_paterno'),
-						'apellido_materno' => $this->input->post('fapellido_materno'),
+						'nombre'           => mb_strtoupper($this->input->post('fnombre'), 'utf-8'),
+						'apellido_paterno' => mb_strtoupper($this->input->post('fapellido_paterno'), 'utf-8'),
+						'apellido_materno' => mb_strtoupper($this->input->post('fapellido_materno'), 'utf-8'),
 						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
 						'password'         => trim($this->input->post('fpass'))?$this->input->post('fpass'): NULL,
 
-						'calle'            => $this->input->post('fcalle'),
-						'numero'           => $this->input->post('fnumero'),
-						'colonia'          => $this->input->post('fcolonia'),
-						'municipio'        => $this->input->post('fmunicipio'),
-						'estado'           => $this->input->post('festado'),
-						'cp'               => $this->input->post('fcp'),
+						'calle'            => mb_strtoupper($this->input->post('fcalle'), 'utf-8'),
+						'numero'           => mb_strtoupper($this->input->post('fnumero'), 'utf-8'),
+						'colonia'          => mb_strtoupper($this->input->post('fcolonia'), 'utf-8'),
+						'municipio'        => mb_strtoupper($this->input->post('fmunicipio'), 'utf-8'),
+						'estado'           => mb_strtoupper($this->input->post('festado'), 'utf-8'),
+						'cp'               => mb_strtoupper($this->input->post('fcp'), 'utf-8'),
 
-						'curp'             => $this->input->post('fcurp'),
+						'curp'             => mb_strtoupper($this->input->post('fcurp'), 'utf-8'),
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
 						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
@@ -89,7 +92,11 @@ class Usuarios_model extends privilegios_model {
 						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
 						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
-						'rfc'                  => $this->input->post('frfc'),
+						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
+
+						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
+						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -120,17 +127,17 @@ class Usuarios_model extends privilegios_model {
 		if ($data == NULL)
 		{
 			$data = array(
-						'nombre'           => $this->input->post('fnombre'),
-						'apellido_paterno' => $this->input->post('fapellido_paterno'),
-						'apellido_materno' => $this->input->post('fapellido_materno'),
+						'nombre'           => mb_strtoupper($this->input->post('fnombre'), 'utf-8'),
+						'apellido_paterno' => mb_strtoupper($this->input->post('fapellido_paterno'), 'utf-8'),
+						'apellido_materno' => mb_strtoupper($this->input->post('fapellido_materno'), 'utf-8'),
 						'usuario'          => trim($this->input->post('fusuario'))!=''?$this->input->post('fusuario'): NULL,
 						'password'         => trim($this->input->post('fpass')),
 
-						'calle'            => $this->input->post('fcalle'),
-						'numero'           => $this->input->post('fnumero'),
-						'colonia'          => $this->input->post('fcolonia'),
-						'municipio'        => $this->input->post('fmunicipio'),
-						'estado'           => $this->input->post('festado'),
+						'calle'            => mb_strtoupper($this->input->post('fcalle'), 'utf-8'),
+						'numero'           => mb_strtoupper($this->input->post('fnumero'), 'utf-8'),
+						'colonia'          => mb_strtoupper($this->input->post('fcolonia'), 'utf-8'),
+						'municipio'        => mb_strtoupper($this->input->post('fmunicipio'), 'utf-8'),
+						'estado'           => mb_strtoupper($this->input->post('festado'), 'utf-8'),
 						'cp'               => $this->input->post('fcp'),
 
 						'curp'             => $this->input->post('fcurp'),
@@ -150,7 +157,11 @@ class Usuarios_model extends privilegios_model {
 						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
 						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
-						'rfc'                  => $this->input->post('frfc'),
+						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
+
+						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
+						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
@@ -185,7 +196,7 @@ class Usuarios_model extends privilegios_model {
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi, 
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
-						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc" )
+						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
 												->where("id", $id_usuario)

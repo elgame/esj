@@ -342,7 +342,11 @@ class facturacion extends MY_Controller {
   public function enviar_documentos()
   {
     $this->carabiner->js(array(
+      array('libs/jquery.cleditor.min.js'),
       array('panel/facturacion/email.js'),
+    ));
+    $this->carabiner->css(array(
+      array('libs/jquery.cleditor.css','screen'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info'];

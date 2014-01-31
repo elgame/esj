@@ -57,7 +57,7 @@ class Ventas_model extends privilegios_model{
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
         WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
-        ORDER BY  f.folio ASC, f.fecha DESC, f.serie DESC
+        ORDER BY  f.folio DESC, f.fecha DESC, f.serie DESC
         ", $params, true);
     $res = $this->db->query($query['query']);
 

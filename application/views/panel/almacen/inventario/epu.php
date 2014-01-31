@@ -7,16 +7,16 @@
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
-                  <label class="control-label" for="fechaini">Del</label>
+                  <label class="control-label" for="ffecha1">Del</label>
                   <div class="controls">
-                    <input type="date" name="fechaini" class="span11" id="fechaini" value="<?php echo isset($_GET['fechaini']) ? $_GET['fechaini'] : date('Y-m-01'); ?>">
+                    <input type="date" name="ffecha1" class="span11" id="ffecha1" value="<?php echo isset($_GET['ffecha1']) ? $_GET['ffecha1'] : date('Y-m-01'); ?>">
                   </div>
                 </div>
 
                 <div class="control-group span6">
-                  <label class="control-label" for="fechaend">Al</label>
+                  <label class="control-label" for="ffecha2">Al</label>
                   <div class="controls">
-                    <input type="date" name="fechaend" class="span11" id="fechaend" value="<?php echo isset($_GET['fechaend']) ? $_GET['fechaend'] : date('Y-m-d'); ?>">
+                    <input type="date" name="ffecha2" class="span11" id="ffecha2" value="<?php echo isset($_GET['ffecha2']) ? $_GET['ffecha2'] : date('Y-m-d'); ?>">
                   </div>
                 </div>
 
@@ -50,6 +50,11 @@
                       value="<?php echo set_value_get('fproducto', $this->input->get('fproducto')) ?>" id="fproducto" class="span12" placeholder="Nombre">
                     <input type="hidden" name="fid_producto" value="<?php echo set_value_get('fid_producto', $this->input->get('fid_producto')) ?>" id="fid_producto">
                   </div>
+                </div>
+
+                <div>
+                  <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> | 
+                  <label for="con_movimiento">Con Movimientos <input type="checkbox" name="con_movimiento" id="con_movimiento" value="si"> </label>
                 </div>
 
                 <div class="form-actions">

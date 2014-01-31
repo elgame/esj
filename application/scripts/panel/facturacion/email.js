@@ -22,6 +22,14 @@
 
     });
 
+    $("#dcomentario").cleditor({ 
+      width:        400,
+      height:       100,
+      controls: "bold italic underline style",
+      styles:       // styles in the style popup
+          [["Paragraph", "<p>"]], 
+    });
+
   });
 
 });
