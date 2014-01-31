@@ -102,11 +102,12 @@ class nomina_fiscal_model extends CI_Model {
               (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
               (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
               (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
-              u.rfc
+              u.rfc,
+              u.cuenta_banco
        FROM usuarios u
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-       WHERE u.id = 13 and u.esta_asegurado = 't' AND user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
+       WHERE u.esta_asegurado = 't' AND user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
        ORDER BY u.apellido_paterno ASC
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -1917,16 +1918,12 @@ class nomina_fiscal_model extends CI_Model {
     $empleados = $this->nomina($configuraciones, $filtros);
     $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
 
-    // echo "<pre>";
-    //   var_dump($empleados);
-    // echo "</pre>";exit;
-
     $content = array();
     foreach ($empleados as $key => $empleado)
     {
       $content[] = $this->formatoBanco($key + 1, '0', 9, 'I') .
                   $this->formatoBanco($empleado->rfc, ' ', 16, 'D') .
-                  $this->formatoBanco('99'.'2906220193', ' ', 22, 'D') .
+                  $this->formatoBanco('99'.$empleado->cuenta_banco, ' ', 22, 'D') .
                   $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
                   $this->formatoBanco($empleado->nombre, ' ', 40, 'D') .
                   "001001";
@@ -1953,13 +1950,13 @@ class nomina_fiscal_model extends CI_Model {
       {
         if (strpos($valor, '.'))
         {
+          $valor = number_format($valor, 2, '.', '');
           $valor = explode('.', $valor);
 
           if (strlen($valor[1]) > 2)
           {
             $valor[1] = substr($valor[1], 0, 2);
           }
-
           $valor = $valor[0].$valor[1];
         }
         else
