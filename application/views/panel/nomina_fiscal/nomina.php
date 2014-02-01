@@ -88,9 +88,9 @@
                     <tr>
                       <th colspan="6"></th>
                       <th colspan="4" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="5" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
-                      <th colspan="3" style="background-color: #EEEEBC;"></th>
+                      <th colspan="6" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
                       <th>VACAS.</th>
@@ -114,7 +114,6 @@
                       <th style="background-color: #EEBCBC;">INFO.</th>
                       <th style="background-color: #EEBCBC;">IMSS</th>
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
-                      <th style="background-color: #EEBCBC;">DESC. PLAY</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
@@ -124,6 +123,9 @@
                       <!-- Totales por fuera -->
                       <th style="background-color: #EEEEBC;">BONOS</th>
                       <th style="background-color: #EEEEBC;">OTRAS</th>
+                      <th style="background-color: #EEEEBC;">DOMINGO</th>
+                      <th style="background-color: #EEBCBC;">DESC. PLAY</th>
+                      <th style="background-color: #EEBCBC;">DESC. OTRO</th>
                       <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
@@ -147,11 +149,13 @@
                       $totalImss = 0;
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
+                      $totalDescuentoOtros = 0;
                       $totalIsrs = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
                       $totalBonos = 0;
                       $totalOtras = 0;
+                      $totalDomingos = 0;
                       $totalComplementos = 0;
                       $utilidadEmpresa = 0;
                       $ultimoNoGenerado = '';
@@ -162,10 +166,10 @@
 
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
                                             $e->nomina->deducciones['imss']['total'] +
-                                            $e->nomina->deducciones['rcv']['total'] +
-                                            $e->descuento_playeras;
+                                            $e->nomina->deducciones['rcv']['total']; //+
+                                            //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = $e->dias_trabajados * $e->salario_diario_real;
+                        $totalComplementoEmpleado = ($e->dias_trabajados-1) * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';
@@ -316,7 +320,6 @@
                           <?php echo String::formatoNumero($totalPrestamosEmpleado) ?>
                           <input type="hidden" value="<?php echo $totalPrestamosEmpleado ?>" class="span12 prestamos">
                         </td>
-                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="isr-span"><?php echo String::formatoNumero($isrEmpleado) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $isrEmpleado ?>" class="span12 isr">
@@ -341,14 +344,22 @@
                           <?php echo String::formatoNumero($e->otros) ?>
                           <input type="hidden" value="<?php echo $e->otros ?>" class="span12 otros">
                         </td>
+                        <td style="<?php echo $bgColor ?>">
+                          <?php echo String::formatoNumero($e->domingo) ?>
+                          <input type="hidden" value="<?php echo $e->domingo ?>" class="span12 domingo">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php $totalComplementoEmpleado = $totalComplementoEmpleado +
                                                   $e->bonos +
-                                                  $e->otros -
+                                                  $e->otros + 
+                                                  $e->domingo -
                                                   (floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) -
                                                   $e->nomina->deducciones['infonavit']['total'] -
                                                   $totalPrestamosEmpleado -
-                                                  $e->descuento_playeras;
+                                                  $e->descuento_playeras -
+                                                  $e->descuento_otros;
                                                   ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>
@@ -371,11 +382,13 @@
                       $totalImss += $e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total'];
                       $totalPrestamos += $totalPrestamosEmpleado;
                       $totalDescuentoPlayeras += $e->descuento_playeras;
+                      $totalDescuentoOtros += $e->descuento_otros;
                       $totalIsrs += $isrEmpleado;
                       $totalDeducciones += $totalDeduccionesEmpleado;
                       $totalTransferencias += floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado);
                       $totalBonos += $e->bonos;
                       $totalOtras += $e->otros;
+                      $totalDomingos += $e->domingo;
                       $totalComplementos += $totalComplementoEmpleado;
                     } ?>
                     <tr>
@@ -394,12 +407,14 @@
                       <td id="totales-infonavit" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalInfonavit) ?></td>
                       <td id="totales-imss" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalImss) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPrestamos) ?></td>
-                      <td id="totales-descuento-playeras" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDescuentoPlayeras) ?></td>
                       <td id="totales-isrs" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalIsrs) ?></td>
                       <td id="totales-deducciones" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDeducciones) ?></td>
                       <td id="totales-transferencias" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalTransferencias) ?></td>
                       <td id="totales-bonos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalBonos) ?></td>
                       <td id="totales-otras" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalOtras) ?></td>
+                      <td id="totales-domingo" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDomingos) ?></td>
+                      <td id="totales-descuento-playeras" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDescuentoPlayeras) ?></td>
+                      <td id="totales-descuento-otros" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDescuentoOtros) ?></td>
                       <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>

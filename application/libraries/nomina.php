@@ -771,7 +771,7 @@ class nomina
    */
   public function dOtros()
   {
-    $otros = floatval($this->empleado->descuento_playeras);
+    $otros = 0; //floatval($this->empleado->descuento_playeras);
 
     foreach ($this->empleado->prestamos as $prestamo)
     {
@@ -836,6 +836,10 @@ class nomina
     return $diasVacaciones;
   }
 
+  /**
+   * Obtiene los dias de las vacaciones para calcular los dias a pagar
+   * @return int
+   */
   private function diasAnioVacaciones()
   {
     //Dias trabajados en el año en que entro

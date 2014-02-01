@@ -73,14 +73,19 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <?php foreach ($bonosOtros as $key => $item) { ?>
+                        <?php foreach ($bonosOtros as $key => $item) { 
+                          if($item->bono > 0) $cantidad = $item->bono; 
+                          elseif($item->otro > 0) $cantidad = $item->otro; 
+                          else $cantidad = $item->domingo; 
+                        ?>
                           <tr>
                             <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $item->fecha ?>" class="span12" readonly> </td>
-                            <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $item->bono !== '0' ? $item->bono : $item->otro ?>" class="span12 vpositive cantidad" required></td>
+                            <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $cantidad ?>" class="span12 vpositive cantidad" required></td>
                             <td style="width: 200px;">
                               <select name="tipo[]" class="span12">
                                 <option value="bono" <?php echo $item->bono !== '0' ? 'selected' : '' ?>>Bono</option>
                                 <option value="otro" <?php echo $item->otro !== '0' ? 'selected' : '' ?>>Otro</option>
+                                <option value="domingo">Domingo</option>
                               </select>
                             </td>
                             <td>

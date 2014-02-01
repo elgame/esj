@@ -81,6 +81,7 @@
                 '<select name="tipo[]" class="span12">' +
                   '<option value="bono" '+selectedBono+'>Bono</option>' +
                   '<option value="otro" '+selectedOtro+'>Otro</option>' +
+                  '<option value="domingo">Domingo</option>' +
                 '</select>' +
               '</td>' +
               '<td>' +

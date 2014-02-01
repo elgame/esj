@@ -97,6 +97,7 @@ class Usuarios_model extends privilegios_model {
 						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -162,6 +163,7 @@ class Usuarios_model extends privilegios_model {
 						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
 					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
@@ -405,6 +407,28 @@ class Usuarios_model extends privilegios_model {
     }
 
     return $puestos;
+  }
+
+  /**
+   * Obtiene los departamentos de los usuarios.
+   *
+   * @return array
+   */
+  public function departamentos()
+  {
+    $query = $this->db->query("SELECT id_departamento, nombre
+                               FROM usuarios_departamento
+                               WHERE status = 't'
+                               ORDER BY nombre ASC");
+
+    $departamentos = array();
+
+    if ($query->num_rows() > 0)
+    {
+      $departamentos = $query->result();
+    }
+
+    return $departamentos;
   }
 
 }

@@ -284,6 +284,8 @@ $(function(){
               'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
               'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
               'kilos': jsonObj[i]['kilos'],
+              'id_size': jsonObj[i]['id_size'],
+              'size': jsonObj[i]['size'],
             });
           }
         });
@@ -350,6 +352,8 @@ function loadPalletByFolio() {
                     'id_unidad_clasificacion': data['rendimientos'][i]['id_unidad_clasificacion'],
                     'iva_clasificacion': data['rendimientos'][i]['iva_clasificacion'],
                     'kilos': data['rendimientos'][i]['kilos'],
+                    'id_size': data['rendimientos'][i]['id_size'],
+                    'size': data['rendimientos'][i]['size'],
                   });
                 }
               }, 'json');
@@ -436,6 +440,7 @@ function addProducto(unidades, prod) {
       ivaSelected = '0', prod_kilos = 0, cantidad = 0;
 
   if (prod) {
+    console.log(prod);
     // Verificar si existe la clasificacion...
     $tabla.find('input#prod_did_prod').each(function(index, el) {
       var $prodIdInput = $(this), // input hidde prod id.
@@ -444,9 +449,10 @@ function addProducto(unidades, prod) {
       $tr = $prodIdInput.parents('tr'); // tr parent.
       $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
       $idUnidadRendimiento = $tr.find('#id_unidad_rendimiento');
+      $idSizeRendimiento = $tr.find('#id_size_rendimiento');
 
-      // console.log($prodIdInput.val(), prod.id, $medidaInput.val(), prod.id_unidad);
-      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad) {
+      // console.log($prodIdInput.val(), prod.id, $idUnidadRendimiento.val(), prod.id_unidad, $idSizeRendimiento.val(), prod.id_size);
+      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad && $idSizeRendimiento.val() == prod.id_size) {
         existe = true;
         return false;
       }
@@ -458,8 +464,10 @@ function addProducto(unidades, prod) {
     prod_kilos  = prod.kilos;
     pallet      = prod.id_pallet;
     idUnidad    = prod.id_unidad ? prod.id_unidad : ''; // id_unidad del rendimiento.
+    idSize      = prod.id_size ? prod.id_size : ''; // id_size del rendimiento.
     unidad      = prod.unidad ? prod.unidad : ''; // nombre de la unidad del rendimiento.
-    prod_nombre += ' ' + unidad; // le concatena la unidad del rendmiento a la descripcion.
+    size        = prod.size ? prod.size : ''; // nombre de la size del rendimiento.
+    prod_nombre += ' ' + unidad + ' ' + size; // le concatena la unidad del rendmiento a la descripcion.
 
     idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
@@ -467,6 +475,8 @@ function addProducto(unidades, prod) {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
     idUnidadClasificacion = unidades[0].id_unidad;
+    idSize = '';
+    size = '';
   }
 
   // Si el producto existe en el listado.
@@ -530,6 +540,7 @@ function addProducto(unidades, prod) {
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
+                  '<input type="hidden" name="id_size_rendimiento[]" value="'+idSize+'" id="id_size_rendimiento" class="span12">' +
                 '</td>' +
                 '<td>' +
                   '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +

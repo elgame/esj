@@ -42,11 +42,11 @@
                 <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
-                <label for="ffecha1" style="margin-top: 15px;">Puesto</label>
+                <label for="ffecha1" style="margin-top: 15px;">Departamento</label>
                   <select name="puestoId" class="input-large">
                     <option value=""></option>
                   <?php foreach ($puestos as $puesto) { ?>
-                    <option value="<?php echo $puesto->id_puesto ?>" <?php echo set_select_get('puestoId', $puesto->id_puesto) ?>><?php echo $puesto->nombre ?></option>
+                    <option value="<?php echo $puesto->id_departamento ?>" <?php echo set_select_get('puestoId', $puesto->id_departamento) ?>><?php echo $puesto->nombre ?></option>
                   <?php } ?>
                 </select>
 
@@ -75,7 +75,7 @@
               <?php
                 foreach ($puestos as $puesto) {
                   $tuvoEmpleados = false;
-                  if ( ! isset($_GET['puestoId']) || ($_GET['puestoId'] == $puesto->id_puesto || $_GET['puestoId'] == '')) {
+                  if ( ! isset($_GET['puestoId']) || ($_GET['puestoId'] == $puesto->id_departamento || $_GET['puestoId'] == '')) {
                 ?>
                     <table class="table table-striped table-bordered bootstrap-datatable">
                       <caption style="text-align: left;"><?php echo $puesto->nombre; ?></caption>
@@ -93,7 +93,7 @@
                       </thead>
                       <tbody>
                     <?php foreach($empleados as $e) {
-                            if ($puesto->id_puesto === $e->id_puesto) {
+                            if ($puesto->id_departamento === $e->id_departamente) {
                               $tuvoEmpleados = true;
                     ?>
                           <tr>

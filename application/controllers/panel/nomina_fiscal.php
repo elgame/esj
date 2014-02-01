@@ -169,7 +169,7 @@ class nomina_fiscal extends MY_Controller {
     // Datos para la vista.
     $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleadosAsistencias($filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
-    $params['puestos'] = $this->usuarios_model->puestos();
+    $params['puestos'] = $this->usuarios_model->departamentos(); //puestos();
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
 
     // Determina cual es la semana que dejara seleccionada en la vista.

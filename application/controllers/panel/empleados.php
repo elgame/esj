@@ -84,7 +84,9 @@ class empleados extends MY_Controller {
 		}
 
 		$this->load->model('usuarios_puestos_model');
-		$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
+		$this->load->model('usuarios_model');
+		$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false);
+		$params['departamentos'] = $this->usuarios_model->departamentos();
 
 
 		if (isset($_GET['msg']))
@@ -136,6 +138,7 @@ class empleados extends MY_Controller {
 			$params['data'] = $this->usuarios_model->get_usuario_info();
 			$this->load->model('usuarios_puestos_model');
 			$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
+			$params['departamentos'] = $this->usuarios_model->departamentos();
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
