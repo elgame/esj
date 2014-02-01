@@ -105,11 +105,12 @@ class nomina_fiscal_model extends CI_Model {
               (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
               (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
               (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
-              u.rfc
+              u.rfc,
+              u.cuenta_banco
        FROM usuarios u
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-       WHERE u.id = 13 and u.esta_asegurado = 't' AND user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
+       WHERE u.esta_asegurado = 't' AND user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
        ORDER BY u.apellido_paterno ASC
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -1925,6 +1926,75 @@ class nomina_fiscal_model extends CI_Model {
     readfile(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
 
     unlink(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
+  }
+
+  public function descargarTxtBanco($semana, $empresaId)
+  {
+    $configuraciones = $this->configuraciones();
+    $semana = $this->fechasDeUnaSemana($semana);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId);
+    $empleados = $this->nomina($configuraciones, $filtros);
+    $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
+
+    $content = array();
+    foreach ($empleados as $key => $empleado)
+    {
+      $content[] = $this->formatoBanco($key + 1, '0', 9, 'I') .
+                  $this->formatoBanco($empleado->rfc, ' ', 16, 'D') .
+                  $this->formatoBanco('99'.$empleado->cuenta_banco, ' ', 22, 'D') .
+                  $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
+                  $this->formatoBanco($empleado->nombre, ' ', 40, 'D') .
+                  "001001";
+    }
+    $content = implode("\n", $content);
+
+    $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
+    fwrite($fp,$content);
+    fclose($fp);
+
+    header('Content-Type: text/plain');
+    header("Content-disposition: attachment; filename={$nombre}");
+    readfile(APPPATH."media/temp/{$nombre}");
+    unlink(APPPATH."media/temp/{$nombre}");
+  }
+
+  public function formatoBanco($valor, $relleno = ' ', $cantidad = 0, $lado = 'I', $decimal = false)
+  {
+    if ($cantidad != intval(0) && $valor)
+    {
+      $valor = (string)$valor;
+
+      if ($decimal)
+      {
+        if (strpos($valor, '.'))
+        {
+          $valor = number_format($valor, 2, '.', '');
+          $valor = explode('.', $valor);
+
+          if (strlen($valor[1]) > 2)
+          {
+            $valor[1] = substr($valor[1], 0, 2);
+          }
+          $valor = $valor[0].$valor[1];
+        }
+        else
+        {
+          $valor .= '00';
+        }
+      }
+
+      $longitudValor = strlen($valor);
+      for ($i = $longitudValor;  $i < $cantidad; $i++)
+      {
+        $valor = strtoupper($lado) === 'I' ? $relleno . $valor : $valor . $relleno;
+      }
+
+      return $valor;
+
+      // echo "<pre>";
+      //   var_dump($valor, $relleno, $cantidad, $lado, $decimal, $longitudValor);
+      // echo "</pre>";exit;
+    }
   }
 
   /*
