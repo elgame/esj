@@ -414,7 +414,7 @@ class cuentas_cobrar_model extends privilegios_model{
 						(
 							SELECT 
 								id_nc AS id_factura,
-								Sum(total) AS abonos
+								Sum(total) AS abono
 							FROM
 								facturacion
 							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
@@ -1179,7 +1179,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Saldo de un cliente seleccionado
 	 * @return [type] [description]
 	 */
-	public function getEstadoCuentaData($sql_clientes='', $all_clientes=false, $all_facturas=false)
+	public function getEstadoCuentaData($sql_clientes='', $all_clientes=false, $all_facturas=false, $sqlext=array('',''))
 	{
 		$sql = '';
 		
@@ -1264,7 +1264,7 @@ class cuentas_cobrar_model extends privilegios_model{
 								)
 							) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
 						WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-							AND Date(f.fecha) < '{$fecha1}'{$sql}
+							AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
 						GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
 						UNION ALL
@@ -1317,7 +1317,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				WHERE id_cliente = {$cliente->id_cliente} 
 					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
 					AND (Date(fecha) >= '{$fecha1}' AND Date(fecha) <= '{$fecha2}')
-					{$sql}
+					{$sql} {$sqlext[1]}
 				ORDER BY fecha ASC");
 			$cliente->facturas = $facturas->result();
 			$facturas->free_result();
@@ -1425,7 +1425,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				$pdf->Row($header, true);
 			}
 
-			$pdf->SetFont('Arial','',8);
+			$pdf->SetFont('Arial','B',8);
 			$pdf->SetTextColor(0,0,0);
 
 			$pdf->SetXY(6, $pdf->GetY());
@@ -1437,6 +1437,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 			$pdf->SetXY(6, $pdf->GetY()+3);
 
+			$pdf->SetFont('Arial','',8);
 			foreach ($item->facturas as $keyf => $factura)
 			{
 				$total_cargo += $factura->total;
@@ -1464,10 +1465,10 @@ class cuentas_cobrar_model extends privilegios_model{
 								String::fechaATexto($factura->fecha_vencimiento, '/c'),
 							);
 					
-				$pdf->SetXY(6, $pdf->GetY()-1);
+				$pdf->SetXY(6, $pdf->GetY());
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->Row($datos, false, false);
+				$pdf->Row($datos, false, true);
 
 				foreach ($factura->abonos as $keya => $abono)
 				{
@@ -1481,14 +1482,14 @@ class cuentas_cobrar_model extends privilegios_model{
 								'', '',
 							);
 					
-					$pdf->SetXY(6, $pdf->GetY()-2);
+					$pdf->SetXY(6, $pdf->GetY());
 					$pdf->SetAligns($aligns);
 					$pdf->SetWidths($widths);
-					$pdf->Row($datos, false, false);
+					$pdf->Row($datos, false, true);
 				}
 			}
 			
-			$pdf->SetX(116);
+			$pdf->SetX(115);
 			$pdf->SetFont('Arial','B',8);
 			// $pdf->SetTextColor(255,255,255);
 			$pdf->SetAligns(array('R', 'R', 'R', 'R'));
@@ -1501,19 +1502,19 @@ class cuentas_cobrar_model extends privilegios_model{
 			$saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
 			$pdf->SetAligns(array('R', 'R', 'R', 'R'));
 			$pdf->SetWidths(array(50, 23, 23));
-			$pdf->SetX(66);
+			$pdf->SetX(65);
 			$pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false)), false);
-			$pdf->SetX(66);
+			$pdf->SetX(65);
 			$pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false)), false);
-			$pdf->SetX(66);
+			$pdf->SetX(65);
 			$pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
-			$pdf->SetX(66);
+			$pdf->SetX(65);
 			$pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false)), false);
 
 			$total_saldo_cliente += $saldo_cliente;
 		}
 
-		$pdf->SetXY(66, $pdf->GetY()+4);
+		$pdf->SetXY(65, $pdf->GetY()+4);
 		$pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
 	
 	

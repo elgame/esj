@@ -214,10 +214,10 @@
 									  <label class="control-label" for="fdepartamente">Departamento </label>
 									  <div class="controls">
 										<select name="fdepartamente" id="fdepartamente">
-										<?php foreach ($departamentos['departamentos'] as $key => $value)
+										<?php foreach ($departamentos as $key => $value)
 										{
 										?>
-											<option value="<?php echo $value->id_puesto ?>" <?php echo set_select('fdepartamente', $value->id_departamente, false, $this->input->post('fdepartamente')); ?>><?php echo $value->nombre ?></option>
+											<option value="<?php echo $value->id_departamento ?>" <?php echo set_select('fdepartamente', $value->id_departamento, false, $this->input->post('fdepartamente')); ?>><?php echo $value->nombre ?></option>
 										<?php
 										} ?>
 										</select>

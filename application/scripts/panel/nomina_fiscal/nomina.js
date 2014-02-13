@@ -270,6 +270,10 @@
         $totalComplemento = $parent.find('.total-complemento'),
         $totalComplementoSpan = $parent.find('.total-complemento-span'),
 
+        $esta_asegurado = $parent.find('.empleado-esta_asegurado'),
+
+        $cuenta_banco = $parent.find('.empleado-cuenta_banco'),
+
         totalPercepciones = 0,
         totalDeducciones = 0,
         totalNomina = 0,
@@ -302,21 +306,39 @@
 
     // Percepciones.
     totalPercepciones += parseFloat($sueldo.val()) + parseFloat($hExtras.val()) + parseFloat($subsidio.val()) + parseFloat($ptu.val());
-    $totalPercepciones.val(totalPercepciones);
-    $totalPercepcionesSpan.text(util.darFormatoNum(totalPercepciones));
+    if( $esta_asegurado.val() == 't' )
+    {
+      $totalPercepciones.val(totalPercepciones);
+      $totalPercepcionesSpan.text(util.darFormatoNum(totalPercepciones));
+    }else{
+      $totalPercepciones.val(0);
+      $totalPercepcionesSpan.text(util.darFormatoNum(0));
+    }
 
     // Deducciones.
     totalDeducciones =  parseFloat($infonavit.val()) + parseFloat($imss.val()) + parseFloat($prestamos.val()) + parseFloat($isr.val()); // + parseFloat($playeras.val());
-    $totalDeducciones.val(totalDeducciones);
-    $totalDeduccionesSpan.text(util.darFormatoNum(totalDeducciones));
+    if( $esta_asegurado.val() == 't' )
+    {
+      $totalDeducciones.val(totalDeducciones);
+      $totalDeduccionesSpan.text(util.darFormatoNum(totalDeducciones));
+    }else{
+      $totalDeducciones.val(0);
+      $totalDeduccionesSpan.text(util.darFormatoNum(0));
+    }
 
     // Total de nomina.
     totalNomina = util.round2Dec(parseFloat($totalPercepciones.val()) - parseFloat($totalDeducciones.val()));
+    var ttotal_nomina_cheques = 0;
+    if($cuenta_banco.val() == ''){
+      // ttotal_nomina_cheques = totalNomina;
+      totalNomina = 0;
+    }
     $totalNomina.val(totalNomina);
     $totalNominaSpan.text(util.darFormatoNum(totalNomina));
 
     // Total complemento.
     totalComplemento = parseFloat(totalComplemento) +
+                       parseFloat(ttotal_nomina_cheques) + 
                        parseFloat($bonos.val()) +
                        parseFloat($otros.val()) + 
                        parseFloat($domingo.val()) -
@@ -464,6 +486,7 @@
         con_aguinaldo: $('#con-aguinaldo').val(),
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
+        esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),
       },
     })
     .done(function(result) {

@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
+            <form action="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -49,9 +49,8 @@
                   <label class="control-label" for="dtipo_factura">Empresa</label>
                   <div class="controls">
                     <select name="dtipo_factura">
-                      <option value="">Todas</option>
-                      <option value="t">Facturas</option>
                       <option value="f">Remision</option>
+                      <option value="t">Facturas</option>
                     </select>
                   </div>
                 </div>
@@ -71,7 +70,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" src="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

@@ -235,7 +235,7 @@
                     {
                     ?>
                       <option value="<?php echo $value->id_departamento ?>" 
-                        <?php echo set_select('fdepartamente', $value->id_departamento, false, (isset($data['info'][0]->id_departamento)?$data['info'][0]->id_departamento:'')); ?>><?php echo $value->nombre ?></option>
+                        <?php echo set_select('fdepartamente', $value->id_departamento, false, (isset($data['info'][0]->id_departamente)?$data['info'][0]->id_departamente:'')); ?>><?php echo $value->nombre ?></option>
                     <?php
                     } ?>
                     </select>

@@ -9,6 +9,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/addAsistencias/',
     'nomina_fiscal/show_otros/',
     'nomina_fiscal/bonos_otros/',
+    'nomina_fiscal/add_vacaciones/',
 
     'nomina_fiscal/add_nomina/',
     'nomina_fiscal/ajax_add_nomina_empleado/',
@@ -18,6 +19,10 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
     'nomina_fiscal/nomina_fiscal_banco/',
+    'nomina_fiscal/nomina_fiscal_rpt_pdf/',
+    'nomina_fiscal/recibo_nomina_pdf/',
+
+    'nomina_fiscal/rpt_vacaciones_pdf/',
   );
 
   public function _remap($method)
@@ -220,6 +225,7 @@ class nomina_fiscal extends MY_Controller {
 
     // Obtiene los dias de la semana.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem']);
+    $params['semana'] = $semana;
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $params['nombresDias'] = array('Viernes', 'Sabado', 'Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves');
 
@@ -228,6 +234,9 @@ class nomina_fiscal extends MY_Controller {
 
     // Obtiene los prestamos que se hicieron en la semana cargada.
     $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem']);
+
+    // Obtiene el registro si se agrego vacaciones.
+    $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem']);
 
     if(isset($_GET['msg']{0}))
     {
@@ -254,6 +263,14 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addPrestamos($_GET['eid'], $_POST, $_GET['sem']);
+
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function add_vacaciones()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addVacaciones($_GET['eid'], $_POST, $_GET['sem']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }
@@ -327,6 +344,39 @@ class nomina_fiscal extends MY_Controller {
 
   /*
    |------------------------------------------------------------------------
+   | Reportes
+   |------------------------------------------------------------------------
+   */
+  public function rpt_vacaciones()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Vacaciones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rptvacaciones',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_vacaciones_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->rptVacacionesPdf($_GET['did_empresa']);
+  }
+
+  /*
+   |------------------------------------------------------------------------
    | Ajax
    |------------------------------------------------------------------------
    */
@@ -358,6 +408,12 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_model->pdfNominaFiscal($_GET['semana'], $_GET['empresaId']);
   }
 
+  public function nomina_fiscal_rpt_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfRptNominaFiscal($_GET['semana'], $_GET['empresaId']);
+  }
+
   public function nomina_fiscal_cfdis()
   {
     $this->load->model('nomina_fiscal_model');
@@ -368,6 +424,13 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId']);
+  }
+
+  public function recibo_nomina_pdf()
+  {
+    $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
   }
 
   /*

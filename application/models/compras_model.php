@@ -384,7 +384,7 @@ class compras_model extends privilegios_model{
       // 'condicion_pago' => $data['asdasdasd'],
       // 'plazo_credito' => $data['asdasdasd'],
       // 'tipo_documento' => $data['asdasdasd'],
-      // 'fecha' => $data['asdasdasd'],
+      'fecha' => $data['fecha'],
       'subtotal' => $data['totalImporte'],
       'importe_iva' => $data['totalImpuestosTrasladados'],
       'retencion_iva' => $data['totalRetencion'],
@@ -487,7 +487,7 @@ class compras_model extends privilegios_model{
       // 'condicion_pago' => $data['asdasdasd'],
       // 'plazo_credito' => $data['asdasdasd'],
       // 'tipo_documento' => $data['asdasdasd'],
-      // 'fecha' => $data['asdasdasd'],
+      'fecha' => $data['fecha'],
       'subtotal' => $data['totalImporte'],
       'importe_iva' => $data['totalImpuestosTrasladados'],
       'retencion_iva' => $data['totalRetencion'],
@@ -540,7 +540,7 @@ class compras_model extends privilegios_model{
       $xmlFile     = explode('application', $xmlData['full_path']);
       $datos['xml'] = 'application'.$xmlFile[1];
     }
-
+    
     $this->db->update('compras', $datos, array('id_compra' => $notaCreditoId));
 
     $this->db->delete('compras_notas_credito_productos', array('id_compra' => $notaCreditoId));

@@ -127,7 +127,7 @@ class facturacion_model extends privilegios_model{
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
-        ->where('id_factura = ' . $idFactura)
+        ->where('id_factura = ' . $idFactura)->order_by('fp.num_row', 'asc')
         ->get();
 
       $response['productos'] = $res->result();
@@ -1883,12 +1883,16 @@ class facturacion_model extends privilegios_model{
         $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
       }
 
+      $tipo_factura = array('', '');
+      if($this->input->get('dtipo_factura') != '')
+        $tipo_factura = array(" AND f.is_factura='".$this->input->get('dtipo_factura')."'", " AND is_factura='".$this->input->get('dtipo_factura')."'");
+
       $sql_clientes = '';
       if(is_array($this->input->get('ids_clientes')))
         $sql_clientes = " AND id_cliente IN(".implode(',', $this->input->get('ids_clientes')).")";
 
       $this->load->model('cuentas_cobrar_model');
-      $response = $this->cuentas_cobrar_model->getEstadoCuentaData($sql_clientes, true, true);
+      $response = $this->cuentas_cobrar_model->getEstadoCuentaData($sql_clientes, true, true, $tipo_factura);
       
 
       return $response;

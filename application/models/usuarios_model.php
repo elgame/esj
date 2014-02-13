@@ -198,7 +198,8 @@ class Usuarios_model extends privilegios_model {
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi, 
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
-						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro" )
+						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro,
+						u.id_departamente" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
 												->where("id", $id_usuario)

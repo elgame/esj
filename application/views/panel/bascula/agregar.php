@@ -184,7 +184,7 @@
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
                       <input type="text" name="pfolio" value="<?php echo set_value('pfolio', $next_folio) ?>"
-                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha"<?php echo ($e === true? ' disabled': ''); ?>>
+                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha"<?php echo ($e === true? ' readonly': ''); ?>>
                       <span class="help-inline">
                         <button class="btn" type="button" id="loadFolio" style="<?php echo ($e === true? 'display:none': ''); ?>">Cargar</button>
                       </span>
