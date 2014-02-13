@@ -947,7 +947,7 @@ class nomina_fiscal_model extends CI_Model {
               {$diasTrabajadosSemana} as dias_trabajados_semana,
               (SELECT COALESCE(isr, 0)
                FROM nomina_fiscal
-               WHERE id_empleado = 6 AND dias_trabajados = 7 AND horas_extras = 0 AND ptu = 0 AND vacaciones = 0 AND prima_vacacional = 0 AND aguinaldo = 0
+               WHERE id_empleado = {$empleadoId} AND dias_trabajados = 7 AND horas_extras = 0 AND ptu = 0 AND vacaciones = 0 AND prima_vacacional = 0 AND aguinaldo = 0
                ORDER BY fecha DESC
                LIMIT 1) as isr_ultima_semana
        FROM usuarios u
