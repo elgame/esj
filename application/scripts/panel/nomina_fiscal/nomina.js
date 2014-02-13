@@ -7,6 +7,7 @@
 
     eventOnChangeHorasExtras();
     eventOnChangeDescuentoPlayeras();
+    eventOnChangeDescuentoOtros();
     eventClickCheckVacaciones();
     eventClickCheckAguinaldo();
     eventOnSubmitForm();
@@ -60,6 +61,12 @@
 
   var eventOnChangeDescuentoPlayeras = function () {
     $('.descuento-playeras').on('change', function(event) {
+      recalculaEmpleado($(this).parents('tr'));
+    });
+  };
+
+  var eventOnChangeDescuentoOtros = function () {
+    $('.descuento-otros').on('change', function(event) {
       recalculaEmpleado($(this).parents('tr'));
     });
   };
@@ -244,10 +251,12 @@
         $imss       = $parent.find('.imss'),
         $prestamos  = $parent.find('.prestamos'),
         $playeras   = $parent.find('.descuento-playeras'),
+        $dotros     = $parent.find('.descuento-otros'),
         $isr        = $parent.find('.isr'),
 
         $bonos      = $parent.find('.bonos'),
         $otros      = $parent.find('.otros'),
+        $domingo    = $parent.find('.domingo'),
 
         $totalPercepciones = $parent.find('.total-percepciones'),
         $totalPercepcionesSpan = $parent.find('.total-percepciones-span'),
@@ -260,6 +269,10 @@
 
         $totalComplemento = $parent.find('.total-complemento'),
         $totalComplementoSpan = $parent.find('.total-complemento-span'),
+
+        $esta_asegurado = $parent.find('.empleado-esta_asegurado'),
+
+        $cuenta_banco = $parent.find('.empleado-cuenta_banco'),
 
         totalPercepciones = 0,
         totalDeducciones = 0,
@@ -276,6 +289,10 @@
       $playeras.val(0);
     }
 
+    if ($dotros.val() === '') {
+      $dotros.val(0);
+    }
+
     // Si activa las vacaciones entonces sumas las vacaciones y la prima
     // vacacional a las percepciones.
     if ($parent.find('.check-vacaciones').is(':checked')) {
@@ -289,27 +306,47 @@
 
     // Percepciones.
     totalPercepciones += parseFloat($sueldo.val()) + parseFloat($hExtras.val()) + parseFloat($subsidio.val()) + parseFloat($ptu.val());
-    $totalPercepciones.val(totalPercepciones);
-    $totalPercepcionesSpan.text(util.darFormatoNum(totalPercepciones));
+    if( $esta_asegurado.val() == 't' )
+    {
+      $totalPercepciones.val(totalPercepciones);
+      $totalPercepcionesSpan.text(util.darFormatoNum(totalPercepciones));
+    }else{
+      $totalPercepciones.val(0);
+      $totalPercepcionesSpan.text(util.darFormatoNum(0));
+    }
 
     // Deducciones.
-    totalDeducciones =  parseFloat($infonavit.val()) + parseFloat($imss.val()) + parseFloat($prestamos.val()) + parseFloat($playeras.val()) + parseFloat($isr.val());
-    $totalDeducciones.val(totalDeducciones);
-    $totalDeduccionesSpan.text(util.darFormatoNum(totalDeducciones));
+    totalDeducciones =  parseFloat($infonavit.val()) + parseFloat($imss.val()) + parseFloat($prestamos.val()) + parseFloat($isr.val()); // + parseFloat($playeras.val());
+    if( $esta_asegurado.val() == 't' )
+    {
+      $totalDeducciones.val(totalDeducciones);
+      $totalDeduccionesSpan.text(util.darFormatoNum(totalDeducciones));
+    }else{
+      $totalDeducciones.val(0);
+      $totalDeduccionesSpan.text(util.darFormatoNum(0));
+    }
 
     // Total de nomina.
     totalNomina = util.round2Dec(parseFloat($totalPercepciones.val()) - parseFloat($totalDeducciones.val()));
+    var ttotal_nomina_cheques = 0;
+    if($cuenta_banco.val() == ''){
+      // ttotal_nomina_cheques = totalNomina;
+      totalNomina = 0;
+    }
     $totalNomina.val(totalNomina);
     $totalNominaSpan.text(util.darFormatoNum(totalNomina));
 
     // Total complemento.
     totalComplemento = parseFloat(totalComplemento) +
+                       parseFloat(ttotal_nomina_cheques) + 
                        parseFloat($bonos.val()) +
-                       parseFloat($otros.val()) -
+                       parseFloat($otros.val()) + 
+                       parseFloat($domingo.val()) -
                        parseFloat($totalNomina.val()) -
                        parseFloat($infonavit.val())-
                        parseFloat($prestamos.val()) -
-                       parseFloat($playeras.val());
+                       parseFloat($playeras.val()) -
+                       parseFloat($dotros.val());
 
     $totalComplementoSpan.text(util.darFormatoNum(util.trunc2Dec(totalComplemento)));
     $totalComplemento.val(util.trunc2Dec(totalComplemento));
@@ -329,6 +366,7 @@
         $tdTotalesPtus = $('#totales-ptus'),
         $tdTotalesPercepciones = $('#totales-percepciones'),
         $tdTotalesDescuentoPlayeras = $('#totales-descuento-playeras'),
+        $tdTotalesDescuentoOtros = $('#totales-descuento-otros'),
         $tdTotalesIsrs = $('#totales-isrs'),
         $tdTotalesDeducciones = $('#totales-deducciones'),
         $tdTotalesTransferencias = $('#totales-transferencias'),
@@ -341,6 +379,7 @@
         totalesPtus = 0,
         totalesPercepciones = 0,
         totalesDescuentoPlayeras = 0,
+        totalesDescuentoOtros = 0,
         totalesIsrs = 0,
         totalesDeducciones = 0,
         totalesTransferencias = 0,
@@ -362,6 +401,7 @@
       totalesPtus += parseFloat($tr.find('.ptu').val());
       totalesPercepciones += parseFloat($tr.find('.total-percepciones').val());
       totalesDescuentoPlayeras += parseFloat($tr.find('.descuento-playeras').val());
+      totalesDescuentoOtros += parseFloat($tr.find('.descuento-otros').val());
       totalesDeducciones += parseFloat($tr.find('.total-deducciones').val());
       totalesTransferencias += parseFloat($tr.find('.total-nomina').val());
       totalesComplementos += parseFloat($tr.find('.total-complemento').val());
@@ -375,6 +415,7 @@
     $tdTotalesPtus.text(util.darFormatoNum(totalesPtus));
     $tdTotalesPercepciones.text(util.darFormatoNum(totalesPercepciones));
     $tdTotalesDescuentoPlayeras.text(util.darFormatoNum(totalesDescuentoPlayeras));
+    $tdTotalesDescuentoOtros.text(util.darFormatoNum(totalesDescuentoOtros));
     $tdTotalesIsrs.text(util.darFormatoNum(totalesIsrs));
     $tdTotalesDeducciones.text(util.darFormatoNum(totalesDeducciones));
     $tdTotalesTransferencias.text(util.darFormatoNum(totalesTransferencias));
@@ -437,6 +478,7 @@
         numSemana: $('#semanas').find('option:selected').val(),
         horas_extras: $tr.find('.horas-extras').val(),
         descuento_playeras: $tr.find('.descuento-playeras').val(),
+        descuento_otros: $tr.find('.descuento-otros').val(),
         subsidio: $tr.find('.subsidio').val(),
         isr: $tr.find('.isr').val(),
         utilidad_empresa: $('#ptu').val(),
@@ -444,6 +486,7 @@
         con_aguinaldo: $('#con-aguinaldo').val(),
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
+        esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),
       },
     })
     .done(function(result) {

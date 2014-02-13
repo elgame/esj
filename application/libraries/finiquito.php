@@ -670,10 +670,10 @@ class finiquito
         $isrAuxConOtros = round((($sumaImporteGravadosDiariosConOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
       }
     }
-
     $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
-    $isr = round(($isrAuxConOtros - $isrUltimaSemana) * 365, 2);
+    $isr = round(($isrAuxConOtros - $isrUltimaSemana) * $this->empleado->dias_trabajados, 2);
     $isr += floatval($isrSemana);
+
 
     // echo "<pre>";
     //   var_dump($aguinaldoGravadoDiario,

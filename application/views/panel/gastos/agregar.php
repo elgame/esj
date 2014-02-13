@@ -50,23 +50,22 @@
                       <option value="fa" <?php echo set_select('tipo_documento', 'fa') ?>>FACTURA</option>
                       <option value="nv" <?php echo set_select('tipo_documento', 'nv') ?>>NOTA DE VENTA</option>
                     </select>
-                    <!-- <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo
-                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="vehiculo|serie" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label> -->
+                    <label for="es_vehiculo" class="span3" style="text-align: right;">Vehiculo
+                        <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="vehiculo|serie" <?php echo set_checkbox('es_vehiculo', 'si'); ?>></label>
                   </div>
                 </div>
 
-                <!-- <div class="control-group" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">
+                <div class="control-group" id="groupVehiculo" style="display: <?php echo isset($_POST['es_vehiculo']) ? ($_POST['es_vehiculo'] === 'si' ? 'block' : 'none') : 'none' ?>;">
                   <label class="control-label" for="vehiculo">Vehiculos</label>
                   <div class="controls">
                     <input type="text" name="vehiculo" class="span7 sikey" id="vehiculo" value="<?php echo set_value('vehiculo') ?>" placeholder="Vehiculos" data-next="tipo_vehiculo" style="float: left;">
 
                     <select name="tipo_vehiculo" id="tipo_vehiculo" class="span4 sikey" style="float: right;" data-next="serie">
-                      <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot') ?>>OTRO</option>
-                      <option value="g" <?php echo set_select('tipo_vehiculo', 'g') ?>>GASOLINA</option>
+                      <option value="ot" <?php echo set_select('tipo_vehiculo', 'ot') ?>>REFACCIONES Y OTROS</option>
                     </select>
                   </div>
                     <input type="hidden" name="vehiculoId" id="vehiculoId" value="<?php echo set_value('vehiculoId') ?>">
-                </div> -->
+                </div>
 
                 <div class="control-group">
                   <label class="control-label" for="serie">Serie</label>

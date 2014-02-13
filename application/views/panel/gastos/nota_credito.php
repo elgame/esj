@@ -44,7 +44,7 @@
                 <div class="span3">
                   <div class="control-group">
                     <div class="controls span9">
-                      Fecha<input type="datetime-local" name="fecha" class="span12" id="fecha" value="<?php echo set_value('fecha', $fecha); ?>">
+                      Fecha<input type="date" name="fecha" class="span12" id="fecha" value="<?php echo set_value('fecha', $fecha); ?>">
                     </div>
                   </div>
                 </div>

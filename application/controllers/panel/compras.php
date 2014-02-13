@@ -136,7 +136,7 @@ class compras extends MY_Controller {
     }
 
     $params['unidades']      = $this->compras_ordenes_model->unidades();
-    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d"));
     $params['compra'] = $this->compras_model->getInfoCompra($_GET['id']);
 
     if (isset($_GET['msg']))
@@ -198,8 +198,8 @@ class compras extends MY_Controller {
     }
 
     $params['unidades']      = $this->compras_ordenes_model->unidades();
-    $params['fecha'] = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['nota_credito'] = $this->compras_model->getInfoNotaCredito($_GET['id']);
+    $params['fecha'] = substr($params['nota_credito']['info']->fecha, 0, 10);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

@@ -177,7 +177,7 @@ class nomina
   public function procesar()
   {
     $this->empleado->anios_trabajados      = $this->aniosTrabajadosEmpleado();
-    $this->empleado->dias_vacaciones       = $this->diasDeVacaciones();
+    $this->empleado->dias_vacaciones       = $this->empleado->dias_vacaciones_fijo>0? $this->empleado->dias_vacaciones_fijo: $this->diasDeVacaciones();
     $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
     $this->empleado->factor_integracion    = $this->factorIntegracion();
 
@@ -771,7 +771,7 @@ class nomina
    */
   public function dOtros()
   {
-    $otros = floatval($this->empleado->descuento_playeras);
+    $otros = 0; //floatval($this->empleado->descuento_playeras);
 
     foreach ($this->empleado->prestamos as $prestamo)
     {
@@ -815,27 +815,56 @@ class nomina
   private function diasDeVacaciones()
   {
     // Dias de vacaciones son cero por si no tiene almenos 1 año de antigüedad.
-    $diasVacaciones = 0;
-    // Si tiene 1 año o mas.
-    if (intval($this->empleado->anios_trabajados) > 0)
-    {
-      // Recorre las configuraciones para obtener los dias de vacaciones a dar
-      // segun los años trabajados.
-      foreach ($this->vacacionesConfig as $anio)
-      {
-        if (intval($this->empleado->anios_trabajados) >= intval($anio->anio1) && intval($this->empleado->anios_trabajados) <= intval($anio->anio2))
-        {
-          $diasVacaciones = intval($anio->dias);
-          break;
-        }
-      }
-    }
+    $diasVacaciones = $this->diasVacacionesCorresponden($this->empleado->anios_trabajados);
+    // // Si tiene 1 año o mas.
+    // if (intval($this->empleado->anios_trabajados) > 0)
+    // {
+    //   // Recorre las configuraciones para obtener los dias de vacaciones a dar
+    //   // segun los años trabajados.
+    //   foreach ($this->vacacionesConfig as $anio)
+    //   {
+    //     if (intval($this->empleado->anios_trabajados) >= intval($anio->anio1) && intval($this->empleado->anios_trabajados) <= intval($anio->anio2))
+    //     {
+    //       $diasVacaciones = intval($anio->dias);
+    //       break;
+    //     }
+    //   }
+    // }
 
     $diasVacaciones = round(($this->diasAnioVacaciones() / 365) * $diasVacaciones, 4);
 
     return $diasVacaciones;
   }
 
+  /**
+   * Obtienen los dias que le tocan de acuerdo a la configuracion de vacaciones y años trabajados
+   * @param  [type] $anios_trabajados [description]
+   * @return [type]                   [description]
+   */
+  public function diasVacacionesCorresponden($anios_trabajados)
+  {
+    $diasVacaciones = 0;
+    // Si tiene 1 año o mas.
+    if (intval($anios_trabajados) > 0)
+    {
+      // Recorre las configuraciones para obtener los dias de vacaciones a dar
+      // segun los años trabajados.
+      foreach ($this->vacacionesConfig as $anio)
+      {
+        if (intval($anios_trabajados) >= intval($anio->anio1) && intval($anios_trabajados) <= intval($anio->anio2))
+        {
+          $diasVacaciones = intval($anio->dias);
+          break;
+        }
+      }
+    }
+    return $diasVacaciones;
+  }
+
+  /**
+   * Obtiene los dias de las vacaciones para calcular los dias a pagar
+   * @return int
+   */
   private function diasAnioVacaciones()
   {
     //Dias trabajados en el año en que entro

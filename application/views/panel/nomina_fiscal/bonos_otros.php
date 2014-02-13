@@ -40,6 +40,7 @@
         <?php if ($this->usuarios_model->tienePrivilegioDe('', 'nomina_fiscal/add_prestamos/')){ ?>
           <li><a href="#tab-prestamos">Prestamos</a></li>
         <?php } ?>
+        <li><a href="#tab-vacaciones">Vacaciones</a></li>
       </ul>
       <div class="tab-content">
           <div class="tab-pane active" id="tab-bonos-otros">
@@ -73,14 +74,19 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <?php foreach ($bonosOtros as $key => $item) { ?>
+                        <?php foreach ($bonosOtros as $key => $item) { 
+                          if($item->bono > 0) $cantidad = $item->bono; 
+                          elseif($item->otro > 0) $cantidad = $item->otro; 
+                          else $cantidad = $item->domingo; 
+                        ?>
                           <tr>
                             <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $item->fecha ?>" class="span12" readonly> </td>
-                            <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $item->bono !== '0' ? $item->bono : $item->otro ?>" class="span12 vpositive cantidad" required></td>
+                            <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $cantidad ?>" class="span12 vpositive cantidad" required></td>
                             <td style="width: 200px;">
                               <select name="tipo[]" class="span12">
                                 <option value="bono" <?php echo $item->bono !== '0' ? 'selected' : '' ?>>Bono</option>
                                 <option value="otro" <?php echo $item->otro !== '0' ? 'selected' : '' ?>>Otro</option>
+                                <option value="domingo">Domingo</option>
                               </select>
                             </td>
                             <td>
@@ -139,6 +145,38 @@
                             </td>
                           </tr>
                         <?php } ?>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-success" id="btn-guardar-prestamos">Guardar</button>
+                </div><!--/modal-footer -->
+            </form><!--/form-horizontal -->
+          </div><!--/tab-pane -->
+          <div class="tab-pane" id="tab-vacaciones">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_vacaciones/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+                <div class="row-fluid">
+                  <div class="span12">
+                    <table class="table table-striped table-bordered table-hover table-condensed" id="table-vacaciones">
+                      <thead>
+                        <tr>
+                          <th>Fecha Pago</th>
+                          <th>Fecha Regreso</th>
+                          <th>Dias</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="width: 200px;"><input type="date" name="vfecha" value="<?php echo set_value('vfecha', (isset($vacaciones->anio)?$vacaciones->fecha:$semana['fecha_inicio']) ); ?>" class="span12 vfecha" required> </td>
+                          <td style="width: 200px;"><input type="date" name="vfecha1" value="<?php echo set_value('vfecha1', (isset($vacaciones->anio)?$vacaciones->fecha_fin:$semana['fecha_inicio']) ); ?>" class="span12 vfecha1" required> </td>
+                          <td style="width: 100px;"><input type="text" name="vdias" value="<?php echo set_value('vdias', (isset($vacaciones->anio)?$vacaciones->dias_vacaciones:0) ); ?>" class="span12 vpositive vdias" required></td>
+                          <td style="width: 100px;">
+                            <input type="hidden" id="vfechadefault" value="<?php echo str_replace('-', '/', $semana['fecha_inicio']); ?>">
+                            <button type="button" class="btn btn-danger btn-del-item-vacacion"><i class="icon-trash"></i></button>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

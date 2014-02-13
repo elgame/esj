@@ -7,6 +7,7 @@ class ventas extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'ventas/get_folio/',
+    'ventas/rventasr_pdf/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -78,6 +79,7 @@ class ventas extends MY_Controller {
 
     $this->load->library('cfdi');
     $this->load->model('facturacion_model');
+    $this->load->model('ventas_model');
 
     $this->configAddModFactura();
     if($this->form_validation->run() == FALSE)
@@ -86,7 +88,6 @@ class ventas extends MY_Controller {
     }
     else
     {
-      $this->load->model('ventas_model');
 
       if (isset($_GET['id_nr']))
         $respons = $this->ventas_model->updateNotaVenta($_GET['id_nr']);
@@ -126,7 +127,7 @@ class ventas extends MY_Controller {
 
     if (isset($_GET['id_nr']))
     {
-      $params['borrador']                = $this->facturacion_model->getInfoFactura($_GET['id_nr']);
+      $params['borrador']                = $this->ventas_model->getInfoVenta($_GET['id_nr']);
       $params['fecha']  = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
       // $params['borrador']['info']->serie = '';
       // $params['borrador']['info']->folio = '';
@@ -161,6 +162,35 @@ class ventas extends MY_Controller {
 
       redirect(base_url('panel/ventas/?'.String::getVarsLink(array('msg','id')).'&msg=5'));
     }
+  }
+
+
+  public function rventasr()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas remisiones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/ventas_remision/rventasc',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rventasr_pdf(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRVentasrPdf();
+
   }
 
   /**

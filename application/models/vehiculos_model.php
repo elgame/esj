@@ -173,6 +173,8 @@ class vehiculos_model extends CI_Model {
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
 		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+		$sqlf1 = " AND Date(c.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+		$sqlf2 = " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
 
 		if($this->input->get('fid_vehiculo') == '') $_GET['fid_vehiculo'] = 0;
 		$sql .= " AND cv.id_vehiculo = ".$this->input->get('fid_vehiculo');
@@ -192,7 +194,7 @@ class vehiculos_model extends CI_Model {
 			FROM compras_ordenes AS c 
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-			WHERE c.status<>'ca' AND c.tipo_vehiculo='g' {$sql}
+			WHERE c.status<>'ca' AND c.tipo_vehiculo='g' {$sql} {$sqlf1}
 			ORDER BY c.fecha_aceptacion ASC
 			");
 		$response = array('gasolina' => array(), 'disel' => array(), 'gastos' => array());
@@ -209,7 +211,7 @@ class vehiculos_model extends CI_Model {
 			FROM compras_ordenes AS c 
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-			WHERE c.status<>'ca' AND c.tipo_vehiculo='d' {$sql}
+			WHERE c.status<>'ca' AND c.tipo_vehiculo='d' {$sql} {$sqlf1}
 			ORDER BY c.fecha_aceptacion ASC
 			");
 		if($res->num_rows() > 0)
@@ -220,13 +222,26 @@ class vehiculos_model extends CI_Model {
 
 		//Gastos
 		$res = $this->db->query(
-			"SELECT c.id_orden, (c.folio) AS folio, Date(c.fecha_aceptacion) AS fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre, 
-				(SELECT Sum(total) FROM compras_productos WHERE id_orden = c.id_orden) AS total,
-				array_to_string(Array(SELECT descripcion FROM compras_productos WHERE id_orden = c.id_orden), ', ') AS concepto
-			FROM compras_ordenes AS c 
-				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
-			WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql}
-			ORDER BY c.fecha_aceptacion ASC
+			"SELECT cc.id_orden, cc.folio, Date(cc.fecha) AS fecha, cc.nombre, cc.total, cc.concepto
+			FROM (
+				(
+					SELECT c.id_orden, (c.folio) AS folio, c.fecha_aceptacion AS fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre, 
+						(SELECT Sum(total) FROM compras_productos WHERE id_orden = c.id_orden) AS total,
+						array_to_string(Array(SELECT descripcion FROM compras_productos WHERE id_orden = c.id_orden), ', ') AS concepto
+					FROM compras_ordenes AS c 
+						INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+					WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql} {$sqlf1}
+				)
+				UNION 
+				(
+					SELECT c.id_compra AS id_orden, c.folio, c.fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre, 
+						c.total, c.concepto
+					FROM compras AS c 
+						INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+					WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql} {$sqlf2}
+				)
+			) AS cc
+			ORDER BY cc.fecha ASC
 			");
 		if($res->num_rows() > 0)
 			$response['gastos'] = $res->result();

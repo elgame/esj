@@ -228,6 +228,21 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="fdepartamente">Departamento </label>
+                    <div class="controls">
+                    <select name="fdepartamente" id="fdepartamente">
+                    <?php foreach ($departamentos as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->id_departamento ?>" 
+                        <?php echo set_select('fdepartamente', $value->id_departamento, false, (isset($data['info'][0]->id_departamente)?$data['info'][0]->id_departamente:'')); ?>><?php echo $value->nombre ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="fpuesto">Puesto </label>
                     <div class="controls">
                     <select name="fpuesto" id="fpuesto">

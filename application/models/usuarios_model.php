@@ -97,6 +97,7 @@ class Usuarios_model extends privilegios_model {
 						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -162,6 +163,7 @@ class Usuarios_model extends privilegios_model {
 						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
 					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
@@ -196,7 +198,8 @@ class Usuarios_model extends privilegios_model {
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi, 
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
-						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro" )
+						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro,
+						u.id_departamente" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
 												->where("id", $id_usuario)
@@ -405,6 +408,28 @@ class Usuarios_model extends privilegios_model {
     }
 
     return $puestos;
+  }
+
+  /**
+   * Obtiene los departamentos de los usuarios.
+   *
+   * @return array
+   */
+  public function departamentos()
+  {
+    $query = $this->db->query("SELECT id_departamento, nombre
+                               FROM usuarios_departamento
+                               WHERE status = 't'
+                               ORDER BY nombre ASC");
+
+    $departamentos = array();
+
+    if ($query->num_rows() > 0)
+    {
+      $departamentos = $query->result();
+    }
+
+    return $departamentos;
   }
 
 }

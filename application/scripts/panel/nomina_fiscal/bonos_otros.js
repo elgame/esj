@@ -12,6 +12,8 @@
     eventClickBtnDelItemPrestamo();
     eventClickBtnGuardarPrestamos();
 
+    eventClickBtnDelItemVacaciones();
+
      $('#myTab a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
@@ -81,6 +83,7 @@
                 '<select name="tipo[]" class="span12">' +
                   '<option value="bono" '+selectedBono+'>Bono</option>' +
                   '<option value="otro" '+selectedOtro+'>Otro</option>' +
+                  '<option value="domingo">Domingo</option>' +
                 '</select>' +
               '</td>' +
               '<td>' +
@@ -177,6 +180,24 @@
       } else {
         $form.submit();
       }
+    });
+  };
+
+  /*
+   |------------------------------------------------------------------------
+   | Vacaciones
+   |------------------------------------------------------------------------
+   */
+
+  var eventClickBtnDelItemVacaciones = function () {
+    $('#table-vacaciones').on('click', '.btn-del-item-vacacion', function(event) {
+      var $parent = $(this).parents('tr'),
+      f = new Date($parent.find('#vfechadefault').val());
+      
+      $parent.find('.vfecha').val(f.toJSON().substr(0, 10));
+      $parent.find('.vfecha1').val(f.toJSON().substr(0, 10));
+      $parent.find('.vdias').val('0');
+      // $parent.remove();
     });
   };
 

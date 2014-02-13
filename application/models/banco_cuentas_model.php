@@ -637,6 +637,7 @@ class banco_cuentas_model extends banco_model {
 						);
 			}
 			$this->addDeposito($data_traspaso);
+			$this->db->update('banco_movimientos', array('id_traspaso' => $id_movimiento), "id_movimiento = {$id_movimiento}");
 		}
 
 		return array('error' => FALSE, 'ver_cheque' => ($data['metodo_pago']=='cheque'? true: false), 'id_movimiento' => $id_movimiento);

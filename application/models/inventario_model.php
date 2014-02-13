@@ -248,7 +248,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
-			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.String::getVarsLink(array('fproductor', 'fid_producto'))) ));
+			$pdf->SetMyLinks(array( base_url('panel/inventario/cproducto_pdf?id_producto='.$producto->id_producto.'&'.String::getVarsLink(array('fproductor', 'ids_productos'))) ));
 			$pdf->Row($datos, false, false);
 
 			$proveedor_cantidad  += $producto->cantidad;
@@ -380,7 +380,7 @@ class inventario_model extends privilegios_model{
 				), false, false);
 
 			$pdf->SetXY(6, $pdf->GetY()-2);
-			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_producto.
+			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_compra.
 							'&id_orden='.$producto->id_orden.'&'.String::getVarsLink(array('id_orden', 'id_compra'))) ));
 			$pdf->Row(array($producto->fecha, 
 				$producto->serie,

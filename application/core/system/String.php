@@ -17,6 +17,7 @@ class String{
 			else
 				$decimales = 0;
 		}
+		$number = floatval(number_format($number, $decimales, '.', ''))==0? abs($number): $number;
 		return $sigini.number_format($number, $decimales, '.', ',');
 	}
 	/**
