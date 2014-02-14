@@ -43,14 +43,14 @@ class inventario_model extends privilegios_model{
 	    foreach ($proveedores->result() as $key => $proveedor)
 	    {
 	    	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, cp.cantidad, cp.importe, cp.impuestos, cp.total
-					FROM 
+					FROM
 						productos AS p INNER JOIN (
 							SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe, (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
-							FROM compras AS c 
+							FROM compras AS c
 								INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 								INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
 							WHERE cp.id_producto IS NOT NULL AND c.id_proveedor = {$proveedor->id_proveedor} {$sql} AND
-								Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' 
+								Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 							GROUP BY cp.id_producto
 						) AS cp ON p.id_producto = cp.id_producto
 	    				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
@@ -67,14 +67,23 @@ class inventario_model extends privilegios_model{
 	public function getCProveedorPdf(){
 		$res = $this->getCProveedorData();
 
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
 		$pdf->titulo2 = 'Reporte de Compras por Proveedor';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'R', 'C', 'R', 'R', 'R');
 		$widths = array(65, 30, 20, 30, 30, 30);
 		$header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
@@ -84,7 +93,7 @@ class inventario_model extends privilegios_model{
 		foreach($res as $key => $item){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-				
+
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
@@ -100,12 +109,12 @@ class inventario_model extends privilegios_model{
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths(array(150));
 			$pdf->Row(array($item->nombre_fiscal), false, false);
-			
+
 			$pdf->SetFont('Arial','',8);
 			$proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
 			foreach ($item->productos as $key => $producto)
 			{
-				$datos = array($producto->nombre, 
+				$datos = array($producto->nombre,
 					String::formatoNumero($producto->cantidad, 2, '', false),
 					$producto->abreviatura,
 					String::formatoNumero($producto->importe, 2, '', false),
@@ -123,7 +132,7 @@ class inventario_model extends privilegios_model{
 				$proveedor_total     += $producto->total;
 			}
 
-			$datos = array('Total Proveedor', 
+			$datos = array('Total Proveedor',
 				String::formatoNumero($proveedor_cantidad, 2, '', false),
 				'',
 				String::formatoNumero($proveedor_importe, 2, '', false),
@@ -134,14 +143,14 @@ class inventario_model extends privilegios_model{
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->Row($datos, false);
-			
+
 			$total_cantidad  += $proveedor_cantidad;
 			$total_importe   += $proveedor_importe;
 			$total_impuestos += $proveedor_impuestos;
 			$total_total     += $proveedor_total;
 		}
 
-		$datos = array('Total General', 
+		$datos = array('Total General',
 			String::formatoNumero($total_cantidad, 2, '', false),
 			'',
 			String::formatoNumero($total_importe, 2, '', false),
@@ -152,7 +161,7 @@ class inventario_model extends privilegios_model{
 		$pdf->SetAligns($aligns);
 		$pdf->SetWidths($widths);
 		$pdf->Row($datos, false);
-		
+
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
@@ -183,16 +192,16 @@ class inventario_model extends privilegios_model{
 	    	$idsproveedores = " WHERE p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
 
 	    $response = array();
-    	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, 
+    	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
     				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total
-				FROM 
+				FROM
 					productos AS p LEFT JOIN (
 						SELECT cp.id_producto, SUM(cp.cantidad) AS cantidad, SUM(cp.importe) AS importe, (SUM(cp.iva) - SUM(cp.retencion_iva)) AS impuestos, SUM(cp.total) AS total
-						FROM compras AS c 
+						FROM compras AS c
 							INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 							INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
 						WHERE cp.id_producto IS NOT NULL {$sql} AND
-							Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' 
+							Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 						GROUP BY cp.id_producto
 					) AS cp ON p.id_producto = cp.id_producto
     				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
@@ -208,14 +217,23 @@ class inventario_model extends privilegios_model{
 	public function getCProductosPdf(){
 		$res = $this->getCProductosData();
 
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'R', 'C', 'R', 'R', 'R');
 		$widths = array(65, 30, 20, 30, 30, 30);
 		$header = array('Nombre (Producto, Servicio)', 'Cantidad', 'Unidad', 'Neto', 'Impuestos', 'Total');
@@ -225,7 +243,7 @@ class inventario_model extends privilegios_model{
 		foreach($res as $key => $producto){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-				
+
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
@@ -235,10 +253,10 @@ class inventario_model extends privilegios_model{
 				$pdf->Row($header, true);
 				$pdf->SetY($pdf->GetY()+2);
 			}
-			
+
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('Arial','',8);
-			$datos = array($producto->nombre, 
+			$datos = array($producto->nombre,
 				String::formatoNumero($producto->cantidad, 2, '', false),
 				$producto->abreviatura,
 				String::formatoNumero($producto->importe, 2, '', false),
@@ -257,7 +275,7 @@ class inventario_model extends privilegios_model{
 			$proveedor_total     += $producto->total;
 
 		}
-		$datos = array('Total General', 
+		$datos = array('Total General',
 			String::formatoNumero($proveedor_cantidad, 2, '', false),
 			'',
 			String::formatoNumero($proveedor_importe, 2, '', false),
@@ -269,7 +287,7 @@ class inventario_model extends privilegios_model{
 		$pdf->SetWidths($widths);
 		$pdf->SetMyLinks(array());
 		$pdf->Row($datos, false);
-		
+
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
@@ -298,19 +316,19 @@ class inventario_model extends privilegios_model{
 	    $idsproveedores = $this->input->get('id_producto');
 
 	    $response = array();
-    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, 
+    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
 				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
 				cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
-			FROM 
+			FROM
 				productos AS p LEFT JOIN (
-					SELECT cp.id_producto, c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, co.id_orden, Date(co.fecha_autorizacion) AS fechao, co.folio AS folioo, 
+					SELECT cp.id_producto, c.id_compra, Date(c.fecha) AS fecha, c.serie, c.folio, co.id_orden, Date(co.fecha_autorizacion) AS fechao, co.folio AS folioo,
 						cp.cantidad, cp.importe, (cp.iva - cp.retencion_iva) AS impuestos, cp.total
-					FROM compras AS c 
+					FROM compras AS c
 						INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 						INNER JOIN compras_ordenes AS co ON cf.id_orden = co.id_orden
 						INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
 					WHERE cp.id_producto = {$idsproveedores} {$sql} AND
-						Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' 
+						Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 				) AS cp ON p.id_producto = cp.id_producto
 				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
 			WHERE p.id_producto = {$idsproveedores}
@@ -333,7 +351,7 @@ class inventario_model extends privilegios_model{
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'C', 'R', 'L', 'R', 'R');
 		$widths = array(25, 20, 25, 65, 35, 35);
 		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Ordenado', 'Comprado');
@@ -355,7 +373,7 @@ class inventario_model extends privilegios_model{
 					$pdf->SetXY(6, $pdf->GetY()-2);
 					$pdf->Row(array('Nombre: ', $producto->nombre), false, false);
 				}
-				
+
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
 				$pdf->SetX(6);
@@ -364,14 +382,14 @@ class inventario_model extends privilegios_model{
 				$pdf->Row($header, true);
 				$pdf->SetY($pdf->GetY()+2);
 			}
-			
+
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->SetMyLinks(array());
-			$pdf->Row(array($producto->fechao, 
+			$pdf->Row(array($producto->fechao,
 				'',
 				String::formatoNumero($producto->folioo, 0, '', false),
 				'Orden de Compra',
@@ -382,7 +400,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_compra.
 							'&id_orden='.$producto->id_orden.'&'.String::getVarsLink(array('id_orden', 'id_compra'))) ));
-			$pdf->Row(array($producto->fecha, 
+			$pdf->Row(array($producto->fecha,
 				$producto->serie,
 				String::formatoNumero($producto->folio, 0, '', false),
 				'Compra',
@@ -393,7 +411,7 @@ class inventario_model extends privilegios_model{
 			$proveedor_cantidad  += $producto->cantidad;
 
 		}
-		$datos = array('Total General', 
+		$datos = array('Total General',
 			'', '', '',
 			String::formatoNumero($proveedor_cantidad, 2, '', false),
 			String::formatoNumero(($proveedor_cantidad), 2, '', false),
@@ -403,7 +421,7 @@ class inventario_model extends privilegios_model{
 		$pdf->SetWidths($widths);
 		$pdf->SetMyLinks(array());
 		$pdf->Row($datos, false);
-		
+
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
@@ -471,14 +489,14 @@ class inventario_model extends privilegios_model{
 		$pdf->SetAligns($aligns);
 		$pdf->SetWidths($widths);
 		$pdf->Row(array(
-			String::fechaATexto(substr($res['compra']->fecha, 0, 10), '/c'), 
+			String::fechaATexto(substr($res['compra']->fecha, 0, 10), '/c'),
 			$res['compra']->serie,
 			$res['compra']->folio,
 			'Compra',
 			$res['orden']->proveedor,
-			String::fechaATexto(substr($res['orden']->fecha_aceptacion, 0, 10), '/c'), 
+			String::fechaATexto(substr($res['orden']->fecha_aceptacion, 0, 10), '/c'),
 			), false, false);
-		
+
 		$aligns = array('L', 'L', 'R', 'R', 'R');
 		$widths = array(25, 65, 35, 35, 35);
 		$header = array('Codigo', 'Nombre', 'Cantidad', 'Surtido', 'Total');
@@ -498,7 +516,7 @@ class inventario_model extends privilegios_model{
 			if($_GET['id_producto'] == $value->id_producto){
 				$pdf->SetXY(6, $pdf->GetY()-1);
 				$pdf->Row(array(
-					$value->codigo, 
+					$value->codigo,
 					$value->producto,
 					String::formatoNumero($value->cantidad, 2, '', false),
 					String::formatoNumero($value->cantidad, 2, '', false),
@@ -522,7 +540,7 @@ class inventario_model extends privilegios_model{
 					String::formatoNumero($total, 2, '', false),
 					), false);
 		$pdf->Text($pdf->GetX(), $pdf->GetY(), "Orde de Compra {$res['orden']->folio}");
-		
+
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
@@ -560,47 +578,47 @@ class inventario_model extends privilegios_model{
 	    }
 
 		$res = $this->db->query(
-			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura, COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas, 
+			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura, COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
 				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior
-			FROM productos AS p 
+			FROM productos AS p
 			INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 			INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
-				FROM compras_ordenes AS co 
-				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' 
-				GROUP BY cp.id_producto 
+				FROM compras_ordenes AS co
+				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+				GROUP BY cp.id_producto
 			) AS co ON co.id_producto = p.id_producto
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
-				FROM compras_salidas AS sa 
-				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida 
-				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' 
-				GROUP BY sp.id_producto 
+				FROM compras_salidas AS sa
+				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+				GROUP BY sp.id_producto
 			) AS sa ON sa.id_producto = p.id_producto
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
-				FROM compras_ordenes AS co 
-				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) < '{$fecha}' 
-				GROUP BY cp.id_producto 
+				FROM compras_ordenes AS co
+				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) < '{$fecha}'
+				GROUP BY cp.id_producto
 			) AS sal_co ON sal_co.id_producto = p.id_producto
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
-				FROM compras_salidas AS sa 
-				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida 
-				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) < '{$fecha}' 
-				GROUP BY sp.id_producto 
+				FROM compras_salidas AS sa
+				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) < '{$fecha}'
+				GROUP BY sp.id_producto
 			) AS sal_sa ON sal_sa.id_producto = p.id_producto
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
 			ORDER BY nombre, nombre_producto ASC
 			");
-		
+
 		$response = array();
 		if($res->num_rows() > 0)
 			$response = $res->result();
@@ -613,15 +631,23 @@ class inventario_model extends privilegios_model{
 	public function getEPUPdf(){
 		$res = $this->getEPUData();
 
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Existencia por unidades';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'R', 'R', 'R', 'R');
 		$widths = array(65, 35, 35, 35, 35);
 		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
@@ -632,7 +658,7 @@ class inventario_model extends privilegios_model{
 			$band_head = false;
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-				
+
 				if ($key == 0)
 				{
 					$pdf->SetFont('Arial','B',11);
@@ -661,10 +687,10 @@ class inventario_model extends privilegios_model{
 				$pdf->Row(array($item->nombre), false, false);
 				$familia = $item->nombre;
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			
+
 			$imprimir = true;
 			$existencia = $item->saldo_anterior+$item->entradas-$item->salidas;
 			if($this->input->get('con_existencia') == 'si')
@@ -677,45 +703,45 @@ class inventario_model extends privilegios_model{
 
 			if($imprimir)
 			{
-				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
+				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
 					String::formatoNumero($item->saldo_anterior, 2, '', false),
 					String::formatoNumero($item->entradas, 2, '', false),
 					String::formatoNumero($item->salidas, 2, '', false),
 					String::formatoNumero($existencia, 2, '', false),
 					);
-				
+
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
 				$pdf->Row($datos, false);
 			}
 		}
-		
+
 		$pdf->Output('epu.pdf', 'I');
 	}
 
 	public function cuentasPagarExcel(){
 		$res = $this->getCuentasPagarData(60);
-		
+
 		$this->load->library('myexcel');
 		$xls = new myexcel();
-	
+
 		$worksheet =& $xls->workbook->addWorksheet();
-	
+
 		$xls->titulo2 = 'Cuentas por pagar';
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': $this->input->get('ftipo') == 'pp'? 'Pendientes por pagar': 'Todas');
-		
+
 		$data_fac = $res['cuentas'];
-			
+
 		$row=0;
 		//Header
 		$xls->excelHead($worksheet, $row, 8, array(
-				array($xls->titulo2, 'format_title2'), 
+				array($xls->titulo2, 'format_title2'),
 				array($xls->titulo3, 'format_title3'),
 				array($xls->titulo4, 'format_title3')
 		));
-			
+
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $data_fac, array(
 				'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo'),
@@ -729,9 +755,9 @@ class inventario_model extends privilegios_model{
 
 		foreach ($data_fac as $key => $cuenta) {
 			$_GET['id_proveedor'] = $cuenta->id_proveedor;
-			$this->cuentaProveedorExcel($xls, false);	
+			$this->cuentaProveedorExcel($xls, false);
 		}
-	
+
 		$xls->workbook->send('cuentas_pagar.xls');
 		$xls->workbook->close();
 	}
@@ -766,13 +792,13 @@ class inventario_model extends privilegios_model{
 
 		$res = $this->db->query(
 			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
-			FROM productos AS p 
+			FROM productos AS p
 				INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 				INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
 			ORDER BY nombre, nombre_producto ASC
 			");
-		
+
 		$response = array();
 		if($res->num_rows() > 0)
 		{
@@ -795,15 +821,24 @@ class inventario_model extends privilegios_model{
 	{
 		$res = $this->getEPCData();
 
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
 		$pdf->titulo2 = 'Existencia por unidades';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'R', 'R', 'R', 'R');
 		$widths = array(65, 35, 35, 35, 35);
 		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
@@ -814,7 +849,7 @@ class inventario_model extends privilegios_model{
 			$band_head = false;
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-				
+
 				if ($key == 0)
 				{
 					$pdf->SetFont('Arial','B',11);
@@ -843,7 +878,7 @@ class inventario_model extends privilegios_model{
 				$pdf->Row(array($item->nombre), false, false);
 				$familia = $item->nombre;
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 
@@ -858,13 +893,13 @@ class inventario_model extends privilegios_model{
 
 			if($imprimir)
 			{
-				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')', 
+				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
 					String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
 					String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
 					String::formatoNumero($item->data['salida'][2], 2, '$', false),
 					String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
 					);
-				
+
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
@@ -875,7 +910,7 @@ class inventario_model extends privilegios_model{
 
 			$pdf->SetMyLinks(array());
 		}
-		
+
 		$pdf->Output('epc.pdf', 'I');
 	}
 
@@ -890,21 +925,21 @@ class inventario_model extends privilegios_model{
 	{
 
 		$res = $this->db->query(
-		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo 
-		FROM 
+		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
+		FROM
 			(
 				(
 				SELECT cp.id_producto, cp.num_row, cp.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
-				FROM compras_ordenes AS co 
-				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden 
-				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a' 
+				FROM compras_ordenes AS co
+				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
 					AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
 				)
 				UNION ALL
 				(
 				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
-				FROM compras_salidas AS sa 
-				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida 
+				FROM compras_salidas AS sa
+				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
 				WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
 				)
 			) AS t
@@ -912,8 +947,8 @@ class inventario_model extends privilegios_model{
 
 		$result   = array();
 		$result[] = array('fecha' => 'S. Anterior',
-						'entrada' => array(0, 0, 0), 
-						'salida' => array(0, 0, 0), 
+						'entrada' => array(0, 0, 0),
+						'salida' => array(0, 0, 0),
 						'saldo' => array(0, 0, 0), );
 		foreach ($res->result() as $key => $value)
 		{
@@ -953,7 +988,7 @@ class inventario_model extends privilegios_model{
 		}
 		if($entro == 1)
 		{
-			$result[$valkey+1] = array('fecha' => 'S. Anterior', 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 
+			$result[$valkey+1] = array('fecha' => 'S. Anterior', 'entrada' => array('', '', ''), 'salida' => array('', '', ''),
 						'saldo' => $result[$valkey+1]['saldo'] );
 		}
 
@@ -976,12 +1011,12 @@ class inventario_model extends privilegios_model{
 			}
 			$keyconta++;
 		}
-		$result[] = array('fecha' => 'Total', 'entrada' => array($entrada_cantidadt1, '', $entrada_importet1), 'salida' => array($salida_cantidad, '', $salida_importe), 
+		$result[] = array('fecha' => 'Total', 'entrada' => array($entrada_cantidadt1, '', $entrada_importet1), 'salida' => array($salida_cantidad, '', $salida_importe),
 						'saldo' => array('', '', '') );
 
-		$result[] = array('fecha' => 'Total General', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe), 
+		$result[] = array('fecha' => 'Total General', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe),
 						'saldo' => array(($entrada_cantidad-$salida_cantidad), '',($entrada_importe-$salida_importe)) );
-		
+
 		return $result;
 	}
 
@@ -1001,7 +1036,7 @@ class inventario_model extends privilegios_model{
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
 		$widths = array(20, 18, 18, 26, 18, 18, 26, 18, 18, 26);
 		$header = array('Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
@@ -1025,7 +1060,7 @@ class inventario_model extends privilegios_model{
 				$pdf->SetWidths($widths);
 				$pdf->Row($header, true);
 			}
-			
+
 			$keyconta++;
 
 			if(strpos($item['fecha'], 'Total') !== false)
@@ -1049,7 +1084,7 @@ class inventario_model extends privilegios_model{
 				$item['saldo'][1]!=''? String::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
 				$item['saldo'][2]!=''? String::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
 				);
-			
+
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
@@ -1078,14 +1113,14 @@ class inventario_model extends privilegios_model{
 
 	    $query = BDUtil::pagination(
 	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
-			FROM productos AS p 
+			FROM productos AS p
 				INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 				INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
 			ORDER BY nombre, nombre_producto ASC
 			", $params, true);
 		$res = $this->db->query($query['query']);
-		
+
 		$response = array(
 			'productos'       => array(),
 			'total_rows'     => $query['total_rows'],
@@ -1174,8 +1209,8 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('compras_ordenes_model');
 
-			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs 
-				LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden 
+			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs
+				LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
 				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = Date(now()) GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
@@ -1233,11 +1268,11 @@ class inventario_model extends privilegios_model{
 		}
 
 		$res = $this->db->query(
-			"SELECT c.id_clasificacion, c.nombre, COALESCE(en.cajas, 0) AS entradas, COALESCE(sa.cajas, 0) AS salidas, 
-				(COALESCE(en.cajas, 0) - COALESCE(sa.cajas, 0)) AS existencia, COALESCE(en.kilos, 0) AS entradas_kilos, 
+			"SELECT c.id_clasificacion, c.nombre, COALESCE(en.cajas, 0) AS entradas, COALESCE(sa.cajas, 0) AS salidas,
+				(COALESCE(en.cajas, 0) - COALESCE(sa.cajas, 0)) AS existencia, COALESCE(en.kilos, 0) AS entradas_kilos,
 				COALESCE(sa.kilos, 0) AS salidas_kilos, (COALESCE(en.kilos, 0) - COALESCE(sa.kilos, 0)) AS existencia_kilos
 			FROM clasificaciones AS c
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT rpr.id_clasificacion, Sum(rpr.cajas) AS cajas, (rrc.kilos * Sum(rpr.cajas)) AS kilos
 				FROM rastria_pallets_rendimiento AS rpr
@@ -1245,10 +1280,10 @@ class inventario_model extends privilegios_model{
 				WHERE Date(rpr.fecha) <= '{$_GET['ffecha1']}' {$sql}
 				GROUP BY rpr.id_clasificacion, rrc.kilos
 			) AS en ON en.id_clasificacion = c.id_clasificacion
-			LEFT JOIN 
+			LEFT JOIN
 			(
 				SELECT rpr.id_clasificacion, Sum(rpr.cajas) AS cajas, (rrc.kilos * Sum(rpr.cajas)) AS kilos
-				FROM facturacion AS f 
+				FROM facturacion AS f
 					INNER JOIN facturacion_pallets AS fp ON f.id_factura = fp.id_factura
 					INNER JOIN rastria_pallets_rendimiento AS rpr ON rpr.id_pallet = fp.id_pallet
 					INNER JOIN rastria_rendimiento_clasif AS rrc ON rrc.id_rendimiento = rpr.id_rendimiento AND rrc.id_clasificacion = rpr.id_clasificacion AND rrc.id_unidad = rpr.id_unidad AND rrc.id_calibre = rpr.id_calibre AND rrc.id_etiqueta = rpr.id_etiqueta
@@ -1258,7 +1293,7 @@ class inventario_model extends privilegios_model{
 			WHERE c.status = 't'
 			ORDER BY nombre ASC
 			");
-		
+
 		$response = array();
 		if($res->num_rows() > 0)
 		{
@@ -1282,7 +1317,7 @@ class inventario_model extends privilegios_model{
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-		
+
 		$aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R');
 		$widths = array(75, 20, 20, 20, 23, 23, 23);
 		$header = array('Clasificacion', 'Entradas', 'Salidas', 'Existencia', 'Kg Entradas', 'Kg Salidas', 'Kg Existencia');
@@ -1302,10 +1337,10 @@ class inventario_model extends privilegios_model{
 				$pdf->SetWidths($widths);
 				$pdf->Row($header, true);
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			$datos = array($item->nombre, 
+			$datos = array($item->nombre,
 				String::formatoNumero($item->entradas, 2, '', false),
 				String::formatoNumero($item->salidas, 2, '', false),
 				String::formatoNumero(($item->existencia), 2, '', false),
@@ -1313,13 +1348,13 @@ class inventario_model extends privilegios_model{
 				String::formatoNumero($item->salidas_kilos, 2, '', false),
 				String::formatoNumero(($item->existencia_kilos), 2, '', false),
 				);
-			
+
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->Row($datos, false);
 		}
-		
+
 		$pdf->Output('eclasif.pdf', 'I');
 	}
 }
