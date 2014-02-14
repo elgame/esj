@@ -130,7 +130,8 @@
                           <th>Cantidad</th>
                           <th>Pago semana</th>
                           <th>Fecha inicio pagos</th>
-                          <th>Acción</th>
+                          <th>Pausar</th>
+                          <th>Eliminar</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -140,8 +141,14 @@
                             <td style="width: 100px;"><input type="text" name="cantidad[]" value="<?php echo $prestamo->prestado ?>" class="span12 vpositive cantidad" required></td>
                             <td style="width: 100px;"><input type="text" name="pago_semana[]" value="<?php echo $prestamo->pago_semana ?>" class="span12 vpositive pago-semana" required></td>
                             <td style="width: 200px;"><input type="date" name="fecha_inicia_pagar[]" value="<?php echo $prestamo->inicio_pago ?>" class="span12 vpositive" required></td>
+                            <td style="width: 100px;">
+                              <input type="hidden" name="id_prestamo[]" value="<?php echo $prestamo->id_prestamo; ?>">
+                              <select name="pausarp[]" required style="width: 100px;">
+                                <option value="f" <?php echo set_select('pausarp', 'f', false, $prestamo->pausado); ?>>Activo</option>
+                                <option value="t" <?php echo set_select('pausarp', 't', false, $prestamo->pausado); ?>>Pausado</option>
+                              </select></td>
                             <td>
-                              <button type="button" class="btn btn-danger btn-del-item-prestamo"><i class="icon-trash"></i></button>
+                              <input type="checkbox" name="eliminar_prestamo[]" value="<?php echo $prestamo->id_prestamo; ?>">
                             </td>
                           </tr>
                         <?php } ?>

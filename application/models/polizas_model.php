@@ -257,7 +257,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Ventas del dia '.String::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
         foreach ($data as $key => $value) 
         {
@@ -273,7 +273,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',10).
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio.' CANCELADA',100).
-                              $this->setEspacios('',4)."\n";
+                              $this->setEspacios('',4)."\r\n";
           }else
           {
             //Colocamos el Cargo al Cliente de la factura
@@ -285,7 +285,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',10).  //iddiario poner 0
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
-                              $this->setEspacios('',4)."\n"; //segmento de negocio
+                              $this->setEspacios('',4)."\r\n"; //segmento de negocio
             
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
@@ -302,7 +302,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',10).
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
-                              $this->setEspacios('',4)."\n";
+                              $this->setEspacios('',4)."\r\n";
             }
             //Colocamos los impuestos de la factura
             foreach ($impuestos as $key => $impuesto) 
@@ -317,7 +317,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',10).
                               $this->setEspacios('0.0',20).
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
-                              $this->setEspacios('',4)."\n";
+                              $this->setEspacios('',4)."\r\n";
               }
             }
           }
@@ -393,7 +393,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
         foreach ($data as $key => $value) 
         {
@@ -409,7 +409,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio, 100). //concepto
-                            $this->setEspacios('',4)."\n"; //segmento de negocio
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
           
           $impuestos['iva_trasladar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
@@ -426,7 +426,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto) 
@@ -441,7 +441,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
             }
           }
           unset($inf_factura);
@@ -533,7 +533,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Gastos del dia '.String::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
         
         //Contenido de la Poliza de Compras
         foreach ($data as $key => $value) 
@@ -558,7 +558,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto) 
@@ -573,7 +573,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
             }
           }
 
@@ -586,7 +586,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal, 100). //concepto
-                            $this->setEspacios('',4)."\n"; //segmento de negocio
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
                             
           unset($inf_compra);
         }
@@ -605,7 +605,7 @@ class polizas_model extends CI_Model {
         //                     $this->setEspacios('0',10).  //iddiario poner 0
         //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
         //                     $this->setEspacios('Compra Boleta. '.$inf_compra['info'][0]->folio, 100). //concepto
-        //                     $this->setEspacios('',4)."\n"; //segmento de negocio
+        //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
           
         //   // $impuestos['iva_acreditar']['importe'] = 0;
         //   // $impuestos['iva_retenido']['importe']  = 0;
@@ -622,7 +622,7 @@ class polizas_model extends CI_Model {
         //                     $this->setEspacios('0',10).
         //                     $this->setEspacios('0.0',20).
         //                     $this->setEspacios('Compra Boleta. '.$inf_compra['info'][0]->folio,100).
-        //                     $this->setEspacios('',4)."\n";
+        //                     $this->setEspacios('',4)."\r\n";
         //   }
         //   unset($inf_compra);
         // }
@@ -697,7 +697,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
         foreach ($data as $key => $value) 
         {
@@ -712,7 +712,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal, 100). //concepto
-                            $this->setEspacios('',4)."\n"; //segmento de negocio
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
           
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
@@ -731,7 +731,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
           foreach ($impuestos as $key => $impuesto) 
@@ -746,7 +746,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
-                            $this->setEspacios('',4)."\n";
+                            $this->setEspacios('',4)."\r\n";
             }
           }
           unset($inf_factura);
@@ -769,7 +769,7 @@ class polizas_model extends CI_Model {
    */
   public function polizaDiarioNomina()
   {
-    $response = array('data' => '', 'facturas' => array());
+    $response = array('data' => '', 'facturas' => array(), 'folio' => '');
     $sql = $sql2 = '';
 
     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
@@ -787,6 +787,8 @@ class polizas_model extends CI_Model {
     $fecha = $_GET['ffecha1'];
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
+
+    $folio = $this->input->get('ffolio');
 
     $query = $this->db->query(
       "SELECT id_empleado, id_empresa, anio, semana, Date(fecha_inicio) AS fecha_inicio, Date(fecha_final) AS fecha_final, sueldo_semanal, vacaciones, 
@@ -813,6 +815,7 @@ class polizas_model extends CI_Model {
         $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
       }else{
+        $value->fecha_inicio1 = $value->fecha_inicio;
         $value->fecha_inicio = str_replace('-', '/', $value->fecha_inicio);
         $value->fecha_final = str_replace('-', '/', $value->fecha_final);
         $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
@@ -836,14 +839,14 @@ class polizas_model extends CI_Model {
 
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
-                            $this->setEspacios(str_replace('-', '', $value->fecha_inicio),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
-                            $this->setEspacios($this->input->get('ffolio'),9,'r').  //folio poliza
+                            $this->setEspacios(str_replace('-', '', $value->fecha_inicio1),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                            $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
                             $this->setEspacios("Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}",100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
 
         //Colocamos el Cargo de la nomina
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -854,7 +857,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("SUELDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNVacaciones(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -863,7 +866,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("VACACIONES Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNPrimaVacacional(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -872,7 +875,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("PRIMA VACACIONAL Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNAguinaldo(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -881,7 +884,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("AGUINALDOS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNHorasHex(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -890,7 +893,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("HRS EXTRAS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
 
         //Colocamos los abonos de la nomina
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -901,7 +904,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("NOMINAS POR PAGAR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNSubsidio(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -910,7 +913,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("SUBSIDIO AL EMPLEO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNImss(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -919,7 +922,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("IMSS RETENIDO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNInfonavit(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -928,7 +931,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("CREDITO INFONAVIT Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($this->getCuentaNIsr(),30).  //cuenta contpaq
                           $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
@@ -937,7 +940,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("ISR Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         foreach ($prestamos as $keyp => $prestamo)
         {
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -948,11 +951,13 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("{$prestamo->nombre} Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
+        $folio++;
       }
     }
-
+    
+    $response['folio'] = $folio-1;
     $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
@@ -1023,7 +1028,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Ingresos, '.String::fechaATexto($value->fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
         
         //Se obtiene un registro del abono si es que se pago de mas
         $query_mayor = $this->db->query(
@@ -1059,7 +1064,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Colocamos el Abono al Cliente que realizo el pago
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
@@ -1069,7 +1074,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Si hay abonos de mas se agregan a los mov
         if (isset($query_mayor->cuenta_cpi))
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -1080,7 +1085,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($query_mayor->concepto,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Si hay abonos de mas se agregan a los mov
         if (isset($query_saldar->cuenta_cpi))
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -1091,7 +1096,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($query_saldar->concepto,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
 
         
         //Colocamos los impuestos de la factura
@@ -1107,7 +1112,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).
                           $this->setEspacios('0.0',20).
                           $this->setEspacios($value->concepto,100).
-                          $this->setEspacios('',4)."\n";
+                          $this->setEspacios('',4)."\r\n";
           }
         }
         $folio++;
@@ -1177,7 +1182,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios($this->input->get('fconcepto'),100). //concepto
                           $this->setEspacios('11',2). //sistema de origen
                           $this->setEspacios('0',1). //impresa
-                          $this->setEspacios('0',1)."\n"; //ajuste
+                          $this->setEspacios('0',1)."\r\n"; //ajuste
       //Contenido de la Poliza
       foreach ($data as $key => $value) 
       {
@@ -1205,7 +1210,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($data_frutas[0]->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Colocamos el Abono al Proveedor que realizo el pago
         foreach ($data_frutas as $key => $value_fruta)
         {
@@ -1217,7 +1222,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->concepto.' (Boleta:'.$value_fruta->folio.')',100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
         
         // //Colocamos los impuestos de la factura
@@ -1233,7 +1238,7 @@ class polizas_model extends CI_Model {
         //                   $this->setEspacios('0',10).
         //                   $this->setEspacios('0.0',20).
         //                   $this->setEspacios($value->concepto,100).
-        //                   $this->setEspacios('',4)."\n";
+        //                   $this->setEspacios('',4)."\r\n";
         //   }
         // }
       }
@@ -1339,7 +1344,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Egresos de gastos, '.String::fechaATexto($value->fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
 
         // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
         $impuestos['iva_retener']['importe']    = $value->retencion_iva; //$factor*$value->retencion_iva/100;
@@ -1358,7 +1363,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Colocamos el Abono al Proveedor que realizo el pago
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
@@ -1368,7 +1373,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto  $value->concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         
         //Colocamos los impuestos de la factura
         foreach ($impuestos as $key => $impuesto) 
@@ -1383,7 +1388,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).
                           $this->setEspacios('0.0',20).
                           $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
-                          $this->setEspacios('',4)."\n";
+                          $this->setEspacios('',4)."\r\n";
           }
         }
         $folio++;
@@ -1410,7 +1415,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('Egresos de gastos, '.String::fechaATexto($value->fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\n"; //ajuste
+                            $this->setEspacios('0',1)."\r\n"; //ajuste
 
         //Colocamos el Cargo al Banco que se deposito el dinero
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -1421,7 +1426,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         //Colocamos el Abono al Proveedor que realizo el pago
         $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                           $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
@@ -1431,7 +1436,7 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios($value->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\n"; //segmento de negocio
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
         $folio++;
       }
 
@@ -1535,19 +1540,19 @@ class polizas_model extends CI_Model {
         if (isset($_POST['poliza']{0})) 
         {
           $idsf = array();
-          foreach ($response['facturas'] as $key => $value) 
-            $idsf[] = $value->id_factura;
-          if(count($idsf) > 0)
-          {
+          // foreach ($response['facturas'] as $key => $value) 
+          //   $idsf[] = $value->id_factura;
+          // if(count($idsf) > 0)
+          // {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
             $_GET['poliza_nombre'] = 'polizadiarioncg '.String::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
-          }
+          // }
         }
-      }else
+      }else //nomina diario
       {
         $response = $this->polizaDiarioNomina();
 
@@ -1555,29 +1560,29 @@ class polizas_model extends CI_Model {
         if (isset($_POST['poliza']{0})) 
         {
           $idsf = array();
-          foreach ($response['facturas'] as $key => $value) 
-            $idsf[] = $value->id_compra;
+          // foreach ($response['facturas'] as $key => $value) 
+          //   $idsf[] = $value->id_compra;
           $idsb = array();
-          foreach ($response['bascula'] as $key => $value) 
-            $idsb[] = $value->id_bascula;
-          if(count($idsf) > 0 || count($idsb) > 0)
-          {
-            if(count($idsf) > 0)
-            {
-              // $this->db->where_in('id_compra', $idsf);
-              // $this->db->update('compras', array('poliza_diario' => 't'));
-            }
-            if(count($idsb) > 0)
-            {
-              // $this->db->where_in('id_bascula', $idsb);
-              // $this->db->update('bascula', array('poliza_diario' => 't'));
-            }
+          // foreach ($response['bascula'] as $key => $value) 
+          //   $idsb[] = $value->id_bascula;
+          // if(count($idsf) > 0 || count($idsb) > 0)
+          // {
+          //   if(count($idsf) > 0)
+          //   {
+          //     // $this->db->where_in('id_compra', $idsf);
+          //     // $this->db->update('compras', array('poliza_diario' => 't'));
+          //   }
+          //   if(count($idsb) > 0)
+          //   {
+          //     // $this->db->where_in('id_bascula', $idsb);
+          //     // $this->db->update('bascula', array('poliza_diario' => 't'));
+          //   }
 
 
             $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
-            $this->addPoliza($response['data']); //se registra la poliza en la BD
-          }
+            $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
+          // }
         }
       }
 
