@@ -1882,7 +1882,6 @@ class facturacion_model extends privilegios_model{
       if($this->input->get('did_empresa') != ''){
         $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
       }
-
       $tipo_factura = array('', '');
       if($this->input->get('dtipo_factura') != '')
         $tipo_factura = array(" AND f.is_factura='".$this->input->get('dtipo_factura')."'", " AND is_factura='".$this->input->get('dtipo_factura')."'");
@@ -1893,7 +1892,6 @@ class facturacion_model extends privilegios_model{
 
       $this->load->model('cuentas_cobrar_model');
       $response = $this->cuentas_cobrar_model->getEstadoCuentaData($sql_clientes, true, true, $tipo_factura);
-      
 
       return $response;
     }
@@ -1903,21 +1901,28 @@ class facturacion_model extends privilegios_model{
     public function getRVentascPdf(){
       $res = $this->getRVentascData();
 
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = 'Ventas por Cliente';
       $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
-    
+
       $aligns = array('L', 'L', 'R', 'L', 'R', 'R', 'R', 'R', 'R');
       $widths = array(20, 11, 15, 40, 23, 23, 23, 23, 23);
       $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cantidad', 'Neto', 'Impuesto', 'Total', 'Saldo');
       $links = array('', '', '', '', '', '', '', '', '');
-      
+
       $total_saldo_cliente = 0;
       foreach($res as $key => $item){
         $total_subtotal = 0;
@@ -1925,10 +1930,10 @@ class facturacion_model extends privilegios_model{
         $total_total = 0;
         $total_cantidad = 0;
         $total_saldo = 0;
-        
+
         if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
           $pdf->AddPage();
-    
+
           $pdf->SetFont('Arial','B',8);
           $pdf->SetTextColor(255,255,255);
           $pdf->SetFillColor(160,160,160);
@@ -1959,18 +1964,18 @@ class facturacion_model extends privilegios_model{
           $total_total += $factura->total;
 
           $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura);
-          $datos = array(String::fechaATexto($factura->fecha, '/c'), 
-                  $factura->serie, 
-                  $factura->folio, 
-                  $factura->concepto, 
-                  String::formatoNumero($factura->cantidad_productos, 2, '', false), 
-                  String::formatoNumero($factura->subtotal, 2, '', false), 
-                  String::formatoNumero($factura->importe_iva, 2, '', false), 
-                  String::formatoNumero($factura->total, 2, '', false), 
-                  String::formatoNumero( ($factura->saldo) , 2, '', false), 
+          $datos = array(String::fechaATexto($factura->fecha, '/c'),
+                  $factura->serie,
+                  $factura->folio,
+                  $factura->concepto,
+                  String::formatoNumero($factura->cantidad_productos, 2, '', false),
+                  String::formatoNumero($factura->subtotal, 2, '', false),
+                  String::formatoNumero($factura->importe_iva, 2, '', false),
+                  String::formatoNumero($factura->total, 2, '', false),
+                  String::formatoNumero( ($factura->saldo) , 2, '', false),
                   // String::fechaATexto($factura->fecha_vencimiento, '/c'),
                 );
-            
+
           $pdf->SetXY(6, $pdf->GetY()-1);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
@@ -1978,7 +1983,7 @@ class facturacion_model extends privilegios_model{
           $pdf->Row($datos, false, false);
         }
         $pdf->SetMyLinks(array());
-        
+
         $pdf->SetX(93);
         $pdf->SetFont('Arial','B',8);
         // $pdf->SetTextColor(255,255,255);
@@ -1996,8 +2001,8 @@ class facturacion_model extends privilegios_model{
 
       // $pdf->SetXY(66, $pdf->GetY()+4);
       // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
-    
-    
+
+
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
 
@@ -2011,7 +2016,7 @@ class facturacion_model extends privilegios_model{
       $sql = '';
 
       //Filtros para buscar
-      $response['factura'] = $this->db->query("SELECT * 
+      $response['factura'] = $this->db->query("SELECT *
         FROM facturacion AS f INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
         WHERE f.id_factura = ".floatval($this->input->get('venta')))->row();
       $response['productos'] = $this->db->query("SELECT * FROM facturacion_productos WHERE id_factura = ".floatval($this->input->get('venta')))->result();
@@ -2033,7 +2038,7 @@ class facturacion_model extends privilegios_model{
       $pdf->AliasNbPages();
       $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
-    
+
       $aligns = array('L', 'R', 'C', 'L', 'L');
       $widths = array(25, 25, 25, 50, 70);
       $header = array('Serie', 'Folio', 'Fecha', 'Concepto', 'Cliente');
@@ -2058,14 +2063,14 @@ class facturacion_model extends privilegios_model{
       $aligns = array('L', 'R', 'R', 'R', 'R', 'R');
       $widths = array(70, 25, 25, 25, 25, 25);
       $header = array('Nombre', 'Cantidad', 'Precio', 'Neto', 'Impuesto', 'Total');
-      
+
       $total_cantidad = 0;
       foreach($res['productos'] as $key => $item){
-        
+
         if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
-    
+
           $pdf->SetFont('Arial','B',8);
           $pdf->SetTextColor(255,255,255);
           $pdf->SetFillColor(160,160,160);
@@ -2100,8 +2105,8 @@ class facturacion_model extends privilegios_model{
           String::formatoNumero($res['factura']->subtotal, 2, '', false),
           String::formatoNumero($res['factura']->importe_iva, 2, '', false),
           String::formatoNumero($res['factura']->total, 2, '', false)), false);
-    
-    
+
+
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
 
@@ -2135,7 +2140,7 @@ class facturacion_model extends privilegios_model{
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
-        
+
 
         $pdf->SetXY(0, 0);
         /////////////////////////////////////

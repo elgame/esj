@@ -182,7 +182,7 @@ class Bascula_model extends CI_Model {
         $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
         $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
 
-        $info_boleta = $this->getBasculaInfo($idb); 
+        $info_boleta = $this->getBasculaInfo($idb);
         if($info_boleta['info'][0]->fecha_tara != '' && substr($info_boleta['info'][0]->fecha_tara, 0, 16) != str_replace('T', ' ', $_POST['pfecha']) ){
           $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
           $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
@@ -387,7 +387,7 @@ class Bascula_model extends CI_Model {
 
     $data = $this->getBasculaInfo($id);
 
-    //Actualiza el control de impresiones, se le suma 1 
+    //Actualiza el control de impresiones, se le suma 1
     //al valor de la BD para la siguiente impresion
     $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false)
         ->update('bascula');
@@ -634,7 +634,7 @@ class Bascula_model extends CI_Model {
         $sql .= " AND DATE(b.fecha_bruto) <= '".$this->input->get('fechaend')."'";
 
     $str_query =
-        "SELECT 
+        "SELECT
                 bp.id_pago,
                 bp.tipo_pago,
                 bp.monto,
@@ -825,6 +825,17 @@ class Bascula_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+      {
+        $this->load->model('empresas_model');
+        $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+        if ($empresa['info']->logo !== '')
+          $pdf->logo = $empresa['info']->logo;
+        $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      }
+
       $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
       $pdf->titulo3 = $this->input->get('fproveedor').' | '.$data['tipo'].' | '.$this->input->get('fempresa');
 
@@ -985,20 +996,20 @@ class Bascula_model extends CI_Model {
           $data[$caja->folio] = $caja;
       }
     }
-    
+
     $this->load->library('myexcel');
     $xls = new myexcel();
-  
+
     $worksheet =& $xls->workbook->addWorksheet();
-  
+
     $xls->titulo2 = 'REPORTE DIARIO DE ENTRADAS';
     $xls->titulo3 = "<".$res['area']['info']->nombre."> DEL DIA " . $this->input->get('ffecha1');
     $xls->titulo4 = 'Pagos en efectivo';
-      
+
     $row=0;
     //Header
     $xls->excelHead($worksheet, $row, 8, array(
-        array($xls->titulo2, 'format_title2'), 
+        array($xls->titulo2, 'format_title2'),
         array($xls->titulo3, 'format_title3'),
         array($xls->titulo4, 'format_title3')
     ));
@@ -1007,7 +1018,7 @@ class Bascula_model extends CI_Model {
     {
       $data[$key]->colnull = '';
     }
-      
+
     $row +=3;
     $xls->excelContent($worksheet, $row, $data, array(
         'head' => array('BOLETA', 'PRODUCTOR', '', '', 'IMPORTE'),
@@ -1019,7 +1030,7 @@ class Bascula_model extends CI_Model {
             array('name' => 'importe', 'format' => 'format4', 'sum' => 0),
           )
     ));
-  
+
     $xls->workbook->send('reporte_diario_entradas.xls');
     $xls->workbook->close();
   }
@@ -1128,6 +1139,17 @@ class Bascula_model extends CI_Model {
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if (isset($_GET['fid_empresa']))
+      {
+        $this->load->model('empresas_model');
+        $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+        if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+        $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      }
+
       $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
       $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
 

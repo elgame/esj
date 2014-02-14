@@ -1162,14 +1162,14 @@ class Ventas_model extends privilegios_model{
 
       $res = $this->db->query(
         "SELECT
-          f.id_factura, 
+          f.id_factura,
           c.nombre_fiscal,
-          f.serie, 
-          f.folio, 
+          f.serie,
+          f.folio,
           f.status,
-          Date(f.fecha) AS fecha, 
+          Date(f.fecha) AS fecha,
           COALESCE(f.total, 0) AS cargo,
-          COALESCE(f.importe_iva, 0) AS iva, 
+          COALESCE(f.importe_iva, 0) AS iva,
           COALESCE(ac.abono, 0) AS abono,
           (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo
         FROM
@@ -1179,7 +1179,7 @@ class Ventas_model extends privilegios_model{
             SELECT id_factura, Sum(abono) AS abono
             FROM (
               (
-                SELECT 
+                SELECT
                   id_factura,
                   Sum(total) AS abono
                 FROM
@@ -1189,19 +1189,19 @@ class Ventas_model extends privilegios_model{
               )
               UNION
               (
-                SELECT 
+                SELECT
                   id_nc AS id_factura,
                   Sum(total) AS abono
                 FROM
                   facturacion
-                WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL 
+                WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
                   AND Date(fecha) <= '{$_GET['ffecha2']}'
                 GROUP BY id_nc
               )
             ) AS ffs
             GROUP BY id_factura
           ) AS ac ON f.id_factura = ac.id_factura
-        WHERE f.status <> 'b' AND id_nc IS NULL  
+        WHERE f.status <> 'b' AND id_nc IS NULL
           AND (Date(f.fecha) >= '{$_GET['ffecha1']}' AND Date(f.fecha) <= '{$_GET['ffecha2']}')
           {$sql}{$tipo_factura[0]}{$sql_clientes}
         ORDER BY folio ASC
@@ -1217,26 +1217,34 @@ class Ventas_model extends privilegios_model{
     public function getRVentasrPdf(){
       $res = $this->getRVentascData();
 
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = $_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS';
       $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
-    
+
       $aligns = array('L', 'L', 'R', 'L', 'R', 'R');
       $widths = array(20, 15, 15, 90, 30, 30);
       $header = array('Fecha', 'Serie', 'Folio', 'Razon Social', 'Total', 'Pendiente');
-      
+
       $total_total = 0;
       $total_saldo = 0;
       foreach($res as $key => $factura){
         if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
           $pdf->AddPage();
-    
+
           $pdf->SetFont('Arial','B',9);
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
@@ -1249,19 +1257,19 @@ class Ventas_model extends privilegios_model{
         $total_saldo    += ($factura->status=='ca'?0:$factura->saldo);
         $total_total    += $factura->cargo;
 
-        $datos = array(String::fechaATexto($factura->fecha, '/c'), 
-                $factura->serie, 
-                $factura->folio, 
-                $factura->nombre_fiscal.($factura->status=='ca'?' (Cancelada)':''), 
-                String::formatoNumero($factura->cargo, 2, '', false), 
-                String::formatoNumero( ($factura->status=='ca'?0:$factura->saldo) , 2, '', false), 
+        $datos = array(String::fechaATexto($factura->fecha, '/c'),
+                $factura->serie,
+                $factura->folio,
+                $factura->nombre_fiscal.($factura->status=='ca'?' (Cancelada)':''),
+                String::formatoNumero($factura->cargo, 2, '', false),
+                String::formatoNumero( ($factura->status=='ca'?0:$factura->saldo) , 2, '', false),
               );
-          
+
         $pdf->SetXY(6, $pdf->GetY()-1);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row($datos, false, false);
-        
+
         // $pdf->SetTextColor(255,255,255);
       }
 
@@ -1272,8 +1280,8 @@ class Ventas_model extends privilegios_model{
       $pdf->Row(array(
           String::formatoNumero($total_total, 2, '', false),
           String::formatoNumero($total_saldo, 2, '', false)), false);
-    
-    
+
+
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
 
