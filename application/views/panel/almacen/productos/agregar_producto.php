@@ -42,7 +42,7 @@
     <div id="content" class="span12">
       <!-- content starts -->
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -55,7 +55,7 @@
           <div class="box-content">
 
             <form action="<?php echo base_url('panel/productos/agregar/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
-              
+
               <div class="span6">
                 <div class="control-group">
                   <label class="control-label" for="fcodigo">Codigo </label>
@@ -67,7 +67,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fnombre">Nombre </label>
                   <div class="controls">
-                    <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90" 
+                    <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
                     value="<?php echo set_value('fnombre'); ?>" required placeholder="Nombre del producto" autofocus>
                   </div>
                 </div>
@@ -89,7 +89,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fstock_min">Stock min </label>
                   <div class="controls">
-                    <input type="text" name="fstock_min" id="fstock_min" class="span12 vpositive" maxlength="40" 
+                    <input type="text" name="fstock_min" id="fstock_min" class="span12 vpositive" maxlength="40"
                     value="<?php echo set_value('fstock_min'); ?>" placeholder="Stock min">
                   </div>
                 </div>
@@ -97,15 +97,23 @@
                 <div class="control-group">
                   <label class="control-label" for="ubicacion">Ubicacion </label>
                   <div class="controls">
-                    <input type="text" name="ubicacion" id="ubicacion" class="span12" maxlength="70" 
+                    <input type="text" name="ubicacion" id="ubicacion" class="span12" maxlength="70"
                     value="<?php echo set_value('ubicacion'); ?>" placeholder="Ubicacion del producto">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fieps">IEPS (%) </label>
+                  <div class="controls">
+                    <input type="text" name="fieps" id="fieps" class="span12 vpositive"
+                    value="<?php echo set_value('fieps', 0) ?>" placeholder="Porcentaje: 4, 10, 15, etc">
                   </div>
                 </div>
 
                 <div class="control-group">
                   <label class="control-label" for="cuenta_contpaq"><strong>Cuenta contpaq</strong> </label>
                   <div class="controls">
-                    <input type="text" name="cuenta_contpaq" id="cuenta_contpaq" class="span12" maxlength="12" 
+                    <input type="text" name="cuenta_contpaq" id="cuenta_contpaq" class="span12" maxlength="12"
                     value="<?php echo set_value('cuenta_contpaq'); ?>" placeholder="Cuenta afectable contpaq">
                   </div>
                 </div>
@@ -122,7 +130,7 @@
                     </tr>
                   </thead>
                   <tbody id="tblproductosrow">
-              <?php 
+              <?php
               if (is_array($this->input->post('pnombre')))
               {
                 foreach ($this->input->post('pnombre') as $key => $value)
