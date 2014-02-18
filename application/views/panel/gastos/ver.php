@@ -220,7 +220,7 @@
               </div>
             </div><!--/row-fluid -->
 
-            <?php if ( ! $gasto['info']->xml) { ?>
+            <?php //if ( ! $gasto['info']->xml) { ?>
               <div class="span4 pull-right">
                 <div class="control-group">
                   <div class="controls span9">
@@ -230,7 +230,7 @@
                   </div>
                 </div>
               </div>
-            <?php } ?>
+            <?php //} ?>
 
           </form>
         </div>

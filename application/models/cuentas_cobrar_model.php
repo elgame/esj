@@ -497,7 +497,8 @@ class cuentas_cobrar_model extends privilegios_model{
 
 					if($this->input->get('ftipo')=='pv' || $this->input->get('ftipo')=='pp')
 						unset($response['cuentas'][$key]);
-				}
+				}elseif($cuenta->dias_transc<0)
+					$cuenta->dias_transc = '';
 			}
 		}
 
@@ -721,7 +722,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		// {
 			$data['info'] = $this->db->query(
 											"SELECT id_factura AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito, id_cliente, 'f' AS tipo
+												plazo_credito, id_cliente, id_empresa, 'f' AS tipo
 												FROM facturacion
 												WHERE id_factura={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_abonos',
@@ -778,11 +779,20 @@ class cuentas_cobrar_model extends privilegios_model{
 			$prov = $this->clientes_model->getClienteInfo($data['info'][0]->id_cliente, true);
 		}
 
+		//obtenemos la info de la empresa
+		$empresa['info'] = '';
+		if (isset($data['info'][0]->id_empresa))
+		{
+			$this->load->model('empresas_model');
+			$empresa = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa, true);
+		}
+
 		$response = array(
 				'abonos'  => array(),
 				'saldo'   => '',
 				'cobro'   => $data['info'],
 				'cliente' => $prov['info'],
+				'empresa' => $empresa['info'],
 				'fecha1'  => $fecha1
 		);
 		$abonos = 0;

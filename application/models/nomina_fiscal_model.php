@@ -61,6 +61,12 @@ class nomina_fiscal_model extends CI_Model {
       $sql .= " AND u.esta_asegurado = 't'";
     }
 
+    $ordenar = " ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC ";
+    if(isset($filtros['ordenar']))
+    {
+      $ordenar = $filtros['ordenar'];
+    }
+
     $diaPrimeroDeLaSemana = $semana['fecha_inicio']; // fecha del primero dia de la semana.
     $diaUltimoDeLaSemana = $semana['fecha_final']; // fecha del ultimo dia de la semana.
     $anio = $semana['anio'];
@@ -120,7 +126,7 @@ class nomina_fiscal_model extends CI_Model {
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
        WHERE user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
-       ORDER BY u.apellido_paterno ASC
+       {$ordenar}
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
 
@@ -269,6 +275,25 @@ class nomina_fiscal_model extends CI_Model {
     //   var_dump($empleados);
     // echo "</pre>";exit;
     return $empleados;
+  }
+
+  /**
+   * Obtiene el registro de los datos precapturados en la nomina para q se carguen de nuevo
+   * @param  [type] $empleadoId [description]
+   * @param  [type] $empresaId  [description]
+   * @param  [type] $anio       [description]
+   * @param  [type] $semana     [description]
+   * @return [type]             [description]
+   */
+  public function getPreNomina($empleadoId, $empresaId, $anio, $semana)
+  {
+    $data = $this->db->query("SELECT * FROM nomina_fiscal_presave WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$anio} AND semana = {$semana}")->row();
+
+    return array(
+      'horas_extras' => isset($data->horas_extras)? $data->horas_extras: 0,
+      'desc_playeras' => isset($data->desc_playeras)? $data->desc_playeras: 0,
+      'desc_otros' => isset($data->desc_otros)? $data->desc_otros: 0,
+      );
   }
 
   // public function add_nominas($datos, $empresaId)
@@ -989,6 +1014,25 @@ class nomina_fiscal_model extends CI_Model {
     // echo "</pre>";exit;
 
     return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
+  }
+
+  public function add_prenominas($datos, $empresaId, $empleadoId)
+  {
+    $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_fiscal_presave WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$datos['anio']} AND semana = {$datos['numSemana']}")->row();
+    $data = array(
+      'id_empleado'   => $empleadoId,
+      'id_empresa'    => $empresaId,
+      'anio'          => $datos['anio'],
+      'semana'        => $datos['numSemana'],
+      'horas_extras'  => $datos['horas_extras'],
+      'desc_playeras' => $datos['descuento_playeras'],
+      'desc_otros'    => $datos['descuento_otros'],
+    );
+    if($existe->num > 0)
+      $this->db->update('nomina_fiscal_presave', $data, "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$datos['anio']} AND semana = {$datos['numSemana']}");
+    else
+      $this->db->insert('nomina_fiscal_presave', $data);
+    return array('status' => true);
   }
 
   public function finiquito($empleadoId, $fechaSalida)
@@ -1777,6 +1821,9 @@ class nomina_fiscal_model extends CI_Model {
   {
     $anio = substr($datos['vfecha'], 0, 4);
 
+    $data_vac = $this->db->query("SELECT Date(fecha) AS fecha, Date(fecha_fin) AS fecha_fin FROM nomina_fiscal_vacaciones WHERE id_empleado = {$empleadoId} AND anio = {$anio} AND semana = {$numSemana}")->row();
+    if(isset($data_vac->fecha))
+      $this->db->delete('nomina_asistencia', "id_usuario = {$empleadoId} AND fecha_ini BETWEEN '{$data_vac->fecha}' AND '{$data_vac->fecha_fin}'");
     $this->db->where("id_empleado = {$empleadoId} AND anio = {$anio} AND semana = {$numSemana}");
     $this->db->delete('nomina_fiscal_vacaciones');
 
@@ -1791,6 +1838,53 @@ class nomina_fiscal_model extends CI_Model {
         'fecha_fin'       => $datos['vfecha1'],
       );
       $this->db->insert('nomina_fiscal_vacaciones', $insertData);
+
+      //Se asignan las faltas del rango de fechas de vacaciones
+      $fecha1 = new DateTime($datos['vfecha']);
+      $fecha2 = new DateTime($datos['vfecha1']);
+      for ($cont = $fecha1->diff($fecha2)->d; $cont >= 0; $cont--)
+      {
+        var_dump(array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
+        $this->db->insert('nomina_asistencia', array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
+        $fecha1->add(new DateInterval('P1D'));
+      }
+    }
+
+    return array('passes' => true);
+  }
+
+  /**
+   * Agrega las incapaciades.
+   *
+   * @param string $empleadoId
+   * @param array  $datos
+   * @param string $numSemana
+   * @return array
+   */
+  public function addIncapaciades($empleadoId, array $datos, $numSemana)
+  {
+    if($datos['idias'] > 0)
+    {
+      $sqlData = array(
+        'fecha_ini'           => $datos['ifecha'],
+        'fecha_fin'           => String::suma_fechas($datos['ifecha'], $datos['idias']-1),
+        'id_usuario'          => $empleadoId,
+        'tipo'                => 'in',
+        'id_clave'            => $datos['itipo_inciden'],
+        'dias_autorizados'    => $datos['idias'],
+        'ramo_seguro'         => $datos['iramo_seguro'],
+        'control_incapacidad' => $datos['icontrol_incapa'],
+        'folio'               => $datos['ifolio'],
+      );
+      if(isset($datos['iid_asistencia']{0}))
+      {
+        $this->db->update('nomina_asistencia', $sqlData, "id_asistencia = {$datos['iid_asistencia']}");
+      }else
+        $this->db->insert('nomina_asistencia', $sqlData);
+    }else
+    {
+      if(isset($datos['iid_asistencia']{0}))
+        $this->db->delete('nomina_asistencia', "id_asistencia = {$datos['iid_asistencia']}");
     }
 
     return array('passes' => true);
@@ -1845,6 +1939,33 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     return $vacaciones;
+  }
+
+  /**
+   * Obtiene las incapacidades que se agrego en la semana.
+   *
+   * @param  string $empleadoId
+   * @param  string $numSemana
+   * @return array
+   */
+  public function getIncapacidadesEmpleado($empleadoId, $numSemana, $anio=null)
+  {
+    $anio = $anio==null?date("Y"):$anio;
+    $semana = $this->fechasDeUnaSemana($numSemana, $anio);
+
+    $query = $this->db->query("SELECT id_asistencia, DATE(fecha_ini) AS fecha_ini, DATE(fecha_fin) AS fecha_fin, id_usuario, tipo, 
+                                id_clave, dias_autorizados, ramo_seguro, control_incapacidad, folio
+                               FROM nomina_asistencia
+                               WHERE tipo = 'in' AND id_usuario = {$empleadoId} AND DATE(fecha_ini) BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
+                               LIMIT 1");
+
+    $incapacidad = array();
+    if ($query->num_rows() > 0)
+    {
+      $incapacidad = $query->row();
+    }
+
+    return $incapacidad;
   }
 
   /*
@@ -2117,15 +2238,19 @@ class nomina_fiscal_model extends CI_Model {
     $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
 
     $content = array();
+    $contador = 1;
     foreach ($empleados as $key => $empleado)
     {
       if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
-        $content[] = $this->formatoBanco($key + 1, '0', 9, 'I') .
-                    $this->formatoBanco($empleado->rfc, ' ', 16, 'D') .
-                    $this->formatoBanco('99'.$empleado->cuenta_banco, ' ', 22, 'D') .
+        $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
+                    $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
+                    $this->formatoBanco('99', ' ', 2, 'I') .
+                    $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
                     $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
-                    $this->formatoBanco($empleado->nombre, ' ', 40, 'D') .
-                    "001001";
+                    $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D');
+        $contador++;
       }
     }
     $content = implode("\r\n", $content);
@@ -2140,6 +2265,10 @@ class nomina_fiscal_model extends CI_Model {
     unlink(APPPATH."media/temp/{$nombre}");
   }
 
+  public function removeTrash($valor)
+  {
+    return str_replace(array('á','é','í','ó','ú','Á','É','Í','Ó','Ú','.','ñ','Ñ'), array('a','e','i','o','u','A','E','I','O','U',' ','n','N'), trim($valor));
+  }
   public function formatoBanco($valor, $relleno = ' ', $cantidad = 0, $lado = 'I', $decimal = false)
   {
     if ($cantidad != intval(0) && $valor)
@@ -2192,7 +2321,7 @@ class nomina_fiscal_model extends CI_Model {
 
     $semana = $this->fechasDeUnaSemana($semana, $anio);
     $configuraciones = $this->configuraciones();
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si');
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC");
     $empleados = $this->nomina($configuraciones, $filtros);
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
@@ -4221,6 +4350,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->show_head = true;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->logo = $empresa['info']->logo;
     // $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     // $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
     $pdf->AliasNbPages();

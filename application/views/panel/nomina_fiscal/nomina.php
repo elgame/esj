@@ -171,6 +171,13 @@
                       $ultimoNoGenerado = '';
                       foreach($empleados as $key => $e)
                       {
+                        //Se obtienen lo que se preguardo en hrs_ext y descuentos para q se carguen de nuevo
+                        $prenomina = $this->nomina_fiscal_model->getPreNomina($e->id, $_GET['empresaId'], $_GET['anio'], $_GET['semana']);
+                        $e->nomina->percepciones['horas_extras']['total'] = $e->nomina->percepciones['horas_extras']['total']==0?$prenomina['horas_extras']: $e->nomina->percepciones['horas_extras']['total'];
+                        $e->horas_extras_dinero = $e->nomina->percepciones['horas_extras']['total'];
+                        $e->descuento_playeras  = $prenomina['desc_playeras'];
+                        $e->descuento_otros     = $prenomina['desc_otros'];
+
                         $totalPercepcionesEmpleado = $e->nomina->percepciones['sueldo']['total'] +
                                              $e->nomina->percepciones['horas_extras']['total'];
 

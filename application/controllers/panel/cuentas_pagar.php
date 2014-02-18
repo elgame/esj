@@ -194,9 +194,10 @@ class cuentas_pagar extends MY_Controller {
         $params['data'] = $this->cuentas_pagar_model->getDetalleVentaFacturaData();
         $proveedor = $params['data']['proveedor'];
       }
+      $id_empresa = isset($params['data']['empresa']->id_empresa)? $params['data']['empresa']->id_empresa : $params['data']['facturas'][0]['empresa']->id_empresa;
 
       //Cuentas de banco
-      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
+      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
       //metodos de pago
       $params['metods_pago']  = array( 
         array('nombre' => 'Transferencia', 'value' => 'transferencia'),

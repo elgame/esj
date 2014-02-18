@@ -202,9 +202,11 @@ class cuentas_cobrar extends MY_Controller {
         $_GET['tipo'] = $tipos_aux;
       }else  
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
+      $id_empresa = isset($params['data']['empresa']->id_empresa)? $params['data']['empresa']->id_empresa : $params['data']['facturas'][0]['empresa']->id_empresa;
+
 
       //Cuentas de banco
-      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false);
+      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
       //metodos de pago
       $params['metods_pago']  = array( 
         array('nombre' => 'Transferencia', 'value' => 'transferencia'),

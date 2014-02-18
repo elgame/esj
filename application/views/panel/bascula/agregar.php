@@ -3,6 +3,21 @@
       <?php
         $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? 'disabled' : '';
 
+        $bmod = array(
+          'tipo'       => '',
+          'area'       => '',
+          'empresa'    => '',
+          'proveedor'  => '',
+          'rancho'     => '',
+          'camion'     => '',
+          'chofer'     => '',
+          'fecha'      => '',
+          'k_bruto'    => '',
+          'k_tara'     => '',
+          'cajas_pres' => '',
+          'pagar'      => '',
+          'cajas'      => '',
+          );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';
         if ($e === true)
@@ -10,6 +25,22 @@
           $readonly = '';
           $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
+
+          $bmod = array(
+          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
+          'area'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
+          'empresa'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
+          'proveedor'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mproveedor/')?'':' readonly'),
+          'rancho'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
+          'camion'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
+          'chofer'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
+          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')?'':' readonly'),
+          'k_bruto'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
+          'k_tara'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
+          'cajas_pres' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
+          'pagar'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
+          'cajas'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
+          );
         }
       ?>
 
@@ -86,9 +117,9 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled ?> autofocus>
-                        <option value="en" <?php echo set_select('ptipo', 'en', false, $this->input->post('ptipo')) ?>>Entrada</option>
-                        <option value="sa" <?php echo set_select('ptipo', 'sa', false, $this->input->post('ptipo')) ?>>Salida</option>
+                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled; ?> autofocus>
+                        <option value="en" <?php $set_select=set_select('ptipo', 'en', false, $this->input->post('ptipo')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['tipo']); ?>>Entrada</option>
+                        <option value="sa" <?php $set_select=set_select('ptipo', 'sa', false, $this->input->post('ptipo')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['tipo']); ?>>Salida</option>
                       </select>
                     </div>
                   </div>
@@ -96,11 +127,12 @@
                   <div class="control-group">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
-                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
-                        <option value=""></option>
+                      <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled; ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
+                        <option value="" <?php echo $bmod['area']; ?>></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
                           <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
-                            <?php echo set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') ) ?>><?php echo $area->nombre ?></option>
+                            <?php $set_select=set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') );
+                             echo $set_select.($set_select==' selected="selected"'? '': $bmod['area']); ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
                       </select>
                       <!-- <span class="help-inline">
@@ -113,7 +145,7 @@
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
-                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge next" placeholder="Empresa" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $empresa_default->nombre_fiscal)) ?>" id="pempresa" class="input-xlarge next" placeholder="Empresa" <?php echo $disabled.$bmod['empresa']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_empresa') ?>" class="btn" rel="superbox-80x500">Agregar</a>
                       </span>
@@ -125,7 +157,7 @@
                     <label class="control-label" for="pproveedor">Proveedor</label>
                     <div class="controls">
                       <input type="text" name="pproveedor"
-                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pproveedor', $this->input->post('pproveedor')) ?>" id="pproveedor" class="input-xlarge" placeholder="Proveedor" <?php echo $disabled.$bmod['proveedor']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_proveedor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -137,7 +169,7 @@
                     <label class="control-label" for="prancho">Rancho</label>
                     <div class="controls">
                       <input type="text" name="prancho" value="<?php echo set_value('prancho', $this->input->post('prancho')) ?>" 
-                        id="prancho" class="input-xlarge" placeholder="Rancho" <?php echo $disabled ?>>
+                        id="prancho" class="input-xlarge" placeholder="Rancho" <?php echo $disabled.$bmod['rancho']; ?>>
                     </div>
                   </div>
 
@@ -145,7 +177,7 @@
                     <label class="control-label" for="pcliente">Cliente</label>
                     <div class="controls">
                       <input type="text" name="pcliente" value="<?php echo set_value('pcliente', $this->input->post('pcliente')) ?>" id="pcliente" 
-                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="Cliente" <?php echo $disabled ?>>
+                        class="input-xlarge sikey" data-replace="pproveedor" data-next="pcamion" placeholder="Cliente" <?php echo $disabled.$bmod['proveedor']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_cliente') ?>" class="btn" rel="superbox-80x550">Agregar</a>
                       </span>
@@ -157,7 +189,7 @@
                     <label class="control-label" for="pcamion">Camión</label>
                     <div class="controls">
                       <input type="text" name="pcamion"
-                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled ?>>
+                        value="<?php echo set_value('pcamion', $this->input->post('pcamion')) ?>" id="pcamion" class="input-xlarge" placeholder="Placas" <?php echo  $disabled.$bmod['camion']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_camion') ?>" class="btn" rel="superbox-30x540" id="btnSupermodal">Agregar</a>
                       </span>
@@ -169,7 +201,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pkilos_brutos|pkilos_tara" <?php echo $disabled ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pkilos_brutos|pkilos_tara" <?php echo $disabled.$bmod['chofer']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-40x600">Agregar</a>
                       </span>
@@ -195,7 +227,7 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled ?> data-next="pproveedor|pcliente">
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled.$bmod['fecha']; ?> data-next="pproveedor|pcliente">
                     </div>
                   </div>
 
@@ -203,7 +235,7 @@
                     <!-- <label class="control-label">Finalizado?</label> -->
                     <div class="controls">
                       <button type="button" class="btn btn-success span10 <?php echo ($accion==='p' || $accion === 'b') ? 'active' : '' ?>" data-toggle="button"
-                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled ?>>Pagar</button>
+                        id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled.$bmod['pagar']; ?>>Pagar</button>
                     </div>
                   </div>
 
@@ -236,7 +268,7 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.' '.((($accion === 'n' && $e === false) || ($this->input->post('ptipo') === 'sa')) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.$bmod['k_bruto'].' '.((($accion === 'n' && $e === false) || ($this->input->post('ptipo') === 'sa')) ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -248,7 +280,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.' '.(((($accion === 'en' || $accion === 'sa') && $e === false) || ($this->input->post('ptipo') === 'en')) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.$bmod['k_tara'].' '.(((($accion === 'en' || $accion === 'sa') && $e === false) || ($this->input->post('ptipo') === 'en')) ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -260,7 +292,7 @@
                     <label class="control-label" for="pcajas_prestadas" style="width: 100px;">Cajas Prestadas</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pcajas_prestadas" id="pcajas_prestadas" class="input-small vpos-int"
-                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>">
+                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>" <?php echo $disabled.$bmod['cajas_pres']; ?>>
                     </div>
                   </div>
                 </div>
@@ -368,14 +400,14 @@
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
                                   <td id="tdkilos"><?php echo $_POST['pkilos'][$key] ?></td>
                                   <td id="tdpromedio">
-                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;">
+                                    <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;" <?php echo $bmod['cajas'][1]; ?>>
                                   </td>
                                   <td>
                                     <?php //echo $_POST['pprecio'][$key] ?>
-                                    <input type="text" name="pprecio[]" value="<?php echo $_POST['pprecio'][$key] ?>" class="vpositive" id="pprecio" style="width: 80px;">
+                                    <input type="text" name="pprecio[]" value="<?php echo $_POST['pprecio'][$key] ?>" class="vpositive" id="pprecio" style="width: 80px;" <?php echo $bmod['cajas'][1]; ?>>
                                   </td>
                                   <td id="tdimporte"><?php echo $_POST['pimporte'][$key] ?></td>
-                                  <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled ?>><i class="icon-trash"></i></button></td>
+                                  <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled.$bmod['cajas'][0]; ?>><i class="icon-trash"></i></button></td>
                                 </tr>
 
                       <?php }} ?>

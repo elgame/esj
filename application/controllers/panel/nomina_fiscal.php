@@ -10,11 +10,13 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/show_otros/',
     'nomina_fiscal/bonos_otros/',
     'nomina_fiscal/add_vacaciones/',
+    'nomina_fiscal/add_incapacidades/',
 
     'nomina_fiscal/add_nomina/',
     'nomina_fiscal/ajax_add_nomina_empleado/',
     'nomina_fiscal/ajax_get_empleado/',
     'nomina_fiscal/add_finiquito/',
+    'nomina_fiscal/ajax_add_prenomina_empleado/',
 
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
@@ -238,6 +240,10 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene el registro si se agrego vacaciones.
     $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem']);
 
+    //Incapacidades
+    $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
+    $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem']);
+
     if(isset($_GET['msg']{0}))
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -271,6 +277,14 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addVacaciones($_GET['eid'], $_POST, $_GET['sem']);
+
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function add_incapacidades()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->addIncapaciades($_GET['eid'], $_POST, $_GET['sem']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }
@@ -389,6 +403,19 @@ class nomina_fiscal extends MY_Controller {
     $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
 
     $result = $this->nomina_fiscal_model->add_nominas($_POST, $empresaId, $_POST['empleado_id']);
+
+    echo json_encode($result);
+  }
+
+  public function ajax_add_prenomina_empleado()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $empresaDefault = $this->empresas_model->getDefaultEmpresa();
+    $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
+
+    $result = $this->nomina_fiscal_model->add_prenominas($_POST, $empresaId, $_POST['empleado_id']);
 
     echo json_encode($result);
   }
