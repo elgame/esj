@@ -118,6 +118,12 @@
                 '<td style="width: 100px;"><input type="text" name="cantidad[]" value="0" class="span12 vpositive cantidad" required></td>' +
                 '<td style="width: 100px;"><input type="text" name="pago_semana[]" value="0" class="span12 vpositive pago-semana" required></td>' +
                 '<td style="width: 200px;"><input type="date" name="fecha_inicia_pagar[]" value="" class="span12 vpositive fecha-inicia-pagar" required></td>' +
+                '<td style="width: 100px;">' +
+                  '<input type="hidden" name="id_prestamo[]" value="">' +
+                  '<select name="pausarp[]" required style="width: 100px;">' +
+                    '<option value="f">Activo</option>' +
+                    '<option value="t">Pausado</option>' +
+                  '</select></td>' +
                 '<td>' +
                   '<button type="button" class="btn btn-danger btn-del-item-prestamo"><i class="icon-trash"></i></button>' +
                 '</td>' +

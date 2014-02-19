@@ -618,7 +618,7 @@ class cuentas_pagar_model extends privilegios_model{
 		// {
 			$data['info'] = $this->db->query(
 											"SELECT id_compra AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito, id_proveedor, 'f'::text AS tipo 
+												plazo_credito, id_proveedor, id_empresa, 'f'::text AS tipo 
 												FROM compras
 												WHERE id_compra={$_GET['id']}")->result();
 			$sql = array('tabla' => 'compras_abonos', 
@@ -674,12 +674,21 @@ class cuentas_pagar_model extends privilegios_model{
 			$this->load->model('proveedores_model');
 			$prov = $this->proveedores_model->getProveedorInfo($data['info'][0]->id_proveedor, true);
 		}
+
+		//obtenemos la info de la empresa
+		$empresa['info'] = '';
+		if (isset($data['info'][0]->id_empresa))
+		{
+			$this->load->model('empresas_model');
+			$empresa = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa, true);
+		}
 	
 		$response = array(
 				'abonos'    => array(),
 				'saldo'     => '',
 				'cobro'     => $data['info'],
 				'proveedor' => $prov['info'],
+				'empresa' => $empresa['info'],
 				'fecha1'    => $fecha1
 		);
 		$abonos = 0;

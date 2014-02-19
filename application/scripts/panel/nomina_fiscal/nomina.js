@@ -56,18 +56,21 @@
   var eventOnChangeHorasExtras = function () {
     $('.horas-extras').on('change', function(event) {
       ajaxGetEmpleado($(this).parents('tr'));
+      guardaPreNominaEmpleado($(this).parents('tr'));
     });
   };
 
   var eventOnChangeDescuentoPlayeras = function () {
     $('.descuento-playeras').on('change', function(event) {
       recalculaEmpleado($(this).parents('tr'));
+      guardaPreNominaEmpleado($(this).parents('tr'));
     });
   };
 
   var eventOnChangeDescuentoOtros = function () {
     $('.descuento-otros').on('change', function(event) {
       recalculaEmpleado($(this).parents('tr'));
+      guardaPreNominaEmpleado($(this).parents('tr'));
     });
   };
 
@@ -516,4 +519,31 @@
       console.log("error");
     });
   };
+
+  var guardaPreNominaEmpleado = function ($tr) {
+    loader.create();
+    $.ajax({
+      url: base_url + 'panel/nomina_fiscal/ajax_add_prenomina_empleado/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        empresa_id: $('#empresaId').val(),
+        empleado_id: $tr.find('.empleado-id').val(),
+        anio: $('#anio').val(),
+        numSemana: $('#semanas').find('option:selected').val(),
+        horas_extras: $tr.find('.horas-extras').val(),
+        descuento_playeras: $tr.find('.descuento-playeras').val(),
+        descuento_otros: $tr.find('.descuento-otros').val(),
+      },
+    })
+    .done(function(result) {
+      // result.status
+
+      loader.close();
+    })
+    .fail(function() {
+      console.log("error");
+    });
+  };
+
 });

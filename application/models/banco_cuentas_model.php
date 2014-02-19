@@ -752,7 +752,7 @@ class banco_cuentas_model extends banco_model {
 	 * @param  boolean $paginados [description]
 	 * @return [type]             [description]
 	 */
-	public function getCuentas($paginados = true, $id_cuenta=null)
+	public function getCuentas($paginados = true, $id_cuenta=null, $data=array())
 	{
 		$sql = '';
 		$query['total_rows'] = $params['result_items_per_page'] = $params['result_page'] = '';
@@ -783,6 +783,9 @@ class banco_cuentas_model extends banco_model {
 
 		if ($id_cuenta != null)
 			$sql .= ($sql==''? ' WHERE ': ' AND ')." c.id_cuenta = {$id_cuenta}";
+
+		if(isset($data['id_empresa']))
+			$sql .= ($sql==''? ' WHERE ': ' AND ')." e.id_empresa = {$data['id_empresa']}";
 
  		$query['query'] = 
  						"SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco, e.nombre_fiscal, 
