@@ -242,7 +242,7 @@ class productos_model extends CI_Model {
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
         'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => $this->input->post('fieps'),
+				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
 				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}
@@ -272,7 +272,7 @@ class productos_model extends CI_Model {
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
         'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => $this->input->post('fieps'),
+				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
 				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}

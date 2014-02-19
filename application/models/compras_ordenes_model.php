@@ -167,6 +167,8 @@ class compras_ordenes_model extends CI_Model {
         'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
         'faltantes'            => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
         'observacion'          => $_POST['observacion'][$key],
+        'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+        'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
       );
     }
 
@@ -319,7 +321,9 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
           'faltantes' => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
           'observacion'     => $_POST['observacion'][$key],
-          'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p'
+          'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p',
+          'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+          'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
         );
       }
 
@@ -360,6 +364,7 @@ class compras_ordenes_model extends CI_Model {
       'fecha'          => str_replace('T', ' ', $_POST['fecha']),
       'subtotal'       => $_POST['totalImporte'],
       'importe_iva'    => $_POST['totalImpuestosTrasladados'],
+      'importe_ieps'   => $_POST['totalIeps'],
       'total'          => $_POST['totalOrden'],
       'concepto'       => 'Concepto',
       'isgasto'        => 'f',
@@ -447,6 +452,8 @@ class compras_ordenes_model extends CI_Model {
         'total'           => $_POST['total'][$key],
         'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
         'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+        'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+        'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
       );
 
       $this->db->update('compras_productos', $prodData, array(
@@ -513,7 +520,8 @@ class compras_ordenes_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion
+                  cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion,
+                  cp.ieps, cp.porcentaje_ieps
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -657,6 +665,8 @@ class compras_ordenes_model extends CI_Model {
         'fecha_aceptacion' => date('Y-m-d H:i:s'),
         'faltantes'       => $faltantesProd,
         'observacion'     => $_POST['observacion'][$key],
+        'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+        'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
       );
 
       if ($faltantesProd !== '0')

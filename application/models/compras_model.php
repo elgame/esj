@@ -191,6 +191,7 @@ class compras_model extends privilegios_model{
     $compra = array(
       'subtotal'      => String::float($this->input->post('totalImporte')),
       'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
+      'importe_ieps'  => String::float($this->input->post('totalIeps')),
       'retencion_iva' => String::float($this->input->post('totalRetencion')),
       'total'         => String::float($this->input->post('totalOrden')),
     );
@@ -540,7 +541,7 @@ class compras_model extends privilegios_model{
       $xmlFile     = explode('application', $xmlData['full_path']);
       $datos['xml'] = 'application'.$xmlFile[1];
     }
-    
+
     $this->db->update('compras', $datos, array('id_compra' => $notaCreditoId));
 
     $this->db->delete('compras_notas_credito_productos', array('id_compra' => $notaCreditoId));

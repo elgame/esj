@@ -343,7 +343,11 @@
                         <option value="16">16%</option>
                       </select>
                     </div><!--/span2 -->
-                    <div class="span2 offset3">
+                    <div class="span2">
+                      <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
+                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
+                    </div><!--/span2 -->
+                    <div class="span2 offset1">
                       <?php if ($showButton){ ?>
                           <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
                       <?php } ?>
@@ -365,6 +369,7 @@
                           <th>FALTANTES</th>
                           <th>P.U.</th>
                           <th>IVA</th>
+                          <th>IEPS (%)</th>
                           <th>RET 4%</th>
                           <th>IMPORTE</th>
                           <th>DESCRIP</th>
@@ -373,11 +378,12 @@
                       </thead>
                       <tbody>
                         <?php if (isset($_POST['concepto'])) {
-                              $subtotal = $iva = $total = $retencion = 0;
+                              $subtotal = $iva = $ieps = $total = $retencion = 0;
                               foreach ($_POST['concepto'] as $key => $concepto) {
 
                                 $subtotal += $_POST['importe'][$key];
                                 $iva      += $_POST['trasladoTotal'][$key];
+                                $ieps     += $_POST['iepsTotal'][$key];
                                 $retencion+= $_POST['retTotal'][$key];
                                 $total    += $_POST['total'][$key];
                             ?>
@@ -424,6 +430,10 @@
                                   <input type="hidden" name="trasladoPorcent[]" value="<?php echo $_POST['trasladoPorcent'][$key] ?>" id="trasladoPorcent" class="span12">
                               </td>
                               <td style="width: 66px;">
+                                <input type="text" name="iepsPorcent[]" value="<?php echo $_POST['iepsPorcent'][$key] ?>" id="iepsPorcent" class="span12">
+                                <input type="hidden" name="iepsTotal[]" value="<?php echo $_POST['iepsTotal'][$key] ?>" id="iepsTotal" class="span12">
+                              </td>
+                              <td style="width: 66px;">
                                   <input type="text" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
                               </td>
                               <td>
@@ -437,10 +447,11 @@
                               <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
                             </tr>
                           <?php  }} else {
-                               $subtotal = $iva = $total = $retencion = 0;
+                               $subtotal = $iva = $ieps = $total = $retencion = 0;
                                foreach ($orden['info'][0]->productos as $key => $prod) {
                                   $subtotal += $prod->importe;
                                   $iva      += $prod->iva;
+                                  $ieps     += $prod->ieps;
                                   $retencion+= $prod->retencion_iva;
                                   $total    += $prod->total;
 
@@ -538,6 +549,10 @@
                                      <input type="hidden" name="trasladoTotal[]" value="<?php echo $prod->iva ?>" id="trasladoTotal" class="span12">
                                      <input type="hidden" name="trasladoPorcent[]" value="<?php echo $prod->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
                                  </td>
+                                 <td style="width: 66px;">
+                                   <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
+                                   <input type="hidden" name="iepsTotal[]" value="<?php echo $prod->ieps ?>" id="iepsTotal" class="span12">
+                                 </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
                                      <input type="text" name="retTotal[]" value="<?php echo $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
                                  </td>
@@ -589,6 +604,11 @@
                     <td>IVA</td>
                     <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
                     <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', $iva); ?>">
+                  </tr>
+                  <tr>
+                    <td>IEPS</td>
+                    <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps', $ieps))?></td>
+                    <input type="hidden" name="totalIeps" id="totalIeps" value="<?php echo set_value('totalIeps', $ieps); ?>">
                   </tr>
                   <tr>
                     <td>RET.</td>

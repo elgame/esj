@@ -270,6 +270,7 @@ class productos extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('general/msgbox.js'),
+        array('libs/jquery.numeric.js'),
 				array('panel/almacen/agregar_familias.js'),
 			));
 

@@ -14,7 +14,7 @@
 
     eventCodigoBarras();
     eventBtnAddProducto();
-    eventIvaKeypress();
+    eventIepsKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
     eventBtnDelProducto();
@@ -267,7 +267,7 @@
               tipo: $('#tipoOrden').find('option:selected').val()
             },
             success: function (data) {
-              response(data)
+              response(data);
             }
           });
         } else {
@@ -284,6 +284,7 @@
             $fprecio       = $('#fprecio'),
             $fpresentacion = $('#fpresentacion'),
             $funidad       = $('#funidad'),
+            $fieps         = $('#fieps'),
             $ftraslado     = $('#ftraslado');
 
         $fconcepto.css("background-color", "#B6E7FF");
@@ -292,6 +293,7 @@
         $fcantidad.val('1');
         $fprecio.val(ui.item.item.precio_unitario);
         $funidad.val(ui.item.item.id_unidad);
+        $fieps.val(ui.item.item.ieps);
 
         var presentaciones = ui.item.item.presentaciones,
             html = '<option value=""></option>';
@@ -363,12 +365,10 @@
         noty({"text": 'Favor de Seleccionar una empresa.', "layout":"topRight", "type": 'error'});
       }
     });
-  }
+  };
 
-  var eventIvaKeypress = function () {
-    $('#ftraslado').on('keypress', function(event) {
-      event.preventDefault();
-
+  var eventIepsKeypress = function () {
+    $('#fieps').on('keypress', function(event) {
       if (event.which === 13) {
         $('#btnAddProd').click();
       }
@@ -384,6 +384,7 @@
           $fprecio     = $('#fprecio').css({'background-color': '#FFF'}),
           $fpresentacion = $('#fpresentacion'),
           $funidad     = $('#funidad'),
+          $fieps     = $('#fieps'),
           $ftraslado   = $('#ftraslado'),
 
           campos = [$fcantidad, $fprecio],
@@ -394,17 +395,17 @@
       // campos vacios entonces los pinta de amarillo y manda una alerta.
       for (var i in campos) {
         if (campos[i].val() === '') {
-          campos[i].css({'background-color': '#FDFC9A'})
+          campos[i].css({'background-color': '#FDFC9A'});
           error = true;
         } else {
-          campos[i].css({'background-color': '#FFF'})
+          campos[i].css({'background-color': '#FFF'});
         }
       }
 
       // Si el tipo de orden es producto entonces verifica si se selecciono
       // un producto, si no no deja agregar descripciones.
       if ($('#tipoOrden').find('option:selected').val() === 'p') {
-        if ($fconceptoId.val() == '') {
+        if ($fconceptoId.val() === '') {
           $fconcepto.css({'background-color': '#FDFC9A'});
           error = true;
         }
@@ -412,7 +413,7 @@
 
       // Valida si el campo cantida es 0.
       if ($fcantidad.val() === '0') {
-        $fcantidad.css({'background-color': '#FDFC9A'})
+        $fcantidad.css({'background-color': '#FDFC9A'});
         error = true;
       }
 
@@ -450,6 +451,7 @@
           'presentacion': selectHtml,
           'presentacionCantidad': $fpresentacion.find('option:selected').attr('data-cantidad') || '',
           'unidad': $funidad.find('option:selected').val(),
+          'ieps': $fieps.val(),
           'traslado': $ftraslado.find('option:selected').val(),
         };
 
@@ -475,7 +477,7 @@
 
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
-    $('#table-productos').on('keyup', '#cantidad, #valorUnitario', function(e) {
+    $('#table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent();
@@ -483,7 +485,7 @@
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotalProducto($tr);
       }
-    }).on('change', '#cantidad, #valorUnitario', function(event) {
+    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent', function(event) {
       var $tr = $(this).parent().parent();
       calculaTotalProducto($tr);
     });
@@ -658,6 +660,10 @@
                       '<input type="hidden" name="trasladoPorcent[]" value="'+producto.traslado+'" id="trasladoPorcent" class="span12">' +
                   '</td>' +
                   '<td style="width: 66px;">' +
+                      '<input type="text" name="iepsPorcent[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
+                      '<input type="hidden" name="iepsTotal[]" value="0" id="iepsTotal" class="span12">' +
+                  '</td>' +
+                  '<td style="width: 66px;">' +
                       '<input type="text" name="retTotal[]" value="0" id="retTotal" class="span12" readonly>' +
                   '</td>' +
                   '<td>' +
@@ -697,6 +703,7 @@
   function calculaTotal () {
     var total_importes = 0,
         total_ivas     = 0,
+        total_ieps     = 0,
         total_ret      = 0,
         total_orden    = 0;
 
@@ -713,12 +720,17 @@
      });
      total_ivas = util.trunc2Dec(total_ivas);
 
+     $('input#iepsTotal').each(function(i, e) {
+       total_ieps += parseFloat($(this).val());
+     });
+     total_ieps = util.trunc2Dec(total_ieps);
+
      $('input#retTotal').each(function(i, e) {
        total_ret += parseFloat($(this).val());
      });
      total_ret = util.trunc2Dec(total_ret);
 
-     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) - parseFloat(total_ret);
+     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_ret);
 
     $('#importe-format').html(util.darFormatoNum(total_subtotal));
      $('#totalImporte').val(total_subtotal);
@@ -726,13 +738,16 @@
      $('#traslado-format').html(util.darFormatoNum(total_ivas));
      $('#totalImpuestosTrasladados').val(total_ivas);
 
+     $('#ieps-format').html(util.darFormatoNum(total_ieps));
+     $('#totalIeps').val(total_ieps);
+
      $('#retencion-format').html(util.darFormatoNum(total_ret));
      $('#totalRetencion').val(total_ret);
 
      $('#total-format').html(util.darFormatoNum(total_orden));
      $('#totalOrden').val(total_orden);
 
-     $('#totalLetra').val(util.numeroToLetra.covertirNumLetras(total_orden.toString()))
+     $('#totalLetra').val(util.numeroToLetra.covertirNumLetras(total_orden.toString()));
   }
 
   // Realiza los calculos del producto: iva, importe total.
@@ -744,11 +759,14 @@
         $totalIva          = $tr.find('#trasladoTotal'), // Input hidden iva total
         $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
         $total             = $tr.find('#total'), // Input hidden iva total
+        $ieps             = $tr.find('#iepsPorcent'), // Input hidden iva total
+        $iepsTotal        = $tr.find('#iepsTotal'), // Input hidden iva total
 
         totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
         totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
+        totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100),
         totalRet     = util.trunc2Dec(totalImporte * 0.04),
-        total        = util.trunc2Dec(totalImporte + totalIva);
+        total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
 
     if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
       total -= parseFloat(totalRet);
@@ -756,6 +774,7 @@
     }
 
     $totalIva.val(totalIva);
+    $iepsTotal.val(totalIeps);
     $importe.parent().find('span').text(util.darFormatoNum(totalImporte));
     $importe.val(totalImporte);
     $total.val(total);
