@@ -173,6 +173,7 @@ class inventario_model extends privilegios_model{
 	public function getCProductosData()
   	{
 		$sql = '';
+	    $idsproveedores = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -181,15 +182,15 @@ class inventario_model extends privilegios_model{
 
 		$this->load->model('empresas_model');
 		$client_default = $this->empresas_model->getDefaultEmpresa();
-		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
-		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+		$_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+		$_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
 	    if($this->input->get('did_empresa') != ''){
 	      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+	      $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
-	    $idsproveedores = '';
 	    if(is_array($this->input->get('ids_productos')))
-	    	$idsproveedores = " WHERE p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
+	    	$idsproveedores .= " AND p.id_producto IN(".implode(',', $this->input->get('ids_productos')).")";
 
 	    $response = array();
     	$productos = $this->db->query("SELECT p.id_producto, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
@@ -344,9 +345,16 @@ class inventario_model extends privilegios_model{
 	public function getCProductoPdf(){
 		$res = $this->getCProductoData();
 
+		$this->load->model('empresas_model');
+		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+		if ($empresa['info']->logo !== '')
+		  $pdf->logo = $empresa['info']->logo;
+
+		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
@@ -464,9 +472,17 @@ class inventario_model extends privilegios_model{
 	public function getCSeguimientoPdf(){
 		$res = $this->getCSeguimientoData();
 
+		$this->load->model('empresas_model');
+		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+		
+		if ($empresa['info']->logo !== '')
+		  $pdf->logo = $empresa['info']->logo;
+
+		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte Seguimiento de Operaciones de Compra';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
@@ -821,17 +837,17 @@ class inventario_model extends privilegios_model{
 	{
 		$res = $this->getEPCData();
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+		$this->load->model('empresas_model');
+		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+		if ($empresa['info']->logo !== '')
+		  $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$pdf->titulo2 = 'Existencia por unidades';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
@@ -844,6 +860,7 @@ class inventario_model extends privilegios_model{
 		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
 
 		$familia = '';
+		$totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
 		$total_cargos = $total_abonos = $total_saldo = 0;
 		foreach($res as $key => $item){
 			$band_head = false;
@@ -860,17 +877,32 @@ class inventario_model extends privilegios_model{
 					$familia = $item->nombre;
 				}
 
-				$pdf->SetFont('Arial','B',8);
-				$pdf->SetTextColor(255,255,255);
-				$pdf->SetFillColor(160,160,160);
+				$pdf->SetFont('Arial','B',9);
+				// $pdf->SetTextColor(255,255,255);
+				// $pdf->SetFillColor(160,160,160);
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->Row($header, true);
+				$pdf->Row($header, false, false);
 			}
 
 			if ($familia <> $item->nombre)
 			{
+				if ($key > 0)
+				{
+					$pdf->SetX(6);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->SetMyLinks(array());
+					$pdf->Row(array('TOTAL',
+						String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+						String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+						String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+						String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+						), false, false);
+				}
+				$totaltes['familia'] = array(0,0,0,0);
+
 				$pdf->SetFont('Arial','B',11);
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
@@ -893,6 +925,16 @@ class inventario_model extends privilegios_model{
 
 			if($imprimir)
 			{
+				$totaltes['familia'][0] += $item->data_saldo['saldo'][2];
+				$totaltes['familia'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+				$totaltes['familia'][2] += $item->data['salida'][2];
+				$totaltes['familia'][3] += $item->data['saldo'][2];
+
+				$totaltes['general'][0] += $item->data_saldo['saldo'][2];
+				$totaltes['general'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+				$totaltes['general'][2] += $item->data['salida'][2];
+				$totaltes['general'][3] += $item->data['saldo'][2];
+
 				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
 					String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
 					String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
@@ -903,13 +945,32 @@ class inventario_model extends privilegios_model{
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->SetMyLinks(array(base_url('panel/inventario/promedio_pdf?id_producto='.$item->id_producto.'&ffecha1='.
-									$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
+				$pdf->SetMyLinks(array(base_url('panel/inventario/promedio_pdf?id_producto='.$item->id_producto.'&id_empresa='.$empresa['info']->id_empresa.
+									'&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
 				$pdf->Row($datos, false);
 			}
 
 			$pdf->SetMyLinks(array());
 		}
+
+		$pdf->SetX(6);
+		$pdf->SetAligns($aligns);
+		$pdf->SetWidths($widths);
+		$pdf->SetMyLinks(array());
+		$pdf->Row(array('TOTAL',
+			String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+			String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+			String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+			String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+			), false, false);
+
+		$pdf->SetXY(6, $pdf->GetY()+5);
+		$pdf->Row(array('TOTAL GENERAL',
+			String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+			String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+			String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+			String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+			), false);
 
 		$pdf->Output('epc.pdf', 'I');
 	}
@@ -1028,9 +1089,18 @@ class inventario_model extends privilegios_model{
 
 		$res = $this->promedioData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2']);
 
+		$this->load->model('empresas_model');
+		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('id_empresa'));
+
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+		
+		if ($empresa['info']->logo !== '')
+		  $pdf->logo = $empresa['info']->logo;
+
+		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de inventario costo promedio';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();

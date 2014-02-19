@@ -16,7 +16,10 @@ class inventario extends MY_Controller {
     'inventario/promedio_pdf/',
     'inventario/eclasif_pdf/',
 
+    'inventario/ajax_get_familias/',
+
     'cuentas_pagar/saldos_xls/',
+    
   );
 
 
@@ -294,6 +297,13 @@ class inventario extends MY_Controller {
 
   }
 
+
+  public function ajax_get_familias()
+  {
+    $this->load->model('productos_model');
+    $params = $this->productos_model->getFamilias(false, 'p');
+    echo json_encode($params);
+  }
 
   /**
    * Configura los metodos de agregar y modificar

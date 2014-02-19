@@ -7,6 +7,7 @@ $(function(){
     select: function( event, ui ) {
       $("#did_empresa").val(ui.item.id);
       $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      cargaListaFamlias(ui.item.id);
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -98,3 +99,14 @@ $(function(){
   });
 
 });
+
+function cargaListaFamlias ($empresaId) {
+  $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId}, 
+    function(data){
+      var html = '';
+      for (var i in data.familias) {
+        html += '<li><label><input type="checkbox" name="ffamilias[]" value="'+data.familias[i].id_familia+'" checked> '+data.familias[i].nombre+'</label></li>';
+      };
+      $("#lista_familias").html(html);
+  });
+}
