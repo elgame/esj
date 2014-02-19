@@ -41,7 +41,7 @@ class productos_model extends CI_Model {
 				".$sql."
 				ORDER BY nombre ASC
 				";
-		
+
 		if($paginados){
 			$query = BDUtil::pagination($str_query, $params, true);
 			$res = $this->db->query($query['query']);
@@ -184,7 +184,7 @@ class productos_model extends CI_Model {
 				$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 		}
 		$familia = array();
-		
+
 		//Filtros para buscar
 		if (isset($_GET['fid_familia']))
 		{
@@ -241,7 +241,8 @@ class productos_model extends CI_Model {
 				'codigo'     => $this->input->post('fcodigo'),
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-				'ubicacion'  => $this->input->post('ubicacion'),
+        'ubicacion'  => $this->input->post('ubicacion'),
+				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
 				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}
@@ -270,7 +271,8 @@ class productos_model extends CI_Model {
 				'codigo'     => $this->input->post('fcodigo'),
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-				'ubicacion'  => $this->input->post('ubicacion'),
+        'ubicacion'  => $this->input->post('ubicacion'),
+				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
 				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);
 		}
@@ -283,7 +285,7 @@ class productos_model extends CI_Model {
 	}
 
 	/**
-	 * Agrega o actualiza las presentaciones 
+	 * Agrega o actualiza las presentaciones
 	 * @param [type] $id_producto [description]
 	 * @param [type] $data        [description]
 	 */
@@ -327,8 +329,8 @@ class productos_model extends CI_Model {
 	{
 		$id_producto = (isset($_GET['id']))? $_GET['id']: $id_producto;
 
-		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, 
-									ubicacion, precio_promedio, status, cuenta_cpi" )
+		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();
@@ -380,7 +382,7 @@ class productos_model extends CI_Model {
 			if($params['result_page'] % $params['result_items_per_page'] == 0)
 				$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 		}
-		
+
 		//Filtros para buscar
 		// $_GET['fstatus'] = (isset($_GET['fstatus'])? $_GET['fstatus']: 'ac');
 		// $sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";

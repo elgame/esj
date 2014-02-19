@@ -270,6 +270,7 @@ class productos extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('general/msgbox.js'),
+        array('libs/jquery.numeric.js'),
 				array('panel/almacen/agregar_familias.js'),
 			));
 
@@ -406,6 +407,9 @@ class productos extends MY_Controller {
 			array('field' => 'ubicacion',
 						'label' => 'Ubicacion',
 						'rules' => 'max_length[70]'),
+      array('field' => 'fieps',
+            'label' => 'IEPS',
+            'rules' => 'numeric'),
 			array('field' => 'cuenta_contpaq',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'max_length[12]'),
