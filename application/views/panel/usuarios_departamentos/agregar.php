@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						<a href="<?php echo base_url('panel/usuarios_puestos/'); ?>">Puestos</a> <span class="divider">/</span>
+						<a href="<?php echo base_url('panel/usuarios_departamentos/'); ?>">Departamentos</a> <span class="divider">/</span>
 					</li>
 					<li>Agregar</li>
 				</ul>
@@ -17,13 +17,13 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-plus"></i> Agregar puesto</h2>
+						<h2><i class="icon-plus"></i> Agregar departamento</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/usuarios_puestos/agregar'); ?>" method="post" class="form-horizontal">
+						<form action="<?php echo base_url('panel/usuarios_departamentos/agregar'); ?>" method="post" class="form-horizontal">
 						  <fieldset>
 								<legend></legend>
 
@@ -44,17 +44,9 @@
 								  </div>
 								</div>
 
-								<div class="control-group">
-								  <label class="control-label" for="fabreviatura">Abreviatura </label>
-								  <div class="controls">
-										<input type="text" name="fabreviatura" id="fabreviatura" class="span6" value="<?php echo set_value('fabreviatura'); ?>"
-											maxlength="3" placeholder="TR, XD">
-								  </div>
-								</div>
-
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>
-								  <a href="<?php echo base_url('panel/usuarios_puestos/'); ?>" class="btn">Cancelar</a>
+								  <a href="<?php echo base_url('panel/usuarios_departamentos/'); ?>" class="btn">Cancelar</a>
 								</div>
 						  </fieldset>
 						</form>

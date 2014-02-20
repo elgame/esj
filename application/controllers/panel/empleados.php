@@ -8,6 +8,7 @@ class empleados extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
     'empleados/ajax_get_usuarios/',
+    'empleados/ajax_get_depa_pues/',
   );
 
 	public function _remap($method){
@@ -84,10 +85,12 @@ class empleados extends MY_Controller {
 		}
 
 		$this->load->model('usuarios_puestos_model');
-		$this->load->model('usuarios_model');
+		$this->load->model('usuarios_departamentos_model');
+		$this->load->model('empresas_model');
+		$params['empresa']       = $this->empresas_model->getDefaultEmpresa();
+		$_GET['did_empresa']     = $params['empresa']->id_empresa;
 		$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false);
-		$params['departamentos'] = $this->usuarios_model->departamentos();
-
+		$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -134,11 +137,14 @@ class empleados extends MY_Controller {
 				if($res_mdl['error'] == FALSE)
 					redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
+			
+			$this->load->model('usuarios_puestos_model');
+			$this->load->model('usuarios_departamentos_model');
 
 			$params['data'] = $this->usuarios_model->get_usuario_info();
-			$this->load->model('usuarios_puestos_model');
-			$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
-			$params['departamentos'] = $this->usuarios_model->departamentos();
+			$_GET['did_empresa']     = $params['data']['info'][0]->id_empresa;
+			$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false);
+			$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -194,6 +200,15 @@ class empleados extends MY_Controller {
    {
       $this->load->model('usuarios_model');
       echo json_encode($this->usuarios_model->getUsuariosAjax());
+   }
+
+   public function ajax_get_depa_pues()
+   {
+	$this->load->model('usuarios_puestos_model');
+	$this->load->model('usuarios_departamentos_model');
+	$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false)['puestos'];
+	$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+	echo json_encode($params);
    }
 
 

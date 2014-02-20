@@ -8,7 +8,7 @@
 						<a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
 					</li>
 					<li>
-						Puestos
+						Departamentos
 					</li>
 				</ul>
 			</div>
@@ -16,13 +16,13 @@
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-briefcase"></i> Puestos de trabajo</h2>
+						<h2><i class="icon-briefcase"></i> Departamentos de trabajo</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/usuarios_puestos/'); ?>" method="get" class="form-search">
+						<form action="<?php echo base_url('panel/usuarios_departamentos/'); ?>" method="get" class="form-search">
 							<fieldset>
 								<legend>Filtros</legend>
 
@@ -42,7 +42,7 @@
 						</form>
 
 						<?php 
-						echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/agregar/', array(
+						echo $this->usuarios_model->getLinkPrivSm('usuarios_departamentos/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
 										'attrs' => array('style' => 'margin-bottom: 10px;') )
@@ -52,7 +52,6 @@
 						  <thead>
 							  <tr>
 						  		<th>Nombre</th>
-								  <th>Abreviatura</th>
 								  <th>Empresa</th>
 								  <th>Status</th>
 								  <th>Opciones</th>
@@ -62,7 +61,6 @@
 						<?php foreach($puestos['puestos'] as $puesto){ ?>
 							<tr>
 								<td><?php echo $puesto->nombre; ?></td>
-								<td><?php echo $puesto->abreviatura; ?></td>
 								<td><?php echo $puesto->nombre_fiscal; ?></td>
 								<td>
 									<?php
@@ -78,21 +76,21 @@
 								</td>
 								<td class="center">
 										<?php 
-										echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/modificar/', array(
-												'params'   => 'id='.$puesto->id_puesto,
+										echo $this->usuarios_model->getLinkPrivSm('usuarios_departamentos/modificar/', array(
+												'params'   => 'id='.$puesto->id_departamento,
 												'btn_type' => 'btn-success')
 										);
 										if ($puesto->status == 't') {
-											echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/eliminar/', array(
-													'params'   => 'id='.$puesto->id_puesto,
+											echo $this->usuarios_model->getLinkPrivSm('usuarios_departamentos/eliminar/', array(
+													'params'   => 'id='.$puesto->id_departamento,
 													'btn_type' => 'btn-danger',
-													'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el puesto?', 'usuarios_puestos', this); return false;"))
+													'attrs' => array('onclick' => "msb.confirm('Estas seguro de eliminar el puesto?', 'usuarios_departamentos', this); return false;"))
 											);
 										}else{
-											echo $this->usuarios_model->getLinkPrivSm('usuarios_puestos/activar/', array(
-													'params'   => 'id='.$puesto->id_puesto,
+											echo $this->usuarios_model->getLinkPrivSm('usuarios_departamentos/activar/', array(
+													'params'   => 'id='.$puesto->id_departamento,
 													'btn_type' => 'btn-danger',
-													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el puesto?', 'usuarios_puestos', this); return false;"))
+													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el puesto?', 'usuarios_departamentos', this); return false;"))
 											);
 										}
 										

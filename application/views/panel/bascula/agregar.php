@@ -16,7 +16,7 @@
           'k_tara'     => '',
           'cajas_pres' => '',
           'pagar'      => '',
-          'cajas'      => '',
+          'cajas'      => array('',''),
           );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';

@@ -32,7 +32,7 @@
                 <div class="control-group">
                   <label class="control-label" for="fproducto">Familias</label>
                   <div class="controls" style="height:150px;overflow-y: scroll;background-color:#eee;">
-                    <ul style="list-style: none;">
+                    <ul id="lista_familias" style="list-style: none;">
                   <?php foreach ($data['familias'] as $key => $value)
                   {
                   ?>

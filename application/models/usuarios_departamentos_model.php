@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class usuarios_puestos_model extends CI_Model {
+class usuarios_departamentos_model extends CI_Model {
 
 
 	function __construct()
@@ -35,8 +35,8 @@ class usuarios_puestos_model extends CI_Model {
 		if($this->input->get('did_empresa') != '')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.id_empresa='".$this->input->get('did_empresa')."'";
 		
-		$query['query'] = "SELECT p.id_puesto, p.nombre, p.abreviatura, p.status, e.id_empresa, e.nombre_fiscal
-					FROM usuarios_puestos p 
+		$query['query'] = "SELECT p.id_departamento, p.nombre, p.status, e.id_empresa, e.nombre_fiscal
+					FROM usuarios_departamento p 
 						INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
 					".$sql."
 					ORDER BY p.nombre ASC";
@@ -69,12 +69,11 @@ class usuarios_puestos_model extends CI_Model {
 		{
 			$data = array(
 					'nombre'      => $this->input->post('fnombre'),
-					'abreviatura' => $this->input->post('fabreviatura'),
 					'id_empresa'  => $this->input->post('did_empresa'),
 				);
 		}
 
-		$this->db->insert('usuarios_puestos', $data);
+		$this->db->insert('usuarios_departamento', $data);
 		// $id_camion = $this->db->insert_id('proveedores', 'id_camion');
 
 		return array('error' => FALSE);
@@ -86,19 +85,18 @@ class usuarios_puestos_model extends CI_Model {
 	 * @param  [type] $data       [description]
 	 * @return [type]             [description]
 	 */
-	public function updatePuesto($id_puesto, $data=NULL)
+	public function updatePuesto($id_departamento, $data=NULL)
 	{
 
 		if ($data==NULL)
 		{
 			$data = array(
 					'nombre'      => $this->input->post('fnombre'),
-					'abreviatura' => $this->input->post('fabreviatura'),
 					'id_empresa'  => $this->input->post('did_empresa'),
 				);
 		}
 
-		$this->db->update('usuarios_puestos', $data, array('id_puesto' => $id_puesto));
+		$this->db->update('usuarios_departamento', $data, array('id_departamento' => $id_departamento));
 
 		return array('error' => FALSE);
 	}
@@ -109,14 +107,14 @@ class usuarios_puestos_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getPuestoInfo($id_puesto=FALSE, $basic_info=FALSE)
+	public function getPuestoInfo($id_departamento=FALSE, $basic_info=FALSE)
 	{
-		$id_puesto = (isset($_GET['id']))? $_GET['id']: $id_puesto;
+		$id_departamento = (isset($_GET['id']))? $_GET['id']: $id_departamento;
 
-		$sql_res = $this->db->select("up.id_puesto, up.nombre, up.abreviatura, up.status, e.id_empresa, e.nombre_fiscal" )
-												->from("usuarios_puestos AS up")
+		$sql_res = $this->db->select("up.id_departamento, up.nombre, up.status, e.id_empresa, e.nombre_fiscal" )
+												->from("usuarios_departamento AS up")
 												->join("empresas AS e", "up.id_empresa = e.id_empresa", "inner")
-												->where("up.id_puesto", $id_puesto)
+												->where("up.id_departamento", $id_departamento)
 												->get();
 		$data['info'] = array();
 
@@ -135,7 +133,7 @@ class usuarios_puestos_model extends CI_Model {
 	 * Obtiene el listado de camiones para usar ajax
 	 * @param term. termino escrito en la caja de texto, busca en las placas, modelo, marca
 	 */
-	public function getPuestosAjax(){
+	public function getDepartamentoAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
@@ -143,8 +141,8 @@ class usuarios_puestos_model extends CI_Model {
 			$sql = " AND id_empresa = ".$this->input->get('id_empresa');
 
 		$res = $this->db->query("
-				SELECT id_puesto, nombre, abreviatura, status
-				FROM camiones
+				SELECT id_puesto, nombre, status
+				FROM usuarios_departamento
 				WHERE status = 't' ".$sql."
 				ORDER BY nombre ASC
 				LIMIT 20");

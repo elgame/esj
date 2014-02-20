@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            <a href="<?php echo base_url('panel/usuarios_puestos/'); ?>">Puestos</a> <span class="divider">/</span>
+            <a href="<?php echo base_url('panel/usuarios_departamentos/'); ?>">Departamentos</a> <span class="divider">/</span>
           </li>
           <li>Modificar</li>
         </ul>
@@ -17,13 +17,13 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-edit"></i> Modificar puesto</h2>
+            <h2><i class="icon-edit"></i> Modificar departamento</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/usuarios_puestos/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/usuarios_departamentos/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal">
               <fieldset>
                 <legend></legend>
                 <?php
@@ -43,21 +43,13 @@
                   <label class="control-label" for="fnombre">Nombre </label>
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="30"
-                    value="<?php echo isset($data->nombre)?$data->nombre:''; ?>" required autofocus placeholder="Tractorista, XDia">
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label" for="fabreviatura">Modelo </label>
-                  <div class="controls">
-                    <input type="text" name="fabreviatura" id="fabreviatura" class="span6" value="<?php echo isset($data->abreviatura)?$data->abreviatura:''; ?>"
-                      maxlength="3" placeholder="TR, XD">
+                    value="<?php echo isset($data->nombre)?$data->nombre:''; ?>" required placeholder="Administracion, etc">
                   </div>
                 </div>
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
-                  <a href="<?php echo base_url('panel/usuarios_puestos/'); ?>" class="btn">Cancelar</a>
+                  <a href="<?php echo base_url('panel/usuarios_departamentos/'); ?>" class="btn">Cancelar</a>
                 </div>
               </fieldset>
             </form>

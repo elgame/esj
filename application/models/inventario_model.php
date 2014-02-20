@@ -67,18 +67,17 @@ class inventario_model extends privilegios_model{
 	public function getCProveedorPdf(){
 		$res = $this->getCProveedorData();
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+	    $this->load->model('empresas_model');
+	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+	    if ($empresa['info']->logo !== '')
+	      $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-
+	    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Proveedor';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
@@ -647,17 +646,17 @@ class inventario_model extends privilegios_model{
 	public function getEPUPdf(){
 		$res = $this->getEPUData();
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+	    $this->load->model('empresas_model');
+	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+	    if ($empresa['info']->logo !== '')
+	      $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+	    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Existencia por unidades';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
@@ -669,6 +668,7 @@ class inventario_model extends privilegios_model{
 		$header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
 
 		$familia = '';
+		$totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
 		$total_cargos = $total_abonos = $total_saldo = 0;
 		foreach($res as $key => $item){
 			$band_head = false;
@@ -696,6 +696,20 @@ class inventario_model extends privilegios_model{
 
 			if ($familia <> $item->nombre)
 			{
+				if($key > 0){
+					$pdf->SetFont('Arial','B',8);
+					$pdf->SetX(6);
+					$pdf->SetAligns($aligns);
+					$pdf->SetWidths($widths);
+					$pdf->Row(array('',
+						String::formatoNumero($totales['familia'][0], 2, '', false),
+						String::formatoNumero($totales['familia'][1], 2, '', false),
+						String::formatoNumero($totales['familia'][2], 2, '', false),
+						String::formatoNumero($totales['familia'][3], 2, '', false),
+						), true, false);
+				}
+				$totales['familia'] = array(0,0,0,0);
+
 				$pdf->SetFont('Arial','B',11);
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
@@ -719,6 +733,16 @@ class inventario_model extends privilegios_model{
 
 			if($imprimir)
 			{
+				$totales['familia'][0] += $item->saldo_anterior;
+				$totales['familia'][1] += $item->entradas;
+				$totales['familia'][2] += $item->salidas;
+				$totales['familia'][3] += $existencia;
+
+				$totales['general'][0] += $item->saldo_anterior;
+				$totales['general'][1] += $item->entradas;
+				$totales['general'][2] += $item->salidas;
+				$totales['general'][3] += $existencia;
+
 				$datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
 					String::formatoNumero($item->saldo_anterior, 2, '', false),
 					String::formatoNumero($item->entradas, 2, '', false),
@@ -732,6 +756,25 @@ class inventario_model extends privilegios_model{
 				$pdf->Row($datos, false);
 			}
 		}
+
+		$pdf->SetFont('Arial','B',8);
+		$pdf->SetX(6);
+		$pdf->SetAligns($aligns);
+		$pdf->SetWidths($widths);
+		$pdf->Row(array('',
+			String::formatoNumero($totales['familia'][0], 2, '', false),
+			String::formatoNumero($totales['familia'][1], 2, '', false),
+			String::formatoNumero($totales['familia'][2], 2, '', false),
+			String::formatoNumero($totales['familia'][3], 2, '', false),
+			), true, false);
+
+		$pdf->SetXY(6, $pdf->GetY()+5);
+		$pdf->Row(array('GENERAL',
+			String::formatoNumero($totales['general'][0], 2, '', false),
+			String::formatoNumero($totales['general'][1], 2, '', false),
+			String::formatoNumero($totales['general'][2], 2, '', false),
+			String::formatoNumero($totales['general'][3], 2, '', false),
+			), false, true);
 
 		$pdf->Output('epu.pdf', 'I');
 	}

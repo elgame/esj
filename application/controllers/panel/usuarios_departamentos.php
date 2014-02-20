@@ -1,12 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class usuarios_puestos extends MY_Controller {
+class usuarios_departamentos extends MY_Controller {
 
 	/**
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('usuarios_puestos/ajax_get_puestos/');
+	private $excepcion_privilegio = array('usuarios_departamentos/ajax_get_departamentos/');
 
 	public function _remap($method){
 
@@ -34,15 +34,15 @@ class usuarios_puestos extends MY_Controller {
 			'titulo' => 'Administración de puestos'
 		);
 
-		$this->load->model('usuarios_puestos_model');
-		$params['puestos'] = $this->usuarios_puestos_model->getPuestos();
+		$this->load->model('usuarios_departamentos_model');
+		$params['puestos'] = $this->usuarios_departamentos_model->getPuestos();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/usuarios_puestos/admin', $params);
+		$this->load->view('panel/usuarios_departamentos/admin', $params);
 		$this->load->view('panel/footer');
 	}
 
@@ -74,11 +74,11 @@ class usuarios_puestos extends MY_Controller {
 		}
 		else
 		{
-			$this->load->model('usuarios_puestos_model');
-			$res_mdl = $this->usuarios_puestos_model->addPuesto();
+			$this->load->model('usuarios_departamentos_model');
+			$res_mdl = $this->usuarios_departamentos_model->addPuesto();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/usuarios_puestos/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/usuarios_departamentos/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
@@ -88,7 +88,7 @@ class usuarios_puestos extends MY_Controller {
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/usuarios_puestos/agregar', $params);
+		$this->load->view('panel/usuarios_departamentos/agregar', $params);
 		$this->load->view('panel/footer');
 	}
 
@@ -108,7 +108,7 @@ class usuarios_puestos extends MY_Controller {
 				array('panel/usuarios/usuarios_puestos.js')
 			));
 
-			$this->load->model('usuarios_puestos_model');
+			$this->load->model('usuarios_departamentos_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
@@ -122,24 +122,24 @@ class usuarios_puestos extends MY_Controller {
 			}
 			else
 			{
-				$res_mdl = $this->usuarios_puestos_model->updatePuesto($this->input->get('id'));
+				$res_mdl = $this->usuarios_departamentos_model->updatePuesto($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
-			$params['data'] = $this->usuarios_puestos_model->getPuestoInfo();
+			$params['data'] = $this->usuarios_departamentos_model->getPuestoInfo();
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
 			$this->load->view('panel/header', $params);
 			$this->load->view('panel/general/menu', $params);
-			$this->load->view('panel/usuarios_puestos/modificar', $params);
+			$this->load->view('panel/usuarios_departamentos/modificar', $params);
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -150,13 +150,13 @@ class usuarios_puestos extends MY_Controller {
 	{
 		if (isset($_GET['id']))
 		{
-			$this->load->model('usuarios_puestos_model');
-			$res_mdl = $this->usuarios_puestos_model->updatePuesto( $this->input->get('id'), array('status' => 'f') );
+			$this->load->model('usuarios_departamentos_model');
+			$res_mdl = $this->usuarios_departamentos_model->updatePuesto( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -167,21 +167,21 @@ class usuarios_puestos extends MY_Controller {
 	{
 		if (isset($_GET['id']))
 		{
-			$this->load->model('usuarios_puestos_model');
-			$res_mdl = $this->usuarios_puestos_model->updatePuesto( $this->input->get('id'), array('status' => 't') );
+			$this->load->model('usuarios_departamentos_model');
+			$res_mdl = $this->usuarios_departamentos_model->updatePuesto( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/usuarios_puestos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios_departamentos/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
 	 * Obtiene lostado de camiones para el autocomplete, ajax
 	 */
-	public function ajax_get_puestos(){
-		$this->load->model('usuarios_puestos_model');
-		$params = $this->usuarios_puestos_model->getPuestosAjax();
+	public function ajax_get_departamentos(){
+		$this->load->model('usuarios_departamentos_model');
+		$params = $this->usuarios_departamentos_model->getDepartamentoAjax();
 
 		echo json_encode($params);
 	}
@@ -204,9 +204,6 @@ class usuarios_puestos extends MY_Controller {
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
 						'rules' => 'required|max_length[30]'),
-			array('field' => 'fabreviatura',
-						'label' => 'Abreviatura',
-						'rules' => 'max_length[3]'),
 		);
 
 		$this->form_validation->set_rules($rules);
@@ -225,19 +222,19 @@ class usuarios_puestos extends MY_Controller {
 				$icono = 'error';
 				break;
 			case 3:
-				$txt = 'El puesto se agregó correctamente.';
+				$txt = 'El departamento se agregó correctamente.';
 				$icono = 'success';
 				break;
 			case 4:
-				$txt = 'El puesto se modificó correctamente.';
+				$txt = 'El departamento se modificó correctamente.';
 				$icono = 'success';
 				break;
 			case 5:
-				$txt = 'El puesto se eliminó correctamente.';
+				$txt = 'El departamento se eliminó correctamente.';
 				$icono = 'success';
 				break;
 			case 6:
-				$txt = 'El puesto se activó correctamente.';
+				$txt = 'El departamento se activó correctamente.';
 				$icono = 'success';
 				break;
 		}

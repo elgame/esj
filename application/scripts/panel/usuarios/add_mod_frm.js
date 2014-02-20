@@ -20,6 +20,7 @@ $(function(){
 		select: function( event, ui ) {
 		  $("#did_empresa").val(ui.item.id);
 		  $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+		  cargaDepaPues();
 		}
 	}).keydown(function(e){
 		if (e.which === 8) {
@@ -34,6 +35,13 @@ $(function(){
 	campos_requeridos($("#festa_asegurado"));
 
 });
+
+function cargaDepaPues () {
+	$.getJSON(base_url+'panel/empleados/ajax_get_depa_pues/', {'did_empresa': $("#did_empresa").val()}, 
+		function(data){
+			console.log(data);
+	});
+}
 
 function campos_requeridos ($this) {
 	if($this.is(':checked'))

@@ -1626,6 +1626,11 @@ class facturacion_model extends privilegios_model{
         $sql .= " AND f.id_cliente = " . $this->input->get('fid_cliente');
       }
 
+      if ($this->input->get('did_empresa') != '')
+      {
+        $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+      }
+
       // filtra por pagadas
       if (isset($_GET['dpagadas']))
       {
@@ -1784,10 +1789,18 @@ class facturacion_model extends privilegios_model{
       {
         $facturas = $this->getRPF();
 
+        $this->load->model('empresas_model');
+        $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+        
         $this->load->library('mypdf');
         // Creación del objeto de la clase heredada
         $pdf = new MYpdf('P', 'mm', 'Letter');
         $pdf->show_head = true;
+
+        if ($empresa['info']->logo !== '')
+          $pdf->logo = $empresa['info']->logo;
+
+        $pdf->titulo1 = $empresa['info']->nombre_fiscal;
         $pdf->titulo2 = "Reporte Productos Facturados";
 
         $pdf->titulo3 = "{$_GET['dproducto']} \n";
@@ -1963,7 +1976,7 @@ class facturacion_model extends privilegios_model{
           $total_impuesto += $factura->importe_iva;
           $total_total += $factura->total;
 
-          $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura);
+          $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura.'&did_empresa='.$empresa['info']->id_empresa);
           $datos = array(String::fechaATexto($factura->fecha, '/c'),
                   $factura->serie,
                   $factura->folio,
@@ -2029,9 +2042,17 @@ class facturacion_model extends privilegios_model{
     public function getRVentasDetallePdf(){
       $res = $this->getRVentasDetalleData();
 
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+      
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = 'Detalle de venta';
       // $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');

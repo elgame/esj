@@ -231,7 +231,7 @@
                     <label class="control-label" for="fdepartamente">Departamento </label>
                     <div class="controls">
                     <select name="fdepartamente" id="fdepartamente">
-                    <?php foreach ($departamentos as $key => $value)
+                    <?php foreach ($departamentos['puestos'] as $key => $value)
                     {
                     ?>
                       <option value="<?php echo $value->id_departamento ?>" 
