@@ -102,6 +102,14 @@
                         maxlength="45" placeholder="MEXICO">
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fempresa">Empresa </label>
+                    <div class="controls">
+                    <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa['info']->nombre_fiscal); ?>" placeholder="Nombre">
+                    <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa['info']->id_empresa); ?>" id="did_empresa">
+                    </div>
+                  </div>
                 </div> <!--/span-->
 
                 <div class="span5">
@@ -170,6 +178,27 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="fmetodo_pago">Metodo de Pago </label>
+                    <div class="controls">
+                      <select name="fmetodo_pago" class="span9" id="fmetodo_pago">
+                        <option value="no identificado" <?php echo $data->metodo_pago === 'no identificado' ? 'selected' : ''?>>No identificado</option>
+                        <option value="efectivo" <?php echo $data->metodo_pago === 'efectivo' ? 'selected' : ''?>>Efectivo</option>
+                        <option value="cheque" <?php echo $data->metodo_pago === 'cheque' ? 'selected' : ''?>>Cheque</option>
+                        <option value="tarjeta" <?php echo $data->metodo_pago === 'tarjeta' ? 'selected' : ''?>>Tarjeta</option>
+                        <option value="transferencia" <?php echo $data->metodo_pago === 'transferencia' ? 'selected' : ''?>>Transferencia</option>
+                        <option value="deposito" <?php echo $data->metodo_pago === 'deposito' ? 'selected' : ''?>>Deposito</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fdigitos">Ultimos 4 digitos </label>
+                    <div class="controls">
+                      <input type="text" name="fdigitos" id="fdigitos" class="span12" value="<?php echo set_value('fdigitos', $data->ultimos_digitos); ?>" placeholder="1234">
+                    </div>
+                  </div>
+
                 </div> <!--/span-->
 
                 <div class="clearfix"></div>
@@ -185,10 +214,10 @@
               $ul1 = $ul2 = '';
               foreach ($documentos['documentos'] as $key => $value) {
                 if($key % 2 == 0)
-                  $ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+                  $ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
                             '.set_checkbox('documentos[]', $value->id_documento, (array_search($value->id_documento, $docus_select)!==false? true: false)).'> '.$value->nombre.'</label></li>';
                 else
-                  $ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+                  $ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
                             '.set_checkbox('documentos[]', $value->id_documento, (array_search($value->id_documento, $docus_select)!==false? true: false)).'> '.$value->nombre.'</label></li>';
               }
               ?>

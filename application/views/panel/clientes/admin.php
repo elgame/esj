@@ -28,7 +28,11 @@
 
 								<label for="fnombre">Buscar</label>
 								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
-									class="input-large search-query" placeholder="GAS MENGUC SA DE CV, 5 DE MAYO" autofocus> |
+									class="input-large search-query" placeholder="GAS MENGUC SA DE CV, 5 DE MAYO" autofocus>
+
+                <label class="control-label" for="fempresa">Empresa </label>
+                <input type="text" name="fempresa" id="fempresa" class="input-xlarge search-query" value="<?php echo set_value_get('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
+                <input type="hidden" name="did_empresa" value="<?php echo set_value_get('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">|
 
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">

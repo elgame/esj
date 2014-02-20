@@ -33,8 +33,11 @@ class Usuarios_model extends privilegios_model {
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? ' AND': ' AND')." u.status='".$this->input->get('fstatus')."'";
 
+    if($this->input->get('did_empresa') != '')
+      $sql .= ' AND u.id_empresa = ' . $this->input->get('did_empresa');
+
 		$query = BDUtil::pagination("
-				SELECT u.id AS id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.usuario, u.email, u.tipo, 
+				SELECT u.id AS id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.usuario, u.email, u.tipo,
 					u.status, u.rfc, u.cuenta_banco, u.no_seguro
 				FROM usuarios u
 				".$sql."
@@ -59,7 +62,6 @@ class Usuarios_model extends privilegios_model {
  	*/
 	public function setRegistro($data=NULL)
 	{
-
 		if ($data == NULL)
 		{
 			$data = array(
@@ -196,7 +198,7 @@ class Usuarios_model extends privilegios_model {
 		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
-						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi, 
+						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro,
 						u.id_departamente" )

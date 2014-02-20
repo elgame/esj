@@ -44,6 +44,7 @@
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
+          cargaSemanas();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -341,9 +342,9 @@
 
     // Total complemento.
     totalComplemento = parseFloat(totalComplemento) +
-                       parseFloat(ttotal_nomina_cheques) + 
+                       parseFloat(ttotal_nomina_cheques) +
                        parseFloat($bonos.val()) +
-                       parseFloat($otros.val()) + 
+                       parseFloat($otros.val()) +
                        parseFloat($domingo.val()) -
                        parseFloat($totalNomina.val()) -
                        parseFloat($infonavit.val())-
@@ -543,6 +544,18 @@
     })
     .fail(function() {
       console.log("error");
+    });
+  };
+
+  var cargaSemanas = function () {
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'did_empresa': $("#empresaId").val()},
+      function(data){
+        var html = '', i;
+        console.log(data);
+        for (i in data) {
+          html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
+        }
+        $('#semanas').html(html);
     });
   };
 

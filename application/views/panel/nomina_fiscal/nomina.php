@@ -27,6 +27,10 @@
                 <label for="anio">Año</label>
                 <input type="number" name="anio" class="search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
 
+                <label for="empresa">Empresa</label>
+                <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
+                <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
+
                 <label for="ffecha1" style="margin-top: 15px;">Semana</label>
                 <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {
@@ -35,17 +39,13 @@
                       }
                     ?>
                     <option value="<?php echo $semana['semana'] ?>" <?php echo $semana['semana'] == $numSemanaSelected ? 'selected' : '' ?>><?php echo "{$semana['semana']} - Del {$semana['fecha_inicio']} Al {$semana['fecha_final']}" ?></option>
-                  <?php } 
+                  <?php }
                     $_GET['anio'] = isset($_GET['anio']) ? $_GET['anio'] : date("Y");
                     $_GET['semana'] = isset($_GET['semana']) ? $_GET['semana'] : $semana2['semana'];
                     $_GET['empresaId'] = isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa;
                     $_GET['empresa'] = isset($_GET['empresa']) ? $_GET['empresa'] : $empresaDefault->nombre_fiscal;
                   ?>
                 </select>
-
-                <label for="empresa">Empresa</label>
-                <input type="text" name="empresa" class="input-xlarge search-query" id="empresa" value="<?php echo set_value_get('empresa', $empresaDefault->nombre_fiscal); ?>" size="73">
-                <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
                <!--  <label for="ffecha1" style="margin-top: 15px;">Puesto</label>
                   <select name="puestoId" class="input-large">
@@ -361,7 +361,7 @@
 
                         <!-- Total Nomina -->
                         <td style="<?php echo $bgColor ?>">
-                          <span class="total-nomina-span"><?php 
+                          <span class="total-nomina-span"><?php
                             $ttotal_nomina = $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
                             $ttotal_nomina_cheques = 0;
                             if($e->cuenta_banco == ''){
@@ -389,19 +389,19 @@
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <!-- total por fuera -->
-                        <?php 
-                          
+                        <?php
+
                             $totalComplementoEmpleado = $totalComplementoEmpleado +
                                                   $ttotal_nomina_cheques +
                                                   $e->bonos +
-                                                  $e->otros + 
+                                                  $e->otros +
                                                   $e->domingo -
                                                   ( $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) ) -
                                                   ($e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total']) -
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros;
-                          
+
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>

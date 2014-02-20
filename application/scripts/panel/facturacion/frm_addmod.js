@@ -12,6 +12,9 @@ $(function(){
         $("#dcliente").css("background-color", "#B0FFB0");
 
         $('#dplazo_credito').val(ui.item.item.dias_credito);
+
+        $('#dmetodo_pago').val(ui.item.item.metodo_pago);
+        $('#dmetodo_pago_digitos').val(ui.item.item.ultimos_digitos);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -866,7 +869,7 @@ function trunc2Dec(num, digits) {
   digits = digits? digits: 2;
   var result = Math.round(num*Math.pow(10,digits))/Math.pow(10,digits);
   return result;
-  
+
   var numS = num.toString(),
       decPos = numS.indexOf('.'),
       result;

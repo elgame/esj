@@ -99,6 +99,14 @@
 												maxlength="45" placeholder="MEXICO">
 									  </div>
 									</div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fempresa">Empresa </label>
+                    <div class="controls">
+                    <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo set_value('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
+                    <input type="hidden" name="did_empresa" value="<?php echo set_value('did_empresa', $empresa->id_empresa); ?>" id="did_empresa">
+                    </div>
+                  </div>
 								</div> <!--/span-->
 
 								<div class="span5">
@@ -167,20 +175,41 @@
 									  </div>
 									</div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="fmetodo_pago">Metodo de Pago </label>
+                    <div class="controls">
+                      <select name="fmetodo_pago" class="span9" id="fmetodo_pago">
+                        <option value="no identificado">No identificado</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="deposito">Deposito</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fdigitos">Ultimos 4 digitos </label>
+                    <div class="controls">
+                      <input type="text" name="fdigitos" id="fdigitos" class="span12" value="<?php echo set_value('fdigitos', 'No identificado'); ?>" placeholder="1234">
+                    </div>
+                  </div>
+
 	              </div> <!--/span-->
 
 	              <div class="clearfix"></div>
-								
+
 	              <fieldset>
 	              	<legend>Documentos del cliente</legend>
 							<?php
 							$ul1 = $ul2 = '';
 							foreach ($documentos['documentos'] as $key => $value) {
 								if($key % 2 == 0)
-									$ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+									$ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
 														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
 								else
-									$ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'" 
+									$ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
 														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
 							}
 							?>
