@@ -989,7 +989,8 @@ class polizas_model extends CI_Model {
         bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
         bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
         Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal, 
-        c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha
+        c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
+        string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas
       FROM facturacion AS f 
         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
         INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
@@ -1047,11 +1048,26 @@ class polizas_model extends CI_Model {
         WHERE fao.tipo = 's' AND bmf.id_movimiento = {$value->id_movimiento}
         GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
 
+        $importe_iva = $importe_retencion = 0;
+        $facturasIds = explode(',', $value->idfacturas);
+        foreach ($facturasIds as $keyi => $facid)
+        {
+          $facid2 = explode('-', $facid);
+          $infodac = $this->db->query("SELECT 
+              importe_iva, retencion_iva, 
+              (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= {$facid2[1]} AND id_factura = facturacion.id_factura) AS num
+            FROM facturacion WHERE id_factura = {$facid2[0]}")->row();
+          if($infodac->num == 1){
+            $importe_iva += $infodac->importe_iva;
+            $importe_retencion += $infodac->retencion_iva;
+          }
+        }
+
         // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
-        $impuestos['iva_retener']['importe']    = $value->retencion_iva; //$factor*$value->retencion_iva/100;
+        $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;
         $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
 
-        $impuestos['iva_trasladar']['importe']  = $value->importe_iva; //$factor*($value->importe_iva)/100;
+        $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
         $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
         $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
 

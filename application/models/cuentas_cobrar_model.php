@@ -1223,6 +1223,11 @@ class cuentas_cobrar_model extends privilegios_model{
 			$sql = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
 			$sqlt = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
 			$sql2 = 'WHERE saldo > 0';
+		}elseif($this->input->get('ftipo')=='to'){
+			$all_clientes = true;
+			$all_facturas = true;
+			if($this->input->get('fid_cliente') != '')
+				$sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
 		}
 
 	    if($this->input->get('did_empresa') != ''){
@@ -1480,17 +1485,17 @@ class cuentas_cobrar_model extends privilegios_model{
 		$res = $this->getEstadoCuentaData();
 		// var_dump($res);
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+	    $this->load->model('empresas_model');
+	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+	    if ($empresa['info']->logo !== '')
+	      $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    	$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'ESTADO DE CUENTA DE CLIENTES';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		// $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
@@ -1503,15 +1508,15 @@ class cuentas_cobrar_model extends privilegios_model{
 		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargos', 'Abonos', 'Saldo', 'F. Ven.');
 
 		$total_saldo_cliente = 0;
-    $totalVencido = 0;
+    	$totalVencido = 0;
 		foreach($res as $key => $item){
 			$total_cargo = 0;
 			$total_abono = 0;
 			$total_saldo = 0;
-      $totalVencido = 0;
+      		$totalVencido = 0;
 
-      if (isset($item->saldo_anterior_vencido->saldo))
-        $totalVencido += $item->saldo_anterior_vencido->saldo;
+	      if (isset($item->saldo_anterior_vencido->saldo))
+	        $totalVencido += $item->saldo_anterior_vencido->saldo;
 
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
@@ -1564,11 +1569,21 @@ class cuentas_cobrar_model extends privilegios_model{
 								String::formatoNumero( ($factura->saldo) , 2, '', false),
 								String::fechaATexto($factura->fecha_vencimiento, '/c'),
 							);
+				//si esta vencido
+		        if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
+		        {
+		          $totalVencido += $factura->saldo;
+		          if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+		          	$pdf->SetFillColor(255,255,204);
+		          else
+		          	$pdf->SetFillColor(255,255,255);
+		        }else
+		        	$pdf->SetFillColor(255,255,255);
 
 				$pdf->SetXY(6, $pdf->GetY());
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->Row($datos, false, true);
+				$pdf->Row($datos, true, true);
 
 				foreach ($factura->abonos as $keya => $abono)
 				{
@@ -1588,10 +1603,6 @@ class cuentas_cobrar_model extends privilegios_model{
 					$pdf->Row($datos, false, true);
 				}
 
-        if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
-        {
-          $totalVencido += $factura->saldo;
-        }
 			}
 
 			$pdf->SetX(115);
