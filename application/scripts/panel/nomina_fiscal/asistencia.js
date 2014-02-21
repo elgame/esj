@@ -16,6 +16,8 @@
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
+          cargaDepaPues();
+          cargaSemanas();
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -51,5 +53,29 @@
       default: return 'yellow'; // Incapacidad
     }
   };
+
+  function cargaDepaPues () {
+    $.getJSON(base_url+'panel/empleados/ajax_get_depa_pues/', {'did_empresa': $("#empresaId").val()},
+      function(data){
+        var html = '<option value=""></option>', i;
+        // console.log(data);
+        for (i in data.departamentos) {
+          html += '<option value="'+data.departamentos[i].id_departamento+'">'+data.departamentos[i].nombre+'</option>';
+        }
+        $('#puestoId').html(html);
+    });
+  }
+
+  function cargaSemanas () {
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'did_empresa': $("#empresaId").val()},
+      function(data){
+        var html = '', i;
+        // console.log(data);
+        for (i in data) {
+          html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
+        }
+        $('#semanas').html(html);
+    });
+  }
 
 });

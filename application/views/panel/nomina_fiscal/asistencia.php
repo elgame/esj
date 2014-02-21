@@ -28,7 +28,7 @@
             <form action="<?php echo base_url('panel/nomina_fiscal/asistencia'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
                 <label for="ffecha1" style="margin-top: 15px;">Semana</label>
-                <select name="semana" class="input-xlarge">
+                <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {
                       if ($semana['semana'] == $numSemanaSelected) {
                         $semana2 =  $semana;
@@ -43,9 +43,9 @@
                 <input type="hidden" name="empresaId" id="empresaId" value="<?php echo set_value_get('empresaId', $empresaDefault->id_empresa); ?>">
 
                 <label for="ffecha1" style="margin-top: 15px;">Departamento</label>
-                  <select name="puestoId" class="input-large">
+                  <select name="puestoId" class="input-large" id="puestoId">
                     <option value=""></option>
-                  <?php foreach ($puestos as $puesto) { ?>
+                  <?php foreach ($puestos['puestos'] as $puesto) { ?>
                     <option value="<?php echo $puesto->id_departamento ?>" <?php echo set_select_get('puestoId', $puesto->id_departamento) ?>><?php echo $puesto->nombre ?></option>
                   <?php } ?>
                 </select>
@@ -73,7 +73,7 @@
 
               <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
               <?php
-                foreach ($puestos as $puesto) {
+                foreach ($puestos['puestos'] as $puesto) {
                   $tuvoEmpleados = false;
                   if ( ! isset($_GET['puestoId']) || ($_GET['puestoId'] == $puesto->id_departamento || $_GET['puestoId'] == '')) {
                 ?>

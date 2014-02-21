@@ -532,9 +532,34 @@ class String{
     // Obtiene el primer dia de la primera semana del año.
     $primerDiaPrimeraSemanaDelAnio = self::primerDiaPrimeraSemanaDelAnio($anio);
 
+    switch ($diaEmpieza)
+    {
+      case 0:
+        $dias = '-7';
+        break;
+      case 1:
+        $dias = '-6';
+        break;
+      case 2:
+        $dias = '-5';
+        break;
+      case 3:
+        $dias = '-4';
+        break;
+      case 4:
+        $dias = '-3';
+        break;
+      case 5:
+        $dias = '-2';
+        break;
+      default:
+        $dias = '-1';
+        break;
+    }
+
     // Obtiene el primer dia donde se empezaran a contar las semanas.
     // $siguientePrimerDia = strtotime($nombrePrimerDia, $primerDiaPrimeraSemanaDelAnio);
-    $siguientePrimerDia = strtotime(date('Y-m-d', $primerDiaPrimeraSemanaDelAnio) . ' -3 days');
+    $siguientePrimerDia = strtotime(date('Y-m-d', $primerDiaPrimeraSemanaDelAnio) . " {$dias} days");
 
     // Si el dia actual es menor al primer dia de la primera semana del año que se
     // estan calculando las semanas, entonces quiere decir que no pertenece

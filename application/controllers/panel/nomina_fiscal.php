@@ -17,6 +17,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/ajax_get_empleado/',
     'nomina_fiscal/add_finiquito/',
     'nomina_fiscal/ajax_add_prenomina_empleado/',
+    'nomina_fiscal/ajax_get_semana/',
 
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
@@ -44,6 +45,9 @@ class nomina_fiscal extends MY_Controller {
 
   public function index()
   {
+    if (isset($_GET['empresaId']) && $_GET['empresaId'] === '')
+      redirect(base_url('panel/nomina_fiscal?msg=9'));
+
     $this->carabiner->js(array(
       array('general/supermodal.js'),
       array('libs/jquery.numeric.js'),
@@ -72,7 +76,17 @@ class nomina_fiscal extends MY_Controller {
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
-    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+    // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
+    if ($filtros['empresaId'] !== '')
+    {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    }
+    else
+    {
+      $dia = '4';
+    }
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
     $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
@@ -165,6 +179,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
+    $this->load->model('usuarios_departamentos_model');
 
     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
 
@@ -177,8 +192,21 @@ class nomina_fiscal extends MY_Controller {
     // Datos para la vista.
     $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleadosAsistencias($filtros);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
-    $params['puestos'] = $this->usuarios_model->departamentos(); //puestos();
-    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+    // $params['puestos'] = $this->usuarios_model->departamentos(); //puestos();
+
+    $_GET['did_empresa'] = $filtros['empresaId'];
+    $params['puestos'] = $this->usuarios_departamentos_model->getPuestos(false); //puestos();
+
+    if ($filtros['empresaId'] !== '')
+    {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    }
+    else
+    {
+      $dia = '4';
+    }
+
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
     $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
@@ -429,6 +457,14 @@ class nomina_fiscal extends MY_Controller {
     echo json_encode($empleado);
   }
 
+  public function ajax_get_semana()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['did_empresa'])->get()->row()->dia_inicia_semana;
+    echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia));
+  }
+
+
   public function nomina_fiscal_pdf()
   {
     $this->load->model('nomina_fiscal_model');
@@ -504,6 +540,10 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 8:
         $txt = 'Ocurrio un error al intentar generar el finiquito, intentelo de nuevo.';
+        $icono = 'error';
+        break;
+      case 9:
+        $txt = 'Favor de especificar una empresa para generar su nomina.';
         $icono = 'error';
         break;
     }

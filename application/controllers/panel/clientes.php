@@ -32,7 +32,7 @@ public function fecha($fecha)
 
 	public function merges()
 	{
-	  
+
 		$fila = 0;
 		//C¢digo Cliente,Raz¢n Social,R.F.C.,Estatus,Calle,N£mero Exterior,N£mero Interior,Colonia,C¢digo Postal,eMail,Pa¡s,Estado,Ciudad,Municipio
 		if (($gestor = fopen("estados_de_cuenta2.csv", "r")) !== FALSE) {
@@ -98,10 +98,10 @@ public function fecha($fecha)
 				// {
 				// 	if($datos[2] != '')
 				// 	{
-				// 		// echo "UPDATE clientes SET nombre_fiscal = '".utf8_encode(trim($datos[1]))."', calle = '".utf8_encode(trim($datos[4]))."', 
-				// 		// 							no_exterior = '".trim($datos[5])."', no_interior = '".trim($datos[6])."', colonia = '".utf8_encode(trim($datos[7]))."', 
-				// 		// 							cp = '".trim($datos[8])."', email = '".trim($datos[9])."', pais = '".utf8_encode(trim($datos[10]))."', 
-				// 		// 							estado = '".utf8_encode(trim($datos[11]))."', localidad = '".utf8_encode(trim($datos[12]))."', 
+				// 		// echo "UPDATE clientes SET nombre_fiscal = '".utf8_encode(trim($datos[1]))."', calle = '".utf8_encode(trim($datos[4]))."',
+				// 		// 							no_exterior = '".trim($datos[5])."', no_interior = '".trim($datos[6])."', colonia = '".utf8_encode(trim($datos[7]))."',
+				// 		// 							cp = '".trim($datos[8])."', email = '".trim($datos[9])."', pais = '".utf8_encode(trim($datos[10]))."',
+				// 		// 							estado = '".utf8_encode(trim($datos[11]))."', localidad = '".utf8_encode(trim($datos[12]))."',
 				// 		// 							municipio = '".utf8_encode(trim($datos[13]))."', rfc = '".trim($datos[2])."', cuenta_cpi = '".trim($datos[0])."'
 				// 		// 		WHERE rfc like '".trim($datos[2])."'; <br>";
 				// 	}
@@ -111,23 +111,23 @@ public function fecha($fecha)
 				// 	if ($res->num_rows() == 0)
 				// 	{
 				// 		// echo "INSERT INTO clientes (
-				// 		// 	nombre_fiscal, calle, no_exterior, no_interior, 
-				// 		// 	colonia, cp, email, pais, 
-				// 		// 	estado, localidad, municipio, rfc, cuenta_cpi) VALUES 
-				// 		// 	('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."', 
-				// 		// 	'".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."', 
-				// 		// 	'".utf8_encode(trim($datos[11]))."', '".utf8_encode(trim($datos[12]))."', '".utf8_encode(trim($datos[13]))."', 
+				// 		// 	nombre_fiscal, calle, no_exterior, no_interior,
+				// 		// 	colonia, cp, email, pais,
+				// 		// 	estado, localidad, municipio, rfc, cuenta_cpi) VALUES
+				// 		// 	('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."',
+				// 		// 	'".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."',
+				// 		// 	'".utf8_encode(trim($datos[11]))."', '".utf8_encode(trim($datos[12]))."', '".utf8_encode(trim($datos[13]))."',
 				// 		// 	'".trim($datos[2])."', '".trim($datos[0])."'  ); <br>";
 				// 	}
 
 				// 	$fila++;
 				// 	// if($datos[2] != '')
 				// 		// echo "INSERT INTO clientes (
-				// 		// nombre_fiscal, calle, no_exterior, no_interior, 
-				// 		// colonia, cp, email, pais, 
-				// 		// estado, localidad, municipio, rfc, cuenta_cpi) VALUES 
-				// 		// ('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."', 
-				// 		// '".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."', 
+				// 		// nombre_fiscal, calle, no_exterior, no_interior,
+				// 		// colonia, cp, email, pais,
+				// 		// estado, localidad, municipio, rfc, cuenta_cpi) VALUES
+				// 		// ('".utf8_encode(trim($datos[1]))."', '".utf8_encode(trim($datos[4]))."', '".trim($datos[5])."', '".trim($datos[6])."',
+				// 		// '".utf8_encode(trim($datos[7]))."', '".trim($datos[8])."', '".trim($datos[9])."', '".utf8_encode(trim($datos[10]))."',
 				// 		// '".utf8_encode(trim($datos[11]))."', '".utf8_encode(trim($datos[12]))."', '".utf8_encode(trim($datos[13]))."', '".trim($datos[2])."', '".trim($datos[0])."'  ); <br>";
 				// 	// echo "'".trim($datos[2])."',";
 				// }
@@ -141,7 +141,8 @@ public function fecha($fecha)
   public function index()
   {
 		$this->carabiner->js(array(
-				array('general/msgbox.js')
+        array('general/msgbox.js'),
+				array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -149,12 +150,14 @@ public function fecha($fecha)
 			'titulo' => 'Administración de Proveedores'
 		);
 
+    $this->load->model('empresas_model');
+
 		$this->load->model('clientes_model');
 		$params['clientes'] = $this->clientes_model->getClientes();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
-
 
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
@@ -172,8 +175,11 @@ public function fecha($fecha)
 			array('libs/jquery.uniform.css', 'screen'),
 		));
 		$this->carabiner->js(array(
-			array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.uniform.min.js'),
+			array('panel/clientes/agregar.js'),
 		));
+
+    $this->load->model('empresas_model');
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
@@ -196,6 +202,7 @@ public function fecha($fecha)
 
 		$this->load->model('documentos_model');
 		$params['documentos'] = $this->documentos_model->getDocumentos();
+    $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -223,7 +230,8 @@ public function fecha($fecha)
 				array('panel/usuarios/add_mod_frm.js')
 			));
 
-			$this->load->model('clientes_model');
+      $this->load->model('clientes_model');
+			$this->load->model('empresas_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 			$params['seo'] = array(
@@ -247,6 +255,7 @@ public function fecha($fecha)
 
 			$this->load->model('documentos_model');
 			$params['documentos'] = $this->documentos_model->getDocumentos();
+      $params['empresa']       = $this->empresas_model->getInfoEmpresa($params['cliente']['info']->id_empresa);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -366,10 +375,23 @@ public function fecha($fecha)
 			array('field' => 'fdias_credito',
 						'label' => 'Dias de credito',
 						'rules' => 'is_natural'),
+      array('field' => 'fmetodo_pago',
+            'label' => 'Metodo de Pago',
+            'rules' => 'max_length[20]'),
+      array('field' => 'fdigitos',
+            'label' => 'Ultimos 4 digitos',
+            'rules' => 'max_length[20]'),
 
 			array('field' => 'documentos[]',
 						'label' => 'Documentos del cliente',
 						'rules' => 'is_natural_no_zero'),
+
+      array('field' => 'fempresa',
+            'label' => '',
+            'rules' => ''),
+      array('field' => 'did_empresa',
+            'label' => 'Empresa',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

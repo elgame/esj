@@ -29,7 +29,8 @@ class empleados extends MY_Controller {
   public function index()
   {
 		$this->carabiner->js(array(
-				array('general/msgbox.js')
+        array('general/msgbox.js'),
+				array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -38,7 +39,10 @@ class empleados extends MY_Controller {
 		);
 
 		$this->load->model('usuarios_model');
+    $this->load->model('empresas_model');
+
 		$params['usuarios'] = $this->usuarios_model->get_usuarios(true, 't');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -137,7 +141,7 @@ class empleados extends MY_Controller {
 				if($res_mdl['error'] == FALSE)
 					redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
-			
+
 			$this->load->model('usuarios_puestos_model');
 			$this->load->model('usuarios_departamentos_model');
 
@@ -276,7 +280,7 @@ class empleados extends MY_Controller {
 							array('field' => 'fcuenta_cpi',
 										'label' => 'Cuenta contpaqi',
 										'rules' => 'max_length[12]'),
-							
+
 							array('field' => 'did_empresa',
 										'label' => 'Empresa',
 										'rules' => 'required|numeric'),
@@ -296,6 +300,13 @@ class empleados extends MY_Controller {
 							array('field' => 'dno_seguro',
 										'label' => 'No seguro',
 										'rules' => ''),
+
+              array('field' => 'fdepartamente',
+                    'label' => 'Departamento',
+                    'rules' => ''),
+              array('field' => 'fpuesto',
+                    'label' => 'Puesto',
+                    'rules' => ''),
 		);
 
 		if ($accion == 'agregar')

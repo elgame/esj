@@ -34,6 +34,9 @@ class clientes_model extends CI_Model {
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
+    if($this->input->get('did_empresa') != '')
+      $sql .= ' AND p.id_empresa = ' . $this->input->get('did_empresa');
+
 		// if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
 		// 	$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
@@ -93,7 +96,10 @@ class clientes_model extends CI_Model {
 						'rfc'            => $this->input->post('frfc'),
 						'curp'           => $this->input->post('fcurp'),
 						'pais'           => $this->input->post('fpais'),
-						'dias_credito'   => (is_numeric($this->input->post('fdias_credito'))? $this->input->post('fdias_credito'): 0),
+            'dias_credito'   => (is_numeric($this->input->post('fdias_credito'))? $this->input->post('fdias_credito'): 0),
+            'metodo_pago'    => $this->input->post('fmetodo_pago'),
+            'ultimos_digitos' => $this->input->post('fdigitos'),
+						'id_empresa' => $this->input->post('did_empresa'),
 						);
 		}
 
@@ -133,6 +139,9 @@ class clientes_model extends CI_Model {
 						'curp'           => $this->input->post('fcurp'),
 						'pais'           => $this->input->post('fpais'),
 						'dias_credito'   => $this->input->post('fdias_credito'),
+            'metodo_pago'    => $this->input->post('fmetodo_pago'),
+            'ultimos_digitos' => $this->input->post('fdigitos'),
+            'id_empresa' => $this->input->post('did_empresa'),
 						);
 		}
 
@@ -177,7 +186,8 @@ class clientes_model extends CI_Model {
 		$id_cliente = $id_cliente? $id_cliente: $_GET['id'];
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito, pais" )
+														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito, pais,
+                            metodo_pago, ultimos_digitos, id_empresa" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();
@@ -214,7 +224,7 @@ class clientes_model extends CI_Model {
       $sql .= $sqlX;
 
 		$res = $this->db->query(
-      "SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito
+      "SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito, metodo_pago, ultimos_digitos, id_empresa
   			FROM clientes
   			WHERE status = 'ac'
         {$sql}
