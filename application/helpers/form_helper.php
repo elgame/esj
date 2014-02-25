@@ -692,15 +692,14 @@ if ( ! function_exists('set_value_get'))
 {
 	function set_value_get($field = '', $default = '')
 	{
-		if (FALSE === ($OBJ =& _get_validation_object()))
-		{
+		// if (FALSE === ($OBJ =& _get_validation_object()))
+		// {
 			if ( ! isset($_GET[$field]))
 			{
 				return $default;
 			}
-
 			return form_prep($_GET[$field], $field);
-		}
+		// }
 
 		return form_prep($OBJ->set_value($field, $default), $field);
 	}

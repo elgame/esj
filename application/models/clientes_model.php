@@ -220,14 +220,17 @@ class clientes_model extends CI_Model {
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
-    if ( ! is_null($sqlX))
-      $sql .= $sqlX;
+		if ($this->input->get('did_empresa') !== false)
+			$sql .= " AND id_empresa = ".$this->input->get('did_empresa');
+
+	    if ( ! is_null($sqlX))
+	      $sql .= $sqlX;
 
 		$res = $this->db->query(
-      "SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito, metodo_pago, ultimos_digitos, id_empresa
+      	"SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito, metodo_pago, ultimos_digitos, id_empresa
   			FROM clientes
   			WHERE status = 'ac'
-        {$sql}
+        	{$sql}
   			ORDER BY nombre_fiscal ASC
   			LIMIT 20"
     );

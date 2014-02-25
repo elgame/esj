@@ -1231,8 +1231,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 
 	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
       if($this->input->get('fid_cliente') != ''){

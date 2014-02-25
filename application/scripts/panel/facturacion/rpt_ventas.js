@@ -18,7 +18,19 @@ $(function(){
 
   // Autocomplete cliente
   $("#dcliente").autocomplete({
-    source: base_url + 'panel/clientes/ajax_get_proveedores/',
+    source: function(request, response) {
+        $.ajax({
+            url: base_url + 'panel/clientes/ajax_get_proveedores/',
+            dataType: "json",
+            data: {
+                term : request.term,
+                did_empresa : $("#did_empresa").val()
+            },
+            success: function(data) {
+                response(data);
+            }
+        });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {

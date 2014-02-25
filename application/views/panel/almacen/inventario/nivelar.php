@@ -6,8 +6,8 @@
             <form action="<?php echo base_url('panel/inventario/nivelar/'); ?>" method="GET" class="form-search">
               <label class="control-label" for="dempresa">Empresa</label>
               <input type="text" name="dempresa"
-                value="<?php echo (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: ''); ?>" id="dempresa" class="" placeholder="Nombre">
-              <input type="hidden" name="did_empresa" value="<?php echo (isset($empresa->id_empresa)? $empresa->id_empresa: ''); ?>" id="did_empresa">
+                value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '')); ?>" id="dempresa" class="" placeholder="Nombre">
+              <input type="hidden" name="fid_empresa" value="<?php echo set_value_get('fid_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>" id="did_empresa">
 
               <label class="control-label" for="dfamilias">Familias</label>
               <select name="dfamilias" id="dfamilias">

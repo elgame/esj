@@ -34,13 +34,17 @@ class proveedores_model extends CI_Model {
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
+		if($this->input->get('did_empresa') != '')
+			$sql .= ($sql==''? 'WHERE': ' AND')." p.id_empresa='".$this->input->get('did_empresa')."'";
+
 		if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
-		$query = BDUtil::pagination("
-				SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
-							p.telefono, p.estado, p.tipo_proveedor, p.status
+		$query = BDUtil::pagination(
+				"SELECT p.id_proveedor, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
+							p.telefono, p.estado, p.tipo_proveedor, p.status, e.id_empresa, e.nombre_fiscal AS empresa
 				FROM proveedores p
+				INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
 				".$sql."
 				ORDER BY p.nombre_fiscal ASC
 				", $params, true);
@@ -124,6 +128,7 @@ class proveedores_model extends CI_Model {
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
 						'condicion_pago' => $this->input->post('condicionPago'),
 						'dias_credito'   => intval($this->input->post('plazoCredito')),
+						'id_empresa'     => $this->input->post('did_empresa'),
 						);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
@@ -204,6 +209,7 @@ class proveedores_model extends CI_Model {
 						'cfdi_version'   => $this->input->post('dcfdi_version'),
 						'condicion_pago' => $this->input->post('condicionPago'),
 						'dias_credito'   => intval($this->input->post('plazoCredito')),
+						'id_empresa'     => $this->input->post('did_empresa'),
 						);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
@@ -227,19 +233,23 @@ class proveedores_model extends CI_Model {
 
 		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
 							estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
-                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal, condicion_pago, dias_credito" )
+                            cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal, condicion_pago, dias_credito, id_empresa" )
 												->from("proveedores")
 												->where("id_proveedor", $id_proveedor)
 												->get();
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
+		{
 			$data['info']	= $sql_res->row();
+
+			if ($basic_info == False) {
+				$this->load->model('empresas_model');
+				$data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+			}
+		}
 		$sql_res->free_result();
 
-		if ($basic_info == False) {
-
-		}
 
 		return $data;
 	}
@@ -253,8 +263,9 @@ class proveedores_model extends CI_Model {
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		// if($this->input->get('type') !== false)
-		// 	$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
+		if($this->input->get('did_empresa') != '')
+			$sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+
 		$res = $this->db->query("
 				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, 
 					condicion_pago, dias_credito

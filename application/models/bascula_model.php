@@ -183,7 +183,7 @@ class Bascula_model extends CI_Model {
         $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
 
         $info_boleta = $this->getBasculaInfo($idb);
-        if($info_boleta['info'][0]->fecha_tara != '' && substr($info_boleta['info'][0]->fecha_tara, 0, 16) != str_replace('T', ' ', $_POST['pfecha']) ){
+        if($info_boleta['info'][0]->fecha_tara != '' && strtotime(substr($info_boleta['info'][0]->fecha_tara, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
           $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
           $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
         }else
@@ -677,7 +677,19 @@ class Bascula_model extends CI_Model {
       $this->db->update('bascula', array('accion' => 'sa'), "id_bascula = {$value->id_bascula}");
     }
     if($delete)
+    {
+      //Elimina el mov del banco
+      $data_bascula = $this->db->query("SELECT id_movimiento, id_bascula_pago
+                                        FROM banco_movimientos_bascula 
+                                        WHERE id_bascula_pago = {$id_pago}")->result();
+      if(count($data_bascula) > 0){
+        foreach ($data_bascula as $key => $value) {
+          $this->db->delete('banco_movimientos', "id_movimiento = {$value->id_movimiento}");
+        }
+      }
+
       $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
+    }
     else
       $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
   }

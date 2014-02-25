@@ -50,7 +50,19 @@ function setAutocomplet(tipo, first){
   }
   if (tipo == "en") {
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -65,7 +77,19 @@ function setAutocomplet(tipo, first){
     });
   }else if(tipo == "sa"){
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_clientes/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_clientes/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

@@ -154,6 +154,7 @@ class gastos_model extends privilegios_model{
       'retencion_iva' => String::float($this->input->post('ret_iva')),
       'retencion_isr' => String::float($this->input->post('ret_isr')),
       'total'         => String::float($this->input->post('total')),
+      'fecha'         => $this->input->post('fecha'),
     );
 
     // Realiza el upload del XML.

@@ -62,7 +62,19 @@
 
     // Autocomplete para los Proveedores.
     $("#proveedor").autocomplete({
-      source: base_url + 'panel/proveedores/ajax_get_proveedores/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

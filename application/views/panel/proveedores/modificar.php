@@ -121,6 +121,15 @@
                         maxlength="10" placeholder="28084, 28000">
                     </div>
                   </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fempresa">Empresa </label>
+                    <div class="controls">
+                      <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo isset($data->empresa->id_empresa)?$data->empresa->nombre_fiscal:''; ?>" required placeholder="Empresa">
+                      <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo isset($data->empresa->id_empresa)?$data->empresa->id_empresa:''; ?>">
+                    </div>
+                  </div>
+
                 </div> <!--/span-->
 
                 <div class="span5">

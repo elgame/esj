@@ -26,7 +26,8 @@ class proveedores extends MY_Controller {
   public function index()
   {
 		$this->carabiner->js(array(
-				array('general/msgbox.js')
+			array('general/msgbox.js'),
+			array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -34,8 +35,10 @@ class proveedores extends MY_Controller {
 			'titulo' => 'Administración de Proveedores'
 		);
 
+		$this->load->model('empresas_model');
 		$this->load->model('proveedores_model');
 		$params['proveedores'] = $this->proveedores_model->getProveedores();
+		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -252,6 +255,13 @@ class proveedores extends MY_Controller {
 			array('field' => 'festado',
 						'label' => 'Estado',
 						'rules' => 'max_length[45]'),
+
+			array('field' => 'fempresa',
+						'label' => 'Empresa',
+						'rules' => ''),
+			array('field' => 'did_empresa',
+						'label' => 'Empresa',
+						'rules' => ''),
 
 			array('field' => 'frfc',
 						'label' => 'RFC',
