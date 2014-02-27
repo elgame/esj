@@ -677,7 +677,7 @@ class bascula extends MY_Controller {
     {
       $this->load->model('bascula_model');
 
-      $res_mdl = $this->bascula_model->cancelar_pago($_GET['id']);
+      $res_mdl = $this->bascula_model->cancelar_pago($_GET['id'], true);
       redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
     }else
       redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));

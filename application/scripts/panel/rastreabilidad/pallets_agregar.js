@@ -126,7 +126,19 @@ var addpallets = (function($){
 
     //Clientes
     $("#fcliente").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_clientes/',
+      source: function(request, response) {
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_clientes/',
+            dataType: "json",
+            data: {
+              term : request.term,
+              did_empresa : '2'
+            },
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

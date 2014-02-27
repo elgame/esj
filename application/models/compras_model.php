@@ -194,6 +194,7 @@ class compras_model extends privilegios_model{
       'importe_ieps'  => String::float($this->input->post('totalIeps')),
       'retencion_iva' => String::float($this->input->post('totalRetencion')),
       'total'         => String::float($this->input->post('totalOrden')),
+      'fecha'         => $this->input->post('fecha'),
     );
 
     // Realiza el upload del XML.

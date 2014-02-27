@@ -18,6 +18,7 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/imprimir_abono/',
 
     'cuentas_cobrar/estado_cuenta_pdf/',
+    'cuentas_cobrar/estado_cuenta_xls/',
   );
 
 
@@ -76,7 +77,7 @@ class cuentas_cobrar extends MY_Controller {
   }
   public function estado_cuenta_xls(){
     $this->load->model('cuentas_cobrar_model');
-    $this->cuentas_cobrar_model->cuentaClienteExcel();
+    $this->cuentas_cobrar_model->estadoCuentaXls();
   }
 
   public function cuenta()

@@ -141,20 +141,20 @@ public function fecha($fecha)
   public function index()
   {
 		$this->carabiner->js(array(
-        array('general/msgbox.js'),
-				array('panel/clientes/agregar.js'),
+	        array('general/msgbox.js'),
+			array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Administración de Proveedores'
+			'titulo' => 'Administración de Clientes'
 		);
 
-    $this->load->model('empresas_model');
+    	$this->load->model('empresas_model');
 
 		$this->load->model('clientes_model');
 		$params['clientes'] = $this->clientes_model->getClientes();
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    	$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -175,11 +175,11 @@ public function fecha($fecha)
 			array('libs/jquery.uniform.css', 'screen'),
 		));
 		$this->carabiner->js(array(
-      array('libs/jquery.uniform.min.js'),
+      	array('libs/jquery.uniform.min.js'),
 			array('panel/clientes/agregar.js'),
 		));
 
-    $this->load->model('empresas_model');
+    	$this->load->model('empresas_model');
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(

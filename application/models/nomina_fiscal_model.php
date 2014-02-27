@@ -2253,6 +2253,7 @@ class nomina_fiscal_model extends CI_Model {
         $contador++;
       }
     }
+    $content[] = '';
     $content = implode("\r\n", $content);
 
     $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");

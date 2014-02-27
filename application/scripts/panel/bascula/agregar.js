@@ -141,7 +141,19 @@ $(function(){
 
   // Autocomplete Proveedor
   $("#pproveedor").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_proveedores/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#pid_empresa").val()) > 0)
+        params.did_empresa = $("#pid_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -183,7 +195,19 @@ $(function(){
 
   // Autocomplete Cliente
   $("#pcliente").autocomplete({
-    source: base_url + 'panel/bascula/ajax_get_clientes/',
+    source: function(request, response) {
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_get_clientes/',
+          dataType: "json",
+          data: {
+              term : request.term,
+              did_empresa : $("#pid_empresa").val()
+          },
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {

@@ -3,7 +3,19 @@ $(function(){
   $('#form').keyJump();
 
   $("#dcliente").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clientes/',
+      source: function(request, response) {
+          $.ajax({
+              url: base_url+'panel/facturacion/ajax_get_clientes/',
+              dataType: "json",
+              data: {
+                  term : request.term,
+                  did_empresa : $("#did_empresa").val()
+              },
+              success: function(data) {
+                  response(data);
+              }
+          });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -215,7 +227,7 @@ $(function(){
         data: {id: $clienteId.val()},
       })
       .done(function(pallets) {
-        // console.log(pallets);
+        console.log(pallets);
         var $tablePalletsCliente = $('#table-pallets-cliente'),
             htmlTd = '',
             disabled = '',
@@ -238,7 +250,15 @@ $(function(){
               });
 
               for (var rnd in pallets[i].rendimientos) {
-                rnd_txt += pallets[i].rendimientos[rnd].nombre+';'+pallets[i].rendimientos[rnd].size+' | ';
+                rnd_txt += '<table style="width: 100%;font-size: 10px;">'+
+                              '<tbody>'+
+                                '<tr>'+
+                                  '<td style="padding: 0px 5px;">'+pallets[i].rendimientos[rnd].nombre+'</td>'+
+                                  '<td style="padding: 0px 5px;">'+pallets[i].rendimientos[rnd].unidad+'</td>'+
+                                  '<td style="padding: 0px 5px;">'+pallets[i].rendimientos[rnd].size+'</td>'+
+                                '</tr>'+
+                              '</tbody>'+
+                            '</table>';
               };
 
               jsonStr = JSON.stringify(pallets[i].rendimientos).replace(/\"/g,'&quot;');

@@ -17,7 +17,19 @@ $(function(){
 
   // Autocomplete Cliente
   $("#dcliente").autocomplete({
-    source: base_url + 'panel/clientes/ajax_get_proveedores/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/clientes/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
@@ -63,11 +75,11 @@ var abonom = (function($){
       total += parseFloat( util.quitarFormatoNum(vttis.text()) );
     });
     url = btn_abonos_masivo.attr("href").split("?");
-    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total;
+    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total.toFixed(2);
     btn_abonos_masivo.attr("href", url);
     if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
-      $("#sumaRowsSel").text(util.darFormatoNum(total)).show();
+      $("#sumaRowsSel").text(util.darFormatoNum( total.toFixed(2) )).show();
     }else{
       btn_abonos_masivo.hide();
       $("#sumaRowsSel").hide();

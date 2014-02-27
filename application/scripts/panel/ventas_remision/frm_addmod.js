@@ -3,7 +3,19 @@ $(function(){
   $('#form').keyJump();
 
   $("#dcliente").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_clientes_vr/',
+      source: function(request, response) {
+          $.ajax({
+              url: base_url+'panel/facturacion/ajax_get_clientes_vr/',
+              dataType: "json",
+              data: {
+                  term : request.term,
+                  did_empresa : $("#did_empresa").val()
+              },
+              success: function(data) {
+                  response(data);
+              }
+          });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

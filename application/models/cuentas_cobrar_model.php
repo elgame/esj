@@ -1223,11 +1223,16 @@ class cuentas_cobrar_model extends privilegios_model{
 			$sql = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
 			$sqlt = " AND (Date('".$fecha2."'::timestamp with time zone)-Date(f.fecha)) > f.plazo_credito";
 			$sql2 = 'WHERE saldo > 0';
+		}elseif($this->input->get('ftipo')=='to'){
+			$all_clientes = true;
+			$all_facturas = true;
+			if($this->input->get('fid_cliente') != '')
+				$sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
 		}
 
 	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
-	      $sqlt .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
       if($this->input->get('fid_cliente') != ''){
@@ -1480,17 +1485,17 @@ class cuentas_cobrar_model extends privilegios_model{
 		$res = $this->getEstadoCuentaData();
 		// var_dump($res);
 
-    $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+	    $this->load->model('empresas_model');
+	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 
-    if ($empresa['info']->logo !== '')
-      $pdf->logo = $empresa['info']->logo;
+	    if ($empresa['info']->logo !== '')
+	      $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    	$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'ESTADO DE CUENTA DE CLIENTES';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		// $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
@@ -1503,15 +1508,15 @@ class cuentas_cobrar_model extends privilegios_model{
 		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargos', 'Abonos', 'Saldo', 'F. Ven.');
 
 		$total_saldo_cliente = 0;
-    $totalVencido = 0;
+    	$totalVencido = 0;
 		foreach($res as $key => $item){
 			$total_cargo = 0;
 			$total_abono = 0;
 			$total_saldo = 0;
-      $totalVencido = 0;
+      		$totalVencido = 0;
 
-      if (isset($item->saldo_anterior_vencido->saldo))
-        $totalVencido += $item->saldo_anterior_vencido->saldo;
+	      if (isset($item->saldo_anterior_vencido->saldo))
+	        $totalVencido += $item->saldo_anterior_vencido->saldo;
 
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
@@ -1564,11 +1569,21 @@ class cuentas_cobrar_model extends privilegios_model{
 								String::formatoNumero( ($factura->saldo) , 2, '', false),
 								String::fechaATexto($factura->fecha_vencimiento, '/c'),
 							);
+				//si esta vencido
+		        if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
+		        {
+		          $totalVencido += $factura->saldo;
+		          if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+		          	$pdf->SetFillColor(255,255,204);
+		          else
+		          	$pdf->SetFillColor(255,255,255);
+		        }else
+		        	$pdf->SetFillColor(255,255,255);
 
 				$pdf->SetXY(6, $pdf->GetY());
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
-				$pdf->Row($datos, false, true);
+				$pdf->Row($datos, true, true);
 
 				foreach ($factura->abonos as $keya => $abono)
 				{
@@ -1588,10 +1603,6 @@ class cuentas_cobrar_model extends privilegios_model{
 					$pdf->Row($datos, false, true);
 				}
 
-        if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
-        {
-          $totalVencido += $factura->saldo;
-        }
 			}
 
 			$pdf->SetX(115);
@@ -1625,6 +1636,167 @@ class cuentas_cobrar_model extends privilegios_model{
 
 
 		$pdf->Output('estado_cuenta.pdf', 'I');
+	}
+
+	public function estadoCuentaXls()
+	{
+		header('Content-type: application/vnd.ms-excel');
+		header("Content-Disposition: attachment; filename=nominaCampo.xls");
+		header("Pragma: no-cache");
+		header("Expires: 0");
+
+		$res = $this->getEstadoCuentaData();
+		
+		$this->load->model('empresas_model');
+	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    	$titulo1 = $empresa['info']->nombre_fiscal;
+		$titulo2 = "ESTADO DE CUENTA DE CLIENTES";
+		$titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+
+		$html = '<table>
+		  <tbody>
+		    <tr>
+		      <td colspan="8" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+		    </tr>
+		    <tr>
+		      <td colspan="8" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+		    </tr>
+		    <tr>
+		      <td colspan="8" style="text-align:center;">'.$titulo3.'</td>
+		    </tr>
+		    <tr style="font-weight:bold">
+		      <td style="width:80px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+		      <td style="width:60px;border:1px solid #000;background-color: #cccccc;">Serie</td>
+		      <td style="width:60px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+		      <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Concepto</td>
+		      <td style="width:80px;border:1px solid #000;background-color: #cccccc;">Cargos</td>
+		      <td style="width:80px;border:1px solid #000;background-color: #cccccc;">Abonos</td>
+		      <td style="width:80px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+		      <td style="width:80px;border:1px solid #000;background-color: #cccccc;">F. Ven.</td>
+		    </tr>';
+		$total_saldo_cliente = 0;
+		foreach ($res as $key => $value)
+		{
+			$total_cargo = $total_abono = $total_saldo = $totalVencido = 0;
+
+			if (isset($value->saldo_anterior_vencido->saldo))
+	        	$totalVencido += $value->saldo_anterior_vencido->saldo;
+
+			$html .= '
+			<tr style="font-weight:bold;">
+			  <td>CLIENTE:</td>
+			  <td colspan="7" style="text-align:left;">'.$value->cuenta_cpi.'</td>
+			</tr>
+			<tr style="font-weight:bold;">
+			  <td>NOMBRE:</td>
+			  <td colspan="7">'.$value->nombre_fiscal.'</td>
+			</tr>';
+
+			foreach ($value->facturas as $keyf => $factura)
+			{
+				$total_cargo += $factura->total;
+				$total_saldo += $factura->saldo;
+
+				if( $keyf == 0 && isset($value->saldo_anterior->saldo) )
+					$html .= '
+					<tr>
+					  <td colspan="3"></td>
+					  <td>Saldo Inicial</td>
+					  <td>'.$value->saldo_anterior->saldo.'</td>
+					  <td colspan="3"></td>
+					</tr>';
+
+				//si esta vencido
+				$color = '255,255,255';
+		        if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
+		        {
+		          $totalVencido += $factura->saldo;
+		          if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+		          	$color = '255,255,204';
+		        }
+
+				$html .= '
+				<tr>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');text-align:left;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->serie.'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->folio.'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->concepto.'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->total.'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');"></td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->saldo.'</td>
+				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.String::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
+				</tr>';
+
+				foreach ($factura->abonos as $keya => $abono)
+				{
+					$total_abono += $abono->abono;
+
+					$html .= '
+					<tr>
+					  <td>'.String::fechaATexto($abono->fecha, '/c').'</td>
+					  <td>'.$abono->serie.'</td>
+					  <td>'.$abono->folio.'</td>
+					  <td>'.$abono->concepto.'</td>
+					  <td></td>
+					  <td>'.$abono->abono.'</td>
+					  <td></td>
+					  <td></td>
+					</tr>';
+				}
+			}
+
+			$saldo_cliente = ((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
+			$total_saldo_cliente += $saldo_cliente;
+			$html .= '<tr style="font-weight:bold">
+			  <td colspan="4"></td>
+			  <td style="border:1px solid #000;">'.$total_cargo.'</td>
+			  <td style="border:1px solid #000;">'.$total_abono.'</td>
+			  <td style="border:1px solid #000;">'.$total_saldo.'</td>
+			  <td></td>
+			</tr>
+			<tr style="font-weight:bold">
+			  <td colspan="3"></td>
+			  <td style="border:1px solid #000;text-align:right;">Saldo Inicial</td>
+			  <td style="border:1px solid #000;">'.(isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0).'</td>
+			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">Vencido</td>
+			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">'.$totalVencido.'</td>
+			  <td></td>
+			</tr>
+			<tr style="font-weight:bold">
+			  <td colspan="3"></td>
+			  <td style="border:1px solid #000;text-align:right;">(+) Cargos</td>
+			  <td style="border:1px solid #000;">'.$total_cargo.'</td>
+			  <td colspan="3"></td>
+			</tr>
+			<tr style="font-weight:bold">
+			  <td colspan="3"></td>
+			  <td style="border:1px solid #000;text-align:right;">(-) Abonos</td>
+			  <td style="border:1px solid #000;">'.$total_abono.'</td>
+			  <td colspan="3"></td>
+			</tr>
+			<tr style="font-weight:bold">
+			  <td colspan="3"></td>
+			  <td style="border:1px solid #000;text-align:right;">(=) Saldo Final</td>
+			  <td style="border:1px solid #000;">'.$saldo_cliente.'</td>
+			  <td colspan="3"></td>
+			</tr>
+			<tr>
+			  <td colspan="8"></td>
+			</tr>';
+		}
+
+		$html .= '
+				<tr style="font-weight:bold">
+				  <td colspan="3"></td>
+				  <td style="border:1px solid #000;">TOTAL SALDO DE CLIENTES</td>
+				  <td style="border:1px solid #000;">'.$total_saldo_cliente.'</td>
+				  <td colspan="3"></td>
+				</tr>
+			</tbody>
+		</table>';
+
+		echo $html;
 	}
 
 }
