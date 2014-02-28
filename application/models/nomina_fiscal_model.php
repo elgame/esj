@@ -3683,13 +3683,25 @@ class nomina_fiscal_model extends CI_Model {
       if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
     }
 
+    $ver_infonavit = $ver_trans = 0;
+    foreach ($_POST['empleado_id'] as $key => $empleado)
+    {
+      $ver_infonavit += $_POST['total_infonavit'][$key];
+      $ver_trans += $_POST['ttotal_nomina'][$key];
+    }
+
     $columnas = array('n' => array(), 'w' => array(64, 20, 20, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'SUELDO';
     $columnas['n'][] = 'OTRAS';
     $columnas['n'][] = 'DOMINGO';
     $columnas['n'][] = 'PTMO';
-    $columnas['n'][] = 'INFONAVIT';
+
+    if ($ver_infonavit != 0)
+    {
+      $columnas['n'][] = 'INFONAVIT';
+    }
+
     if($ver_des_playera){
       $columnas['n'][] = 'DESC. PLAY';
       $columnas['w'][] = 20;
@@ -3701,7 +3713,12 @@ class nomina_fiscal_model extends CI_Model {
       $columnas['a'][] = 'R';
     }
     $columnas['n'][] = 'TOTAL A PAGAR';
-    $columnas['n'][] = 'TRANSF';
+
+    if ($ver_trans !== 0)
+    {
+      $columnas['n'][] = 'TRANSF';
+    }
+
     $columnas['n'][] = 'TOTAL COMPLEM';
 
     $pdf->SetFont('Helvetica','B', 8);
@@ -3716,6 +3733,10 @@ class nomina_fiscal_model extends CI_Model {
     // $departamentos = $this->usuarios_model->departamentos();
     $_GET['did_empresa'] = $empresaId;
     $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    // echo "<pre>";
+    //   var_dump($infonavit, $trans);
+    // echo "</pre>";exit;
 
     foreach ($departamentos as $keyd => $departamento)
     {
@@ -3769,13 +3790,23 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
           $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '$', false);
           $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+
+          if ($ver_infonavit != 0)
+          {
+            $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+          }
+
           if($ver_des_playera)
             $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
           if($ver_des_otro)
             $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
           $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+
+          if ($ver_trans != 0)
+          {
+            $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          }
+
           $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
@@ -3815,13 +3846,22 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
       $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
       $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
-      $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+
+      if ($ver_infonavit != 0)
+      {
+        $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+      }
+
       if($ver_des_playera)
         $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
       if($ver_des_otro)
         $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
       $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+
+      if ($ver_trans != 0)
+      {
+        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+      }
       $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
@@ -3852,11 +3892,15 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->AddPage();
     $pdf->SetAligns(array('L', 'L', 'L'));
     $pdf->SetWidths(array(50, 50, 50));
-    $pdf->Row(array(
-      'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '$', false),
-      'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '$', false),
-      'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
-      ), false, true, null, 2, 1);
+
+    if ($empresa['info']->rfc === 'ESJ97052763A')
+    {
+      $pdf->Row(array(
+        'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '$', false),
+        'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '$', false),
+        'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
+        ), false, true, null, 2, 1);
+    }
 
     $pdf->Output('Nomina.pdf', 'I');
   }
@@ -4434,6 +4478,249 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->Output('Nomina.pdf', 'I');
   }
 
+  public function rptTrabajadoresPrestamosPdf($usuarioId, $fecha1, $fecha2, $todos = false)
+  {
+    if ($usuarioId)
+    {
+      $this->load->model('empresas_model');
+
+      $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
+      $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
+
+      $sql = '';
+
+      if ($fecha1 != '')
+      {
+        $sql .= " AND DATE(np.fecha) >= '{$fecha1}'";
+      }
+
+      if ($fecha2 != '')
+      {
+        $sql .= " AND DATE(np.fecha) <= '{$fecha2}'";
+      }
+
+      if ($usuarioId && $usuarioId !== '')
+      {
+        $sql .= " AND np.id_usuario = {$usuarioId}";
+      }
+
+      if ( ! $todos)
+      {
+        $sql .= " AND np.status = 'f'";
+      }
+
+      $data = $this->db->query(
+        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - SUM(nfp.monto) as total_pagado
+        FROM nomina_prestamos as np
+        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo
+        WHERE '1' {$sql}
+        GROUP BY np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha), DATE(np.inicio_pago)
+        ORDER BY fecha ASC
+        ")->result();
+
+      foreach ($data as $key => $prestamo)
+      {
+        $prestamo->prestamos = $this->db->query(
+          "SELECT nfp.anio, nfp.semana, nfp.monto
+          FROM nomina_fiscal_prestamos as nfp
+          WHERE id_prestamo = $prestamo->id_prestamo
+          ")->result();
+      }
+
+      $this->load->model('usuarios_model');
+      $empleado = $this->usuarios_model->get_usuario_info($usuarioId);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->show_head = true;
+      // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      // $pdf->titulo1 S= $empresa['info']->nombre_fiscal;
+      // $pdf->logo = $empresa['info']->logo;
+      $pdf->titulo2 = $empleado['info'][0]->nombre;
+      $pdf->titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $columnas = array(
+        'n' => array('FECHA', 'FECHA INICIO PAGO', 'PRESTADO', 'PAGO X SEMANA', 'SALDO'),
+        'w' => array(40, 40, 40, 40, 40),
+        'a' => array('L', 'L', 'L', 'L', 'R')
+      );
+
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetAligns($columnas['a']);
+      $pdf->SetWidths($columnas['w']);
+      $pdf->Row($columnas['n'], 1, 1, null, 2, 1);
+
+      $y = $pdf->GetY();
+
+      $columnas2 = array(
+        'n' => array('AÑO', 'SEMANA', 'MONTO'),
+        'w' => array(40, 40, 40),
+        'a' => array('L', 'L', 'R')
+      );
+
+      foreach ($data as $key => $prestamo)
+      {
+        $pdf->SetFont('Helvetica','', 8);
+        if($pdf->GetY() >= $pdf->limiteY){
+          $pdf->AddPage();
+          $pdf->SetFont('Helvetica','B', 8);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->Row($columnas['n'], false, false, null, 2, 1);
+        }
+
+        $pdf->SetFont('Helvetica','', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+
+        $data2 = array(
+          $prestamo->fecha,
+          $prestamo->inicio_pago,
+          String::formatoNumero($prestamo->prestado),
+          String::formatoNumero($prestamo->pago_semana),
+          String::formatoNumero($prestamo->total_pagado),
+        );
+
+        $pdf->Row($data2, false, true, null, 2, 1);
+
+        if ($prestamo->prestamos)
+        {
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Helvetica','B', 8);
+          $pdf->SetXY(86, $pdf->GetY() + 2);
+          $pdf->SetFillColor(242, 242, 242);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetAligns($columnas2['a']);
+          // $pdf->SetWidths($columnas2['w']);
+          $pdf->Row($columnas2['n'], 1, 1, null, 2, 1);
+
+          foreach ($prestamo->prestamos as $p)
+          {
+            if($pdf->GetY() >= $pdf->limiteY)
+              $pdf->AddPage();
+
+            $pdf->SetXY(86, $pdf->GetY());
+            $pdf->SetFillColor(255, 255, 255);
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->Row(array($p->anio, $p->semana, $p->monto), 1, 1, null, 2, 1);
+          }
+
+          $pdf->SetY($pdf->GetY() + 2);
+        }
+      }
+
+      $pdf->Output('Reporte_Prestamos_Trabajador.pdf', 'I');
+    }
+  }
+
+  public function asistencia_pdf($empresaId, $semana)
+  {
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId);
+
+    $sem = $this->fechasDeUnaSemana($semana);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->logo = $empresa['info']->logo;
+    $pdf->titulo2 = "Semana {$semana} del {$sem['fecha_inicio']} al {$sem['fecha_final']}";
+    $pdf->titulo3 = "LISTA DE TRABAJO";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $columnas = array(
+      'n' => array('', 'NOMBRE DEL TRABAJADOR', 'DIAS TRABAJADOS'),
+      'w' => array(5, 60, 140),
+      'a' => array('L', 'L', 'C')
+    );
+
+    $pdf->SetFont('Helvetica','B', 8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFillColor(255, 255, 255); // 242, 242, 242
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetAligns($columnas['a']);
+    $pdf->SetWidths($columnas['w']);
+    $pdf->Row($columnas['n'], 1, 1, null, 2, 1);
+
+    $columnas = array(
+      'n' => array('', '', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'PTMOS'),
+      'w' => array(5, 60, 17, 17, 17, 17, 17, 17, 17, 21),
+      'a' => array('', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')
+    );
+
+    $pdf->SetFont('Helvetica','B', 8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetFillColor(255, 255, 255); // 242, 242, 242
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetAligns($columnas['a']);
+    $pdf->SetWidths($columnas['w']);
+    $pdf->Row($columnas['n'], 1, 1, null, 2, 1);
+
+    $y = $pdf->GetY();
+    $this->load->model('usuarios_puestos_model');
+    $_GET['did_empresa'] = $empresaId;
+    $puestos = $this->usuarios_puestos_model->getPuestos(false);
+
+    $filtros = array(
+      'semana'    => $semana,
+      'empresaId' => $empresaId,
+      'puestoId'  => '',
+    );
+
+    // Datos para la vista.
+    $empleados = $this->listadoEmpleadosAsistencias($filtros);
+
+    foreach ($puestos['puestos'] as $key => $puesto)
+    {
+      $pdf->SetFont('Helvetica','', 8);
+      if($pdf->GetY() >= $pdf->limiteY){
+        $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row($columnas['n'], false, false, null, 2, 1);
+      }
+
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFillColor(242, 242, 242); // 242, 242, 242
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetAligns($columnas['a']);
+      $pdf->SetWidths($columnas['w']);
+      $pdf->Row(array('', $puesto->nombre, '', '', '', '', '', '', '', ''), 1, 1, null, 2, 1);
+
+      foreach ($empleados as $empleado)
+      {
+        if ($empleado->id_puesto == $puesto->id_puesto)
+        {
+          if($pdf->GetY() >= $pdf->limiteY){
+            $pdf->AddPage();
+            $pdf->SetFont('Helvetica','B', 8);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->Row($columnas['n'], false, false, null, 2, 1);
+          }
+
+          $pdf->SetFont('Helvetica','B', 8);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetFillColor(255, 255, 255); // 242, 242, 242
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetAligns($columnas['a']);
+          $pdf->SetWidths($columnas['w']);
+          $pdf->Row(array('', $empleado->nombre, '', '', '', '', '', '', '', ''), 1, 1, null, 2, 1);
+        }
+      }
+    }
+
+    $pdf->Output('Reporte_Asistencias.pdf', 'I');
+  }
 }
 /* End of file nomina_fiscal_model.php */
 /* Location: ./application/models/nomina_fiscal_model.php */

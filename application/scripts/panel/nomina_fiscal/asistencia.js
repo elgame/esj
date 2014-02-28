@@ -6,6 +6,7 @@
     autocompleteEmpresas();
     eventOnChangeSelectDia();
     eventDblClickEmpleado();
+    eventOnChangeSemana();
   });
 
   var autocompleteEmpresas = function () {
@@ -18,6 +19,7 @@
           $(this).css("background-color", "#B0FFB0");
           cargaDepaPues();
           cargaSemanas();
+          $('#asis-pdf').attr('href', base_url + 'panel/nomina_fiscal/asistencia_pdf/?id=' + ui.item.id + '&sem=' + $('#semanas').find('option:selected').val());
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
@@ -35,6 +37,15 @@
 
       color = getColor($option.val());
       $select.css({'background-color': color});
+    });
+  };
+
+  var eventOnChangeSemana = function () {
+    $('#semanas').on('change', function(event) {
+      var $select = $(this),
+          $option = $select.find('option:selected');
+
+      $('#asis-pdf').attr('href', base_url + 'panel/nomina_fiscal/asistencia_pdf/?id=' + $('#empresaId').val() + '&sem=' + $option.val());
     });
   };
 
@@ -75,6 +86,8 @@
           html += '<option value="'+data[i].semana+'">'+data[i].semana+' - Del '+data[i].fecha_inicio+' Al '+data[i].fecha_final+'</option>';
         }
         $('#semanas').html(html);
+
+        $('#asis-pdf').attr('href', base_url + 'panel/nomina_fiscal/asistencia_pdf/?id=' + $('#empresaId').val() + '&sem=' + $('#semanas').find('option:selected').val());
     });
   }
 

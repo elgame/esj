@@ -12,7 +12,7 @@
 |
 | If this is not set then CodeIgniter will guess the protocol, domain and
 | path to your installation.
-|http://localhost/sanjorge/   sanjorge.dev
+|http://localhost/sanjorge/   http://sanjorge.dev/
 */
 $config['base_url'] = 'http://localhost/sanjorge/'; //http://192.168.1.100/sanjorge/
 $config['base_url_bascula'] = 'http://localhost/sanjorge_bascula/';

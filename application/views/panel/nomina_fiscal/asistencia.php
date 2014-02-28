@@ -63,10 +63,13 @@
                   <span class="label" style="background-color: red; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Falta</span>
                   <span class="label" style="background-color: yellow; color: black; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Incapacidad</span>
                 </div>
-                <div class="span6">
+                <div class="span5">
                   <div style="font-size: 1.5em;"><?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?></div>
                 </div>
                 <div class="span2">
+                  <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
+                </div>
+                <div class="span1">
                   <button type="submit" name="guardar" class="btn btn-success" style="float: right;">Guardar</button>
                 </div>
               </div>
