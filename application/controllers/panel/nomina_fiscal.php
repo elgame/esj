@@ -26,6 +26,8 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/recibo_nomina_pdf/',
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
+    'nomina_fiscal/rpt_pdf/',
+    'nomina_fiscal/asistencia_pdf/',
   );
 
   public function _remap($method)
@@ -411,6 +413,41 @@ class nomina_fiscal extends MY_Controller {
     $this->load->view('panel/nomina_fiscal/rptvacaciones',$params);
     $this->load->view('panel/footer',$params);
   }
+
+  public function rpt_prestamos_trabajador()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_trabajador_prestamos.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Prestamos Trabajador');
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_prestamos_trabajador',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $trabajadorId = isset($_GET['fid_trabajador']) ? $_GET['fid_trabajador'] : false;
+    $fecha1 = isset($_GET['ffecha1']) ? $_GET['ffecha1'] : false;
+    $fecha2 = isset($_GET['ffecha2']) ? $_GET['ffecha2'] : false;
+    $todos = isset($_GET['ftodos']) ? true : false;
+
+    $this->nomina_fiscal_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos);
+  }
+
   public function rpt_vacaciones_pdf()
   {
     $this->load->model('nomina_fiscal_model');
@@ -494,6 +531,12 @@ class nomina_fiscal extends MY_Controller {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+  }
+
+  public function asistencia_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->asistencia_pdf($_GET['id'], $_GET['sem']);
   }
 
   /*
