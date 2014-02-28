@@ -401,8 +401,10 @@ class Bascula_model extends CI_Model {
     // echo "<pre>";
     //   var_dump($data);
     // echo "</pre>";exit;
-
     $pdf = new mypdf_ticket();
+    $pdf->titulo1 = $data['info'][0]->empresa;
+    if($data['info'][0]->id_empresa != 2)
+      $pdf->reg_fed = '';
     $pdf->SetFont('Arial','',8);
     $pdf->AddPage();
 
@@ -680,7 +682,7 @@ class Bascula_model extends CI_Model {
     {
       //Elimina el mov del banco
       $data_bascula = $this->db->query("SELECT id_movimiento, id_bascula_pago
-                                        FROM banco_movimientos_bascula 
+                                        FROM banco_movimientos_bascula
                                         WHERE id_bascula_pago = {$id_pago}")->result();
       if(count($data_bascula) > 0){
         foreach ($data_bascula as $key => $value) {

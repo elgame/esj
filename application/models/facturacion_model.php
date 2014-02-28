@@ -1791,7 +1791,7 @@ class facturacion_model extends privilegios_model{
 
         $this->load->model('empresas_model');
         $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
-        
+
         $this->load->library('mypdf');
         // Creación del objeto de la clase heredada
         $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -2044,7 +2044,7 @@ class facturacion_model extends privilegios_model{
 
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
-      
+
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');

@@ -1411,7 +1411,7 @@ class cuentas_cobrar_model extends privilegios_model{
 					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
 					AND (Date(fecha) >= '{$fecha1}' AND Date(fecha) <= '{$fecha2}')
 					{$sql} {$sqlext[1]}
-				ORDER BY fecha ASC");
+				ORDER BY fecha ASC, folio ASC");
 			$cliente->facturas = $facturas->result();
 			$facturas->free_result();
 			foreach ($cliente->facturas as $key => $factura)
@@ -1641,12 +1641,12 @@ class cuentas_cobrar_model extends privilegios_model{
 	public function estadoCuentaXls()
 	{
 		header('Content-type: application/vnd.ms-excel');
-		header("Content-Disposition: attachment; filename=nominaCampo.xls");
+		header("Content-Disposition: attachment; filename=estado_cuenta.xls");
 		header("Pragma: no-cache");
 		header("Expires: 0");
 
 		$res = $this->getEstadoCuentaData();
-		
+
 		$this->load->model('empresas_model');
 	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
