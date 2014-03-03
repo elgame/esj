@@ -18,6 +18,7 @@ class banco extends MY_Controller {
 
 		'banco/saldos_pdf/',
 		'banco/saldos_xls/',
+    'banco/get_cuentas_contpaq/',
 		);
 
 	public function _remap($method){
@@ -35,7 +36,7 @@ class banco extends MY_Controller {
 			redirect(base_url('panel/home'));
 	}
 
- 	
+
 	public function index()
 	{
 		$this->carabiner->js(array(
@@ -151,7 +152,7 @@ class banco extends MY_Controller {
 		$params['seo'] = array(
 			'titulo' => 'Agregar deposito'
 		);
-		
+
 		$this->load->model('banco_cuentas_model');
 
 		$this->configAddDeposito();
@@ -171,8 +172,8 @@ class banco extends MY_Controller {
 		$_GET['id_banco']       = $params['bancos']['bancos'][0]->id_banco;
 		$params['cuentas']      = $this->banco_cuentas_model->getCuentas(false);
 		$params['cuenta_saldo'] = (isset($params['cuentas']['cuentas'][0])? $params['cuentas']['cuentas'][0]->saldo: 0);
-		
-		$params['metods_pago']  = array( 
+
+		$params['metods_pago']  = array(
 			array('nombre' => 'Transferencia', 'value' => 'transferencia'),
 			array('nombre' => 'Cheque', 'value' => 'cheque'),
 			array('nombre' => 'Efectivo', 'value' => 'efectivo'),
@@ -202,7 +203,7 @@ class banco extends MY_Controller {
 		$params['seo'] = array(
 			'titulo' => 'Agregar retiro'
 		);
-		
+
 		$this->load->model('banco_cuentas_model');
 
 		$this->configAddDeposito();
@@ -225,8 +226,8 @@ class banco extends MY_Controller {
 		$_GET['id_banco']       = $params['bancos']['bancos'][0]->id_banco;
 		$params['cuentas']      = $this->banco_cuentas_model->getCuentas(false);
 		$params['cuenta_saldo'] = (isset($params['cuentas']['cuentas'][0])? $params['cuentas']['cuentas'][0]->saldo: 0);
-		
-		$params['metods_pago']  = array( 
+
+		$params['metods_pago']  = array(
 			array('nombre' => 'Transferencia', 'value' => 'transferencia'),
 			array('nombre' => 'Cheque', 'value' => 'cheque'),
 			array('nombre' => 'Efectivo', 'value' => 'efectivo'),
@@ -285,7 +286,7 @@ class banco extends MY_Controller {
 		if (isset($_GET['id_movimiento']{0}))
 		{
 			$this->load->model('banco_cuentas_model');
-			$response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'], 
+			$response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'],
 				array('entransito' => ($this->input->get('mstatus')=='Trans'? 'f' : 't') ));
 			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=11'));
 		}else
@@ -293,6 +294,11 @@ class banco extends MY_Controller {
 	}
 
 
+
+  public function get_cuentas_contpaq(){
+    $this->load->model('cuentas_cpi_model');
+    echo json_encode($this->cuentas_cpi_model->getCuentasAjax());
+  }
 
 	/**
 	 * ************************************************
@@ -340,7 +346,7 @@ class banco extends MY_Controller {
 		$params['seo'] = array(
 			'titulo' => 'Agregar cuenta'
 		);
-		
+
 		$this->load->model('empresas_model');
 		$this->load->model('banco_cuentas_model');
 

@@ -14,7 +14,7 @@ class banco_cuentas_model extends banco_model {
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
 		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
-		
+
 		$_GET['vertodos'] = $this->input->get('vertodos')!=''? $this->input->get('vertodos'): 'all';
 		$sql = $sql_todos = '';
 		if($_GET['vertodos'] == 'tran')
@@ -31,17 +31,17 @@ class banco_cuentas_model extends banco_model {
 			$sql .= " AND e.id_empresa = {$this->input->get('did_empresa')}";
 		else
 			$sql .= " AND e.id_empresa = {$empresa->id_empresa}";
-			
+
 		$res = $this->db->query(
-								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, 
-									substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, 
+								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal,
+									substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi,
 									(
-										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}') - 
+										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}') -
 										(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta AND Date(fecha) <= '{$fecha}' {$sql_todos})
 									) AS saldo
 								FROM banco_cuentas AS bc
-									INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco 
-									INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa 
+									INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
+									INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
 								WHERE bc.status = 'ac' {$sql}
 								ORDER BY bb.nombre ASC, bc.alias ASC");
 
@@ -66,7 +66,7 @@ class banco_cuentas_model extends banco_model {
 	public function saldosCuentasPdf()
 	{
 		$res = $this->getSaldosCuentasData();
-		
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
@@ -82,19 +82,19 @@ class banco_cuentas_model extends banco_model {
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-	
+
 		$aligns = array('L', 'L', 'L', 'R');
 		$widths = array(50, 24, 80, 50);
 		$header = array('Banco', 'Cuenta', 'Alias', 'Saldo');
-		
+
 		$total_cargo = 0;
 		$total_abono = 0;
 		$total_saldo = 0;
-		
+
 		foreach($res['cuentas'] as $key => $item){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-	
+
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(255,255,255);
 				$pdf->SetFillColor(160,160,160);
@@ -103,43 +103,43 @@ class banco_cuentas_model extends banco_model {
 				$pdf->SetWidths($widths);
 				$pdf->Row($header, true);
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			
-			$datos = array($item->banco, 
-									$item->numero, 
-									$item->alias,  
+
+			$datos = array($item->banco,
+									$item->numero,
+									$item->alias,
 									String::formatoNumero($item->saldo, 2, '$', false) );
-				
+
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->Row($datos, false);
 		}
-	
+
 		$pdf->SetX(6);
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(255,255,255);
 		$pdf->SetAligns(array('R', 'R'));
 		$pdf->SetWidths(array(154, 50));
-		$pdf->Row(array('Totales:', 
+		$pdf->Row(array('Totales:',
 										String::formatoNumero($res['total_saldos'], 2, '$', false)
 									), true);
-	
+
 		$pdf->Output('saldos_cuentas.pdf', 'I');
 	}
-	
+
 	public function saldosCuentasExcel(&$xls=null, $close=true)
 	{
 		$res = $this->getSaldosCuentasData();
-		
+
 		$this->load->library('myexcel');
 		if($xls == null)
 			$xls = new myexcel();
-	
+
 		$worksheet =& $xls->workbook->addWorksheet();
-	
+
 		$xls->titulo2 = 'Saldos de Cuentas '.(isset($_GET['dempresa']{0})? '<'.$this->input->get('dempresa').'>': '');
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		if($this->input->get('vertodos') == 'tran')
@@ -148,15 +148,15 @@ class banco_cuentas_model extends banco_model {
 			$xls->titulo4 .= 'Cobrados';
 		else
 			$xls->titulo4 .= 'Todos';
-			
+
 		$row=0;
 		//Header
 		$xls->excelHead($worksheet, $row, 8, array(
-				array($xls->titulo2, 'format_title2'), 
+				array($xls->titulo2, 'format_title2'),
 				array($xls->titulo3, 'format_title3'),
 				array($xls->titulo4, 'format_title3')
 		));
-			
+
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $res['cuentas'], array(
 				'head' => array('Banco', 'Cuenta', 'Alias', 'Saldo'),
@@ -166,7 +166,7 @@ class banco_cuentas_model extends banco_model {
 						array('name' => 'alias', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0) )
 		));
-	
+
 		if($close)
 		{
 			$xls->workbook->send('saldos_cuentas.xls');
@@ -187,7 +187,7 @@ class banco_cuentas_model extends banco_model {
 			$fecha1 = $_GET['ffecha2'];
 			$fecha2 = $_GET['ffecha1'];
 		}
-		
+
 		$_GET['vertodos'] = $this->input->get('vertodos')!=''? $this->input->get('vertodos'): 'all';
 		$sql = $sql_todos = $sqloperacion = '';
 		if($_GET['vertodos'] == 'tran')
@@ -208,12 +208,12 @@ class banco_cuentas_model extends banco_model {
 			$sql .= " AND e.id_empresa = {$this->input->get('did_empresa')}";
 		else
 			$sql .= " AND e.id_empresa = {$empresa->id_empresa}";*/
-		
+
 		// Se Obtiene el saldo anterior a fecha1
 		$data_anterior = $this->db->query(
-				"SELECT deposito, retiro, (deposito - retiro) AS saldo 
+				"SELECT deposito, retiro, (deposito - retiro) AS saldo
 				FROM (
-					SELECT 
+					SELECT
 						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}') AS deposito,
 
 						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sql_todos}) AS retiro
@@ -240,7 +240,7 @@ class banco_cuentas_model extends banco_model {
 
 		//Saldo en el rango de fecha
 		$res = $this->db->query("SELECT
-				m.id_movimiento, 
+				m.id_movimiento,
 				Date(m.fecha) AS fecha,
 				m.numero_ref,
 				m.concepto,
@@ -255,18 +255,18 @@ class banco_cuentas_model extends banco_model {
 				m.entransito,
 				m.metodo_pago,
 				m.id_cuenta_proveedor
-			FROM banco_movimientos AS m 
-				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente 
+			FROM banco_movimientos AS m
+				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
-			WHERE m.id_cuenta = {$this->input->get('id_cuenta')} 
-				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}' 
-				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos})) 
+			WHERE m.id_cuenta = {$this->input->get('id_cuenta')}
+				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}'
+				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
 				{$sqloperacion}
 			ORDER BY m.fecha ASC");
 
 		if($res->num_rows() > 0)
 		{
-			foreach ($res->result() as $key => $item) 
+			foreach ($res->result() as $key => $item)
 			{
 				//estado de los cheques
 				if ($item->entransito == 't' && $item->metodo_pago == 'cheque')
@@ -288,7 +288,7 @@ class banco_cuentas_model extends banco_model {
 					$item->deposito = $item->monto;
 					$item->saldo    = $response['total_saldos'];
 				}else //retiros
-				{ 
+				{
 					if ($item->status == 't'){
 						$response['total_saldos'] -= $item->monto;
 						$response['total_retiro'] += $item->monto;
@@ -296,7 +296,7 @@ class banco_cuentas_model extends banco_model {
 					$item->retiro = $item->monto;
 					$item->saldo  = $response['total_saldos'];
 				}
-				
+
 				$response['movimientos'][] = $item;
 			}
 		}
@@ -310,7 +310,7 @@ class banco_cuentas_model extends banco_model {
 	public function getSaldoCuentaPdf()
 	{
 		$res = $this->getSaldoCuentaData();
-		
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
@@ -326,19 +326,19 @@ class banco_cuentas_model extends banco_model {
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-	
+
 		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'C');
 		$widths = array(17, 15, 40, 40, 20, 20, 20, 20, 15);
 		$header = array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M. pago', 'Retiro', 'Deposito', 'Saldo', 'Estado');
-		
+
 		$total_cargo = 0;
 		$total_abono = 0;
 		$total_saldo = 0;
-		
+
 		foreach($res['movimientos'] as $key => $item){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
-	
+
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(0,0,0);
 				$pdf->SetFillColor(160,160,160);
@@ -347,51 +347,51 @@ class banco_cuentas_model extends banco_model {
 				$pdf->SetWidths($widths);
 				$pdf->Row($header, false);
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			
-			$datos = array($item->fecha, 
-							$item->numero_ref, 
+
+			$datos = array($item->fecha,
+							$item->numero_ref,
 							substr($item->cli_pro, 0, 35),
 							strip_tags($item->concepto),
-							$item->metodo_pago,  
+							$item->metodo_pago,
 							String::formatoNumero($item->retiro, 2, '$', false),
 							String::formatoNumero($item->deposito, 2, '$', false),
-							String::formatoNumero($item->saldo, 2, '$', false), 
+							String::formatoNumero($item->saldo, 2, '$', false),
 							str_replace('|', ' ', $item->entransito),
 							);
-				
+
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->Row($datos, false);
 		}
-	
+
 		$pdf->SetX(6);
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
 		$pdf->SetWidths(array(112, 20, 20, 20));
-		$pdf->Row(array('Totales:', 
+		$pdf->Row(array('Totales:',
 					String::formatoNumero($res['total_retiro'], 2, '$', false),
 					String::formatoNumero($res['total_deposito'], 2, '$', false),
 					String::formatoNumero($res['total_saldos'], 2, '$', false),
 				), false);
-	
+
 		$pdf->Output('saldo_cuenta.pdf', 'I');
 	}
-	
+
 	public function getSaldoCuentaExcel(&$xls=null, $close=true)
 	{
 		$res = $this->getSaldoCuentaData();
-		
+
 		$this->load->library('myexcel');
 		if($xls == null)
 			$xls = new myexcel();
-	
+
 		$worksheet =& $xls->workbook->addWorksheet();
-	
+
 		$xls->titulo2 = 'Cuenta <'.$res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias.'>';
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		if($this->input->get('vertodos') == 'tran')
@@ -400,15 +400,15 @@ class banco_cuentas_model extends banco_model {
 			$xls->titulo4 .= 'Cobrados';
 		else
 			$xls->titulo4 .= 'Todos';
-			
+
 		$row=0;
 		//Header
 		$xls->excelHead($worksheet, $row, 8, array(
-				array($xls->titulo2, 'format_title2'), 
+				array($xls->titulo2, 'format_title2'),
 				array($xls->titulo3, 'format_title3'),
 				array($xls->titulo4, 'format_title3')
 		));
-			
+
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $res['movimientos'], array(
 				'head' => array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M pago', 'Retiro', 'Deposito', 'Saldo', 'Estado'),
@@ -424,7 +424,7 @@ class banco_cuentas_model extends banco_model {
 						array('name' => 'entransito', 'format' => 'format4', 'sum' => -1),
 						 )
 		));
-	
+
 		if($close)
 		{
 			$xls->workbook->send('saldo_cuenta.xls');
@@ -435,7 +435,7 @@ class banco_cuentas_model extends banco_model {
 	public function showConciliacion()
 	{
 		$res = $this->getSaldoCuentaData();
-		
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
@@ -445,14 +445,14 @@ class banco_cuentas_model extends banco_model {
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
-	
+
 		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'C');
 		$widths = array(17, 15, 50, 50, 20, 20, 20, 15);
 		$header = array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M. pago', 'Retiro', 'Deposito', 'Estado');
-		
+
 		$total_retiro   = 0;
 		$total_deposito = 0;
-		
+
 		foreach($res['movimientos'] as $key => $item){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
@@ -464,7 +464,7 @@ class banco_cuentas_model extends banco_model {
 					$pdf->SetX(6);
 					$pdf->MultiCell(160, 8, "SALDO SEGUN CONTABILIDAD: ".$res['total_saldos'], '', "L", false);
 				}
-	
+
 				$pdf->SetFont('Arial','B',8);
 				$pdf->SetTextColor(0,0,0);
 				$pdf->SetFillColor(160,160,160);
@@ -473,22 +473,22 @@ class banco_cuentas_model extends banco_model {
 				$pdf->SetWidths($widths);
 				$pdf->Row($header, false);
 			}
-			
+
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			
+
 			if(substr($item->entransito, 0, 5) == 'Trans')
 			{
-				$datos = array($item->fecha, 
-								$item->numero_ref, 
+				$datos = array($item->fecha,
+								$item->numero_ref,
 								substr($item->cli_pro, 0, 35),
 								strip_tags($item->concepto),
-								$item->metodo_pago,  
+								$item->metodo_pago,
 								String::formatoNumero($item->retiro, 2, '$', false),
 								String::formatoNumero($item->deposito, 2, '$', false),
 								str_replace('|', ' ', $item->entransito),
 								);
-					
+
 				$pdf->SetX(6);
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
@@ -498,26 +498,26 @@ class banco_cuentas_model extends banco_model {
 				$total_deposito += $item->deposito;
 			}
 		}
-	
+
 		$pdf->SetX(6);
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R'));
 		$pdf->SetWidths(array(152, 20, 20));
-		$pdf->Row(array('Totales:', 
+		$pdf->Row(array('Totales:',
 					String::formatoNumero($total_retiro, 2, '$', false),
 					String::formatoNumero($total_deposito, 2, '$', false),
 				), false);
 
-		
+
 		$conciliado = $res['total_saldos']+$total_retiro-$total_deposito;
 		$pdf->SetFont('Arial','B',10);
 		$pdf->SetAligns(array('L', 'R'));
 		$pdf->SetWidths(array(50, 30));
-		$pdf->Row(array('SALDO  CONCILIADO:', 
+		$pdf->Row(array('SALDO  CONCILIADO:',
 					String::formatoNumero($conciliado, 2, '$', false),
 				), false, false);
-		$pdf->Row(array('DIFERENCIA:', 
+		$pdf->Row(array('DIFERENCIA:',
 					String::formatoNumero($_GET['saldob']-$conciliado, 2, '$', false),
 				), false, false);
 
@@ -527,8 +527,8 @@ class banco_cuentas_model extends banco_model {
 
 	public function getChequesNoCobrados($id_cuenta)
 	{
-		$data = $this->db->query("SELECT Coalesce(Sum(monto), 0) AS r_nocob FROM banco_movimientos 
-			WHERE status = 't' AND id_cuenta = {$id_cuenta} AND metodo_pago = 'cheque' 
+		$data = $this->db->query("SELECT Coalesce(Sum(monto), 0) AS r_nocob FROM banco_movimientos
+			WHERE status = 't' AND id_cuenta = {$id_cuenta} AND metodo_pago = 'cheque'
 				AND entransito = 't' AND tipo = 'f'")->row();
 		return $data->r_nocob;
 	}
@@ -557,6 +557,8 @@ class banco_cuentas_model extends banco_model {
 						);
 			if(is_numeric($_POST['did_cliente']))
 				$data['id_cliente'] = $this->input->post('did_cliente');
+      if(is_numeric($_POST['did_cuentacpi']))
+        $data['cuenta_cpi'] = $this->input->post('did_cuentacpi');
 		}
 		$data['concepto'] = substr($data['concepto'], 0, 120);
 
@@ -587,6 +589,8 @@ class banco_cuentas_model extends banco_model {
 						);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
+      if(is_numeric($_POST['did_cuentacpi']))
+        $data['cuenta_cpi'] = $this->input->post('did_cuentacpi');
 		}
 		$data['concepto'] = substr($data['concepto'], 0, 120);
 
@@ -622,7 +626,7 @@ class banco_cuentas_model extends banco_model {
 		//Registro el traspaso de dinero a otra cuenta
 		if($traspaso)
 		{
-			if ($data_traspaso==null) 
+			if ($data_traspaso==null)
 			{
 				$data_traspaso = array(
 						'id_cuenta'   => $this->input->post('fcuenta_destino'),
@@ -636,8 +640,8 @@ class banco_cuentas_model extends banco_model {
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						);
 			}
-			$this->addDeposito($data_traspaso);
-			$this->db->update('banco_movimientos', array('id_traspaso' => $id_movimiento), "id_movimiento = {$id_movimiento}");
+			$res_trasp = $this->addDeposito($data_traspaso);
+			$this->db->update('banco_movimientos', array('id_traspaso' => $res_trasp['id_movimiento']), "id_movimiento = {$id_movimiento}");
 		}
 
 		return array('error' => FALSE, 'ver_cheque' => ($data['metodo_pago']=='cheque'? true: false), 'id_movimiento' => $id_movimiento);
@@ -650,8 +654,8 @@ class banco_cuentas_model extends banco_model {
 		{
 			$cheque = new Cheque();
 			$cheque->{'generaCheque_'.$data['info']->id_banco}(
-						$data['info']->a_nombre_de, 
-						$data['info']->monto, 
+						$data['info']->a_nombre_de,
+						$data['info']->monto,
 						substr($data['info']->fecha, 0, 10)
 						);
 		}else
@@ -682,20 +686,20 @@ class banco_cuentas_model extends banco_model {
 	public function deleteMovimiento($id_movimiento, $cancelar=false)
 	{
 		//compras, ventas, notas de venta ligadas al movimiento bancario
-		// $data_compras     = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, ca.id_compra 
-		// 	FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS ca ON ca.id_abono = bm.id_compra_abono 
+		// $data_compras     = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, ca.id_compra
+		// 	FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS ca ON ca.id_abono = bm.id_compra_abono
 		// 	WHERE bm.id_movimiento = {$id_movimiento}");
 		$data_facturas    = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_factura, af.id_factura
-			FROM banco_movimientos_facturas AS bm INNER JOIN facturacion_abonos AS af ON af.id_abono = bm.id_abono_factura 
+			FROM banco_movimientos_facturas AS bm INNER JOIN facturacion_abonos AS af ON af.id_abono = bm.id_abono_factura
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 		$data_notas_venta = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_venta_remision, af.id_venta
-			FROM banco_movimientos_ventas_remision AS bm INNER JOIN facturacion_ventas_remision_abonos AS af ON af.id_abono = bm.id_abono_venta_remision 
+			FROM banco_movimientos_ventas_remision AS bm INNER JOIN facturacion_ventas_remision_abonos AS af ON af.id_abono = bm.id_abono_venta_remision
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 		$data_compras = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, af.id_compra
-			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono 
+			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
-			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago 
+			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 
 		if($cancelar)//cancelar movimiento
@@ -733,7 +737,7 @@ class banco_cuentas_model extends banco_model {
 				$this->bascula_model->cancelar_pago($value->id_bascula_pago, true);
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -770,8 +774,8 @@ class banco_cuentas_model extends banco_model {
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
 			$sql = "WHERE ( lower(c.numero) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
-								lower(c.alias) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
-								lower(bb.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR 
+								lower(c.alias) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+								lower(bb.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(e.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
 		$_GET['fstatus'] = ($this->input->get('fstatus') !== false? $this->input->get('fstatus'): 'ac');
@@ -787,16 +791,16 @@ class banco_cuentas_model extends banco_model {
 		if(isset($data['id_empresa']))
 			$sql .= ($sql==''? ' WHERE ': ' AND ')." e.id_empresa = {$data['id_empresa']}";
 
- 		$query['query'] = 
- 						"SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco, e.nombre_fiscal, 
+ 		$query['query'] =
+ 						"SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco, e.nombre_fiscal,
  										c.numero, c.alias, c.cuenta_cpi, c.status,
  										(
-											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = c.id_cuenta) - 
+											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = c.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = c.id_cuenta)
 										) AS saldo
-						FROM banco_cuentas AS c 
-							INNER JOIN banco_bancos AS bb ON c.id_banco = bb.id_banco 
-							INNER JOIN empresas AS e ON c.id_empresa = e.id_empresa 
+						FROM banco_cuentas AS c
+							INNER JOIN banco_bancos AS bb ON c.id_banco = bb.id_banco
+							INNER JOIN empresas AS e ON c.id_empresa = e.id_empresa
 						{$sql}
 						ORDER BY (bb.nombre, c.alias) ASC";
 		if($paginados)
@@ -879,15 +883,15 @@ class banco_cuentas_model extends banco_model {
 		$id_cuenta = $id_cuenta? $id_cuenta: $_GET['id'];
 
 		$sql_res = $this->db->query(
-								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, 
-										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, bc.numero AS cuenta, bc.sucursal, 
+								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal,
+										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, bc.numero AS cuenta, bc.sucursal,
 										(
-											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) - 
+											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)
 										) AS saldo
                  FROM banco_cuentas AS bc
-                 		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco 
-										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa 
+                 		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
+										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
                  WHERE bc.id_cuenta = {$id_cuenta}");
 		$data['info'] = array();
 

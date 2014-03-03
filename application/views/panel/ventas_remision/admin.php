@@ -94,13 +94,16 @@
                             } else if ($fact->status === 'pa') {
                               $texto = 'Pagada';
                               $label = 'success';
-                            }?>
+                            }
+                            if($fact->id_nc != '')
+                              $texto .= ' - Nota de Credito'
+                            ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td class="center">
                     <?php
 
-                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/modificar/'))
+                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/modificar/') && $fact->id_nc == '')
                         echo '<a class="btn btn-success" href="'.base_url().'panel/ventas/agregar/?id_nr='.$fact->id_factura.'" title="Modificar">
                               <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Modificar</span></a>';
 
@@ -117,15 +120,20 @@
                           'btn_type' => 'btn-danger',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la nota de remisión?', 'Notas de Remisión', this); return false;"))
                         );
-
-                        echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
-                              'params'   => 'id='.$fact->id_factura,
-                              'btn_type' => 'btn-success',
-                              'attrs'    => array())
-                          );
+                        if($fact->id_nc == '')
+                        {
+                          echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                                'params'   => 'id='.$fact->id_factura,
+                                'btn_type' => 'btn-success',
+                                'attrs'    => array())
+                            );
+                          if($this->usuarios_model->tienePrivilegioDe('', 'ventas/nota_credito/'))
+                            echo '<a class="btn btn-warning" href="'.base_url().'panel/ventas/agregar/?id_nrc='.$fact->id_factura.'" title="Agregar Nota credito">
+                                  <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Nota Credito</span></a>';
+                        }
                       }
 
-                      if ($fact->status === 'ca')
+                      if ($fact->status === 'ca' && $fact->id_nc == '')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
                           'params'   => 'id_nr='.$fact->id_factura,

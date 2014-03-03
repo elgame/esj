@@ -23,11 +23,11 @@
           </div>
           <div class="box-content">
             <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Imprimir</a> | 
+              <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Excel</a> | 
+              <i class="icon-table"></i> Excel</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Estado cuenta</a> | 
+              <i class="icon-print"></i> Estado cuenta</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Estado cuenta</a>
 
@@ -36,18 +36,21 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
-                
+                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
+
                 <label for="ftipo">Pagos:</label>
                 <select name="ftipo" id="ftipo" class="input-large search-query">
                   <option value="to" <?php echo set_select_get('ftipo', 'to'); ?>>Todas</option>
                   <option value="pp" <?php echo set_select_get('ftipo', 'pp'); ?>>Pendientes por pagar</option>
                   <option value="pv" <?php echo set_select_get('ftipo', 'pv'); ?>>Plazo vencido</option>
-                </select><br>
+                </select>
+                <label for="fcon_saldo">Con saldo:</label>
+                <input type="checkbox" name="fcon_saldo" id="fcon_saldo" value="si" <?php echo isset($_GET['fcon_saldo'])? 'checked': ''; ?>>
+                <br>
 
                 <label for="dcliente">Cliente</label>
                 <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
-                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> | 
+                <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
@@ -68,7 +71,7 @@
               </thead>
               <tbody>
             <?php
-            $total_saldo = $total_abono = $total_cargo = 0; 
+            $total_saldo = $total_abono = $total_cargo = 0;
             foreach($data['cuentas'] as $cuenta){
               $total_cargo += $cuenta->total;
               $total_abono += $cuenta->abonos;

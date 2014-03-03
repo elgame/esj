@@ -26,7 +26,7 @@
 						<form action="<?php echo base_url('panel/banco/retirar'); ?>" method="post" class="form-horizontal">
 						  <fieldset>
 								<legend></legend>
-							
+
 								<div class="span6">
 									<span style="display: block; margin: 0 auto;text-align: center;border-bottom: 1px solid #ccc;font-size: 20px;">Origen</span>
 									<div class="control-group">
@@ -53,7 +53,7 @@
 									  <label class="control-label" for="fcuenta">Cuenta </label>
 									  <div class="controls">
 											<select name="fcuenta" id="fcuenta" required>
-									<?php  
+									<?php
 									foreach ($cuentas['cuentas'] as $key => $value) {
 										$select = set_select('fcuenta', $value->id_cuenta);
 										if($select == ' selected="selected"')
@@ -118,13 +118,22 @@
 												placeholder="Comisiones bancarias">
 									  </div>
 									</div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dcuenta_cpi">Cuenta Contpaq</label>
+                    <div class="controls">
+                      <input type="text" name="dcuenta_cpi" class="span12" id="dcuenta_cpi" value="<?php echo set_value('dcuenta_cpi'); ?>">
+                      <input type="hidden" name="did_cuentacpi" id="did_cuentacpi" value="<?php echo set_value('did_cuentacpi'); ?>">
+                    </div>
+                  </div>
+
 								</div>
 
 								<div class="span5">
 									<div style="margin-top: -25px;margin-left: -50px;">
 										<label for="ftraspaso">Traspaso <input type="checkbox" name="ftraspaso" id="ftraspaso" value="si" <?php echo set_checkbox('ftraspaso'); ?> data-uniform="false"></label>
 									</div>
-									
+
 									<div id="div_destino" style="display:none;">
 										<span style="display: block; margin: 0 auto;text-align: center;border-bottom: 1px solid #ccc;font-size: 20px;">Destino</span>
 										<div class="control-group">
@@ -144,7 +153,7 @@
 										  <label class="control-label" for="fcuenta_destino">Cuenta </label>
 										  <div class="controls">
 												<select name="fcuenta_destino" id="fcuenta_destino" required>
-										<?php  
+										<?php
 										foreach ($cuentas['cuentas'] as $key => $value) {
 											$select = set_select('fcuenta_destino', $value->id_cuenta);
 											if($select == ' selected="selected"')
@@ -158,7 +167,7 @@
 										</div>
 									</div>
 								</div> <!-- /span -->
-								
+
 								<div class="clearfix"></div>
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>
@@ -180,7 +189,7 @@
 
 <!-- Bloque de alertas -->
 <script type="text/javascript" charset="UTF-8">
-<?php 
+<?php
 if (isset($_GET['id_movimiento']{0}))
 	echo "window.open('".base_url('panel/banco/cheque?id=')."{$_GET['id_movimiento']}', 'Print cheque');";
 
@@ -191,7 +200,7 @@ if(isset($frm_errors)){
 		noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
 	});
 <?php }
-}?>	
+}?>
 </script>
 <!-- Bloque de alertas -->
 
