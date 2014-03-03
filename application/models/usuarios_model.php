@@ -365,13 +365,16 @@ class Usuarios_model extends privilegios_model {
    */
   public function getUsuariosAjax(){
     $sql = '';
-    $res = $this->db->query("
-        SELECT id, nombre, usuario, apellido_paterno, apellido_materno
+    if($this->input->get('empleados')!='')
+      $sql = " AND user_nomina = 't'";
+    $res = $this->db->query(
+        "SELECT id, nombre, usuario, apellido_paterno, apellido_materno
         FROM usuarios
         WHERE status = 't' AND
                 (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
                  lower(apellido_paterno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
                  lower(apellido_materno) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')
+          {$sql}
         ORDER BY nombre ASC
         LIMIT 20");
 

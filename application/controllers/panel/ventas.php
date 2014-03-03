@@ -96,7 +96,12 @@ class ventas extends MY_Controller {
 
 
       if($respons['passes'])
-        redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
+      {
+        if(isset($_POST['id_nrc']{0}))
+          redirect(base_url('panel/ventas/?msg=10'));
+        else
+          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
+      }
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
     }
@@ -125,12 +130,22 @@ class ventas extends MY_Controller {
       ->order_by('nombre')
       ->get()->result();
 
-    if (isset($_GET['id_nr']))
+    if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
-      $params['borrador']                = $this->ventas_model->getInfoVenta($_GET['id_nr']);
-      $params['fecha']  = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
-      // $params['borrador']['info']->serie = '';
-      // $params['borrador']['info']->folio = '';
+      $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
+      if(isset($_GET['id_nr']))
+        $params['fecha']    = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
+      if(isset($_GET['id_nrc']))
+      {
+        $params['borrador']['info']->serie         = '';
+        $params['borrador']['info']->folio         = '';
+        $params['borrador']['info']->subtotal      = '';
+        $params['borrador']['info']->subtotal      = '';
+        $params['borrador']['info']->importe_iva   = '';
+        $params['borrador']['info']->retencion_iva = '';
+        $params['borrador']['info']->total         = '';
+        $params['seo']['titulo'] = 'Agregar Nota de credito';
+      }
     }
 
     if(isset($_GET['msg']{0}))
@@ -611,6 +626,10 @@ class ventas extends MY_Controller {
         break;
       case 9:
         $txt = 'La Nota de remisión se pagó correctamente.';
+        $icono = 'success';
+        break;
+      case 10:
+        $txt = 'La Nota de credito se agrego correctamente.';
         $icono = 'success';
         break;
     }

@@ -1,4 +1,20 @@
 $(function(){
+  //Autocomplete clientes
+  $("#dcuenta_cpi").autocomplete({
+      source: base_url+'panel/banco/get_cuentas_contpaq/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_cuentacpi").val(ui.item.id);
+        $("#dcuenta_cpi").css("background-color", "#B0FFB0");
+      }
+  }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dcuenta_cpi").css("background-color", "#FFD9B3");
+        $("#did_cuentacpi").val("");
+      }
+  });
+
 	//si es trapaso
 	$("#ftraspaso").change(function(){
 		if($(this).is(":checked")){

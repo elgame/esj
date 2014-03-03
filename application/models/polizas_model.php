@@ -103,7 +103,7 @@ class polizas_model extends CI_Model {
     $len   = strlen($texto);
     $faltante = $posiciones-$len;
     $espacios = '';
-    if ($faltante > 0) 
+    if ($faltante > 0)
       for ($i=0; $i < $faltante; $i++)
         $espacios .= ' ';
 
@@ -154,11 +154,11 @@ class polizas_model extends CI_Model {
       {
         $response['concepto'] = "Ventas del dia ".String::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas';
-      }elseif ($tipo2 == 'vnc') 
+      }elseif ($tipo2 == 'vnc')
       {
         $response['concepto'] = "Notas de Credito del dia ".String::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas_nc';
-      }elseif ($tipo2 == 'no') 
+      }elseif ($tipo2 == 'no')
       {
         $response['concepto'] = "Nomina ".String::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'nomina';
@@ -175,7 +175,7 @@ class polizas_model extends CI_Model {
       {
         $response['concepto'] = "Egresos de cheques, ".String::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_cheque';
-      }elseif ($tipo3 == 'eg') 
+      }elseif ($tipo3 == 'eg')
       {
         $response['concepto'] = "Egresos de gastos, ".String::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_gasto';
@@ -185,7 +185,7 @@ class polizas_model extends CI_Model {
 
     $anio = date("Y"); $mes = date("m");
     $result = $this->db->query("SELECT * FROM polizas
-                               WHERE extract(year FROM fecha) = '{$anio}' AND extract(month FROM fecha) = '{$mes}' 
+                               WHERE extract(year FROM fecha) = '{$anio}' AND extract(month FROM fecha) = '{$mes}'
                                 {$sql} ORDER BY id_poliza DESC LIMIT 1");
     $folio = $rangos[$rango_sel][0];
     if ($result->num_rows() > 0) {
@@ -232,8 +232,8 @@ class polizas_model extends CI_Model {
       $query = $this->db->query(
         "SELECT id_factura
          FROM facturacion AS f
-        WHERE status <> 'b' AND is_factura = 't' 
-            AND poliza_diario = 'f' AND id_nc IS NULL 
+        WHERE status <> 'b' AND is_factura = 't'
+            AND poliza_diario = 'f' AND id_nc IS NULL
            {$sql} {$sql_fecha}
         ORDER BY id_factura ASC
         ");
@@ -259,7 +259,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
-        foreach ($data as $key => $value) 
+        foreach ($data as $key => $value)
         {
           $inf_factura = $this->facturacion_model->getInfoFactura($value->id_factura);
 
@@ -286,11 +286,11 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio, 100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
-            
+
             $impuestos['iva_trasladar']['importe'] = 0;
             $impuestos['iva_retenido']['importe']  = 0;
             //Colocamos los Ingresos de la factura (41040000)
-            foreach ($inf_factura['productos'] as $key => $value) 
+            foreach ($inf_factura['productos'] as $key => $value)
             {
               $impuestos['iva_trasladar']['importe'] += $value->iva;
               $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -305,9 +305,9 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('',4)."\r\n";
             }
             //Colocamos los impuestos de la factura
-            foreach ($impuestos as $key => $impuesto) 
+            foreach ($impuestos as $key => $impuesto)
             {
-              if ($impuestos[$key]['importe'] > 0) 
+              if ($impuestos[$key]['importe'] > 0)
               {
                 $response['data'] .= $this->setEspacios('M',2).
                               $this->setEspacios($impuesto['cuenta_cpi'],30).
@@ -368,8 +368,8 @@ class polizas_model extends CI_Model {
       $query = $this->db->query(
         "SELECT id_factura
          FROM facturacion AS f
-        WHERE status <> 'ca' AND status <> 'b' 
-            AND poliza_diario = 'f' AND id_nc IS NOT NULL 
+        WHERE status <> 'ca' AND status <> 'b'
+            AND poliza_diario = 'f' AND id_nc IS NOT NULL
            {$sql} {$sql_fecha}
         ORDER BY id_factura ASC
         ");
@@ -395,7 +395,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
-        foreach ($data as $key => $value) 
+        foreach ($data as $key => $value)
         {
           $inf_factura = $this->facturacion_model->getInfoFactura($value->id_factura);
           $inf_facturanc = $this->facturacion_model->getInfoFactura($inf_factura['info']->id_nc);
@@ -410,11 +410,11 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios('NC/'.$inf_factura['info']->serie.$inf_factura['info']->folio.' F/'.$inf_facturanc['info']->serie.$inf_facturanc['info']->folio, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          
+
           $impuestos['iva_trasladar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
           //Colocamos los Ingresos de la factura
-          foreach ($inf_factura['productos'] as $key => $value) 
+          foreach ($inf_factura['productos'] as $key => $value)
           {
             $impuestos['iva_trasladar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -429,9 +429,9 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
-          foreach ($impuestos as $key => $impuesto) 
+          foreach ($impuestos as $key => $impuesto)
           {
-            if ($impuestos[$key]['importe'] > 0) 
+            if ($impuestos[$key]['importe'] > 0)
             {
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($impuesto['cuenta_cpi'],30).
@@ -534,18 +534,18 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
-        
+
         //Contenido de la Poliza de Compras
-        foreach ($data as $key => $value) 
+        foreach ($data as $key => $value)
         {
           $inf_compra = $this->compras_model->getInfoCompra($value->id_compra);
 
-          
+
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
           $impuestos['isr_retenido']['importe']  = 0;
           //Colocamos los productos de la factura
-          foreach ($inf_compra['productos'] as $key => $value) 
+          foreach ($inf_compra['productos'] as $key => $value)
           {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -561,9 +561,9 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
-          foreach ($impuestos as $key => $impuesto) 
+          foreach ($impuestos as $key => $impuesto)
           {
-            if ($impuestos[$key]['importe'] > 0) 
+            if ($impuestos[$key]['importe'] > 0)
             {
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($impuesto['cuenta_cpi'],30).
@@ -587,12 +587,12 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
-                            
+
           unset($inf_compra);
         }
 
         // //Contenido de la Poliza de Bascula
-        // foreach ($data2 as $key => $value) 
+        // foreach ($data2 as $key => $value)
         // {
         //   $inf_compra = $this->bascula_model->getBasculaInfo($value->id_bascula);
 
@@ -606,11 +606,11 @@ class polizas_model extends CI_Model {
         //                     $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
         //                     $this->setEspacios('Compra Boleta. '.$inf_compra['info'][0]->folio, 100). //concepto
         //                     $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          
+
         //   // $impuestos['iva_acreditar']['importe'] = 0;
         //   // $impuestos['iva_retenido']['importe']  = 0;
         //   //Colocamos los productos de la factura
-        //   foreach ($inf_compra['cajas'] as $key => $value) 
+        //   foreach ($inf_compra['cajas'] as $key => $value)
         //   {
         //     // $impuestos['iva_acreditar']['importe'] += $value->iva;
         //     // $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -671,8 +671,8 @@ class polizas_model extends CI_Model {
       $query = $this->db->query(
         "SELECT id_compra
          FROM compras AS f
-        WHERE status <> 'ca' AND status <> 'b' 
-            AND poliza_diario = 'f' AND id_nc IS NOT NULL 
+        WHERE status <> 'ca' AND status <> 'b'
+            AND poliza_diario = 'f' AND id_nc IS NOT NULL
            {$sql} {$sql_fecha}
         ORDER BY id_compra ASC
         ");
@@ -699,7 +699,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
         //Contenido de la Poliza
-        foreach ($data as $key => $value) 
+        foreach ($data as $key => $value)
         {
           $inf_factura = $this->compras_model->getInfoNotaCredito($value->id_compra);
 
@@ -713,12 +713,12 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal, 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          
+
           $impuestos['iva_acreditar']['importe'] = 0;
           $impuestos['iva_retenido']['importe']  = 0;
           $impuestos['isr_retenido']['importe']  = 0;
           //Colocamos los Ingresos de la factura
-          foreach ($inf_factura['productos'] as $key => $value) 
+          foreach ($inf_factura['productos'] as $key => $value)
           {
             $impuestos['iva_acreditar']['importe'] += $value->iva;
             $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -734,9 +734,9 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('',4)."\r\n";
           }
           //Colocamos los impuestos de la factura, negativos por nota de credito
-          foreach ($impuestos as $key => $impuesto) 
+          foreach ($impuestos as $key => $impuesto)
           {
-            if ($impuestos[$key]['importe'] > 0) 
+            if ($impuestos[$key]['importe'] > 0)
             {
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($impuesto['cuenta_cpi'],30).
@@ -791,10 +791,10 @@ class polizas_model extends CI_Model {
     $folio = $this->input->get('ffolio');
 
     $query = $this->db->query(
-      "SELECT id_empleado, id_empresa, anio, semana, Date(fecha_inicio) AS fecha_inicio, Date(fecha_final) AS fecha_final, sueldo_semanal, vacaciones, 
+      "SELECT id_empleado, id_empresa, anio, semana, Date(fecha_inicio) AS fecha_inicio, Date(fecha_final) AS fecha_final, sueldo_semanal, vacaciones,
           prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto
        FROM nomina_fiscal AS f
-      WHERE esta_asegurado = 't' 
+      WHERE esta_asegurado = 't'
          {$sql}
       ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
       ");
@@ -829,7 +829,7 @@ class polizas_model extends CI_Model {
       $this->load->model('facturacion_model');
 
       //Contenido de la Poliza
-      foreach ($nominas as $key => $value) 
+      foreach ($nominas as $key => $value)
       {
         //Se obtienen los prestamos
         $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
@@ -956,7 +956,7 @@ class polizas_model extends CI_Model {
         $folio++;
       }
     }
-    
+
     $response['folio'] = $folio-1;
     $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
@@ -979,29 +979,59 @@ class polizas_model extends CI_Model {
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
       $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
       $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sql2 .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
     }
 
     if ($this->input->get('fid_empresa') != '')
+    {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
-
+      $sql2 .= " AND bc.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+    $cuenta_cuadre = '00000';
     $query = $this->db->query(
-      "SELECT 
-        bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
-        bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
-        Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal, 
-        c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
-        string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas
-      FROM facturacion AS f 
-        INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-        INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
-        INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente 
-        INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono 
-      WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f' 
-         {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
-      GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto, 
-        bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
-      ORDER BY bmf.id_movimiento ASC
-      ");
+      "SELECT *
+      FROM (
+        (
+          SELECT
+            bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+            c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
+            string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
+            'facturas'::character varying AS tipoo
+          FROM facturacion AS f
+            INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+            INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+            INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+          WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
+             {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
+          GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
+          ORDER BY bmf.id_movimiento ASC
+        )
+        UNION
+        (
+          SELECT
+            bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
+            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva,
+            COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
+            COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
+            0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
+            'banco'::character varying AS tipoo
+          FROM banco_movimientos AS bm
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
+            LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+            LEFT JOIN banco_movimientos_facturas AS bmc ON bmc.id_movimiento = bm.id_movimiento
+            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+          WHERE bm.status = 't' AND bm.tipo = 't' AND bm.clasificacion <> 'elimon' {$sql2}
+          GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
+          HAVING Count(bmc.id_movimiento) = 0
+          ORDER BY bm.fecha ASC
+        )
+      ) AS t
+      ORDER BY fecha ASC");
 
     if($query->num_rows() > 0)
     {
@@ -1015,121 +1045,158 @@ class polizas_model extends CI_Model {
         'iva_trasladado' => array('cuenta_cpi' => $this->getCuentaIvaTrasladado(), 'importe' => 0, 'tipo' => '0'),
         'iva_retener'    => array('cuenta_cpi' => $this->getCuentaIvaRetXCobrarAc(), 'importe' => 0, 'tipo' => '1'),
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetCobradoAc(), 'importe' => 0, 'tipo' => '0'), );
-  
+
       $folio = $this->input->get('ffolio');
       //Contenido de la Poliza
-      foreach ($data as $key => $value) 
+      foreach ($data as $key => $value)
       {
-        //Agregamos el header de la poliza
-        $response['data'] .= $this->setEspacios('P',2).
-                            $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('1',4,'r').  //tipo poliza = 1 poliza ingresos
-                            $this->setEspacios($folio,9,'r').  //folio poliza
-                            $this->setEspacios('1',1). //clase
-                            $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Ingresos, '.String::fechaATexto($value->fecha),100). //concepto
-                            $this->setEspacios('11',2). //sistema de origen
-                            $this->setEspacios('0',1). //impresa
-                            $this->setEspacios('0',1)."\r\n"; //ajuste
-        
-        //Se obtiene un registro del abono si es que se pago de mas
-        $query_mayor = $this->db->query(
-        "SELECT Date(fao.fecha) AS fecha, fao.concepto, Sum(fao.total) AS total, fao.cuenta_cpi
-        FROM facturacion_abonos AS fa 
-          INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-          INNER JOIN facturacion_abonos_otros AS fao ON fao.id_factura = fa.id_factura AND fao.id_abono = bmf.id_abono_factura
-        WHERE fao.tipo = 'm' AND bmf.id_movimiento = {$value->id_movimiento}
-        GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
-        //Se obtiene un registro del abono si es que se pago de menos
-        $query_saldar = $this->db->query(
-        "SELECT Date(fao.fecha) AS fecha, fao.concepto, Sum(fao.total) AS total, fao.cuenta_cpi
-        FROM facturacion_abonos AS fa 
-          INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-          INNER JOIN facturacion_abonos_otros AS fao ON fao.id_factura = fa.id_factura AND fao.id_abono = bmf.id_abono_factura
-        WHERE fao.tipo = 's' AND bmf.id_movimiento = {$value->id_movimiento}
-        GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
-
-        $importe_iva = $importe_retencion = 0;
-        $facturasIds = explode(',', $value->idfacturas);
-        foreach ($facturasIds as $keyi => $facid)
+        //Son los pagos echos desde cuentas por cobrar
+        if($value->tipoo == 'facturas')
         {
-          $facid2 = explode('-', $facid);
-          $infodac = $this->db->query("SELECT 
-              importe_iva, retencion_iva, 
-              (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= {$facid2[1]} AND id_factura = facturacion.id_factura) AS num
-            FROM facturacion WHERE id_factura = {$facid2[0]}")->row();
-          if($infodac->num == 1){
-            $importe_iva += $infodac->importe_iva;
-            $importe_retencion += $infodac->retencion_iva;
-          }
-        }
+          //Agregamos el header de la poliza
+          $response['data'] .= $this->setEspacios('P',2).
+                              $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('1',4,'r').  //tipo poliza = 1 poliza ingresos
+                              $this->setEspacios($folio,9,'r').  //folio poliza
+                              $this->setEspacios('1',1). //clase
+                              $this->setEspacios('0',10). //iddiario
+                              $this->setEspacios('Ingresos, '.String::fechaATexto($value->fecha),100). //concepto
+                              $this->setEspacios('11',2). //sistema de origen
+                              $this->setEspacios('0',1). //impresa
+                              $this->setEspacios('0',1)."\r\n"; //ajuste
 
-        // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
-        $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;
-        $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+          //Se obtiene un registro del abono si es que se pago de mas
+          $query_mayor = $this->db->query(
+          "SELECT Date(fao.fecha) AS fecha, fao.concepto, Sum(fao.total) AS total, fao.cuenta_cpi
+          FROM facturacion_abonos AS fa
+            INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+            INNER JOIN facturacion_abonos_otros AS fao ON fao.id_factura = fa.id_factura AND fao.id_abono = bmf.id_abono_factura
+          WHERE fao.tipo = 'm' AND bmf.id_movimiento = {$value->id_movimiento}
+          GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
+          //Se obtiene un registro del abono si es que se pago de menos
+          $query_saldar = $this->db->query(
+          "SELECT Date(fao.fecha) AS fecha, fao.concepto, Sum(fao.total) AS total, fao.cuenta_cpi
+          FROM facturacion_abonos AS fa
+            INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+            INNER JOIN facturacion_abonos_otros AS fao ON fao.id_factura = fa.id_factura AND fao.id_abono = bmf.id_abono_factura
+          WHERE fao.tipo = 's' AND bmf.id_movimiento = {$value->id_movimiento}
+          GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
 
-        $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
-        $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
-        $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
-
-        //Colocamos el Cargo al Banco que se deposito el dinero
-        $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
-                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-                          $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
-                          $this->setEspacios( $this->numero($subtotal+( isset($query_mayor->cuenta_cpi)? $query_mayor->total: 0)-( isset($query_saldar->cuenta_cpi)? $query_saldar->total: 0) ) , 20).  //importe movimiento
-                          $this->setEspacios('0',10).  //iddiario poner 0
-                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios($value->nombre_fiscal,100). //concepto
-                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
-        //Colocamos el Abono al Cliente que realizo el pago
-        $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
-                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-                          $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
-                          $this->setEspacios( $this->numero($subtotal), 20).  //importe movimiento
-                          $this->setEspacios('0',10).  //iddiario poner 0
-                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios($value->concepto,100). //concepto
-                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
-        //Si hay abonos de mas se agregan a los mov
-        if (isset($query_mayor->cuenta_cpi))
-          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($query_mayor->cuenta_cpi,30).  //cuenta contpaq
-                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-                          $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
-                          $this->setEspacios( $this->numero($query_mayor->total), 20).  //importe movimiento
-                          $this->setEspacios('0',10).  //iddiario poner 0
-                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios($query_mayor->concepto,100). //concepto
-                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
-        //Si hay abonos de mas se agregan a los mov
-        if (isset($query_saldar->cuenta_cpi))
-          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                          $this->setEspacios($query_saldar->cuenta_cpi,30).  //cuenta contpaq
-                          $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-                          $this->setEspacios('0',1).  //tipo movimiento, Cliente es un abono = 1
-                          $this->setEspacios( $this->numero($query_saldar->total), 20).  //importe movimiento
-                          $this->setEspacios('0',10).  //iddiario poner 0
-                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                          $this->setEspacios($query_saldar->concepto,100). //concepto
-                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
-
-        
-        //Colocamos los impuestos de la factura
-        foreach ($impuestos as $key => $impuesto) 
-        {
-          if ($impuestos[$key]['importe'] > 0) 
+          $importe_iva = $importe_retencion = 0;
+          $facturasIds = explode(',', $value->idfacturas);
+          foreach ($facturasIds as $keyi => $facid)
           {
-            $response['data'] .= $this->setEspacios('M',2).
-                          $this->setEspacios($impuesto['cuenta_cpi'],30).
-                          $this->setEspacios($value->ref_movimiento,10).
-                          $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
-                          $this->setEspacios( $this->numero($impuesto['importe']) , 20).
-                          $this->setEspacios('0',10).
-                          $this->setEspacios('0.0',20).
-                          $this->setEspacios($value->concepto,100).
-                          $this->setEspacios('',4)."\r\n";
+            $facid2 = explode('-', $facid);
+            $infodac = $this->db->query("SELECT
+                importe_iva, retencion_iva,
+                (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= {$facid2[1]} AND id_factura = facturacion.id_factura) AS num
+              FROM facturacion WHERE id_factura = {$facid2[0]}")->row();
+            if($infodac->num == 1){
+              $importe_iva += $infodac->importe_iva;
+              $importe_retencion += $infodac->retencion_iva;
+            }
           }
+
+          // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
+          $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;
+          $impuestos['iva_retenido']['importe']   = $impuestos['iva_retener']['importe'];
+
+          $impuestos['iva_trasladar']['importe']  = $importe_iva; //$value->importe_iva; //$factor*($value->importe_iva)/100;
+          $impuestos['iva_trasladado']['importe'] = $impuestos['iva_trasladar']['importe'];
+          $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_trasladar']['importe'];
+
+          //Colocamos el Cargo al Banco que se deposito el dinero
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
+                            $this->setEspacios( $this->numero($subtotal+( isset($query_mayor->cuenta_cpi)? $query_mayor->total: 0)-( isset($query_saldar->cuenta_cpi)? $query_saldar->total: 0) ) , 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($value->nombre_fiscal,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          //Colocamos el Abono al Cliente que realizo el pago
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
+                            $this->setEspacios( $this->numero($subtotal), 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($value->concepto,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          //Si hay abonos de mas se agregan a los mov
+          if (isset($query_mayor->cuenta_cpi))
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($query_mayor->cuenta_cpi,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, Cliente es un abono = 1
+                            $this->setEspacios( $this->numero($query_mayor->total), 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($query_mayor->concepto,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          //Si hay abonos de mas se agregan a los mov
+          if (isset($query_saldar->cuenta_cpi))
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($query_saldar->cuenta_cpi,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, Cliente es un abono = 1
+                            $this->setEspacios( $this->numero($query_saldar->total), 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($query_saldar->concepto,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+
+
+          //Colocamos los impuestos de la factura
+          foreach ($impuestos as $key => $impuesto)
+          {
+            if ($impuestos[$key]['importe'] > 0)
+            {
+              $response['data'] .= $this->setEspacios('M',2).
+                            $this->setEspacios($impuesto['cuenta_cpi'],30).
+                            $this->setEspacios($value->ref_movimiento,10).
+                            $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                            $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                            $this->setEspacios('0',10).
+                            $this->setEspacios('0.0',20).
+                            $this->setEspacios($value->concepto,100).
+                            $this->setEspacios('',4)."\r\n";
+            }
+          }
+        }else //Son los depositos directos de banco
+        {
+          //Agregamos el header de la poliza
+          $response['data'] .= $this->setEspacios('P',2).
+                              $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('1',4,'r').  //tipo poliza = 1 poliza ingresos
+                              $this->setEspacios($folio,9,'r').  //folio poliza
+                              $this->setEspacios('1',1). //clase
+                              $this->setEspacios('0',10). //iddiario
+                              $this->setEspacios($value->concepto, 100). //concepto
+                              $this->setEspacios('11',2). //sistema de origen
+                              $this->setEspacios('0',1). //impresa
+                              $this->setEspacios('0',1)."\r\n"; //ajuste
+
+          //Colocamos el Cargo al Banco que se deposito el dinero
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, banco es un cargo = 0
+                            $this->setEspacios( $this->numero($value->total) , 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($value->nombre_fiscal,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          //Colocamos el Abono al Cliente que realizo el pago
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($value->cuenta_cpi_cliente,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, Proveedor es un abono = 1
+                            $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($value->nombre_fiscal,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
         $folio++;
       }
@@ -1163,17 +1230,17 @@ class polizas_model extends CI_Model {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
 
     $query = $this->db->query(
-      "SELECT 
-        fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono, 
+      "SELECT
+        fa.id_pago, '' AS ref_movimiento, fa.concepto, fa.monto AS total_abono,
         bc.cuenta_cpi, Date(fa.fecha) AS fecha, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_prov
-      FROM bascula_pagos AS fa 
-        INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
-        INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago 
-        INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula 
-        INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor 
+      FROM bascula_pagos AS fa
+        INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+        INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
+        INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula
+        INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
       WHERE fa.status = 't' AND fa.poliza_egreso = 'f'
          {$sql}
-      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi 
+      GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi
       ORDER BY fa.id_pago ASC
       ");
 
@@ -1192,7 +1259,7 @@ class polizas_model extends CI_Model {
         'iva_retenido'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
 
       //Contenido de la Poliza
-      foreach ($data as $key => $value) 
+      foreach ($data as $key => $value)
       {
         //Agregamos el header de la poliza
         $response['data'] .= $this->setEspacios('P',2).
@@ -1206,10 +1273,10 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',1)."\r\n"; //ajuste
 
         // $data_frutas = $this->db->query(
-        //     "SELECT b.id_bascula, b.importe, b.folio, p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi 
-        //     FROM bascula AS b 
-        //       INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_bascula = b.id_bascula 
-        //       INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor 
+        //     "SELECT b.id_bascula, b.importe, b.folio, p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi
+        //     FROM bascula AS b
+        //       INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_bascula = b.id_bascula
+        //       INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
         //     WHERE bpb.id_pago = {$value->id_pago}")->result();
 
         $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
@@ -1291,43 +1358,44 @@ class polizas_model extends CI_Model {
 
     $cuenta_cuadre = $this->getCuentaCuadreGasto();
     $query = $this->db->query(
-      "SELECT * 
-      FROM 
+      "SELECT *
+      FROM
       (
         (
-          SELECT 
-            bmc.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono, 
-            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva, 
-            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal, 
-            c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso, 
+          SELECT
+            bmc.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
+            c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'facturas'::character varying AS tipoo
-          FROM compras AS f 
+          FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
-            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta 
-            INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor 
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+            INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
             INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
-            INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento 
-          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f' 
+            INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
+          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
              {$sql}
-          GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto, 
+          GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha)
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
         (
-          SELECT 
-            bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono, 
-            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps, 
-            COALESCE(c.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, 
-            COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
+          SELECT
+            bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono,
+            bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps,
+            COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
+            COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo
-          FROM banco_movimientos AS bm 
-            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta 
-            LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor 
+          FROM banco_movimientos AS bm
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
+            LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
             LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-          WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2} 
-          GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi, 
-            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso
+            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+          WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
+          GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
           HAVING Count(bmc.id_movimiento) = 0
           ORDER BY bm.fecha ASC
         )
@@ -1337,17 +1405,17 @@ class polizas_model extends CI_Model {
 
     // $cuenta_cuadre = $this->getCuentaCuadreGasto();
     // $query2 = $this->db->query(
-    //   "SELECT 
-    //     bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto AS total_abono, 
-    //     bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, COALESCE(c.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, 
+    //   "SELECT
+    //     bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto AS total_abono,
+    //     bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, COALESCE(c.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal,
     //     COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
     //     Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso
-    //   FROM banco_movimientos AS bm 
-    //     INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta 
-    //     LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor 
+    //   FROM banco_movimientos AS bm
+    //     INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
+    //     LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
     //     LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
-    //   WHERE bm.status = 't' AND bm.tipo = 'f' {$sql2} 
-    //   GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi, 
+    //   WHERE bm.status = 't' AND bm.tipo = 'f' {$sql2}
+    //   GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
     //     bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso
     //   HAVING Count(bmc.id_movimiento) = 0
     //   ORDER BY bm.fecha ASC
@@ -1372,7 +1440,7 @@ class polizas_model extends CI_Model {
 
       $folio = $this->input->get('ffolio');
       //Contenido de la Poliza de las facturas de compra
-      foreach ($data as $key => $value) 
+      foreach ($data as $key => $value)
       {
         if ($value->tipoo == 'facturas')
         {
@@ -1396,7 +1464,7 @@ class polizas_model extends CI_Model {
 
           $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
           $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
-          
+
           $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
 
           //Colocamos el Cargo al Proveedor que realizo el pago
@@ -1419,11 +1487,11 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
-          
+
           //Colocamos los impuestos de la factura
-          foreach ($impuestos as $key => $impuesto) 
+          foreach ($impuestos as $key => $impuesto)
           {
-            if ($impuestos[$key]['importe'] > 0) 
+            if ($impuestos[$key]['importe'] > 0)
             {
               $response['data'] .= $this->setEspacios('M',2).
                             $this->setEspacios($impuesto['cuenta_cpi'],30).
@@ -1484,7 +1552,7 @@ class polizas_model extends CI_Model {
       }
 
       // //Contenido de la Poliza de los movimientos directos de banco
-      // foreach ($response['banco_mov'] as $key => $value) 
+      // foreach ($response['banco_mov'] as $key => $value)
       // {
       //   //Es traspaso entre cuentas bancarias, se cambian los numeros
       //   if($value->es_traspaso > 0)
@@ -1537,7 +1605,7 @@ class polizas_model extends CI_Model {
     return $response;
   }
 
-  
+
 
    /**
     * Visualiza/Descarga el PDF para el Reporte Diario de Entradas.
@@ -1554,10 +1622,10 @@ class polizas_model extends CI_Model {
         $response = $this->polizaDiarioVentas();
 
         //actualizamos el estado de la factura y descarga el archivo
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsf = array();
-          foreach ($response['facturas'] as $key => $value) 
+          foreach ($response['facturas'] as $key => $value)
             $idsf[] = $value->id_factura;
           if(count($idsf) > 0)
           {
@@ -1574,10 +1642,10 @@ class polizas_model extends CI_Model {
         $response = $this->polizaDiarioVentasNC();
 
         //actualizamos el estado de la factura y descarga el archivo
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsf = array();
-          foreach ($response['facturas'] as $key => $value) 
+          foreach ($response['facturas'] as $key => $value)
             $idsf[] = $value->id_factura;
           if(count($idsf) > 0)
           {
@@ -1594,13 +1662,13 @@ class polizas_model extends CI_Model {
         $response = $this->polizaDiarioGastos();
 
         //actualizamos el estado de la factura y bascula y descarga el archivo
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsf = array();
-          foreach ($response['facturas'] as $key => $value) 
+          foreach ($response['facturas'] as $key => $value)
             $idsf[] = $value->id_compra;
           $idsb = array();
-          // foreach ($response['bascula'] as $key => $value) 
+          // foreach ($response['bascula'] as $key => $value)
           //   $idsb[] = $value->id_bascula;
           if(count($idsf) > 0 || count($idsb) > 0)
           {
@@ -1626,10 +1694,10 @@ class polizas_model extends CI_Model {
         $response = $this->polizaDiarioGastosNC();
 
         //actualizamos el estado de la factura y descarga el archivo
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsf = array();
-          // foreach ($response['facturas'] as $key => $value) 
+          // foreach ($response['facturas'] as $key => $value)
           //   $idsf[] = $value->id_factura;
           // if(count($idsf) > 0)
           // {
@@ -1646,13 +1714,13 @@ class polizas_model extends CI_Model {
         $response = $this->polizaDiarioNomina();
 
         //actualizamos el estado de la factura y bascula y descarga el archivo
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsf = array();
-          // foreach ($response['facturas'] as $key => $value) 
+          // foreach ($response['facturas'] as $key => $value)
           //   $idsf[] = $value->id_compra;
           $idsb = array();
-          // foreach ($response['bascula'] as $key => $value) 
+          // foreach ($response['bascula'] as $key => $value)
           //   $idsb[] = $value->id_bascula;
           // if(count($idsf) > 0 || count($idsb) > 0)
           // {
@@ -1675,15 +1743,15 @@ class polizas_model extends CI_Model {
         }
       }
 
-      
+
     }elseif ($this->input->get('ftipo') == '1')  //*******Polizas Ingresos
     {
       $response = $this->polizaIngreso();
       //actualizamos el estado de los abonos de las facturas
-      if (isset($_POST['poliza']{0})) 
+      if (isset($_POST['poliza']{0}))
       {
         $idsa = array();
-        foreach ($response['abonos'] as $key => $value) 
+        foreach ($response['abonos'] as $key => $value)
           $idsa[] = $value->id_movimiento;
         if(count($idsa) > 0)
         {
@@ -1695,17 +1763,17 @@ class polizas_model extends CI_Model {
           $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
         }
       }
-    
+
     }elseif ($this->input->get('ftipo') == '2')  //*******Polizas Egreso
     {
       if($this->input->get('ftipo3') == 'el')  //Egreso de limon
       {
         $response = $this->polizaEgresoLimon();
         //actualizamos el estado de los abonos de las boletas
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsa = array();
-          foreach ($response['abonos'] as $key => $value) 
+          foreach ($response['abonos'] as $key => $value)
             $idsa[] = $value->id_pago;
           if(count($idsa) > 0)
           {
@@ -1721,10 +1789,10 @@ class polizas_model extends CI_Model {
       {
         $response = $this->polizaEgreso();
         //actualizamos el estado de los abonos de las compras
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsa = array();
-          foreach ($response['abonos'] as $key => $value) 
+          foreach ($response['abonos'] as $key => $value)
             $idsa[] = $value->id_abono;
           if(count($idsa) > 0)
           {
@@ -1740,10 +1808,10 @@ class polizas_model extends CI_Model {
       {
         $response = $this->polizaEgreso('otros');
         //actualizamos el estado de los abonos de las facturas
-        if (isset($_POST['poliza']{0})) 
+        if (isset($_POST['poliza']{0}))
         {
           $idsa = array();
-          // foreach ($response['abonos'] as $key => $value) 
+          // foreach ($response['abonos'] as $key => $value)
           //   $idsa[] = $value->id_abono;
           // if(count($idsa) > 0)
           // {

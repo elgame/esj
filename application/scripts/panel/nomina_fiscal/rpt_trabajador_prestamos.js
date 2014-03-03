@@ -1,7 +1,7 @@
 $(function(){
   // Autocomplete Empresas
   $("#ftrabajador").autocomplete({
-    source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+    source: base_url + 'panel/usuarios/ajax_get_usuarios/?empleados=si',
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {

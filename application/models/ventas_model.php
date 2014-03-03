@@ -246,6 +246,12 @@ class Ventas_model extends privilegios_model{
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'is_factura'          => 'f'
     );
+    //Si existe el parametro es una nota de credito de la factura
+    if(isset($_POST['id_nrc']{0}))
+    {
+      $datosFactura['id_nc'] = $_POST['id_nrc'];
+      $datosFactura['status'] = 'pa';
+    }
 
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
@@ -823,7 +829,7 @@ class Ventas_model extends privilegios_model{
       $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
 
       $pdf->SetXY(109, 0);
-      $pdf->Cell(50, 4, 'Venta de Remisión', 0, 0, 'L', 1);
+      $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
 
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(109, 6);

@@ -1012,7 +1012,7 @@ class facturacion_model extends privilegios_model{
             $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
             $nombreEmisor   = $factura['info']->empresa->nombre_fiscal;
             $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
-            $contrasena     = "s4nj0rg3"; // Contraseña de $correEmisor
+            $contrasena     = "S4nj0rg3V14n3y"; // Contraseña de $correEmisor S4nj0rg3V14n3y
 
             ////////////////////////
             // Datos del Receptor //

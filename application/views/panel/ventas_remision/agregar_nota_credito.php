@@ -15,7 +15,7 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
-        <h2><i class="icon-plus"></i> <?php echo (isset($_GET['id_nrc'])? 'Agregar Nota de credito': 'Agregar Venta de Remisión') ?></h2>
+        <h2><i class="icon-plus"></i> Agregar Nota de Credito</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
         </div>
@@ -119,9 +119,7 @@
                   <textarea name="dobservaciones" class="span9" id="dobservaciones"><?php echo set_value('dobservaciones', isset($borrador) ? $borrador['info']->observaciones : ''); ?></textarea>
                 </div>
               </div>
-              <?php if( isset($_GET['id_nrc']) ){ ?>
-                <input type="hidden" name="id_nrc" value="<?php echo $_GET['id_nrc']; ?>">
-              <?php }else{ ?>
+
               <div class="control-group" style="margin-top: 145px;">
                 <label class="control-label">Folio Pallet</label>
                 <div class="controls">
@@ -139,7 +137,6 @@
                   </div>
                 </div>
               </div>
-              <?php } ?>
             </div>
 
             <div class="span6">
@@ -272,7 +269,7 @@
                 </thead>
                 <tbody>
                   <?php
-                        if (isset($borrador) && ! isset($_POST['prod_did_prod']) && isset($_GET['id_nr']))
+                        if (isset($borrador) && ! isset($_POST['prod_did_prod']))
                         {
                           foreach ($borrador['productos'] as $key => $p) {
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
@@ -354,7 +351,7 @@
                         <?php }}} ?>
                   <tr data-pallets="">
                     <td>
-                      <input type="text" name="prod_ddescripcion[]" value="<?php echo (isset($_GET['id_nrc'])?'Nota de credito':''); ?>" id="prod_ddescripcion" class="span12">
+                      <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                       <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
                       <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
