@@ -14,6 +14,9 @@ class cuentas_pagar extends MY_Controller {
 
     'cuentas_pagar/saldos_pdf/',
     'cuentas_pagar/saldos_xls/',
+
+    'cuentas_pagar/estado_cuenta_pdf/',
+    'cuentas_pagar/estado_cuenta_xls/',
   );
 
 
@@ -64,6 +67,15 @@ class cuentas_pagar extends MY_Controller {
   public function saldos_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->cuentasPagarExcel();
+  }
+
+  public function estado_cuenta_pdf(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->estadoCuentaPdf();
+  }
+  public function estado_cuenta_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->estadoCuentaXls();
   }
 
   public function cuenta()
@@ -151,7 +163,7 @@ class cuentas_pagar extends MY_Controller {
     $params['template']   = '';
     $params['closeModal'] = false;
 
-    if (isset($_GET['id']{0}) && isset($_GET['tipo']{0})) 
+    if (isset($_GET['id']{0}) && isset($_GET['tipo']{0}))
     {
       $ids_aux = $_GET['id'];
       $tipos_aux = $_GET['tipo'];
@@ -182,7 +194,7 @@ class cuentas_pagar extends MY_Controller {
         $params['data'] = array('saldo' => $_GET['total'], 'facturas' => array() );
         $ids   = explode(',', substr($ids_aux, 1));
         $tipos = explode(',', substr($tipos_aux, 1));
-        foreach ($ids as $key => $value) 
+        foreach ($ids as $key => $value)
         {
           $params['data']['facturas'][] = $this->cuentas_pagar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
         }
@@ -199,7 +211,7 @@ class cuentas_pagar extends MY_Controller {
       //Cuentas de banco
       $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
       //metodos de pago
-      $params['metods_pago']  = array( 
+      $params['metods_pago']  = array(
         array('nombre' => 'Transferencia', 'value' => 'transferencia'),
         array('nombre' => 'Cheque', 'value' => 'cheque'),
         array('nombre' => 'Efectivo', 'value' => 'efectivo'),
@@ -219,7 +231,7 @@ class cuentas_pagar extends MY_Controller {
   }
 
   public function eliminar_abono(){
-    if (isset($_GET['ida']{0}) && isset($_GET['tipo']{0})) 
+    if (isset($_GET['ida']{0}) && isset($_GET['tipo']{0}))
     {
       $this->load->model('cuentas_pagar_model');
       $respons = $this->cuentas_pagar_model->removeAbono();
@@ -228,6 +240,48 @@ class cuentas_pagar extends MY_Controller {
       redirect(base_url('panel/cuentas_pagar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
+  /**
+   * Listado de pagos echos desde cuentas por pagar
+   * @return [type] [description]
+   */
+  public function lista_pagos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_pagar_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Cuentas por pagar');
+
+    $params['data'] = $this->cuentas_pagar_model->getAbonosData();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/cuentas_pagar/lista_pagos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  /**
+   * Elimina un abono a una compra, lo quita tambien de bancos
+   * @return [type] [description]
+   */
+  public function eliminar_movimiento()
+  {
+    if (isset($_GET['id_movimiento']{0}) )
+    {
+      $this->load->model('banco_cuentas_model');
+      $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=5'));
+    }else
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+  }
 
 
 
