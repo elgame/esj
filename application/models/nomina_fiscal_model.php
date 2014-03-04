@@ -4483,6 +4483,11 @@ class nomina_fiscal_model extends CI_Model {
     if ($usuarioId)
     {
       $this->load->model('empresas_model');
+      $this->load->model('usuarios_model');
+      $empleado = $this->usuarios_model->get_usuario_info($usuarioId);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      $semanas = $this->semanasDelAno($empresa['info']->dia_inicia_semana);
 
       $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
       $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
@@ -4496,6 +4501,16 @@ class nomina_fiscal_model extends CI_Model {
 
       if ($fecha2 != '')
       {
+        $semana = array();
+        foreach ($semanas as $s)
+        {
+          if (strtotime($fecha2) <= strtotime($s['fecha_final']))
+          {
+            $semana = $s;
+            break;
+          }
+        }
+
         $sql .= " AND DATE(np.fecha) <= '{$fecha2}'";
       }
 
@@ -4504,17 +4519,19 @@ class nomina_fiscal_model extends CI_Model {
         $sql .= " AND np.id_usuario = {$usuarioId}";
       }
 
+      $having = '';
       if ( ! $todos)
       {
-        $sql .= " AND np.status = 'f'";
+        $having .= " HAVING (np.prestado - COALESCE(SUM(nfp.monto), 0)) > 0";
       }
 
       $data = $this->db->query(
-        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - SUM(nfp.monto) as total_pagado
+        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - COALESCE(SUM(nfp.monto), 0) as total_pagado
         FROM nomina_prestamos as np
-        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo
+        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo AND nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}
         WHERE '1' {$sql}
         GROUP BY np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha), DATE(np.inicio_pago)
+        {$having}
         ORDER BY fecha ASC
         ")->result();
 
@@ -4523,18 +4540,16 @@ class nomina_fiscal_model extends CI_Model {
         $prestamo->prestamos = $this->db->query(
           "SELECT nfp.anio, nfp.semana, nfp.monto
           FROM nomina_fiscal_prestamos as nfp
-          WHERE id_prestamo = $prestamo->id_prestamo
+          WHERE id_prestamo = $prestamo->id_prestamo AND nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}
+          ORDER BY (nfp.anio, nfp.semana)
           ")->result();
       }
-
-      $this->load->model('usuarios_model');
-      $empleado = $this->usuarios_model->get_usuario_info($usuarioId);
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
       $pdf->show_head = true;
-      // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       // $pdf->titulo1 S= $empresa['info']->nombre_fiscal;
       // $pdf->logo = $empresa['info']->logo;
       $pdf->titulo2 = $empleado['info'][0]->nombre;
