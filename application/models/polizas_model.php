@@ -1367,7 +1367,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -1387,7 +1387,8 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps,
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
-            Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo
+            Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
+            bm.desglosar_iva
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -1514,6 +1515,12 @@ class polizas_model extends CI_Model {
             $value->nombre_fiscal        = $info_cuenta->alias;
           }
 
+          $impuestos2 = array('iva_activo' => array('cuenta_cpi' => $this->getCuentaIvaAcreditado(), 'importe' => 0, 'tipo' => '0'),);
+          if ($value->desglosar_iva == 't')
+          {
+            $impuestos2['iva_activo']['importe'] = $value->total-($value->total/1.16);
+          }
+
           //Agregamos el header de la poliza
           $response['data'] .= $this->setEspacios('P',2).
                               $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('2',4,'r').  //tipo poliza = 2 poliza egreso
@@ -1545,6 +1552,22 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          //Colocamos los impuestos de la factura
+          foreach ($impuestos2 as $key => $impuesto)
+          {
+            if ($impuestos2[$key]['importe'] > 0)
+            {
+              $response['data'] .= $this->setEspacios('M',2).
+                            $this->setEspacios($impuesto['cuenta_cpi'],30).
+                            $this->setEspacios($value->ref_movimiento,10).
+                            $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
+                            $this->setEspacios( $this->numero($impuesto['importe']) , 20).
+                            $this->setEspacios('0',10).
+                            $this->setEspacios('0.0',20).
+                            $this->setEspacios($value->nombre_fiscal,100).  // $value->concepto
+                            $this->setEspacios('',4)."\r\n";
+            }
+          }
         }
 
 

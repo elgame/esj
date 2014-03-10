@@ -69,17 +69,10 @@ class nomina_fiscal extends MY_Controller {
 
     $filtros = array(
       'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
     );
-
-    // Datos para la vista.
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
-    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
-    $params['empresas'] = $this->empresas_model->getEmpresasAjax();
-    $params['puestos'] = $this->usuarios_model->puestos();
-    // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
-
     if ($filtros['empresaId'] !== '')
     {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
@@ -88,7 +81,16 @@ class nomina_fiscal extends MY_Controller {
     {
       $dia = '4';
     }
-    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia);
+    $filtros['dia_inicia_semana'] = $dia;
+
+    // Datos para la vista.
+    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
+    $params['empresas'] = $this->empresas_model->getEmpresasAjax();
+    $params['puestos'] = $this->usuarios_model->puestos();
+    // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
     $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
@@ -96,7 +98,7 @@ class nomina_fiscal extends MY_Controller {
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected']);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
@@ -187,9 +189,20 @@ class nomina_fiscal extends MY_Controller {
 
     $filtros = array(
       'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'      => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
     );
+    $_GET['anio'] = $filtros['anio'];
+    if ($filtros['empresaId'] !== '')
+    {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    }
+    else
+    {
+      $dia = '4';
+    }
+    $filtros['dia_inicia_semana'] = $dia;
 
     // Datos para la vista.
     $params['empleados'] = $this->nomina_fiscal_model->listadoEmpleadosAsistencias($filtros);
@@ -199,16 +212,8 @@ class nomina_fiscal extends MY_Controller {
     $_GET['did_empresa'] = $filtros['empresaId'];
     $params['puestos'] = $this->usuarios_departamentos_model->getPuestos(false); //puestos();
 
-    if ($filtros['empresaId'] !== '')
-    {
-      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
-    }
-    else
-    {
-      $dia = '4';
-    }
 
-    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia);
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
     $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
@@ -216,7 +221,7 @@ class nomina_fiscal extends MY_Controller {
 
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected']);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -233,7 +238,7 @@ class nomina_fiscal extends MY_Controller {
   public function addAsistencias()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana']);
+    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['empresaId'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/asistencia/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }
@@ -254,21 +259,23 @@ class nomina_fiscal extends MY_Controller {
 
     // Obtiene la informacion del empleado.
     $params['empleado'] = $this->usuarios_model->get_usuario_info($_GET['eid']);
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
 
     // Obtiene los dias de la semana.
-    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem']);
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
     $params['semana'] = $semana;
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
-    $params['nombresDias'] = array('Viernes', 'Sabado', 'Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves');
+    foreach ($params['dias'] as $key => $value)
+      $params['nombresDias'][] = String::dia($value);
 
     // Obtiene los bonos y otros que ya tiene el empleado de la semana.
-    $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem']);
+    $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     // Obtiene los prestamos que se hicieron en la semana cargada.
-    $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem']);
+    $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     // Obtiene el registro si se agrego vacaciones.
-    $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem']);
+    $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     //Incapacidades
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -536,7 +543,7 @@ class nomina_fiscal extends MY_Controller {
   public function asistencia_pdf()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->asistencia_pdf($_GET['id'], $_GET['sem']);
+    $this->nomina_fiscal_model->asistencia_pdf($_GET['id'], $_GET['sem'], $_GET['anio']);
   }
 
   /*

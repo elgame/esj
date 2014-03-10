@@ -372,7 +372,7 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
-		$pdf->SetWidths(array(112, 20, 20, 20));
+		$pdf->SetWidths(array(132, 20, 20, 20));
 		$pdf->Row(array('Totales:',
 					String::formatoNumero($res['total_retiro'], 2, '$', false),
 					String::formatoNumero($res['total_deposito'], 2, '$', false),
@@ -528,7 +528,7 @@ class banco_cuentas_model extends banco_model {
 	public function getChequesNoCobrados($id_cuenta)
 	{
 		$data = $this->db->query("SELECT Coalesce(Sum(monto), 0) AS r_nocob FROM banco_movimientos
-			WHERE status = 't' AND id_cuenta = {$id_cuenta} AND metodo_pago = 'cheque'
+			WHERE status = 't' AND id_cuenta = {$id_cuenta} AND lower(metodo_pago) = 'cheque'
 				AND entransito = 't' AND tipo = 'f'")->row();
 		return $data->r_nocob;
 	}
@@ -551,7 +551,7 @@ class banco_cuentas_model extends banco_model {
 						'concepto'    => $this->input->post('fconcepto'),
 						'monto'       => $this->input->post('fmonto'),
 						'tipo'        => 't',
-						'entransito'  => 't',
+						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dcliente'),
 						);
@@ -582,10 +582,11 @@ class banco_cuentas_model extends banco_model {
 						'concepto'    => $this->input->post('fconcepto'),
 						'monto'       => $this->input->post('fmonto'),
 						'tipo'        => 'f',
-						'entransito'  => 't',
+						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dproveedor'),
 						'clasificacion' => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
+            'desglosar_iva' => ($this->input->post('fdesglosa_iva')=='t'? 't': 'f'),
 						);
 			if(is_numeric($_POST['did_proveedor']))
 				$data['id_proveedor'] = $this->input->post('did_proveedor');
@@ -615,9 +616,10 @@ class banco_cuentas_model extends banco_model {
 						'concepto'    => 'Comision por SPEI',
 						'monto'       => $comision,
 						'tipo'        => 'f',
-						'entransito'  => 't',
+						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						'a_nombre_de' => $this->input->post('dproveedor'),
+            'desglosar_iva' => 't',
 						);
 			}
 			$this->addRetiro($data_comision);
@@ -636,7 +638,7 @@ class banco_cuentas_model extends banco_model {
 						'concepto'    => $this->input->post('fconcepto'),
 						'monto'       => $this->input->post('fmonto'),
 						'tipo'        => 't',
-						'entransito'  => 't',
+						'entransito'  => 'f',
 						'metodo_pago' => $this->input->post('fmetodo_pago'),
 						);
 			}

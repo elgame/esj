@@ -27,13 +27,13 @@
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
 
-                <label for="dproveedor">Proveedor</label>
-                <input type="text" name="dproveedor" class="input-large search-query" id="proveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
-                <input type="hidden" name="did_proveedor" id="proveedorId" value="<?php echo set_value_get('did_proveedor'); ?>">
-
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa'); ?>">
+
+                <label for="dproveedor">Proveedor</label>
+                <input type="text" name="dproveedor" class="input-large search-query" id="proveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
+                <input type="hidden" name="did_proveedor" id="proveedorId" value="<?php echo set_value_get('did_proveedor'); ?>">
 
                 <label for="ftipo">Tipo</label>
                 <select name="ftipo" class="input-medium" id="ftipo">
@@ -115,7 +115,7 @@
                   <td class="center">
                     <?php
 
-                      if ($compra->status === 'p')
+                      if ($compra->status === 'p' || $compra->id_nc != '')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras/cancelar/', array(
                           'params'   => 'id='.$compra->id_compra,

@@ -73,12 +73,12 @@ class home extends MY_Controller {
 
 		//     	// if(array_search($datos[3], $puestos) === false)
 		//     	// 	$puestos[] = $datos[3];
-		    	
+
 		//     	echo "UPDATE usuarios SET salario_diario='{$datos[9]}', salario_diario_real='{$datos[10]}', rfc='{$datos[5]}' WHERE no_seguro = '{$datos[0]}';<br>";
-		//       //   echo "INSERT INTO usuarios(nombre, apellido_paterno, apellido_materno, curp, fecha_nacimiento, fecha_entrada, nacionalidad, 
+		//       //   echo "INSERT INTO usuarios(nombre, apellido_paterno, apellido_materno, curp, fecha_nacimiento, fecha_entrada, nacionalidad,
 		//       //   	estado_civil, id_empresa, id_puesto, esta_asegurado, regimen_contratacion, rfc, cuenta_banco, user_nomina, no_seguro, email, id_departamente)
-  //   				// VALUES ('{$nombre}', '{$appe1}', '{$appe2}', '{$datos[4]}', '".date("Y-m-d", strtotime(str_replace('/', '-', $datos[6])))."', 
-  //   				// 	'".date("Y-m-d", strtotime(str_replace('/', '-', $datos[7])))."', 'MEXICANA', 'soltero', 1, ".(isset($puestos[$datos[3]])? $puestos[$datos[3]]: 'NULL').", 't', '2', '', 
+  //   				// VALUES ('{$nombre}', '{$appe1}', '{$appe2}', '{$datos[4]}', '".date("Y-m-d", strtotime(str_replace('/', '-', $datos[6])))."',
+  //   				// 	'".date("Y-m-d", strtotime(str_replace('/', '-', $datos[7])))."', 'MEXICANA', 'soltero', 1, ".(isset($puestos[$datos[3]])? $puestos[$datos[3]]: 'NULL').", 't', '2', '',
   //   				// 	'{$datos[8]}', 't', '$datos[0]', '', ".$departamento[$datos[1]].");<br><br>";
 		//     }
 		//     fclose($gestor);

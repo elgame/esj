@@ -83,7 +83,6 @@
         $proveedor.val(ui.item.id);
         $("#proveedorId").val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
-
         $("#condicionPago").val(ui.item.item.condicion_pago);
         $("#plazoCredito").val(ui.item.item.dias_credito);
 

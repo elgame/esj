@@ -27,6 +27,9 @@
           <div class="box-content">
             <form action="<?php echo base_url('panel/nomina_fiscal/asistencia'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
+                <label for="anio">Año</label>
+                <input type="number" name="anio" class="input-small" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
+
                 <label for="ffecha1" style="margin-top: 15px;">Semana</label>
                 <select name="semana" class="input-xlarge" id="semanas">
                   <?php foreach ($semanasDelAno as $semana) {
@@ -67,7 +70,7 @@
                   <div style="font-size: 1.5em;"><?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?></div>
                 </div>
                 <div class="span2">
-                  <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
+                  <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
                 </div>
                 <div class="span1">
                   <button type="submit" name="guardar" class="btn btn-success" style="float: right;">Guardar</button>
@@ -85,13 +88,9 @@
                       <thead>
                         <tr>
                           <th>Nombre</th>
-                          <th>VI</th>
-                          <th>SA</th>
-                          <th>DO</th>
-                          <th>LU</th>
-                          <th>MA</th>
-                          <th>MI</th>
-                          <th>JU</th>
+                          <?php foreach ($dias as $dia => $fecha) { ?>
+                          <th><?php echo String::dia($fecha, 'c'); ?></th>
+                          <?php } ?>
                         </tr>
                       </thead>
                       <tbody>
@@ -100,7 +99,7 @@
                               $tuvoEmpleados = true;
                     ?>
                           <tr>
-                            <td class="empleado-dbl-click"><a href="<?php echo base_url('panel/nomina_fiscal/show_otros/?eid='.$e->id.'&sem='.$numSemanaSelected) ?>" class="btn btn-info" rel="superbox-50x450" title="Bonos y Otros"><i class="icon-cogs"></i></a><?php echo $e->nombre; ?></td>
+                            <td class="empleado-dbl-click"><a href="<?php echo base_url('panel/nomina_fiscal/show_otros/?eid='.$e->id.'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-info" rel="superbox-50x450" title="Bonos y Otros"><i class="icon-cogs"></i></a><?php echo $e->nombre; ?></td>
 
                             <?php foreach ($dias as $dia => $fecha) { ?>
                               <td style="width: 100px;padding: 0;">

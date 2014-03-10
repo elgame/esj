@@ -25,15 +25,15 @@
           </div>
           <div class="box-content">
           	<a href="<?php echo base_url('panel/banco/?'.String::getVarsLink(array('msg', 'id_cuenta', 'fstatus'))); ?>" class="linksm">
-              <i class="icon-chevron-left"></i> Atras</a> | 
+              <i class="icon-chevron-left"></i> Atras</a> |
             <a href="<?php echo base_url('panel/banco/cuenta_pdf/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Imprimir</a> | 
+              <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/banco/cuenta_xls/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a>
             <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
               <i class="icon-archive"></i> Conciliacion</a>
         <?php if($data['cuenta']['info']->banco == 'Afirme'){ ?>
-               | 
+               |
             <a href="<?php echo base_url('panel/banco/cuenta_banamex/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-file-text"></i> Banamex</a>
         <?php } ?>
@@ -44,8 +44,8 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
-                
+                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
+
                 <label for="vertodos">Tipo:</label>
                 <select name="vertodos" id="vertodos" class="input-large search-query">
                   <option value="" <?php echo set_select_get('vertodos', ''); ?>>Todas</option>
@@ -56,11 +56,11 @@
                 <label for="fid_banco">Banco:</label>
                 <select name="fid_banco" id="fid_banco" class="input-large search-query">
                   <option value="" <?php echo set_select_get('fid_banco', ''); ?>></option>
-              <?php 
+              <?php
               foreach ($bancos['bancos'] as $key => $banco) {
               ?>
                   <option value="<?php echo $banco->id_banco; ?>" <?php echo set_select_get('fid_banco', $banco->id_banco); ?>><?php echo $banco->nombre; ?></option>
-              <?php 
+              <?php
               } ?>
                 </select>
 
@@ -104,11 +104,11 @@
         			$status = explode('|', $movimiento->entransito);
             ?>
             	<tr>
-            		<td><?php 
+            		<td><?php
             			if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
-            				echo '<input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'" 
-            					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'" 
-            					data-status="'.$status[0].'" '.($status[0]=='Trans'? '' : 'checked').'>';
+            				echo '<input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
+            					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
+            					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').'>';
             		?></td>
             		<td><?php echo $movimiento->fecha; ?></td>
             		<td><?php echo $movimiento->numero_ref; ?></td>
@@ -118,7 +118,7 @@
             		<td><?php echo String::formatoNumero($movimiento->retiro); ?></td>
             		<td><?php echo String::formatoNumero($movimiento->deposito); ?></td>
             		<td><?php echo String::formatoNumero($movimiento->saldo); ?></td>
-            		<td><?php 
+            		<td><?php
             			if(count($status)>0)
             				echo '<span class="label label-'.($status[0]=='Trans'? 'info' : 'success').'">'.$status[0].'</span>'
         						.'<br><span class="label label-'.($status[1]=='Cancelado'? 'important' : 'success').'">'.$status[1].'</span>';

@@ -224,9 +224,9 @@ class bascula extends MY_Controller {
         if($info['info'][0]->fecha_tara != '')
           $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
         if($info['info'][0]->fecha_bruto != '')
-          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
+          $params['fecha']      =  substr($info['info'][0]->fecha_bruto, 0, 10).'T'.date("H:i");
         else
-          $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i:s"), 0, 16));
+          $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i"), 0, 16));
 
         $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;
@@ -575,7 +575,7 @@ class bascula extends MY_Controller {
   public function rde_xls()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->rde_xls(); 
+    $this->bascula_model->rde_xls();
   }
 
   /**

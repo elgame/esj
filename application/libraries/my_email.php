@@ -55,12 +55,12 @@ class my_email {
 
     $mail->IsSMTP();
     $mail->SMTPDebug  = 0;
-    $mail->Host       = 'smtp.gmail.com';
+    $mail->Host       = 'smtp.mandrillapp.com'; //smtp.gmail.com
     $mail->SMTPAuth   = true;
     $mail->Username   = $this->data['correoEmisor'];
     $mail->Password   = $this->data['contrasena'];
-    $mail->SMTPSecure = 'ssl';
-    $mail->Port       = 465;
+    $mail->SMTPSecure = 'tls'; //ssl
+    $mail->Port       = 587; //465
 
     $mail->From     = $this->data['correoEmisorEm'];
     $mail->FromName = $this->data['nombreEmisor'];

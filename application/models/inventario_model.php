@@ -477,7 +477,7 @@ class inventario_model extends privilegios_model{
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
-		
+
 		if ($empresa['info']->logo !== '')
 		  $pdf->logo = $empresa['info']->logo;
 
@@ -892,7 +892,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
-		$pdf->titulo2 = 'Existencia por unidades';
+		$pdf->titulo2 = 'Existencia por costos';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -1139,7 +1139,7 @@ class inventario_model extends privilegios_model{
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
-		
+
 		if ($empresa['info']->logo !== '')
 		  $pdf->logo = $empresa['info']->logo;
 

@@ -1240,7 +1240,7 @@ class cuentas_cobrar_model extends privilegios_model{
         $sqlt .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
       }
 
-	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi FROM clientes WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
+	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito FROM clientes WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");
 	    $response = array();
 	    foreach ($clientes->result() as $keyc => $cliente)
 	    {
@@ -1625,7 +1625,7 @@ class cuentas_cobrar_model extends privilegios_model{
   			$pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', String::formatoNumero($totalVencido, 2, '', false)), false);
 
   			$pdf->SetX(65);
-  			$pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false)), false);
+  			$pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false), 'Credito', $item->dias_credito.' Dias'), false);
   			$pdf->SetX(65);
   			$pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
   			$pdf->SetX(65);
@@ -1773,7 +1773,9 @@ class cuentas_cobrar_model extends privilegios_model{
   			  <td colspan="3"></td>
   			  <td style="border:1px solid #000;text-align:right;">(+) Cargos</td>
   			  <td style="border:1px solid #000;">'.$total_cargo.'</td>
-  			  <td colspan="3"></td>
+  			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">Credito</td>
+          <td style="border:1px solid #000;background-color: rgb(255,255,204);">'.$value->dias_credito.'</td>
+          <td></td>
   			</tr>
   			<tr style="font-weight:bold">
   			  <td colspan="3"></td>

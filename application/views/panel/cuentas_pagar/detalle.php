@@ -28,7 +28,7 @@
             	<fieldset class="span6" style="color: #555; font-size: .9em; border-bottom: none;">
 								<legend style="margin: 0;">Datos del proveedor</legend>
 								<strong>Nombre:</strong> <?php echo $data['proveedor']->nombre_fiscal; ?> <br>
-								<strong>Dirección: </strong> 
+								<strong>Dirección: </strong>
 										<?php
 											$info = $data['proveedor']->calle!=''? $data['proveedor']->calle: '';
 											$info .= $data['proveedor']->no_exterior!=''? ' #'.$data['proveedor']->no_exterior: '';
@@ -39,7 +39,7 @@
 											$info .= $data['proveedor']->estado!=''? ', '.$data['proveedor']->estado: '';
 											echo $info;
 										?> <br>
-								<strong>Teléfono: </strong> <?php echo $data['proveedor']->telefono; ?> 
+								<strong>Teléfono: </strong> <?php echo $data['proveedor']->telefono; ?>
 								<strong>Email: </strong> <?php echo $data['proveedor']->email; ?>
 							</fieldset>
 
@@ -48,7 +48,7 @@
 								<strong>Fecha:</strong> <?php echo $data['cobro'][0]->fecha; ?> <br>
 								<strong>Serie:</strong> <?php echo $data['cobro'][0]->serie; ?> <br>
 								<strong>Folio:</strong> <?php echo $data['cobro'][0]->folio; ?> <br>
-								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?> 
+								<strong>Condicion pago: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 'Contado': 'Credito'; ?>
 								<strong>Plazo credito: </strong> <?php echo $data['cobro'][0]->condicion_pago=='co'? 0: $data['cobro'][0]->plazo_credito; ?> <br>
 								<strong>Estado:</strong> <span id="inf_fact_estado">
 									<?php echo $data['cobro'][0]->status=='pa'? 'Pagada': 'Pendiente'; ?></span>
@@ -63,11 +63,11 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-					<th>Fecha</th>
-					<th>Concepto</th>
-					<th>Abono</th>
-					<th>Saldo</th>
-					<th></th>
+                  <th>Fecha</th>
+                  <th>Concepto</th>
+                  <th>Abono</th>
+                  <th>Saldo</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>

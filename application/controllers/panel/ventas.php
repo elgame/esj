@@ -8,9 +8,11 @@ class ventas extends MY_Controller {
   private $excepcion_privilegio = array(
     'ventas/get_folio/',
     'ventas/rventasr_pdf/',
+    'ventas/rpsaldo_vencido_pdf/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
+
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/'
@@ -206,6 +208,37 @@ class ventas extends MY_Controller {
     $this->load->model('ventas_model');
     $this->ventas_model->getRVentasrPdf();
 
+  }
+
+  /**
+   * Reporte de ventas con saldo vencido
+   * @return [type] [description]
+   */
+  public function rpsaldo_vencido()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas Vencidas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/ventas_remision/rpsaldo_vencido',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpsaldo_vencido_pdf(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRVencidasPdf();
   }
 
   /**

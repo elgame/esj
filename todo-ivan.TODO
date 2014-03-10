@@ -1,3 +1,24 @@
+Consultas para las ordenes de compra sin costo
+      SELECT id_orden, num_row, id_producto, id_presentacion, descripcion,
+             cantidad, precio_unitario, importe, iva, retencion_iva, total,
+             porcentaje_iva, porcentaje_retencion, status, fecha_aceptacion,
+             faltantes, observacion, porcentaje_ieps, ieps
+        FROM compras_productos
+        WHERE id_producto = 128;
+
+      UPDATE compras_productos AS cp
+         SET precio_unitario=(SELECT precio_unitario from compras_productos where id_producto = cp.id_producto and id_orden = 631),
+             porcentaje_iva=16
+       WHERE id_producto IN(109,108,88,100,102,97,131,103,95,130,129,101,123,128,98,99,104,116,96) AND id_orden <> 631;
+       UPDATE compras_productos
+         SET importe=(cantidad * precio_unitario),
+             iva=((cantidad * precio_unitario)*0.16),
+             total=((cantidad * precio_unitario)+((cantidad * precio_unitario)*0.16))
+       WHERE id_producto IN(109,108,88,100,102,97,131,103,95,130,129,101,123,128,98,99,104,116,96) AND id_orden <> 631;
+
+
+      SELECT array_to_string( ARRAY(SELECT id_producto from compras_productos where id_orden = 631) , ',')
+
 Proveedores:
 
     PRIVILEGIOS:

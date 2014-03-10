@@ -357,6 +357,23 @@ class String{
 		return $meses[$num_limpio];
 	}
 
+  /**
+   * mes()
+   *
+   * Devuelve la cadena de texto asociada al número de semana
+   *
+   * @param   int mes (entero entre 1 y 12)
+   * @return  string  nombre_del_mes
+   */
+  public static function dia($fecha, $formato='l'){
+    $num = date("w", strtotime($fecha));
+    if($formato == 'c')
+      $meses = array('DO', 'LU', 'MA', 'MI', 'JU', 'VI', 'SA');
+    else
+      $meses = array('DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO');
+    return $meses[$num];
+  }
+
 	/**
 	 * fechaATexto()
 	 *

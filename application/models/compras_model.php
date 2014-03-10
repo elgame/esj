@@ -63,7 +63,7 @@ class compras_model extends privilegios_model{
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
                 co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
-                co.tipo
+                co.tipo, co.id_nc
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
@@ -170,6 +170,8 @@ class compras_model extends privilegios_model{
 
   public function cancelar($compraId)
   {
+    $compra = $this->getInfoCompra($compraId);
+
     // cambia el status de la compra a cancelado.
     $this->db->update('compras', array('status' => 'ca'), array('id_compra' => $compraId));
 
@@ -182,6 +184,10 @@ class compras_model extends privilegios_model{
     {
       $this->db->update('compras_ordenes', array('status' => 'a'), array('id_orden' => $orden->id_orden));
     }
+
+    //si es una nota de credito la que se cancela, cambia de estado la compra a pendiente
+    if($compra['info']->id_nc != '')
+      $this->db->update('compras', array('status' => 'p'), array('id_compra' => $compra['info']->id_nc));
 
     return true;
   }
@@ -473,6 +479,8 @@ class compras_model extends privilegios_model{
     {
       $this->db->insert_batch('compras_notas_credito_productos', $productos);
     }
+    //Actualiza la compra si es que se paga
+    $this->actualizaCompra($compraId, $datos['total']);
 
     return array('passes' => true, 'msg' => '5');
   }
@@ -548,33 +556,59 @@ class compras_model extends privilegios_model{
     $this->db->delete('compras_notas_credito_productos', array('id_compra' => $notaCreditoId));
 
     $productos = array();
-    foreach ($data['concepto'] as $key => $concepto)
+    if (isset($data['concepto']))
     {
-      $productos[] = array(
-        'id_compra' => $notaCreditoId,
-        'num_row' => $key,
-        'id_producto' => $data['productoId'][$key],
-        // 'id_presentacion' => $data['asdasd'][$key],
-        'descripcion' => $concepto,
-        'cantidad' => $data['cantidad'][$key],
-        'precio_unitario' => $data['valorUnitario'][$key],
-        'importe' => $data['importe'][$key],
-        'iva' => $data['trasladoTotal'][$key],
-        'retencion_iva' => $data['retTotal'][$key],
-        'total' => $data['total'][$key],
-        'porcentaje_iva' => $data['trasladoPorcent'][$key],
-        'porcentaje_retencion' => 0,
-        'observacion' => $data['observacion'][$key],
-        'id_unidad' => $data['unidad'][$key],
-      );
+      foreach ($data['concepto'] as $key => $concepto)
+      {
+        $productos[] = array(
+          'id_compra' => $notaCreditoId,
+          'num_row' => $key,
+          'id_producto' => $data['productoId'][$key],
+          // 'id_presentacion' => $data['asdasd'][$key],
+          'descripcion' => $concepto,
+          'cantidad' => $data['cantidad'][$key],
+          'precio_unitario' => $data['valorUnitario'][$key],
+          'importe' => $data['importe'][$key],
+          'iva' => $data['trasladoTotal'][$key],
+          'retencion_iva' => $data['retTotal'][$key],
+          'total' => $data['total'][$key],
+          'porcentaje_iva' => $data['trasladoPorcent'][$key],
+          'porcentaje_retencion' => 0,
+          'observacion' => $data['observacion'][$key],
+          'id_unidad' => $data['unidad'][$key],
+        );
+      }
     }
 
     if (count($productos) > 0)
     {
       $this->db->insert_batch('compras_notas_credito_productos', $productos);
     }
+    //Actualiza la compra si es que se paga
+    $this->actualizaCompra($notaCredito['info']->id_nc, $datos['total'], $notaCredito['info']->total);
 
     return array('passes' => true, 'msg' => '6');
+  }
+  /**
+   * Actualiza el estado de la compra cuando se agregan nc
+   * @param  [type]  $id_compra       [description]
+   * @param  [type]  $total           [description]
+   * @param  integer $total_nc_update [description]
+   * @return [type]                   [description]
+   */
+  public function actualizaCompra($id_compra, $total, $total_nc_update=0)
+  {
+    $this->load->model('cuentas_pagar_model');
+    $pagada = false;
+    $inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id_compra);
+    if (($inf_factura['saldo']+$total_nc_update) <= $total){ //se ajusta
+      $pagada = true;
+    }
+    //verifica si la factura se pago, se cambia el status
+    if($pagada){
+      $this->db->update('compras', array('status' => 'pa'), "id_compra = {$id_compra}");
+    }else
+      $this->db->update('compras', array('status' => 'p'), "id_compra = {$id_compra}");
   }
 
   /*
