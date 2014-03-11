@@ -3,18 +3,18 @@ $(function(){
   $('#form').keyJump();
 
   $("#dcliente").autocomplete({
-      source: function(request, response) {
-          $.ajax({
-              url: base_url+'panel/facturacion/ajax_get_clientes/',
-              dataType: "json",
-              data: {
-                  term : request.term,
-                  did_empresa : $("#did_empresa").val()
-              },
-              success: function(data) {
-                  response(data);
-              }
-          });
+    source: function(request, response) {
+        $.ajax({
+            url: base_url+'panel/facturacion/ajax_get_clientes/',
+            dataType: "json",
+            data: {
+                term : request.term,
+                did_empresa : $("#did_empresa").val()
+            },
+            success: function(data) {
+                response(data);
+            }
+        });
       },
       minLength: 1,
       selectFirst: true,
@@ -39,33 +39,33 @@ $(function(){
   });
 
   $("#dempresa").autocomplete({
-      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        $("#did_empresa").val(ui.item.id);
-        $("#dempresa").css("background-color", "#B0FFB0");
+    source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_empresa").val(ui.item.id);
+      $("#dempresa").css("background-color", "#B0FFB0");
 
-        $('#dversion').val(ui.item.item.cfdi_version);
-        $('#dcer_caduca').val(ui.item.item.cer_caduca);
+      $('#dversion').val(ui.item.item.cfdi_version);
+      $('#dcer_caduca').val(ui.item.item.cer_caduca);
 
-        $('#dno_certificado').val(ui.item.item.no_certificado);
+      $('#dno_certificado').val(ui.item.item.no_certificado);
 
-        loadSerieFolio(ui.item.id, true);
-      }
+      loadSerieFolio(ui.item.id, true);
+    }
   }).on("keydown", function(event){
-      if(event.which == 8 || event == 46){
-        $("#dempresa").css("background-color", "#FFD9B3");
-        $("#did_empresa").val("");
-        $('#dserie').html('');
-        $("#dfolio").val("");
-        $("#dno_aprobacion").val("");
+    if(event.which == 8 || event == 46){
+      $("#dempresa").css("background-color", "#FFD9B3");
+      $("#did_empresa").val("");
+      $('#dserie').html('');
+      $("#dfolio").val("");
+      $("#dno_aprobacion").val("");
 
-        $('#dversion').val('');
-        $('#dcer_caduca').val('');
-        $('#dno_certificado').val('');
-        $('#serie-selected').val('');
-      }
+      $('#dversion').val('');
+      $('#dcer_caduca').val('');
+      $('#dno_certificado').val('');
+      $('#serie-selected').val('');
+    }
   });
 
   autocompleteClasifi();
@@ -113,13 +113,16 @@ $(function(){
       var $this = $(this),
           $tr = $this.parent().parent(),
           palletsClasifi = $tr.attr('data-pallets'), // los pallets que tienen la clasificacion que se esta eliminando.
+          remisionesIds = $tr.attr('data-remisiones'), // las remisiones de los pallets.
           $table = $('#table_prod');
-
+          console.log(remisionesIds);
       $tr.remove(); // elimina el tr padre.
 
       // Si palletsClasifi no es vacio, significa que se se esta eliminando
       // una clasificacion que se agrego de pallets.
       palletsClasifi = palletsClasifi.split('-');
+
+      remisionesIds = remisionesIds.split('-');
 
       // auxiliar que indica si existe otra clasificacion con el mismo pallet,
       // este sirve para evitar eliminar el input que contiene el id del pallet.
@@ -146,6 +149,33 @@ $(function(){
           }
 
           existe = false;
+        }
+      }
+
+      var existeRemision = false;
+      if (remisionesIds !== '') {
+        for (var ir in remisionesIds) {
+          $table.find('tbody tr').each(function(index, el) {
+            var $this = $(this);
+            console.log($this);
+            if ($this.attr('data-remisiones') !== '') {
+              var auxRemisiones = $this.attr('data-remisiones').split('-');
+              for (var iir in auxRemisiones) {
+                if (auxRemisiones[iir] == remisionesIds[ir]) {
+                  existeRemision = true;
+                }
+              }
+            }
+          });
+
+          // si no existe otra clasificacion q se halla cargado de una remision
+          // igual,
+          if ( ! existeRemision) {
+            $('#remision' + remisionesIds[ir]).remove();
+            $('#chk-cli-remision-' + remisionesIds[ir]).css('background-color', '').find('.chk-cli-remisiones').prop('disabled', false).prop('checked', false);
+          }
+
+          existeRemision = false;
         }
       }
       calculaTotal();
@@ -227,7 +257,7 @@ $(function(){
         data: {id: $clienteId.val()},
       })
       .done(function(pallets) {
-        console.log(pallets);
+        // console.log(pallets);
         var $tablePalletsCliente = $('#table-pallets-cliente'),
             htmlTd = '',
             disabled = '',
@@ -320,6 +350,78 @@ $(function(){
     }
   });
 
+  // Boton Ventas de Remision.
+  $('#show-remisiones').on('click', function(event) {
+    var $this = $(this); // boton
+    $('#modal-remisiones').modal('show');
+  });
+
+  $('#BtnAddRemisiones').on('click', function(event) {
+    if ($('.chk-cli-remisiones:checked').length > 0) {
+      $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+        $('.chk-cli-remisiones:checked').each(function(index, el) {
+          var $chkRemision = $(this);
+              $parent = $chkRemision.parent(),
+              jsonObj = jQuery.parseJSON($parent.find('#jsonData').val());
+
+          var existRemision = false;
+          $('.remision-selected').each(function(index, el) {
+            if ($(this).val() === $chkRemision.val()) {
+              existRemision = true;
+              return false;
+            }
+          });
+
+          // Si no existe la remision en el listado entonces la agrega.
+          if ( ! existRemision) {
+
+            $parent.parent().css('background-color', '#FF9A9D');
+            $chkRemision.prop('disabled', true);
+
+            $('#remisiones-selected').append('<input type="hidden" value="' + $chkRemision.val() + '" name="remisionesIds[]" class="remision-selected" id="remision' + $chkRemision.val() + '">');
+
+            var existPallet;
+            for (var i in jsonObj) {
+              existPallet = false;
+              $('.pallet-selected').each(function(index, el) {
+                if ($(this).val() === jsonObj[i]['id_pallet']) {
+                  existPallet = true;
+                  return false;
+                }
+              });
+
+              if (! existPallet) {
+                $('#pallets-selected').append('<input type="hidden" value="' + jsonObj[i]['id_pallet'] + '" name="palletsIds[]" class="pallet-selected" id="pallet' + jsonObj[i]['id_pallet'] + '">');
+              }
+
+              addProducto(unidades, {
+                'id': jsonObj[i]['id_clasificacion'],
+                'nombre': jsonObj[i]['nombre'],
+                'cajas': jsonObj[i]['cajas'],
+                'id_pallet': jsonObj[i]['id_pallet'],
+                'id_unidad': jsonObj[i]['id_unidad'],
+                'unidad': jsonObj[i]['unidad'],
+                'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
+                'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
+                'kilos': jsonObj[i]['kilos'],
+                'id_size': jsonObj[i]['id_size'],
+                'size': jsonObj[i]['size'],
+                'id_remision': $chkRemision.val(),
+              });
+            }
+          }
+        });
+
+        $('#modal-remisiones').modal('hide');
+      }, 'json');
+    } else {
+      noty({"text": 'Seleccione al menos una remisión para agregarla al listado.', "layout":"topRight", "type": 'error'});
+    }
+  });
+
+  $('.remision-selected').each(function(index, el) {
+    $('#chk-cli-remision-' + $(this).val()).css('background-color', '#FF9A9D').find('.chk-cli-remisiones').prop('disabled', true).prop('checked', true);
+  });
 });
 
 var EventKeyPressFolioPallet = function () {
@@ -463,7 +565,7 @@ function addProducto(unidades, prod) {
       ivaSelected = '0', prod_kilos = 0, cantidad = 0;
 
   if (prod) {
-    console.log(prod);
+    // console.log(prod);
     // Verificar si existe la clasificacion...
     $tabla.find('input#prod_did_prod').each(function(index, el) {
       var $prodIdInput = $(this), // input hidde prod id.
@@ -486,6 +588,7 @@ function addProducto(unidades, prod) {
     prod_cajas  = prod.cajas;
     prod_kilos  = prod.kilos;
     pallet      = prod.id_pallet;
+    remision    = prod.id_remision;
     idUnidad    = prod.id_unidad ? prod.id_unidad : ''; // id_unidad del rendimiento.
     idSize      = prod.id_size ? prod.id_size : ''; // id_size del rendimiento.
     unidad      = prod.unidad ? prod.unidad : ''; // nombre de la unidad del rendimiento.
@@ -542,6 +645,23 @@ function addProducto(unidades, prod) {
       $tr.find('#pallets_id').val(pallets);
     }
 
+    // Remision
+    var existeRemision = false,
+        remisiones = $tr.attr('data-remisiones').split('-');
+
+    for (var r in remisiones) {
+      if (remisiones[r] == prod.id_remision) {
+        existeRemision = true;
+        return false;
+      }
+    }
+
+    if ( ! existeRemision) {
+      var remisionesIds = $tr.attr('data-remisiones') + '-' + prod.id_remision;
+      $tr.attr('data-remisiones', remisionesIds);
+      $tr.find('#remisiones_id').val(remisionesIds);
+    }
+
   } else {
     var unidadesHtml = '';
     for (var i in unidades) {
@@ -557,11 +677,12 @@ function addProducto(unidades, prod) {
       cantidad = prod_cajas;
     }
 
-    trHtml = '<tr data-pallets="'+pallet+'">' +
+    trHtml = '<tr data-pallets="'+pallet+'" data-remisiones="'+remision+'">' +
                 '<td>' +
                   '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
+                  '<input type="hidden" name="remisiones_id[]" value="'+remision+'" id="remisiones_id" class="span12">' +
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
                   '<input type="hidden" name="id_size_rendimiento[]" value="'+idSize+'" id="id_size_rendimiento" class="span12">' +
                 '</td>' +

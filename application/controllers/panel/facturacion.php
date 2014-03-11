@@ -15,6 +15,7 @@ class facturacion extends MY_Controller {
     'facturacion/prodfact_pdf/',
     'facturacion/rventasc_pdf/',
     'facturacion/rventasc_detalle_pdf/',
+    'facturacion/remisiones_detalle_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -25,7 +26,7 @@ class facturacion extends MY_Controller {
     'facturacion/ajax_get_pallets_cliente/',
 
     'facturacion/xml/',
-    'facturacion/nomina/'
+    'facturacion/nomina/',
   );
 
   public function _remap($method)
@@ -191,6 +192,8 @@ class facturacion extends MY_Controller {
     }
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
+
+    $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -602,6 +605,15 @@ class facturacion extends MY_Controller {
         'field'   => 'palletsIds[]',
         'label'   => 'Pallets',
         'rules'   => 'callback_check_existen_pallets'
+      );
+    }
+
+    if (isset($_POST['remisionesIds']) && isset($_POST['timbrar']))
+    {
+      $rules[] = array(
+        'field'   => 'remisionesIds[]',
+        'label'   => 'Remisiones',
+        'rules'   => ''
       );
     }
 
@@ -1205,6 +1217,43 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
     $this->facturacion_model->getRVentasDetallePdf();
+  }
+
+  public function rpt_remisiones_detalle()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/admin.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Remisiones Facturadas y No Facturadas');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/facturacion/rpt_remisiones_detalle',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function remisiones_detalle_pdf()
+  {
+    $this->load->model('facturacion_model');
+
+    $_GET = array_merge(array(
+      'ffecha1' => isset($_GET['ffecha1']) ?: date('Y-m-d'),
+      'ffecha2' => isset($_GET['ffecha2']) ?: date('Y-m-d'),
+      'did_empresa' => isset($_GET['did_empresa']) ?:false,
+      'ffacturadas' => isset($_GET['ffacturadas']) ?:false,
+    ), $_GET);
+
+    $this->facturacion_model->remisionesDetallePdf($_GET);
   }
 
   /*

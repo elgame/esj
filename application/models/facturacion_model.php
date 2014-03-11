@@ -123,7 +123,7 @@ class facturacion_model extends privilegios_model{
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento')
+                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
@@ -173,6 +173,11 @@ class facturacion_model extends privilegios_model{
         ORDER BY fp.id_pallet ASC;");
 
       $response['pallets'] = $res->result();
+
+      $response['remisiones'] = $this->db->query(
+        "SELECT id_venta
+        FROM facturacion_ventas_remision_pivot
+        WHERE id_factura = {$idFactura}")->result();
 
 			return $response;
 		}else
@@ -421,6 +426,7 @@ class facturacion_model extends privilegios_model{
               'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
               'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
               'ids_pallets' => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+              'ids_remisiones' => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
               'kilos' => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
               'cajas' => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
               'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
@@ -459,6 +465,29 @@ class facturacion_model extends privilegios_model{
             }
 
             $this->db->insert_batch('facturacion_pallets', $pallets);
+          }
+        }
+
+        if (isset($_POST['remisionesIds']))
+        {
+          $remisiones = array(); // Ids de los pallets cargados en la factura.
+          // Crea el array de los pallets a insertar.
+          foreach ($_POST['remisionesIds'] as $remisionId)
+          {
+            $remisiones[] = array(
+              'id_factura' => $idFactura,
+              'id_venta'  => $remisionId
+            );
+          }
+
+          if (count($remisiones) > 0)
+          {
+            if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+            {
+              $this->db->delete('facturacion_ventas_remision_pivot', array('id_factura' => $idFactura));
+            }
+
+            $this->db->insert_batch('facturacion_ventas_remision_pivot', $remisiones);
           }
         }
 
@@ -1213,6 +1242,7 @@ class facturacion_model extends privilegios_model{
             'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
             'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
             'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+            'ids_remisiones'    => $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
             'kilos'             => $_POST['prod_dkilos'][$key],
             'cajas'             => $_POST['prod_dcajas'][$key],
             'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
@@ -1221,6 +1251,7 @@ class facturacion_model extends privilegios_model{
       }
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
+      $this->db->delete('facturacion_ventas_remision_pivot', array('id_factura' => $idBorrador));
 
       if (count($productosFactura) > 0)
         $this->db->insert_batch('facturacion_productos', $productosFactura);
@@ -1239,6 +1270,22 @@ class facturacion_model extends privilegios_model{
 
         if (count($pallets) > 0)
           $this->db->insert_batch('facturacion_pallets', $pallets);
+      }
+
+      if (isset($_POST['remisionesIds']))
+      {
+        $remisiones = array(); // Ids de los pallets cargados en la factura.
+        // Crea el array de los pallets a insertar.
+        foreach ($_POST['remisionesIds'] as $remisionId)
+        {
+          $remisiones[] = array(
+            'id_factura' => $idBorrador,
+            'id_venta'  => $remisionId
+          );
+        }
+
+        if (count($remisiones) > 0)
+          $this->db->insert_batch('facturacion_ventas_remision_pivot', $remisiones);
       }
     }
 
@@ -2734,5 +2781,282 @@ class facturacion_model extends privilegios_model{
 
       return $resultTimbrado;
     }
+  }
+
+  public function getRemisiones($remisionId = null)
+  {
+    $this->load->model('rastreabilidad_pallets_model');
+
+    $sql = '';
+    if ($remisionId)
+    {
+      $sql = " AND f.id_factura = {$remisionId}";
+    }
+
+    $remisiones = $this->db->query(
+      "SELECT f.id_factura, f.serie, f.folio, c.nombre_fiscal, f.is_factura, DATE(f.fecha) as fecha
+       FROM facturacion f
+       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+       LEFT JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
+       WHERE f.status = 'ca' AND f.is_factura = false AND ((SELECT status FROM facturacion WHERE id_factura = fvp.id_factura) in ('ca', 'b') OR COALESCE(fvp.id_factura, 0) = 0) {$sql}
+       ORDER BY (DATE(f.fecha), f.serie, f.folio) DESC")->result();
+
+    // echo "<pre>";
+    //   var_dump($remisiones);
+    // echo "</pre>";exit;
+
+    foreach ($remisiones as $remision)
+    {
+      $remision->pallets = array();
+
+      $pallets = $this->db->query("SELECT id_pallet
+                                 FROM facturacion_pallets
+                                 WHERE id_factura = {$remision->id_factura}");
+
+      if ($pallets->num_rows() > 0)
+      {
+        foreach ($pallets->result() as $pallet)
+        {
+          $remision->pallets[] = $this->rastreabilidad_pallets_model->getInfoPallet($pallet->id_pallet);
+        }
+      }
+    }
+    // echo "<pre>";
+    //   var_dump($remisiones);
+    // echo "</pre>";exit;
+
+    return $remisiones;
+  }
+
+  public function remisionesDetallePdf($filtros)
+  {
+    // echo "<pre>";
+    //   var_dump($filtros);
+    // echo "</pre>";exit;
+    $this->load->model('empresas_model');
+
+    if ($filtros['did_empresa'] === false || $filtros['did_empresa'] === '')
+    {
+      $default = $this->empresas_model->getDefaultEmpresa();
+      $filtros['did_empresa'] = $default->id_empresa;
+    }
+
+    if ($filtros['ffacturadas'] === false)
+    {
+      $titulo2 = 'Reporte Remisiones';
+
+      // Obtiene las remisiones no facturadas.
+      $remisiones = $this->db->query(
+        "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente, f.total, 'remision' as tipo
+         FROM facturacion f
+         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+         LEFT JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
+         WHERE f.is_factura = false AND
+              f.status != 'ca' AND
+              ((SELECT status FROM facturacion WHERE id_factura = fvp.id_factura) in ('ca', 'b') OR COALESCE(fvp.id_factura, 0) = 0) AND
+              f.id_empresa = {$filtros['did_empresa']} AND
+              DATE(f.fecha) >= '{$filtros['ffecha1']}' AND
+              DATE(f.fecha) <= '{$filtros['ffecha2']}'
+         ORDER BY (f.fecha, f.serie, f.folio) ASC")->result();
+    }
+    else
+    {
+      $titulo2 = 'Reporte Remisiones Facturadas';
+
+      $remisiones = $this->db->query(
+        "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente, f.total, 'factura' as tipo
+         FROM facturacion f
+         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+         INNER JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_factura = f.id_factura
+         WHERE f.is_factura = true AND
+               f.status != 'ca' AND
+               f.status != 'b' AND
+               f.id_empresa = {$filtros['did_empresa']} AND
+               DATE(f.fecha) >= '{$filtros['ffecha1']}' AND
+               DATE(f.fecha) <= '{$filtros['ffecha2']}'
+         GROUP BY f.id_factura, c.nombre_fiscal
+         ORDER BY (f.fecha, f.serie, f.folio) ASC")->result();
+
+      foreach ($remisiones as $remision)
+      {
+        $remision->remisiones = $this->db->query(
+          "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente, f.total
+           FROM facturacion f
+           INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+           INNER JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
+           WHERE DATE(f.fecha) >= '{$filtros['ffecha1']}' AND
+                 DATE(f.fecha) <= '{$filtros['ffecha2']}' AND
+                 fvp.id_factura = {$remision->id_factura}
+           ORDER BY (f.fecha, f.serie, f.folio) ASC")->result();
+      }
+    }
+
+    // echo "<pre>";
+    //   var_dump($remisiones);
+    // echo "</pre>";exit;
+
+    $empresa = $this->empresas_model->getInfoEmpresa($filtros['did_empresa']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = $titulo2;
+    $pdf->titulo3 = 'Del: '.$filtros['ffecha1']." Al ".$filtros['ffecha2']."\n";
+    // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+    $pdf->AliasNbPages();
+    // $pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'R', 'L', 'R');
+    $widths = array(28, 11, 20, 122, 23);
+    $header = array('Fecha', 'Serie', 'Folio', 'Cliente', 'Importe');
+
+    $total = 0;
+    foreach($remisiones as $key => $item)
+    {
+      // if (($item->saldo > 0 && $this->input->get('fcon_saldo')=='si') || $this->input->get('fcon_saldo')!='si')
+      // {
+      //   $total_cargo = 0;
+      //   $total_abono = 0;
+      //   $total_saldo = 0;
+      //   $totalVencido = 0;
+
+        // if (isset($item->saldo_anterior_vencido->saldo))
+        //   $totalVencido += $item->saldo_anterior_vencido->saldo;
+
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+
+        // $pdf->SetXY(6, $pdf->GetY());
+        // $pdf->SetAligns(array('L', 'L'));
+        // $pdf->SetWidths(array(20, 170));
+        // $pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
+        // $pdf->SetXY(6, $pdf->GetY()-2);
+        // $pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
+
+        // $pdf->SetXY(6, $pdf->GetY()+3);
+
+        $pdf->SetFont('Arial','',8);
+        // foreach ($item->facturas as $keyf => $factura)
+        // {
+          // $total_cargo += $factura->total;
+          // $total_saldo += $factura->saldo;
+
+          // if($keyf == 0 && isset($item->saldo_anterior->saldo) ){
+          //   $datos = array('', '', '',
+          //     'Saldo Inicial',
+          //     String::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
+          //     '', '', '',
+          //   );
+          //   $pdf->SetXY(6, $pdf->GetY()-2);
+          //   $pdf->SetAligns($aligns);
+          //   $pdf->SetWidths($widths);
+          //   $pdf->Row($datos, false, false);
+          // }
+
+          $datos = array(String::fechaATexto($item->fecha, '/c'),
+                  $item->serie,
+                  $item->folio,
+                  $item->cliente,
+                  String::formatoNumero($item->total, 2, '', false),
+                );
+          //si esta vencido
+              // if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
+              // {
+              //   $totalVencido += $factura->saldo;
+              //   if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+              if ($item->tipo === 'factura')
+              {
+                $pdf->SetFillColor(255,255,204);
+              }
+              else
+              {
+                $pdf->SetFillColor(255,255,255);
+              }
+              //   else
+              // }else
+              //   $pdf->SetFillColor(255,255,255);
+
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, true, true);
+
+          if (isset($item->remisiones))
+          {
+            foreach ($item->remisiones as $keya => $remi)
+            {
+              // $total_abono += $abono->abono;
+              $datos = array(
+                '     '.String::fechaATexto($remi->fecha, '/c'),
+                $remi->serie,
+                $remi->folio,
+                $remi->cliente,
+                '('.String::formatoNumero($remi->total, 2, '', false).')',
+              );
+
+              $pdf->SetXY(6, $pdf->GetY());
+              $pdf->SetAligns($aligns);
+              $pdf->SetWidths($widths);
+              $pdf->Row($datos, false, true);
+            }
+          }
+
+        $total += floatval($item->total);
+
+        // }
+
+        // $pdf->SetX(115);
+        // $pdf->SetFont('Arial','B',8);
+        // // $pdf->SetTextColor(255,255,255);
+        // $pdf->SetAligns(array('R'));
+        // $pdf->SetWidths(array(23));
+        // $pdf->Row(array(String::formatoNumero($item->total, 2, '', false)), false);
+
+        // $saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
+        // $pdf->SetAligns(array('R', 'R', 'R', 'R'));
+        // $pdf->SetWidths(array(50, 23, 23, 23));
+        // $pdf->SetX(65);
+        // $pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', String::formatoNumero($totalVencido, 2, '', false)), false);
+
+        // $pdf->SetX(65);
+        // $pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false)), false);
+        // $pdf->SetX(65);
+        // $pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
+        // $pdf->SetX(65);
+        // $pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false)), false);
+
+        // $total_saldo_cliente += $saldo_cliente;
+      // }
+    }
+
+    $pdf->SetXY(157, $pdf->GetY() + 2);
+    $pdf->SetFont('Arial','B',8);
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(30, 23));
+    $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '', false)), false);
+
+    // $pdf->SetXY(65, $pdf->GetY()+4);
+    // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+
+
+    $pdf->Output('reporte_remisiones.pdf', 'I');
   }
 }

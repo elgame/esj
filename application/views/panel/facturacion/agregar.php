@@ -137,6 +137,14 @@
                   </div>
                 </div>
               </div>
+              <div class="control-group">
+                <label class="control-label">Ventas de Remisión</label>
+                <div class="controls">
+                  <div>
+                    <button type="button" class="btn btn-info" id="show-remisiones">Buscar</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="span6">
@@ -283,6 +291,7 @@
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
                             $_POST['pallets_id'][$key]      = $p->ids_pallets;
+                            $_POST['remisiones_id'][$key]   = $p->ids_remisiones;
                             $_POST['prod_dkilos'][$key]     = $p->kilos;
                             $_POST['prod_dcajas'][$key]     = $p->cajas;
                             $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
@@ -294,11 +303,12 @@
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
                             if ($_POST['prod_importe'][$k] != 0) {
                             ?>
-                              <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
+                              <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>" data-remisiones="<?php echo $_POST['remisiones_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                   <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
+                                  <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
                                   <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
                                 </td>
                                 <td>
@@ -349,61 +359,62 @@
                                 </td>
                               </tr>
                         <?php }}} ?>
-                  <tr data-pallets="">
-                    <td>
-                      <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
-                      <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
-                      <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
-                      <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
-                    </td>
-                    <td>
-                      <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
-                      <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                        <?php foreach ($unidades as $key => $u) {
-                            if ($key === 0) $uni = $u->id_unidad;
-                          ?>
-                          <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
-                        <?php } ?>
-                        <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
-                      </select>
-                    </td>
-                    <td>
-                        <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
-                        <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
-                        <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
-                    </td>
-                    <td>
-                      <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive">
-                    </td>
-                    <td>
-                        <select name="diva" id="diva" class="span12">
-                          <option value="0">0%</option>
-                          <option value="11">11%</option>
-                          <option value="16">16%</option>
-                        </select>
+                        <tr data-pallets="" data-remisiones="">
+                          <td>
+                            <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
+                            <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                            <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
+                            <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
+                            <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
+                          </td>
+                          <td>
+                            <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
+                            <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                              <?php foreach ($unidades as $key => $u) {
+                                  if ($key === 0) $uni = $u->id_unidad;
+                                ?>
+                                <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
+                              <?php } ?>
+                              <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
+                            </select>
+                          </td>
+                          <td>
+                              <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
+                              <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
+                              <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
+                          </td>
+                          <td>
+                            <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive">
+                          </td>
+                          <td>
+                              <select name="diva" id="diva" class="span12">
+                                <option value="0">0%</option>
+                                <option value="11">11%</option>
+                                <option value="16">16%</option>
+                              </select>
 
-                        <!-- <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12"> -->
-                        <input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
-                    </td>
-                    <td style="width: 80px;">
-                      <input type="text" name="prod_diva_total[]" class="span12" value="0" id="prod_diva_total" readonly>
-                    </td>
-                    <td>
-                      <select name="dreten_iva" id="dreten_iva" class="span12 prod">
-                        <option value="0">No retener</option>
-                        <option value="0.04">4%</option>
-                        <option value="0.10667">2 Terceras</option>
-                        <option value="0.16">100 %</option>
-                      </select>
+                              <!-- <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12"> -->
+                              <input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
+                          </td>
+                          <td style="width: 80px;">
+                            <input type="text" name="prod_diva_total[]" class="span12" value="0" id="prod_diva_total" readonly>
+                          </td>
+                          <td>
+                            <select name="dreten_iva" id="dreten_iva" class="span12 prod">
+                              <option value="0">No retener</option>
+                              <option value="0.04">4%</option>
+                              <option value="0.10667">2 Terceras</option>
+                              <option value="0.16">100 %</option>
+                            </select>
 
-                      <input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">
-                      <input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">
-                    </td>
-                    <td>
-                      <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
-                    </td>
-                    <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
-                  </tr>
+                            <input type="hidden" name="prod_dreten_iva_total[]" value="0" id="prod_dreten_iva_total" class="span12">
+                            <input type="hidden" name="prod_dreten_iva_porcent[]" value="0" id="prod_dreten_iva_porcent" class="span12">
+                          </td>
+                          <td>
+                            <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
+                          </td>
+                          <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                        </tr>
                 </tbody>
               </table>
             </div>
@@ -417,6 +428,17 @@
             <?php }} else  if (isset($borrador) && count($borrador['pallets']) > 0) {
                 foreach ($borrador['pallets'] as $pallet) { ?>
                   <input type="hidden" value="<?php echo $pallet->id_pallet ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $pallet->id_pallet ?>">
+            <?php }} ?>
+          </div>
+
+          <div id="remisiones-selected">
+            <?php
+              if (isset($_POST['remisionesIds'])) {
+                foreach ($_POST['remisionesIds'] as $remisionId) { ?>
+                <input type="hidden" value="<?php echo $remisionId ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remisionId ?>">
+            <?php }} else  if (isset($borrador) && count($borrador['remisiones']) > 0) {
+                foreach ($borrador['remisiones'] as $remision) { ?>
+                  <input type="hidden" value="<?php echo $remision->id_venta ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remision->id_venta ?>">
             <?php }} ?>
           </div>
 
@@ -508,6 +530,51 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddClientePallets">Agregar Pallets</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal remisiones-->
+  <div id="modal-remisiones" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Remisiones</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-pallets-cliente">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Serie - Folio</th>
+              <th>Cliente</th>
+              <th style="width:70px;">Fecha</th>
+              <!-- <th>Clasificacion</th> -->
+            </tr>
+          </thead>
+          <tbody>
+
+            <?php foreach ($remisiones as $key => $remision) {
+                    $rendimientos = array();
+                    foreach ($remision->pallets as $pallet) {
+                      $rendimientos = array_merge($rendimientos, $pallet['rendimientos']);
+                    }
+            ?>
+
+              <tr style="" id="chk-cli-remision-<?php echo $remision->id_factura ?>">
+                <td><input type="checkbox" value="<?php echo $remision->id_factura ?>" class="chk-cli-remisiones"><input type="hidden" id="jsonData" value="<?php echo htmlentities(json_encode($rendimientos)) ?>"></td>
+                <td><?php echo ($remision->serie !== '' && $remision->serie !== null ? $remision->serie.'-' : '').$remision->folio ?></td>
+                <td><?php echo $remision->nombre_fiscal ?></td>
+                <td><?php echo $remision->fecha ?></td>
+                <!-- <td></td> -->
+              </tr>
+            <?php } ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddRemisiones">Agregar Remisiones</button>
     </div>
   </div><!--/modal pallets -->
 
