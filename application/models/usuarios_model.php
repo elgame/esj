@@ -368,7 +368,7 @@ class Usuarios_model extends privilegios_model {
     if($this->input->get('empleados')!='')
       $sql = " AND user_nomina = 't'";
     $res = $this->db->query(
-        "SELECT id, nombre, usuario, apellido_paterno, apellido_materno
+        "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida
         FROM usuarios
         WHERE status = 't' AND
                 (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR

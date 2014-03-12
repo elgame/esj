@@ -24,6 +24,8 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/nomina_fiscal_banco/',
     'nomina_fiscal/nomina_fiscal_rpt_pdf/',
     'nomina_fiscal/recibo_nomina_pdf/',
+    'nomina_fiscal/recibo_vacaciones_pdf/',
+    'nomina_fiscal/recibo_finiquito_pdf/',
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
@@ -459,6 +461,75 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->rptVacacionesPdf($_GET['did_empresa']);
+  }
+
+  public function recibo_vacaciones()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_trabajador_prestamos.js'),
+    ));
+
+    $this->load->library('pagination');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Recibo de Vacaciones');
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_recibo_vacaciones',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function recibo_vacaciones_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+
+    $_GET = array_merge(array(
+      'fid_trabajador' => isset($_GET['fid_trabajador']) ?: '',
+      'fsalario_real' => isset($_GET['fsalario_real']) ?: '',
+      'fdias' => isset($_GET['fdias']) ?: '',
+    ), $_GET);
+
+    $this->nomina_fiscal_model->printReciboVacaciones($_GET);
+  }
+
+  public function recibo_finiquito()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_trabajador_prestamos.js'),
+    ));
+
+    $this->load->library('pagination');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Recibo de Finiquito');
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_recibo_finiquito',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function recibo_finiquito_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+
+    $_GET = array_merge(array(
+      'fid_trabajador' => isset($_GET['fid_trabajador']) ?: '',
+      'fsalario_real' => isset($_GET['fsalario_real']) ?: '',
+      'ffecha1' => isset($_GET['ffecha1']) ?: '',
+      'ffecha2' => isset($_GET['ffecha2']) ?: '',
+    ), $_GET);
+
+    $this->nomina_fiscal_model->printReciboFiniquito($_GET);
   }
 
   /*

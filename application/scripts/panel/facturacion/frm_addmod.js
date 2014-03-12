@@ -561,7 +561,7 @@ function addProducto(unidades, prod) {
       existe    = false,
       $tr, addInputPalletId = true;
 
-  var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
+  var prod_nombre = '', prod_id = '', pallet = '', remision = '', prod_cajas = 0,
       ivaSelected = '0', prod_kilos = 0, cantidad = 0;
 
   if (prod) {

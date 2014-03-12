@@ -298,320 +298,6 @@ class nomina_fiscal_model extends CI_Model {
       );
   }
 
-  // public function add_nominas($datos, $empresaId)
-  // {
-  //   $startTime = new DateTime(date('Y-m-d H:i:s'));
-
-  //   $this->load->library('cfdi');
-  //   $this->load->library('facturartebarato_api');
-  //   $this->load->model('empresas_model');
-  //   $this->load->model('usuarios_model');
-
-  //   // Obtiene la informacion de la empresa.
-  //   $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
-
-  //   // Obtiene el certificado.
-  //   $certificado = $this->cfdi->obtenCertificado($this->db
-  //     ->select('cer')
-  //     ->from("empresas")
-  //     ->where("id_empresa", $empresaId)
-  //     ->get()->row()->cer
-  //   );
-
-  //   // Obtiene las configuraciones.
-  //   $configuraciones = $this->configuraciones();
-
-  //   // Almacenara los datos de las nominas de cada empleado para despues
-  //   // insertarlas.
-  //   $nominasEmpleados = array();
-
-  //   // Almacenara los datos de los prestamos de cada empleado para despues
-  //   // insertarlos.
-  //   $prestamosEmpleados = array();
-
-  //   // Obtiene el rango de fechas de la semana.
-  //   $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana']);
-
-  //   // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
-  //   $errorTimbrar = false;
-
-  //   // Recorre los empleados para agregar y timbrar sus nominas.
-  //   foreach ($datos['empleado_id'] as $key => $empleadoId)
-  //   {
-  //     // Si la nomina del empleado no se ha generado entonces entra.
-  //     if ($datos['generar_nomina'][$key] === '1')
-  //     {
-  //       $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
-
-  //       $empleadoNomina = $this->nomina(
-  //         $configuraciones,
-  //         array('semana' => $datos['numSemana'], 'empresaId' => $empresaId),
-  //         $empleadoId,
-  //         $datos['horas_extras'][$key],
-  //         $datos['descuento_playeras'][$key],
-  //         $datos['subsidio'][$key],
-  //         $datos['isr'][$key],
-  //         $datos['utilidad_empresa']
-  //       );
-  //       // unset($empleadoNomina[0]->nomina->percepciones['subsidio']);
-  //       // unset($empleadoNomina[0]->nomina->percepciones['ptu']);
-  //       // unset($empleadoNomina[0]->nomina->deducciones['isr']);
-
-  //       $valorUnitario = 0; // Total de las Percepciones.
-
-  //       // Recorre las percepciones del empleado.
-  //       foreach ($empleadoNomina[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
-  //       {
-  //         // Si activaron las vacaciones entonces suma las vacaciones y la prima vacacional.
-  //         if ($tipoPercepcion === 'vacaciones' || $tipoPercepcion === 'prima_vacacional')
-  //         {
-  //           if ($datos['con_vacaciones'][$key] === '1' && $empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total'] != 0)
-  //           {
-  //             $valorUnitario += $percepcion['total'];
-  //             unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-  //           }
-  //           else
-  //             unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-  //         }
-  //         // Si el tipo de percepcion es aguinaldo
-  //         else if ($tipoPercepcion === 'aguinaldo')
-  //         {
-  //           // Si activarion el aguinaldo entonces lo suma.
-  //           if ($datos['con_aguinaldo'] === '1')
-  //           {
-  //             $valorUnitario += $percepcion['total'];
-  //             unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-  //           }
-  //           else
-  //             unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-  //         }
-  //         // Si es el sueldo u horas extras los suma directo.
-  //         else
-  //         {
-  //           $valorUnitario += $percepcion['total'];
-  //           unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-  //         }
-  //       }
-
-  //       $isr = 0; // retenciones
-  //       $descuento = 0; // Total de las deducciones(gravado + excento) excepto el ISR.
-  //       // Recorre las deducciones del empleado.
-  //       foreach ($empleadoNomina[0]->nomina->deducciones as $tipoDeduccion => $deduccion)
-  //       {
-  //         if ($tipoDeduccion !== 'isr')
-  //         {
-  //           $descuento += $deduccion['total'];
-  //         }
-  //         else
-  //         {
-  //           $isr = $deduccion['total'];
-  //         }
-  //         unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]['total']);
-  //       }
-
-  //       // Le suma al imss el rcv, para tener solamente la deduccion imss.
-  //       $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'] += $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteExcento'];
-  //       unset($empleadoNomina[0]->nomina->deducciones['rcv']);
-
-  //       // Obtiene los datos para la cadena original.
-  //       $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-  //       $datosCadenaOriginal['subTotal'] = $valorUnitario;
-  //       $datosCadenaOriginal['descuento'] = $descuento;
-  //       $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
-  //       $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-  //       $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
-
-  //       // Concepto de la nomina.
-  //       $concepto = array(array(
-  //         'cantidad'         => 1,
-  //         'unidad'           => 'Servicio',
-  //         'descripcion'      => 'Pago de nomina',
-  //         'valorUnitario'    => $valorUnitario,
-  //         'importe'          => $valorUnitario,
-  //         'idClasificacion' => null,
-  //       ));
-
-  //       $datosCadenaOriginal['concepto'] = $concepto;
-
-  //       // Obtiene la cadena original para la nomina.
-  //       $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadenaOriginal, true, $empleadoNomina);
-
-  //       // Genera el sello en base a la cadena original.
-  //       $sello = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-
-  //       // Construye los datos para el xml.
-  //       $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-  //       $datosXML['concepto'] = $concepto;
-
-  //       $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana);
-
-  //       $result = $this->timbrar($archivo['pathXML']);
-  //       // echo "<pre>";
-  //       //   var_dump($archivo, $result, $cadenaOriginal);
-  //       // echo "</pre>";exit;
-
-  //       // Si la nomina se timbro entonces agrega al array nominas la nomina del
-  //       // empleado para despues insertarla en la bdd.
-  //       if ($result['result']->status)
-  //       {
-  //         $vacaciones = isset($empleadoNomina[0]->nomina->percepciones['vacaciones'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteGravado'] +
-  //             $empleadoNomina[0]->nomina->percepciones['vacaciones']['ImporteExcento']
-  //           : 0;
-
-  //         $primaVacacionalGravable = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado']
-  //           : 0;
-
-  //         $primaVacacionalExcento = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
-  //           : 0;
-
-  //         $primaVacacional = isset($empleadoNomina[0]->nomina->percepciones['prima_vacacional'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteGravado'] +
-  //             $empleadoNomina[0]->nomina->percepciones['prima_vacacional']['ImporteExcento']
-  //           : 0;
-
-  //         $aguinaldoGravable = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado']
-  //           : 0;
-
-  //         $aguinaldoExcento = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
-  //           : 0;
-
-  //         $aguinaldo = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado'] +
-  //             $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
-  //           : 0;
-
-  //         $imss = $empleadoNomina[0]->nomina->deducciones['imss']['ImporteGravado'] +
-  //                 $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'];
-
-  //         $infonavit = $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteGravado'] +
-  //                      $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteExcento'];
-
-  //         $ptuGravado = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteGravado']
-  //           : 0;
-
-  //         $ptuExcento = isset($empleadoNomina[0]->nomina->percepciones['ptu'])
-  //           ? $empleadoNomina[0]->nomina->percepciones['ptu']['ImporteExcento']
-  //           : 0;
-
-  //         $ptu = $ptuGravado + $ptuExcento;
-
-  //         $totalPrestamos = 0;
-  //         // Recorre los prestamos del empleado para
-  //         foreach ($empleadoNomina[0]->prestamos as $prestamo)
-  //         {
-  //           $totalPrestamos += floatval($prestamo['pago_semana_descontar']);
-
-  //           $prestamosEmpleados[] = array(
-  //             'id_empleado' => $empleadoId,
-  //             'id_empresa' => $empresaId,
-  //             'anio' => date('Y'),
-  //             'semana' => $datos['numSemana'],
-  //             'id_prestamo' => $prestamo['id_prestamo'],
-  //             'monto' => $prestamo['pago_semana_descontar'],
-  //           );
-
-  //           // Suma lo que lleva pagado mas lo que se esta abonando.
-  //           $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
-
-  //           // Si ya termino de pagar el prestamo entonces le cambia el status.
-  //           if ($totalAbonado >= floatval($prestamo['prestado']))
-  //           {
-  //             $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
-  //           }
-  //         }
-
-  //         $totalNoFiscal = floatval($datos['total_no_fiscal'][$key]);
-
-  //         $nominasEmpleados[] = array(
-  //           'id_empleado' => $empleadoId,
-  //           'id_empresa' => $empresaId,
-  //           'anio' => $fechasSemana['anio'],
-  //           'semana' => $datos['numSemana'],
-  //           'fecha_inicio' => $fechasSemana['fecha_inicio'],
-  //           'fecha_final' => $fechasSemana['fecha_final'],
-  //           'dias_trabajados' => $empleadoNomina[0]->dias_trabajados,
-  //           'salario_diario' => $empleadoNomina[0]->salario_diario,
-  //           'salario_integral' => $empleadoNomina[0]->nomina->salario_diario_integrado,
-  //           'subsidio' => $datos['subsidio'][$key],
-  //           'sueldo_semanal' => $empleadoNomina[0]->nomina->percepciones['sueldo']['ImporteGravado'],
-  //           'bonos' => $empleadoNomina[0]->bonos,
-  //           'otros' => $empleadoNomina[0]->otros,
-  //           'subsidio_pagado' => 0,
-  //           'vacaciones' => $vacaciones,
-  //           'prima_vacacional_grabable' => $primaVacacionalGravable,
-  //           'prima_vacacional_exento' => $primaVacacionalExcento,
-  //           'prima_vacacional' => $primaVacacional,
-  //           'aguinaldo_grabable' => $aguinaldoGravable,
-  //           'aguinaldo_exento' => $aguinaldoExcento,
-  //           'aguinaldo' => $aguinaldo,
-  //           'total_percepcion' => $valorUnitario,
-  //           'imss' => $imss,
-  //           'vejez' => 0,
-  //           'isr' => $datos['isr'][$key],
-  //           'infonavit' => $infonavit,
-  //           'subsidio_cobrado' => 0,
-  //           'prestamos' => $totalPrestamos,
-  //           'total_deduccion' => $descuento + $isr,
-  //           'total_neto' => $valorUnitario - $descuento - $isr,
-  //           'id_empleado_creador' => $this->session->userdata('id_usuario'),
-  //           'ptu_exento' => $ptuExcento,
-  //           'ptu_grabable' => $ptuGravado,
-  //           'ptu' => $ptu,
-  //           'id_puesto' => $empleadoNomina[0]->id_puesto,
-  //           'salario_real' => $empleadoNomina[0]->salario_diario_real,
-  //           'sueldo_real' => $empleadoNomina[0]->salario_diario_real * $empleadoNomina[0]->dias_trabajados,
-  //           'total_no_fiscal' => $totalNoFiscal,
-  //           'horas_extras' => $empleadoNomina[0]->horas_extras_dinero,
-  //           'horas_extras_grabable' => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteGravado'],
-  //           'horas_extras_excento' => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteExcento'],
-  //           'descuento_playeras' => $datos['descuento_playeras'][$key],
-  //           'xml' => $result['xml'],
-  //           'uuid' => $result['uuid'],
-  //           'utilidad_empresa' => $empleadoNomina[0]->utilidad_empresa
-  //         );
-  //       }
-  //       else
-  //       {
-  //         $errorTimbrar = true;
-  //       }
-
-  //       // echo "<pre>";
-  //       //   var_dump($datosXML, $archivo);
-  //       // echo "</pre>";exit;
-
-  //       // echo "<pre>";
-  //       //   var_dump($empleado, $cadenaOriginal, $sello, $certificado);
-  //       // echo "</pre>";exit;
-  //     }
-  //   }
-
-  //   // Inserta las nominas.
-  //   if (count($nominasEmpleados) > 0)
-  //   {
-  //     $this->db->insert_batch('nomina_fiscal', $nominasEmpleados);
-  //   }
-
-  //   // Inserta los abonos de los prestamos.
-  //   if (count($prestamosEmpleados) > 0)
-  //   {
-  //     $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
-  //   }
-
-  //   $endTime = new DateTime(date('Y-m-d H:i:s'));
-
-  //   echo "<pre>";
-  //     var_dump($startTime->diff($endTime)->format('%H:%I:%S'));
-  //   echo "</pre>";exit;
-
-  //   return array('errorTimbrar' => $errorTimbrar);
-  // }
-
   public function add_nominas($datos, $empresaId, $empleadoId)
   {
     // echo "<pre>";
@@ -4836,6 +4522,236 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $pdf->Output('Reporte_Asistencias.pdf', 'I');
+  }
+
+  public function printReciboVacaciones($filtros)
+  {
+    if ($filtros['fid_trabajador'] !== '' && $filtros['fsalario_real'] !== '' && $filtros['fdias'])
+    {
+      $this->load->model('usuarios_model');
+      $this->load->model('empresas_model');
+      $this->load->library('mypdf');
+
+      $empleado = $this->usuarios_model->get_usuario_info($filtros['fid_trabajador']);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      // echo "<pre>";
+      //   var_dump($empleado);
+      // echo "</pre>";exit;
+
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo2 = 'CALCULO DE VACACIONES';
+      $pdf->titulo3 = '';
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      // $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $pdf->SetFont('Arial','B', 11);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetXY(33, 50);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(100, 50));
+      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+
+      $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
+      $primaVacacional = $vacaciones * 0.25;
+
+      $pdf->SetFont('Arial','', 11);
+      $pdf->SetXY(33, $pdf->GetY() + 5);
+      $pdf->Row(array("{$filtros['fdias']} DIAS DE VACACIONES", String::formatoNumero($filtros['fsalario_real'] * $filtros['fdias'], 2, '$', false)), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("P. VACACIONAL", String::formatoNumero($primaVacacional, 2, '$', false)), false, false);
+
+      $pdf->SetFont('Arial','B', 11);
+      $pdf->SetX(33);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->Row(array("TOTAL", String::formatoNumero($vacaciones + $primaVacacional, 2, '$', false)), false, false);
+
+      $pdf->SetFont('Arial','', 10);
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("RECIBI POR CONCEPTO DE VACACIONES LA CANTIDAD DE " . String::formatoNumero($vacaciones + $primaVacacional, 2, '$', false)), false, false);
+      $pdf->SetX(33);
+
+      $pdf->Row(array("(== " . strtoupper(String::num2letras($vacaciones + $primaVacacional)) . " ==)"), false, false);
+      $pdf->SetX(33);
+
+      $inicio = new DateTime($empleado['info'][0]->fecha_entrada);
+      $hoy = new DateTime(date('Y-m-d'));
+
+      $pdf->Row(array("POR LAS VACACIONES DEL ".String::numeroCardinal($hoy->diff($inicio)->y)." AÑO DE LABORES. "), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("RECIBI"), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 15);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("__________________________________________________________"), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}"), false, false);
+
+      $pdf->Output('RECIBO_VACACIONES.pdf', 'I');
+    }
+  }
+
+  public function printReciboFiniquito($filtros)
+  {
+    if ($filtros['fid_trabajador'] !== '' && $filtros['fsalario_real'] !== '' && $filtros['ffecha1'] && $filtros['ffecha2'])
+    {
+      $this->load->model('usuarios_model');
+      $this->load->model('empresas_model');
+      $this->load->library('mypdf');
+
+      $empleado = $this->usuarios_model->get_usuario_info($filtros['fid_trabajador']);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      // echo "<pre>";
+      //   var_dump($empleado);
+      // echo "</pre>";exit;
+
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo2 = 'CALCULO DE RENUNCIA VOLUNTARIA';
+      $pdf->titulo3 = '';
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      // $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $pdf->SetFont('Arial','B', 11);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetXY(33, 35);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(100, 50));
+      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", "SALARIO DIARIO " . String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+
+      // $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
+      // $primaVacacional = $vacaciones * 0.25;
+
+      $pdf->SetFont('Arial','', 11);
+      $pdf->SetX(33);
+      $pdf->SetAligns(array('L', 'l'));
+      $pdf->SetWidths(array(50, 50));
+      $pdf->Row(array("FECHA DE INGRESO", $filtros['ffecha1']), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("FECHA DE BAJA", $filtros['ffecha2']), false, false);
+
+      $pdf->SetAligns(array('L', 'R'));
+
+      $pdf->SetFont('Arial','B', 9);
+      $pdf->SetXY(60, $pdf->GetY() + 5);
+      $pdf->Row(array("VACACIONES", ""), false, false);
+
+      $pdf->SetFont('Arial','', 9);
+      $pdf->SetX(60);
+      $pdf->Row(array("SALARIO DIARIO", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+
+      $fechaEntrada = new DateTime($filtros['ffecha1']);
+      $fechaSalida = new DateTime($filtros['ffecha2']);
+      $diasProporcionVacaciones = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 6, 2);
+      $diasProporcionAguinaldo = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 15, 2);
+      $vacaciones = $diasProporcionVacaciones * $filtros['fsalario_real'];
+      $aguinaldo = $diasProporcionAguinaldo * $filtros['fsalario_real'];
+
+      $pdf->SetX(60);
+      $pdf->Row(array("DIAS (PROPORCION)", $diasProporcionVacaciones), false, false);
+
+      $pdf->SetX(60);
+      $pdf->Row(array("TOTAL", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+
+      // ---------------------------
+
+      $pdf->SetFont('Arial','B', 9);
+      $pdf->SetXY(60, $pdf->GetY() + 5);
+      $pdf->Row(array("PRIMA VACACIONAL", ""), false, false);
+
+      $pdf->SetFont('Arial','', 9);
+      $pdf->SetX(60);
+      $pdf->Row(array("VACACIONES", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+
+      $fechaEntrada = new DateTime($filtros['ffecha1']);
+      $fechaSalida = new DateTime($filtros['ffecha2']);
+      $diasProporcionVacaciones = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 6, 2);
+
+      $pdf->SetX(60);
+      $pdf->Row(array("TASA", '25%'), false, false);
+
+      $pdf->SetX(60);
+      $pdf->Row(array("PRIMA A PAGAR", String::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
+
+      // ---------------------------
+
+      $pdf->SetFont('Arial','B', 9);
+      $pdf->SetXY(60, $pdf->GetY() + 5);
+      $pdf->Row(array("AGUINALDO", ""), false, false);
+
+      $pdf->SetFont('Arial','', 9);
+      $pdf->SetX(60);
+      $pdf->Row(array("SALARIO DIARIO", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+
+      $pdf->SetX(60);
+      $pdf->Row(array("DIAS (PROPORCION)", $diasProporcionAguinaldo), false, false);
+
+      $pdf->SetX(60);
+      $pdf->Row(array("TOTAL", String::formatoNumero($aguinaldo, 2, '$', false)), false, false);
+
+      // --------------------------------
+
+      $pdf->SetXY(60, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(100));
+      $pdf->Row(array("RESUMEN"), false, true);
+
+      $pdf->SetFont('Arial','B', 9);
+      $pdf->SetXY(60, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(50, 50));
+      $pdf->Row(array("VACACIONES", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+      $pdf->SetX(60);
+      $pdf->Row(array("PRIMA VACACIONAL", String::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
+      $pdf->SetX(60);
+      $pdf->Row(array("AGUINALDO", String::formatoNumero($aguinaldo, 2, '$', false)), false, false);
+      $pdf->SetXY(60, $pdf->GetY() + 2);
+      $pdf->Row(array("NETO A PAGAR", String::formatoNumero($vacaciones + ($vacaciones * 0.25) + $aguinaldo, 2, '$', false)), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("RECIBI"), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("__________________________________________________________"), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}"), false, false);
+
+      $pdf->SetFont('Arial','', 7);
+      $pdf->SetXY(33, $pdf->GetY() + 5);
+      $pdf->Row(array("Recibi las cantidades arriba señaladas por concepto de mi Terminación de la Relación de Trabajo, manifestando que durante todo este tiempo no sufri Riesgo de Trabajo alguno y que no se me adeuda cantidad alguna por concepto de sueldos o prestaciones, y que  no me reservo acción legal alguna a futuro en contra EMPAQUE SAN JORGE SA DE CV. o a quien sus Derechos Represente."), false, false);
+
+      $pdf->Output('RECIBO_FINIQUITO.pdf', 'I');
+    }
   }
 }
 /* End of file nomina_fiscal_model.php */

@@ -2919,132 +2919,77 @@ class facturacion_model extends privilegios_model{
     $total = 0;
     foreach($remisiones as $key => $item)
     {
-      // if (($item->saldo > 0 && $this->input->get('fcon_saldo')=='si') || $this->input->get('fcon_saldo')!='si')
-      // {
-      //   $total_cargo = 0;
-      //   $total_abono = 0;
-      //   $total_saldo = 0;
-      //   $totalVencido = 0;
-
-        // if (isset($item->saldo_anterior_vencido->saldo))
-        //   $totalVencido += $item->saldo_anterior_vencido->saldo;
-
-        if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
-          $pdf->AddPage();
-
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetTextColor(255,255,255);
-          $pdf->SetFillColor(160,160,160);
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
-        }
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+        $pdf->AddPage();
 
         $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(0,0,0);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
 
-        // $pdf->SetXY(6, $pdf->GetY());
-        // $pdf->SetAligns(array('L', 'L'));
-        // $pdf->SetWidths(array(20, 170));
-        // $pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
-        // $pdf->SetXY(6, $pdf->GetY()-2);
-        // $pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
 
-        // $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->SetFont('Arial','',8);
 
-        $pdf->SetFont('Arial','',8);
-        // foreach ($item->facturas as $keyf => $factura)
-        // {
-          // $total_cargo += $factura->total;
-          // $total_saldo += $factura->saldo;
+      $datos = array(
+        String::fechaATexto($item->fecha, '/c'),
+        $item->serie,
+        $item->folio,
+        $item->cliente,
+        String::formatoNumero($item->total, 2, '', false),
+      );
 
-          // if($keyf == 0 && isset($item->saldo_anterior->saldo) ){
-          //   $datos = array('', '', '',
-          //     'Saldo Inicial',
-          //     String::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
-          //     '', '', '',
-          //   );
-          //   $pdf->SetXY(6, $pdf->GetY()-2);
-          //   $pdf->SetAligns($aligns);
-          //   $pdf->SetWidths($widths);
-          //   $pdf->Row($datos, false, false);
-          // }
+      if ($item->tipo === 'factura')
+      {
+        $pdf->SetFillColor(255,255,204);
+      }
+      else
+      {
+        $pdf->SetFillColor(255,255,255);
+      }
 
-          $datos = array(String::fechaATexto($item->fecha, '/c'),
-                  $item->serie,
-                  $item->folio,
-                  $item->cliente,
-                  String::formatoNumero($item->total, 2, '', false),
-                );
-          //si esta vencido
-              // if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
-              // {
-              //   $totalVencido += $factura->saldo;
-              //   if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
-              if ($item->tipo === 'factura')
-              {
-                $pdf->SetFillColor(255,255,204);
-              }
-              else
-              {
-                $pdf->SetFillColor(255,255,255);
-              }
-              //   else
-              // }else
-              //   $pdf->SetFillColor(255,255,255);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, true, true);
+
+      if (isset($item->remisiones))
+      {
+        foreach ($item->remisiones as $keya => $remi)
+        {
+          if($pdf->GetY() >= $pdf->limiteY) { //salta de pagina si exede el max
+            $pdf->AddPage();
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+          }
+
+          $datos = array(
+            '     '.String::fechaATexto($remi->fecha, '/c'),
+            $remi->serie,
+            $remi->folio,
+            $remi->cliente,
+            '('.String::formatoNumero($remi->total, 2, '', false).')',
+          );
 
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
-          $pdf->Row($datos, true, true);
+          $pdf->Row($datos, false, true);
+        }
+      }
 
-          if (isset($item->remisiones))
-          {
-            foreach ($item->remisiones as $keya => $remi)
-            {
-              // $total_abono += $abono->abono;
-              $datos = array(
-                '     '.String::fechaATexto($remi->fecha, '/c'),
-                $remi->serie,
-                $remi->folio,
-                $remi->cliente,
-                '('.String::formatoNumero($remi->total, 2, '', false).')',
-              );
-
-              $pdf->SetXY(6, $pdf->GetY());
-              $pdf->SetAligns($aligns);
-              $pdf->SetWidths($widths);
-              $pdf->Row($datos, false, true);
-            }
-          }
-
-        $total += floatval($item->total);
-
-        // }
-
-        // $pdf->SetX(115);
-        // $pdf->SetFont('Arial','B',8);
-        // // $pdf->SetTextColor(255,255,255);
-        // $pdf->SetAligns(array('R'));
-        // $pdf->SetWidths(array(23));
-        // $pdf->Row(array(String::formatoNumero($item->total, 2, '', false)), false);
-
-        // $saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
-        // $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-        // $pdf->SetWidths(array(50, 23, 23, 23));
-        // $pdf->SetX(65);
-        // $pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', String::formatoNumero($totalVencido, 2, '', false)), false);
-
-        // $pdf->SetX(65);
-        // $pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false)), false);
-        // $pdf->SetX(65);
-        // $pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
-        // $pdf->SetX(65);
-        // $pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false)), false);
-
-        // $total_saldo_cliente += $saldo_cliente;
-      // }
+      $total += floatval($item->total);
     }
 
     $pdf->SetXY(157, $pdf->GetY() + 2);
@@ -3052,10 +2997,6 @@ class facturacion_model extends privilegios_model{
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(30, 23));
     $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '', false)), false);
-
-    // $pdf->SetXY(65, $pdf->GetY()+4);
-    // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
-
 
     $pdf->Output('reporte_remisiones.pdf', 'I');
   }
