@@ -1709,7 +1709,7 @@ class cuentas_cobrar_model extends privilegios_model{
   					<tr>
   					  <td colspan="3"></td>
   					  <td>Saldo Inicial</td>
-  					  <td>'.$value->saldo_anterior->saldo.'</td>
+  					  <td>'.String::float($value->saldo_anterior->saldo).'</td>
   					  <td colspan="3"></td>
   					</tr>';
 
@@ -1724,14 +1724,14 @@ class cuentas_cobrar_model extends privilegios_model{
 
   				$html .= '
   				<tr>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');text-align:left;">'.String::fechaATexto($factura->fecha, '/c').'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->serie.'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->folio.'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->concepto.'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->total.'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');"></td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.$factura->saldo.'</td>
-  				  <td style="border:1px solid #000;background-color: rgb('.$color.');">'.String::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');text-align:left;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->serie.'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->folio.'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->concepto.'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.String::float($factura->total).'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');"></td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.String::float($factura->saldo).'</td>
+  				  <td style="border:0px solid #000;background-color: rgb('.$color.');">'.String::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
   				</tr>';
 
   				foreach ($factura->abonos as $keya => $abono)
@@ -1756,37 +1756,37 @@ class cuentas_cobrar_model extends privilegios_model{
   			$total_saldo_cliente += $saldo_cliente;
   			$html .= '<tr style="font-weight:bold">
   			  <td colspan="4"></td>
-  			  <td style="border:1px solid #000;">'.$total_cargo.'</td>
-  			  <td style="border:1px solid #000;">'.$total_abono.'</td>
-  			  <td style="border:1px solid #000;">'.$total_saldo.'</td>
+  			  <td style="border:0px solid #000;">'.String::float($total_cargo).'</td>
+  			  <td style="border:0px solid #000;">'.String::float($total_abono).'</td>
+  			  <td style="border:0px solid #000;">'.String::float($total_saldo).'</td>
   			  <td></td>
   			</tr>
   			<tr style="font-weight:bold">
   			  <td colspan="3"></td>
-  			  <td style="border:1px solid #000;text-align:right;">Saldo Inicial</td>
-  			  <td style="border:1px solid #000;">'.(isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0).'</td>
-  			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">Vencido</td>
-  			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">'.$totalVencido.'</td>
+  			  <td style="border:0px solid #000;text-align:right;">Saldo Inicial</td>
+  			  <td style="border:0px solid #000;">'.String::float((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0)).'</td>
+  			  <td style="border:0px solid #000;background-color: rgb(255,255,204);">Vencido</td>
+  			  <td style="border:0px solid #000;background-color: rgb(255,255,204);">'.String::float($totalVencido).'</td>
   			  <td></td>
   			</tr>
   			<tr style="font-weight:bold">
   			  <td colspan="3"></td>
-  			  <td style="border:1px solid #000;text-align:right;">(+) Cargos</td>
-  			  <td style="border:1px solid #000;">'.$total_cargo.'</td>
-  			  <td style="border:1px solid #000;background-color: rgb(255,255,204);">Credito</td>
-          <td style="border:1px solid #000;background-color: rgb(255,255,204);">'.$value->dias_credito.'</td>
+  			  <td style="border:0px solid #000;text-align:right;">(+) Cargos</td>
+  			  <td style="border:0px solid #000;">'.String::float($total_cargo).'</td>
+  			  <td style="border:0px solid #000;background-color: rgb(255,255,204);">Credito</td>
+          <td style="border:0px solid #000;background-color: rgb(255,255,204);">'.$value->dias_credito.'</td>
           <td></td>
   			</tr>
   			<tr style="font-weight:bold">
   			  <td colspan="3"></td>
-  			  <td style="border:1px solid #000;text-align:right;">(-) Abonos</td>
-  			  <td style="border:1px solid #000;">'.$total_abono.'</td>
+  			  <td style="border:0px solid #000;text-align:right;">(-) Abonos</td>
+  			  <td style="border:0px solid #000;">'.String::float($total_abono).'</td>
   			  <td colspan="3"></td>
   			</tr>
   			<tr style="font-weight:bold">
   			  <td colspan="3"></td>
-  			  <td style="border:1px solid #000;text-align:right;">(=) Saldo Final</td>
-  			  <td style="border:1px solid #000;">'.$saldo_cliente.'</td>
+  			  <td style="border:0px solid #000;text-align:right;">(=) Saldo Final</td>
+  			  <td style="border:0px solid #000;">'.String::float($saldo_cliente).'</td>
   			  <td colspan="3"></td>
   			</tr>
   			<tr>
@@ -1798,8 +1798,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		$html .= '
 				<tr style="font-weight:bold">
 				  <td colspan="3"></td>
-				  <td style="border:1px solid #000;">TOTAL SALDO DE CLIENTES</td>
-				  <td style="border:1px solid #000;">'.$total_saldo_cliente.'</td>
+				  <td style="border:0px solid #000;">TOTAL SALDO DE CLIENTES</td>
+				  <td style="border:0px solid #000;">'.String::float($total_saldo_cliente).'</td>
 				  <td colspan="3"></td>
 				</tr>
 			</tbody>

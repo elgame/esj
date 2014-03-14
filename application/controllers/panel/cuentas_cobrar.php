@@ -165,7 +165,7 @@ class cuentas_cobrar extends MY_Controller {
     $params['template']   = '';
     $params['closeModal'] = false;
 
-    if (isset($_GET['id']{0}) && isset($_GET['tipo']{0})) 
+    if (isset($_GET['id']{0}) && isset($_GET['tipo']{0}))
     {
       $ids_aux = $_GET['id'];
       $tipos_aux = $_GET['tipo'];
@@ -195,13 +195,13 @@ class cuentas_cobrar extends MY_Controller {
         $ids   = explode(',', substr($ids_aux, 1));
         $tipos = explode(',', substr($tipos_aux, 1));
 
-        foreach ($ids as $key => $value) 
+        foreach ($ids as $key => $value)
         {
           $params['data']['facturas'][] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
         }
         $_GET['id'] = $ids_aux;
         $_GET['tipo'] = $tipos_aux;
-      }else  
+      }else
         $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
       $id_empresa = isset($params['data']['empresa']->id_empresa)? $params['data']['empresa']->id_empresa : $params['data']['facturas'][0]['empresa']->id_empresa;
 
@@ -209,7 +209,7 @@ class cuentas_cobrar extends MY_Controller {
       //Cuentas de banco
       $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
       //metodos de pago
-      $params['metods_pago']  = array( 
+      $params['metods_pago']  = array(
         array('nombre' => 'Transferencia', 'value' => 'transferencia'),
         array('nombre' => 'Cheque', 'value' => 'cheque'),
         array('nombre' => 'Efectivo', 'value' => 'efectivo'),
@@ -227,7 +227,7 @@ class cuentas_cobrar extends MY_Controller {
   }
 
   public function eliminar_abono(){
-    if (isset($_GET['ida']{0}) && isset($_GET['tipo']{0})) 
+    if (isset($_GET['ida']{0}) && isset($_GET['tipo']{0}))
     {
       $this->load->model('cuentas_cobrar_model');
       $respons = $this->cuentas_cobrar_model->removeAbono();
@@ -273,7 +273,7 @@ class cuentas_cobrar extends MY_Controller {
 
   public function eliminar_movimiento()
   {
-    if (isset($_GET['id_movimiento']{0}) ) 
+    if (isset($_GET['id_movimiento']{0}) )
     {
       $this->load->model('banco_cuentas_model');
       $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);

@@ -1027,7 +1027,6 @@ class inventario_model extends privilegios_model{
 	 */
 	public function promedioData($id_producto, $fecha1, $fecha2)
 	{
-
 		$res = $this->db->query(
 		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
 		FROM
@@ -1218,7 +1217,6 @@ class inventario_model extends privilegios_model{
 		if($params['result_page'] % $params['result_items_per_page'] == 0)
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
-
 		$sql = '';
 
 		//Filtros para buscar
@@ -1240,9 +1238,13 @@ class inventario_model extends privilegios_model{
 			'items_per_page' => $params['result_items_per_page'],
 			'result_page'    => $params['result_page'],
 		);
-		if($res->num_rows() > 0){
+		if($res->num_rows() > 0) {
 			$response['productos'] = $res->result();
-			$fecha = date("Y-m-d", strtotime("+1 day"));
+
+      // determinara por la fecha del form o la actual.
+			$fecha = isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d');
+      $fecha = date($fecha, strtotime("+1 day"));
+
 			foreach ($response['productos'] as $key => $value)
 			{
 				$data = $this->promedioData($value->id_producto, $fecha, $fecha);
@@ -1271,7 +1273,7 @@ class inventario_model extends privilegios_model{
 					'id_producto'     => $produto,
 					'cantidad'        => abs($_POST['diferencia'][$key]),
 					'precio_unitario' => $_POST['precio_producto'][$key],
-					);
+				);
 			}elseif($_POST['diferencia'][$key] < 0) //compra
 			{
 				$presenta = $this->db->query("SELECT id_presentacion FROM productos_presentaciones WHERE status = 'ac' AND id_producto = {$produto} AND cantidad = 1 LIMIT 1")->row();
@@ -1342,8 +1344,12 @@ class inventario_model extends privilegios_model{
 					'id_empleado'     => $this->session->userdata('id_usuario'),
 					'folio'           => 0,
 					'status'          => 'n',
-					'autorizado'      => 't'
+					'autorizado'      => 't',
+          'fecha_autorizacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
+          'fecha_aceptacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
+          'fecha_creacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
 				);
+
 				$res = $this->compras_ordenes_model->agregarData($data);
 				$id_orden = $res['id_orden'];
 			}

@@ -798,6 +798,7 @@ class polizas_model extends CI_Model {
          {$sql}
       ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
       ");
+
     $nominas = array();
     foreach ($query->result() as $key => $value)
     {
@@ -828,13 +829,17 @@ class polizas_model extends CI_Model {
 
       $this->load->model('facturacion_model');
 
+      $sql2 = '';
+      if ($this->input->get('fid_empresa') != '')
+        $sql2 .= " AND u.id_empresa = '".$_GET['fid_empresa']."'";
+
       //Contenido de la Poliza
       foreach ($nominas as $key => $value)
       {
         //Se obtienen los prestamos
         $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
                                FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
-                               WHERE nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}'
+                               WHERE nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
                                GROUP BY u.id")->result();
 
         //Agregamos el header de la poliza

@@ -32,14 +32,14 @@ $(function(){
 function calculaTotal($tr){
   var $esistema = $tr.find('input.esistema'),
   $efisica = $tr.find('input.efisica'),
-  $diferencia = $tr.find('input.diferencia')
-  diferencia = parseFloat($esistema.val()) - parseFloat($efisica.val());
+  $diferencia = $tr.find('input.diferencia'),
+  diferencia = parseFloat($esistema.val() || 0) - parseFloat($efisica.val());
 
   $diferencia.val( (isNaN(diferencia)?'':diferencia) );
 }
 
 function cargaListaFamlias ($empresaId) {
-  $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId}, 
+  $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId},
     function(data){
       var html = '';
       for (var i in data.familias) {

@@ -11,13 +11,16 @@
 
               <label class="control-label" for="dfamilias">Familias</label>
               <select name="dfamilias" id="dfamilias">
-            <?php foreach ($familias['familias'] as $key => $value)
-            {
-            ?>
+              <?php foreach ($familias['familias'] as $key => $value)
+              {
+              ?>
                 <option value="<?php echo $value->id_familia; ?>" <?php echo set_select_get('dfamilias', $value->id_familia); ?>><?php echo $value->nombre; ?></option>
-            <?php
-            } ?>
+              <?php
+              }
+              ?>
               </select>
+
+              <label class="control-label" for="dfecha">Fecha Nivelación</label><input type="date" name="dfecha" value="<?php echo date('Y-m-d') ?>" class="input-large">
 
               <button type="submit" class="btn">Enviar</button>
             </form> <!-- /form -->
@@ -32,6 +35,7 @@
 
       <form action="<?php echo base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('fstatus', 'fid_empresa', 'fempresa'))); ?>" method="post">
         <input type="submit" class="btn btn-primary pull-right" name="guardar" value="Nivelar">
+
         <table class="table table-striped table-bordered bootstrap-datatable">
           <thead>
             <tr>

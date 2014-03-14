@@ -19,7 +19,7 @@ class inventario extends MY_Controller {
     'inventario/ajax_get_familias/',
 
     'cuentas_pagar/saldos_xls/',
-    
+
   );
 
 

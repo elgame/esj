@@ -186,7 +186,6 @@ class compras_ordenes_model extends CI_Model {
 
   public function agregarProductosData($data)
   {
-
     $this->db->insert_batch('compras_productos', $data);
 
     return array('passes' => true, 'msg' => 3);
