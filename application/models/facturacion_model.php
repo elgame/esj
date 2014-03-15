@@ -67,7 +67,7 @@ class facturacion_model extends privilegios_model{
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada
+                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada, f.total
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -2879,8 +2879,8 @@ class facturacion_model extends privilegios_model{
 
       foreach ($remisiones as $remision)
       {
-        $remision->remisiones = $this->db->query(
-          "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente, f.total
+        $rems = $this->db->query(
+          "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente, f.total, c.id_cliente
            FROM facturacion f
            INNER JOIN clientes c ON c.id_cliente = f.id_cliente
            INNER JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
@@ -2888,8 +2888,27 @@ class facturacion_model extends privilegios_model{
                  DATE(f.fecha) <= '{$filtros['ffecha2']}' AND
                  fvp.id_factura = {$remision->id_factura}
            ORDER BY (f.fecha, f.serie, f.folio) ASC")->result();
+
+        $fRemisiones = array();
+        foreach ($rems as $r)
+        {
+          if (isset($fRemisiones[$r->id_cliente]))
+          {
+            $fRemisiones[$r->id_cliente]['remisiones'][] = $r;
+          }
+          else
+          {
+            $fRemisiones[$r->id_cliente]['cliente'] = $r->cliente;
+            $fRemisiones[$r->id_cliente]['remisiones'][] = $r;
+          }
+        }
+
+        $remision->remisiones = $fRemisiones;
       }
     }
+
+    // $remisiones = array_merge($remisiones, $remisiones);
+    // $remisiones = array_merge($remisiones, $remisiones);
 
     // echo "<pre>";
     //   var_dump($remisiones);
@@ -2912,9 +2931,9 @@ class facturacion_model extends privilegios_model{
     // $pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'R', 'L', 'R');
-    $widths = array(28, 11, 20, 122, 23);
-    $header = array('Fecha', 'Serie', 'Folio', 'Cliente', 'Importe');
+    $aligns = array('L', 'L', 'R', 'R', 'R');
+    $widths = array(122, 28, 11, 20, 23);
+    $header = array('Cliente', 'Fecha', 'Serie', 'Folio', 'Importe');
 
     $total = 0;
     foreach($remisiones as $key => $item)
@@ -2937,10 +2956,10 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFont('Arial','',8);
 
       $datos = array(
+        $item->cliente,
         String::fechaATexto($item->fecha, '/c'),
         $item->serie,
         $item->folio,
-        $item->cliente,
         String::formatoNumero($item->total, 2, '', false),
       );
 
@@ -2960,7 +2979,7 @@ class facturacion_model extends privilegios_model{
 
       if (isset($item->remisiones))
       {
-        foreach ($item->remisiones as $keya => $remi)
+        foreach ($item->remisiones as $keya => $cliente)
         {
           if($pdf->GetY() >= $pdf->limiteY) { //salta de pagina si exede el max
             $pdf->AddPage();
@@ -2975,17 +2994,45 @@ class facturacion_model extends privilegios_model{
           }
 
           $datos = array(
-            '     '.String::fechaATexto($remi->fecha, '/c'),
-            $remi->serie,
-            $remi->folio,
-            $remi->cliente,
-            '('.String::formatoNumero($remi->total, 2, '', false).')',
+            '     ' . $cliente['cliente'],
+            '',
+            '',
+            '',
+            '',
           );
 
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
           $pdf->Row($datos, false, true);
+
+          foreach ($cliente['remisiones'] as $remi)
+          {
+            if($pdf->GetY() >= $pdf->limiteY) { //salta de pagina si exede el max
+              $pdf->AddPage();
+
+              $pdf->SetFont('Arial','B',8);
+              $pdf->SetTextColor(255,255,255);
+              $pdf->SetFillColor(160,160,160);
+              $pdf->SetX(6);
+              $pdf->SetAligns($aligns);
+              $pdf->SetWidths($widths);
+              $pdf->Row($header, true);
+            }
+
+            $datos = array(
+              '',
+              String::fechaATexto($remi->fecha, '/c'),
+              $remi->serie,
+              $remi->folio,
+              '('.String::formatoNumero($remi->total, 2, '', false).')',
+            );
+
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($datos, false, true);
+          }
         }
       }
 

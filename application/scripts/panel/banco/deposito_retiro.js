@@ -47,38 +47,83 @@ $(function(){
 	// 	getRefCheque($(this));
 	// });
 
+  $("#dempresa").autocomplete({
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_empresa").val(ui.item.id);
+        $("#dempresa").css("background-color", "#B0FFB0");
+      }
+  }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dempresa").val("").css("background-color", "#FFD9B3");
+        $("#did_empresa").val("");
+
+        $("#dproveedor").val("").css("background-color", "#FFD9B3");
+        $("#did_proveedor").val("");
+
+        $("#dcliente").val("").css("background-color", "#FFD9B3");
+        $("#did_cliente").val("");
+      }
+  });
+
 	//Autocomplete de Productores
 	if($("#did_proveedor").length > 0){
 		$("#dproveedor").autocomplete({
-	      source: base_url+'panel/proveedores/ajax_get_proveedores/',
-	      minLength: 1,
-	      selectFirst: true,
-	      select: function( event, ui ) {
-	        $("#did_empresa").val(ui.item.id);
-	        $("#dproveedor").css("background-color", "#B0FFB0");
-	      }
-	  }).on("keydown", function(event){
-	      if(event.which == 8 || event == 46){
-	        $("#dproveedor").css("background-color", "#FFD9B3");
-	        $("#did_empresa").val("");
-	      }
-	  });
+      source: function(request, response) {
+        $.ajax({
+            url: base_url+'panel/proveedores/ajax_get_proveedores/',
+            dataType: "json",
+            data: {
+              term : request.term,
+              did_empresa : $("#did_empresa").val()
+            },
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_proveedor").val(ui.item.id);
+        $("#dproveedor").css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dproveedor").css("background-color", "#FFD9B3");
+        $("#did_proveedor").val("");
+      }
+    });
 	}else if($("#did_cliente").length > 0){
 		//Autocomplete clientes
 		$("#dcliente").autocomplete({
-	      source: base_url+'panel/clientes/ajax_get_proveedores/',
-	      minLength: 1,
-	      selectFirst: true,
-	      select: function( event, ui ) {
-	        $("#did_cliente").val(ui.item.id);
-	        $("#dcliente").css("background-color", "#B0FFB0");
-	      }
-	  }).on("keydown", function(event){
-	      if(event.which == 8 || event == 46){
-	        $("#dcliente").css("background-color", "#FFD9B3");
-	        $("#did_cliente").val("");
-	      }
-	  });
+      source: function(request, response) {
+        $.ajax({
+          url: base_url+'panel/clientes/ajax_get_proveedores/',
+          dataType: "json",
+          data: {
+            term : request.term,
+            did_empresa : $("#did_empresa").val()
+          },
+          success: function(data) {
+            response(data);
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_cliente").val(ui.item.id);
+        $("#dcliente").css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dcliente").css("background-color", "#FFD9B3");
+        $("#did_cliente").val("");
+      }
+    });
 	}
 
 	$("#fmetodo_pago").change(function(){
@@ -86,7 +131,7 @@ $(function(){
 		$("#dproveedor, #id_proveedor").removeAttr("required");
 		if (vvth.val() == 'cheque'){
 			$("#dproveedor, #id_proveedor").attr("required", "required");
-		};
+		}
 	});
 
 	if(document.getElementById('linkcheque')!=null){

@@ -69,7 +69,9 @@
                   <th>Empresa</th>
                   <th>Tipo</th>
                   <th>Estado</th>
+                  <th>Total</th>
                   <th>XML?</th>
+                  <th>Observaciones</th>
                   <th>Opc</th>
                 </tr>
               </thead>
@@ -102,6 +104,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo String::formatoNumero($compra->total); ?></td>
                   <td><?php
                           $texto = 'NO';
                           $label = 'warning';
@@ -112,6 +115,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo $compra->observaciones; ?></td>
                   <td class="center">
                     <?php
 

@@ -28,10 +28,10 @@ class cuentas_cpi_model extends CI_Model {
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
 				$response[] = array(
-						'id'    => $itm->cuenta,
-						'label' => $itm->nombre,
-						'value' => $itm->nombre,
-						'item'  => $itm,
+					'id'    => $itm->cuenta,
+					'label' => $itm->nombre.' - '.$itm->cuenta,
+					'value' => $itm->nombre.' - '.$itm->cuenta,
+					'item'  => $itm,
 				);
 			}
 		}

@@ -220,7 +220,7 @@ class clientes_model extends CI_Model {
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
-		if ($this->input->get('did_empresa') !== false)
+		if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
 			$sql .= " AND id_empresa = ".$this->input->get('did_empresa');
 
 	    if ( ! is_null($sqlX))

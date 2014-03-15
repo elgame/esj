@@ -69,7 +69,9 @@
                   <th>Cliente</th>
                   <th>Empresa</th>
                   <th>Forma de Pago</th>
+                  <th>Total</th>
                   <th>Estado</th>
+                  <th>Observaciones</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -85,6 +87,7 @@
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo String::formatoNumero($fact->total); ?></td>
                   <td><?php
                             $texto = 'Cancelada';
                             $label = 'important';
@@ -100,6 +103,7 @@
                             ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
+                  <td><?php echo $fact->observaciones; ?></td>
                   <td class="center">
                     <?php
 

@@ -196,7 +196,7 @@ class banco extends MY_Controller {
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
 			array('general/util.js'),
-			array('panel/banco/deposito_retiro.js'),
+      array('panel/banco/deposito_retiro.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado

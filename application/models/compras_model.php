@@ -63,7 +63,7 @@ class compras_model extends privilegios_model{
                 co.id_empleado, u.nombre AS empleado,
                 co.serie, co.folio, co.condicion_pago, co.plazo_credito,
                 co.tipo_documento, co.fecha, co.status, co.xml, co.isgasto,
-                co.tipo, co.id_nc
+                co.tipo, co.id_nc, co.observaciones, co.total
         FROM compras AS co
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa

@@ -104,6 +104,14 @@
 									  </div>
 									</div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dempresa">Empresa</label>
+                    <div class="controls">
+                      <input type="text" name="dempresa" class="span12" id="dempresa" value="" size="">
+                      <input type="hidden" name="did_empresa" id="did_empresa" value="">
+                    </div>
+                  </div>
+
 									<div class="control-group">
 										<label class="control-label" for="dproveedor">Proveedor</label>
 										<div class="controls">
