@@ -100,7 +100,7 @@
 									  <div class="controls">
 											<input type="number" step="any" name="fmonto" id="fmonto" class="span9 pull-left" value="<?php echo set_value('fmonto'); ?>"
 												maxlength="12" min="0.0" placeholder="1052" required>
-                        <label for="fdesglosa_iva" class="pull-right">Desglosar IVA <input type="checkbox" name="fdesglosa_iva" id="fdesglosa_iva" value="t"></label>
+                        <label for="fdesglosa_iva" class="pull-right">Desglosar IVA <input type="checkbox" name="fdesglosa_iva" id="fdesglosa_iva" value="t" data-uniform="false"></label>
 									  </div>
 									</div>
 

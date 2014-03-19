@@ -1202,7 +1202,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Saldo de un cliente seleccionado
 	 * @return [type] [description]
 	 */
-	public function getEstadoCuentaData($sql_clientes='', $all_clientes=false, $all_facturas=false, $sqlext=array('',''))
+	public function getEstadoCuentaData($sql_clientes='', $all_clientes=true, $all_facturas=true, $sqlext=array('',''))
 	{
 		$sql = '';
 
