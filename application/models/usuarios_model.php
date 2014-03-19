@@ -80,7 +80,8 @@ class Usuarios_model extends privilegios_model {
 
 						'curp'             => mb_strtoupper($this->input->post('fcurp'), 'utf-8'),
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
-						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
+            'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
+						'fecha_imss'       => ($this->input->post('ffecha_imss')!=''? $this->input->post('ffecha_imss'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
 						'estado_civil'     => $this->input->post('festado_civil'),
 						'sexo'             => $this->input->post('fsexo'),
@@ -145,7 +146,8 @@ class Usuarios_model extends privilegios_model {
 
 						'curp'             => $this->input->post('fcurp'),
 						'fecha_nacimiento' => ($this->input->post('ffecha_nacimiento')!=''? $this->input->post('ffecha_nacimiento'): NULL),
-						'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
+            'fecha_entrada'    => ($this->input->post('ffecha_entrada')!=''? $this->input->post('ffecha_entrada'): NULL),
+						'fecha_imss'       => ($this->input->post('ffecha_imss')!=''? $this->input->post('ffecha_imss'): NULL),
 						'fecha_salida'     => ($this->input->post('ffecha_salida')!=''? $this->input->post('ffecha_salida'): NULL),
 						'nacionalidad'     => $this->input->post('fnacionalidad'),
 						'estado_civil'     => $this->input->post('festado_civil'),
@@ -201,7 +203,7 @@ class Usuarios_model extends privilegios_model {
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro,
-						u.id_departamente, e.dia_inicia_semana" )
+						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
 												->where("id", $id_usuario)

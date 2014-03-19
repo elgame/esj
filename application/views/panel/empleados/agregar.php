@@ -132,6 +132,13 @@
 										  </div>
 										</div>
 
+                    <div class="control-group">
+                      <label class="control-label" for="ffecha_imss">Fecha Alta IMSS </label>
+                      <div class="controls">
+                        <input type="date" name="ffecha_imss" id="ffecha_imss" class="span6" value="<?php echo set_value('ffecha_imss', date('Y-m-d')); ?>" maxlength="25" placeholder="Fecha IMSS">
+                      </div>
+                    </div>
+
 										<div class="control-group">
 										  <label class="control-label" for="ffecha_salida">Fecha de salida </label>
 										  <div class="controls">
