@@ -15,7 +15,8 @@ class cuentas_cpi_model extends CI_Model {
 	public function getCuentasAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+			$sql = " AND ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                    lower(cuenta) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
 
 		$res = $this->db->query(
 				"SELECT id_cuenta, id_padre, nivel, cuenta, nombre, tipo

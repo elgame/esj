@@ -33,6 +33,9 @@ class gastos_model extends privilegios_model{
       'retencion_iva'  => $data['ret_iva'],
       'retencion_isr'  => $data['ret_isr'],
     );
+    //Cuenta espesifica al gasto
+    if(is_numeric($data['did_cuentacpi']))
+        $datos['cuenta_cpi_gst'] = $data['did_cuentacpi'];
 
     //si se registra a un vehiculo
     if (isset($data['es_vehiculo']))

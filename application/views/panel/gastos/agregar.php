@@ -124,6 +124,14 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="dcuenta_cpi">Cuenta Contpaq (Gasto)</label>
+                  <div class="controls">
+                    <input type="text" name="dcuenta_cpi" class="span12" id="dcuenta_cpi" value="<?php echo set_value('dcuenta_cpi'); ?>">
+                    <input type="hidden" name="did_cuentacpi" id="did_cuentacpi" value="<?php echo set_value('did_cuentacpi'); ?>">
+                  </div>
+                </div>
+
               </div><!--/span6 -->
             </div><!--/row-fluid -->
 

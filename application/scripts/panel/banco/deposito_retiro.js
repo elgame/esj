@@ -1,5 +1,5 @@
 $(function(){
-  //Autocomplete clientes
+  //Autocomplete cuentas contpaq
   $("#dcuenta_cpi").autocomplete({
       source: base_url+'panel/banco/get_cuentas_contpaq/',
       minLength: 1,
