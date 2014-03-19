@@ -240,6 +240,9 @@ class usuarios extends MY_Controller {
 							array('field' => 'ffecha_entrada',
 										'label' => 'Fecha de entrada',
 										'rules' => 'max_length[25]'),
+              array('field' => 'ffecha_imss',
+                    'label' => 'Fecha IMSS',
+                    'rules' => 'max_length[25]'),
 							array('field' => 'ffecha_salida',
 										'label' => 'Fecha de salida',
 										'rules' => 'max_length[25]'),
@@ -258,7 +261,7 @@ class usuarios extends MY_Controller {
 							array('field' => 'fcuenta_cpi',
 										'label' => 'Cuenta contpaqi',
 										'rules' => 'max_length[12]'),
-							
+
 							array('field' => 'did_empresa',
 										'label' => 'Empresa',
 										'rules' => 'required|numeric'),
