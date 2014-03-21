@@ -225,13 +225,17 @@ class empleados extends MY_Controller {
 		$rules = array(
 							array('field' => 'fnombre',
 										'label' => 'Nombre',
-										'rules' => 'required|max_length[90]'),
+										'rules' => 'required|max_length[90]|callback_valida_nombre_full'),
 							array('field' => 'fapellido_paterno',
 										'label' => 'Apellido paterno',
 										'rules' => 'max_length[25]'),
 							array('field' => 'fapellido_materno',
 										'label' => 'Apellido materno',
 										'rules' => 'max_length[25]'),
+
+              array('field' => 'frfc',
+                    'label' => 'RFC',
+                    'rules' => 'is_unique[usuarios.rfc]'),
 
 							array('field' => 'fcalle',
 										'label' => 'Calle',
@@ -376,6 +380,23 @@ class empleados extends MY_Controller {
 			}
 		return TRUE;
 	}
+
+  public function valida_nombre_full()
+  {
+    $query = $this->db->query("SELECT id
+                               FROM usuarios
+                               WHERE lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
+                                     lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
+                                     lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");
+
+    if ($query->num_rows() > 0)
+    {
+      $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado.');
+      return false;
+    }
+
+    return true;
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{

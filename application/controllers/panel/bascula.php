@@ -866,6 +866,8 @@ class bascula extends MY_Controller {
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('general/keyjump.js'),
+      array('panel/proveedores/addmod.js'),
       array('panel/bascula/fix_proveedores.js'),
     ));
 
@@ -907,6 +909,8 @@ class bascula extends MY_Controller {
     ));
     $this->carabiner->js(array(
       array('libs/jquery.uniform.min.js'),
+      array('general/keyjump.js'),
+      array('panel/proveedores/addmod.js'),
       array('panel/bascula/fix_clientes.js')
     ));
 
@@ -935,6 +939,12 @@ class bascula extends MY_Controller {
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->model('documentos_model');
+    $params['documentos'] = $this->documentos_model->getDocumentos();
 
     $params['template'] = $this->load->view('panel/clientes/agregar', $params, true);
 
