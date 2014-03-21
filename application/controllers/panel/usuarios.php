@@ -203,17 +203,13 @@ class usuarios extends MY_Controller {
 		$rules = array(
 							array('field' => 'fnombre',
 										'label' => 'Nombre',
-										'rules' => 'required|max_length[90]|max_length[90]|callback_valida_nombre_full'),
+										'rules' => 'required|max_length[90]|max_length[90]'),
 							array('field' => 'fapellido_paterno',
 										'label' => 'Apellido paterno',
 										'rules' => 'max_length[25]'),
 							array('field' => 'fapellido_materno',
 										'label' => 'Apellido materno',
 										'rules' => 'max_length[25]'),
-
-              array('field' => 'frfc',
-                    'label' => 'RFC',
-                    'rules' => 'is_unique[usuarios.rfc]'),
 
 							array('field' => 'fcalle',
 										'label' => 'Calle',
@@ -282,6 +278,12 @@ class usuarios extends MY_Controller {
 
 		if ($accion == 'agregar')
 		{
+      $rules[] = array('field' => 'fnombre',
+                      'label' => 'Nombre',
+                      'rules' => 'required|max_length[90]|max_length[90]|callback_valida_nombre_full');
+      $rules[] = array('field' => 'frfc',
+                      'label' => 'RFC',
+                      'rules' => 'is_unique[usuarios.rfc]');
 			$rules[] = 	array('field' => 'fpass',
 												'label' => 'Password',
 												'rules' => 'max_length[32]');
