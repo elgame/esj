@@ -4753,6 +4753,99 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Output('RECIBO_FINIQUITO.pdf', 'I');
     }
   }
+
+  public function printReciboIncapacidad($filtros)
+  {
+    if ($filtros['fid_trabajador'] !== '' && $filtros['fsalario_real'] !== '' && $filtros['ffecha_inicio'] && $filtros['fdias_incapacidad'] && $filtros['fincapacidad_seguro'])
+    {
+      $this->load->model('usuarios_model');
+      $this->load->model('empresas_model');
+      $this->load->library('mypdf');
+
+      $empleado = $this->usuarios_model->get_usuario_info($filtros['fid_trabajador']);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      // echo "<pre>";
+      //   var_dump($empleado);
+      // echo "</pre>";exit;
+
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo2 = 'CALCULO DE INCAPACIDAD';
+      $pdf->titulo3 = '';
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      // $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $pdf->SetFont('Arial','B', 11);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetXY(33, 35);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(100, 50));
+      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", ""), false, false); // "SALARIO DIARIO " . String::formatoNumero($filtros['fsalario_real'], 2, '$', false)
+
+      // $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
+      // $primaVacacional = $vacaciones * 0.25;
+
+      $fechaInicio = new DateTime($filtros['ffecha_inicio']);
+
+      $pdf->SetFont('Arial','', 11);
+      $pdf->SetX(33);
+      $pdf->SetAligns(array('L', 'l'));
+      $pdf->SetWidths(array(50, 60));
+      $pdf->Row(array("INICIO A PARTIR DE: ", $fechaInicio->format('d') .' DE '. mb_strtoupper(String::mes(9)). ' DEL '. $fechaInicio->format('Y')), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 4);
+      $pdf->Row(array("EMPRESA", ""), false, false);
+
+      $total = $filtros['fsalario_real'] * $filtros['fdias_incapacidad'];
+      $pdf->SetAligns(array('L', 'R'));
+
+      $pdf->SetX(33);
+      $pdf->Row(array("SUELDO REAL", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("DIAS INCAPACIDAD", $filtros['fdias_incapacidad']), false, false);
+
+      $pdf->SetX(33);
+      $pdf->Row(array("TOTAL", String::formatoNumero($total, 2, '$', false)), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 2);
+      $pdf->Row(array("100% SUBSIDIO", ""), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetX(33);
+      $pdf->Row(array("INCAPACIDAD PAGADA POR EL SEGURO", String::formatoNumero($filtros['fincapacidad_seguro'], 2, '$', false)), false, false);
+      // $pdf->SetAligns(array('L', 'R'));
+
+      $pdf->SetFont('Arial','B', 11);
+      $pdf->SetXY(33, $pdf->GetY() + 5);
+      $pdf->Row(array("INCAPACIDAD PAGADA POR EL PATRON", String::formatoNumero($total - $filtros['fincapacidad_seguro'], 2, '$', false)), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("RECIBI"), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("__________________________________________________________"), false, false);
+
+      $pdf->SetXY(33, $pdf->GetY() + 10);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetWidths(array(150));
+      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}"), false, false);
+
+      $pdf->Output('RECIBO_INCAPACIDAD.pdf', 'I');
+    }
+  }
 }
 /* End of file nomina_fiscal_model.php */
 /* Location: ./application/models/nomina_fiscal_model.php */
