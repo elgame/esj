@@ -1562,7 +1562,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -1583,7 +1583,7 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -1638,6 +1638,9 @@ class polizas_model extends CI_Model {
       //Contenido de la Poliza de las facturas de compra
       foreach ($data as $key => $value)
       {
+        // echo "<pre>";
+        //   var_dump($value);
+        // echo "</pre>";
         if ($value->tipoo == 'facturas')
         {
           //Agregamos el header de la poliza
@@ -1728,7 +1731,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',1)."\r\n"; //ajuste
 
           //Colocamos el Cargo al Proveedor que realizo el pago
-          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
                             $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                             $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
@@ -1737,6 +1740,24 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
+
+          if ($value->banco_cuenta_contpaq !== '' && $value->desglosar_iva == 't')
+          {
+            // echo "<pre>";
+            //   var_dump($value);
+            // echo "</pre>";exit;
+            //Colocamos el Cargo al Proveedor que realizo el pago
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
+                              $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
+                              $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                              $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
+                              $this->setEspacios( $this->numero($value->total - ($value->total / 1.16))  , 20).  //importe movimiento
+                              $this->setEspacios('0',10).  //iddiario poner 0
+                              $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                              $this->setEspacios($value->nombre_fiscal,100). //concepto
+                              $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          }
+
           //Colocamos el Abono al Banco que se deposito el dinero
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
@@ -1768,6 +1789,8 @@ class polizas_model extends CI_Model {
 
         $folio++;
       }
+
+      // exit;
 
       // //Contenido de la Poliza de los movimientos directos de banco
       // foreach ($response['banco_mov'] as $key => $value)

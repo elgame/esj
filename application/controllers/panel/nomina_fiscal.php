@@ -26,6 +26,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/recibo_nomina_pdf/',
     'nomina_fiscal/recibo_vacaciones_pdf/',
     'nomina_fiscal/recibo_finiquito_pdf/',
+    'nomina_fiscal/recibo_incapacidad_pdf/',
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
@@ -531,6 +532,42 @@ class nomina_fiscal extends MY_Controller {
     ), $_GET);
 
     $this->nomina_fiscal_model->printReciboFiniquito($_GET);
+  }
+
+  public function recibo_incapacidad()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_trabajador_prestamos.js'),
+    ));
+
+    $this->load->library('pagination');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Recibo de Incapacidad');
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_recibo_incapacidad',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function recibo_incapacidad_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+
+    $_GET = array_merge(array(
+      'fid_trabajador' => isset($_GET['fid_trabajador']) ?: '',
+      'fsalario_real' => isset($_GET['fsalario_real']) ?: '',
+      'ffecha_inicio' => isset($_GET['ffecha_inicio']) ?: '',
+      'fdias_incapacidad' => isset($_GET['fdias_incapacidad']) ?: '',
+      'fincapacidad_seguro' => isset($_GET['fincapacidad_seguro']) ?: '',
+    ), $_GET);
+
+    $this->nomina_fiscal_model->printReciboIncapacidad($_GET);
   }
 
   /*
