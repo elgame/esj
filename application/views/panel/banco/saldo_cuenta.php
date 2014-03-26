@@ -32,7 +32,7 @@
               <i class="icon-table"></i> Excel</a>
             <a href="" data-href="<?php echo base_url('panel/banco/conciliacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" id="verConciliacion" class="linksm" target="_blank">
               <i class="icon-archive"></i> Conciliacion</a>
-        <?php if($data['cuenta']['info']->banco == 'Afirme'){ ?>
+        <?php if($data['cuenta']['info']->banco == 'Banamex'){ ?>
                |
             <a href="<?php echo base_url('panel/banco/cuenta_banamex/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" class="linksm" target="_blank">
               <i class="icon-file-text"></i> Banamex</a>
@@ -82,17 +82,17 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
-					<th></th>
-					<th>Fecha</th>
-					<th>Ref</th>
-					<th>Cliente / Proveedor</th>
-					<th>Concepto</th>
-					<th>Metodo de pago</th>
-					<th>Retiro</th>
-					<th>Deposito</th>
-					<th>Saldo</th>
-					<th>Estado</th>
-					<th></th>
+        					<th></th>
+        					<th>Fecha</th>
+        					<th>Ref</th>
+        					<th>Cliente / Proveedor</th>
+        					<th>Concepto</th>
+        					<th>Metodo de pago</th>
+        					<th>Deposito</th>
+                  <th>Retiro</th>
+        					<th>Saldo</th>
+        					<th>Estado</th>
+        					<th></th>
                 </tr>
               </thead>
               <tbody>
@@ -115,8 +115,8 @@
             		<td><?php echo $movimiento->cli_pro; ?></td>
             		<td><?php echo $movimiento->concepto; ?></td>
             		<td><?php echo $movimiento->metodo_pago; ?></td>
-            		<td><?php echo String::formatoNumero($movimiento->retiro); ?></td>
             		<td><?php echo String::formatoNumero($movimiento->deposito); ?></td>
+                <td><?php echo String::formatoNumero($movimiento->retiro); ?></td>
             		<td><?php echo String::formatoNumero($movimiento->saldo); ?></td>
             		<td><?php
             			if(count($status)>0)
@@ -145,8 +145,8 @@
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
                   <td style="text-align: right" colspan="6">Total:</td>
-                  <td><?php echo String::formatoNumero($data['total_retiro']); ?></td>
                   <td><?php echo String::formatoNumero($data['total_deposito']); ?></td>
+                  <td><?php echo String::formatoNumero($data['total_retiro']); ?></td>
                   <td id="total_saldo"><?php echo String::formatoNumero($data['total_saldos']); ?></td>
                 </tr>
               </tbody>

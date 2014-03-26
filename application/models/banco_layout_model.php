@@ -26,18 +26,18 @@ class banco_layout_model extends banco_cuentas_model {
 		  		{
 		  			if ($data_proveedor[0]->codigo == '7' ) //es banamex
 			  		{
-						$data['movimientos'][$key]->data_prov = $data_proveedor[0];
-						$data['total_retiro']                 += $value->retiro;
-						$data['num_cargos']++;
+  						$data['movimientos'][$key]->data_prov = $data_proveedor[0];
+  						$data['total_retiro']                 += $value->retiro;
+  						$data['num_cargos']++;
 			  		}else
 			  			unset($data['movimientos'][$key]);
 		  		}elseif($this->input->get('toperacion')=='in')
 		  		{
 		  			if ($data_proveedor[0]->codigo != '7' ) //es interbancario
 			  		{
-						$data['movimientos'][$key]->data_prov = $data_proveedor[0];
-						$data['total_retiro']                 += $value->retiro;
-						$data['num_cargos']++;
+  						$data['movimientos'][$key]->data_prov = $data_proveedor[0];
+  						$data['total_retiro']                 += $value->retiro;
+  						$data['num_cargos']++;
 			  		}else
 			  			unset($data['movimientos'][$key]);
 		  		}else
@@ -49,7 +49,7 @@ class banco_layout_model extends banco_cuentas_model {
 
 		if (count($data['movimientos']) > 0)
 		{
-			$res_files = $this->db->query("SELECT Count(id_mov_banamex) AS num FROM banco_movimientos_banamex 
+			$res_files = $this->db->query("SELECT Count(id_mov_banamex) AS num FROM banco_movimientos_banamex
 							WHERE Date(fecha) = '".$this->input->get('ffecha2')."' AND tipo_operacion = '".$this->input->get('toperacion')."'")->row();
 			$data['conta_dia'] = $res_files->num+1;
 
@@ -65,7 +65,7 @@ class banco_layout_model extends banco_cuentas_model {
 				'id_cuenta'      => $data['cuenta']['info']->id_cuenta,
 				));
 
-			header ("Content-Disposition: attachment; filename=".($this->input->get('toperacion')=='ba'? 'banamex': 'interbancaria').".txt "); 
+			header ("Content-Disposition: attachment; filename=".($this->input->get('toperacion')=='ba'? 'banamex': 'interbancaria').".txt ");
 			header ("Content-Type: application/octet-stream");
 			echo $this->row_control;
 		}
@@ -76,7 +76,7 @@ class banco_layout_model extends banco_cuentas_model {
 		$this->row_control = '1'; //tipo de registro
 		$this->row_control .= $this->numero('123456789', 12); //Número de identificación del cliente
 		$this->row_control .= date("dmy", strtotime($this->input->get('ffecha2') )); //Fecha de pago
-		$this->row_control .= $this->numero($data['conta_dia'], 4); //Secuencial del archivo 
+		$this->row_control .= $this->numero($data['conta_dia'], 4); //Secuencial del archivo
 		$this->row_control .= $this->string($data['cuenta']['info']->nombre_fiscal, 36); //Nombre del la empresa
 		$this->row_control .= $this->string('Pago a proveedores', 20); //Descripción del archivo
 		$this->row_control .= ($this->input->get('toperacion')=='ba'? '06': '12'); //Naturaleza del archivo, 06:Pago a proveedores, 12:Pagos interbancarios CLABE
@@ -106,11 +106,16 @@ class banco_layout_model extends banco_cuentas_model {
 			$this->row_control .= '1'; //Tipo de operación, 1:Si es Cargo
 			$this->row_control .= '001'; //Clave de la moneda
 			$this->row_control .= $this->numero($value->retiro, 18, true); //Importe a abonar o cargar
-			$this->row_control .= '01'; //Tipo de cuenta
-			if ($this->input->get('toperacion')=='ba') //banamex
-				$cuenta = $this->numero($value->data_prov->sucursal, 4).$this->numero($value->data_prov->cuenta, 7);
-			else //interbancaria
-				$cuenta = $value->data_prov->cuenta;
+      $tipo_cuenta = '01';
+      if ($this->input->get('toperacion')=='ba') //banamex
+        $cuenta = $this->numero($value->data_prov->sucursal, 4).$this->numero($value->data_prov->cuenta, 7);
+      else //interbancaria
+      {
+        $cuenta = $value->data_prov->cuenta;
+        if(strlen($cuenta) == 16) //Tarjeta de debito o credito
+          $tipo_cuenta = '03';
+      }
+			$this->row_control .= $tipo_cuenta; //Tipo de cuenta
 			$this->row_control .= $this->numero($cuenta, 20); //Número de cuenta
 			$this->row_control .= $this->string(date("dmy", strtotime($this->input->get('ffecha2') )), 40); //Referencia  Alfanumérica
 			$this->row_control .= $this->string($value->cli_pro, 55); //Beneficiario
@@ -129,7 +134,7 @@ class banco_layout_model extends banco_cuentas_model {
 		$this->row_control .= $this->numero('0', 6); //Número de abonos
 		$this->row_control .= $this->numero('0', 18, true); //Importe total de abonos
 		$this->row_control .= $this->numero($data['num_cargos'], 6); //Número de cargos
-		$this->row_control .= $this->numero($data['total_retiro'], 18, true); //Importe total de cargos
+		$this->row_control .= $this->numero($data['total_retiro'], 18, true)."\n"; //Importe total de cargos
 	}
 
 

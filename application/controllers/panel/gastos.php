@@ -377,7 +377,7 @@ class gastos extends MY_Controller {
             'rules' => ''),
       array('field' => 'folio',
             'label' => 'Folio',
-            'rules' => 'required|numeric'),
+            'rules' => 'required|numeric|callback_serie_folio'),
 
       array('field' => 'fecha',
             'label' => 'Fecha',
@@ -459,6 +459,23 @@ class gastos extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function serie_folio($folio)
+  {
+    $serie = mb_strtoupper($this->input->post('serie'), 'utf-8');
+    $query = $this->db->query("SELECT Count(id_compra) AS num FROM compras WHERE status <> 'ca' AND folio = {$folio} AND UPPER(serie) = '{$serie}'
+      AND id_empresa = ".$this->input->post('empresaId')." AND id_proveedor = ".$this->input->post('proveedorId')."  ".
+      (isset($_GET['id']{0})? " AND id_compra <> ".$_GET['id']: '') )->row();
+    if ($query->num > 0)
+    {
+      $this->form_validation->set_message('serie_folio', 'El %s ya esta asignado.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+
   public function configUpdateXml()
   {
     $this->load->library('form_validation');
@@ -470,6 +487,12 @@ class gastos extends MY_Controller {
       array('field' => 'aux',
             'label' => '',
             'rules' => ''),
+      array('field' => 'serie',
+            'label' => 'Serie',
+            'rules' => ''),
+      array('field' => 'folio',
+            'label' => 'Folio',
+            'rules' => 'required|numeric|callback_serie_folio'),
     );
 
     $this->form_validation->set_rules($rules);

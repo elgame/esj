@@ -1468,7 +1468,9 @@ class cuentas_cobrar_model extends privilegios_model{
 
   			if( $cliente->saldo > 0 || $all_clientes)
   			{
-  				if($cliente->saldo > 0 && $all_clientes == false)
+          if($all_clientes && $all_facturas)
+            $response[] = $cliente;
+  				elseif($cliente->saldo > 0 && $all_clientes == false)
   					$response[] = $cliente;
   				elseif($all_clientes && count($cliente->facturas) > 0)
   					$response[] = $cliente;

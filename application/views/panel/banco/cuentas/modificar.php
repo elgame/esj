@@ -83,6 +83,14 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fnumero_cheque">No Cheque </label>
+                  <div class="controls">
+                    <input type="text" name="fnumero_cheque" id="fnumero_cheque" class="span6" value="<?php echo isset($data->numero_cheque)?$data->numero_cheque:''; ?>"
+                      maxlength="9" placeholder="5">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Guardar</button>
                   <a href="<?php echo base_url('panel/banco/cuentas/'); ?>" class="btn">Cancelar</a>

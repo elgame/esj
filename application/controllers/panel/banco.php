@@ -488,16 +488,19 @@ class banco extends MY_Controller {
 			array('field' => 'falias',
 						'label' => 'Alias',
 						'rules' => 'required|max_length[80]'),
+      array('field' => 'fnumero_cheque',
+            'label' => 'No cheque',
+            'rules' => 'numeric'),
 
-			array('field' => 'fnumero',
-						'label' => 'Numero',
-						'rules' => 'max_length[20]'),
-			array('field' => 'fcuenta_cpi',
-						'label' => 'Cta contpaq',
-						'rules' => 'max_length[12]'),
-			array('field' => 'dempresa',
-						'label' => 'Empresa',
-						'rules' => ''),
+      array('field' => 'fnumero',
+            'label' => 'Numero',
+            'rules' => 'max_length[20]'),
+      array('field' => 'fcuenta_cpi',
+            'label' => 'Cta contpaq',
+            'rules' => 'max_length[12]'),
+      array('field' => 'dempresa',
+            'label' => 'Empresa',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

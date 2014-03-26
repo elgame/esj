@@ -9,6 +9,7 @@ class ventas extends MY_Controller {
     'ventas/get_folio/',
     'ventas/rventasr_pdf/',
     'ventas/rpsaldo_vencido_pdf/',
+    'ventas/rventas_nc_pdf/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -207,6 +208,38 @@ class ventas extends MY_Controller {
   public function rventasr_pdf(){
     $this->load->model('ventas_model');
     $this->ventas_model->getRVentasrPdf();
+
+  }
+
+  /**
+   * Reporte de facturas y notas de credito
+   * @return [type] [description]
+   */
+  public function rventas_nc()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Facturas y NC');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/ventas_remision/rptfacturas_nc',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rventas_nc_pdf(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRFacturasNCPdf();
 
   }
 

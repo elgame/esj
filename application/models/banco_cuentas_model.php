@@ -328,8 +328,8 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetFont('Arial','',8);
 
 		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R', 'C');
-		$widths = array(17, 15, 40, 40, 20, 20, 20, 20, 15);
-		$header = array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M. pago', 'Retiro', 'Deposito', 'Saldo', 'Estado');
+		$widths = array(17, 13, 40, 40, 20, 22, 22, 22, 11);
+		$header = array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M. pago', 'Deposito', 'Retiro', 'Saldo', 'Estado');
 
 		$total_cargo = 0;
 		$total_abono = 0;
@@ -356,8 +356,8 @@ class banco_cuentas_model extends banco_model {
 							substr($item->cli_pro, 0, 35),
 							strip_tags($item->concepto),
 							$item->metodo_pago,
-							String::formatoNumero($item->retiro, 2, '$', false),
 							String::formatoNumero($item->deposito, 2, '$', false),
+              String::formatoNumero($item->retiro, 2, '$', false),
 							String::formatoNumero($item->saldo, 2, '$', false),
 							str_replace('|', ' ', $item->entransito),
 							);
@@ -372,10 +372,10 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
-		$pdf->SetWidths(array(132, 20, 20, 20));
+		$pdf->SetWidths(array(130, 22, 22, 22));
 		$pdf->Row(array('Totales:',
-					String::formatoNumero($res['total_retiro'], 2, '$', false),
 					String::formatoNumero($res['total_deposito'], 2, '$', false),
+          String::formatoNumero($res['total_retiro'], 2, '$', false),
 					String::formatoNumero($res['total_saldos'], 2, '$', false),
 				), false);
 
@@ -411,15 +411,15 @@ class banco_cuentas_model extends banco_model {
 
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $res['movimientos'], array(
-				'head' => array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M pago', 'Retiro', 'Deposito', 'Saldo', 'Estado'),
+				'head' => array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M pago', 'Deposito', 'Retiro', 'Saldo', 'Estado'),
 				'conte' => array(
 						array('name' => 'fecha', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'numero_ref', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'cli_pro', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'concepto', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'metodo_pago', 'format' => 'format4', 'sum' => -1),
-						array('name' => 'retiro', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'deposito', 'format' => 'format4', 'sum' => 0),
+            array('name' => 'retiro', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'entransito', 'format' => 'format4', 'sum' => -1),
 						 )
@@ -866,6 +866,7 @@ class banco_cuentas_model extends banco_model {
 						'alias'      => $this->input->post('falias'),
 						'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
 						'sucursal'   => $this->input->post('fsucursal'),
+            'numero_cheque'   => $this->input->post('fnumero_cheque'),
 						);
 		}
 
@@ -885,7 +886,7 @@ class banco_cuentas_model extends banco_model {
 		$id_cuenta = $id_cuenta? $id_cuenta: $_GET['id'];
 
 		$sql_res = $this->db->query(
-								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal,
+								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, bc.numero_cheque,
 										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, bc.numero AS cuenta, bc.sucursal,
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
