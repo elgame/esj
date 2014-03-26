@@ -413,6 +413,327 @@ class caja_chica_model extends CI_Model {
     return true;
   }
 
+  public function printCaja($fecha)
+  {
+    $caja = $this->get($fecha);
+
+    // echo "<pre>";
+    //   var_dump($caja);
+    // echo "</pre>";exit;
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+    // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    // $pdf->titulo1 S= $empresa['info']->nombre_fiscal;
+    // $pdf->logo = $empresa['info']->logo;
+    // $pdf->titulo2 = $empleado['info'][0]->nombre;
+    $pdf->titulo2 = "Caja Chica del {$fecha}";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    // Saldo inicial
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(255, 255 ,255);
+    $pdf->SetXY(6, $pdf->GetY() - 8);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(125));
+    $pdf->Row(array('SALDO INICIAL '.String::formatoNumero($caja['saldo_inicial'], 2, '$')), false, false);
+
+    $ttotalGastos = 0;
+    foreach ($caja['gastos'] as $gasto)
+    {
+      $ttotalGastos += floatval($gasto->monto);
+    }
+
+    // Reporte caja
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(125));
+    $pdf->Row(array('REPORTE CAJA "COMPRAS LIMON"'), true, true);
+
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetXY(131, $pdf->GetY() - 5.5);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(77));
+    $pdf->Row(array('DESGLOSE "OTROS INGRESOS"'), false, true);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(19, 35, 21, 25, 25));
+
+    $lastY = $pdf->GetY();
+
+    $totalIngresos = 0;
+    foreach ($caja['ingresos'] as $key => $ingreso)
+    {
+      $pdf->SetX(6);
+
+      $pdf->Row(array(
+        ($key === 0) ? 'INGRESOS:' : '',
+        $ingreso->concepto,
+        String::float(String::formatoNumero($ingreso->monto, 2, ''))), false, true);
+
+      $totalIngresos += floatval($ingreso->monto);
+    }
+
+    foreach ($caja['otros'] as $key => $ingreso)
+    {
+      $pdf->SetX(6);
+
+      $pdf->Row(array(
+        ($key === 0) ? 'OTROS INGRESOS:' : '',
+        $ingreso->concepto,
+        String::float(String::formatoNumero($ingreso->monto, 2, ''))), false, true);
+
+      $totalIngresos += floatval($ingreso->monto);
+    }
+
+    $comprasY = $pdf->GetY();
+
+    $ttotalIngresos = $totalIngresos + $caja['saldo_inicial'];
+
+    $pdf->SetX(6);
+    $pdf->Row(array('', '', '', String::formatoNumero($totalIngresos, 2, '$'), String::formatoNumero($ttotalIngresos, 2, '$')), false, true);
+
+    // Remisiones
+    $pdf->SetY($lastY);
+
+    $pdf->SetX(131);
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(41, 15, 21));
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->Row(array('OBSV.', 'No. REM', 'IMPORTE'), true, true);
+
+    $totalRemisiones = 0;
+    foreach ($caja['remisiones'] as $key => $remision)
+    {
+      $pdf->SetX(131);
+
+      $pdf->Row(array(
+        $remision->observacion,
+        $remision->folio,
+        String::float(String::formatoNumero($remision->monto, 2, ''))), false, true);
+
+      $totalRemisiones += floatval($remision->monto);
+    }
+
+    $pdf->SetX(131);
+    $pdf->Row(array('', '', String::formatoNumero($totalRemisiones, 2, '$')), false, true);
+
+    if ($comprasY >= $pdf->GetY())
+    {
+      $pdf->SetY($comprasY);
+    }
+
+    // Boletas
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetXY(6, $pdf->GetY() + 5.2);
+    $pdf->SetAligns(array('C', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(19, 56, 25, 25));
+    $pdf->Row(array('BOLETA', 'PRODUCTOR', 'IMPORTE', ''), true, true);
+
+    // $caja['boletas'] = array_merge($caja['boletas'], $caja['boletas']);
+
+    $pdf->SetFont('Arial','', 7);
+    $boletasY = $pdf->GetY();
+
+    $totalBoletas = 0;
+    foreach ($caja['boletas'] as $key => $boleta)
+    {
+      if($pdf->GetY() >= $pdf->limiteY){
+        $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 7);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('BOLETA', 'PRODUCTOR', 'IMPORTE', ''), true, true);
+
+        $boletasY = $pdf->GetY();
+      }
+
+      $pdf->SetFont('Helvetica','', 7);
+      $pdf->SetX(6);
+
+      $pdf->Row(array(
+        $boleta->folio,
+        $boleta->proveedor,
+        String::float(String::formatoNumero($boleta->importe, 2, ''))), false, true);
+
+      $totalBoletas += floatval($boleta->importe);
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array('', '', '', String::formatoNumero($totalBoletas, 2, '$')), false, true);
+
+    $boletasLastY = $pdf->GetY();
+
+    // Tabulaciones
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetXY(131, $boletasY - 5.4);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(75));
+    $pdf->Row(array('TABULACION DE EFECTIVO'), true, true);
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    // $pdf->SetXY(131, $boletasY - 5.4);
+    $pdf->SetXY(131, $pdf->GetY() + 5);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(25, 25, 25));
+    $pdf->Row(array('NUMERO', 'DENOMINACION', 'TOTAL'), false, false);
+
+    $pdf->SetAligns(array('R', 'R', 'R'));
+    $pdf->SetFont('Arial','', 7);
+    $totalEfectivo = 0;
+    foreach ($caja['denominaciones'] as $key => $denominacion)
+    {
+      // if($pdf->GetY() >= $pdf->limiteY){
+      //   $pdf->AddPage();
+      //   $pdf->SetFont('Helvetica','B', 7);
+      //   $pdf->SetXY(6, $pdf->GetY());
+      //   $pdf->Row(array('BOLETA', 'PRODUCTOR', 'IMPORTE', ''), true, true);
+      // }
+
+      // $pdf->SetFont('Helvetica','', 7);
+      $pdf->SetX(131);
+
+      $pdf->Row(array(
+        $denominacion['cantidad'],
+        $denominacion['denominacion'],
+        String::float(String::formatoNumero($denominacion['total'], 2, ''))), false, true);
+
+      $totalEfectivo += floatval($denominacion['total']);
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(131);
+    $pdf->Row(array('', 'TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$')), false, true);
+
+    $pdf->SetX(131);
+    $pdf->Row(array('', 'DIFERENCIA', String::formatoNumero($totalEfectivo - ($ttotalIngresos - $totalBoletas - $ttotalGastos) , 2, '$')), false, true);
+
+    if ($boletasLastY > $pdf->GetY())
+    {
+      $pdf->SetY($boletasLastY);
+    }
+
+    if($pdf->GetY() >= $pdf->limiteY){
+      $pdf->AddPage();
+    }
+
+    // Gastos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(125));
+    $pdf->Row(array('GASTOS DEL DIA'), true, true);
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'L', 'C', 'R'));
+    $pdf->SetWidths(array(75, 25, 25, 25, 25, 25));
+    $pdf->Row(array('CONCEPTO', 'CARGO', 'IMPORTE'), true, true);
+
+    $pdf->SetAligns(array('L', 'C', 'R', 'L', 'R', 'R'));
+    $pdf->SetFont('Arial','', 7);
+    $totalGastos = 0;
+    foreach ($caja['gastos'] as $key => $gasto)
+    {
+      if ($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 7);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('CONCEPTO', 'CARGO', 'IMPORTE'), true, true);
+      }
+
+      $pdf->SetX(6);
+
+      $totalGastos += floatval($gasto->monto);
+
+      if ($key === count($caja['gastos']) - 1)
+      {
+        $pdf->Row(array(
+          $gasto->concepto,
+          $gasto->abreviatura,
+          String::float(String::formatoNumero($gasto->monto, 2, '')),
+          '$ ' . String::float(String::formatoNumero($totalGastos, 2, '')),
+          'Saldo Al Corte',
+          '$ ' . String::float(String::formatoNumero($ttotalIngresos - $totalBoletas - $totalGastos, 2, ''))), false, true);
+      }
+      else
+      {
+        $pdf->Row(array(
+          $gasto->concepto,
+          $gasto->abreviatura,
+          String::float(String::formatoNumero($gasto->monto, 2, ''))), false, true);
+      }
+    }
+
+    // Reposicion por gastos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(125));
+    $pdf->Row(array('REPOSICION DE GASTOS X CONCEPTOS'), true, true);
+
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(210, 210, 210);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'L', 'R', 'R'));
+    $pdf->SetWidths(array(25, 50, 25, 25));
+    // $pdf->Row(array('CONCEPTO', 'CARGO', 'IMPORTE'), true, true);
+
+    $pdf->SetFont('Arial', '', 7);
+    foreach ($caja['categorias'] as $key => $cate)
+    {
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+      }
+
+      $pdf->SetX(6);
+
+      if ($key === count($caja['categorias']) - 1)
+      {
+        $pdf->Row(array(
+          $key + 1,
+          $cate->nombre,
+          String::float(String::formatoNumero($cate->importe, 2, '')),
+          '$ ' . String::float(String::formatoNumero($totalGastos, 2, ''))), false, true);
+      }
+      else
+      {
+        $pdf->Row(array(
+          $key + 1,
+          $cate->nombre,
+          String::float(String::formatoNumero($cate->importe, 2, ''))), false, true);
+      }
+    }
+
+    $pdf->Output('CAJA_CHICA.pdf', 'I');
+  }
+
 }
 
 /* End of file caja_chica_model.php */

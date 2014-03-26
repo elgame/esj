@@ -86,7 +86,7 @@
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/print?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -413,7 +413,7 @@
                       <?php } ?>
 
                       <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                        <div class="span5"><a href="<?php echo base_url('panel/caja_chica/print?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                        <div class="span5"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                       <?php }  ?>
                     </div>
                   </div>

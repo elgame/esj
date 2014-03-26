@@ -10,6 +10,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/guardar/',
     'caja_chica/ajax_get_categorias/',
     'caja_chica/cerrar_caja/',
+    'caja_chica/print_caja/',
   );
 
   public function _remap($method)
@@ -310,6 +311,12 @@ class caja_chica extends MY_Controller {
     $this->caja_chica_model->cerrarCaja($_GET['id']);
 
     redirect(base_url('panel/caja_chica/cargar/?'.String::getVarsLink(array('id', 'msg')).'&msg=7'));
+  }
+
+  public function print_caja()
+  {
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->printCaja($_GET['ffecha']);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')
