@@ -1248,7 +1248,7 @@ class inventario_model extends privilegios_model{
 			foreach ($response['productos'] as $key => $value)
 			{
 				$data = $this->promedioData($value->id_producto, $fecha, $fecha);
-				array_pop($data);
+				array_pop($data); array_pop($data);
 				$value->data = array_pop($data)['saldo'];
 				$response[$key] = $value;
 			}

@@ -1291,6 +1291,146 @@ class Ventas_model extends privilegios_model{
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
 
+    /**
+     * Reporte de facturas y notas de credito
+     * @return
+     */
+    public function getRFacturasNCData()
+    {
+      $sql = '';
+
+      //Filtros para buscar
+      $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+      $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+      $fecha = $_GET['ffecha1'] < $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+      $this->load->model('empresas_model');
+      $client_default = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+      $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
+
+      $res = $this->db->query(
+        "SELECT
+          f.id_factura,
+          fc.rfc,
+          f.serie,
+          f.folio,
+          f.status,
+          Date(f.fecha) AS fecha,
+          COALESCE(f.total, 0) AS cargo,
+          COALESCE(f.importe_iva, 0) AS iva,
+          f.id_nc
+        FROM
+          facturacion AS f
+          INNER JOIN facturacion_cliente AS fc ON fc.id_factura = f.id_factura
+        WHERE f.status <> 'b' AND f.is_factura = 't'
+          AND (Date(f.fecha) >= '{$_GET['ffecha1']}' AND Date(f.fecha) <= '{$_GET['ffecha2']}')
+          {$sql}
+        ORDER BY f.fecha ASC
+        ");
+
+      $response = $res->result();
+
+      return $response;
+    }
+    /**
+    * Reporte compras x cliente pdf
+    */
+    public function getRFacturasNCPdf(){
+      $res = $this->getRFacturasNCData();
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo2 = String::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
+      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('Arial','',8);
+
+      $aligns = array('L', 'L', 'R', 'L', 'R', 'R', 'C');
+      $widths = array(32, 15, 20, 25, 25, 25, 20);
+      $header = array('RFC', 'Serie', 'Folio', 'Fecha', 'Operacion', 'IVA', 'Estado');
+
+      $total_nc_cancel = $total_nc = $total_factura_cancel = $total_iva_cancel = $total_factura = $total_iva = 0;
+      foreach($res as $key => $factura){
+        if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',9);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true, false);
+        }
+
+        $pdf->SetFont('Arial','',8);
+
+        if(is_numeric($factura->id_nc))
+        {
+          $factura->status=='ca'? $total_nc_cancel += $factura->cargo : $total_nc += $factura->cargo ;
+        }else
+        {
+          if ($factura->status=='ca')
+          {
+            $total_factura_cancel += $factura->cargo;
+            $total_iva_cancel += $factura->iva;
+          }else
+          {
+            $total_factura += $factura->cargo;
+            $total_iva += $factura->iva;
+          }
+        }
+
+        $datos = array($factura->rfc,
+                $factura->serie,
+                $factura->folio,
+                String::fechaATexto($factura->fecha, '/c'),
+                String::formatoNumero($factura->cargo, 2, '', false),
+                String::formatoNumero( $factura->iva , 2, '', false),
+                ($factura->status=='ca'? '0': '1'),
+              );
+
+        $pdf->SetXY(6, $pdf->GetY()-1);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false, false);
+
+        // $pdf->SetTextColor(255,255,255);
+      }
+
+      $pdf->SetX(80);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(60, 40));
+      $pdf->Row(array('FACTURAS ADMIN', String::formatoNumero( $total_factura+$total_factura_cancel , 2, '', false) ), false);
+      $pdf->SetX(80);
+      $pdf->Row(array('IVA ADMIN', String::formatoNumero( $total_iva+$total_iva_cancel , 2, '', false) ), false);
+      $pdf->SetX(80);
+      $pdf->Row(array('FACT  CANCELADAS', String::formatoNumero( $total_factura_cancel , 2, '', false) ), false);
+      $pdf->SetX(80);
+      $pdf->Row(array('IVA CANCELADO', String::formatoNumero( $total_iva_cancel , 2, '', false) ), false);
+      $pdf->SetX(80);
+      $pdf->Row(array('FACT. CONTAB', String::formatoNumero( $total_factura-$total_iva , 2, '', false) ), false);
+      $pdf->SetX(80);
+      $pdf->Row(array('IVA TRASLADADO CONTAB', String::formatoNumero( $total_iva , 2, '', false) ), false);
+
+
+      $pdf->Output('reporte_ventas.pdf', 'I');
+    }
+
 
 
   public function getRVP()

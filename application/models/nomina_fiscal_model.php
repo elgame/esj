@@ -127,7 +127,7 @@ class nomina_fiscal_model extends CI_Model {
        FROM usuarios u
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-       WHERE user_nomina = 't' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
+       WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
        {$ordenar}
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -1174,7 +1174,7 @@ class nomina_fiscal_model extends CI_Model {
       "SELECT id, (COALESCE(apellido_paterno, '') || ' ' || COALESCE(apellido_materno, '') || ' ' || nombre) as nombre,
               DATE(fecha_entrada) as fecha_entrada, id_puesto, id_departamente
        FROM usuarios
-       WHERE user_nomina = 't' AND DATE(fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND status = 't' {$sql}
+       WHERE user_nomina = 't' AND de_rancho = 'n' AND DATE(fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND status = 't' {$sql}
        ORDER BY apellido_paterno ASC
       ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -3357,17 +3357,17 @@ class nomina_fiscal_model extends CI_Model {
     return array('data' => $nominasEmpleados);
   }
 
-  public function pdfRptNominaFiscal($semana, $empresaId)
+  public function pdfRptNominaFiscal($semana, $empresaId, $anio)
   {
     // var_dump($_POST);
     // exit();
     // $empleados = $this->pdfRptDataNominaFiscal($_POST, $empresaId);
-    $semana = $this->fechasDeUnaSemana($semana);
-
     $this->load->model('usuarios_model');
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -3686,6 +3686,88 @@ class nomina_fiscal_model extends CI_Model {
         'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '$', false),
         'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
         ), false, true, null, 2, 1);
+    }
+
+    //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
+    if ($empresa['info']->rfc == 'GGU090120I91')
+    {
+      $this->load->model('nomina_ranchos_model');
+      $filtros = array(
+        'semana'    => $semana['semana'],
+        'anio'      => $semana['anio'],
+        'empresaId' => $empresa['info']->id_empresa,
+        'puestoId'  => '',
+        'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+      );
+      $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
+
+      $pdf->SetFont('Helvetica','B', 10);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Cell(130, 6, 'Corte de limon', 0, 0, 'L', 0);
+      $pdf->SetXY(6, $pdf->GetY()+5);
+      $pdf->SetFont('Helvetica','B', 8);
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+      $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(65, 13, 13, 13, 13, 13, 13, 13, 13, 22, 22, 18, 30));
+      $pdf->Row(array('Nombre', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
+      $pdf->SetFont('Helvetica','', 8);
+      foreach ($empleados_rancho as $key => $value)
+      {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $value->nombre,
+          String::formatoNumero($value->total_lam, 2, ''),
+          String::formatoNumero($value->sabado, 2, ''),
+          String::formatoNumero($value->lunes, 2, ''),
+          String::formatoNumero($value->martes, 2, ''),
+          String::formatoNumero($value->miercoles, 2, ''),
+          String::formatoNumero($value->jueves, 2, ''),
+          String::formatoNumero($value->viernes, 2, ''),
+          String::formatoNumero($value->domingo, 2, ''),
+          String::formatoNumero($value->total_lam, 2, ''),
+          String::formatoNumero($value->total_lvrd, 2, ''),
+          String::formatoNumero($value->prestamo, 2, '$', false),
+          String::formatoNumero($value->total_pagar, 2, '$', false),
+        ), false, true, null, 2, 1);
+        $totales_rancho[0] += $value->total_lam;
+        $totales_rancho[1] += $value->sabado;
+        $totales_rancho[2] += $value->lunes;
+        $totales_rancho[3] += $value->martes;
+        $totales_rancho[4] += $value->miercoles;
+        $totales_rancho[5] += $value->jueves;
+        $totales_rancho[6] += $value->viernes;
+        $totales_rancho[7] += $value->domingo;
+        $totales_rancho[8] += $value->total_lam;
+        $totales_rancho[9] += $value->total_lvrd;
+        $totales_rancho[10] += $value->prestamo;
+        $totales_rancho[11] += $value->total_pagar;
+      }
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        'TOTAL',
+        String::formatoNumero($totales_rancho[0], 2, ''),
+        String::formatoNumero($totales_rancho[1], 2, ''),
+        String::formatoNumero($totales_rancho[2], 2, ''),
+        String::formatoNumero($totales_rancho[3], 2, ''),
+        String::formatoNumero($totales_rancho[4], 2, ''),
+        String::formatoNumero($totales_rancho[5], 2, ''),
+        String::formatoNumero($totales_rancho[6], 2, ''),
+        String::formatoNumero($totales_rancho[7], 2, ''),
+        String::formatoNumero($totales_rancho[8], 2, ''),
+        String::formatoNumero($totales_rancho[9], 2, ''),
+        String::formatoNumero($totales_rancho[10], 2, '$', false),
+        String::formatoNumero($totales_rancho[11], 2, '$', false),
+      ), false, true, null, 2, 1);
+
+      $pdf->SetWidths(array(35, 23));
+      $pdf->SetXY(6, $pdf->GetY()+3);
+      $pdf->Row(array(
+        'TOTAL',
+        String::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '$', false),
+      ), false, true, null, 2, 1);
     }
 
     $pdf->Output('Nomina.pdf', 'I');

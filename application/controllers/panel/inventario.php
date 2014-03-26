@@ -257,6 +257,7 @@ class inventario extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('productos_model');
     $this->load->model('inventario_model');
+    $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Existencia de Clasificaciones');
@@ -276,10 +277,11 @@ class inventario extends MY_Controller {
       }
     }
 
-    $params['familias'] = $this->productos_model->getFamilias(false, 'p');
-
     $params['empresa']   = $this->empresas_model->getDefaultEmpresa();
     $_GET['did_empresa'] = (isset($params['empresa']->id_empresa)? $params['empresa']->id_empresa: '');
+    $_GET['fempresa'] = isset($_GET['dempresa'])?$_GET['dempresa']:$params['empresa']->nombre_fiscal;
+
+    $params['familias'] = $this->productos_model->getFamilias(false, 'p');
 
     $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);
     $params['data'] = $this->inventario_model->getNivelarData($id_familia);

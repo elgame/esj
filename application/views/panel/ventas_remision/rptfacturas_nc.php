@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
+            <form action="<?php echo base_url('panel/ventas/rventas_nc_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -29,33 +29,6 @@
                   </div>
                 </div>
 
-                <div class="control-group">
-                  <label class="control-label" for="dcliente">Cliente</label>
-                  <div class="controls">
-                    <div class="input-append span12">
-                      <input type="text" name="dcliente" value="" id="dcliente" class="span9" placeholder="Buscar">
-                      <button class="btn" type="button" id="btnAddProveedor" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="did_cliente" value="" id="did_cliente">
-                    </div>
-                    <div class="clearfix"></div>
-                    <div style="height:130px;overflow-y: scroll;background-color:#eee;">
-                      <ul id="lista_clientes" style="list-style: none;margin-left: 4px;">
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label" for="dtipo_factura">Tipo</label>
-                  <div class="controls">
-                    <select name="dtipo_factura">
-                      <option value="">Todas</option>
-                      <option value="t">Facturas</option>
-                      <option value="f">Remision</option>
-                    </select>
-                  </div>
-                </div>
-
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
@@ -71,7 +44,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" src="<?php echo base_url('panel/ventas/rventas_nc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

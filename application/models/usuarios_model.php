@@ -8,7 +8,7 @@ class Usuarios_model extends privilegios_model {
 		parent::__construct();
 	}
 
-	public function get_usuarios($paginados = true, $tipo='f')
+	public function get_usuarios($paginados = true, $tipo='f', $de_rancho='n')
 	{
 		$sql = '';
 		//paginacion
@@ -24,6 +24,7 @@ class Usuarios_model extends privilegios_model {
 		}
 
 		$sql = "WHERE user_nomina = '{$tipo}'";
+    $sql .= " AND u.de_rancho = '{$de_rancho}'"; //filtro para los de rancho
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
 			$sql .= " AND ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
@@ -101,6 +102,7 @@ class Usuarios_model extends privilegios_model {
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -168,6 +170,7 @@ class Usuarios_model extends privilegios_model {
 						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 					);
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
