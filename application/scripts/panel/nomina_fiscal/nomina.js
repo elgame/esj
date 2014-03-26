@@ -477,6 +477,7 @@
       dataType: 'json',
       data: {
         empresa_id: $('#empresaId').val(),
+        anio: $('#anio').val(),
         empleado_id: $tr.find('.empleado-id').val(),
         generar_nomina: $tr.find('.generar-nomina').val(),
         numSemana: $('#semanas').find('option:selected').val(),

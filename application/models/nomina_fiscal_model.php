@@ -322,6 +322,7 @@ class nomina_fiscal_model extends CI_Model {
     );
 
     // Obtiene las configuraciones.
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
 
     // Almacenara los datos de las nominas de cada empleado para despues
@@ -333,7 +334,7 @@ class nomina_fiscal_model extends CI_Model {
     $prestamosEmpleados = array();
 
     // Obtiene el rango de fechas de la semana.
-    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana']);
+    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana'], $datos['anio'], $empresa['info']->dia_inicia_semana );
 
     // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
     $errorTimbrar = false;
@@ -349,7 +350,7 @@ class nomina_fiscal_model extends CI_Model {
 
         $empleadoNomina = $this->nomina(
           $configuraciones,
-          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId),
+          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'], 'dia_inicia_semana' => $empresa['info']->dia_inicia_semana ),
           $empleadoId,
           $datos['horas_extras'],
           $datos['descuento_playeras'],
@@ -802,18 +803,18 @@ class nomina_fiscal_model extends CI_Model {
     $salariosZonas = $this->getConfigSalariosZonas();
 
     $cuentasContpaq = array(
-      'sueldo'           => $this->getSueldoCuentaContpaq(),
-      'horas_extras'     => $this->getHorasExtrasCuentaContpaq(),
-      'vacaciones'       => $this->getVacacionesCuentaContpaq(),
-      'prima_vacacional' => $this->getPrimaVacacionalCuentaContpaq(),
-      'aguinaldo'        => $this->getAguinaldoCuentaContpaq(),
-      'ptu'              => $this->getPtuCuentaContpaq(),
-      'imss'             => $this->getImssCuentaContpaq(),
-      'rcv'              => $this->getRcvCuentaContpaq(),
-      'infonavit'        => $this->getInfonavitCuentaContpaq(),
-      'otros'            => $this->getOtrosGastosCuentaContpaq(),
-      'subsidio'         => $this->getSubsidioCuentaContpaq(),
-      'isr'              => $this->getIsrCuentaContpaq(),
+      'sueldo'           => $this->getSueldoCuentaContpaq($empleado[0]->id_empresa),
+      'horas_extras'     => $this->getHorasExtrasCuentaContpaq($empleado[0]->id_empresa),
+      'vacaciones'       => $this->getVacacionesCuentaContpaq($empleado[0]->id_empresa),
+      'prima_vacacional' => $this->getPrimaVacacionalCuentaContpaq($empleado[0]->id_empresa),
+      'aguinaldo'        => $this->getAguinaldoCuentaContpaq($empleado[0]->id_empresa),
+      'ptu'              => $this->getPtuCuentaContpaq($empleado[0]->id_empresa),
+      'imss'             => $this->getImssCuentaContpaq($empleado[0]->id_empresa),
+      'rcv'              => $this->getRcvCuentaContpaq($empleado[0]->id_empresa),
+      'infonavit'        => $this->getInfonavitCuentaContpaq($empleado[0]->id_empresa),
+      'otros'            => $this->getOtrosGastosCuentaContpaq($empleado[0]->id_empresa),
+      'subsidio'         => $this->getSubsidioCuentaContpaq($empleado[0]->id_empresa),
+      'isr'              => $this->getIsrCuentaContpaq($empleado[0]->id_empresa),
     );
 
     $tablas = $this->getTablasIsr();
@@ -1675,124 +1676,244 @@ class nomina_fiscal_model extends CI_Model {
    |------------------------------------------------------------------------
    */
 
-  private function getSueldoCuentaContpaq()
+  private function getSueldoCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%sueldo%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%sueldos%' AND id_cuenta = '1678'"; //francis
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%sueldo%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%sueldo%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getHorasExtrasCuentaContpaq()
+  private function getHorasExtrasCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%horas extras%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%horas extras%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%horas extras%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%horas extras%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getVacacionesCuentaContpaq()
+  private function getVacacionesCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%vacaciones%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%vacaciones%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%vacaciones%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%vacaciones%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getPrimaVacacionalCuentaContpaq()
+  private function getPrimaVacacionalCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%prima vacacional%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%prima vacacional%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%prima vacacional%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%prima vacacional%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getAguinaldoCuentaContpaq()
+  private function getAguinaldoCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%aguinaldos%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getInfonavitCuentaContpaq()
+  private function getInfonavitCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%credito infonavit%' AND id_padre = '1191'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%credito infonavit%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%credito infonavit%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%credito infonavit%' AND id_padre = '1191'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getRcvCuentaContpaq()
+  private function getRcvCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%rcv%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%rcv%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%rcv%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%rcv%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getPtuCuentaContpaq()
+  private function getPtuCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%ptu%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%ptu%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%ptu%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%ptu%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getImssCuentaContpaq()
+  private function getImssCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%imss retenido%' AND id_padre = '1191'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%imss retenido%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%imss retenido%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%imss retenido%' AND id_padre = '1191'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getOtrosGastosCuentaContpaq()
+  private function getOtrosGastosCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%otros gastos%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%otros gastos%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%otros gastos%' AND id_padre = '1296'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%otros gastos%' AND id_padre = '1296'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getSubsidioCuentaContpaq()
+  private function getSubsidioCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%subsidio%' AND id_padre = '28'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%subsidio%' AND id_cuenta = '1600'"; //francis
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%subsidio%' AND id_padre = '28'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%subsidio%' AND id_padre = '28'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-  private function getIsrCuentaContpaq()
+  private function getIsrCuentaContpaq($id_empresa=null)
   {
+    $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
+    $sql = '';
+    if ($id_empresa==2) $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
+    elseif($id_empresa==4) $sql=""; //Raul jorge
+    elseif($id_empresa==3) $sql=""; //Gomez gudiño
+    elseif($id_empresa==5) $sql=""; //vianey rocio
+    else{
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    }
     $query = $this->db->query(
       "SELECT *
        FROM cuentas_contpaq
-       WHERE LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'")->result();
+       WHERE id_empresa = {$id_empresa} {$sql}")->result();
 
-    return $query[0]->cuenta;
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
 
@@ -1934,6 +2055,7 @@ class nomina_fiscal_model extends CI_Model {
   public function descargarTxtBanco($semana, $empresaId, $anio=null)
   {
     $anio = $anio==null?date("Y"):$anio;
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $semana = $this->fechasDeUnaSemana($semana, $anio);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId);
@@ -2025,6 +2147,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC");
     $empleados = $this->nomina($configuraciones, $filtros);
@@ -3136,6 +3259,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_model');
 
     // Obtiene las configuraciones.
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
 
     // Almacenara los datos de las nominas de cada empleado para despues
@@ -3778,6 +3902,7 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
 
     $semana = $this->fechasDeUnaSemana($semana, $anio);
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId);
     $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
