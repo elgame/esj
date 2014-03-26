@@ -1,9 +1,9 @@
-    <div class="span3">
+    <div class="span2">
       <!-- content starts -->
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/caja_chica/recibo_incapacidad_pdf/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
+            <form action="<?php echo base_url('panel/caja_chica/cargar/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group">
@@ -16,7 +16,6 @@
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
-
               </div>
             </form> <!-- /form -->
           </div>
@@ -24,14 +23,14 @@
       </div><!--/row-fluid -->
     </div><!-- /span2 -->
 
-    <div id="content" class="span9">
+    <div id="content" class="span10">
       <!-- content starts -->
 
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
             <div class="row-fluid">
-              <iframe name="rdeReporte" id="iframe-reporte" class="span12" src="<?php echo base_url('panel/caja_chica/recibo_incapacidad_pdf/')?>" style="height:520px;"></iframe>
+              <iframe name="rdeReporte" id="iframe-reporte" class="span12" src="<?php echo base_url('panel/caja_chica/cargar/')?>" style="height:520px;"></iframe>
             </div>
           </div>
         </div><!--/span-->
