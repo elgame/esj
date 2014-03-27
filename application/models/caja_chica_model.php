@@ -225,9 +225,9 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica']));
     if (count($ingresos) > 0)
     {
-      $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica']));
       $this->db->insert_batch('cajachica_ingresos', $ingresos);
     }
 

@@ -146,7 +146,7 @@
                             <?php
                               if (isset($_POST['otros_concepto'])) {
                                 foreach ($_POST['otros_concepto'] as $key => $concepto) {
-                                  $totalIngresos += floatval($_POST['otros_monto'][$key]);
+                                  // $totalIngresos += floatval($_POST['otros_monto'][$key]);
                                 ?>
                                   <tr>
                                     <td><input type="text" name="otros_concepto[]" value="<?php echo $concepto ?>" class="otros-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>></td>
@@ -155,7 +155,7 @@
                                   </tr>
                             <?php }} else {
                                   foreach ($caja['otros'] as $otro) {
-                                    $totalIngresos += floatval($otro->monto);
+                                    // $totalIngresos += floatval($otro->monto);
                                   ?>
                                     <tr>
                                       <td><input type="text" name="otros_concepto[]" value="<?php echo $otro->concepto ?>" class="otros-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>></td>
@@ -166,6 +166,16 @@
                           </tbody>
                         </table>
                       </div>
+
+                      <?php if (isset($_POST['remision_concepto'])) {
+                          foreach ($_POST['remision_concepto'] as $key => $remision) {
+                              $totalIngresos += floatval($_POST['remision_importe'][$key]);
+                            ?>
+                      <?php }} else {
+                            foreach ($caja['remisiones'] as $remision) {
+                                $totalIngresos += floatval($remision->monto);
+                              ?>
+                      <?php }} ?>
                       <div class="span3">
                         <div class="row-fluid">
                           <input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;">
