@@ -4792,7 +4792,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array("(== " . strtoupper(String::num2letras($vacaciones + $primaVacacional)) . " ==)"), false, false);
       $pdf->SetX(33);
 
-      $inicio = new DateTime($empleado['info'][0]->fecha_entrada);
+      $inicio = new DateTime($empleado['info'][0]->fecha_imss);
       $hoy = new DateTime(date('Y-m-d'));
 
       $pdf->Row(array("POR LAS VACACIONES DEL ".String::numeroCardinal($hoy->diff($inicio)->y)." AÑO DE LABORES. "), false, false);
