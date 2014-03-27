@@ -85,7 +85,11 @@
       total += parseFloat($(this).val() || 0);
     });
 
-    $('.otros-monto').each(function(index, el) {
+    // $('.otros-monto').each(function(index, el) {
+    //   total += parseFloat($(this).val() || 0);
+    // });
+
+    $('.remision-importe').each(function(index, el) {
       total += parseFloat($(this).val() || 0);
     });
 
@@ -98,7 +102,8 @@
   };
 
   var onChanceIngresos = function () {
-    $('#table-ingresos, #table-otros').on('keyup', '.ingreso-monto, .otros-monto', function(e) {
+    // $('#table-ingresos, #table-otros').on('keyup', '.ingreso-monto, .otros-monto', function(e) {
+    $('#table-ingresos').on('keyup', '.ingreso-monto', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent();
@@ -151,6 +156,8 @@
     $('.remision-importe').each(function(index, el) {
       total += parseFloat($(this).val());
     });
+
+    calculaTotalIngresos();
 
     $('#total-remisiones').text(util.darFormatoNum(total.toFixed(2)));
   };

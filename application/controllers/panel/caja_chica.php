@@ -99,14 +99,18 @@ class caja_chica extends MY_Controller {
       array('field' => 'saldo_inicial',
             'label' => 'Saldo Inicial',
             'rules' => 'required|numeric'),
-
-      array('field' => 'ingreso_concepto[]',
-            'label' => 'Ingreso Conceptos',
-            'rules' => 'required'),
-      array('field' => 'ingreso_monto[]',
-            'label' => 'Ingreso Monto',
-            'rules' => 'required|numeric'),
     );
+
+    if (isset($_POST['ingreso_concepto']))
+    {
+      $rules[] = array('field' => 'ingreso_concepto[]',
+                      'label' => 'Ingreso Conceptos',
+                      'rules' => 'required');
+
+      $rules[] = array('field' => 'ingreso_monto[]',
+                      'label' => 'Ingreso Monto',
+                      'rules' => 'required|numeric');
+    }
 
     if (isset($_POST['otros_concepto']))
     {
