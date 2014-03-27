@@ -86,6 +86,7 @@ class nomina_fiscal extends MY_Controller {
     }
     $filtros['dia_inicia_semana'] = $dia;
 
+    $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     // Datos para la vista.
     $configuraciones = $this->nomina_fiscal_model->configuraciones();
     $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
@@ -602,9 +603,10 @@ class nomina_fiscal extends MY_Controller {
 
   public function ajax_get_empleado()
   {
-    $this->load->model('nomina_fiscal_model');
-    $configuraciones = $this->nomina_fiscal_model->configuraciones();
     $filtros = array('semana' => $_POST['semana'], 'empresaId' => $_POST['empresa_id']);
+    $this->load->model('nomina_fiscal_model');
+    $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
+    $configuraciones = $this->nomina_fiscal_model->configuraciones();
     $empleado = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, $_POST['empleado_id'], $_POST['horas_extras'], null, null, null, $_POST['ptu']);
     echo json_encode($empleado);
   }
