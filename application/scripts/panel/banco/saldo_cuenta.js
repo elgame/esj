@@ -1,5 +1,5 @@
 $(function(){
-	
+
 	$(".transit_chekrs").on('click', function() {
 		var vt = $(this);
 		msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
@@ -25,6 +25,16 @@ $(function(){
 		var vthis = $(this);
 		vthis.attr("href", vthis.attr("data-href")+"&saldob="+$("#sb_banco").val() );
 	});
+
+  var ids = [];
+  $('.transit_chekrs').each(function(index, el) {
+    if ($(this).is(':checked')) {
+      ids.push($(this).attr('data-id'));
+    }
+  });
+
+  var $btn = $('#cambia-fecha-movi');
+  $btn.attr('href', $btn.attr('href') + '&ids=' + ids.join(','));
 });
 
 function calculaSaldo(){
@@ -37,7 +47,7 @@ function recalculaSaldo(){
 	empresa_real = parseFloat( util.quitarFormatoNum($("#total_saldo").text()) ).toFixed(2),
 	dif1 = (num-empresa_real).toFixed(2), dif1 = +dif1 || 0,
 	dif2 = dif1-( parseFloat( util.quitarFormatoNum($("#sb_cheque_ncob").text()) ) ).toFixed(2), dif2 = +dif2 || 0;
-	
+
 	$("#sb_dif1").text( util.darFormatoNum(dif1) );
 	$("#sb_dif2").text( util.darFormatoNum(dif2) );
 }

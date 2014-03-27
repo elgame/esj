@@ -1320,7 +1320,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($value->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
           //Si hay abonos de mas se agregan a los mov
-          if (isset($query_mayor->cuenta_cpi))
+          if (isset($query_mayor->cuenta_cpi) && ((floor($query_mayor->total * 100) / 100) > 0))
             $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($query_mayor->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
@@ -1331,7 +1331,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($query_mayor->concepto,100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
           //Si hay abonos de mas se agregan a los mov
-          if (isset($query_saldar->cuenta_cpi))
+          if (isset($query_saldar->cuenta_cpi) && ((floor($query_saldar->total * 100) / 100) > 0))
             $response['data'] .= $this->setEspacios('M',2). //movimiento = M
                             $this->setEspacios($query_saldar->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
