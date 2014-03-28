@@ -942,6 +942,23 @@ class banco_cuentas_model extends banco_model {
 	// 	return $response;
 	// }
 
+  public function moverMovimiento($ids)
+  {
+    if ($ids !== '')
+    {
+      $ids = explode(',', $ids);
+
+      foreach ($ids as $id)
+      {
+        $this->db->query("UPDATE banco_movimientos SET fecha = fecha + CAST('1 months' AS INTERVAL) WHERE id_movimiento = $id");
+      }
+
+      return 31;
+    }
+
+    return 32;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

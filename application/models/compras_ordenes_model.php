@@ -918,7 +918,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetFont('helvetica','', 8);
 
       $aligns = array('C', 'C', 'L', 'R', 'R');
-      $widths = array(25, 25, 104, 25, 25);
+      $widths = array(35, 25, 94, 25, 25);
       $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
 
       $subtotal = $iva = $total = $retencion = 0;
@@ -940,7 +940,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
         $datos = array(
-          $prod->cantidad,
+          $prod->cantidad.' '.$prod->abreviatura,
           $prod->codigo,
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
           String::formatoNumero($prod->precio_unitario, 2, '$', false),

@@ -19,6 +19,7 @@ class banco extends MY_Controller {
 		'banco/saldos_pdf/',
 		'banco/saldos_xls/',
     'banco/get_cuentas_contpaq/',
+    'banco/mover_movimiento/',
 		);
 
 	public function _remap($method){
@@ -35,7 +36,6 @@ class banco extends MY_Controller {
 		}else
 			redirect(base_url('panel/home'));
 	}
-
 
 	public function index()
 	{
@@ -543,6 +543,13 @@ class banco extends MY_Controller {
 		$this->form_validation->set_rules($rules);
 	}
 
+  public function mover_movimiento()
+  {
+    $this->load->model('banco_cuentas_model');
+    $msg = $this->banco_cuentas_model->moverMovimiento($_GET['ids']);
+
+    redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'ids')).'&msg='.$msg));
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{
@@ -596,6 +603,14 @@ class banco extends MY_Controller {
 				$txt = 'La cuenta no tiene saldo suficiente.';
 				$icono = 'error';
 				break;
+      case 31:
+        $txt = 'Los movimientos se trasladaron correctamente!';
+        $icono = 'success';
+        break;
+      case 32:
+        $txt = 'No hubo movimientos para trasladar!';
+        $icono = 'error';
+        break;
 		}
 
 		return array(

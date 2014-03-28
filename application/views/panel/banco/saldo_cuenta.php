@@ -38,6 +38,9 @@
               <i class="icon-file-text"></i> Banamex</a>
         <?php } ?>
 
+            <a href="<?php echo base_url('panel/banco/mover_movimiento/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-info" id="cambia-fecha-movi"
+              onclick="msb.confirm('Estas seguro de mover los movimientos al siguiente mes?', 'Cuentas', this); return false;">Trasladar cuentas</a>
+
             <form action="<?php echo base_url('panel/banco/cuenta/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
               	<input type="hidden" name="id_cuenta" value="<?php echo set_value_get('id_cuenta'); ?>">
@@ -108,7 +111,7 @@
             			if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
             				echo '<input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
             					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
-            					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').'>';
+            					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'">';
             		?></td>
             		<td><?php echo $movimiento->fecha; ?></td>
             		<td><?php echo $movimiento->numero_ref; ?></td>
