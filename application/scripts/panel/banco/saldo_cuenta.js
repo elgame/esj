@@ -37,12 +37,13 @@ $(function(){
   $btn.attr('href', $btn.attr('href') + '&ids=' + ids.join(','));
 });
 
-function calculaSaldo(){
+function calculaSaldo() {
 	var empresa_real = $("#total_saldo").text();
 
 	$("#sb_empresar").text(empresa_real);
 }
-function recalculaSaldo(){
+
+function recalculaSaldo() {
 	var num = parseFloat($("#sb_banco").val()),
 	empresa_real = parseFloat( util.quitarFormatoNum($("#total_saldo").text()) ).toFixed(2),
 	dif1 = (num-empresa_real).toFixed(2), dif1 = +dif1 || 0,
