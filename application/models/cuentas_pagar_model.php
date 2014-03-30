@@ -752,9 +752,10 @@ class cuentas_pagar_model extends privilegios_model{
 			{
 				$_GET['id']   = $value;
 				$_GET['tipo'] = $_POST['tipos'][$key];
-				$data = array('fecha'        => $this->input->post('dfecha'),
+				$data = array('fecha'  => $this->input->post('dfecha'),
 							'concepto'       => $this->input->post('dconcepto'),
 							'total'          => $_POST['montofv'][$key], //$total,
+              'total_bc'       => $_POST['montofv'][$key], //$total,
 							'id_cuenta'      => $this->input->post('dcuenta'),
 							'ref_movimiento' => $this->input->post('dreferencia') );
 				$resa = $this->addAbono($data, null, true);
@@ -783,9 +784,10 @@ class cuentas_pagar_model extends privilegios_model{
 		}
 
 		if ($data == null) {
-			$data = array('fecha'        => $this->input->post('dfecha'),
+			$data = array('fecha'  => $this->input->post('dfecha'),
 						'concepto'       => $this->input->post('dconcepto'),
 						'total'          => $this->input->post('dmonto'),
+            'total_bc'       => $this->input->post('dmonto'),
 						'id_cuenta'      => $this->input->post('dcuenta'),
 						'ref_movimiento' => $this->input->post('dreferencia'),
 						'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL) );
@@ -812,7 +814,7 @@ class cuentas_pagar_model extends privilegios_model{
 						'fecha'        => $data['fecha'],
 						'numero_ref'   => $data['ref_movimiento'],
 						'concepto'     => $data['concepto'],
-						'monto'        => $data['total'],
+						'monto'        => (isset($data['total_bc']{0})? $data['total_bc']: $data['total']),
 						'tipo'         => 'f',
 						'entransito'   => 't',
 						'metodo_pago'  => $this->input->post('fmetodo_pago'),

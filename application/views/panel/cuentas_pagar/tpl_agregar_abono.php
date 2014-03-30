@@ -26,7 +26,7 @@
                 <label class="control-label" for="dcuenta">Cuenta Bancaria</label>
                 <div class="controls">
                   <select name="dcuenta" id="dcuenta" required>
-                <?php 
+                <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
                     <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
@@ -54,7 +54,7 @@
               <div class="control-group" style="display: <?php echo (isset($_GET['total']{0})? 'none': 'block'); ?>">
                 <label class="control-label" for="dmonto">Monto</label>
                 <div class="controls">
-                  <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="1" max="<?php echo $data['saldo'] ?>">
+                  <input type="number" step="any" name="dmonto" class="span8 vpositive" id="dmonto" value="<?php echo set_value('dmonto', $data['saldo']); ?>" min="0.001">
                 </div>
               </div>
 
@@ -83,9 +83,9 @@
                   </select>
                 </div>
               </div>
-              
+
             </div>
-            <?php  
+            <?php
             if(isset($_GET['total']{0})) //si es masivo
             {
             ?>
@@ -99,7 +99,7 @@
                 </tr>
               </thead>
               <tbody>
-              <?php  
+              <?php
               $suma_saldo = $suma_monto = 0;
               foreach ($data['facturas'] as $key => $value)
               {
@@ -113,7 +113,7 @@
                     <input type="hidden" name="tipos[]" value="<?php echo $value['cobro'][0]->tipo; ?>">
                   </td>
                   <td><?php echo $value['saldo']; ?></td>
-                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="0.001" max="<?php echo $value['saldo'] ?>"></td>
+                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="0.001"></td>
                 </tr>
               <?php
               }
@@ -140,7 +140,7 @@
 </div>
 
 <!-- Bloque de alertas -->
-<?php 
+<?php
 if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){
 ?>

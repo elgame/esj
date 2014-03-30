@@ -314,6 +314,12 @@ class empleadosr extends MY_Controller {
 
 		if ($accion == 'agregar')
 		{
+      $rules[] = array('field' => 'fnombre',
+                        'label' => 'Nombre',
+                        'rules' => 'required|max_length[90]|callback_valida_nombre_full');
+      $rules[] = array('field' => 'frfc',
+                        'label' => 'RFC',
+                        'rules' => 'callback_valida_rfc');
 			$rules[] = 	array('field' => 'fpass',
 												'label' => 'Password',
 												'rules' => 'max_length[32]');
@@ -366,6 +372,39 @@ class empleadosr extends MY_Controller {
 		$this->form_validation->set_rules($rules);
 	}
 
+  public function valida_nombre_full()
+  {
+    $query = $this->db->query("SELECT id
+                               FROM usuarios
+                               WHERE de_rancho = 'l' AND id_empresa = ".$this->input->post('did_empresa')." AND lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
+                                     lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
+                                     lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");
+
+    if ($query->num_rows() > 0)
+    {
+      $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado, si esta eliminado lo puede activar de nuevo.');
+      return false;
+    }
+
+    return true;
+  }
+  public function valida_valida_rfc($rfc)
+  {
+    if ($rfc != '')
+    {
+      $query = $this->db->query("SELECT id
+                                 FROM usuarios
+                                 WHERE de_rancho = 'l' AND id_empresa = ".$this->input->post('did_empresa')." AND lower(rfc) = '".mb_strtolower(trim($rfc))."'");
+
+      if ($query->num_rows() > 0)
+      {
+        $this->form_validation->set_message('valida_valida_rfc', 'Ya existe un empleado con el mismo RFC, si esta eliminado lo puede activar de nuevo.');
+        return false;
+      }
+    }
+
+    return true;
+  }
 
 	public function valida_email($email)
 	{

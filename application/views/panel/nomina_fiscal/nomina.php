@@ -80,7 +80,11 @@
                   </div>
                 </div>
                 <div class="span3">
-                  <button type="submit" name="rptlistado" class="btn btn-success" style="float: right;" id="rptlistado">Reporte</button>
+                  <div class="input-prepend input-append">
+                    <span class="add-on"><input type="checkbox" value="si" name="xls"> En Excel</span>
+                    <button type="submit" name="rptlistado" class="btn btn-success" id="rptlistado">Reporte</button>
+                  </div>
+
                   <?php if ( ! $nominas_finalizadas){ ?>
                     <button type="button" name="guardar" class="btn btn-success" style="float: right;" id="guardarNomina">Guardar</button>
                   <?php } else { ?>

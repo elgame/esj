@@ -3497,6 +3497,7 @@ class nomina_fiscal_model extends CI_Model {
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('L', 'mm', 'Letter');
     $pdf->show_head = true;
+    $pdf->logo = $empresa['info']->logo;
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
     $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
@@ -3696,16 +3697,34 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
+
+    //la nomina de limon para sacar prestamos
+    $total_prestamos_limon = 0;
+    if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
+    {
+      $this->load->model('nomina_ranchos_model');
+      $filtros = array(
+        'semana'    => $semana['semana'],
+        'anio'      => $semana['anio'],
+        'empresaId' => $empresa['info']->id_empresa,
+        'puestoId'  => '',
+        'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+      );
+      $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
+      foreach ($empleados_rancho as $key => $value)
+        $total_prestamos_limon += $value->prestamo;
+    }
     // Si es diferente a sanjorge agrega empleados ficticios para recuperar los prestamos
     // Se registran como otro departamento y empleados
-    if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros) > 0)
+    if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
     {
+
       $pdf->SetFont('Helvetica','B', 10);
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Cell(130, 6, 'Otros', 0, 0, 'L', 0);
       $pdf->SetXY(6, $pdf->GetY()+6);
       $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
-      $data_otross = array('PRESTAMO FIJO' => $total_prestamos, 'PRESTAMO SEMANAL' => $descuento_otros);
+      $data_otross = array('PRESTAMO FIJO' => $total_prestamos, 'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon);
       foreach ($data_otross as $keyotss => $dottoss)
       {
         if ($dottoss > 0)
@@ -3776,8 +3795,8 @@ class nomina_fiscal_model extends CI_Model {
 
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->SetFont('Helvetica','B', 8);
-      if($pdf->GetY() >= $pdf->limiteY)
-        $pdf->AddPage();
+    if($pdf->GetY() >= $pdf->limiteY)
+      $pdf->AddPage();
     $datatto = array();
     $datatto[] = 'TOTAL';
     $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '$', false);
@@ -3813,18 +3832,8 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
-    if ($empresa['info']->rfc == 'GGU090120I91')
+    if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
     {
-      $this->load->model('nomina_ranchos_model');
-      $filtros = array(
-        'semana'    => $semana['semana'],
-        'anio'      => $semana['anio'],
-        'empresaId' => $empresa['info']->id_empresa,
-        'puestoId'  => '',
-        'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
-      );
-      $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
-
       $pdf->SetFont('Helvetica','B', 10);
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Cell(130, 6, 'Corte de limon', 0, 0, 'L', 0);
@@ -3832,16 +3841,19 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','B', 8);
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
-      $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(65, 13, 13, 13, 13, 13, 13, 13, 13, 22, 22, 18, 30));
-      $pdf->Row(array('Nombre', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
+      $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(65, 13, 13, 13, 13, 13, 13, 13, 13, 13, 18, 18, 18, 30));
+      $pdf->Row(array('', '', '', '', '', '', '', '', '', '', '$'.$empleados_rancho[0]->precio_lam, '$'.$empleados_rancho[0]->precio_lvr, '', ''), false, false, null, 2, 1);
+      $pdf->SetX(6);
+      $pdf->Row(array('Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
       $pdf->SetFont('Helvetica','', 8);
       foreach ($empleados_rancho as $key => $value)
       {
         $pdf->SetX(6);
         $pdf->Row(array(
           $value->nombre,
+          String::formatoNumero($value->cajas_cargadas, 2, ''),
           String::formatoNumero($value->total_lam, 2, ''),
           String::formatoNumero($value->sabado, 2, ''),
           String::formatoNumero($value->lunes, 2, ''),
@@ -3867,11 +3879,13 @@ class nomina_fiscal_model extends CI_Model {
         $totales_rancho[9] += $value->total_lvrd;
         $totales_rancho[10] += $value->prestamo;
         $totales_rancho[11] += $value->total_pagar;
+        $totales_rancho[12] += $value->cajas_cargadas;
       }
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetX(6);
       $pdf->Row(array(
         'TOTAL',
+        String::formatoNumero($totales_rancho[12], 2, ''),
         String::formatoNumero($totales_rancho[0], 2, ''),
         String::formatoNumero($totales_rancho[1], 2, ''),
         String::formatoNumero($totales_rancho[2], 2, ''),
@@ -3895,6 +3909,370 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $pdf->Output('Nomina.pdf', 'I');
+  }
+
+  private function rowXls($data, $style='')
+  {
+    $html = '';
+    $html .= '<tr>';
+    foreach ($data as $keycc => $col)
+      $html .= '<td '.(is_array($style)? $style[$keycc]: $style).'>'.utf8_decode($col).'</td>';
+    $html .= '</tr>';
+    return $html;
+  }
+  public function xlsRptNominaFiscal($semana, $empresaId, $anio)
+  {
+    $this->load->model('usuarios_model');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_departamentos_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+
+    $html = '<table>';
+    $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
+    $html .= $this->rowXls( array("Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}") );
+    $html .= $this->rowXls( array("Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}") );
+    $html .= $this->rowXls( array() );
+
+    //no mostrar algunas columnas
+    $ver_des_otro = $ver_des_playera = false;
+    foreach ($_POST['empleado_id'] as $key => $empleado){
+      if($_POST['descuento_playeras'][$key]>0) $ver_des_playera = true;
+      if($_POST['descuento_otros'][$key]>0) $ver_des_otro = true;
+    }
+
+    $ver_infonavit = $ver_trans = 0;
+    foreach ($_POST['empleado_id'] as $key => $empleado)
+    {
+      $ver_infonavit += $_POST['total_infonavit'][$key];
+      $ver_trans += $_POST['ttotal_nomina'][$key];
+    }
+
+    $columnas = array('n' => array(), 'w' => array(64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas['n'][] = 'NOMBRE';
+    $columnas['n'][] = 'SUELDO';
+    $columnas['n'][] = 'OTRAS';
+    $columnas['n'][] = 'DOMINGO';
+    $columnas['n'][] = 'PTMO';
+
+    if ($ver_infonavit != 0)
+    {
+      $columnas['n'][] = 'INFONAVIT';
+      $columnas['w'][] = 20;
+      $columnas['a'][] = 'R';
+    }
+
+    if($ver_des_playera){
+      $columnas['n'][] = 'DESC. PLAY';
+      $columnas['w'][] = 20;
+      $columnas['a'][] = 'R';
+    }
+    if($ver_des_otro){
+      $columnas['n'][] = 'DESC. OTRO';
+      $columnas['w'][] = 20;
+      $columnas['a'][] = 'R';
+    }
+    $columnas['n'][] = 'TOTAL A PAGAR';
+
+    if ($ver_trans !== 0)
+    {
+      $columnas['n'][] = 'TRANSF';
+      $columnas['w'][] = 20;
+      $columnas['a'][] = 'R';
+    }
+
+    $columnas['n'][] = 'TOTAL COMPLEM';
+
+    $ttotal_aseg_no_trs = $sueldo_semanal_real = $otras_percepciones = $domingo = $total_prestamos = $total_infonavit = $descuento_playeras = $descuento_otros = $ttotal_pagar = $ttotal_nomina = $total_no_fiscal = 0;
+
+    // $departamentos = $this->usuarios_model->departamentos();
+    $_GET['did_empresa'] = $empresaId;
+    $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+
+    $html .= $this->rowXls($columnas['n']);
+    $html .= $this->rowXls(array(''));
+    foreach ($departamentos as $keyd => $departamento)
+    {
+      $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
+
+      $html .= '<tr><td style="font-size:14px;">'.$departamento->nombre.'</td></tr>';
+
+      // $pdf->SetXY(6, $pdf->GetY()+6);
+      foreach ($_POST['empleado_id'] as $key => $empleado)
+      {
+        if($departamento->id_departamento == $_POST['departamento_id'][$key])
+        {
+          $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+          $total_pagar = $_POST['sueldo_semanal_real'][$key] +
+            ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
+            $_POST['domingo'][$key] -
+            $_POST['total_prestamos'][$key] -
+            $_POST['total_infonavit'][$key] -
+            $_POST['descuento_playeras'][$key] -
+            $_POST['descuento_otros'][$key];
+
+          $dataarr = array();
+          $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+          $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
+
+          if ($ver_infonavit != 0)
+          {
+            $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '', false);
+          }
+
+          if($ver_des_playera)
+            $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
+          if($ver_des_otro)
+            $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+
+          if ($ver_trans != 0)
+          {
+            $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
+          }
+
+          $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
+
+          $html .= $this->rowXls($dataarr);
+          $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
+          $otras_percepciones  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+          $domingo             += $_POST['domingo'][$key];
+          $total_prestamos     += $_POST['total_prestamos'][$key];
+          $total_infonavit     += $_POST['total_infonavit'][$key];
+          $descuento_playeras  += $_POST['descuento_playeras'][$key];
+          $descuento_otros     += $_POST['descuento_otros'][$key];
+          $ttotal_pagar        += $total_pagar;
+          $ttotal_nomina       += $_POST['ttotal_nomina'][$key];
+          $total_no_fiscal     += $_POST['total_no_fiscal'][$key];
+          $ttotal_aseg_no_trs  += $_POST['total_percepciones'][$key]-$_POST['total_deducciones'][$key];
+
+          $sueldo_semanal_real1 += $_POST['sueldo_semanal_real'][$key];
+          $otras_percepciones1  += ($_POST['bonos'][$key]+$_POST['otros'][$key]);
+          $domingo1             += $_POST['domingo'][$key];
+          $total_prestamos1     += $_POST['total_prestamos'][$key];
+          $total_infonavit1     += $_POST['total_infonavit'][$key];
+          $descuento_playeras1  += $_POST['descuento_playeras'][$key];
+          $descuento_otros1     += $_POST['descuento_otros'][$key];
+          $ttotal_pagar1        += $total_pagar;
+          $ttotal_nomina1       += $_POST['ttotal_nomina'][$key];
+          $total_no_fiscal1     += $_POST['total_no_fiscal'][$key];
+        }
+      }
+
+      $datatto = array();
+      $datatto[] = 'TOTAL';
+      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+      $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+      $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+      $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+
+      if ($ver_infonavit != 0)
+      {
+        $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+      }
+
+      if($ver_des_playera)
+        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+      if($ver_des_otro)
+        $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
+      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+
+      if ($ver_trans != 0)
+      {
+        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+      }
+      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+      // $pdf->Row($datatto, false, true, null, 2, 1);
+      $html .= $this->rowXls($datatto);
+      $html .= $this->rowXls(array(''));
+    }
+
+    //la nomina de limon para sacar prestamos
+    $total_prestamos_limon = 0;
+    if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
+    {
+      $this->load->model('nomina_ranchos_model');
+      $filtros = array(
+        'semana'    => $semana['semana'],
+        'anio'      => $semana['anio'],
+        'empresaId' => $empresa['info']->id_empresa,
+        'puestoId'  => '',
+        'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+      );
+      $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
+      foreach ($empleados_rancho as $key => $value)
+        $total_prestamos_limon += $value->prestamo;
+    }
+    // Si es diferente a sanjorge agrega empleados ficticios para recuperar los prestamos
+    // Se registran como otro departamento y empleados
+    if ($empresa['info']->rfc != 'ESJ97052763A' && ($total_prestamos+$descuento_otros+$total_prestamos_limon) > 0)
+    {
+      $html .= $this->rowXls(array('Otros'), 'style="font-weight:bold;font-size:14px;"');
+      $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
+      $data_otross = array('PRESTAMO FIJO' => $total_prestamos, 'PRESTAMO SEMANAL' => $descuento_otros, 'PRESTAMO LIMON' => $total_prestamos_limon);
+      foreach ($data_otross as $keyotss => $dottoss)
+      {
+        if ($dottoss > 0)
+        {
+          $total_pagar = $dottoss;
+
+          $dataarr = array();
+          $dataarr[] = $keyotss;
+          $dataarr[] = String::formatoNumero('0', 2, '', false);
+          $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+          $dataarr[] = String::formatoNumero('0', 2, '', false);
+          $dataarr[] = String::formatoNumero('0', 2, '', false);
+          if ($ver_infonavit != 0)
+            $dataarr[] = String::formatoNumero('0', 2, '', false);
+          if($ver_des_playera)
+            $dataarr[] = String::formatoNumero('0', 2, '', false);
+          if($ver_des_otro)
+            $dataarr[] = String::formatoNumero('0', 2, '', false);
+          $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+          if ($ver_trans != 0)
+            $dataarr[] = String::formatoNumero('0', 2, '', false);
+          $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+
+          // $pdf->Row($dataarr, false, true, null, 2, 1);
+          $html .= $this->rowXls($dataarr);
+          $otras_percepciones  += $dottoss;
+          $ttotal_pagar        += $dottoss;
+          $total_no_fiscal     += $dottoss;
+
+          $otras_percepciones1  += $dottoss;
+          $ttotal_pagar1        += $dottoss;
+          $total_no_fiscal1     += $dottoss;
+        }
+      }
+
+      $datatto = array();
+      $datatto[] = 'TOTAL';
+      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+      $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+      $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+      $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+
+      if ($ver_infonavit != 0)
+        $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+      if($ver_des_playera)
+        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+      if($ver_des_otro)
+        $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
+      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+      if ($ver_trans != 0)
+        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+      // $pdf->Row($datatto, false, true, null, 2, 1);
+      $html .= $this->rowXls($datatto, 'style="font-weight:bold;font-size:14px;"');
+      $html .= $this->rowXls(array(''));
+    }
+
+    $datatto = array();
+    $datatto[] = 'TOTAL';
+    $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '', false);
+    $datatto[] = String::formatoNumero($otras_percepciones, 2, '', false);
+    $datatto[] = String::formatoNumero($domingo, 2, '', false);
+    $datatto[] = String::formatoNumero($total_prestamos, 2, '', false);
+    if($ver_infonavit != 0)
+      $datatto[] = String::formatoNumero($total_infonavit, 2, '', false);
+    if($ver_des_playera)
+      $datatto[] = String::formatoNumero($descuento_playeras, 2, '', false);
+    if($ver_des_otro)
+      $datatto[] = String::formatoNumero($descuento_otros, 2, '', false);
+    $datatto[] = String::formatoNumero($ttotal_pagar, 2, '', false);
+    if ($ver_trans != 0)
+      $datatto[] = String::formatoNumero($ttotal_nomina, 2, '', false);
+    $datatto[] = String::formatoNumero($total_no_fiscal, 2, '', false);
+    // $pdf->Row($datatto, false, true, null, 2, 1);
+    $html .= $this->rowXls($datatto, 'style="font-weight:bold;font-size:14px;"');
+    $html .= $this->rowXls(array(''));
+
+
+    if ($empresa['info']->rfc === 'ESJ97052763A')
+    {
+      $html .= $this->rowXls(array(
+        'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
+        'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '', false),
+        'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
+        ), 'style="font-weight:bold;font-size:14px;"');
+      $html .= $this->rowXls(array(''));
+    }
+
+    //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
+    if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
+    {
+      $html .= $this->rowXls(array('Corte de limon'), 'style="font-weight:bold;font-size:14px;"');
+      $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      $html .= $this->rowXls( array('', '', '', '', '', '', '', '', '', '', ''.$empleados_rancho[0]->precio_lam, ''.$empleados_rancho[0]->precio_lvr, '', '') );
+      $html .= $this->rowXls( array('Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total') );
+
+      foreach ($empleados_rancho as $key => $value)
+      {
+        $html .= $this->rowXls( array(
+          $value->nombre,
+          String::formatoNumero($value->cajas_cargadas, 2, ''),
+          String::formatoNumero($value->total_lam, 2, ''),
+          String::formatoNumero($value->sabado, 2, ''),
+          String::formatoNumero($value->lunes, 2, ''),
+          String::formatoNumero($value->martes, 2, ''),
+          String::formatoNumero($value->miercoles, 2, ''),
+          String::formatoNumero($value->jueves, 2, ''),
+          String::formatoNumero($value->viernes, 2, ''),
+          String::formatoNumero($value->domingo, 2, ''),
+          String::formatoNumero($value->total_lam, 2, ''),
+          String::formatoNumero($value->total_lvrd, 2, ''),
+          String::formatoNumero($value->prestamo, 2, '', false),
+          String::formatoNumero($value->total_pagar, 2, '', false),
+        ) );
+
+        $totales_rancho[0] += $value->total_lam;
+        $totales_rancho[1] += $value->sabado;
+        $totales_rancho[2] += $value->lunes;
+        $totales_rancho[3] += $value->martes;
+        $totales_rancho[4] += $value->miercoles;
+        $totales_rancho[5] += $value->jueves;
+        $totales_rancho[6] += $value->viernes;
+        $totales_rancho[7] += $value->domingo;
+        $totales_rancho[8] += $value->total_lam;
+        $totales_rancho[9] += $value->total_lvrd;
+        $totales_rancho[10] += $value->prestamo;
+        $totales_rancho[11] += $value->total_pagar;
+        $totales_rancho[12] += $value->cajas_cargadas;
+      }
+
+      $html .= $this->rowXls( array(
+        'TOTAL',
+        String::formatoNumero($totales_rancho[12], 2, ''),
+        String::formatoNumero($totales_rancho[0], 2, ''),
+        String::formatoNumero($totales_rancho[1], 2, ''),
+        String::formatoNumero($totales_rancho[2], 2, ''),
+        String::formatoNumero($totales_rancho[3], 2, ''),
+        String::formatoNumero($totales_rancho[4], 2, ''),
+        String::formatoNumero($totales_rancho[5], 2, ''),
+        String::formatoNumero($totales_rancho[6], 2, ''),
+        String::formatoNumero($totales_rancho[7], 2, ''),
+        String::formatoNumero($totales_rancho[8], 2, ''),
+        String::formatoNumero($totales_rancho[9], 2, ''),
+        String::formatoNumero($totales_rancho[10], 2, '', false),
+        String::formatoNumero($totales_rancho[11], 2, '', false),
+      ), 'style="font-weight:bold;font-size:14px;"' );
+
+      $html .= $this->rowXls( array(
+        'TOTAL',
+        String::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '', false),
+      ), 'style="font-weight:bold;font-size:14px;"' );
+    }
+    $html .= '</table>';
+
+    header("Content-type: application/vnd.ms-excel; name='excel'");
+    header("Content-Disposition: filename=nomina.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+    echo $html;
   }
 
   public function pdfReciboNominaFiscal($empleadoId, $semana, $anio, $empresaId)
