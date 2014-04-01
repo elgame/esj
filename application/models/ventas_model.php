@@ -780,6 +780,19 @@ class Ventas_model extends privilegios_model{
       // 0, 171, 72 = verde
 
       $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
+
+      // $pdf->SetXY(109, 0);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
       // $pdf->SetFillColor(0, 171, 72);
       $pdf->SetTextColor(255, 255, 255);
       // $pdf->SetXY(0, 0);
@@ -822,19 +835,20 @@ class Ventas_model extends privilegios_model{
       // Folio Fisca, CSD, Lugar y Fecha //
       /////////////////////////////////////
 
-      $pdf->SetFont('helvetica','B', 9);
-      $pdf->SetFillColor(242, 242, 242);
-      $pdf->SetTextColor(0, 171, 72);
-      $pdf->SetXY(109, 0);
-      $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
+      // $pdf->SetFont('helvetica','B', 9);
+      // $pdf->SetFillColor(242, 242, 242);
+      // $pdf->SetTextColor(0, 171, 72);
+      // $pdf->SetXY(109, 0);
+      // $pdf->Cell(108, 4, "Serie - Folio:", 0, 0, 'R', 1);
+
+      // $pdf->SetXY(109, 0);
+      // $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
+
+      // $pdf->SetTextColor(0, 0, 0);
+      // $pdf->SetXY(109, 6);
+      // $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
 
       $pdf->SetXY(109, 0);
-      $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
-
-      $pdf->SetTextColor(0, 0, 0);
-      $pdf->SetXY(109, 6);
-      $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
-
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 171, 72);
       $pdf->SetXY(109, $pdf->GetY() + 4);
