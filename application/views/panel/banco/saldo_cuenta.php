@@ -118,9 +118,9 @@
             		<td><?php echo $movimiento->cli_pro; ?></td>
             		<td><?php echo $movimiento->concepto; ?></td>
             		<td><?php echo $movimiento->metodo_pago; ?></td>
-            		<td><?php echo String::formatoNumero($movimiento->deposito); ?></td>
-                <td><?php echo String::formatoNumero($movimiento->retiro); ?></td>
-            		<td><?php echo String::formatoNumero($movimiento->saldo); ?></td>
+            		<td style="text-align: right;"><?php echo String::formatoNumero($movimiento->deposito, 2, '$', false); ?></td>
+                <td style="text-align: right;"><?php echo String::formatoNumero($movimiento->retiro, 2, '$', false); ?></td>
+            		<td style="text-align: right;"><?php echo String::formatoNumero($movimiento->saldo, 2, '$', false); ?></td>
             		<td><?php
             			if(count($status)>0)
             				echo '<span class="label label-'.($status[0]=='Trans'? 'info' : 'success').'">'.$status[0].'</span>'
@@ -148,9 +148,9 @@
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
                   <td style="text-align: right" colspan="6">Total:</td>
-                  <td><?php echo String::formatoNumero($data['total_deposito']); ?></td>
-                  <td><?php echo String::formatoNumero($data['total_retiro']); ?></td>
-                  <td id="total_saldo"><?php echo String::formatoNumero($data['total_saldos']); ?></td>
+                  <td style="text-align: right"><?php echo String::formatoNumero($data['total_deposito'], 2, '$', false); ?></td>
+                  <td style="text-align: right"><?php echo String::formatoNumero($data['total_retiro'], 2, '$', false); ?></td>
+                  <td id="total_saldo" style="text-align: right"><?php echo String::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
                 </tr>
               </tbody>
             </table>

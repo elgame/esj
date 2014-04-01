@@ -93,7 +93,7 @@
                   </td>
                   <td><?php echo $fact->nombre_fiscal; ?></td>
                   <td><?php echo $fact->empresa; ?></td>
-                  <td><?php echo String::formatoNumero($fact->total, 2, '$'); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($fact->total, 2, '$', false); ?></td>
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>

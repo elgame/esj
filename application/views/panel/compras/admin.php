@@ -104,7 +104,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
-                  <td><?php echo String::formatoNumero($compra->total); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($compra->total, 2, '$', false); ?></td>
                   <td><?php
                           $texto = 'NO';
                           $label = 'warning';
