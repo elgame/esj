@@ -338,7 +338,8 @@ class cuentas_pagar_model extends privilegios_model{
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto,
-				'f'::text as tipo
+				'f'::text as tipo,
+        COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
 			FROM
 				compras AS f
 				LEFT JOIN (

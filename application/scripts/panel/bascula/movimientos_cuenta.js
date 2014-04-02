@@ -1,4 +1,29 @@
 $(function(){
+  /**
+   * asigna o quita la compra en los pagos de banco
+   */
+  $(".change_spago").on('click', function(event) {
+    var $this = $(this);
+    if($this.is(':checked')){
+      msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
+        $.post(base_url + 'panel/banco_pagos/set_bascula/',
+          {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+      }, function(){ $this.removeAttr('checked') });
+    }else{
+      msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
+        $.post(base_url + 'panel/banco_pagos/set_bascula/',
+          {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      }, function(){ $this.attr('checked', 'true') });
+    }
+  });
+
+
   $('#fechaini').datepicker({
     dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
     //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha

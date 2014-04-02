@@ -515,7 +515,8 @@ class Bascula_model extends CI_Model {
                b.tipo,
                pagos.tipo_pago,
                pagos.concepto,
-               b.id_bonificacion
+               b.id_bonificacion,
+               COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago
         FROM bascula AS b
           LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
           {$table_ms}
@@ -603,6 +604,64 @@ class Bascula_model extends CI_Model {
     }
 
     $this->db->insert_batch('bascula_pagos_basculas', $pesadas);
+
+    return array('passess' => true);
+  }
+
+  public function pago_basculas_banco($datos)
+  {
+    //Se registra el movimiento en la cuenta bancaria
+    $this->load->model('banco_cuentas_model');
+    $data_cuenta  = $this->banco_cuentas_model->getCuentaInfo( $datos['dcuenta'] );
+    $data_cuenta  = $data_cuenta['info'];
+    $_GET['id']   = $datos['boletas'][0]['id_bascula'];
+    $inf_factura  = $this->getBasculaInfo($_GET['id'], 0, true);
+
+    $resp = $this->banco_cuentas_model->addRetiro(array(
+          'id_cuenta'           => $datos['dcuenta'],
+          'id_banco'            => $data_cuenta->id_banco,
+          'fecha'               => $datos['dfecha'],
+          'numero_ref'          => $datos['dreferencia'],
+          'concepto'            => $datos['descrip'],
+          'monto'               => $datos['dmonto'],
+          'tipo'                => 'f',
+          'entransito'          => 't',
+          'metodo_pago'         => $datos['fmetodo_pago'],
+          'id_proveedor'        => $inf_factura['info'][0]->id_proveedor,
+          'a_nombre_de'         => $inf_factura['info'][0]->proveedor,
+          'id_cuenta_proveedor' => ($datos['fcuentas_proveedor']!=''? $datos['fcuentas_proveedor']: NULL),
+          'clasificacion'       => 'elimon',
+          ));
+
+    if ($resp['error'] == false)
+    {
+
+      $bascula_pagos = array(
+        'tipo_pago' => $datos['fmetodo_pago'],
+        'monto'     => $datos['dmonto'],
+        'concepto'  => $datos['dconcepto'],
+      );
+
+      $this->db->insert('bascula_pagos', $bascula_pagos);
+      $id_bascula_pagos = $this->db->insert_id();
+
+      $this->db->insert('banco_movimientos_bascula', array('id_movimiento' => $resp['id_movimiento'], 'id_bascula_pago' => $id_bascula_pagos ));
+
+      $pesadas = array();
+      $pesadas_update = array();
+      foreach ($datos['boletas'] as $pesada)
+      {
+        $this->db->update('bascula', array('accion' => 'b'), array('id_bascula' => $pesada['id_bascula']));
+
+        $pesadas[] = array(
+          'id_pago' => $id_bascula_pagos,
+          'id_bascula' => $pesada['id_bascula']
+        );
+      }
+
+      $this->db->insert_batch('bascula_pagos_basculas', $pesadas);
+    }
+
 
     return array('passess' => true);
   }

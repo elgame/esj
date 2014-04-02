@@ -90,6 +90,7 @@
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
+                  <th style="width:15px;"></th>
                   <th>Fecha</th>
 									<th>Serie</th>
 									<th>Folio</th>
@@ -104,6 +105,7 @@
               </thead>
               <tbody>
             		<tr>
+                  <td></td>
 									<td></td>
 									<td></td>
 									<td></td>
@@ -136,6 +138,12 @@
 								$total_saldo += $cuenta->saldo;
 						?>
 								<tr>
+                  <td>
+                  <?php if($cuenta->estado == 'Pendiente'){ ?>
+                    <input type="checkbox" class="change_spago" <?php echo ($cuenta->en_pago>0? 'checked': ''); ?>
+                        data-idcompra="<?php echo $cuenta->id_compra; ?>" data-idproveedor="<?php echo $this->input->get('id_proveedor'); ?>" data-monto="<?php echo $cuenta->saldo; ?>">
+                  <?php } ?>
+                  </td>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->serie; ?></td>
 									<td>

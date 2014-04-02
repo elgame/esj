@@ -158,6 +158,7 @@
                           <th>TOTAL</th>
                           <th>TIPO PAGO</th>
                           <th>CONCEPTO</th>
+                          <th style="width:15px;"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -206,6 +207,14 @@
                             <?php if ($mov->folio != $lastboleta) { ?>
                               <?php echo $mov->concepto ?>
                             <?php } ?>
+                          </td>
+                          <td>
+                            <?php if ($mov->folio != $lastboleta) { ?>
+                              <?php if ($mov->status === 'b' || $mov->status === 'p') { ?>
+                              <?php } else { ?>
+                                <input type="checkbox" class="change_spago" <?php echo ($mov->en_pago>0? 'checked': ''); ?>
+                                  data-idcompra="<?php echo $mov->id_bascula; ?>" data-idproveedor="<?php echo $this->input->get('fid_proveedor'); ?>" data-monto="<?php echo $mov->importe_todas; ?>">
+                              <?php }} ?>
                           </td>
                         </tr>
                       <?php

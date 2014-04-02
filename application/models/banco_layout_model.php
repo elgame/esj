@@ -8,6 +8,99 @@ class banco_layout_model extends banco_cuentas_model {
 		parent::__construct();
 	}
 
+  public function get($data)
+  {
+    if (count($data['pagos']) > 0)
+    {
+      $res_files = $this->db->query("SELECT Count(id_mov_banamex) AS num FROM banco_movimientos_banamex
+              WHERE Date(fecha) = '".$data['fecha_pago']."' AND tipo_operacion = '".$data['toperacion']."'")->row();
+      $data['conta_dia'] = $res_files->num+1;
+
+      $this->regControl($data);
+      $this->regGlobal($data);
+      $this->regIndividual($data);
+      $this->regTotales($data);
+
+      $this->db->insert('banco_movimientos_banamex', array(
+        'fecha'          => $data['fecha_pago'],
+        'tipo_operacion' => $data['toperacion'],
+        'registros'      => $this->row_control,
+        'id_cuenta'      => $data['id_cuenta'],
+        ));
+
+      header ("Content-Disposition: attachment; filename=".($data['toperacion']=='ba'? 'banamex': 'interbancaria').".txt ");
+      header ("Content-Type: application/octet-stream");
+      echo $this->row_control;
+    }
+  }
+
+  public function regControl($data)
+  {
+    $this->row_control = '1'; //tipo de registro
+    $this->row_control .= $this->numero($data['numero_cliente'], 12); //Número de identificación del cliente
+    $this->row_control .= date("dmy", strtotime( $data['fecha_pago'] )); //Fecha de pago
+    $this->row_control .= $this->numero($data['conta_dia'], 4); //Secuencial del archivo
+    $this->row_control .= $this->string($data['nombre_empresa'], 36); //Nombre del la empresa
+    $this->row_control .= $this->string($data['description'], 20); //Descripción del archivo
+    $this->row_control .= ($data['toperacion']=='ba'? '06': '12'); //Naturaleza del archivo, 06:Pago a proveedores, 12:Pagos interbancarios CLABE
+    $this->row_control .= $this->string('', 40); //Instrucciones para órdenes de pago
+    $this->row_control .= 'C'; //Versión del layout
+    $this->row_control .= '0'; //Volúmen
+    $this->row_control .= "0\r\n"; //Características del archivo
+  }
+
+  public function regGlobal($data)
+  {
+    $this->row_control .= '2'; //tipo de registro
+    $this->row_control .= '1'; //Tipo de operación, 1:Si es Cargo
+    $this->row_control .= '001'; //Clave de la moneda
+    $this->row_control .= $this->numero($data['total_retiro'], 18, true); //Importe a abonar o cargar
+    $this->row_control .= '01'; //Tipo de cuenta
+    $this->row_control .= $this->numero($data['sucursal'], 4); //Número de sucursal
+    $this->row_control .= $this->numero($data['cuenta'], 20); //Número de cuenta
+    $this->row_control .= $this->string('', 20)."\r\n"; //Espacio en blanco
+  }
+
+  public function regIndividual($data)
+  {
+    foreach ($data['pagos'] as $key => $value)
+    {
+      $this->row_control .= '3'; //tipo de registro
+      $this->row_control .= '1'; //Tipo de operación, 1:Si es Cargo
+      $this->row_control .= '001'; //Clave de la moneda
+      $this->row_control .= $this->numero($value['monto'], 18, true); //Importe a abonar o cargar
+      $tipo_cuenta = '01';
+      if ($data['toperacion']=='ba') //banamex
+        $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
+      else //interbancaria
+      {
+        $cuenta = $value['proveedor_cuenta'];
+        if(strlen($cuenta) == 16) //Tarjeta de debito o credito
+          $tipo_cuenta = '03';
+      }
+      $this->row_control .= $tipo_cuenta; //Tipo de cuenta
+      $this->row_control .= $this->numero($cuenta, 20); //Número de cuenta
+      $this->row_control .= $this->string($value['ref_alfanumerica'], 40); //Referencia  Alfanumérica
+      $this->row_control .= $this->string( $this->cleanStr($value['beneficiario']), 55); //Beneficiario
+      $this->row_control .= $this->string($value['instrucciones'], 40); //Instrucciones
+      $this->row_control .= $this->string('', 24); //Descripción TEF
+      $this->row_control .= $this->numero($value['clave_banco'], 4); //Clave de Banco
+      $this->row_control .= $this->numero( $value['ref_numerica'] , 7); //Referencia Numérica
+      $this->row_control .= "00\r\n"; //Plazo
+    }
+  }
+
+  public function regTotales($data)
+  {
+    $this->row_control .= '4'; //tipo de registro
+    $this->row_control .= '001'; //Clave de la moneda
+    $this->row_control .= $this->numero('0', 6); //Número de abonos
+    $this->row_control .= $this->numero('0', 18, true); //Importe total de abonos
+    $this->row_control .= $this->numero($data['num_cargos'], 6); //Número de cargos
+    $this->row_control .= $this->numero($data['total_retiro'], 18, true)."\r\n"; //Importe total de cargos
+  }
+
+/*
 	public function get()
 	{
 		$this->load->model('banco_cuentas_model');
@@ -136,7 +229,7 @@ class banco_layout_model extends banco_cuentas_model {
 		$this->row_control .= $this->numero($data['num_cargos'], 6); //Número de cargos
 		$this->row_control .= $this->numero($data['total_retiro'], 18, true)."\n"; //Importe total de cargos
 	}
-
+*/
 
 	private function numero($numero, $pos, $decimales=false)
 	{
@@ -161,6 +254,10 @@ class banco_layout_model extends banco_cuentas_model {
 		}
 		return $str;
 	}
+  private function cleanStr($string)
+  {
+    return str_replace(array('ñ','Ñ','*','#','$','%','=','+'), array('n','N','','','','','',''), $string);
+  }
 
 }
 /* End of file usuarios_model.php */

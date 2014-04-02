@@ -606,7 +606,9 @@ class bascula extends MY_Controller {
         redirect(base_url('panel/bascula/movimientos/?msg=13'));
 
     $this->carabiner->js(array(
-      // array('general/msgbox.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/util.js'),
       array('panel/bascula/movimientos_cuenta.js'),
     ));
 

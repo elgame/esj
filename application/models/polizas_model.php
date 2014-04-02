@@ -1751,7 +1751,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
                               $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                               $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
-                              $this->setEspacios( $this->numero($value->total - ($value->total / 1.16))  , 20).  //importe movimiento
+                              $this->setEspacios( $this->numero($value->total - $impuestos2['iva_activo']['importe']), 20).  //importe movimiento
                               $this->setEspacios('0',10).  //iddiario poner 0
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto

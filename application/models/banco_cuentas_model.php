@@ -886,7 +886,7 @@ class banco_cuentas_model extends banco_model {
 		$id_cuenta = $id_cuenta? $id_cuenta: $_GET['id'];
 
 		$sql_res = $this->db->query(
-								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, bc.numero_cheque,
+								"SELECT bc.id_cuenta, bb.id_banco, e.id_empresa, bb.nombre AS banco, e.nombre_fiscal, bc.numero_cheque, bc.no_cliente,
 										substring(bc.numero from '....$') AS numero, bc.alias, bc.cuenta_cpi, bc.numero AS cuenta, bc.sucursal,
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -

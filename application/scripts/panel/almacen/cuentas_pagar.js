@@ -58,6 +58,8 @@ var abonom = (function($){
     $(".sel_abonom").on('click', selabono);
     btn_abonos_masivo = $(".btn_abonos_masivo");
     $("#fmetodo_pago").on('change', changeMetodoPago);
+
+    $(".change_spago").on('click', clickPagoBanco);
   }
 
   function selabono(){
@@ -99,6 +101,30 @@ var abonom = (function($){
     window.open(base_url+'panel/banco/cheque?id='+$id_movimiento, 'Print cheque');
   }
 
+  /**
+   * asigna o quita la compra en los pagos de banco
+   */
+  function clickPagoBanco(event) {
+    var $this = $(this);
+    if($this.is(':checked')){
+      msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
+        $.post(base_url + 'panel/banco_pagos/set_compra/',
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+      }, function(){ $this.removeAttr('checked') });
+    }else{
+      msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
+        $.post(base_url + 'panel/banco_pagos/set_compra/',
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      }, function(){ $this.attr('checked', 'true') });
+    }
+  }
+
   objs.init = init;
   objs.openCheque = openCheque;
   return objs;
@@ -111,8 +137,8 @@ var modalAbonos = (function($){
 
   function init()
   {
-    if ($("#abonomasivo").length > 0) 
-    { 
+    if ($("#abonomasivo").length > 0)
+    {
       $("#abonomasivo .monto_factura").on('change', calculaMonto);
     }
   }

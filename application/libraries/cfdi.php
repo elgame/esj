@@ -450,8 +450,11 @@ class cfdi{
         $nomina['Percepciones']['percepciones'][] = $percepcion;
       }
     }
-    $nominaPercepciones = array_merge($totalPercepciones, $percepciones);
-    $nomina['Percepciones']['totales'] = $totalPercepciones;
+    if ( floatval($totalPercepciones['total_gravado']+$totalPercepciones['total_excento']) > 0)
+    {
+      $nominaPercepciones = array_merge($totalPercepciones, $percepciones);
+      $nomina['Percepciones']['totales'] = $totalPercepciones;
+    }
 
     $nominaDeducciones = array();
     $totalDeducciones = array('total_gravado' => 0, 'total_excento' => 0);
@@ -470,8 +473,11 @@ class cfdi{
         $nomina['Deducciones']['deducciones'][] = $deduccion;
       }
     }
-    $nominaDeducciones = array_merge($totalDeducciones, array_values($deducciones));
-    $nomina['Deducciones']['totales'] = $totalDeducciones;
+    if ( floatval($totalDeducciones['total_gravado']+$totalDeducciones['total_excento']) > 0)
+    {
+      $nominaDeducciones = array_merge($totalDeducciones, array_values($deducciones));
+      $nomina['Deducciones']['totales'] = $totalDeducciones;
+    }
 
     // echo "<pre>";
     //   var_dump(array_merge(array_values($nominaDatos), array_values($nominaPercepciones),  array_values($nominaDeducciones)));
@@ -1035,19 +1041,25 @@ class cfdi{
       // $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Nomina Version="1.1" RegistroPatronal=""  NumEmpleado="00001" CURP="AASO870618HCMLS02" TipoRegimen="Regimen" NumSeguridadSocial="123456789" FechaPago="2013-12-15" FechaInicialPago="2013-12-01" FechaFinalPago="2013-12-15" NumDiasPagados="15" Departamento="Sistemas" CLABE="" Banco="" FechaInicioRelLaboral="2013-04-22" Antiguedad="30" Puesto="Desarrollador de Software" TipoContrato="Base" TipoJornada="continuada" PeriodicidadPago="quincenal" SalarioBaseCotApor="" RiesgoPuesto="" SalarioDiarioIntegrado="">';
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Nomina Version="'.$data['nomina']['nomina']['Nomina']['Version'].'" NumEmpleado="'.$data['nomina']['nomina']['Nomina']['NumEmpleado'].'" CURP="'.$data['nomina']['nomina']['Nomina']['CURP'].'" TipoRegimen="'.$data['nomina']['nomina']['Nomina']['TipoRegimen'].'" FechaPago="'.$data['nomina']['nomina']['Nomina']['FechaPago'].'" FechaInicialPago="'.$data['nomina']['nomina']['Nomina']['FechaInicialPago'].'" FechaFinalPago="'.$data['nomina']['nomina']['Nomina']['FechaFinalPago'].'" NumDiasPagados="'.$data['nomina']['nomina']['Nomina']['NumDiasPagados'].'" Departamento="'.$data['nomina']['nomina']['Nomina']['Departamento'].'" FechaInicioRelLaboral="'.$data['nomina']['nomina']['Nomina']['FechaInicioRelLaboral'].'" Puesto="'.$data['nomina']['nomina']['Nomina']['Puesto'].'" PeriodicidadPago="'.$data['nomina']['nomina']['Nomina']['PeriodicidadPago'].'">';
 
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepciones TotalGravado="'.(float)$data['nomina']['nomina']['Percepciones']['totales']['total_gravado'].'" TotalExento="'.(float)$data['nomina']['nomina']['Percepciones']['totales']['total_excento'].'">';
-      foreach ($data['nomina']['nomina']['Percepciones']['percepciones'] as $percepcion)
+      if (isset($data['nomina']['nomina']['Percepciones']['percepciones']))
       {
-        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepcion TipoPercepcion="'.$percepcion['TipoPercepcion'].'" Clave="'.$percepcion['Clave'].'" Concepto="'.$percepcion['Concepto'].'" ImporteGravado="'.(float)$percepcion['ImporteGravado'].'" ImporteExento="'.(float)$percepcion['ImporteExcento'].'" />';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepciones TotalGravado="'.(float)$data['nomina']['nomina']['Percepciones']['totales']['total_gravado'].'" TotalExento="'.(float)$data['nomina']['nomina']['Percepciones']['totales']['total_excento'].'">';
+        foreach ($data['nomina']['nomina']['Percepciones']['percepciones'] as $percepcion)
+        {
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Percepcion TipoPercepcion="'.$percepcion['TipoPercepcion'].'" Clave="'.$percepcion['Clave'].'" Concepto="'.$percepcion['Concepto'].'" ImporteGravado="'.(float)$percepcion['ImporteGravado'].'" ImporteExento="'.(float)$percepcion['ImporteExcento'].'" />';
+        }
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Percepciones>';
       }
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Percepciones>';
 
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deducciones TotalGravado="'.(float)$data['nomina']['nomina']['Deducciones']['totales']['total_gravado'].'" TotalExento="'.(float)$data['nomina']['nomina']['Deducciones']['totales']['total_excento'].'">';
-      foreach ($data['nomina']['nomina']['Deducciones']['deducciones'] as $deduccion)
+      if (isset($data['nomina']['nomina']['Deducciones']['deducciones']))
       {
-        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deduccion TipoDeduccion="'.$deduccion['TipoDeduccion'].'" Clave="'.$deduccion['Clave'].'" Concepto="'.$deduccion['Concepto'].'" ImporteGravado="'.(float)$deduccion['ImporteGravado'].'" ImporteExento="'.(float)$deduccion['ImporteExcento'].'" />';
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deducciones TotalGravado="'.(float)$data['nomina']['nomina']['Deducciones']['totales']['total_gravado'].'" TotalExento="'.(float)$data['nomina']['nomina']['Deducciones']['totales']['total_excento'].'">';
+        foreach ($data['nomina']['nomina']['Deducciones']['deducciones'] as $deduccion)
+        {
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina:Deduccion TipoDeduccion="'.$deduccion['TipoDeduccion'].'" Clave="'.$deduccion['Clave'].'" Concepto="'.$deduccion['Concepto'].'" ImporteGravado="'.(float)$deduccion['ImporteGravado'].'" ImporteExento="'.(float)$deduccion['ImporteExcento'].'" />';
+        }
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Deducciones>';
       }
-      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Deducciones>';
 
       if (count($data['nomina']['nomina']['Incapacidades']) > 0)
       {
