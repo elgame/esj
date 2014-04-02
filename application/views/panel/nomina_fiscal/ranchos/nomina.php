@@ -56,6 +56,8 @@
                 </select> -->
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
+
+                <a href="<?php echo base_url('panel/nomina_ranchos/lista_asistencia?').String::getVarsLink(); ?>" class="btn btn-info pull-right" target="_blank">Imprimir Lista</a>
               </div>
             </form>
 
@@ -83,12 +85,13 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <th colspan="11"></th>
+                      <th colspan="12"></th>
                       <th style="width:120px;"><label>AM $<input type="text" name="precio_am" id="precio_am" value="<?php echo (isset($empleados[0]->precio_lam)?$empleados[0]->precio_lam:0); ?>" class="span9 vpositive tchange" <?php echo $readonly ?>></label></th>
                       <th style="width:120px;"><label>Verde $<input type="text" name="precio_verde" id="precio_verde" value="<?php echo (isset($empleados[0]->precio_lvr)?$empleados[0]->precio_lvr:0); ?>" class="span9 vpositive tchange" <?php echo $readonly ?>></label></th>
                     </tr>
                     <tr>
                       <th>NOMBRE</th>
+                      <th style="width:70px;">CC</th>
                       <th style="width:70px;">AM</th>
                       <th style="width:70px;">S</th>
                       <th style="width:70px;">L</th>
@@ -107,9 +110,10 @@
                     <?php
                     $total_limon_am = $total_sabado = $total_lunes = $total_martes = $total_miercoles =
                     $total_jueves = $total_viernes = $total_domingo = $total_total_lam =
-                    $total_total_lvrd = $total_total_pagar = $total_prestamos = 0;
+                    $total_total_lvrd = $total_total_pagar = $total_prestamos = $total_cajas_cargadas = 0;
                     foreach ($empleados as $key => $value)
                     {
+                      $total_cajas_cargadas += $value->cajas_cargadas;
                       $total_limon_am += $value->sabado;
                       $total_sabado += $value->sabado;
                       $total_lunes += $value->lunes;
@@ -128,6 +132,7 @@
                         <input type="hidden" value="<?php echo $value->id; ?>" name="eId[]" id="eId">
                         <input type="hidden" value="<?php echo $value->generada; ?>" name="generada[]" id="generada">
                       </td>
+                      <td><input type="text" name="cajas_cargadas[]" id="cajas_cargadas" value="<?php echo $value->cajas_cargadas; ?>" class="span11 vinteger tchange" <?php echo $readonly ?>></td>
                       <td><input type="text" name="limon_am[]" id="limon_am" value="<?php echo $value->total_lam; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
                       <td><input type="text" name="sabado[]" id="sabado" value="<?php echo $value->sabado; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
                       <td><input type="text" name="lunes[]" id="lunes" value="<?php echo $value->lunes; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
@@ -145,6 +150,7 @@
                     } ?>
                     <tr>
                       <td style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
+                      <td id="total_cajas_cargadas" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_cajas_cargadas, 2, ''); ?></td>
                       <td id="total_limon_am" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_limon_am, 2, ''); ?></td>
                       <td id="total_sabado" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_sabado, 2, ''); ?></td>
                       <td id="total_lunes" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($total_lunes, 2, ''); ?></td>

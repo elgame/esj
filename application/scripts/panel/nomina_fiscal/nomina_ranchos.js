@@ -26,7 +26,7 @@
   }
 
   var calculaTotales = function(){
-    var totales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    var totales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     precio_amarillo = parseFloat($("#precio_am").val()),
     precio_verde = parseFloat($("#precio_verde").val());
     $(".tr_row").each(function(index, el) {
@@ -40,11 +40,13 @@
         parseFloat(el.find('#jueves').val()),
         parseFloat(el.find('#viernes').val()),
         parseFloat(el.find('#domingo').val()),
-        parseFloat(el.find('#prestamo').val()), 0, 0];
+        parseFloat(el.find('#prestamo').val()), 0, 0,
+        parseFloat(el.find('#cajas_cargadas').val())
+      ];
       valores[9] = valores[1]+valores[2]+valores[3]+valores[4]+valores[5]+valores[6]+valores[7]; //total verde
       el.find('#total_lam').val(valores[0]);
       el.find('#total_lvrd').val(valores[9]);
-      valores[10] = (valores[9]*precio_verde)+(valores[0]*precio_amarillo)-valores[8]; //importe de limones - prestamos
+      valores[10] = (valores[9]*precio_verde)+(valores[0]*precio_amarillo)-valores[8]+valores[11]; //importe de limones - prestamos + cajas cargadas
       el.find('#total_pagar').val(valores[10].toFixed(2));
       totales[0] += valores[0];
       totales[1] += valores[1];
@@ -58,6 +60,7 @@
       totales[9] += valores[9];
       totales[10] += valores[8]; //prestamos
       totales[11] += valores[10];
+      totales[12] += valores[11]; //cajas cargadas
     });
     $("#total_limon_am").text( util.darFormatoNum(totales[0], '') );
     $("#total_sabado").text( util.darFormatoNum(totales[1], '') );
@@ -71,6 +74,7 @@
     $("#total_total_lvrd").text( util.darFormatoNum(totales[9], '') );
     $("#total_prestamos").text( util.darFormatoNum(totales[10], '') );
     $("#total_total_pagar").text( util.darFormatoNum(totales[11]) );
+    $("#total_cajas_cargadas").text( util.darFormatoNum(totales[12], '') );
   }
 
   var errorTimbrar = 0, // Auxiliar para saber si ocurrio algun error al timbrar.
@@ -101,6 +105,7 @@
         prestamo: $tr.find('#prestamo').val(),
         total_pagar: $tr.find('#total_pagar').val(),
         generada: $tr.find('#generada').val(),
+        cajas_cargadas: $tr.find('#cajas_cargadas').val(),
       },
     })
     .done(function(result) {

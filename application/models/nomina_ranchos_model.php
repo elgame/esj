@@ -58,6 +58,7 @@ class nomina_ranchos_model extends CI_Model {
               nf.fecha_inicio,
               nf.fecha_final,
               nf.fecha,
+              COALESCE(nf.cajas_cargadas, 0) AS cajas_cargadas,
               COALESCE(nf.precio_lam, 0) AS precio_lam,
               COALESCE(nf.precio_lvr, 0) AS precio_lvr,
               COALESCE(nf.domingo, 0) AS domingo,
@@ -126,6 +127,7 @@ class nomina_ranchos_model extends CI_Model {
         'total_lam'    => $datos['total_lam'],
         'prestamo'     => $datos['prestamo'],
         'total_pagar'  => $datos['total_pagar'],
+        'cajas_cargadas'  => $datos['cajas_cargadas'],
         );
       // Inserta las nominas.
       if (count($nominasEmpleados) > 0)
@@ -139,6 +141,78 @@ class nomina_ranchos_model extends CI_Model {
     // echo "</pre>";exit;
 
     return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => null);
+  }
+
+  public function listadoAsistenciaPdf($datos)
+  {
+    $this->load->model('empresas_model');
+    $this->load->model('nomina_fiscal_model');
+     $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
+      $filtros = array(
+        'semana'    => isset($datos['semana']) ? $datos['semana'] : '',
+        'anio'    => isset($datos['anio']) ? $datos['anio'] : date("Y"),
+        'empresaId' => isset($datos['empresaId']) ? $datos['empresaId'] : $params['empresaDefault']->id_empresa,
+        'puestoId'  => isset($datos['puestoId']) ? $datos['puestoId'] : '',
+      );
+      if ($filtros['empresaId'] !== '')
+      {
+        $empresa = $this->db->select('*')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row();
+        $filtros['dia_inicia_semana'] = $empresa->dia_inicia_semana;
+      }
+      else
+        $filtros['dia_inicia_semana'] = '4';
+      $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']);
+
+      // Datos para la vista.
+      $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('L', 'mm', 'Letter');
+      $pdf->show_head = true;
+      $pdf->logo = $empresa->logo;
+      $pdf->titulo1 = $empresa->nombre_fiscal;
+      $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
+      $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica','B', 10);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetFont('Helvetica','B', 8);
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+      $totales_rancho = array('', '', '', '', '', '', '', '', '', '', '', '', '');
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(65, 13, 13, 13, 13, 13, 13, 13, 13, 13, 18, 18, 18, 30));
+      $pdf->Row(array('Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
+      $pdf->SetFont('Helvetica','', 8);
+      foreach ($empleados_rancho as $key => $value)
+      {
+        $pdf->SetX(6);
+        $pdf->Row(array(
+          $value->nombre, '', '', '', '', '', '', '', '', '', '', '', '', '',
+        ), false, true, null, 2, 1);
+      }
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        'TOTAL',
+        $totales_rancho[12],
+        $totales_rancho[0],
+        $totales_rancho[1],
+        $totales_rancho[2],
+        $totales_rancho[3],
+        $totales_rancho[4],
+        $totales_rancho[5],
+        $totales_rancho[6],
+        $totales_rancho[7],
+        $totales_rancho[8],
+        $totales_rancho[9],
+        $totales_rancho[10],
+        $totales_rancho[11],
+      ), false, true, null, 2, 1);
+      $pdf->Output('Nomina.pdf', 'I');
   }
 
 }

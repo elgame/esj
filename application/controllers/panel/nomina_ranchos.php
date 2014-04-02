@@ -7,6 +7,7 @@ class nomina_ranchos extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_ranchos/ajax_add_nomina_empleado/',
+    'nomina_ranchos/lista_asistencia/',
   );
 
   public function _remap($method)
@@ -96,6 +97,12 @@ class nomina_ranchos extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/nomina_fiscal/ranchos/nomina', $params);
     $this->load->view('panel/footer');
+  }
+
+  public function lista_asistencia()
+  {
+    $this->load->model('nomina_ranchos_model');
+    $result = $this->nomina_ranchos_model->listadoAsistenciaPdf($_GET);
   }
 
   /*

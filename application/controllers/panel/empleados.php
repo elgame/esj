@@ -222,74 +222,75 @@ class empleados extends MY_Controller {
 	public function config_add_usuario($accion='agregar')
 	{
 		$this->load->library('form_validation');
-		$rules = array(
-							array('field' => 'fnombre',
-										'label' => 'Nombre',
-										'rules' => 'required|max_length[90]'),
-							array('field' => 'fapellido_paterno',
-										'label' => 'Apellido paterno',
-										'rules' => 'max_length[25]'),
-							array('field' => 'fapellido_materno',
-										'label' => 'Apellido materno',
-										'rules' => 'max_length[25]'),
-
-							array('field' => 'fcalle',
-										'label' => 'Calle',
-										'rules' => 'max_length[60]'),
-							array('field' => 'fnumero',
-										'label' => 'Numero',
-										'rules' => 'max_length[7]'),
-							array('field' => 'fcolonia',
-										'label' => 'Colonia',
-										'rules' => 'max_length[60]'),
-							array('field' => 'fmunicipio',
-										'label' => 'Municipio',
-										'rules' => 'max_length[45]'),
-							array('field' => 'festado',
-										'label' => 'Estado',
-										'rules' => 'max_length[45]'),
-							array('field' => 'fcp',
-										'label' => 'Codigo postal',
-										'rules' => 'max_length[12]'),
-
-							array('field' => 'dprivilegios[]',
-										'label' => 'Privilegios',
-										'rules' => 'is_natural_no_zero'),
-
-							array('field' => 'ffecha_nacimiento',
-										'label' => 'Fecha de nacimiento',
-										'rules' => 'max_length[25]'),
-							array('field' => 'ffecha_entrada',
-										'label' => 'Fecha de entrada',
-										'rules' => 'max_length[25]'),
-              array('field' => 'ffecha_imss',
-                    'label' => 'Fecha IMSS',
-                    'rules' => 'max_length[25]'),
-							array('field' => 'ffecha_salida',
-										'label' => 'Fecha de salida',
-										'rules' => 'max_length[25]'),
-							array('field' => 'fnacionalidad',
-										'label' => 'Nacionalidad',
-										'rules' => 'max_length[20]'),
-							array('field' => 'festado_civil',
-										'label' => 'Estado civil',
-										'rules' => 'max_length[15]'),
-							array('field' => 'fsexo',
-										'label' => 'Sexo',
-										'rules' => 'max_length[1]'),
-							array('field' => 'femail',
-										'label' => 'Email',
-										'rules' => 'max_length[70]'),
-							array('field' => 'fcuenta_cpi',
-										'label' => 'Cuenta contpaqi',
-										'rules' => 'max_length[12]'),
-
+    $rules = array(
 							array('field' => 'did_empresa',
 										'label' => 'Empresa',
 										'rules' => 'required|numeric'),
 							array('field' => 'fempresa',
 										'label' => 'Empresa',
 										'rules' => 'required'),
+
+              array('field' => 'fnombre',
+                    'label' => 'Nombre',
+                    'rules' => 'required|max_length[90]'),
+              array('field' => 'fapellido_paterno',
+                    'label' => 'Apellido paterno',
+                    'rules' => 'max_length[25]'),
+              array('field' => 'fapellido_materno',
+                    'label' => 'Apellido materno',
+                    'rules' => 'max_length[25]'),
+
+              array('field' => 'fcalle',
+                    'label' => 'Calle',
+                    'rules' => 'max_length[60]'),
+              array('field' => 'fnumero',
+                    'label' => 'Numero',
+                    'rules' => 'max_length[7]'),
+              array('field' => 'fcolonia',
+                    'label' => 'Colonia',
+                    'rules' => 'max_length[60]'),
+              array('field' => 'fmunicipio',
+                    'label' => 'Municipio',
+                    'rules' => 'max_length[45]'),
+              array('field' => 'festado',
+                    'label' => 'Estado',
+                    'rules' => 'max_length[45]'),
+              array('field' => 'fcp',
+                    'label' => 'Codigo postal',
+                    'rules' => 'max_length[12]'),
+
+              array('field' => 'dprivilegios[]',
+                    'label' => 'Privilegios',
+                    'rules' => 'is_natural_no_zero'),
+
+              array('field' => 'ffecha_nacimiento',
+                    'label' => 'Fecha de nacimiento',
+                    'rules' => 'max_length[25]'),
+              array('field' => 'ffecha_entrada',
+                    'label' => 'Fecha de entrada',
+                    'rules' => 'max_length[25]'),
+              array('field' => 'ffecha_imss',
+                    'label' => 'Fecha IMSS',
+                    'rules' => 'max_length[25]'),
+              array('field' => 'ffecha_salida',
+                    'label' => 'Fecha de salida',
+                    'rules' => 'max_length[25]'),
+              array('field' => 'fnacionalidad',
+                    'label' => 'Nacionalidad',
+                    'rules' => 'max_length[20]'),
+              array('field' => 'festado_civil',
+                    'label' => 'Estado civil',
+                    'rules' => 'max_length[15]'),
+              array('field' => 'fsexo',
+                    'label' => 'Sexo',
+                    'rules' => 'max_length[1]'),
+              array('field' => 'femail',
+                    'label' => 'Email',
+                    'rules' => 'max_length[70]'),
+              array('field' => 'fcuenta_cpi',
+                    'label' => 'Cuenta contpaqi',
+                    'rules' => 'max_length[12]'),
+
 							array('field' => 'finfonavit',
 										'label' => 'Infonavit',
 										'rules' => 'numeric'),
@@ -319,7 +320,7 @@ class empleados extends MY_Controller {
                         'rules' => 'required|max_length[90]|callback_valida_nombre_full');
       $rules[] = array('field' => 'frfc',
                         'label' => 'RFC',
-                        'rules' => 'is_unique[usuarios.rfc]');
+                        'rules' => 'callback_valida_rfc');
 			$rules[] = 	array('field' => 'fpass',
 												'label' => 'Password',
 												'rules' => 'max_length[32]');
@@ -387,19 +388,33 @@ class empleados extends MY_Controller {
   {
     $query = $this->db->query("SELECT id
                                FROM usuarios
-                               WHERE lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
+                               WHERE de_rancho = 'n' AND id_empresa = ".$this->input->post('did_empresa')." AND lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
                                      lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
                                      lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");
 
     if ($query->num_rows() > 0)
     {
-      $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado.');
+      $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado, si esta eliminado lo puede activar de nuevo.');
       return false;
     }
 
     return true;
   }
+  public function valida_valida_rfc($rfc)
+  {
+    if ($rfc != '')
+    {
+      $query = $this->db->query("SELECT id
+                                 FROM usuarios
+                                 WHERE de_rancho = 'n' AND id_empresa = ".$this->input->post('did_empresa')." AND lower(rfc) = '".mb_strtolower(trim($rfc))."'");
 
+      if ($query->num_rows() > 0)
+      {
+        $this->form_validation->set_message('valida_valida_rfc', 'Ya existe un empleado con el mismo RFC, si esta eliminado lo puede activar de nuevo.');
+        return false;
+      }
+    }
+  }
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{
 		switch($tipo){
