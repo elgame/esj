@@ -23,7 +23,7 @@
           </div>
           <div class="box-content">
             <a href="<?php echo base_url('panel/banco/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Imprimir</a> | 
+              <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/banco/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a>
 
@@ -32,8 +32,8 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
-                
+                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
+
                 <label for="vertodos">Tipo:</label>
                 <select name="vertodos" id="vertodos" class="input-large search-query">
                   <option value="" <?php echo set_select_get('vertodos', ''); ?>>Todas</option>
@@ -44,11 +44,11 @@
                 <label for="fid_banco">Banco:</label>
                 <select name="fid_banco" id="fid_banco" class="input-large search-query">
                   <option value="" <?php echo set_select_get('fid_banco', ''); ?>></option>
-              <?php 
+              <?php
               foreach ($bancos['bancos'] as $key => $banco) {
               ?>
                   <option value="<?php echo $banco->id_banco; ?>" <?php echo set_select_get('fid_banco', $banco->id_banco); ?>><?php echo $banco->nombre; ?></option>
-              <?php 
+              <?php
               } ?>
                 </select>
 
@@ -81,12 +81,12 @@
                   <td><a href="<?php echo base_url('panel/banco/cuenta').'?id_cuenta='.$cuenta->id_cuenta.'&'.
                     String::getVarsLink(array('id_cuenta', 'msg', 'fstatus')); ?>" class="linksm lkzoom"><?php echo $cuenta->alias; ?></a>
                   </td>
-                  <td><?php echo String::formatoNumero($cuenta->saldo); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
                 </tr>
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
                   <td style="text-align: right" colspan="3">Total:</td>
-                  <td><?php echo String::formatoNumero($data['total_saldos']); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
                 </tr>
               </tbody>
             </table>

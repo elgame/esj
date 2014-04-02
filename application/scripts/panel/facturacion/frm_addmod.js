@@ -27,6 +27,11 @@ $(function(){
 
         $('#dmetodo_pago').val(ui.item.item.metodo_pago);
         $('#dmetodo_pago_digitos').val(ui.item.item.ultimos_digitos);
+
+        var dire = loadDatosRemitente(ui.item.item);
+        $('#destinatario_nombre').val(ui.item.item.nombre_fiscal);
+        $('#destinatario_rfc').val(ui.item.item.rfc);
+        $('#destinatario_domicilio').val(dire);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -52,6 +57,11 @@ $(function(){
       $('#dno_certificado').val(ui.item.item.no_certificado);
 
       loadSerieFolio(ui.item.id, true);
+
+      var dire = loadDatosRemitente(ui.item.item);
+      $('#remitente_nombre').val(ui.item.item.nombre_fiscal);
+      $('#remitente_rfc').val(ui.item.item.rfc);
+      $('#remitente_domicilio').val(dire);
     }
   }).on("keydown", function(event){
     if(event.which == 8 || event == 46){
@@ -115,7 +125,7 @@ $(function(){
           palletsClasifi = $tr.attr('data-pallets'), // los pallets que tienen la clasificacion que se esta eliminando.
           remisionesIds = $tr.attr('data-remisiones'), // las remisiones de los pallets.
           $table = $('#table_prod');
-          console.log(remisionesIds);
+
       $tr.remove(); // elimina el tr padre.
 
       // Si palletsClasifi no es vacio, significa que se se esta eliminando
@@ -157,7 +167,7 @@ $(function(){
         for (var ir in remisionesIds) {
           $table.find('tbody tr').each(function(index, el) {
             var $this = $(this);
-            console.log($this);
+
             if ($this.attr('data-remisiones') !== '') {
               var auxRemisiones = $this.attr('data-remisiones').split('-');
               for (var iir in auxRemisiones) {
@@ -199,13 +209,13 @@ $(function(){
       var $tr = $(this).parent().parent();
 
       if (valida_agregar($tr)) {
-        $tr.find('td').effect("highlight", {'color': '#99FF99'}, 500);
+        $tr.find('td').not('.cporte').effect("highlight", {'color': '#99FF99'}, 500);
           $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
             addProducto(unidades);
           }, 'json');
       } else {
         $tr.find('#prod_ddescripcion').focus();
-        $tr.find('td').effect("highlight", {'color': '#da4f49'}, 500);
+        $tr.find('td').not('.cporte').effect("highlight", {'color': '#da4f49'}, 500);
         noty({"text": 'Verifique los datos del producto.', "layout":"topRight", "type": 'error'});
       }
     }
@@ -421,6 +431,19 @@ $(function(){
 
   $('.remision-selected').each(function(index, el) {
     $('#chk-cli-remision-' + $(this).val()).css('background-color', '#FF9A9D').find('.chk-cli-remisiones').prop('disabled', true).prop('checked', true);
+  });
+
+  $('#es-carta-porte').on('click', function(event) {
+    if ($(this).is(':checked')) {
+      $('#campos-pallets').css({display: 'none'});
+      $('#capos-carta-porte').css({display: ''});
+
+      $('.cporte').css({display: ''});
+    } else {
+      $('#campos-pallets').css({display: ''});
+      $('#capos-carta-porte').css({display: 'none'});
+      $('.cporte').css({display: 'none'});
+    }
   });
 });
 
@@ -677,6 +700,16 @@ function addProducto(unidades, prod) {
       cantidad = prod_cajas;
     }
 
+    var htmlCPorteClase = '', htmlCPortePeso = '';
+    if ($('#es-carta-porte').is(':checked')) {
+      htmlCPorteClase = '<td class="cporte">' +
+                          '<input type="text" name="prod_dclase[]" value="" id="prod_dclase" class="span12" style="width: 50px;">' +
+                        '</td>';
+      htmlCPortePeso =  '<td class="cporte">' +
+                          '<input type="text" name="prod_dpeso[]" value="" id="prod_dpeso" class="span12 vpositive" style="width: 80px;">' +
+                        '</td>';
+    }
+
     trHtml = '<tr data-pallets="'+pallet+'" data-remisiones="'+remision+'">' +
                 '<td>' +
                   '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -686,6 +719,8 @@ function addProducto(unidades, prod) {
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
                   '<input type="hidden" name="id_size_rendimiento[]" value="'+idSize+'" id="id_size_rendimiento" class="span12">' +
                 '</td>' +
+                (htmlCPorteClase !== '' ? $(htmlCPorteClase).find('#prod_dclase').addClass('jump'+(jumpIndex)).attr('data-next', 'jump'+(++jumpIndex)+'').parent().prop('outerHTML') : '')+
+                (htmlCPortePeso !== '' ? $(htmlCPortePeso).find('#prod_dpeso').addClass('jump'+(jumpIndex)).attr('data-next', 'jump'+(++jumpIndex)+'').parent().prop('outerHTML') : '') +
                 '<td>' +
                   '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                     unidadesHtml +
@@ -732,13 +767,14 @@ function addProducto(unidades, prod) {
                 '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
-
     $(trHtml).appendTo($tabla.find('tbody'));
 
     for (i = indexJump, max = jumpIndex; i <= max; i += 1)
       $.fn.keyJump.setElem($('.jump'+i));
 
     $('.jump'+indexJump).focus();
+
+    $(".vpositive").numeric({ negative: false });
   }
 }
 
@@ -1029,4 +1065,18 @@ function trunc2Dec(num, digits) {
 
 function round2Dec(val) {
   return Math.round(val * 100) / 100;
+}
+
+function loadDatosRemitente(data) {
+  var d = [];
+  if (data.calle) d.push(data.calle);
+  if (data.no_exterior) d.push('#' + data.no_exterior);
+  if (data.no_interior) d.push('Int. ' + data.no_interior);
+  if (data.colonia) d.push(data.colonia);
+  if (data.localidad) d.push(data.localidad);
+  if (data.estado) d.push(data.estado);
+  if (data.pais) d.push(data.pais);
+  if (data.cp) d.push(data.cp);
+
+  return d.join(' ');
 }

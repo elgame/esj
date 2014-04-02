@@ -173,11 +173,24 @@ class facturacion extends MY_Controller {
     {
       // Obtiene los datos de la empresa predeterminada.
       $params['empresa_default'] = $this->db
-        ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+        ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
+                  e.no_exterior, e.no_interior, e.rfc")
         ->from("empresas AS e")
         ->where("e.predeterminado", "t")
         ->get()
         ->row();
+
+      $dire = [];
+      if ($params['empresa_default']->calle) array_push($dire, $params['empresa_default']->calle);
+      if ($params['empresa_default']->no_exterior) array_push($dire, $params['empresa_default']->no_exterior);
+      if ($params['empresa_default']->no_interior) array_push($dire, $params['empresa_default']->no_interior);
+      if ($params['empresa_default']->colonia) array_push($dire, $params['empresa_default']->colonia);
+      if ($params['empresa_default']->localidad) array_push($dire, $params['empresa_default']->localidad);
+      if ($params['empresa_default']->municipio) array_push($dire, $params['empresa_default']->municipio);
+      if ($params['empresa_default']->estado) array_push($dire, $params['empresa_default']->estado);
+      if ($params['empresa_default']->pais) array_push($dire, $params['empresa_default']->pais);
+      if ($params['empresa_default']->cp) array_push($dire, $params['empresa_default']->cp);
+      $params['dire'] = implode(' ', $dire);
 
       // Obtiene el numero de certificado de la empresa predeterminada.
       $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);
@@ -596,6 +609,42 @@ class facturacion extends MY_Controller {
               'rules'   => $required),
         array('field'   => 'dobservaciones',
               'label'   => 'Observaciones',
+              'rules'   => ''),
+
+        array('field'   => 'remitente_nombre',
+              'label'   => 'Nombre Remitente',
+              'rules'   => 'max_length[130]'),
+        array('field'   => 'remitente_rfc',
+              'label'   => 'RFC Remitente',
+              'rules'   => 'max_length[13]'),
+        array('field'   => 'remitente_domicilio',
+              'label'   => 'Domicilio Remitente',
+              'rules'   => 'max_length[250]'),
+        array('field'   => 'remitente_chofer',
+              'label'   => 'Chofer Remitente',
+              'rules'   => 'max_length[50]'),
+        array('field'   => 'remitente_marca',
+              'label'   => 'Marca Remitente',
+              'rules'   => 'max_length[50]'),
+        array('field'   => 'remitente_modelo',
+              'label'   => 'Modelo Remitente',
+              'rules'   => 'max_length[50]'),
+        array('field'   => 'remitente_placas',
+              'label'   => 'Placas Remitente',
+              'rules'   => 'max_length[50]'),
+
+        array('field'   => 'destinatario_nombre',
+              'label'   => 'Nombre Destinatario',
+              'rules'   => 'max_length[130]'),
+        array('field'   => 'destinatario_rfc',
+              'label'   => 'RFC Destinatario',
+              'rules'   => 'max_length[13]'),
+        array('field'   => 'destinatario_domicilio',
+              'label'   => 'Domicilio Destinatario',
+              'rules'   => 'max_length[250]'),
+
+        array('field'   => 'es_carta_porte',
+              'label'   => 'Carta Porte',
               'rules'   => ''),
     );
 

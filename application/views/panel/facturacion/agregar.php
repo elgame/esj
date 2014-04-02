@@ -120,28 +120,65 @@
                 </div>
               </div>
 
-              <div class="control-group" style="margin-top: 145px;">
-                <label class="control-label">Folio Pallet</label>
+              <div class="control-group">
+                <label class="control-label" for="es_carta_porte">Carta Porte</label>
                 <div class="controls">
-                  <div class="input-append">
-                    <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
-                    <button type="button" class="btn btn-info" id="show-pallets">Ver Pallets</button>
+                  <input type="checkbox" name="es_carta_porte" id="es-carta-porte" value="1" <?php echo set_checkbox('es_carta_porte', '1', (isset($borrador) && isset($borrador['carta_porte'])) ? true : false); ?>>
+                </div>
+              </div>
+
+              <?php
+                $displayCPorte = 'display: none;';
+                $displayPallets = 'display: ;';
+                if (isset($_POST['es_carta_porte']) || (isset($borrador) && isset($borrador['carta_porte']))) {
+                  $displayCPorte = 'display:;';
+                  $displayPallets = 'display: none;';
+                }
+              ?>
+
+              <div id="campos-pallets" style="<?php echo $displayPallets ?>">
+                <div class="control-group" style="margin-top: 145px;">
+                  <label class="control-label">Folio Pallet</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                      <button type="button" class="btn btn-info" id="show-pallets">Ver Pallets</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Sin Costo</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Ventas de Remisión</label>
+                  <div class="controls">
+                    <div>
+                      <button type="button" class="btn btn-info" id="show-remisiones">Buscar</button>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="control-group">
-                <label class="control-label">Sin Costo</label>
-                <div class="controls">
-                  <div class="input-append">
-                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
+
+              <div id="capos-carta-porte" style="<?php echo $displayCPorte ?>">
+                <div class="control-group" style="margin-top: 145px;">
+                  <label class="control-label">Remitente</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <a href="#modal-remitente" role="button" class="btn btn-info" data-toggle="modal">Informacion Remitente</a>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label">Ventas de Remisión</label>
-                <div class="controls">
-                  <div>
-                    <button type="button" class="btn btn-info" id="show-remisiones">Buscar</button>
+                <div class="control-group">
+                  <label class="control-label">Destinatario</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <a href="#modal-destinatario" role="button" class="btn btn-info" data-toggle="modal">Informacion Destinatario</a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -265,6 +302,8 @@
                 <thead>
                   <tr>
                     <th>Descripción</th>
+                    <th class="cporte" style="<?php echo $displayCPorte; ?>">Clase</th>
+                    <th class="cporte" style="<?php echo $displayCPorte; ?>">Peso</th>
                     <th>Medida</th>
                     <th>Cant.</th>
                     <th>P Unitario</th>
@@ -296,6 +335,9 @@
                             $_POST['prod_dcajas'][$key]     = $p->cajas;
                             $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
                             $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
+
+                            $_POST['prod_dclase'][$key] = $p->clase;
+                            $_POST['prod_dpeso'][$key] = $p->peso;
                           }
                         } ?>
 
@@ -310,6 +352,12 @@
                                   <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
                                   <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
                                   <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
+                                </td>
+                                <td class="cporte" style="<?php echo $displayCPorte; ?>">
+                                  <input type="text" name="prod_dclase[]" value="<?php echo $_POST['prod_dclase'][$k] ?>" id="prod_dclase" class="span12" style="width: 50px;">
+                                </td>
+                                <td class="cporte" style="<?php echo $displayCPorte; ?>">
+                                  <input type="text" name="prod_dpeso[]" value="<?php echo $_POST['prod_dpeso'][$k] ?>" id="prod_dpeso" class="span12 vpositive" style="width: 80px;">
                                 </td>
                                 <td>
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
@@ -361,11 +409,17 @@
                         <?php }}} ?>
                         <tr data-pallets="" data-remisiones="">
                           <td>
-                            <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12">
+                            <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dclase|prod_dmedida">
                             <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                             <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
                             <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
                             <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
+                          </td>
+                          <td class="cporte" style="<?php echo $displayCPorte ?>">
+                            <input type="text" name="prod_dclase[]" value="" id="prod_dclase" class="span12 sikey" style="width: 50px;" data-next="prod_dpeso">
+                          </td>
+                          <td class="cporte" style="<?php echo $displayCPorte ?>">
+                            <input type="text" name="prod_dpeso[]" value="" id="prod_dpeso" class="span12 vpositive sikey" style="width: 80px;" data-next="prod_dmedida">
                           </td>
                           <td>
                             <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
@@ -492,6 +546,94 @@
               </table>
             </div>
           </div>
+
+
+          <!-- Modal Remitente-->
+          <div id="modal-remitente" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-remitente" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModalLabel">Informacion Remitente</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="remitente_nombre" style="width: auto;" style="width: auto;">Remitente</label>
+                <div class="controls" style="margin-left: 0" style="margin-left: 0">
+                  <input type="text" name="remitente_nombre" class="span12" id="remitente_nombre" value="<?php echo set_value('remitente_nombre', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->nombre : (isset($empresa_default->nombre_fiscal) ? $empresa_default->nombre_fiscal : '')); ?>" maxlenth="130">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_rfc" style="width: auto;">RFC</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_rfc" class="span12" id="remitente_rfc" value="<?php echo set_value('remitente_rfc', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->rfc : (isset($empresa_default->rfc) ? $empresa_default->rfc : '')); ?>" maxlenth="13">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_domicilio" style="width: auto;">Domicilio</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_domicilio" class="span12" id="remitente_domicilio" value="<?php echo set_value('remitente_domicilio', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->direccion : (isset($dire) ? $dire : '')); ?>" maxlenth="250">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_chofer" style="width: auto;">Chofer</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_chofer" class="span12" id="remitente_chofer" value="<?php echo set_value('remitente_chofer', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->chofer : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_marca" style="width: auto;">Marca</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_marca" class="span12" id="remitente_marca" value="<?php echo set_value('remitente_marca', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->marca : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_modelo" style="width: auto;">Modelo</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_modelo" class="span12" id="remitente_modelo" value="<?php echo set_value('remitente_modelo', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->modelo : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_placas" style="width: auto;">Placas</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_placas" class="span12" id="remitente_placas" value="<?php echo set_value('remitente_placas', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['remitente'][0]->placas : ''); ?>" maxlenth="30">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Destinatario-->
+          <div id="modal-destinatario" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModalLabel">Informacion Destinatario</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="destinatario_nombre" style="width: auto;">Remitente</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_nombre" class="span12" id="destinatario_nombre" value="<?php echo set_value('destinatario_nombre', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['destinatario'][0]->nombre : ''); ?>" maxlenth="130">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="destinatario_rfc" style="width: auto;">RFC</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_rfc" class="span12" id="destinatario_rfc" value="<?php echo set_value('destinatario_rfc', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['destinatario'][0]->rfc : ''); ?>" maxlenth="13">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="destinatario_domicilio" style="width: auto;">Domicilio</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_domicilio" class="span12" id="destinatario_domicilio" value="<?php echo set_value('destinatario_domicilio', (isset($borrador) && isset($borrador['carta_porte'])) ? $borrador['carta_porte']['destinatario'][0]->direccion : ''); ?>" maxlenth="250">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+          </div>
+
         </form>
 
       </div><!--/span-->
