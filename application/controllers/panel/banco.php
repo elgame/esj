@@ -80,6 +80,7 @@ class banco extends MY_Controller {
 	public function cuenta()
 	{
 		$this->carabiner->js(array(
+      array('general/supermodal.js'),
 			array('general/msgbox.js'),
 			array('general/util.js'),
 			array('panel/banco/cuentas_banco.js'),
@@ -262,7 +263,67 @@ class banco extends MY_Controller {
 		echo json_encode($response);
 	}
 
-	public function eliminar_movimiento(){
+	public function modificar_movimiento(){
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('general/keyjump.js'),
+      array('general/util.js'),
+      array('panel/banco/deposito_retiro.js'),
+      // array('panel/almacen/cuentas_pagar.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('cuentas_pagar_model');
+    $this->load->model('banco_cuentas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Modificar');
+
+    $params['template']   = '';
+    $params['closeModal'] = false;
+
+    if (isset($_GET['id_movimiento']{0}))
+    {
+      $this->configEditMov();
+      if($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $respons = $this->banco_cuentas_model->editMovimiento($_POST, $_GET);
+
+        $params['closeModal'] = true;
+        if ($respons['error']==false)
+        {
+          $params['frm_errors'] = $this->showMsgs(4);
+          // $params['id_movimiento'] = ($respons['ver_cheque'] ? $respons['id_movimiento'] : '');
+        }else
+          $params['frm_errors'] = $this->showMsgs($respons['msg']);
+      }
+
+      $movimiento = $this->banco_cuentas_model->getMovimientoInfo($_GET['id_movimiento'], false);
+      $params['mov'] = $movimiento['info'];
+      $params['empresa'] = $movimiento['empresa'];
+      $params['proveedor'] = $movimiento['proveedor'];
+      $params['cliente'] = $movimiento['cliente'];
+      $params['cuenta_cpi'] = $movimiento['cuenta_cpi'];
+      $cuenta = $this->banco_cuentas_model->getCuentaInfo($params['mov']->id_cuenta)['info'];
+      $params['bancos']       = $this->banco_cuentas_model->getBancos(false);
+      //Cuentas de banco
+      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $cuenta->id_empresa));
+    }else
+      $_GET['msg'] = 1;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/banco/movimientos/modificar_mov',$params);
+  }
+
+  public function eliminar_movimiento(){
 		if (isset($_GET['id_movimiento']{0}))
 		{
 			$this->load->model('banco_cuentas_model');
@@ -542,6 +603,45 @@ class banco extends MY_Controller {
 
 		$this->form_validation->set_rules($rules);
 	}
+
+  /**
+   * Configura los metodos de agregar y modificar
+   */
+  private function configEditMov()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+
+        array('field'   => 'dfecha',
+              'label'   => 'Fecha',
+              'rules'   => 'required'),
+        array('field'   => 'fbanco',
+              'label'   => 'Banco',
+              'rules'   => 'required|numeric'),
+        array('field'   => 'fcuenta',
+              'label'   => 'Cuenta Bancaria',
+              'rules'   => 'required|numeric'),
+    );
+    if (isset($_GET['did_empresa']))
+    {
+      $rules[] = array('field'   => 'did_empresa',
+              'label'   => 'Empresa',
+              'rules'   => 'numeric');
+      $rules[] = array('field'   => 'dproveedor',
+            'label'   => 'Proveedor',
+            'rules'   => '');
+      $rules[] = array('field'   => 'did_proveedor',
+            'label'   => 'Proveedor',
+            'rules'   => 'numeric');
+      $rules[] = array('field'   => 'dcuenta_cpi',
+            'label'   => 'Cuenta contpaq',
+            'rules'   => '');
+      $rules[] = array('field'   => 'did_cuentacpi',
+            'label'   => 'Cuenta contpaq',
+            'rules'   => '');
+    }
+    $this->form_validation->set_rules($rules);
+  }
 
   public function mover_movimiento()
   {

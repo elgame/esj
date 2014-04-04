@@ -261,13 +261,13 @@ class polizas_model extends CI_Model {
   }
   public function getCuentaNInfonavit($basic=true){
     $sql = '';
-    if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%INFONAVIT%'"; //sanjorge
+    if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%INFONAVIT%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%INFONAVIT%'"; //tests carga las de sanjorge
+      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     return $basic? $data->cuenta: $data;

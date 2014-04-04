@@ -667,7 +667,7 @@ class banco_cuentas_model extends banco_model {
 	/**
 	 * Obtiene la informacion de una operacion
 	 */
-	public function getMovimientoInfo($id, $info_basic=false)
+	public function getMovimientoInfo($id, $info_basic=true)
 	{
 		$res = $this->db
 			->select('*')
@@ -680,10 +680,60 @@ class banco_cuentas_model extends banco_model {
 			if($info_basic)
 				return $response;
 
+      $response['bascula'] = $this->db->query("SELECT * FROM banco_movimientos_bascula WHERE id_movimiento = {$response['info']->id_movimiento}")->result();
+      $response['compras'] = $this->db->query("SELECT * FROM banco_movimientos_compras WHERE id_movimiento = {$response['info']->id_movimiento}")->result();
+      $response['facturas'] = $this->db->query("SELECT * FROM banco_movimientos_facturas WHERE id_movimiento = {$response['info']->id_movimiento}")->result();
+      $response['info']->es_ligado = count($response['bascula'])+count($response['compras'])+count($response['facturas']);
+
+      $cuenta = $this->banco_cuentas_model->getCuentaInfo($response['info']->id_cuenta)['info'];
+
+      $this->load->model('empresas_model');
+      $response['empresa'] = $this->empresas_model->getInfoEmpresa($cuenta->id_empresa, true);
+      $this->load->model('proveedores_model');
+      $response['proveedor'] = $this->proveedores_model->getProveedorInfo($response['info']->id_proveedor, true);
+      $this->load->model('clientes_model');
+      $response['cliente'] = $this->clientes_model->getClienteInfo($response['info']->id_cliente, true);
+      $this->load->model('cuentas_cpi_model');
+      $response['cuenta_cpi'] = $this->cuentas_cpi_model->getCuentaInfo(array('cuenta' => $response['info']->cuenta_cpi), true);
+
 			return $response;
 		}else
 			return false;
 	}
+
+  public function editMovimiento($datosP, $datosG)
+  {
+    $data = array(
+            'id_cuenta'   => $datosP['fcuenta'],
+            'id_banco'    => $datosP['fbanco'],
+            'fecha'       => $datosP['dfecha'],
+            );
+    if (isset($datosP['did_proveedor']) && $datosP['did_proveedor'] != '')
+    {
+      $data['a_nombre_de'] = $datosP['dproveedor'];
+      $data['id_proveedor'] = $datosP['did_proveedor'];
+    }
+    if (isset($datosP['did_cuentacpi']) && $datosP['did_cuentacpi'] != '')
+      $data['cuenta_cpi'] = $datosP['did_cuentacpi'];
+    if (isset($datosP['did_cliente']) && $datosP['did_cliente'] != '')
+    {
+      $data['a_nombre_de'] = $datosP['dcliente'];
+      $data['id_cliente'] = $datosP['did_cliente'];
+    }
+    $this->db->update('banco_movimientos', $data, "id_movimiento = {$datosG['id_movimiento']}");
+
+    if ($datosP['es_ligado'] > 0)
+    {
+      $movimiento = $this->getMovimientoInfo($datosG['id_movimiento'], false);
+      foreach ($movimiento['bascula'] as $key => $value)
+        $this->db->update('bascula_pagos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_pago = {$value->id_bascula_pago}");
+      foreach ($movimiento['compras'] as $key => $value)
+        $this->db->update('compras_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_abono = {$value->id_compra_abono}");
+      foreach ($movimiento['facturas'] as $key => $value)
+        $this->db->update('facturacion_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_abono = {$value->id_abono_factura}");
+    }
+
+  }
 
 	public function deleteMovimiento($id_movimiento, $cancelar=false)
 	{

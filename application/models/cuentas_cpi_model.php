@@ -44,6 +44,26 @@ class cuentas_cpi_model extends CI_Model {
 		return $response;
 	}
 
+  public function getCuentaInfo($datos=array(), $info_basic=true)
+  {
+    $sql = isset($datos['id_cuenta'])? " AND bm.id_cuenta = '{$datos['id_cuenta']}'": '';
+    $sql .= isset($datos['cuenta'])? " AND bm.cuenta = '{$datos['cuenta']}'": '';
+    $res = $this->db
+      ->select('*')
+      ->from('cuentas_contpaq AS bm')
+      ->where('id_cuenta > 0 '.$sql)
+    ->get();
+    if($res->num_rows() > 0){
+      $response['info'] = $res->row();
+      $res->free_result();
+      if($info_basic)
+        return $response;
+
+      return $response;
+    }else
+      return false;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

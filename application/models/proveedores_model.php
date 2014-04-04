@@ -229,7 +229,7 @@ class proveedores_model extends CI_Model {
 	 */
 	public function getProveedorInfo($id_proveedor=FALSE, $basic_info=FALSE)
 	{
-		$id_proveedor = $id_proveedor ? $id_proveedor : $_GET['id'] ;
+		$id_proveedor = $id_proveedor ? $id_proveedor : (isset($_GET['id'])? $_GET['id']: 0) ;
 
 		$sql_res = $this->db->select("id_proveedor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
 							estado, cp, telefono, celular, email, cuenta_cpi, tipo_proveedor, rfc, curp, status,
@@ -267,7 +267,7 @@ class proveedores_model extends CI_Model {
 			$sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
 
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, 
+				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono,
 					condicion_pago, dias_credito
 				FROM proveedores
 				WHERE status = 'ac' ".$sql."
@@ -332,7 +332,7 @@ class proveedores_model extends CI_Model {
 								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'),
 								'alias'      => $_POST['cuentas_alias'][$key],
 								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]),
-								'cuenta'     => $_POST['cuentas_cuenta'][$key], 
+								'cuenta'     => $_POST['cuentas_cuenta'][$key],
 								'id_banco'   => $_POST['fbanco'][$key],
 							);
 				if (is_numeric($_POST['cuentas_id'][$key]))  //update
@@ -356,9 +356,9 @@ class proveedores_model extends CI_Model {
 	public function getCuentas($id_proveedor, $id_cuenta=null){
 		$sql = ($id_cuenta==null? '': ' AND pc.id_cuenta = '.$id_cuenta);
 		$res = $this->db->query("
-				SELECT pc.id_cuenta, pc.id_proveedor, pc.is_banamex, pc.alias, pc.sucursal, pc.cuenta, pc.status, 
+				SELECT pc.id_cuenta, pc.id_proveedor, pc.is_banamex, pc.alias, pc.sucursal, pc.cuenta, pc.status,
 					(pc.alias || ' *' || substring(pc.cuenta from '....$')) AS full_alias, bb.id_banco, bb.nombre AS banco, bb.codigo
-				FROM proveedores_cuentas AS pc 
+				FROM proveedores_cuentas AS pc
 					LEFT JOIN banco_bancos AS bb ON pc.id_banco = bb.id_banco
 				WHERE pc.status = 't' AND pc.id_proveedor = {$id_proveedor} {$sql}
 				ORDER BY full_alias ASC");
