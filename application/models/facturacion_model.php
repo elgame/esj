@@ -419,7 +419,7 @@ class facturacion_model extends privilegios_model{
             $productosCadOri[] = array(
               'cantidad'         => $_POST['prod_dcantidad'][$key],
               'unidad'           => $_POST['prod_dmedida'][$key],
-              'descripcion'      => $descripcion . ((isset($_POST['prod_dclase'][$key]) && $_POST['prod_dclase'][$key] !== '') ? ' Clase '.$_POST['prod_dclase'][$key] : '') . ((isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key].' '.$_POST['prod_dmedida'][$key] : ''),
+              'descripcion'      => $descripcion . ((isset($_POST['prod_dclase'][$key]) && $_POST['prod_dclase'][$key] !== '') ? ' Clase '.$_POST['prod_dclase'][$key] : '') . ((isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '0' && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key] : ''),
               'valorUnitario'    => $_POST['prod_dpreciou'][$key],
               'importe'          => $_POST['prod_importe'][$key],
               'idClasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -2383,41 +2383,6 @@ class facturacion_model extends privilegios_model{
 
         $end_y = $pdf->GetY();
 
-        // Remitente
-        if (isset($factura['carta_porte']))
-        {
-          $pdf->SetFillColor(242, 242, 242);
-          $pdf->SetTextColor(0, 171, 72);
-          $pdf->SetXY(0, $pdf->GetY() + 4);
-          $pdf->Cell(108, 4, "Remitente:", 0, 0, 'L', 1);
-
-          $pdf->SetFont('helvetica','', 8);
-          $pdf->SetTextColor(0, 0, 0);
-          $pdf->SetXY(0, $pdf->GetY() + 4);
-
-          $pdf->SetX(0);
-          $pdf->SetAligns(array('L', 'L'));
-          $pdf->SetWidths(array(19, 93));
-          $pdf->Row(array('RFC:', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
-          $pdf->SetWidths(array(19, 196));
-          $pdf->SetX(0);
-          $pdf->Row(array('NOMBRE:', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
-          $pdf->SetX(0);
-          $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
-
-          // $pdf->SetAligns(array('L', 'L', 'L', 'L'));
-          $pdf->SetWidths(array(80, 50, 35, 45));
-          $pdf->SetX(0);
-          $pdf->Row(array(
-            'OPERADOR: ' . $factura['carta_porte']['remitente'][0]->chofer,
-            'MARCA: ' . $factura['carta_porte']['remitente'][0]->marca,
-            'MODELO:' . $factura['carta_porte']['remitente'][0]->modelo,
-            'PLACAS:' . $factura['carta_porte']['remitente'][0]->placas
-          ), false, false, null, 2, 1);
-
-          $end_y = $pdf->GetY();
-        }
-
         //////////
         // Logo //
         //////////
@@ -2512,14 +2477,15 @@ class facturacion_model extends privilegios_model{
                 'CP:', (isset($xml->Receptor->Domicilio[0]['codigoPostal']) ? $xml->Receptor->Domicilio[0]['codigoPostal'] : '') ), false, false, null, 2, 1);
 
 
-        // Destinatario
+
         if (isset($factura['carta_porte']))
         {
-          $pdf->SetFont('helvetica','B', 9);
+          // Remitente
           $pdf->SetFillColor(242, 242, 242);
-          $pdf->SetTextColor(0, 0, 0);
-          $pdf->SetXY(0, $pdf->GetY() + 1);
-          $pdf->Cell(216, 4, "Destinatario:", 0, 0, 'L', 1);
+          $pdf->SetTextColor(0, 171, 72);
+          $pdf->SetXY(0, $pdf->GetY() + 4);
+          $y_aux = $pdf->GetY();
+          $pdf->Cell(108, 4, "Remitente:", 0, 0, 'L', 1);
 
           $pdf->SetFont('helvetica','', 8);
           $pdf->SetTextColor(0, 0, 0);
@@ -2528,11 +2494,44 @@ class facturacion_model extends privilegios_model{
           $pdf->SetX(0);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(19, 93));
-          $pdf->Row(array('RFC:', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
+          $pdf->Row(array('RFC:', $factura['carta_porte']['remitente'][0]->rfc), false, false, null, 2, 1);
           $pdf->SetWidths(array(19, 196));
           $pdf->SetX(0);
-          $pdf->Row(array('NOMBRE:', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
+          $pdf->Row(array('NOMBRE:', $factura['carta_porte']['remitente'][0]->nombre), false, false, null, 2, 1);
           $pdf->SetX(0);
+          $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['remitente'][0]->direccion ), false, false, null, 2, 1);
+
+          // $pdf->SetAligns(array('L', 'L', 'L', 'L'));
+          $pdf->SetWidths(array(80, 50, 35, 45));
+          $pdf->SetX(0);
+          $pdf->Row(array(
+            'OPERADOR: ' . $factura['carta_porte']['remitente'][0]->chofer,
+            'MARCA: ' . $factura['carta_porte']['remitente'][0]->marca,
+            'MODELO:' . $factura['carta_porte']['remitente'][0]->modelo,
+            'PLACAS:' . $factura['carta_porte']['remitente'][0]->placas
+          ), false, false, null, 2, 1);
+
+          $end_y = $pdf->GetY();
+
+          // Destinatario
+          $pdf->SetFont('helvetica','B', 9);
+          $pdf->SetFillColor(242, 242, 242);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetXY(110, $y_aux);
+          $pdf->Cell(216, 4, "Destinatario:", 0, 0, 'L', 1);
+
+          $pdf->SetFont('helvetica','', 8);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetXY(110, $pdf->GetY() + 4);
+
+          $pdf->SetX(110);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(19, 93));
+          $pdf->Row(array('RFC:', $factura['carta_porte']['destinatario'][0]->rfc), false, false, null, 2, 1);
+          $pdf->SetWidths(array(19, 196));
+          $pdf->SetX(110);
+          $pdf->Row(array('NOMBRE:', $factura['carta_porte']['destinatario'][0]->nombre), false, false, null, 2, 1);
+          $pdf->SetX(110);
           $pdf->Row(array('DOMICILIO:', $factura['carta_porte']['destinatario'][0]->direccion ), false, false, null, 2, 1);
         }
 

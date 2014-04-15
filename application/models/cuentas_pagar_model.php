@@ -127,52 +127,60 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Descarga el listado de cuentas por pagar en formato pdf
 	 */
 	public function cuentasPagarPdf(){
-		$this->load->library('mypdf');
-		// Creación del objeto de la clase heredada
-		$pdf = new MYpdf('P', 'mm', 'Letter');
-		$pdf->titulo2 = 'Cuentas por pagar';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
-		$pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': $this->input->get('ftipo') == 'pp'? 'Pendientes por pagar': 'Todas');
-		$pdf->AliasNbPages();
-		//$pdf->AddPage();
-		$pdf->SetFont('Arial','',8);
+		$res = $this->getCuentasPagarData(1000);
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
-		$aligns = array('L', 'R', 'R', 'R');
-		$widths = array(100, 35, 35, 35);
-		$header = array('Cliente', 'Cargos', 'Abonos', 'Saldo');
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Cuentas por pagar';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': $this->input->get('ftipo') == 'pp'? 'Pendientes por pagar': 'Todas');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
 
-		$res = $this->getCuentasPagarData(60);
+    $aligns = array('L', 'R', 'R', 'R');
+    $widths = array(100, 35, 35, 35);
+    $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo');
+
 
 		$total_cargos = $total_abonos = $total_saldo = 0;
 		foreach($res['cuentas'] as $key => $item){
-			$band_head = false;
-			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-				$pdf->AddPage();
+      if ($item->saldo > 0)
+      {
+  			$band_head = false;
+  			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+  				$pdf->AddPage();
 
-				$pdf->SetFont('Arial','B',8);
-				$pdf->SetTextColor(255,255,255);
-				$pdf->SetFillColor(160,160,160);
-				$pdf->SetX(6);
-				$pdf->SetAligns($aligns);
-				$pdf->SetWidths($widths);
-				$pdf->Row($header, true);
-			}
+  				$pdf->SetFont('Arial','B',8);
+  				$pdf->SetTextColor(255,255,255);
+  				$pdf->SetFillColor(160,160,160);
+  				$pdf->SetX(6);
+  				$pdf->SetAligns($aligns);
+  				$pdf->SetWidths($widths);
+  				$pdf->Row($header, true);
+  			}
 
-			$pdf->SetFont('Arial','',8);
-			$pdf->SetTextColor(0,0,0);
-			$datos = array($item->nombre,
-				String::formatoNumero($item->total, 2, '$', false),
-				String::formatoNumero($item->abonos, 2, '$', false),
-				String::formatoNumero($item->saldo, 2, '$', false),
-				);
-			$total_cargos += $item->total;
-			$total_abonos += $item->abonos;
-			$total_saldo += $item->saldo;
+  			$pdf->SetFont('Arial','',8);
+  			$pdf->SetTextColor(0,0,0);
+  			$datos = array($item->nombre,
+  				String::formatoNumero($item->total, 2, '$', false),
+  				String::formatoNumero($item->abonos, 2, '$', false),
+  				String::formatoNumero($item->saldo, 2, '$', false),
+  				);
+  			$total_cargos += $item->total;
+  			$total_abonos += $item->abonos;
+  			$total_saldo += $item->saldo;
 
-			$pdf->SetX(6);
-			$pdf->SetAligns($aligns);
-			$pdf->SetWidths($widths);
-			$pdf->Row($datos, false);
+  			$pdf->SetX(6);
+  			$pdf->SetAligns($aligns);
+  			$pdf->SetWidths($widths);
+  			$pdf->Row($datos, false);
+      }
 		}
 
 		$pdf->SetX(6);
@@ -188,13 +196,16 @@ class cuentas_pagar_model extends privilegios_model{
 	}
 
 	public function cuentasPagarExcel(){
-		$res = $this->getCuentasPagarData(60);
+		$res = $this->getCuentasPagarData(1000);
 
 		$this->load->library('myexcel');
 		$xls = new myexcel();
 
 		$worksheet =& $xls->workbook->addWorksheet();
 
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $xls->titulo1 = $empresa['info']->nombre_fiscal;
 		$xls->titulo2 = 'Cuentas por pagar';
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': $this->input->get('ftipo') == 'pp'? 'Pendientes por pagar': 'Todas');
@@ -208,6 +219,12 @@ class cuentas_pagar_model extends privilegios_model{
 				array($xls->titulo3, 'format_title3'),
 				array($xls->titulo4, 'format_title3')
 		));
+
+    foreach ($data_fac as $key => $value)
+    {
+      if ($value->saldo == 0)
+        unset($data_fac[$key]);
+    }
 
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $data_fac, array(
@@ -422,14 +439,20 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Descarga el listado de cuentas por pagar en formato pdf
 	 */
 	public function cuentaProveedorPdf(){
-		$res = $this->getCuentaProveedorData();
-
-		if (count($res['anterior']) > 0)
-			$res['anterior'] = $res['anterior'][0];
-
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $res = $this->getCuentaProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $pdf->logo = $empresa['info']->logo!=''? (file_exists($empresa['info']->logo)? $empresa['info']->logo: '') : '';
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    if (count($res['anterior']) > 0)
+      $res['anterior'] = $res['anterior'][0];
+
 		$pdf->titulo2 = 'Cuenta de '.$res['proveedor']->nombre_fiscal;
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
@@ -530,6 +553,10 @@ class cuentas_pagar_model extends privilegios_model{
 			$xls = new myexcel();
 
 		$worksheet =& $xls->workbook->addWorksheet();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $xls->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$xls->titulo2 = 'Cuenta de '.$res['proveedor']->nombre_fiscal;
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";

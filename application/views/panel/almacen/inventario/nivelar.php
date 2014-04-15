@@ -33,7 +33,7 @@
     <div id="content" class="row-fluid">
       <!-- content starts -->
 
-      <form action="<?php echo base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('fstatus', 'fid_empresa', 'fempresa'))); ?>" method="post">
+      <form action="<?php echo base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('fstatus'))); ?>" method="post">
         <input type="submit" class="btn btn-primary pull-right" name="guardar" value="Nivelar">
 
         <table class="table table-striped table-bordered bootstrap-datatable">

@@ -436,19 +436,30 @@ class banco_cuentas_model extends banco_model {
 	{
 		$res = $this->getSaldoCuentaData();
 
+    $this->load->model('empresas_model');
+    $defempresa = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = isset($_GET['did_empresa'])? $_GET['did_empresa']: $defempresa->id_empresa;
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
-		$pdf->titulo2 = 'Conciliacion Bancaria <'.$res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias.'>';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+		$pdf->titulo2 = $res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias;
+		$pdf->titulo3 = 'CONCILIACION BANCARIA AL '.String::fechaATexto($this->input->get('ffecha2'), '/c')."\n";
+    if(file_exists($empresa['info']->logo))
+      $pdf->logo = $empresa['info']->logo;
+    else
+      $pdf->logo = '';
 
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
 		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'C');
-		$widths = array(17, 15, 50, 50, 20, 20, 20, 15);
-		$header = array('Fecha', 'Ref', 'Cliente / Proveedor', 'Concepto', 'M. pago', 'Retiro', 'Deposito', 'Estado');
+		$widths = array(17, 25, 55, 50, 20, 25, 20, 15);
+		// $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. pago', 'Retiro', 'Deposito', 'Estado');
+    $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. PAGO', 'IMPORTE');
 
 		$total_retiro   = 0;
 		$total_deposito = 0;
@@ -460,9 +471,14 @@ class banco_cuentas_model extends banco_model {
 				if($pdf->PageNo() == 1){
 					$pdf->SetFont('Arial','B',10);
 					$pdf->SetX(6);
-					$pdf->MultiCell(160, 8, "SALDO SEGUN ESTADO DE CUENTA: ".String::formatoNumero($_GET['saldob'], 2, '$', false), '', "L", false);
+          $pdf->SetAligns(array('L', 'R'));
+          $pdf->SetWidths(array(142, 50));
+          $pdf->Row(array('SALDO DEL BANCO: ',
+                String::formatoNumero($_GET['saldob'], 2, '$', false),
+              ), false, false);
 					$pdf->SetX(6);
-					$pdf->MultiCell(160, 8, "SALDO SEGUN CONTABILIDAD: ".$res['total_saldos'], '', "L", false);
+					// $pdf->MultiCell(160, 8, "SALDO SEGUN CONTABILIDAD: ".$res['total_saldos'], '', "L", false);
+          $pdf->MultiCell(160, 8, "MENOS: ", '', "L", false);
 				}
 
 				$pdf->SetFont('Arial','B',8);
@@ -485,8 +501,8 @@ class banco_cuentas_model extends banco_model {
 								strip_tags($item->concepto),
 								$item->metodo_pago,
 								String::formatoNumero($item->retiro, 2, '$', false),
-								String::formatoNumero($item->deposito, 2, '$', false),
-								str_replace('|', ' ', $item->entransito),
+								// String::formatoNumero($item->deposito, 2, '$', false),
+								// str_replace('|', ' ', $item->entransito),
 								);
 
 				$pdf->SetX(6);
@@ -503,23 +519,25 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R'));
-		$pdf->SetWidths(array(152, 20, 20));
-		$pdf->Row(array('Totales:',
+		$pdf->SetWidths(array(167, 25, 20));
+		$pdf->Row(array('SUMA DE CHEQUES EN TRANSITO:',
 					String::formatoNumero($total_retiro, 2, '$', false),
-					String::formatoNumero($total_deposito, 2, '$', false),
+					// String::formatoNumero($total_deposito, 2, '$', false),
 				), false);
 
 
-		$conciliado = $res['total_saldos']+$total_retiro-$total_deposito;
+		// $conciliado = $res['total_saldos']+$total_retiro-$total_deposito;
+    $conciliado = $_GET['saldob']-$total_retiro;
 		$pdf->SetFont('Arial','B',10);
 		$pdf->SetAligns(array('L', 'R'));
-		$pdf->SetWidths(array(50, 30));
-		$pdf->Row(array('SALDO  CONCILIADO:',
+		$pdf->SetWidths(array(142, 50));
+    $pdf->SetX(6);
+		$pdf->Row(array('SALDO EN LIBROS AL '.String::fechaATexto($this->input->get('ffecha2'), '/c').':',
 					String::formatoNumero($conciliado, 2, '$', false),
 				), false, false);
-		$pdf->Row(array('DIFERENCIA:',
-					String::formatoNumero($_GET['saldob']-$conciliado, 2, '$', false),
-				), false, false);
+		// $pdf->Row(array('DIFERENCIA:',
+		// 			String::formatoNumero($_GET['saldob']-$conciliado, 2, '$', false),
+		// 		), false, false);
 
 		$pdf->Output('saldo_cuenta.pdf', 'I');
 	}

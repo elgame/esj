@@ -770,7 +770,7 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener el empleado.
     $query = $this->db->query(
       "SELECT u.id,
-              id_empresa,
+              u.id_empresa,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.curp,
               DATE(u.fecha_entrada) as fecha_entrada,
@@ -3518,7 +3518,8 @@ class nomina_fiscal_model extends CI_Model {
       $ver_trans += $_POST['ttotal_nomina'][$key];
     }
 
-    $columnas = array('n' => array(), 'w' => array(64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(6, 64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'SUELDO';
     $columnas['n'][] = 'OTRAS';
@@ -3569,7 +3570,7 @@ class nomina_fiscal_model extends CI_Model {
     // echo "<pre>";
     //   var_dump($infonavit, $trans);
     // echo "</pre>";exit;
-
+    $numero_empleado = 0;
     foreach ($departamentos as $keyd => $departamento)
     {
       if($pdf->GetY() >= $pdf->limiteY){
@@ -3594,6 +3595,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
+          $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
 
           $pdf->SetFont('Helvetica','', 8);
@@ -3617,6 +3619,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
 
           $dataarr = array();
+          $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
           $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
@@ -3673,6 +3676,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetXY(6, $pdf->GetY());
       $datatto = array();
+      $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
       $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
@@ -3742,6 +3746,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
 
           $dataarr = array();
+          $dataarr[] = '';
           $dataarr[] = $keyotss;
           $dataarr[] = String::formatoNumero('0', 2, '$', false);
           $dataarr[] = String::formatoNumero($dottoss, 2, '$', false);
@@ -3774,6 +3779,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetXY(6, $pdf->GetY());
       $datatto = array();
+      $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
       $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
@@ -3798,6 +3804,7 @@ class nomina_fiscal_model extends CI_Model {
     if($pdf->GetY() >= $pdf->limiteY)
       $pdf->AddPage();
     $datatto = array();
+    $datatto[] = '';
     $datatto[] = 'TOTAL';
     $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '$', false);
     $datatto[] = String::formatoNumero($otras_percepciones, 2, '$', false);
@@ -3842,16 +3849,18 @@ class nomina_fiscal_model extends CI_Model {
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
       $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(65, 13, 13, 13, 13, 13, 13, 13, 13, 13, 18, 18, 18, 30));
-      $pdf->Row(array('', '', '', '', '', '', '', '', '', '', '$'.$empleados_rancho[0]->precio_lam, '$'.$empleados_rancho[0]->precio_lvr, '', ''), false, false, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(5, 65, 13, 13, 13, 13, 13, 13, 13, 13, 13, 18, 18, 18, 30));
+      $pdf->Row(array('', '', '', '', '', '', '', '', '', '', '', '$'.$empleados_rancho[0]->precio_lam, '$'.$empleados_rancho[0]->precio_lvr, '', ''), false, false, null, 2, 1);
       $pdf->SetX(6);
-      $pdf->Row(array('Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
+      $pdf->Row(array('', 'Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total'), false, false, null, 2, 1);
       $pdf->SetFont('Helvetica','', 8);
       foreach ($empleados_rancho as $key => $value)
       {
+        $numero_empleado++;
         $pdf->SetX(6);
         $pdf->Row(array(
+          $numero_empleado,
           $value->nombre,
           String::formatoNumero($value->cajas_cargadas, 2, ''),
           String::formatoNumero($value->total_lam, 2, ''),
@@ -3884,6 +3893,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','B', 8);
       $pdf->SetX(6);
       $pdf->Row(array(
+        '',
         'TOTAL',
         String::formatoNumero($totales_rancho[12], 2, ''),
         String::formatoNumero($totales_rancho[0], 2, ''),
@@ -3948,7 +3958,8 @@ class nomina_fiscal_model extends CI_Model {
       $ver_trans += $_POST['ttotal_nomina'][$key];
     }
 
-    $columnas = array('n' => array(), 'w' => array(64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(5, 64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'SUELDO';
     $columnas['n'][] = 'OTRAS';
@@ -3989,7 +4000,7 @@ class nomina_fiscal_model extends CI_Model {
     $_GET['did_empresa'] = $empresaId;
     $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
 
-
+    $numero_empleado = 0;
     $html .= $this->rowXls($columnas['n']);
     $html .= $this->rowXls(array(''));
     foreach ($departamentos as $keyd => $departamento)
@@ -4003,6 +4014,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
+          $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
           $total_pagar = $_POST['sueldo_semanal_real'][$key] +
             ($_POST['bonos'][$key]+$_POST['otros'][$key]) +
@@ -4013,6 +4025,7 @@ class nomina_fiscal_model extends CI_Model {
             $_POST['descuento_otros'][$key];
 
           $dataarr = array();
+          $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
           $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
@@ -4064,6 +4077,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       $datatto = array();
+      $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
       $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
@@ -4121,6 +4135,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_pagar = $dottoss;
 
           $dataarr = array();
+          $dataarr[] = '';
           $dataarr[] = $keyotss;
           $dataarr[] = String::formatoNumero('0', 2, '', false);
           $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
@@ -4150,6 +4165,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       $datatto = array();
+      $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
       $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
@@ -4172,6 +4188,7 @@ class nomina_fiscal_model extends CI_Model {
     }
 
     $datatto = array();
+    $datatto[] = '';
     $datatto[] = 'TOTAL';
     $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '', false);
     $datatto[] = String::formatoNumero($otras_percepciones, 2, '', false);
@@ -4207,12 +4224,14 @@ class nomina_fiscal_model extends CI_Model {
     {
       $html .= $this->rowXls(array('Corte de limon'), 'style="font-weight:bold;font-size:14px;"');
       $totales_rancho = array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-      $html .= $this->rowXls( array('', '', '', '', '', '', '', '', '', '', ''.$empleados_rancho[0]->precio_lam, ''.$empleados_rancho[0]->precio_lvr, '', '') );
-      $html .= $this->rowXls( array('Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total') );
+      $html .= $this->rowXls( array('', '', '', '', '', '', '', '', '', '', '', ''.$empleados_rancho[0]->precio_lam, ''.$empleados_rancho[0]->precio_lvr, '', '') );
+      $html .= $this->rowXls( array('', 'Nombre', 'CC', 'AM', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Total AM', 'Total V', 'Prestamo', 'Total') );
 
       foreach ($empleados_rancho as $key => $value)
       {
+        $numero_empleado++;
         $html .= $this->rowXls( array(
+          $numero_empleado,
           $value->nombre,
           String::formatoNumero($value->cajas_cargadas, 2, ''),
           String::formatoNumero($value->total_lam, 2, ''),
@@ -4245,6 +4264,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       $html .= $this->rowXls( array(
+        '',
         'TOTAL',
         String::formatoNumero($totales_rancho[12], 2, ''),
         String::formatoNumero($totales_rancho[0], 2, ''),
@@ -5127,7 +5147,7 @@ class nomina_fiscal_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
 
-      if ($empresa['info']->logo !== '')
+      // if ($empresa['info']->logo !== '')
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
@@ -5210,7 +5230,7 @@ class nomina_fiscal_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
 
-      if ($empresa['info']->logo !== '')
+      // if ($empresa['info']->logo !== '')
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
@@ -5357,7 +5377,7 @@ class nomina_fiscal_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
 
-      if ($empresa['info']->logo !== '')
+      // if ($empresa['info']->logo !== '')
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;

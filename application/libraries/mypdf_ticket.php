@@ -79,11 +79,11 @@ class mypdf_ticket extends FPDF {
         $this->SetY($this->GetY()-1);
 
         // $this->SetFont($this->fount_txt, '', $this->font_size-1);
-        $this->SetWidths(array(9, 14, 10, 10, 8, 15));
+        $this->SetWidths(array(9, 12, 12, 10, 8, 15));
         $this->SetAligns(array('L','L','R','R','R','L'));
         $this->SetFounts(array($this->fount_txt),
                          array(-1,-1,-1,-1,-1,-1));
-        $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', '$', 'IMPORTE'), false, false, 5);
+        $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', '$', 'IMPORTE'), false, true, 5);
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
         $this->CheckPageBreak(4);
@@ -102,7 +102,7 @@ class mypdf_ticket extends FPDF {
                                String::formatoNumero($prod->kilos, 2, ''),
                                $prod->promedio,
                                String::formatoNumero($prod->precio, 2, ''),
-                               String::formatoNumero($prod->importe, 2, '')), false, false);
+                               String::formatoNumero($prod->importe, 2, '', false)), false, false);
             }
         }
 
@@ -116,7 +116,7 @@ class mypdf_ticket extends FPDF {
         $this->SetAligns(array('R', 'R'));
         $this->SetFounts(array($this->fount_txt, $this->fount_num),
                          array(0, 1));
-        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe, 2, '')), false, false, 3);
+        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe, 2, '', false)), false, false, 3);
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
         $this->SetY($this->GetY() + 3);
