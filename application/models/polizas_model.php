@@ -1193,7 +1193,7 @@ class polizas_model extends CI_Model {
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, Sum(f.importe_iva) AS importe_ivat, Sum(f.retencion_iva) AS retencion_ivat,
             string_agg(f.id_factura::text || '-' || fa.id_abono::text, ',') AS idfacturas,
-            'facturas'::character varying AS tipoo
+            'facturas'::character varying AS tipoo, 0::bigint AS es_traspaso
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -1213,7 +1213,8 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_cliente, Date(bm.fecha) AS fecha,
             0 AS importe_ivat, 0 AS retencion_ivat, '' AS idfacturas,
-            'banco'::character varying AS tipoo
+            'banco'::character varying AS tipoo,
+            (SELECT Count(id_movimiento) FROM banco_movimientos WHERE id_traspaso = bm.id_movimiento) AS es_traspaso
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
@@ -1226,6 +1227,7 @@ class polizas_model extends CI_Model {
           ORDER BY bm.fecha ASC
         )
       ) AS t
+      WHERE es_traspaso = 0
       ORDER BY fecha ASC");
 
     if($query->num_rows() > 0)
