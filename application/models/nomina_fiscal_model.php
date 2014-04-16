@@ -929,32 +929,36 @@ class nomina_fiscal_model extends CI_Model {
       $aguinaldo = $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteGravado'] +
                    $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'];
 
-      $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo;
+      $subsidio = $empleadoFiniquito[0]->nomina->percepciones['subsidio']['ImporteGravado'] +
+                   $empleadoFiniquito[0]->nomina->percepciones['subsidio']['ImporteExcento'];
+
+      $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo + $subsidio;
 
       $totalNeto = $totalPercepciones - $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'];
 
       $data = array(
-        'id_empleado' => $empleadoFiniquito[0]->id,
-        'id_empresa' => $empleadoFiniquito[0]->id_empresa,
-        'id_puesto' => $empleadoFiniquito[0]->id_puesto,
-        'id_empleado_creador' => $this->session->userdata('id_usuario'),
-        'fecha_salida' => $fechaSalida,
-        'salario_diario' => $empleadoFiniquito[0]->salario_diario,
-        'vacaciones' => $empleadoFiniquito[0]->nomina->vacaciones,
+        'id_empleado'               => $empleadoFiniquito[0]->id,
+        'id_empresa'                => $empleadoFiniquito[0]->id_empresa,
+        'id_puesto'                 => $empleadoFiniquito[0]->id_puesto,
+        'id_empleado_creador'       => $this->session->userdata('id_usuario'),
+        'fecha_salida'              => $fechaSalida,
+        'salario_diario'            => $empleadoFiniquito[0]->salario_diario,
+        'vacaciones'                => $empleadoFiniquito[0]->nomina->vacaciones,
         'prima_vacacional_grabable' => $empleadoFiniquito[0]->nomina->percepciones['prima_vacacional']['ImporteGravado'],
-        'prima_vacacional_exento' => $empleadoFiniquito[0]->nomina->percepciones['prima_vacacional']['ImporteExcento'],
-        'prima_vacacional' => $primaVacacional,
-        'aguinaldo_grabable' => $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteGravado'],
-        'aguinaldo_exento' => $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'],
-        'aguinaldo' => $aguinaldo,
-        'total_percepcion' => $totalPercepciones,
-        'isr' => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
-        'total_deduccion' => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
-        'total_neto' => $totalNeto,
-        'sueldo_semanal' => $sueldoSemana,
-        'dias_trabajados' => $empleadoFiniquito[0]->dias_trabajados_semana,
-        'xml' => $result['xml'],
-        'uuid' => $result['uuid'],
+        'prima_vacacional_exento'   => $empleadoFiniquito[0]->nomina->percepciones['prima_vacacional']['ImporteExcento'],
+        'prima_vacacional'          => $primaVacacional,
+        'aguinaldo_grabable'        => $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteGravado'],
+        'aguinaldo_exento'          => $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'],
+        'aguinaldo'                 => $aguinaldo,
+        'total_percepcion'          => $totalPercepciones,
+        'isr'                       => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
+        'total_deduccion'           => $empleadoFiniquito[0]->nomina->deducciones['isr']['ImporteExcento'],
+        'total_neto'                => $totalNeto,
+        'sueldo_semanal'            => $sueldoSemana,
+        'dias_trabajados'           => $empleadoFiniquito[0]->dias_trabajados_semana,
+        'xml'                       => $result['xml'],
+        'uuid'                      => $result['uuid'],
+        'subsidio'                  => $subsidio,
       );
 
       $this->db->update('usuarios', array('status' => 'f'), array('id' => $empleadoFiniquito[0]->id));
