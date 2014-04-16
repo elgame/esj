@@ -2778,21 +2778,21 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // // Subsidio
-      // if ($empleado->nomina_fiscal_subsidio > 0)
-      // {
-      //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->SetAligns(array('L', 'L', 'R'));
-      //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
-      //   $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
-      //   $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
-      //   if($pdf->GetY() >= $pdf->limiteY)
-      //   {
-      //     $pdf->AddPage();
-      //     $y2 = $pdf->GetY();
-      //   }
-      // }
+      // Subsidio
+      if ($empleado->subsidio > 0)
+      {
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['subsidio'] += $empleado->subsidio;
+        $total_gral['subsidio'] += $empleado->subsidio;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
 
       // // PTU
       // if ($empleado->nomina_fiscal_ptu > 0)
