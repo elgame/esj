@@ -763,7 +763,7 @@ class nomina_fiscal_model extends CI_Model {
     // Saca los dias transcurridos desde el 1 de Enero del año a la fecha de salida.
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
 
-    $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, 4, true, $fechaSalida->format('Y-m-d'));
+    $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, 4, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
     $fechaInicioSemana = new DateTime($semanaQueSeVa['fecha_inicio']);
     $diasTrabajadosSemana = $fechaInicioSemana->diff($fechaSalida)->days + 1;
 

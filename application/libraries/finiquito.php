@@ -621,9 +621,13 @@ class finiquito
     // el aguinaldo, prima vacacional y ptu
     $sumaImporteGravadosDiariosSinOtros = 0;
 
-    $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 365, 2);
-    $primaVacacionalGravadoDiario = round(floatval($this->empleado->nomina->percepciones['prima_vacacional']['ImporteGravado']) / 365, 2);
-    $vacacionesGravadoDiario = round(floatval($this->empleado->nomina->percepciones['vacaciones']['ImporteGravado']) / 356 , 2);
+    $isrBase = round($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado'] +
+                     $this->empleado->nomina->percepciones['prima_vacacional']['ImporteGravado'] +
+                     $this->empleado->nomina->percepciones['vacaciones']['ImporteGravado'], 2);
+
+    $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 52, 2);
+    $primaVacacionalGravadoDiario = round(floatval($this->empleado->nomina->percepciones['prima_vacacional']['ImporteGravado']) / 52, 2);
+    $vacacionesGravadoDiario = round(floatval($this->empleado->nomina->percepciones['vacaciones']['ImporteGravado']) / 52 , 2);
     $salarioDiario = (float)$this->empleado->salario_diario;
 
     $sueldoSemana = round($this->empleado->dias_trabajados_semana * $this->empleado->salario_diario, 2);
@@ -639,22 +643,31 @@ class finiquito
         break;
       }
     }
+    // echo "<pre>";
+    //   var_dump($isrSemana);
+    // echo "</pre>";exit;
 
     // Recorre los rangos de la tabla semanal de los subsidios para determinar en que
     // limites se encuentra la suma de los importes gravados.
-    // $isrSemana = 0;
-    // foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
-    // {
-    //   if ($sueldoSemana >= floatval($rango->de) && $sueldoSemana <= floatval($rango->hasta))
-    //   {
-    //     // −44.36
-    //     $isrSemana = $isrAntesSubsidio - floatval($rango->subsidio);
-    //     break;
-    //   }
-    // }
+    $isrSemanaSubsidio = 0;
+    foreach ($this->tablasIsr['semanal']['subsidios'] as $rango)
+    {
+      if ($sueldoSemana >= floatval($rango->de) && $sueldoSemana <= floatval($rango->hasta))
+      {
+        // −44.36
+        $isrSemanaSubsidio = floatval($rango->subsidio);
+        break;
+      }
+    }
+    // echo "<pre>";
+    //   var_dump($isrSemanaSubsidio);
+    // echo "</pre>";exit;
 
     // Suma todos los gravados diarios con salario diario. 200.23 $salarioDiario +
-    $sumaImporteGravadosDiariosConOtros = $aguinaldoGravadoDiario + $primaVacacionalGravadoDiario + $vacacionesGravadoDiario;
+    $sumaImporteGravadosDiariosConOtros = $aguinaldoGravadoDiario + $primaVacacionalGravadoDiario + $vacacionesGravadoDiario + $sueldoSemana;
+    // echo "<pre>";
+    //   var_dump($sumaImporteGravadosDiariosConOtros);
+    // echo "</pre>";exit;
 
     // Recorre los rangos de la tabla diaria de ISR para determinar en que
     // limites se encuentra la suma de los importes gravados diarios con
@@ -662,7 +675,7 @@ class finiquito
     // de la suma de los importes gravados diarios sin aguinaldo, prima vacacional
     // y ptu.
     $isrAuxConOtros = 0;
-    foreach ($this->tablasIsr['diaria']['art113'] as $rango)
+    foreach ($this->tablasIsr['semanal']['art113'] as $rango)
     {
       if ($sumaImporteGravadosDiariosConOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosConOtros <= floatval($rango->lim_superior))
       {
@@ -670,25 +683,34 @@ class finiquito
         $isrAuxConOtros = round((($sumaImporteGravadosDiariosConOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
       }
     }
-    $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
-    $isr = round(($isrAuxConOtros - $isrUltimaSemana) * $this->empleado->dias_trabajados, 2);
-    $isr += floatval($isrSemana);
 
-
+    $isrSemaAgu = floatval($isrAuxConOtros) - floatval($isrSemana);
+    $isrAnual = $isrSemaAgu * 52;
+    $isr = floatval($isrSemana - $isrSemanaSubsidio + $isrAnual);
     // echo "<pre>";
-    //   var_dump($aguinaldoGravadoDiario,
-    //            $primaVacacionalGravadoDiario,
-    //            $vacacionesGravadoDiario,
-    //            $sueldoSemana,
-    //            $salarioDiario,
-    //            $isrAntesSubsidio,
-    //            $isrSemana,
-    //            $sumaImporteGravadosDiariosConOtros,
-    //            $isrAuxConOtros,
-    //            $this->empleado->isr_ultima_semana,
-    //            $isrUltimaSemana,
-    //            $isr);
+    //   var_dump($isrSemana, $isrSemanaSubsidio, $isrAnual, $isr);
     // echo "</pre>";exit;
+
+    // $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
+    // $isr = round(($isrAuxConOtros - $isrUltimaSemana) * $this->empleado->dias_trabajados, 2);
+    // $isr += floatval($isrSemana);
+
+    $subsidio = 0;
+    if ($isr < 0)
+    {
+      $subsidio = abs($isr);
+      $isr = 0;
+    }
+
+    $this->empleado->nomina->subsidio = $subsidio;
+    $this->empleado->nomina->percepciones['subsidio'] = array(
+      'TipoPercepcion' => '017',
+      'Clave'          => $this->clavesPatron['subsidio'],
+      'Concepto'       => 'Subsidio para el empleo',
+      'ImporteGravado' => 0,
+      'ImporteExcento' => (float)$subsidio,
+      'total'          => floatval($subsidio) + 0,
+    );
 
     return array(
       'TipoDeduccion' => '002',

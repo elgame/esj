@@ -53,7 +53,7 @@
                   <thead>
                     <tr>
                       <th colspan="7"></th>
-                      <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
+                      <th colspan="6" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="2" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                     </tr>
@@ -71,7 +71,7 @@
                       <th id="head-vacaciones" style="background-color: #BEEEBC;">VACACIONES</th>
                       <th id="head-prima-vacacional" style="background-color: #BEEEBC;">P. VACACIONAL</th>
                       <th id="head-aguinaldo" style="background-color: #BEEEBC;">AGUINALDO</th>
-                      <!-- <th style="background-color: #BEEEBC;">SUBSIDIO</th> -->
+                      <th style="background-color: #BEEEBC;">SUBSIDIO</th>
                       <th style="background-color: #BEEEBC;">TOTAL</th>
 
                       <!-- Deducciones -->
@@ -88,6 +88,7 @@
                         $totalPercepciones = $sueldoSemana +
                                              $empleado[0]->nomina->vacaciones +
                                              $empleado[0]->nomina->prima_vacacional +
+                                             $empleado[0]->nomina->subsidio +
                                              $empleado[0]->nomina->aguinaldo;
                         $totalDeducciones = $empleado[0]->nomina->deducciones['isr']['total'];
                       ?>
@@ -128,6 +129,10 @@
                         <td id="td-aguinaldo">
                           <span class="aguinaldo-span"><?php echo String::formatoNumero($empleado[0]->nomina->aguinaldo) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->aguinaldo ?>" class="span12 aguinaldo">
+                        </td>
+                        <td id="td-subsidio">
+                          <span class="subsidio-span"><?php echo String::formatoNumero($empleado[0]->nomina->subsidio) ?></span>
+                          <input type="hidden" value="<?php echo $empleado[0]->nomina->subsidio ?>" class="span12 subsidio">
                         </td>
                         <td>
                           <span class="total-percepciones-span"><?php echo String::formatoNumero($totalPercepciones) ?></span>
