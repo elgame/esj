@@ -19,6 +19,9 @@ class bascula extends MY_Controller {
     'bascula/ajax_check_limite_proveedor/',
     'bascula/ajax_get_ranchos/',
 
+    'bascula/ajax_pagar_boleta/',
+    'bascula/auth_modify/',
+
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
     'bascula/show_view_agregar_cliente/',
@@ -132,7 +135,15 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->addBascula();
+
+      $log = false;
+      $authId = false;
+      if (isset($_POST['autorizar']))
+      {
+        $log = true;
+        $authId = $_POST['autorizar'];
+      }
+      $res_mdl = $this->bascula_model->addBascula(null, false, $log, $authId);
 
       $ticket = '';
       // if (isset($_POST['pstatus']))
@@ -150,6 +161,7 @@ class bascula extends MY_Controller {
     $params['idb']         = '';
     $params['param_folio'] = '';
     $params['fecha']       = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['autorizar'] = false;
 
     $params['e'] = false;
 
@@ -252,6 +264,8 @@ class bascula extends MY_Controller {
         $_POST['ptotal']         = $info['info'][0]->importe;
         $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
 
+        // Indicara si se necesita autorizacion para modificar.
+        $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
       }
       else
       {
@@ -1724,6 +1738,85 @@ class bascula extends MY_Controller {
         'title' => $title,
         'msg' => $txt,
         'ico' => $icono);
+  }
+
+  public function ajax_pagar_boleta()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->pagarBoleta($_GET['idb']);
+
+    echo json_encode(array('passes' => true));
+  }
+
+  public function auth_modify()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'usuario',
+        'label'   => 'Usuario',
+        'rules'   => 'required'),
+      array('field' => 'pass',
+        'label'   => 'Contraseña',
+        'rules'   => 'required')
+    );
+
+    $this->form_validation->set_rules($rules);
+    if ($this->form_validation->run() == false)
+    {
+      $resp = array(
+        'passes' => false,
+        'title'  => 'Error al Autorizar el Usuario!',
+        'msg'    => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
+        'ico'    => 'error'
+      );
+    }
+    else
+    {
+      $data = "usuario = '".$this->input->post('usuario')."' AND password = '".$this->input->post('pass')."' AND status = '1' ";
+      $sql = $this->db->get_where('usuarios', $data);
+
+      if ($sql->num_rows() > 0)
+      {
+        $user = $sql->result();
+        // echo "<pre>";
+        //   var_dump($user);
+        // echo "</pre>";exit;
+
+        $this->load->model('usuarios_model');
+        $tienePriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar-auth/', false, $user[0]->id);
+
+        if ($tienePriv)
+        {
+           $resp = array(
+            'passes'  => true,
+            'title'   => '',
+            'msg'     => 'Usuario autenticado!',
+            'ico'     => 'successs',
+            'user_id' => $user[0]->id
+          );
+        }
+        else
+        {
+           $resp = array(
+            'passes' => false,
+            'title'  => 'Error!',
+            'msg'    => 'El usuario no cuenta con el privilegio de editar!',
+            'ico'    => 'error'
+          );
+        }
+      }
+      else
+      {
+        $resp = array(
+          'passes' => false,
+          'title' => 'Error al Autorizar el Usuario!',
+          'msg'   => 'El usuario y/o contraseña son incorrectos',
+          'ico'   => 'error'
+        );
+      }
+    }
+
+    echo json_encode($resp);
   }
 
 }

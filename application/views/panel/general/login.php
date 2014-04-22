@@ -1,6 +1,6 @@
 <div class="container-fluid">
 	<div class="row-fluid">
-			
+
 		<div class="row-fluid">
 			<div class="well span5 center login-box">
 				<div class="alert alert-info" style="font-size: 22px;font-weight: bold;">
@@ -40,7 +40,7 @@
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
-	if($frm_errors['msg'] != ''){ 
+	if($frm_errors['msg'] != ''){
 ?>
 <script type="text/javascript" charset="UTF-8">
 	$(document).ready(function(){

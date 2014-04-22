@@ -1,7 +1,7 @@
     <div id="content" class="span10">
       <!-- content starts -->
       <?php
-        $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? 'disabled' : '';
+        $disabled = (($accion === 'p' || $accion === 'b') && $e === false) ? '' : '';
 
         $bmod = array(
           'tipo'       => '',
@@ -17,14 +17,18 @@
           'cajas_pres' => '',
           'pagar'      => '',
           'cajas'      => array('',''),
-          );
+        );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';
-        if ($e === true)
+        $autorizarInput = '';
+        $autorizarInput = '';
+        // if ($e === true)
+        if ($autorizar === true)
         {
           $readonly = '';
           $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
+          $autorizarInput = '<input type="hidden" name="autorizar" id="autorizar" value="" />';
 
           $bmod = array(
           'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
@@ -70,10 +74,19 @@
           Nueva Pesada
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
         </a>
-        <button type="submit" class="btn btn-primary pull-right" <?php echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
-          Guardar
-          <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
-        </button>
+
+        <?php if ($autorizar) { ?>
+          <a href="#myModalAuth" role="button" class="btn btn-primary pull-right" data-toggle="modal" id="btnGuardar" style="margin-right: 5px;">
+            Guardar
+            <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
+          </a>
+        <?php } else {  ?>
+          <!-- <button type="submit" class="btn btn-primary pull-right" <?php //echo $disabled ?> id="btnGuardar" style="margin-right: 5px;">
+            Guardar
+            <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
+          </button> -->
+        <?php } ?>
+
         <?php
         if ($accion !== 'n')
           echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
@@ -94,6 +107,7 @@
 
         ?>
 
+        <?php echo $autorizarInput ?>
         <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn pull-right" style="margin-right: 5px;">Cancelar</a>
 
         <input type="hidden" name="paccion" value="<?php echo $accion ?>" id="paccion">
@@ -216,9 +230,9 @@
                     <label class="control-label" for="pfolio">Folio</label>
                     <div class="controls">
                       <input type="text" name="pfolio" value="<?php echo set_value('pfolio', $next_folio) ?>"
-                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha"<?php echo ($e === true? ' readonly': ''); ?>>
+                        id="pfolio" class="input-medium vpos-int" style="text-align:center;" data-next="pfecha" <?php //echo ($e === true? ' readonly': ''); ?>>
                       <span class="help-inline">
-                        <button class="btn" type="button" id="loadFolio" style="<?php echo ($e === true? 'display:none': ''); ?>">Cargar</button>
+                        <button class="btn" type="button" id="loadFolio" style="<?php //echo ($e === true? 'display:none': ''); ?>">Cargar</button>
                       </span>
                     </div>
                   </div>
@@ -392,13 +406,17 @@
                                     <input type="hidden" name="pcajas[]" value="<?php echo $caja ?>" id="pcajas">
                                     <input type="hidden" name="pcalidad[]" value="<?php echo $_POST['pcalidad'][$key] ?>" id="pcalidad">
                                     <input type="hidden" name="pcalidadtext[]" value="<?php echo $_POST['pcalidadtext'][$key] ?>" id="pcalidadtext">
-                                    <input type="hidden" name="pkilos[]" value="<?php echo $_POST['pkilos'][$key] ?>" id="pkilos">
+                                    <!-- <input type="hidden" name="pkilos[]" value="<?php //echo $_POST['pkilos'][$key] ?>" id="pkilos"> -->
                                     <!-- <input type="hidden" name="ppromedio[]" value="<?php //echo $_POST['ppromedio'][$key] ?>" id="ppromedio"> -->
                                     <!-- <input type="hidden" name="pprecio[]" value="<?php //echo $_POST['pprecio'][$key] ?>" id="pprecio"> -->
                                     <input type="hidden" name="pimporte[]" value="<?php echo $_POST['pimporte'][$key] ?>" id="pimporte">
                                   </td>
                                   <td><?php echo $_POST['pcalidadtext'][$key] ?></td>
-                                  <td id="tdkilos"><?php echo $_POST['pkilos'][$key] ?></td>
+                                  <td id="tdkilos">
+
+                                    <span><?php echo ($_POST['pkilos_neto'] > 300) ? $_POST['pkilos'][$key] : '' ?></span>
+                                    <input type="<?php echo ($_POST['pkilos_neto'] > 300) ? 'hidden' : 'text' ?>" name="pkilos[]" value="<?php echo $_POST['pkilos'][$key] ?>" id="pkilos" style="width: 100px;">
+                                  </td>
                                   <td id="tdpromedio">
                                     <input type="text" name="ppromedio[]" value="<?php echo $_POST['ppromedio'][$key] ?>" id="ppromedio" style="width: 80px;" <?php echo $bmod['cajas'][1]; ?>>
                                   </td>
@@ -409,7 +427,6 @@
                                   <td id="tdimporte"><?php echo $_POST['pimporte'][$key] ?></td>
                                   <td><button class="btn btn-info" type="button" title="Eliminar" id="delCaja" <?php echo $disabled.$bmod['cajas'][0]; ?>><i class="icon-trash"></i></button></td>
                                 </tr>
-
                       <?php }} ?>
                     </tbody>
                   </table>
@@ -452,7 +469,15 @@
 
         <div class="form-actions">
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
-          <button type="submit" class="btn btn-primary" <?php echo $disabled ?> id="btnGuardar">Guardar</button>
+
+          <?php if ($autorizar) { ?>
+            <a href="#myModalAuth" role="button" class="btn btn-primary" data-toggle="modal" id="btnGuardar" style="margin-right: 5px;">
+              Guardar
+              <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
+            </a>
+          <?php } else {  ?>
+            <!-- <button type="submit" class="btn btn-primary" <?php //echo $disabled ?> id="btnGuardar">Guardar</button> -->
+          <?php } ?>
 
           <?php
               if ($accion !== 'n')
@@ -467,8 +492,6 @@
           <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn">Cancelar</a>
         </div>
       </form>
-
-
           <!-- content ends -->
     </div><!--/#content.span10-->
 
@@ -526,6 +549,32 @@
     <button class="btn btn-primary">Save changes</button>
   </div>
 </div> -->
+
+<!-- Modal -->
+<div id="myModalAuth" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Autorizacion</h3>
+  </div>
+  <div class="modal-body">
+    <div class="row-fluid" style="text-align: center;">
+      <div class="input-prepend" title="Usuario" data-rel="tooltip">
+        <span class="add-on"><i class="icon-user"></i>
+        </span><input class="input-large span10" name="usuario" value="admin" id="usuario" type="text" placeholder="usuario">
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="input-prepend mtop" title="Contraseña" data-rel="tooltip">
+        <span class="add-on"><i class="icon-lock"></i>
+        </span><input class="input-large span10" name="pass" value="12345" id="pass" type="password" placeholder="******">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    <button class="btn btn-primary" id="btn-auth">Autorizar</button>
+  </div>
+</div>
 
 
 <?php if (isset($ticket)) { ?>

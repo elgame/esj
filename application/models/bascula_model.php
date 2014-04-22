@@ -99,7 +99,7 @@ class Bascula_model extends CI_Model {
     return $response;
   }
 
-  public function addBascula($data=null, $bonificacion=false)
+  public function addBascula($data=null, $bonificacion=false, $logBitacora = false, $usuario_auth = false)
   {
     if (is_null($data))
     {
@@ -146,7 +146,8 @@ class Bascula_model extends CI_Model {
         {
           $data['id_proveedor'] = $this->input->post('pid_proveedor');
           $data['rancho']       = mb_strtoupper($this->input->post('prancho'), 'UTF-8');
-        }else
+        }
+        else
         {
           $data['id_cliente'] = $this->input->post('pid_cliente');
           $data['rancho']     = '';
@@ -229,7 +230,7 @@ class Bascula_model extends CI_Model {
         }
       }
 
-      $this->updateBascula($idb, $data2, $cajas);
+      $this->updateBascula($idb, $data2, $cajas, $logBitacora, $usuario_auth);
 
       $msg = '7';
       if ($bonificacion)
@@ -242,13 +243,18 @@ class Bascula_model extends CI_Model {
     return array('passes'=>true);
   }
 
-  public function updateBascula($id=null, $data=null, $cajas=null)
+  public function updateBascula($id=null, $data=null, $cajas=null, $logBitacora = false, $usuario_auth = false)
   {
     $id = is_null($id) ? $_GET['id'] : $id;
 
     if (is_null($data))
     {
 
+    }
+
+    if ($logBitacora && is_numeric($usuario_auth))
+    {
+      $this->logBitacora($id, $data, $usuario_auth);
     }
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
@@ -283,7 +289,8 @@ class Bascula_model extends CI_Model {
                 ca.placa AS camion_placas,
                 cl.nombre_fiscal as cliente,
                 cl.cuenta_cpi AS cpi_cliente,
-                b.tipo")
+                b.tipo,
+                b.no_impresiones")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
@@ -1460,6 +1467,61 @@ class Bascula_model extends CI_Model {
       $pdf->Output('REPORTE_MOVIMIENTOS_CUENTA.pdf', 'I');
   }
 
+  public function pagarBoleta($idBascula)
+  {
+    $this->db->update('bascula', array('accion' => 'p'), array('id_bascula' => $idBascula));
+  }
+
+  public function logBitacora($idBascula, $data, $usuario_auth)
+  {
+    // Obtiene la informacion de la pesada.
+    $info = $this->getBasculaInfo($idBascula);
+    // echo "<pre>";
+    //   var_dump($info['info'][0], $data);
+    // echo "</pre>";exit;
+
+    $camposEditados = array();
+    $fecha = date('Y-m-d H:i:s');
+
+    $sql = $this->db->query(
+      "SELECT no_edicion
+       FROM bascula_bitacora
+       WHERE boleta = {$info['info'][0]->folio} AND
+             DATE(fecha) = DATE('".$fecha."')
+        ORDER BY (id) DESC
+        LIMIT 1
+      ");
+
+    $noEdicion = 1;
+    if ($sql->num_rows() > 0)
+    {
+      $noEdicion = $sql->result()[0]->no_edicion + 1;
+    }
+
+    foreach ($info['info'][0] as $campo => $value)
+    {
+      if (isset($data[$campo]))
+      {
+        if ($value != $data[$campo])
+        {
+          $camposEditados[] = array(
+            'id_usuario_auth'     => $usuario_auth,
+            'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+            'boleta'              => $info['info'][0]->folio,
+            'fecha'               => $fecha,
+            'no_edicion'          => $noEdicion,
+            'antes'               => $value,
+            'despues'             => $data[$campo],
+            'campo'             => $campo,
+          );
+        }
+      }
+    }
+
+    echo "<pre>";
+      var_dump($camposEditados);
+    echo "</pre>";exit;
+  }
 
 }
 

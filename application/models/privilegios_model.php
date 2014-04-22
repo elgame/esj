@@ -166,18 +166,20 @@ class privilegios_model extends CI_Model{
 	 * @param unknown_type $url_accion
 	 * @param unknown_type $returninfo
 	 */
-	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false){
+	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false, $id_usuario = null){
 		$band = false;
 		$url_accion = str_replace('index/', '', $url_accion);
 
 		$excluir = array_search($url_accion, $this->excepcion_privilegio);
+
+    $id_usuario = $id_usuario?:$this->session->userdata('id_usuario');
 
 		$sql = $id_privilegio!=''? "p.id = '".$id_privilegio."'": "lower(url_accion) = lower('".$url_accion."')";
 		$res = $this->db
 			->select('p.id, p.nombre, p.url_accion, p.mostrar_menu, p.url_icono')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep', 'p.id = ep.privilegio_id', 'inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND ".$sql."")
+			->where("ep.usuario_id = '".$id_usuario."' AND ".$sql."")
 			->limit(1)
 		->get();
 		if($res->num_rows() > 0){
