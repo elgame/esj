@@ -19,6 +19,9 @@ class bascula extends MY_Controller {
     'bascula/ajax_check_limite_proveedor/',
     'bascula/ajax_get_ranchos/',
 
+    'bascula/ajax_pagar_boleta/',
+    'bascula/auth_modify/',
+
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
     'bascula/show_view_agregar_cliente/',
@@ -42,7 +45,8 @@ class bascula extends MY_Controller {
     'bascula/imprimir2/',
     'bascula/rmc_pdf2/',
 
-    'bascula/bonificaciones_pdf/'
+    'bascula/bonificaciones_pdf/',
+    'bascula/bitacora_pdf/'
     );
 
   public function _remap($method){
@@ -132,7 +136,16 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->addBascula();
+
+      $log = false;
+      $authId = false;
+      if (isset($_POST['autorizar']))
+      {
+        $log = true;
+        $authId = $_POST['autorizar'];
+      }
+
+      $res_mdl = $this->bascula_model->addBascula(null, false, $log, $authId);
 
       $ticket = '';
       // if (isset($_POST['pstatus']))
@@ -150,6 +163,7 @@ class bascula extends MY_Controller {
     $params['idb']         = '';
     $params['param_folio'] = '';
     $params['fecha']       = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['autorizar'] = false;
 
     $params['e'] = false;
 
@@ -244,6 +258,7 @@ class bascula extends MY_Controller {
             $_POST['ppromedio'][]    = $c->promedio;
             $_POST['pprecio'][]      = $c->precio;
             $_POST['pimporte'][]     = $c->importe;
+            $_POST['pnum_registro'][] = $c->num_registro;
           }
         }
 
@@ -252,6 +267,8 @@ class bascula extends MY_Controller {
         $_POST['ptotal']         = $info['info'][0]->importe;
         $_POST['pobcervaciones'] = $info['info'][0]->obcervaciones;
 
+        // Indicara si se necesita autorizacion para modificar.
+        $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
       }
       else
       {
@@ -530,7 +547,6 @@ class bascula extends MY_Controller {
     UploadFiles::base64SaveImg($base64, 'calando');
     echo $base64;
   }
-
 
   /**
    * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
@@ -1074,10 +1090,17 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->updateBascula($_GET['idb'], array(
-        'no_lote' => $this->input->post('pno_lote'),
-        'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
-      ));
+      $res_mdl = $this->bascula_model->updateBascula(
+        $_GET['idb'],
+        array(
+          'no_lote' => $this->input->post('pno_lote'),
+          'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
+        ),
+        null,
+        true,
+        $this->session->userdata['id_usuario'],
+        false
+      );
 
       if($res_mdl['passes'])
         redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
@@ -1724,6 +1747,129 @@ class bascula extends MY_Controller {
         'title' => $title,
         'msg' => $txt,
         'ico' => $icono);
+  }
+
+  public function ajax_pagar_boleta()
+  {
+    $this->load->model('bascula_model');
+
+    $this->bascula_model->logBitacora(
+      $_GET['idb'],
+      array('accion' => 'p'),
+      $this->session->userdata['id_usuario'],
+      null,
+      false
+    );
+
+    $this->bascula_model->pagarBoleta($_GET['idb']);
+    echo json_encode(array('passes' => true));
+  }
+
+  public function auth_modify()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'usuario',
+        'label'   => 'Usuario',
+        'rules'   => 'required'),
+      array('field' => 'pass',
+        'label'   => 'Contraseña',
+        'rules'   => 'required')
+    );
+
+    $this->form_validation->set_rules($rules);
+    if ($this->form_validation->run() == false)
+    {
+      $resp = array(
+        'passes' => false,
+        'title'  => 'Error al Autorizar el Usuario!',
+        'msg'    => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
+        'ico'    => 'error'
+      );
+    }
+    else
+    {
+      $data = "usuario = '".$this->input->post('usuario')."' AND password = '".$this->input->post('pass')."' AND status = '1' ";
+      $sql = $this->db->get_where('usuarios', $data);
+
+      if ($sql->num_rows() > 0)
+      {
+        $user = $sql->result();
+        // echo "<pre>";
+        //   var_dump($user);
+        // echo "</pre>";exit;
+
+        $this->load->model('usuarios_model');
+        $tienePriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar-auth/', false, $user[0]->id);
+
+        if ($tienePriv)
+        {
+           $resp = array(
+            'passes'  => true,
+            'title'   => '',
+            'msg'     => 'Usuario autenticado!',
+            'ico'     => 'successs',
+            'user_id' => $user[0]->id
+          );
+        }
+        else
+        {
+           $resp = array(
+            'passes' => false,
+            'title'  => 'Error!',
+            'msg'    => 'El usuario no cuenta con el privilegio de editar!',
+            'ico'    => 'error'
+          );
+        }
+      }
+      else
+      {
+        $resp = array(
+          'passes' => false,
+          'title' => 'Error al Autorizar el Usuario!',
+          'msg'   => 'El usuario y/o contraseña son incorrectos',
+          'ico'   => 'error'
+        );
+      }
+    }
+
+    echo json_encode($resp);
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE ACUMULADOS DE PRODUCTOS"
+   *
+   * @return void
+   */
+  public function bitacora()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de Acumulados de Productos'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/bitacora', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function bitacora_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->bitacora_pdf();
   }
 
 }

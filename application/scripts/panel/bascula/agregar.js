@@ -41,7 +41,7 @@ $(function(){
 
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
-        $('#pfolio').val(data)
+        $('#pfolio').val(data);
 
         actualFolio = data;
       });
@@ -74,7 +74,8 @@ $(function(){
 
       var $form = $('#form');
 
-      if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+      if ($('#autorizar').length === 0) {
         $form.attr('action', $form.attr('action') + '&p=t');
         $form.submit();
       } else {
@@ -299,19 +300,22 @@ $(function(){
       // if ( ! validaCalidad($calidad.find('option:selected').val())) {
       //   return false;
       // }
-
       // Construye string con el html del tr.
       trHtml = '<tr data-kneto=""><td>' + $caja.val() +
+                  '<input type="hidden" name="pnum_registro[]" value="" id="pnum_registro">' +
                   '<input type="hidden" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
                   '<input type="hidden" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
                   '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
-                  '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
+                  // '<input type="hidden" name="pkilos[]" value="" id="pkilos">' +
                   // '<input type="hidden" name="ppromedio[]" value="" id="ppromedio">' +
                   // '<input type="hidden" name="pprecio[]" value="'+$precio.val()+'" id="pprecio">' +
                   '<input type="hidden" name="pimporte[]" value="" id="pimporte">' +
                '</td>' +
                '<td>' + $calidad.find('option:selected').text() + '</td>' +
-               '<td id="tdkilos"></td>' +
+               '<td id="tdkilos">' +
+                  '<span></span>' +
+                  '<input type="'+((parseFloat($('#pkilos_neto').val()) <= 300) ? 'text': 'hidden')+'" name="pkilos[]" value="" id="pkilos" style="width: 100px;">' +
+               '</td>' +
                '<td id="tdpromedio"><input type="text" name="ppromedio[]" value="" id="ppromedio" class="ppro'+(ppro_cont)+'" style="width: 80px;" data-next="ppro'+(++ppro_cont)+'"></td>' +
                '<td><input type="text" name="pprecio[]" value="'+$precio.val()+'" class="vpositive" id="pprecio" style="width: 80px;"></td>' +
                '<td id="tdimporte"></td>' +
@@ -460,7 +464,7 @@ $(function(){
         kilosNeto  = parseFloat($tr.attr('data-kneto')),
 
         $kilos     = $tr.find('#pkilos'),
-        $tdkilos   = $tr.find('#tdkilos')
+        $tdkilos   = $tr.find('#tdkilos'),
         $precio    = $tr.find('#pprecio'),
         $importe   = $tr.find('#pimporte'),
         $tdimporte = $tr.find('#tdimporte');
@@ -468,10 +472,16 @@ $(function(){
     event.preventDefault();
 
     $kilos.val(kilos);
-    $tdkilos.html(kilos);
+    if (parseFloat($('#pkilos_neto').val()) > 300) {
+      $tr.find('#tdkilos').find('span').html(kilos);
+      $tr.find('#pkilos').get(0).type = 'hidden';
+    } else {
+      $tr.find('#tdkilos').find('span').html('');
+      $tr.find('#pkilos').get(0).type = 'text';
+    }
 
     precio = (parseFloat(kilos) * parseFloat($precio.val())).toFixed(2);
-    $importe.val(precio)
+    $importe.val(precio);
     $tdimporte.html(precio);
 
     calculaTotales(trIndex, kilosNeto - parseFloat(kilos));
@@ -482,7 +492,8 @@ $(function(){
 
     var $form = $('#form');
 
-    if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+    // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
+    if ($('#autorizar').length === 0) {
       $form.attr('action', $form.attr('action') + '&p=t');
       $form.submit();
     } else {
@@ -527,7 +538,17 @@ $(function(){
 
       msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
       {
-        $('#form').submit();
+        // $('#form').submit();
+        $.ajax({
+          url: base_url + 'panel/bascula/ajax_pagar_boleta/',
+          type: 'get',
+          dataType: 'json',
+          data: {idb: $('#pidb').val()},
+        })
+        .done(function() {
+          // location.reload();
+        });
+
       }, function () {
         $('#pstatus').trigger('click');
       });
@@ -540,6 +561,33 @@ $(function(){
 
     $('#pkilos_tara').focus();
 
+  });
+
+  $('#btn-auth').on('click', function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        usuario: $('#usuario').val(),
+        pass: $('#pass').val()
+      },
+    })
+    .done(function(resp) {
+      console.log(resp);
+      if (resp.passes) {
+        $('#autorizar').val(resp.user_id);
+        $('#form').submit();
+      } else {
+        noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
+      }
+    });
+  });
+
+  $('#tableCajas').on('change', 'input#pkilos', function(event) {
+    var $parent = $(this).parents('tr');
+
+    $parent.find('#pprecio').trigger('change');
   });
 
 });
@@ -648,7 +696,7 @@ var validaCalidad = function (calidad) {
 };
 
 var calculaTotales = function (trIndex, kilosNeto) {
-  var $ptotal_cajas = $('#ptotal_cajas')
+  var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
 
@@ -679,16 +727,23 @@ var calculaTotales = function (trIndex, kilosNeto) {
         precio   = parseFloat($tr.find('#pprecio').val());
 
     kilos = Math.round( ((cajas * kilosNeto) / totalCajasP).toFixed(2) );
+
     $tr.find('#pkilos').val(kilos);
-    $tr.find('#tdkilos').html(kilos);
+    if (parseFloat($('#pkilos_neto').val()) > 300) {
+      $tr.find('#tdkilos').find('span').html(kilos);
+      $tr.find('#pkilos').get(0).type = 'hidden';
+    } else {
+      $tr.find('#tdkilos').find('span').html('');
+      $tr.find('#pkilos').get(0).type = 'text';
+    }
 
     promedio = (kilos / cajas).toFixed(2);
-    $tr.find('#ppromedio').val(promedio)
+    $tr.find('#ppromedio').val(promedio);
     // $tr.find('#tdpromedio').html(promedio)
 
     importe = (kilos * precio).toFixed(2);
-    $tr.find('#pimporte').val(importe)
-    $tr.find('#tdimporte').html(importe)
+    $tr.find('#pimporte').val(importe);
+    $tr.find('#tdimporte').html(importe);
 
     $tr.attr('data-kneto', kilosNeto);
 
