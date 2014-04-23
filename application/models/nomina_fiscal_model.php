@@ -2782,21 +2782,21 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // // Subsidio
-      // if ($empleado->nomina_fiscal_subsidio > 0)
-      // {
-      //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->SetAligns(array('L', 'L', 'R'));
-      //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
-      //   $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
-      //   $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
-      //   if($pdf->GetY() >= $pdf->limiteY)
-      //   {
-      //     $pdf->AddPage();
-      //     $y2 = $pdf->GetY();
-      //   }
-      // }
+      // Subsidio
+      if ($empleado->subsidio > 0)
+      {
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['subsidio'] += $empleado->subsidio;
+        $total_gral['subsidio'] += $empleado->subsidio;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
 
       // // PTU
       // if ($empleado->nomina_fiscal_ptu > 0)
@@ -3496,6 +3496,9 @@ class nomina_fiscal_model extends CI_Model {
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
 
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -3706,7 +3709,129 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
 
-    //la nomina de limon para sacar prestamos
+    // **** Se ponen los finiquitos ***********
+    if($pdf->GetY() >= $pdf->limiteY){
+      $pdf->AddPage();
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row($columnas['n'], false, false, null, 2, 1);
+    }
+    $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
+
+    $pdf->SetFont('Helvetica','B', 10);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->Cell(130, 6, 'FINIQUITOS', 0, 0, 'L', 0);
+
+    $pdf->SetXY(6, $pdf->GetY()+6);
+    foreach ($finiquitos as $key => $empleado)
+    {
+      $numero_empleado++;
+      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana['semana'], $semana['anio'], $empresa['info']->dia_inicia_semana);
+      $bonos_suma = 0;
+      foreach ($bonos as $keybb => $value)
+        $bonos_suma += $value->bono+$value->otro;
+      // $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+
+      $pdf->SetFont('Helvetica','', 8);
+      if($pdf->GetY() >= $pdf->limiteY){
+        $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+        // $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+        // $pdf->SetWidths(array(64, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20));
+        $pdf->Row($columnas['n'], false, false, null, 2, 1);
+      }
+
+      $pdf->SetFont('Helvetica','', 8);
+      $total_pagar = $empleado->total_percepcion +
+        $bonos_suma -  //bonos + otros
+        $empleado->total_deduccion;
+      $pdf->SetXY(6, $pdf->GetY());
+
+      $dataarr = array();
+      $dataarr[] = $numero_empleado;
+      $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+      $dataarr[] = String::formatoNumero($empleado->total_percepcion, 2, '$', false);
+      $dataarr[] = String::formatoNumero($bonos_suma, 2, '$', false); //bonos + otros
+      $dataarr[] = String::formatoNumero(0, 2, '$', false);
+      $dataarr[] = String::formatoNumero(0, 2, '$', false);
+
+      if ($ver_infonavit != 0)
+      {
+        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+      }
+
+      if($ver_des_playera)
+        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+      if($ver_des_otro)
+        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+      $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
+
+      if ($ver_trans != 0)
+      {
+        $dataarr[] = String::formatoNumero($empleado->total_neto, 2, '$', false);
+      }
+
+      $dataarr[] = String::formatoNumero(($total_pagar-$empleado->total_neto), 2, '$', false);
+
+      $pdf->Row($dataarr, false, true, null, 2, 1);
+      $sueldo_semanal_real += $empleado->total_percepcion;
+      $otras_percepciones  += $bonos_suma;
+      $domingo             += 0;
+      $total_prestamos     += 0;
+      $total_infonavit     += 0;
+      $descuento_playeras  += 0;
+      $descuento_otros     += 0;
+      $ttotal_pagar        += $total_pagar;
+      $ttotal_nomina       += $empleado->total_neto;
+      $total_no_fiscal     += ($total_pagar-$empleado->total_neto);
+      $ttotal_aseg_no_trs  += $empleado->total_neto;
+
+      $sueldo_semanal_real1 += $empleado->total_percepcion;
+      $otras_percepciones1  += $bonos_suma;
+      $domingo1             += 0;
+      $total_prestamos1     += 0;
+      $total_infonavit1     += 0;
+      $descuento_playeras1  += 0;
+      $descuento_otros1     += 0;
+      $ttotal_pagar1        += $total_pagar;
+      $ttotal_nomina1       += $empleado->total_neto;
+      $total_no_fiscal1     += ($total_pagar-$empleado->total_neto);
+    }
+
+    if($pdf->GetY() >= $pdf->limiteY+10)
+      $pdf->AddPage();
+
+    $pdf->SetFont('Helvetica','B', 8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $datatto = array();
+    $datatto[] = '';
+    $datatto[] = 'TOTAL';
+    $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
+    $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
+    $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
+    $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
+
+    if ($ver_infonavit != 0)
+    {
+      $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+    }
+
+    if($ver_des_playera)
+      $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
+    if($ver_des_otro)
+      $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
+    $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
+
+    if ($ver_trans != 0)
+    {
+      $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+    }
+    $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
+    $pdf->Row($datatto, false, true, null, 2, 1);
+
+
+    //******* la nomina de limon para sacar prestamos
     $total_prestamos_limon = 0;
     if ($empresa['info']->rfc == 'GGU090120I91') //GGU090120I91
     {
@@ -3941,6 +4066,8 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('usuarios_departamentos_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
 
     $html = '<table>';
     $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
@@ -4108,6 +4235,101 @@ class nomina_fiscal_model extends CI_Model {
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
     }
+
+    // **** Se ponen los finiquitos ***********
+    $html .= '<tr><td style="font-size:14px;">FINIQUITOS</td></tr>';
+    $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
+    foreach ($finiquitos as $key => $empleado)
+    {
+      $numero_empleado++;
+      $bonos = $this->getBonosOtrosEmpleado($empleado->id, $semana['semana'], $semana['anio'], $empresa['info']->dia_inicia_semana);
+      $bonos_suma = 0;
+      foreach ($bonos as $keybb => $value)
+        $bonos_suma += $value->bono+$value->otro;
+      // $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+
+      $total_pagar = $empleado->total_percepcion +
+        $bonos_suma -  //bonos + otros
+        $empleado->total_deduccion;
+
+      $dataarr = array();
+      $dataarr[] = $numero_empleado;
+      $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+      $dataarr[] = String::formatoNumero($empleado->total_percepcion, 2, '', false);
+      $dataarr[] = String::formatoNumero($bonos_suma, 2, '', false); //bonos + otros
+      $dataarr[] = String::formatoNumero(0, 2, '', false);
+      $dataarr[] = String::formatoNumero(0, 2, '', false);
+
+      if ($ver_infonavit != 0)
+      {
+        $dataarr[] = String::formatoNumero(0, 2, '', false);
+      }
+
+      if($ver_des_playera)
+        $dataarr[] = String::formatoNumero(0, 2, '', false);
+      if($ver_des_otro)
+        $dataarr[] = String::formatoNumero(0, 2, '', false);
+      $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+
+      if ($ver_trans != 0)
+      {
+        $dataarr[] = String::formatoNumero($empleado->total_neto, 2, '', false);
+      }
+
+      $dataarr[] = String::formatoNumero(($total_pagar-$empleado->total_neto), 2, '', false);
+
+      $html .= $this->rowXls($dataarr);
+      $sueldo_semanal_real += $empleado->total_percepcion;
+      $otras_percepciones  += $bonos_suma;
+      $domingo             += 0;
+      $total_prestamos     += 0;
+      $total_infonavit     += 0;
+      $descuento_playeras  += 0;
+      $descuento_otros     += 0;
+      $ttotal_pagar        += $total_pagar;
+      $ttotal_nomina       += $empleado->total_neto;
+      $total_no_fiscal     += ($total_pagar-$empleado->total_neto);
+      $ttotal_aseg_no_trs  += $empleado->total_neto;
+
+      $sueldo_semanal_real1 += $empleado->total_percepcion;
+      $otras_percepciones1  += $bonos_suma;
+      $domingo1             += 0;
+      $total_prestamos1     += 0;
+      $total_infonavit1     += 0;
+      $descuento_playeras1  += 0;
+      $descuento_otros1     += 0;
+      $ttotal_pagar1        += $total_pagar;
+      $ttotal_nomina1       += $empleado->total_neto;
+      $total_no_fiscal1     += ($total_pagar-$empleado->total_neto);
+    }
+
+    $datatto = array();
+    $datatto[] = '';
+    $datatto[] = 'TOTAL';
+    $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+    $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+    $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+    $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+
+    if ($ver_infonavit != 0)
+    {
+      $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+    }
+
+    if($ver_des_playera)
+      $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+    if($ver_des_otro)
+      $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
+    $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+
+    if ($ver_trans != 0)
+    {
+      $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+    }
+    $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+    $html .= $this->rowXls($datatto);
+    $html .= $this->rowXls(array(''));
+
 
     //la nomina de limon para sacar prestamos
     $total_prestamos_limon = 0;

@@ -312,47 +312,53 @@ class cuentas_cobrar_model extends privilegios_model{
 			FROM
 				(
 					SELECT
-						c.id_cliente,
-						c.nombre_fiscal,
-						Sum(f.total) AS total,
-						Sum(f.importe_iva) AS iva,
-						COALESCE(Sum(faa.abonos),0) as abonos,
-						COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-						'f' as tipo
-					FROM
-						clientes AS c
-						INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-						LEFT JOIN (
-							(
-								SELECT
-									f.id_cliente,
-									f.id_factura,
-									Sum(fa.total) AS abonos
-								FROM
-									facturacion AS f
-										INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-								WHERE f.status <> 'ca' AND f.status <> 'b'
-									AND f.id_cliente = '{$_GET['id_cliente']}'
-									AND Date(fa.fecha) <= '{$fecha2}'{$sql}
-								GROUP BY f.id_cliente, f.id_factura
-							)
-							UNION
-							(
-								SELECT
-									f.id_cliente,
-									f.id_factura,
-									Sum(f.total) AS abonos
-								FROM
-									facturacion AS f
-								WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-									AND f.id_cliente = '{$_GET['id_cliente']}'
-									AND Date(f.fecha) <= '{$fecha2}'{$sql}
-								GROUP BY f.id_cliente, f.id_factura
-							)
-						) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-					WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-						AND Date(f.fecha) < '{$fecha1}'{$sql}
-					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
+            c.id_cliente,
+            c.nombre_fiscal,
+            Sum(f.total) AS total,
+            Sum(f.importe_iva) AS iva,
+            COALESCE(Sum(faa.abonos),0) as abonos,
+            COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+            'f' as tipo
+          FROM
+            clientes AS c
+            INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+            LEFT JOIN (
+              SELECT
+                d.id_cliente,
+                d.id_factura,
+                Sum(d.abonos) AS abonos
+              FROM
+              (
+                SELECT
+                  f.id_cliente,
+                  f.id_factura,
+                  Sum(fa.total) AS abonos
+                FROM
+                  facturacion AS f
+                    INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+                WHERE f.status <> 'ca' AND f.status <> 'b'
+                  AND f.id_cliente = '{$_GET['id_cliente']}'
+                  AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                GROUP BY f.id_cliente, f.id_factura
+
+                UNION
+
+                SELECT
+                  f.id_cliente,
+                  f.id_nc AS id_factura,
+                  Sum(f.total) AS abonos
+                FROM
+                  facturacion AS f
+                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                  AND f.id_cliente = '{$_GET['id_cliente']}'
+                  AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                GROUP BY f.id_cliente, f.id_factura
+              ) AS d
+              GROUP BY d.id_cliente, d.id_factura
+            ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+          WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
+            AND Date(f.fecha) < '{$fecha1}'{$sql}
+          GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
 					UNION ALL
 

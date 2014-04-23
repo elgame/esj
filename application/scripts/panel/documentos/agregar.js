@@ -30,6 +30,10 @@
     doc_tlc.init();
 
     dataTable();
+
+    // Asigna la funcionalidad de ligar remisiones a facturas
+    eventsRemisiones();
+
   });
 
   var config = function () {
@@ -70,6 +74,109 @@
       }
     });
   };
+
+  var eventsRemisiones = function(){
+    // Boton guardar remisiones
+    $('#save-remisiones').on('click', function(event) {
+      var $this = $(this), paramas={
+        id_factura: $("#facturaId").val(),
+        remisionesIds: [], palletsIds: []
+      }; // boton
+      $("#remisiones-selected .remision-selected").each(function(index, el) {
+        paramas.remisionesIds.push($(this).val());
+      });
+      $("#pallets-selected .pallet-selected").each(function(index, el) {
+        paramas.palletsIds.push($(this).val());
+      });
+
+      if (paramas.remisionesIds.length > 0) {
+        msb.confirm("Estas seguro de ligar las remisiones a la factura?", "", this, function(){
+          $.post(base_url + 'panel/facturacion/ajax_ligar_remisiones', paramas, function(data, textStatus, xhr) {
+            noty({"text": data.msg, "layout":"topRight", "type": 'success'});
+          }, 'json');
+        });
+      };
+    });
+
+    // Boton Ventas de Remision.
+    $('#show-remisiones').on('click', function(event) {
+      var $this = $(this); // boton
+      $('#modal-remisiones').modal('show');
+    });
+
+    $("#remisiones-selected").on('click', '.quitRemision', function(event) {
+      event.preventDefault();
+      var $parent = $(this).parent(),
+      modal_sel = $("#chk-cli-remision-"+$parent.find('.remision-selected').val());
+      modal_sel.removeAttr('style');
+      modal_sel.find('.chk-cli-remisiones').removeAttr('disabled').removeAttr('checked');
+      $parent.remove();
+    });
+
+    $('#BtnAddRemisiones').on('click', function(event) {
+      if ($('.chk-cli-remisiones:checked').length > 0) {
+        $.get(base_url + 'panel/facturacion/ajax_get_unidades', function(unidades) {
+          $('.chk-cli-remisiones:checked').each(function(index, el) {
+            var $chkRemision = $(this),
+                $parent = $chkRemision.parent(),
+                jsonObj = jQuery.parseJSON($parent.find('#jsonData').val()),
+                $parent_tr = $parent.parent();
+
+            var existRemision = false;
+            $('.remision-selected').each(function(index, el) {
+              if ($(this).val() === $chkRemision.val()) {
+                existRemision = true;
+                return false;
+              }
+            });
+
+            // Si no existe la remision en el listado entonces la agrega.
+            if ( ! existRemision) {
+
+              $parent.parent().css('background-color', '#FF9A9D');
+              $chkRemision.prop('disabled', true);
+
+              $('#remisiones-selected').append('<label><i class="icon-remove quitRemision"></i> '+$parent_tr.find('td:nth-child(2)').text()+' <input type="hidden" value="' + $chkRemision.val() + '" name="remisionesIds[]" class="remision-selected" id="remision' + $chkRemision.val() + '"></label>');
+
+              var existPallet;
+              for (var i in jsonObj) {
+                existPallet = false;
+                $('.pallet-selected').each(function(index, el) {
+                  if ($(this).val() === jsonObj[i]['id_pallet']) {
+                    existPallet = true;
+                    return false;
+                  }
+                });
+
+                if (! existPallet) {
+                  $('#pallets-selected').append('<input type="hidden" value="' + jsonObj[i]['id_pallet'] + '" name="palletsIds[]" class="pallet-selected" id="pallet' + jsonObj[i]['id_pallet'] + '">');
+                }
+
+                addProducto(unidades, {
+                  'id': jsonObj[i]['id_clasificacion'],
+                  'nombre': jsonObj[i]['nombre'],
+                  'cajas': jsonObj[i]['cajas'],
+                  'id_pallet': jsonObj[i]['id_pallet'],
+                  'id_unidad': jsonObj[i]['id_unidad'],
+                  'unidad': jsonObj[i]['unidad'],
+                  'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
+                  'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
+                  'kilos': jsonObj[i]['kilos'],
+                  'id_size': jsonObj[i]['id_size'],
+                  'size': jsonObj[i]['size'],
+                  'id_remision': $chkRemision.val(),
+                });
+              }
+            }
+          });
+
+          $('#modal-remisiones').modal('hide');
+        }, 'json');
+      } else {
+        noty({"text": 'Seleccione al menos una remisión para agregarla al listado.', "layout":"topRight", "type": 'error'});
+      }
+    });
+  }
 
   var dataTable = function () {
     $('.datatable').dataTable({

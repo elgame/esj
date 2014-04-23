@@ -254,7 +254,8 @@ class banco_cuentas_model extends banco_model {
 				m.status,
 				m.entransito,
 				m.metodo_pago,
-				m.id_cuenta_proveedor
+				m.id_cuenta_proveedor,
+        m.desglosar_iva
 			FROM banco_movimientos AS m
 				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
@@ -435,6 +436,9 @@ class banco_cuentas_model extends banco_model {
 	public function showConciliacion()
 	{
 		$res = $this->getSaldoCuentaData();
+    // echo "<pre>";
+    //   var_dump($res);
+    // echo "</pre>";exit;
 
     $this->load->model('empresas_model');
     $defempresa = $this->empresas_model->getDefaultEmpresa();
@@ -456,10 +460,10 @@ class banco_cuentas_model extends banco_model {
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'C');
-		$widths = array(17, 25, 55, 50, 20, 25, 20, 15);
+		$aligns = array('L', 'L', 'L', 'L', 'L', 'R', 'R', 'R');
+		$widths = array(17, 25, 40, 40, 20, 25, 18, 18);
 		// $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. pago', 'Retiro', 'Deposito', 'Estado');
-    $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. PAGO', 'IMPORTE');
+    $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. PAGO', 'IMPORTE', 'IVA', 'Ret IVA');
 
 		$total_retiro   = 0;
 		$total_deposito = 0;
@@ -495,14 +499,43 @@ class banco_cuentas_model extends banco_model {
 
 			if(substr($item->entransito, 0, 5) == 'Trans')
 			{
+        $monto_r = $item->retiro;
+        $iva_r = $ret_iva_r = 0;
+        if ($item->desglosar_iva == 't')
+          $iva_r = $item->retiro-($item->retiro/1.16);
+        else
+        {
+          $info_compras = $this->db->query("SELECT
+            bmc.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
+            c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq
+          FROM compras AS f
+            INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+            INNER JOIN proveedores AS c ON c.id_proveedor = f.id_proveedor
+            INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+            INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
+          WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f' AND bm.id_movimiento = {$item->id_movimiento}
+          GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha)
+          ORDER BY bmc.id_movimiento ASC")->row();
+          if(isset($info_compras->importe_iva))
+          {
+            $iva_r = $info_compras->importe_iva;
+            $ret_iva_r = $info_compras->retencion_iva;
+          }
+        }
+
 				$datos = array($item->fecha,
 								$item->numero_ref,
 								substr($item->cli_pro, 0, 35),
 								strip_tags($item->concepto),
 								$item->metodo_pago,
-								String::formatoNumero($item->retiro, 2, '$', false),
-								// String::formatoNumero($item->deposito, 2, '$', false),
-								// str_replace('|', ' ', $item->entransito),
+								String::formatoNumero($monto_r, 2, '$', false),
+								String::formatoNumero($iva_r, 2, '$', false),
+								String::formatoNumero($ret_iva_r, 2, '$', false),
 								);
 
 				$pdf->SetX(6);
@@ -519,7 +552,7 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(0,0,0);
 		$pdf->SetAligns(array('R', 'R', 'R'));
-		$pdf->SetWidths(array(167, 25, 20));
+		$pdf->SetWidths(array(142, 25, 20));
 		$pdf->Row(array('SUMA DE CHEQUES EN TRANSITO:',
 					String::formatoNumero($total_retiro, 2, '$', false),
 					// String::formatoNumero($total_deposito, 2, '$', false),
