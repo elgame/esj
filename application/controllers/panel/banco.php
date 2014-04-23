@@ -122,7 +122,7 @@ class banco extends MY_Controller {
 	public function conciliacion()
 	{
 		$this->load->model('banco_cuentas_model');
-    	$this->banco_cuentas_model->showConciliacion();
+    $this->banco_cuentas_model->showConciliacion();
 	}
 
 	public function cuenta_banamex()

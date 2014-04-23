@@ -175,9 +175,9 @@ class facturacion_model extends privilegios_model{
       $response['pallets'] = $res->result();
 
       $response['remisiones'] = $this->db->query(
-        "SELECT id_venta
-        FROM facturacion_ventas_remision_pivot
-        WHERE id_factura = {$idFactura}")->result();
+        "SELECT fvr.id_venta, f.serie, f.folio
+        FROM facturacion AS f INNER JOIN facturacion_ventas_remision_pivot AS fvr ON f.id_factura = fvr.id_venta
+        WHERE fvr.id_factura = {$idFactura}")->result();
 
       $remitente = $this->db->query(
         "SELECT nombre, direccion, rfc, placas, modelo, chofer, marca
@@ -335,6 +335,55 @@ class facturacion_model extends privilegios_model{
         return $data;
     }
 
+    public function addPallestRemisiones($idFactura, $borrador)
+    {
+      if (isset($_POST['palletsIds']))
+      {
+        $pallets = array(); // Ids de los pallets cargados en la factura.
+        // Crea el array de los pallets a insertar.
+        foreach ($_POST['palletsIds'] as $palletId)
+        {
+          $pallets[] = array(
+            'id_factura' => $idFactura,
+            'id_pallet'  => $palletId
+          );
+        }
+
+        if (count($pallets) > 0)
+        {
+          if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+          {
+            $this->db->delete('facturacion_pallets', array('id_factura' => $idFactura));
+          }
+
+          $this->db->insert_batch('facturacion_pallets', $pallets);
+        }
+      }
+
+      if (isset($_POST['remisionesIds']))
+      {
+        $remisiones = array(); // Ids de los pallets cargados en la factura.
+        // Crea el array de los pallets a insertar.
+        foreach ($_POST['remisionesIds'] as $remisionId)
+        {
+          $remisiones[] = array(
+            'id_factura' => $idFactura,
+            'id_venta'  => $remisionId
+          );
+        }
+
+        if (count($remisiones) > 0)
+        {
+          if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
+          {
+            $this->db->delete('facturacion_ventas_remision_pivot', array('id_factura' => $idFactura));
+          }
+
+          $this->db->insert_batch('facturacion_ventas_remision_pivot', $remisiones);
+        }
+      }
+      return array('passes' => true, 'msg' => 'Se ligaron las remisiones correctamente');
+    }
 	/**
 	 * Agrega una Factura.
      *
@@ -469,51 +518,8 @@ class facturacion_model extends privilegios_model{
           $this->db->insert_batch('facturacion_productos', $productosFactura);
         }
 
-        if (isset($_POST['palletsIds']))
-        {
-          $pallets = array(); // Ids de los pallets cargados en la factura.
-          // Crea el array de los pallets a insertar.
-          foreach ($_POST['palletsIds'] as $palletId)
-          {
-            $pallets[] = array(
-              'id_factura' => $idFactura,
-              'id_pallet'  => $palletId
-            );
-          }
-
-          if (count($pallets) > 0)
-          {
-            if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
-            {
-              $this->db->delete('facturacion_pallets', array('id_factura' => $idFactura));
-            }
-
-            $this->db->insert_batch('facturacion_pallets', $pallets);
-          }
-        }
-
-        if (isset($_POST['remisionesIds']))
-        {
-          $remisiones = array(); // Ids de los pallets cargados en la factura.
-          // Crea el array de los pallets a insertar.
-          foreach ($_POST['remisionesIds'] as $remisionId)
-          {
-            $remisiones[] = array(
-              'id_factura' => $idFactura,
-              'id_venta'  => $remisionId
-            );
-          }
-
-          if (count($remisiones) > 0)
-          {
-            if ((isset($_GET['idb']) && ! $borrador)  || $borrador)
-            {
-              $this->db->delete('facturacion_ventas_remision_pivot', array('id_factura' => $idFactura));
-            }
-
-            $this->db->insert_batch('facturacion_ventas_remision_pivot', $remisiones);
-          }
-        }
+        // Inserta los pallests y las remisiones a la factura
+        $this->addPallestRemisiones($idFactura, $borrador);
 
         if (isset($_POST['es_carta_porte']))
         {

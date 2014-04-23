@@ -1,6 +1,40 @@
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>
+        <h2><i class="icon-plus"></i> Ligar Ventas de Remisión</h2>
+        <div class="box-icon">
+          <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+        </div>
+      </div>
+      <div class="box-content">
+        <div class="span4">
+          <button type="button" class="btn btn-info" id="show-remisiones">Buscar</button><br>
+          <button type="button" class="btn btn-info" id="save-remisiones">Guardar</button>
+          <input type="hidden" name="facturaId" id="facturaId" value="<?php echo $factura['info']->id_factura; ?>" >
+        </div>
+        <div id="pallets-selected">
+          <?php
+            if (isset($factura) && count($factura['pallets']) > 0) {
+              foreach ($factura['pallets'] as $pallet) { ?>
+                <input type="hidden" value="<?php echo $pallet->id_pallet ?>" name="palletsIds[]" class="pallet-selected" id="pallet<?php echo $pallet->id_pallet ?>">
+          <?php }} ?>
+        </div>
+
+        <div id="remisiones-selected" class="span4">
+          <?php
+            if (isset($factura) && count($factura['remisiones']) > 0) {
+              foreach ($factura['remisiones'] as $remision) { ?>
+                <label><?php echo $remision->serie.$remision->folio; ?> <input type="hidden" value="<?php echo $remision->id_venta ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remision->id_venta ?>"></label>
+          <?php }} ?>
+        </div>
+
+      </div><!--/span-->
+    </div><!--/row-->
+  </div><!--/row-->
+
+  <div class="row-fluid">
+    <div class="box span12">
+      <div class="box-header well" data-original-title>
         <h2><i class="icon-plus"></i> Datos Factura</h2>
         <div class="box-icon">
           <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
@@ -326,5 +360,50 @@
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
+
+  <!-- Modal remisiones-->
+  <div id="modal-remisiones" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Remisiones</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-pallets-cliente">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Serie - Folio</th>
+              <th>Cliente</th>
+              <th style="width:70px;">Fecha</th>
+              <!-- <th>Clasificacion</th> -->
+            </tr>
+          </thead>
+          <tbody>
+
+            <?php foreach ($remisiones as $key => $remision) {
+                    $rendimientos = array();
+                    foreach ($remision->pallets as $pallet) {
+                      $rendimientos = array_merge($rendimientos, $pallet['rendimientos']);
+                    }
+            ?>
+
+              <tr style="" id="chk-cli-remision-<?php echo $remision->id_factura ?>">
+                <td><input type="checkbox" value="<?php echo $remision->id_factura ?>" class="chk-cli-remisiones"><input type="hidden" id="jsonData" value="<?php echo htmlentities(json_encode($rendimientos)) ?>"></td>
+                <td><?php echo ($remision->serie !== '' && $remision->serie !== null ? $remision->serie.'-' : '').$remision->folio ?></td>
+                <td><?php echo $remision->nombre_fiscal ?></td>
+                <td><?php echo $remision->fecha ?></td>
+                <!-- <td></td> -->
+              </tr>
+            <?php } ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddRemisiones">Agregar Remisiones</button>
+    </div>
+  </div><!--/modal pallets -->
 
 <!-- </div> -->

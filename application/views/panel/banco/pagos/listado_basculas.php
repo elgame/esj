@@ -104,42 +104,44 @@
               <?php
               $total_pagar = 0;
               foreach($pagos as $pago){
-              ?>
-                  <tr>
-                    <td colspan="7"><?php echo $pago->nombre_fiscal; ?></td>
-                  </tr>
-                <?php
+                $total_pagar_proveedor = 0;
+                $html = '';
+
                 foreach ($pago->pagos as $key => $value)
                 {
                   $total_pagar += $value->monto;
-                  ?>
-                <tr>
-                    <td><?php echo $value->fecha; ?></td>
-                    <td><?php echo $value->folio; ?>
-                      <input type="hidden" name="id_pago[]" value="<?php echo $value->id_pago; ?>">
+                  $total_pagar_proveedor += $value->monto;
+                  $html .= '<tr>
+                    <td>'.$value->fecha.'</td>
+                    <td>'.$value->folio.'
+                      <input type="hidden" name="id_pago[]" value="'.$value->id_pago.'">
                     </td>
-                    <td><?php echo String::formatoNumero($value->monto, 2, '$', false); ?></td>
+                    <td>'.String::formatoNumero($value->monto, 2, '$', false).'</td>
                     <td>
                       <select name="cuenta_proveedor[]" class="tipo_cuenta" required>
-                        <option value=""></option>
-                      <?php foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
-                      { $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': ''; ?>
-                        <option value="<?php echo $cuentasp->id_cuenta.'-'.$cuentasp->is_banamex; ?>" <?php echo $select; ?>><?php echo $cuentasp->alias.' *'.substr($cuentasp->cuenta, -4); ?></option>
-                      <?php
-                      } ?>
-                      </select>
+                        <option value=""></option>';
+                      foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
+                      {
+                        $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
+                        $html .= '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
+                      }
+                    $html .= '</select>
                     </td>
-                    <td><input type="text" name="ref_alfanumerica[]" value="<?php echo $value->ref_alfanumerica; ?>" class="ref_alfa" required></td>
-                    <td><input type="text" name="ref_numerica[]" value="<?php echo $value->referencia; ?>" class="input-small ref_numerica" maxlength="7" required></td>
+                    <td><input type="text" name="ref_alfanumerica[]" value="'.$value->ref_alfanumerica.'" class="ref_alfa" required></td>
+                    <td><input type="text" name="ref_numerica[]" value="'.$value->referencia.'" class="input-small ref_numerica" maxlength="7" required></td>
                     <td>
-                      <?php echo $this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago_bascula/', array(
+                      '.$this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago_bascula/', array(
                           'params'   => "id_pago={$value->id_pago}",
                           'btn_type' => 'btn-danger pull-right',
                           'attrs' => array('onclick' => "msb.confirm('Estas seguro de Quitar el pago?', 'Facturas', this); return false;") )
-                      ); ?>
+                      ).'
                     </td>
-                  </tr>
-          <?php }
+                  </tr>';
+                }
+                echo '<tr>
+                    <td colspan="5">'.$pago->nombre_fiscal.'</td>
+                    <td colspan="2">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                  </tr>'.$html;
               } ?>
                   <tr style="background-color:#ccc;font-weight: bold;">
                     <td style="text-align: right" colspan="2">Total:</td>

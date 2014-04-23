@@ -6,7 +6,7 @@ class inventario_model extends privilegios_model{
 	}
 
 	/*-------------------------------------------
-	 * --------- Reportes de compras
+	 * --------- Reportes de compras ------------
 	 -------------------------------------------*/
 
 	/**

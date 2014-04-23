@@ -44,7 +44,7 @@ class inventario extends MY_Controller {
   }
 
   /*-------------------------------------------
-   --------------- Rpt Compras -------------
+   --------------- Rpt Compras ----------------
    -------------------------------------------*/
 
   public function cproveedor()

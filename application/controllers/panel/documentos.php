@@ -87,6 +87,7 @@ class documentos extends MY_Controller {
           array('general/supermodal.js'),
           array('general/keyjump.js'),
           array('general/util.js'),
+          array('general/msgbox.js'),
           array('panel/documentos/agregar.js'),
       ));
 
@@ -100,6 +101,8 @@ class documentos extends MY_Controller {
 
       // Obtiene la informacion de la factura.
       $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['id']);
+      // Se obtienen las remisiones
+      $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
       // Carga la vista de la factura con sus datos.
       $params['facturaView'] = $this->load->view('panel/facturacion/ver', $params, true);
