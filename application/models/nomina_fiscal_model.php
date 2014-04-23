@@ -5498,8 +5498,23 @@ class nomina_fiscal_model extends CI_Model {
 
       $fechaEntrada = new DateTime($filtros['ffecha1']);
       $fechaSalida = new DateTime($filtros['ffecha2']);
+      // $diasProporcionVacaciones = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 6, 2);
+      $diasProporcionAguinaldo = round(( ((new DateTime($fechaSalida->format("Y").'-01-01'))->diff($fechaSalida)->days + 1) / 365) * 15, 2);
+      // Saca la fecha del ultimo año que le tocan vacaciones
+      $anios_dif = $fechaSalida->format("Y") - $fechaEntrada->format("Y");
+      $fechaEntrada->modify("+{$anios_dif} years");
+      if($fechaEntrada->getTimestamp() > $fechaSalida->getTimestamp()) // si se pasa entonces es un año anterior
+        $fechaEntrada->modify("-1 year");
+      // Se busca en la BD si ya se le pagaron las vacaciones en ese año y altera la fecha para q se le pague lo proporcional
+      $vacaciones = $this->db->query("SELECT id_vacaciones, anio, semana, dias_vacaciones, Date(fecha) AS fecha, Date(fecha_fin) AS fecha_fin
+                                 FROM nomina_fiscal_vacaciones
+                                 WHERE id_empleado = {$empleado['info'][0]->id}
+                                   AND Date(fecha) >= '{$fechaEntrada->format("Y-m-d")}'
+                                 ORDER BY anio DESC, semana DESC")->row();
+      if (isset($vacaciones->id_vacaciones))
+        $fechaEntrada->setTimestamp(strtotime($vacaciones->fecha_fin));
       $diasProporcionVacaciones = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 6, 2);
-      $diasProporcionAguinaldo = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 15, 2);
+
       $vacaciones = $diasProporcionVacaciones * $filtros['fsalario_real'];
       $aguinaldo = $diasProporcionAguinaldo * $filtros['fsalario_real'];
 
