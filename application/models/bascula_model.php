@@ -119,7 +119,7 @@ class Bascula_model extends CI_Model {
           // 'kilos_bruto'  => $this->input->post('pkilos_brutos'),
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
-          'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'],
+          'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'],
         );
 
         if ($this->input->post('ptipo') === 'en')
@@ -161,6 +161,7 @@ class Bascula_model extends CI_Model {
         'importe'       => empty($_POST['ptotal']) ? 0 : $_POST['ptotal'],
         'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
         'obcervaciones' => $this->input->post('pobcervaciones'),
+        'rancho'       => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
       );
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
@@ -198,7 +199,7 @@ class Bascula_model extends CI_Model {
         $data2['accion']      = 'sa';
         $data2['tipo']        = $this->input->post('ptipo');
 
-        $data2['cajas_prestadas'] = empty($_POST['pcajas_prestadas']) ? null : $_POST['pcajas_prestadas'];
+        $data2['cajas_prestadas'] = empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'];
 
         if (isset($_POST['pstatus'])){
           if($info_boleta['info'][0]->accion == 'b')
@@ -225,6 +226,7 @@ class Bascula_model extends CI_Model {
               'precio'       => $_POST['pprecio'][$key],
               'importe'      => $_POST['pimporte'][$key],
               'num_registro' => $key,
+              'aux_num_registro' => $_POST['pnum_registro'][$key],
             );
           }
         }
@@ -243,7 +245,7 @@ class Bascula_model extends CI_Model {
     return array('passes'=>true);
   }
 
-  public function updateBascula($id=null, $data=null, $cajas=null, $logBitacora = false, $usuario_auth = false)
+  public function updateBascula($id=null, $data=null, $cajas=null, $logBitacora = false, $usuario_auth = false, $all = true)
   {
     $id = is_null($id) ? $_GET['id'] : $id;
 
@@ -254,14 +256,18 @@ class Bascula_model extends CI_Model {
 
     if ($logBitacora && is_numeric($usuario_auth))
     {
-      $this->logBitacora($id, $data, $usuario_auth);
+      $this->logBitacora($id, $data, $usuario_auth, $cajas, $all);
     }
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
+    foreach ($cajas as $key => $caja)
+    {
+      unset($cajas[$key]['aux_num_registro']);
+    }
 
+    $this->db->delete('bascula_compra', array('id_bascula' => $id));
     if ( ! is_null($cajas) && count($cajas) > 0)
     {
-      $this->db->delete('bascula_compra', array('id_bascula' => $id));
       $this->db->insert_batch('bascula_compra', $cajas);
     }
 
@@ -1472,10 +1478,55 @@ class Bascula_model extends CI_Model {
     $this->db->update('bascula', array('accion' => 'p'), array('id_bascula' => $idBascula));
   }
 
-  public function logBitacora($idBascula, $data, $usuario_auth)
+  public function logBitacora($idBascula, $data, $usuario_auth, $cajas = null, $all = true)
   {
+    $camposExcluidos = array(
+      'fecha_bruto' => '',
+      'fecha_tara'  => '',
+      'kilos_neto2' => '',
+      // 'accion'      => '',
+    );
+
+    // Quita los campos que no seran verificados.
+    $data = array_diff_key($data, $camposExcluidos);
+
+    // Array asoc que asocia el nombre del campo de la tabla con un nombre
+    // mas entendible para el usuario.
+    $campos = array(
+      'tipo'            => 'Tipo',
+      'id_area'         => 'Area',
+      'id_empresa'      => 'Empresa',
+      'id_cliente'      => 'Cliente',
+      'id_proveedor'    => 'Proveedor',
+      'rancho'          => 'Rancho',
+      'id_camion'       => 'Camion',
+      'id_chofer'       => 'Chofer',
+      'kilos_bruto'     => 'Kilos Brutos',
+      'kilos_tara'      => 'Kilos Tara',
+      'cajas_prestadas' => 'Cajas Prestadas',
+      'kilos_neto'      => 'Kilos Neto',
+      'no_lote'         => 'No. Lote',
+      'chofer_es_productor' => 'Chofer es productor',
+      'id_bonificacion' => 'Bonificacion',
+      'importe'         => 'Importe',
+      'total_cajas'     => 'Total Cajas',
+      'obcervaciones'   => 'Observaciones',
+      'accion'          => 'Accion',
+    );
+
+    // Campos que son ids, para facilitar la busqueda de sus valores.
+    $camposIds = array(
+      'id_area'      => "SELECT nombre as dato FROM areas WHERE id_area = ?",
+      'id_empresa'   => "SELECT nombre_fiscal as dato FROM empresas WHERE id_empresa = ?",
+      'id_cliente'   => "SELECT nombre_fiscal as dato FROM clientes WHERE id_cliente = ?",
+      'id_proveedor' => "SELECT nombre_fiscal as dato FROM proveedores WHERE id_proveedor = ?",
+      'id_camion'    => "SELECT placa as dato FROM camiones WHERE id_camion = ?",
+      'id_chofer'    => "SELECT nombre as dato FROM choferes WHERE id_chofer = ?",
+    );
+
     // Obtiene la informacion de la pesada.
     $info = $this->getBasculaInfo($idBascula);
+
     // echo "<pre>";
     //   var_dump($info['info'][0], $data);
     // echo "</pre>";exit;
@@ -1483,44 +1534,433 @@ class Bascula_model extends CI_Model {
     $camposEditados = array();
     $fecha = date('Y-m-d H:i:s');
 
+    // Query para obtener la ultima edicion de la boleta para la fecha indicada.
     $sql = $this->db->query(
       "SELECT no_edicion
        FROM bascula_bitacora
-       WHERE boleta = {$info['info'][0]->folio} AND
+       WHERE id_bascula = {$idBascula} AND
              DATE(fecha) = DATE('".$fecha."')
         ORDER BY (id) DESC
         LIMIT 1
-      ");
+    ");
 
-    $noEdicion = 1;
-    if ($sql->num_rows() > 0)
-    {
-      $noEdicion = $sql->result()[0]->no_edicion + 1;
-    }
+    $noEdicion = ($sql->num_rows() > 0) ? ($sql->result()[0]->no_edicion + 1) : 1;
 
-    foreach ($info['info'][0] as $campo => $value)
+    // Recorre los campos para verificar sus valores y si alguno cambio entonces
+    // es agregado al array $camposEditados
+    foreach ($info['info'][0] as $campoDb => $valorDb)
     {
-      if (isset($data[$campo]))
+      if ($all)
       {
-        if ($value != $data[$campo])
+        if (array_key_exists($campoDb, $camposIds))
         {
+          if ($data[$campoDb] === null)
+          {
+            $data[$campoDb] = 0;
+          }
+        }
+      }
+
+      if (isset($data[$campoDb]))
+      {
+        if ($valorDb != $data[$campoDb])
+        {
+          if (array_key_exists($campoDb, $camposIds))
+          {
+            if ($valorDb !== null && $valorDb !== '')
+            {
+              $query = $this->db->query(str_replace('?', $valorDb, $camposIds[$campoDb]));
+              $antes = $query->result()[0]->dato;
+              $query->free_result();
+            }
+            else
+            {
+              $antes = '';
+            }
+
+            if ($data[$campoDb] != 0 && $data[$campoDb] != '')
+            {
+              $query = $this->db->query(str_replace('?', $data[$campoDb], $camposIds[$campoDb]));
+              $despues = $query->result()[0]->dato;
+            }
+            else
+            {
+              $despues = '';
+            }
+          }
+          else
+          {
+            $antes = $valorDb?: '';
+            $despues = $data[$campoDb];
+          }
+
           $camposEditados[] = array(
             'id_usuario_auth'     => $usuario_auth,
             'id_usuario_logueado' => $this->session->userdata['id_usuario'],
-            'boleta'              => $info['info'][0]->folio,
+            'id_bascula'          => $idBascula,
             'fecha'               => $fecha,
             'no_edicion'          => $noEdicion,
-            'antes'               => $value,
-            'despues'             => $data[$campo],
-            'campo'             => $campo,
+            'antes'               => $antes,
+            'despues'             => $despues,
+            'campo'               => $campos[$campoDb],
           );
         }
       }
     }
 
-    echo "<pre>";
-      var_dump($camposEditados);
-    echo "</pre>";exit;
+    if ($all)
+    {
+      // Verifica los cambios en las Cajas
+      $cajasDb = $this->db->query(
+        "SELECT *
+        FROM bascula_compra
+        WHERE id_bascula = $idBascula
+        ORDER BY num_registro ASC
+      ");
+
+      // Si la boleta tiene cajas.
+      if ($cajasDb->num_rows() > 0)
+      {
+        $cajasDb = $cajasDb->result();
+
+        // echo "<pre>";
+        //   var_dump($cajasDb, $cajas);
+        // echo "</pre>";exit;
+
+        // Si hay cajas recibidas.
+        if (count($cajas) > 0)
+        {
+          // Recorre las cajas de la bdd.
+          foreach ($cajasDb as $cajaDb)
+          {
+            // Auxiliar para saber si la caja que se esta verificando existe
+            // entre las cajas que llegaron.
+            $existe = false;
+
+            // Recorre las cajas que llegaron del form u otro lado.
+            foreach ($cajas as $key => $cajaRec)
+            {
+              // Si la caja es nueva.
+              if ($cajaRec['aux_num_registro'] == '')
+              {
+                $cRec = array_diff_key($cajaRec, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+                $despues = implode('|', $cRec);
+
+                $camposEditados[] = array(
+                  'id_usuario_auth'     => $usuario_auth,
+                  'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+                  'id_bascula'          => $idBascula,
+                  'fecha'               => $fecha,
+                  'no_edicion'          => $noEdicion,
+                  'antes'               => "",
+                  'despues'             => "calidad|cajas|kilos|promedio|precio|importe \n $despues",
+                  'campo'               => 'Cajas',
+                );
+
+                unset($cajas[$key]);
+              }
+
+              // Si la caja es una de las que existen en los registros de la bdd entra.
+              else
+              {
+                if ($cajaDb->num_registro == $cajaRec['aux_num_registro'])
+                {
+                  $existe = true;
+
+                  $cDb = array_diff_key((array)$cajaDb, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+                  $antes = implode('|', $cDb);
+
+                  $cRec = array_diff_key($cajaRec, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+                  $despues = implode('|', $cRec);
+
+                  if ($antes !== $despues)
+                  {
+                    $camposEditados[] = array(
+                      'id_usuario_auth'     => $usuario_auth,
+                      'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+                      'id_bascula'          => $idBascula,
+                      'fecha'               => $fecha,
+                      'no_edicion'          => $noEdicion,
+                      'antes'               => "calidad|cajas|kilos|promedio|precio|importe \n $antes",
+                      'despues'             => "calidad|cajas|kilos|promedio|precio|importe \n $despues",
+                      'campo'               => 'Cajas',
+                    );
+                  }
+
+                  // break 2;
+                }
+                // else
+                // {
+                //   $existe = false;
+                // }
+              }
+            }
+
+            // Si se da el caso que la caja si existe en los registros de la bdd pero
+            // no en los que llegaron del form entonces entra.
+            if ( ! $existe)
+            {
+              $cDb = array_diff_key((array)$cajaDb, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+              $antes = implode('|', $cDb);
+
+              $camposEditados[] = array(
+                'id_usuario_auth'     => $usuario_auth,
+                'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+                'id_bascula'          => $idBascula,
+                'fecha'               => $fecha,
+                'no_edicion'          => $noEdicion,
+                'antes'               => "calidad|cajas|kilos|promedio|precio|importe \n $antes",
+                'despues'             => "Eliminado",
+                'campo'               => 'Cajas',
+              );
+            }
+          }
+          // echo "<pre>";
+          //   var_dump($cajas);
+          // echo "</pre>";exit;
+        }
+
+        // Si no hay cajas entonces significa que eliminaron todas las cajas del form
+        // entonces no se pueden comparar con las que existe en la bdd.
+        else
+        {
+          foreach ($cajasDb as $caja)
+          {
+            $c = array_diff_key((array)$caja, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+            $antes = implode('|', $c);
+
+            $camposEditados[] = array(
+              'id_usuario_auth'     => $usuario_auth,
+              'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+              'id_bascula'          => $idBascula,
+              'fecha'               => $fecha,
+              'no_edicion'          => $noEdicion,
+              'antes'               => "calidad|cajas|kilos|promedio|precio|importe \n $antes",
+              'despues'             => "Eliminado",
+              'campo'               => 'Cajas',
+            );
+          }
+        }
+        // echo "<pre>";
+        //   var_dump($camposEditados);
+        // echo "</pre>";exit;
+      }
+
+      // Si la boleta no tiene cajas pero se registraron nuevas.
+      else if ($cajasDb->num_rows() === 0 && count($cajas) > 0)
+      {
+        foreach ($cajas as $caja)
+        {
+          $c = array_diff_key($caja, array('id_bascula' => '', 'num_registro' => '', 'aux_num_registro' => ''));
+          $despues = implode('|', $c);
+
+          $camposEditados[] = array(
+            'id_usuario_auth'     => $usuario_auth,
+            'id_usuario_logueado' => $this->session->userdata['id_usuario'],
+            'id_bascula'          => $idBascula,
+            'fecha'               => $fecha,
+            'no_edicion'          => $noEdicion,
+            'antes'               => '',
+            'despues'             => "calidad|cajas|kilos|promedio|precio|importe \n $despues",
+            'campo'               => 'Cajas',
+          );
+        }
+      }
+    }
+
+    if (count($camposEditados) > 0)
+    {
+      $this->db->insert_batch('bascula_bitacora', $camposEditados);
+    }
+
+    // echo "<pre>";
+    //   var_dump($camposEditados);
+    // echo "</pre>";exit;
+  }
+
+  private function bitacora()
+  {
+    $sql = "";
+    if ((isset($_GET['ffecha1']) && $_GET['ffecha1']) && (isset($_GET['ffecha2']) && $_GET['ffecha2']))
+    {
+      $sql .= " AND DATE(ba.fecha_tara) >= '{$_GET['ffecha1']}' AND DATE(ba.fecha_tara) <= '{$_GET['ffecha2']}'";
+    }
+    else
+    {
+      $sql .= " AND DATE(ba.fecha_tara) >= '".date('Y-m-d')."' AND DATE(ba.fecha_tara) <= '".date('Y-m-d')."'";
+    }
+
+    if (isset($_GET['farea']) && $_GET['farea'])
+    {
+      $sql .= " AND ba.id_area = {$_GET['farea']}";
+    }
+
+    if (isset($_GET['ftipo']) && $_GET['ftipo'])
+    {
+      $sql .= " AND ba.tipo = '{$_GET['ftipo']}'";
+    }
+
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'])
+    {
+      $sql .= " AND ba.id_empresa = {$_GET['fid_empresa']}";
+    }
+
+    if (isset($_GET['fstatus']) && $_GET['fstatus'])
+    {
+      $sql .=  $_GET['fstatus'] == 1 ? " AND ba.accion = 'p'" : " AND ba.accion != 'p'";
+    }
+
+    $query = $this->db->query(
+      "SELECT ba.id_bascula,
+              ba.folio,
+              DATE(ba.fecha_tara) as fecha_bascula,
+              em.nombre_fiscal as empresa,
+              ba.tipo,
+              ar.nombre as area,
+              ba.accion as status,
+              (us.nombre || ' ' || us.apellido_paterno || ' ' || us.apellido_materno) as usuario_logueado,
+              (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) as usuario_auth,
+              bb.no_edicion,
+              bb.antes,
+              bb.despues,
+              bb.campo,
+              bb.fecha
+       FROM bascula_bitacora bb
+       INNER JOIN bascula ba ON ba.id_bascula = bb.id_bascula
+       INNER JOIN usuarios us ON us.id = bb.id_usuario_logueado
+       INNER JOIN usuarios us2 ON us2.id = bb.id_usuario_auth
+       INNER JOIN empresas em ON em.id_empresa = ba.id_empresa
+       INNER JOIN areas ar ON ar.id_area = ba.id_area
+       WHERE 1=1 $sql
+       ORDER BY bb.id_bascula, bb.fecha, bb.no_edicion
+    ");
+
+    return $query->result();
+  }
+
+  public function bitacora_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->bitacora();
+
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime(isset($_GET['ffecha1'])?$_GET['ffecha1']:date('Y-m-d'));
+    $fecha2 = new DateTime(isset($_GET['ffecha2'])?$_GET['ffecha2']:date('Y-m-d'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'])
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $pdf->titulo2 = "BITACORA BASCULA DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
+    // $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'L', 'L');
+    $widths = array(20, 20, 85, 40, 20, 20);
+    $header = array('FECHA', 'FOLIO', 'EMPRESA', 'AREA', 'TIPO', 'STATUS');
+
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L');
+    $widths2 = array(35, 35, 20, 40, 40, 26);
+    $header2 = array('USUARIO MOVIMIENTO', 'USUARIO AUTORIZO', 'CAMPO', 'ANTES', 'DESPUES', 'FECHA');
+
+    $aux = 0;
+
+    foreach($data as $key => $log)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(240,240,240);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, 1, 1);
+      }
+
+      if ($aux != $log->id_bascula)
+      {
+        $pdf->SetFont('helvetica', 'B', 8);
+
+        // se colocaria la info de la bascula
+        $pdf->SetY($pdf->GetY());
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $log->fecha_bascula,
+            $log->folio,
+            $log->empresa,
+            $log->area,
+            $log->tipo === 'sa' ? 'SALIDA' : 'ENTRADA',
+            $log->status === 'p' ? 'PAGADO' : 'NO PAGADO',
+          ), false, false);
+
+        // se coloca el header de la tabla de los registros
+        $pdf->SetFont('helvetica','', 7);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(255, 255, 255);
+
+        $pdf->SetY($pdf->GetY() + 5);
+        $pdf->SetX(15);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row($header2, false, 1);
+
+        $pdf->SetX(15);
+        $pdf->Row(array(
+            $log->usuario_logueado,
+            $log->usuario_auth,
+            $log->campo,
+            $log->antes,
+            $log->despues,
+            str_replace('-05', '', $log->fecha),
+          ), false, false);
+
+        $aux = $log->id_bascula;
+      }
+      else
+      {
+        $pdf->SetFont('helvetica','', 7);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(255, 255, 255);
+
+        $pdf->SetY($pdf->GetY());
+        $pdf->SetX(15);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths2);
+        $pdf->Row(array(
+            $log->usuario_logueado,
+            $log->usuario_auth,
+            $log->campo,
+            $log->antes,
+            $log->despues,
+            str_replace('-05', '', $log->fecha),
+          ), false, false);
+      }
+    }
+
+    $pdf->Output('BITACORA_BASCULA_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
 
 }

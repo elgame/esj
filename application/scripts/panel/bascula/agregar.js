@@ -302,6 +302,7 @@ $(function(){
       // }
       // Construye string con el html del tr.
       trHtml = '<tr data-kneto=""><td>' + $caja.val() +
+                  '<input type="hidden" name="pnum_registro[]" value="" id="pnum_registro">' +
                   '<input type="hidden" name="pcajas[]" value="'+$caja.val()+'" id="pcajas">' +
                   '<input type="hidden" name="pcalidad[]" value="'+$calidad.find('option:selected').val()+'" id="pcalidad">' +
                   '<input type="hidden" name="pcalidadtext[]" value="'+$calidad.find('option:selected').text()+'" id="pcalidadtext">' +
@@ -545,7 +546,7 @@ $(function(){
           data: {idb: $('#pidb').val()},
         })
         .done(function() {
-          location.reload();
+          // location.reload();
         });
 
       }, function () {

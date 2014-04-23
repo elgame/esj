@@ -45,7 +45,8 @@ class bascula extends MY_Controller {
     'bascula/imprimir2/',
     'bascula/rmc_pdf2/',
 
-    'bascula/bonificaciones_pdf/'
+    'bascula/bonificaciones_pdf/',
+    'bascula/bitacora_pdf/'
     );
 
   public function _remap($method){
@@ -143,6 +144,7 @@ class bascula extends MY_Controller {
         $log = true;
         $authId = $_POST['autorizar'];
       }
+
       $res_mdl = $this->bascula_model->addBascula(null, false, $log, $authId);
 
       $ticket = '';
@@ -256,6 +258,7 @@ class bascula extends MY_Controller {
             $_POST['ppromedio'][]    = $c->promedio;
             $_POST['pprecio'][]      = $c->precio;
             $_POST['pimporte'][]     = $c->importe;
+            $_POST['pnum_registro'][] = $c->num_registro;
           }
         }
 
@@ -544,7 +547,6 @@ class bascula extends MY_Controller {
     UploadFiles::base64SaveImg($base64, 'calando');
     echo $base64;
   }
-
 
   /**
    * Muestra la vista para el Reporte "REPORTE DIARIO DE ENTRADAS"
@@ -1088,10 +1090,17 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->updateBascula($_GET['idb'], array(
-        'no_lote' => $this->input->post('pno_lote'),
-        'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
-      ));
+      $res_mdl = $this->bascula_model->updateBascula(
+        $_GET['idb'],
+        array(
+          'no_lote' => $this->input->post('pno_lote'),
+          'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
+        ),
+        null,
+        true,
+        $this->session->userdata['id_usuario'],
+        false
+      );
 
       if($res_mdl['passes'])
         redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
@@ -1743,8 +1752,16 @@ class bascula extends MY_Controller {
   public function ajax_pagar_boleta()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->pagarBoleta($_GET['idb']);
 
+    $this->bascula_model->logBitacora(
+      $_GET['idb'],
+      array('accion' => 'p'),
+      $this->session->userdata['id_usuario'],
+      null,
+      false
+    );
+
+    $this->bascula_model->pagarBoleta($_GET['idb']);
     echo json_encode(array('passes' => true));
   }
 
@@ -1817,6 +1834,42 @@ class bascula extends MY_Controller {
     }
 
     echo json_encode($resp);
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE ACUMULADOS DE PRODUCTOS"
+   *
+   * @return void
+   */
+  public function bitacora()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte de Acumulados de Productos'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/bitacora', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function bitacora_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->bitacora_pdf();
   }
 
 }
