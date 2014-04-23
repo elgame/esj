@@ -561,13 +561,13 @@
     <div class="row-fluid" style="text-align: center;">
       <div class="input-prepend" title="Usuario" data-rel="tooltip">
         <span class="add-on"><i class="icon-user"></i>
-        </span><input class="input-large span10" name="usuario" value="admin" id="usuario" type="text" placeholder="usuario">
+        </span><input class="input-large span10" name="usuario" value="" id="usuario" type="text" placeholder="usuario">
       </div>
       <div class="clearfix"></div>
 
       <div class="input-prepend mtop" title="Contraseña" data-rel="tooltip">
         <span class="add-on"><i class="icon-lock"></i>
-        </span><input class="input-large span10" name="pass" value="12345" id="pass" type="password" placeholder="******">
+        </span><input class="input-large span10" name="pass" value="" id="pass" type="password" placeholder="******">
       </div>
     </div>
   </div>
