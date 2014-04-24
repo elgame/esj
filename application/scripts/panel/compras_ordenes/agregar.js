@@ -14,7 +14,7 @@
 
     eventCodigoBarras();
     eventBtnAddProducto();
-    eventIepsKeypress();
+    eventTipoCambioKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
     eventBtnDelProducto();
@@ -24,6 +24,8 @@
     //Ligar ordenes
     eventOnChangeCondicionPago();
     eventOnChangeMetodoPago();
+
+    eventTipoMonedaChange();
 
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
@@ -379,25 +381,48 @@
     });
   };
 
-  var eventIepsKeypress = function () {
-    $('#fieps').on('keypress', function(event) {
+  var eventTipoCambioKeypress = function () {
+    $('#ftipo_cambio').on('keypress', function(event) {
       if (event.which === 13) {
         $('#btnAddProd').click();
       }
     });
   };
 
+  var eventTipoMonedaChange = function () {
+    $("#ftipo_moneda").on('change', function(event) {
+      // Se obtiene el tipo de cambio de Banxico
+      if ($(this).val() == 'dolar') {
+        $.ajax({
+          url      : document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=10&callback=?&q=' +
+                      encodeURIComponent("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es"),
+          dataType : 'json',
+          success  : function (data) {
+            if (data.responseData.feed && data.responseData.feed.entries) {
+              $.each(data.responseData.feed.entries, function (i, e) {
+                $("#ftipo_cambio").val(parseFloat(e.title.substr(3, 9)));
+              });
+            }
+          }
+        });
+      }else
+        $("#ftipo_cambio").val('');
+    });
+  }
+
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {
       var $fcodigo     = $('#fcodigo').css({'background-color': '#FFF'}),
-          $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
-          $fconceptoId = $('#fconceptoId'),
-          $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
-          $fprecio     = $('#fprecio').css({'background-color': '#FFF'}),
+          $fconcepto     = $('#fconcepto').css({'background-color': '#FFF'}),
+          $fconceptoId   = $('#fconceptoId'),
+          $fcantidad     = $('#fcantidad').css({'background-color': '#FFF'}),
+          $fprecio       = $('#fprecio').css({'background-color': '#FFF'}),
           $fpresentacion = $('#fpresentacion'),
-          $funidad     = $('#funidad'),
-          $fieps     = $('#fieps'),
-          $ftraslado   = $('#ftraslado'),
+          $funidad       = $('#funidad'),
+          $fieps         = $('#fieps'),
+          $ftipo_moneda  = $('#ftipo_moneda'),
+          $ftipo_cambio  = $('#ftipo_cambio'),
+          $ftraslado     = $('#ftraslado'),
 
           campos = [$fcantidad, $fprecio],
           producto,
@@ -426,6 +451,13 @@
       // Valida si el campo cantida es 0.
       if ($fcantidad.val() === '0') {
         $fcantidad.css({'background-color': '#FDFC9A'});
+        error = true;
+      }
+
+      // Valida el tipo de cambio
+      $ftipo_cambio.css({'background-color': '#FFF'});
+      if ($ftipo_moneda.val() === 'dolar' && $ftipo_cambio.val() == '') {
+        $ftipo_cambio.css({'background-color': '#FDFC9A'});
         error = true;
       }
 
@@ -465,6 +497,8 @@
           'unidad': $funidad.find('option:selected').val(),
           'ieps': $fieps.val(),
           'traslado': $ftraslado.find('option:selected').val(),
+          'tipo_moneda': $ftipo_moneda.val(),
+          'tipo_cambio': $ftipo_cambio.val(),
         };
 
         addProducto(producto);
@@ -480,6 +514,7 @@
         $ftraslado.val('0');
         $fpresentacion.html('');
         $fcodigo.val('');
+        $ftipo_cambio.val('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -626,6 +661,12 @@
       //   }
       // });
       // htmlPresen += '</select>';
+
+      // Si el Tipo de moneda es Dolar hace la conversion
+      if (producto.tipo_moneda == 'dolar')
+      {
+        producto.precio_unitario = parseFloat(producto.precio_unitario)*parseFloat(producto.tipo_cambio);
+      }
 
       var htmlUnidad = '<select name="unidad[]" class="span12" id="unidad">';
       $('#funidad').find('option').each(function(index, el) {

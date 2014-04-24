@@ -262,17 +262,25 @@
                         <?php } ?>
                       </select>
                     </div><!--/span2 -->
-                    <div class="span2">
+                    <div class="span1">
                       <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
                       <select class="span12" id="ftraslado">
                         <option value="0">0%</option>
                         <option value="11">11%</option>
                         <option value="16">16%</option>
                       </select>
-                    </div><!--/span2 -->
-                    <div class="span2">
+                    </div><!--/span1 -->
+                    <div class="span1">
                       <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
                       <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
+                    </div><!--/span1 -->
+                    <div class="span2">
+                      <label for="ftipo_moneda" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Tipo de cambio</label>
+                      <select class="span7 pull-left" id="ftipo_moneda">
+                        <option value="peso">Pesos</option>
+                        <option value="dolar">Dolares</option>
+                      </select>
+                      <input type="text" class="span5 vpositive" id="ftipo_cambio" placeholder="12.45">
                     </div><!--/span2 -->
                     <div class="span2 offset1">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
