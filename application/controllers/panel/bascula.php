@@ -223,7 +223,14 @@ class bascula extends MY_Controller {
         $params['accion']      = $info['info'][0]->accion;
 
         if (isset($_GET['p']))
+        {
           $params['ticket'] = $info['info'][0]->id_bascula;
+
+          if ($info['info'][0]->no_impresiones == 0)
+          {
+            $info['info'][0]->no_impresiones = 1;
+          }
+        }
 
         if (isset($_GET['e']))
           if ($_GET['e'] === 't')
