@@ -1255,98 +1255,12 @@ class cuentas_cobrar_model extends privilegios_model{
 	    	/*** Saldo anterior ***/
   			$saldo_anterior = $this->db->query(
   				"SELECT
-  					id_cliente,
-  					Sum(total) AS total,
-  					Sum(iva) AS iva,
-  					Sum(abonos) AS abonos,
-  					Sum(saldo)::numeric(12, 2) AS saldo
-  				FROM
-  					(
-  						SELECT
-  							c.id_cliente,
-  							c.nombre_fiscal,
-  							Sum(f.total) AS total,
-  							Sum(f.importe_iva) AS iva,
-  							COALESCE(Sum(faa.abonos),0) as abonos,
-  							COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-  							'f'::text as tipo
-  						FROM
-  							clientes AS c
-  							INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-  							LEFT JOIN (
-  								(
-  									SELECT
-  										f.id_cliente,
-  										f.id_factura,
-  										Sum(fa.total) AS abonos
-  									FROM
-  										facturacion AS f
-  											INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-  									WHERE f.status <> 'ca' AND f.status <> 'b'
-  										AND f.id_cliente = '{$cliente->id_cliente}'
-  										AND Date(fa.fecha) <= '{$fecha2}'{$sql}
-  									GROUP BY f.id_cliente, f.id_factura
-  								)
-  								UNION
-  								(
-  									SELECT
-  										f.id_cliente,
-  										f.id_factura,
-  										Sum(f.total) AS abonos
-  									FROM
-  										facturacion AS f
-  									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-  										AND f.id_cliente = '{$cliente->id_cliente}'
-  										AND Date(f.fecha) <= '{$fecha2}'{$sql}
-  									GROUP BY f.id_cliente, f.id_factura
-  								)
-  							) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-  						WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-  							AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
-  						GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
-
-  						UNION ALL
-
-  						SELECT
-  							c.id_cliente,
-  							c.nombre_fiscal,
-  							Sum(f.total) AS total,
-  							0 AS iva,
-  							COALESCE(Sum(taa.abonos), 0) as abonos,
-  							COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
-  							'nv'::text as tipo
-  						FROM
-  							clientes AS c
-  							INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-  							LEFT JOIN (
-  								SELECT
-  									f.id_cliente,
-  									f.id_venta,
-  									Sum(fa.total) AS abonos
-  								FROM
-  									facturacion_ventas_remision AS f
-  										INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-  								WHERE f.id_cliente = '{$cliente->id_cliente}'
-  									AND f.status <> 'ca'
-  									AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
-  								GROUP BY f.id_cliente, f.id_venta
-  							) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
-  						WHERE c.id_cliente = '{$cliente->id_cliente}'
-  									AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
-  						GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
-
-  					) AS sal
-  				{$sql2}
-  				GROUP BY id_cliente
-  			");
-
-        $saldo_anterior_vencido = $this->db->query(
-          "SELECT
             id_cliente,
             Sum(total) AS total,
             Sum(iva) AS iva,
             Sum(abonos) AS abonos,
-            Sum(saldo)::numeric(12, 2) AS saldo
+            Sum(saldo)::numeric(12, 2) AS saldo,
+            tipo
           FROM
             (
               SELECT
@@ -1356,11 +1270,16 @@ class cuentas_cobrar_model extends privilegios_model{
                 Sum(f.importe_iva) AS iva,
                 COALESCE(Sum(faa.abonos),0) as abonos,
                 COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-                'f'::text as tipo
+                'f' as tipo
               FROM
                 clientes AS c
                 INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
                 LEFT JOIN (
+                  SELECT
+                    d.id_cliente,
+                    d.id_factura,
+                    Sum(d.abonos) AS abonos
+                  FROM
                   (
                     SELECT
                       f.id_cliente,
@@ -1373,12 +1292,12 @@ class cuentas_cobrar_model extends privilegios_model{
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
-                  )
-                  UNION
-                  (
+
+                    UNION
+
                     SELECT
                       f.id_cliente,
-                      f.id_factura,
+                      f.id_nc AS id_factura,
                       Sum(f.total) AS abonos
                     FROM
                       facturacion AS f
@@ -1386,7 +1305,102 @@ class cuentas_cobrar_model extends privilegios_model{
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(f.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
-                  )
+                  ) AS d
+                  GROUP BY d.id_cliente, d.id_factura
+                ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+              WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
+                AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
+              GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
+
+              UNION ALL
+
+              SELECT
+                c.id_cliente,
+                c.nombre_fiscal,
+                Sum(f.total) AS total,
+                0 AS iva,
+                COALESCE(Sum(taa.abonos), 0) as abonos,
+                COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
+                'nv' as tipo
+              FROM
+                clientes AS c
+                INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
+                LEFT JOIN (
+                  SELECT
+                    f.id_cliente,
+                    f.id_venta,
+                    Sum(fa.total) AS abonos
+                  FROM
+                    facturacion_ventas_remision AS f
+                      INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
+                  WHERE f.id_cliente = '{$cliente->id_cliente}'
+                    AND f.status <> 'ca'
+                    AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
+                  GROUP BY f.id_cliente, f.id_venta
+                ) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
+              WHERE c.id_cliente = '{$cliente->id_cliente}'
+                    AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
+              GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
+
+            ) AS sal
+          {$sql2}
+          GROUP BY id_cliente, tipo
+  			");
+
+        $saldo_anterior_vencido = $this->db->query(
+          "SELECT
+            id_cliente,
+            Sum(total) AS total,
+            Sum(iva) AS iva,
+            Sum(abonos) AS abonos,
+            Sum(saldo)::numeric(12, 2) AS saldo,
+            tipo
+          FROM
+            (
+              SELECT
+                c.id_cliente,
+                c.nombre_fiscal,
+                Sum(f.total) AS total,
+                Sum(f.importe_iva) AS iva,
+                COALESCE(Sum(faa.abonos),0) as abonos,
+                COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+                'f' as tipo
+              FROM
+                clientes AS c
+                INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+                LEFT JOIN (
+                  SELECT
+                    d.id_cliente,
+                    d.id_factura,
+                    Sum(d.abonos) AS abonos
+                  FROM
+                  (
+                    SELECT
+                      f.id_cliente,
+                      f.id_factura,
+                      Sum(fa.total) AS abonos
+                    FROM
+                      facturacion AS f
+                        INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+                    WHERE f.status <> 'ca' AND f.status <> 'b'
+                      AND f.id_cliente = '{$cliente->id_cliente}'
+                      AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                    GROUP BY f.id_cliente, f.id_factura
+
+                    UNION
+
+                    SELECT
+                      f.id_cliente,
+                      f.id_nc AS id_factura,
+                      Sum(f.total) AS abonos
+                    FROM
+                      facturacion AS f
+                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                      AND f.id_cliente = '{$cliente->id_cliente}'
+                      AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                    GROUP BY f.id_cliente, f.id_factura
+                  ) AS d
+                  GROUP BY d.id_cliente, d.id_factura
                 ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
                 AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]} AND
@@ -1394,7 +1408,7 @@ class cuentas_cobrar_model extends privilegios_model{
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
             ) AS sal
           {$sql2}
-          GROUP BY id_cliente
+          GROUP BY id_cliente, tipo
         ");
 
         // Asigna el saldo anterior vencido del cliente.

@@ -260,14 +260,17 @@ class Bascula_model extends CI_Model {
     }
 
     $this->db->update('bascula', $data, array('id_bascula' => $id));
-    foreach ($cajas as $key => $caja)
-    {
-      unset($cajas[$key]['aux_num_registro']);
-    }
-
-    $this->db->delete('bascula_compra', array('id_bascula' => $id));
     if ( ! is_null($cajas) && count($cajas) > 0)
     {
+      foreach ($cajas as $key => $caja)
+      {
+        unset($cajas[$key]['aux_num_registro']);
+      }
+    }
+
+    if ( ! is_null($cajas) && count($cajas) > 0)
+    {
+      $this->db->delete('bascula_compra', array('id_bascula' => $id));
       $this->db->insert_batch('bascula_compra', $cajas);
     }
 
