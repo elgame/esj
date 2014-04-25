@@ -80,10 +80,12 @@ class mypdf_ticket extends FPDF {
 
         // $this->SetFont($this->fount_txt, '', $this->font_size-1);
         $this->SetWidths(array(9, 12, 12, 10, 8, 15));
-        $this->SetAligns(array('L','L','R','R','R','L'));
+        $this->SetAligns(array('L','L','L','L','R','L'));
         $this->SetFounts(array($this->fount_txt),
                          array(-1,-1,-1,-1,-1,-1));
-        $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', '$', 'IMPORTE'), false, true, 5);
+
+        // $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', '$', 'IMPORTE'), false, true, 5);
+        $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', 'PCIO', 'IMPORTE'), false, true, 5);
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
         $this->CheckPageBreak(4);

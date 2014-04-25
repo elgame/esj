@@ -82,7 +82,7 @@
               </div>
             </form>
 
-            <table class="table table-striped table-bordered bootstrap-datatable">
+            <table class="table table-striped table-bordered bootstrap-datatable" style="">
               <thead>
                 <tr>
         					<th></th>
@@ -113,10 +113,10 @@
             					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
             					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'">';
             		?></td>
-            		<td><?php echo $movimiento->fecha; ?></td>
+            		<td><div style="width: 80px;"><?php echo $movimiento->fecha; ?></div></td>
             		<td><?php echo $movimiento->numero_ref; ?></td>
-            		<td><?php echo $movimiento->cli_pro; ?></td>
-            		<td><?php echo $movimiento->concepto; ?></td>
+            		<td><div style="width: 200px;"><?php echo $movimiento->cli_pro; ?></div></td>
+            		<td><div style="width: 300px; word-wrap: break-word;"><?php echo $movimiento->concepto; ?></div></td>
             		<td><?php echo $movimiento->metodo_pago; ?></td>
             		<td style="text-align: right;"><?php echo String::formatoNumero($movimiento->deposito, 2, '$', false); ?></td>
                 <td style="text-align: right;"><?php echo String::formatoNumero($movimiento->retiro, 2, '$', false); ?></td>
@@ -157,6 +157,8 @@
                   <td style="text-align: right"><?php echo String::formatoNumero($data['total_deposito'], 2, '$', false); ?></td>
                   <td style="text-align: right"><?php echo String::formatoNumero($data['total_retiro'], 2, '$', false); ?></td>
                   <td id="total_saldo" style="text-align: right"><?php echo String::formatoNumero($data['total_saldos'], 2, '$', false); ?></td>
+                  <td></td>
+                  <td></td>
                 </tr>
               </tbody>
             </table>

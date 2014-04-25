@@ -2607,7 +2607,7 @@ class facturacion_model extends privilegios_model{
           $pdf->SetAligns($aligns2);
           $pdf->SetWidths($widths);
           $pdf->Row(array(
-            $item[0]['cantidad'],
+            String::formatoNumero($item[0]['cantidad'], 2, ''),
             $item[0]['unidad'],
             $item[0]['descripcion'],
             String::formatoNumero($item[0]['valorUnitario'], 2, '$', false),
