@@ -606,7 +606,7 @@ class nomina
   public function dInfonavit()
   {
     // $infonavit = round(($this->empleado->infonavit / 30.4) * ($this->salariosZonasConfig->zona_a * $this->empleado->dias_trabajados), 2);
-    $infonavit = $this->empleado->infonavit;
+    $infonavit = round(($this->empleado->infonavit * $this->empleado->dias_trabajados) / 7, 2);
 
     return array(
       'TipoDeduccion' => '010',
