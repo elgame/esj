@@ -81,6 +81,14 @@
                   </select>
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dconcepto">Concepto</label>
+                <div class="controls">
+                  <input type="text" name="dconcepto" class="span12" id="dconcepto" value="<?php echo isset($mov->concepto)? $mov->concepto: ''; ?>" maxlength="120">
+                </div>
+              </div>
+
               <input type="hidden" name="es_ligado" value="<?php echo $mov->es_ligado; ?>">
           <?php if ($mov->es_ligado == 0)
           { ?>

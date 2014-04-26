@@ -421,6 +421,8 @@ $(function(){
     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaKilosNeto();
       calculaTotales();
+    }else if($(this).attr('id') == 'pkilos_tara' && key === 13 && $(this).val() != '' ){
+      $("#pcajas_prestadas").focus();
     }
   });
 
@@ -447,6 +449,12 @@ $(function(){
 
         $('#pkilos_tara').on('focus', function(event) {
           $('#btnKilosTara').trigger('click');
+        }).on('focusout', function(event) {
+          var $this = $(this);
+
+          if ($this.val() !== '' && $this.val() !== 0 && $('#ptipo option:selected').val() == 'sa') {
+            $('#form').submit();
+          }
         });
   }
 
@@ -569,18 +577,18 @@ $(function(){
       type: 'POST',
       dataType: 'json',
       data: {
-        usuario: "admin", //$('#usuario').val(),
-        pass: "12345", //$('#pass').val()
+        usuario: $('#usuario').val(),
+        pass: $('#pass').val()
       },
     })
     .done(function(resp) {
       console.log(resp);
-      // if (resp.passes) {
+      if (resp.passes) {
         $('#autorizar').val(resp.user_id);
         $('#form').submit();
-      // } else {
-      //   noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
-      // }
+      } else {
+        noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
+      }
     });
   });
 

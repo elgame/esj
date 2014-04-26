@@ -755,9 +755,10 @@ class banco_cuentas_model extends banco_model {
   public function editMovimiento($datosP, $datosG)
   {
     $data = array(
-            'id_cuenta'   => $datosP['fcuenta'],
-            'id_banco'    => $datosP['fbanco'],
-            'fecha'       => $datosP['dfecha'],
+            'id_cuenta' => $datosP['fcuenta'],
+            'id_banco'  => $datosP['fbanco'],
+            'fecha'     => $datosP['dfecha'],
+            'concepto'  => $datosP['dconcepto'],
             );
     if (isset($datosP['did_proveedor']) && $datosP['did_proveedor'] != '')
     {
@@ -777,11 +778,11 @@ class banco_cuentas_model extends banco_model {
     {
       $movimiento = $this->getMovimientoInfo($datosG['id_movimiento'], false);
       foreach ($movimiento['bascula'] as $key => $value)
-        $this->db->update('bascula_pagos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_pago = {$value->id_bascula_pago}");
+        $this->db->update('bascula_pagos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta'], 'concepto' => $datosP['dconcepto']), "id_pago = {$value->id_bascula_pago}");
       foreach ($movimiento['compras'] as $key => $value)
-        $this->db->update('compras_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_abono = {$value->id_compra_abono}");
+        $this->db->update('compras_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta'], 'concepto' => $datosP['dconcepto']), "id_abono = {$value->id_compra_abono}");
       foreach ($movimiento['facturas'] as $key => $value)
-        $this->db->update('facturacion_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta']), "id_abono = {$value->id_abono_factura}");
+        $this->db->update('facturacion_abonos', array('fecha' => $datosP['dfecha'], 'id_cuenta' => $datosP['fcuenta'], 'concepto' => $datosP['dconcepto']), "id_abono = {$value->id_abono_factura}");
     }
 
   }

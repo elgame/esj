@@ -621,6 +621,9 @@ class banco extends MY_Controller {
         array('field'   => 'fcuenta',
               'label'   => 'Cuenta Bancaria',
               'rules'   => 'required|numeric'),
+        array('field'   => 'dconcepto',
+              'label'   => 'Cuenta Bancaria',
+              'rules'   => 'required|max_length[120]'),
     );
     if (isset($_GET['did_empresa']))
     {

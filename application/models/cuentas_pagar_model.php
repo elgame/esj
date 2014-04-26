@@ -755,7 +755,7 @@ class cuentas_pagar_model extends privilegios_model{
 		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
 		{
 			$total += $_POST['montofv'][$key];
-			$desc .= '|'.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
+			$desc .= ' | '.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
 		}
 		$desc = ' ('.substr($desc, 1).')';
 		$resp = $this->banco_cuentas_model->addRetiro(array(
