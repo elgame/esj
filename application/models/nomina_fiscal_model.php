@@ -92,7 +92,7 @@ class nomina_fiscal_model extends CI_Model {
               u.infonavit,
               u.regimen_contratacion,
               up.nombre as puesto,
-              7  as dias_trabajados,
+              6  as dias_trabajados,
               (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
               FROM nomina_asistencia
               WHERE DATE(fecha_ini) >= '{$anio}-01-01' AND DATE(fecha_fin) <= '{$anio}-12-31' AND id_usuario = u.id) as dias_faltados_anio,
@@ -259,6 +259,16 @@ class nomina_fiscal_model extends CI_Model {
         else
           unset($empleados[$keye]);
 
+
+        // Calcula proporcional el septimo dia a los asegurados.
+        if ($empleado->esta_asegurado == 't')
+        {
+          $empleado->dias_trabajados = round((($empleado->dias_trabajados >= 0 ? $empleado->dias_trabajados : 0) * 7) / 6, 2);
+        }
+        else
+        {
+          $empleado->dias_trabajados += 1;
+        }
       }
 
     foreach ($empleados as $key => $empleado)
@@ -273,6 +283,7 @@ class nomina_fiscal_model extends CI_Model {
         ->setSubsidioIsr($subsidio, $isr)
         ->procesar();
     }
+
     // echo "<pre>";
     //   var_dump($empleados);
     // echo "</pre>";exit;
