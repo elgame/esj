@@ -9,6 +9,7 @@ class empleados extends MY_Controller {
 	private $excepcion_privilegio = array(
     'empleados/ajax_get_usuarios/',
     'empleados/ajax_get_depa_pues/',
+    'empleados/ajax_get_usuarios2/',
   );
 
 	public function _remap($method){
@@ -206,14 +207,81 @@ class empleados extends MY_Controller {
       echo json_encode($this->usuarios_model->getUsuariosAjax());
    }
 
+   public function ajax_get_usuarios2()
+   {
+      $this->load->model('usuarios_model');
+      $this->load->model('nomina_fiscal_model');
+      $data = $this->usuarios_model->getUsuariosAjax();
+      $_GET['cid_empresa'] = $_GET['did_empresa'];
+      $configuraciones = $this->nomina_fiscal_model->configuraciones();
+      $filtros = array(
+        'semana'            => '',
+        'anio'              => date("Y"),
+        'empresaId'         => $_GET['did_empresa'],
+        'puestoId'          => '',
+        'dia_inicia_semana' => '4',
+      );
+      foreach ($data as $key => $value)
+      {
+        $data[$key]['nomina'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, $value['id']);
+        $data[$key]['nomina'] = count($data[$key]['nomina'])>0? $data[$key]['nomina'][0]: null;
+      }
+      echo json_encode($data);
+   }
+
    public function ajax_get_depa_pues()
    {
-	$this->load->model('usuarios_puestos_model');
-	$this->load->model('usuarios_departamentos_model');
-	$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false)['puestos'];
-	$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
-	echo json_encode($params);
+  	$this->load->model('usuarios_puestos_model');
+  	$this->load->model('usuarios_departamentos_model');
+  	$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false)['puestos'];
+  	$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+  	echo json_encode($params);
    }
+
+  /*
+   |------------------------------------------------------------------------
+   | Ajax
+   |------------------------------------------------------------------------
+   */
+  public function sueldos()
+  {
+    $this->carabiner->js(array(
+        array('libs/jquery.numeric.js'),
+        array('general/keyjump.js'),
+        array('general/msgbox.js'),
+        array('panel/usuarios/sueldos.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Usuarios'
+    );
+
+    $this->load->model('usuarios_model');
+    $this->load->model('empresas_model');
+
+    $this->config_sueldos();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->load->model('usuarios_model');
+      $this->usuarios_model->updateSueldos($_POST);
+      redirect(base_url('panel/empleados/sueldos/?'.String::getVarsLink(array('msg')).'&msg=7'));
+    }
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/empleados/sueldos', $params);
+    $this->load->view('panel/footer');
+  }
 
 
   /*
@@ -415,6 +483,24 @@ class empleados extends MY_Controller {
       }
     }
   }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function config_sueldos($accion='agregar')
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+              array('field' => 'did_empresa',
+                    'label' => 'Empresa',
+                    'rules' => ''),
+              array('field' => 'dempresa',
+                    'label' => 'Empresa',
+                    'rules' => '')
+    );
+    $this->form_validation->set_rules($rules);
+  }
+
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{
 		switch($tipo){
@@ -442,6 +528,11 @@ class empleados extends MY_Controller {
 				$txt = 'El usuario se activó correctamente.';
 				$icono = 'success';
 				break;
+
+      case 7:
+        $txt = 'Se cambio el sueldo correctamente.';
+        $icono = 'success';
+        break;
 		}
 
 		return array(

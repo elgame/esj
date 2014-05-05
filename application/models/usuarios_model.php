@@ -260,6 +260,25 @@ class Usuarios_model extends privilegios_model {
 		return TRUE;
 	}
 
+  public function updateSueldos($datos)
+  {
+    if (count($datos['id_empledo']) > 0)
+    {
+      foreach ($datos['id_empledo'] as $key => $value)
+      {
+        $sd = 0;
+        if ($datos['tipo'][$key] == 't') //asegurados
+          $sd = number_format($datos['sueldo_diario'][$key] / $datos['factor_integracion'][$key], 4, '.', '');
+
+        $this->db->update('usuarios', array(
+          'salario_diario' => $sd,
+          'salario_diario_real' => $datos['sueldo_real'][$key],
+          ), "id = {$value}");
+      }
+    }
+    return true;
+  }
+
 	/*
 		|	Valida un email si esta disponible, primero valida que el email exista para el
 		|	usuario que se modificara, si el email no es igual al de ese usuario entonces
@@ -372,8 +391,12 @@ class Usuarios_model extends privilegios_model {
     $sql = '';
     if($this->input->get('empleados')!='')
       $sql = " AND user_nomina = 't'";
+    if($this->input->get('did_empresa')!='')
+      $sql = " AND id_empresa = ".$this->input->get('did_empresa');
+
     $res = $this->db->query(
-        "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida
+        "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,
+                DATE(fecha_entrada) as fecha_entrada, DATE(fecha_salida) as fecha_salida, esta_asegurado
         FROM usuarios
         WHERE status = 't' AND
                 (lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR

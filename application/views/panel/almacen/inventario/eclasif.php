@@ -16,8 +16,9 @@
                 <div class="control-group">
                   <label class="control-label" for="dunidad">Unidad</label>
                   <div class="controls">
-                    <input type="text" name="dunidad" value="" id="dunidad" class="span12" placeholder="Nombre unidad">
-                    <input type="hidden" name="did_unidad" value="<?php echo (isset($empresa->id_empresa)? $empresa->id_empresa: ''); ?>" id="did_unidad">
+                    <input type="text" name="dunidad" value="<?php echo set_value_get('dunidad', $this->input->get('dunidad')) ?>"
+                      id="dunidad" class="span12" placeholder="Nombre unidad">
+                    <input type="hidden" name="did_unidad" value="<?php echo set_value_get('did_unidad', $this->input->get('did_unidad')) ?>" id="did_unidad">
                   </div>
                 </div>
 
@@ -36,6 +37,13 @@
                     <input type="text" name="dcalibre"
                       value="<?php echo set_value_get('dcalibre', $this->input->get('dcalibre')) ?>" id="dcalibre" class="span12" placeholder="Nombre">
                     <input type="hidden" name="did_calibre" value="<?php echo set_value_get('did_calibre', $this->input->get('did_calibre')) ?>" id="did_calibre">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dcon_mov">Con Movimientos</label>
+                  <div class="controls">
+                    <input type="checkbox" name="dcon_mov" value="si" id="dcon_mov" >
                   </div>
                 </div>
 

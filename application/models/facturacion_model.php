@@ -2050,6 +2050,8 @@ class facturacion_model extends privilegios_model{
     public function getRVentascPdf(){
       $res = $this->getRVentascData();
 
+      $con_mov = $this->input->get('dcon_mov')=='si'? false: true;
+
       $this->load->model('empresas_model');
       $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
       $this->load->library('mypdf');
@@ -2074,78 +2076,81 @@ class facturacion_model extends privilegios_model{
 
       $total_saldo_cliente = 0;
       foreach($res as $key => $item){
-        $total_subtotal = 0;
-        $total_impuesto = 0;
-        $total_total = 0;
-        $total_cantidad = 0;
-        $total_saldo = 0;
-
-        if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-          $pdf->AddPage();
-
-          $pdf->SetFont('Arial','B',8);
-          $pdf->SetTextColor(255,255,255);
-          $pdf->SetFillColor(160,160,160);
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
-        }
-
-        $pdf->SetFont('Arial','',8);
-        $pdf->SetTextColor(0,0,0);
-
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L'));
-        $pdf->SetWidths(array(20, 170));
-        $pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
-        $pdf->SetXY(6, $pdf->GetY()-2);
-        $pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
-
-        $pdf->SetXY(6, $pdf->GetY()+3);
-
-        foreach ($item->facturas as $keyf => $factura)
+        if (count($item->facturas) > 0 || $con_mov)
         {
-          $total_subtotal += $factura->subtotal;
-          $total_saldo += $factura->saldo;
-          $total_cantidad += $factura->cantidad_productos;
-          $total_impuesto += $factura->importe_iva;
-          $total_total += $factura->total;
+          $total_subtotal = 0;
+          $total_impuesto = 0;
+          $total_total = 0;
+          $total_cantidad = 0;
+          $total_saldo = 0;
 
-          $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura.'&did_empresa='.$empresa['info']->id_empresa);
-          $datos = array(String::fechaATexto($factura->fecha, '/c'),
-                  $factura->serie,
-                  $factura->folio,
-                  $factura->concepto,
-                  String::formatoNumero($factura->cantidad_productos, 2, '', false),
-                  String::formatoNumero($factura->subtotal, 2, '', false),
-                  String::formatoNumero($factura->importe_iva, 2, '', false),
-                  String::formatoNumero($factura->total, 2, '', false),
-                  String::formatoNumero( ($factura->saldo) , 2, '', false),
-                  // String::fechaATexto($factura->fecha_vencimiento, '/c'),
-                );
+          if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+            $pdf->AddPage();
 
-          $pdf->SetXY(6, $pdf->GetY()-1);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->SetMyLinks($links);
-          $pdf->Row($datos, false, false);
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+          }
+
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetTextColor(0,0,0);
+
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(20, 170));
+          $pdf->Row(array('CLIENTE:', $item->cuenta_cpi), false, false);
+          $pdf->SetXY(6, $pdf->GetY()-2);
+          $pdf->Row(array('NOMBRE:', $item->nombre_fiscal), false, false);
+
+          $pdf->SetXY(6, $pdf->GetY()+3);
+
+          foreach ($item->facturas as $keyf => $factura)
+          {
+            $total_subtotal += $factura->subtotal;
+            $total_saldo += $factura->saldo;
+            $total_cantidad += $factura->cantidad_productos;
+            $total_impuesto += $factura->importe_iva;
+            $total_total += $factura->total;
+
+            $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura.'&did_empresa='.$empresa['info']->id_empresa);
+            $datos = array(String::fechaATexto($factura->fecha, '/c'),
+                    $factura->serie,
+                    $factura->folio,
+                    $factura->concepto,
+                    String::formatoNumero($factura->cantidad_productos, 2, '', false),
+                    String::formatoNumero($factura->subtotal, 2, '', false),
+                    String::formatoNumero($factura->importe_iva, 2, '', false),
+                    String::formatoNumero($factura->total, 2, '', false),
+                    String::formatoNumero( ($factura->saldo) , 2, '', false),
+                    // String::fechaATexto($factura->fecha_vencimiento, '/c'),
+                  );
+
+            $pdf->SetXY(6, $pdf->GetY()-1);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->SetMyLinks($links);
+            $pdf->Row($datos, false, false);
+          }
+          $pdf->SetMyLinks(array());
+
+          $pdf->SetX(93);
+          $pdf->SetFont('Arial','B',8);
+          // $pdf->SetTextColor(255,255,255);
+          $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+          $pdf->SetWidths(array(23, 23, 23, 23, 23));
+          $pdf->Row(array(
+              String::formatoNumero($total_cantidad, 2, '', false),
+              String::formatoNumero($total_subtotal, 2, '', false),
+              String::formatoNumero($total_impuesto, 2, '', false),
+              String::formatoNumero($total_total, 2, '', false),
+              String::formatoNumero($total_saldo, 2, '', false)), false);
+
+          // $total_saldo_cliente += $saldo_cliente;
         }
-        $pdf->SetMyLinks(array());
-
-        $pdf->SetX(93);
-        $pdf->SetFont('Arial','B',8);
-        // $pdf->SetTextColor(255,255,255);
-        $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
-        $pdf->SetWidths(array(23, 23, 23, 23, 23));
-        $pdf->Row(array(
-            String::formatoNumero($total_cantidad, 2, '', false),
-            String::formatoNumero($total_subtotal, 2, '', false),
-            String::formatoNumero($total_impuesto, 2, '', false),
-            String::formatoNumero($total_total, 2, '', false),
-            String::formatoNumero($total_saldo, 2, '', false)), false);
-
-        // $total_saldo_cliente += $saldo_cliente;
       }
 
       // $pdf->SetXY(66, $pdf->GetY()+4);

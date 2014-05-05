@@ -105,8 +105,8 @@ class nomina_ranchos_model extends CI_Model {
     // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
     $errorTimbrar = false;
 
-    if ($datos['generada'] == 0)
-    {
+    // if ($datos['generada'] == 0)
+    // {
       $nominasEmpleados[] = array(
         'id_empleado'  => $datos['id_empleado'],
         'id_empresa'   => $datos['id_empresa'],
@@ -132,9 +132,18 @@ class nomina_ranchos_model extends CI_Model {
       // Inserta las nominas.
       if (count($nominasEmpleados) > 0)
       {
-        $this->db->insert_batch('nomina_ranchos', $nominasEmpleados);
+        foreach ($nominasEmpleados as $key => $value)
+        {
+          $result = $this->db->query("SELECT Count(*) AS num FROM nomina_ranchos WHERE id_empleado = {$value['id_empleado']}
+            AND id_empresa = {$value['id_empresa']} AND anio = {$value['anio']} AND semana = {$value['semana']}")->row();
+          if($result->num == 0)
+            $this->db->insert('nomina_ranchos', $value);
+          else
+            $this->db->update('nomina_ranchos', $value, "id_empleado = {$value['id_empleado']}
+            AND id_empresa = {$value['id_empresa']} AND anio = {$value['anio']} AND semana = {$value['semana']}");
+        }
       }
-    }
+    // }
 
     // echo "<pre>";
     //   var_dump($startTime->diff($endTime)->format('%H:%I:%S'));

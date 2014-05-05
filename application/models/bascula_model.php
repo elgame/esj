@@ -1218,7 +1218,6 @@ class Bascula_model extends CI_Model {
     */
    public function r_acumulados_pdf()
    {
-
       // Obtiene los datos del reporte.
       $data = $this->r_acumulados_data();
 
@@ -1231,7 +1230,7 @@ class Bascula_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
 
-      if (isset($_GET['fid_empresa']))
+      if (isset($_GET['fid_empresa']{0}))
       {
         $this->load->model('empresas_model');
         $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));

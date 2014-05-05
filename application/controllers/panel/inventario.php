@@ -9,6 +9,7 @@ class inventario extends MY_Controller {
     'inventario/cproveedor_pdf/',
     'inventario/cproductos_pdf/',
     'inventario/cproducto_pdf/',
+    'inventario/cunproductos_pdf/',
     'inventario/cseguimiento_pdf/',
 
     'inventario/epu_pdf/',
@@ -118,6 +119,37 @@ class inventario extends MY_Controller {
   {
     $this->load->model('inventario_model');
     $this->inventario_model->getCSeguimientoPdf();
+  }
+
+  /**
+   * Compras de un Producto
+   * @return [type] [description]
+   */
+  public function cunproductos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de seguimientos x Producto');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/cunproducto',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function cunproductos_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCUnProductosPdf();
   }
 
 

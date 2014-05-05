@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
+            <form action="<?php echo base_url('panel/inventario/cunproductos_pdf/'); ?>" method="GET" class="form-search" id="frmverformprod" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -30,38 +30,27 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="dcliente">Cliente</label>
+                  <label class="control-label" for="fproducto">Producto</label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="dcliente" value="" id="dcliente" class="span9" placeholder="Buscar">
-                      <button class="btn" type="button" id="btnAddProveedor" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="did_cliente" value="" id="did_cliente">
+                      <input type="text" name="fproducto" value="" id="fproducto" class="span9" placeholder="Buscar">
+                      <!-- <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button> -->
+                      <input type="hidden" name="fid_producto" value="" id="fid_producto">
                     </div>
                     <div class="clearfix"></div>
-                    <div style="height:130px;overflow-y: scroll;background-color:#eee;">
-                      <ul id="lista_clientes" style="list-style: none;margin-left: 4px;">
+                    <!-- <div style="height:130px;overflow-y: scroll;background-color:#eee;">
+                      <ul id="lista_proveedores" style="list-style: none;margin-left: 4px;">
                       </ul>
-                    </div>
+                    </div> -->
                   </div>
                 </div>
 
-                <div class="control-group">
-                  <label class="control-label" for="dtipo_factura">Tipo</label>
-                  <div class="controls">
-                    <select name="dtipo_factura">
-                      <option value="">Todas</option>
-                      <option value="t">Facturas</option>
-                      <option value="f">Remision</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="control-group">
+                <!-- <div class="control-group">
                   <label class="control-label" for="dcon_mov">Con Movimientos</label>
                   <div class="controls">
                     <input type="checkbox" name="dcon_mov" value="si" id="dcon_mov" >
                   </div>
-                </div>
+                </div> -->
 
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
@@ -78,7 +67,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" src="<?php echo base_url('panel/inventario/cunproductos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

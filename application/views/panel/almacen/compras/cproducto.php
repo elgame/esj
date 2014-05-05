@@ -45,6 +45,13 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="dcon_mov">Con Movimientos</label>
+                  <div class="controls">
+                    <input type="checkbox" name="dcon_mov" value="si" id="dcon_mov" >
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

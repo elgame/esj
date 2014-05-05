@@ -190,7 +190,7 @@
                                             $e->nomina->deducciones['rcv']['total']; //+
                                             //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = ($e->dias_trabajados-1) * $e->salario_diario_real;
+                        $totalComplementoEmpleado = (($e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';
@@ -405,7 +405,6 @@
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros;
-
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>

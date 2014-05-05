@@ -28,12 +28,21 @@ $(function(){
 
 });
 
+function truncateDecimals (num, digits) {
+    var numS = num.toString(),
+        decPos = numS.indexOf('.'),
+        substrLength = decPos == -1 ? numS.length : 1 + decPos + digits,
+        trimmedResult = numS.substr(0, substrLength),
+        finalResult = isNaN(trimmedResult) ? 0 : trimmedResult;
+
+    return parseFloat(finalResult).toFixed(2);
+}
 
 function calculaTotal($tr){
   var $esistema = $tr.find('input.esistema'),
   $efisica = $tr.find('input.efisica'),
   $diferencia = $tr.find('input.diferencia'),
-  diferencia = parseFloat($esistema.val() || 0) - parseFloat($efisica.val());
+  diferencia = truncateDecimals(parseFloat($esistema.val() || 0) - parseFloat($efisica.val()), 4);
 
   $diferencia.val( (isNaN(diferencia)?'':diferencia) );
 }

@@ -12,7 +12,7 @@ class compras_ordenes_model extends CI_Model {
    *
    * @return
    */
-  public function getOrdenes($perpage = '40', $autorizadas = true)
+  public function getOrdenes($perpage = '100', $autorizadas = true)
     {
     $sql = '';
     //paginacion

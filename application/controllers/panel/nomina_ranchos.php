@@ -80,15 +80,15 @@ class nomina_ranchos extends MY_Controller {
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
-    $params['nominas_finalizadas'] = true;
-    foreach ($params['empleados'] as $key => $value)
-    {
-      if ($value->generada == 0)
-      {
-        $params['nominas_finalizadas'] = false;
-        break;
-      }
-    }
+    $params['nominas_finalizadas'] = false;
+    // foreach ($params['empleados'] as $key => $value)
+    // {
+    //   if ($value->generada == 0)
+    //   {
+    //     $params['nominas_finalizadas'] = false;
+    //     break;
+    //   }
+    // }
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
