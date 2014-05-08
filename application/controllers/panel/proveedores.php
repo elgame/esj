@@ -50,7 +50,7 @@ class proveedores extends MY_Controller {
 // 		    	$bufer = utf8_encode($bufer);
 // 		    	echo "INSERT INTO proveedores (
 // nombre_fiscal, rfc, curp, cuenta_cpi)
-// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."', 
+// VALUES ('".trim(substr($bufer, 10, 101))."', '".trim(substr($bufer, 101, 21))."',
 // '".trim(substr($bufer, 132, 51))."', '".trim(substr($bufer, 186, 31))."');\n";
 
 // 		        // echo trim(substr($búfer, 10, 101))."<br>"; //nombre
@@ -221,8 +221,6 @@ class proveedores extends MY_Controller {
 
 		echo json_encode($params);
 	}
-
-
 
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo

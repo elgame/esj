@@ -71,11 +71,24 @@
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
 
+                | <label for="dcliente"> Cliente / Proveedor</label>
+                <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente', ''); ?>" size="73">
+                <input type="hidden" name="did_cliente" id="did_cliente" value="<?php echo set_value_get('did_cliente', ''); ?>">
+
+                <br>
+
                 | <label for="toperacion">Retiros:</label>
                 <select name="toperacion" id="toperacion" class="input-large search-query">
                   <option value="" <?php echo set_select_get('toperacion', ''); ?>>Todas</option>
                   <option value="in" <?php echo set_select_get('toperacion', 'in'); ?>>Interbancarios</option>
                   <option value="ba" <?php echo set_select_get('toperacion', 'ba'); ?>>Banamex</option>
+                </select>
+
+                | <label for="tmetodo_pago">Metodo de Pago:</label>
+                <select name="tmetodo_pago" id="tmetodo_pago" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('tmetodo_pago', ''); ?>>Todas</option>
+                  <option value="transferencia" <?php echo set_select_get('tmetodo_pago', 'transferencia'); ?>>Transferencia</option>
+                  <option value="cheque" <?php echo set_select_get('tmetodo_pago', 'cheque'); ?>>Cheque</option>
                 </select>
 
                 <button type="submit" class="btn">Enviar</button>

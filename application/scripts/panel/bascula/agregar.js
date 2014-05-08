@@ -421,7 +421,7 @@ $(function(){
     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaKilosNeto();
       calculaTotales();
-    }else if($(this).attr('id') == 'pkilos_tara' && key === 13 && $(this).val() != '' ){
+    } else if($(this).attr('id') == 'pkilos_tara' && key === 13 && $(this).val() !== '' && $('#ptipo').find('option:selected').val() === 'sa') {
       $("#pcajas_prestadas").focus();
     }
   });

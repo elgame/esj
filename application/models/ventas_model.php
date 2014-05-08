@@ -1274,14 +1274,14 @@ class Ventas_model extends privilegios_model{
 
         $pdf->SetFont('Arial','',8);
 
-        $total_saldo    += ($factura->status=='ca'?0:$factura->saldo);
-        $total_total    += ($factura->status=='ca'?0:$factura->cargo);
+        $total_saldo += ($factura->status=='ca'?0:$factura->saldo);
+        $total_total += ($factura->status=='ca'?0:$factura->cargo);
 
         $datos = array(String::fechaATexto($factura->fecha, '/c'),
                 $factura->serie,
                 $factura->folio,
                 $factura->nombre_fiscal.($factura->status=='ca'?' (Cancelada)':''),
-                String::formatoNumero($factura->cargo, 2, '', false),
+                String::formatoNumero($factura->status=='ca'? 0:$factura->cargo, 2, '', false),
                 String::formatoNumero( ($factura->status=='ca'?0:$factura->saldo) , 2, '', false),
               );
 

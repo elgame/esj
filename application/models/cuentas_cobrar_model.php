@@ -45,6 +45,10 @@ class cuentas_cobrar_model extends privilegios_model{
 	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	    }
 
+    if($this->input->get('ftipodoc') != ''){
+      $sql .= " AND f.is_factura = '".($this->input->get('ftipodoc') === 'f' ? 't' : 'f')."'";
+    }
+
 		$query = BDUtil::pagination(
 			"SELECT
 				id_cliente,
@@ -298,6 +302,10 @@ class cuentas_cobrar_model extends privilegios_model{
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
       $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('ftipodoc') != ''){
+      $sql .= " AND f.is_factura = '".($this->input->get('ftipodoc') === 'f' ? 't' : 'f')."'";
     }
 
 		/*** Saldo anterior ***/
@@ -1244,6 +1252,10 @@ class cuentas_cobrar_model extends privilegios_model{
       if($this->input->get('fid_cliente') != ''){
         $sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
         $sqlt .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
+      }
+
+      if($this->input->get('ftipodoc') != ''){
+        $sql .= " AND f.is_factura = '".($this->input->get('ftipodoc') === 'f' ? 't' : 'f')."'";
       }
 
 	    $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito FROM clientes WHERE status = 'ac' {$sql_clientes} ORDER BY cuenta_cpi ASC ");

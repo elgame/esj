@@ -391,6 +391,7 @@
                               <td style="width: 70px;">
                                 <?php echo $_POST['codigo'][$key] ?>
                                 <input type="hidden" name="codigo[]" value="<?php echo $_POST['codigo'][$key] ?>" class="span12">
+                                <input type="hidden" name="tipo_cambio[]" value="<?php echo $_POST['tipo_cambio'][$key] ?>" class="span12">
                               </td>
                               <td>
                                   <?php echo $concepto ?>
@@ -503,6 +504,7 @@
                                    <?php echo $htmlProdOk ?>
                                    <?php echo $prod->codigo?>
                                    <input type="hidden" name="codigo[]" value="<?php echo $prod->codigo || '' ?>" class="span12">
+                                   <input type="hidden" name="tipo_cambio[]" value="<?php echo $prod->tipo_cambio ?>" class="span12">
                                  </td>
                                  <td style="<?php echo $redBg ?>">
                                      <?php echo $prod->descripcion ?>

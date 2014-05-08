@@ -931,6 +931,9 @@ class cuentas_pagar_model extends privilegios_model{
 
       if ($this->input->get('did_empresa') != '')
         $sql .= " AND f.id_empresa = '".$_GET['did_empresa']."'";
+
+      if ($this->input->get('did_proveedor') != '')
+        $sql .= " AND c.id_proveedor = '".$_GET['did_proveedor']."'";
     }
 
     $query = BDUtil::pagination(

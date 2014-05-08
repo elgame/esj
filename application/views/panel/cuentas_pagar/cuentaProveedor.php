@@ -97,7 +97,7 @@
 									<th>Concepto</th>
 									<th>Cargo</th>
 									<th>Abono</th>
-									<th>Saldo</th>
+									<th>Saldo <input type="checkbox" id="select-all-abonom" title="Seleccionar/Deseleccionar"></th>
 									<th>Estado</th>
 									<th>F. Vencimiento</th>
 									<th>D. Transcurridos</th>

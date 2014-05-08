@@ -313,7 +313,7 @@ class vehiculos_model extends CI_Model {
           $datos[2] = String::formatoNumero($item->kilometros - $res['gasolina'][$key-1]->kilometros, 2, '');
 
 					$datos[4] = String::formatoNumero( $rendimiento , 2, '');
-					$datos[5] = String::formatoNumero( (100/$rendimiento) , 2, '');
+					$datos[5] = String::formatoNumero( (100/($rendimiento == 0 ? 1 : $rendimiento)) , 2, '');
 
 					$total_kilometros += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
 					$total_litros     += $item->litros;

@@ -680,6 +680,7 @@
                   '<td style="width: 70px;">' +
                     producto.codigo +
                     '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
+                    '<input type="hidden" name="tipo_cambio[]" value="'+(producto.tipo_cambio || 0)+'" class="span12">' +
                   '</td>' +
                   '<td>' +
                     producto.concepto +

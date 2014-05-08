@@ -1,6 +1,6 @@
 var msb = {
-	confirm: function(msg, title, obj, callback, callback2){
-		$("body").append('<div class="modal hide fade" id="myModal">'+
+	confirm: function(msg, title, obj, callback, callback2, style){
+		$("body").append('<div class="modal hide fade" id="myModal" style="'+style+'">'+
 			'	<div class="modal-header">'+
 			'		<button type="button" class="close" data-dismiss="modal">×</button>'+
 			'		<h3>'+title+'</h3>'+

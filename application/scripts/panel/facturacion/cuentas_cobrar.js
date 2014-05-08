@@ -43,6 +43,34 @@ $(function(){
     }
   });
 
+  // Autocomplete Proveedores
+  $("#dproveedor").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val(), 10) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/proveedores/ajax_get_proveedores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+            response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_proveedor").val(ui.item.id);
+      $("#dproveedor").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#did_proveedor').val('');
+    }
+  });
+
   abonom.init();
 
   modalAbonos.init();
@@ -98,8 +126,8 @@ var modalAbonos = (function($){
 
   function init()
   {
-    if ($("#abonomasivo").length > 0) 
-    { 
+    if ($("#abonomasivo").length > 0)
+    {
       $("#abonomasivo .monto_factura").on('change', calculaMonto);
       $("#form").on('submit', sendFormMasivo);
     }
@@ -124,10 +152,10 @@ var modalAbonos = (function($){
           pass = true;
       });
       if(pass){ //es mayor el cargo a pagar
-        msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'dd', this, function(){
+        msb.confirm('El monto de una o más facturas es mayor al saldo, se saldaran y el resto se cargara a pagos adicionales.', 'Alerta', this, function(){
           $enviar = true;
           $("#form").submit();
-        });
+        }, function (){}, 'top: 30% !important;');
         return false;
       }else{ //es igual o menor el cargo
         return true;

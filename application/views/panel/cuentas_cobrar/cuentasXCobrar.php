@@ -56,6 +56,13 @@
                 <input type="text" name="dcliente" class="input-large search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">
                 <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value_get('fid_cliente'); ?>"> |
 
+                <label for="ftipodoc">Tipo</label>
+                <select name="ftipodoc" id="ftipodoc" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('ftipodoc', ''); ?>>Todas</option>
+                  <option value="f" <?php echo set_select_get('ftipodoc', 'f'); ?>>Facturas</option>
+                  <option value="r" <?php echo set_select_get('ftipodoc', 'r'); ?>>Remisiones</option>
+                </select>
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>

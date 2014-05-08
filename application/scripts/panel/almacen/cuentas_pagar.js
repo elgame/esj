@@ -46,6 +46,25 @@ $(function(){
   abonom.init();
 
   modalAbonos.init();
+
+  $('#select-all-abonom').on('click', function(event) {
+    var $this;
+    if ($(this).is(':checked')) {
+      $('.sel_abonom').each(function(index, el) {
+        $this = $(this);
+        if ( ! $this.hasClass('active')) {
+          $(this).click();
+        }
+      });
+    } else {
+      $('.sel_abonom').each(function(index, el) {
+        $this = $(this);
+        if ($this.hasClass('active')) {
+          $(this).click();
+        }
+      });
+    }
+  });
 });
 
 

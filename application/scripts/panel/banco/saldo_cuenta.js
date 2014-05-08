@@ -35,6 +35,34 @@ $(function(){
 
   var $btn = $('#cambia-fecha-movi');
   $btn.attr('href', $btn.attr('href') + '&ids=' + ids.join(','));
+
+  // Autocomplete clientes
+  // $("#dcliente").autocomplete({
+  //   source: function(request, response) {
+  //     $.ajax({
+  //         url: base_url+'panel/facturacion/ajax_get_clientes/',
+  //         dataType: "json",
+  //         data: {
+  //             term : request.term,
+  //             did_empresa : $("#did_empresa").val()
+  //         },
+  //         success: function(data) {
+  //             response(data);
+  //         }
+  //     });
+  //   },
+  //   minLength: 1,
+  //   selectFirst: true,
+  //   select: function( event, ui ) {
+  //     $("#did_cliente").val(ui.item.id);
+  //     $("#dcliente").css("background-color", "#B0FFB0");
+  //   }
+  // }).on("keydown", function(event){
+  //     if(event.which == 8 || event == 46){
+  //       $("#dcliente").css("background-color", "#FFD9B3");
+  //       $("#did_cliente").val("");
+  //     }
+  // });
 });
 
 function calculaSaldo() {

@@ -199,6 +199,14 @@ class banco_cuentas_model extends banco_model {
 			$sqloperacion .= " AND m.metodo_pago = 'transferencia' AND m.tipo = 'f'";
 		}
 
+    if(isset($_GET['dcliente']{0})){
+      $sqloperacion .= " AND (lower(Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '')) LIKE '%".mb_strtolower($this->input->get('dcliente'), 'UTF-8')."%')";
+    }
+
+    if(isset($_GET['tmetodo_pago']{0}) && $_GET['tmetodo_pago'] !== ''){
+      $sqloperacion .= " AND m.metodo_pago = '{$_GET['tmetodo_pago']}'";
+    }
+
 		/*if(isset($_GET['fid_banco']{0}))
 			$sql .= " AND bb.id_banco = {$this->input->get('fid_banco')}";
 

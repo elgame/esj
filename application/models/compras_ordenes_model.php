@@ -169,6 +169,7 @@ class compras_ordenes_model extends CI_Model {
         'observacion'          => $_POST['observacion'][$key],
         'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+        'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
       );
     }
 
@@ -323,6 +324,7 @@ class compras_ordenes_model extends CI_Model {
           'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p',
           'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
         );
       }
 
@@ -520,7 +522,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion,
-                  cp.ieps, cp.porcentaje_ieps
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
@@ -666,6 +668,7 @@ class compras_ordenes_model extends CI_Model {
         'observacion'     => $_POST['observacion'][$key],
         'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+        'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
       );
 
       if ($faltantesProd !== '0')
@@ -922,8 +925,16 @@ class compras_ordenes_model extends CI_Model {
       $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
 
       $subtotal = $iva = $total = $retencion = 0;
+
+      $tipoCambio = 0;
+
       foreach ($orden['info'][0]->productos as $key => $prod)
       {
+        if ($prod->tipo_cambio != 0)
+        {
+          $tipoCambio = $prod->tipo_cambio;
+        }
+
         $band_head = false;
         if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
           $pdf->AddPage();
@@ -957,13 +968,17 @@ class compras_ordenes_model extends CI_Model {
       }
 
       $pdf->SetX(6);
-      $pdf->SetAligns(array('L', 'L', 'R'));
-      $pdf->SetWidths(array(154, 25, 25));
+      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(114, 40, 25, 25));
       $pdf->Row(array(
         'AREA DE APLICACION: ' . $orden['info'][0]->departamento,
+        ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
         'SUB-TOTAL',
         String::formatoNumero($subtotal, 2, '$', false),
       ), false, false);
+
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(154, 25, 25));
 
       $dato_cliente = '';
       if($orden['info'][0]->tipo_orden == 'f')
