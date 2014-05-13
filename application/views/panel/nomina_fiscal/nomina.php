@@ -72,6 +72,11 @@
                       PTU <input type="text" name="utilidad_empresa" id="ptu" value="" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
                       <a href="javascript:void(0);" class="btn btn-success" id="btn-ptu"><i class="icon-refresh"></i></a>
                     </div>
+
+                    <?php if ( $nominas_finalizadas){ ?>
+                      <a href="<?php echo base_url('panel/nomina_fiscal/recibos_nomina_pdf/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Recibos Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
+                    <?php } ?>
+
                   </div>
                 </div>
                 <div class="span5" style="text-align: center;">

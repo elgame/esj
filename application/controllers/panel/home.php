@@ -93,7 +93,7 @@ class home extends MY_Controller {
 		//     // }
 		// }
 
-		$params['cuentas'] = '';//$this->getArbolCuenta();
+		$params['cuentas'] = $this->getArbolCuenta();
 
 		// $this->load->library('cfdi');
 		// $this->cfdi->cargaDatosFiscales(1076, 'proveedores');

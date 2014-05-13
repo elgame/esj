@@ -317,35 +317,59 @@ class inventario_model extends privilegios_model{
         $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
       }
 
-      if($this->input->get('fid_producto') != '')
-      {
-        $idsproveedores .= " AND p.id_producto = ".$this->input->get('fid_producto');
-        $idsproveedores2 .= " AND cp.id_producto = ".$this->input->get('fid_producto');
-      }else
-      {
-        $idsproveedores .= " AND p.id_producto = 0";
-        $idsproveedores2 .= " AND cp.id_producto = 0";
-      }
+      // if($this->input->get('fid_producto') != '')
+      // {
+      //   $idsproveedores .= " AND p.id_producto = ".$this->input->get('fid_producto');
+      //   $idsproveedores2 .= " AND cp.id_producto = ".$this->input->get('fid_producto');
+      // }else
+      // {
+      //   $idsproveedores .= " AND p.id_producto = 0";
+      //   $idsproveedores2 .= " AND cp.id_producto = 0";
+      // }
 
       $response = array();
-      $productos = $this->db->query("SELECT p.id_producto, cp.serie, cp.folio, cp.fecha, cp.precio_unitario, p.nombre,
-            pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, COALESCE(cp.importe, 0) AS importe,
-            COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total, cp.proveedor
-        FROM
-          productos AS p LEFT JOIN (
-            SELECT cp.id_producto, c.serie, c.folio, Date(c.fecha) AS fecha, cp.cantidad, cp.importe,
-              (cp.iva - cp.retencion_iva) AS impuestos, cp.total, cp.precio_unitario, pr.nombre_fiscal AS proveedor
-            FROM compras AS c
-              INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
-              INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
-              INNER JOIN proveedores AS pr ON pr.id_proveedor = c.id_proveedor
-            WHERE cp.id_producto IS NOT NULL {$idsproveedores2} {$sql} AND
-              Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          ) AS cp ON p.id_producto = cp.id_producto
-            INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
-          {$idsproveedores}
-        ORDER BY cp.fecha DESC, cp.folio ASC");
-      $response = $productos->result();
+      if (is_array($this->input->get('ids_productos')))
+      {
+        foreach ($this->input->get('ids_productos') as $key => $product)
+        {
+          $productos = $this->db->query("SELECT p.id_producto, cp.serie, cp.folio, cp.fecha, cp.precio_unitario, p.nombre,
+                pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, COALESCE(cp.importe, 0) AS importe,
+                COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total, cp.proveedor
+            FROM
+              productos AS p LEFT JOIN (
+                SELECT cp.id_producto, c.serie, c.folio, Date(c.fecha) AS fecha, cp.cantidad, cp.importe,
+                  (cp.iva - cp.retencion_iva) AS impuestos, cp.total, cp.precio_unitario, pr.nombre_fiscal AS proveedor
+                FROM compras AS c
+                  INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
+                  INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
+                  INNER JOIN proveedores AS pr ON pr.id_proveedor = c.id_proveedor
+                WHERE cp.id_producto IS NOT NULL {$idsproveedores2} AND cp.id_producto = {$product} {$sql} AND
+                  Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+              ) AS cp ON p.id_producto = cp.id_producto
+                INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+              {$idsproveedores} AND p.id_producto = {$product}
+            ORDER BY cp.fecha DESC, cp.folio ASC");
+          $response[] = $productos->result();
+        }
+      }
+      // $productos = $this->db->query("SELECT p.id_producto, cp.serie, cp.folio, cp.fecha, cp.precio_unitario, p.nombre,
+      //       pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad, COALESCE(cp.importe, 0) AS importe,
+      //       COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total, cp.proveedor
+      //   FROM
+      //     productos AS p LEFT JOIN (
+      //       SELECT cp.id_producto, c.serie, c.folio, Date(c.fecha) AS fecha, cp.cantidad, cp.importe,
+      //         (cp.iva - cp.retencion_iva) AS impuestos, cp.total, cp.precio_unitario, pr.nombre_fiscal AS proveedor
+      //       FROM compras AS c
+      //         INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
+      //         INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
+      //         INNER JOIN proveedores AS pr ON pr.id_proveedor = c.id_proveedor
+      //       WHERE cp.id_producto IS NOT NULL {$idsproveedores2} {$sql} AND
+      //         Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+      //     ) AS cp ON p.id_producto = cp.id_producto
+      //       INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
+      //     {$idsproveedores}
+      //   ORDER BY cp.fecha DESC, cp.folio ASC");
+      // $response = $productos->result();
 
     return $response;
   }
@@ -368,8 +392,8 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de seguimientos x Producto';
-    $pdf->titulo3 = (isset($res[0]->nombre)?'PRODUCTO: '.$res[0]->nombre:'')."\n";
-    $pdf->titulo3 .= 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    // $pdf->titulo3 = (isset($res[0]->nombre)?'PRODUCTO: '.$res[0]->nombre:'')."\n";
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -378,49 +402,82 @@ class inventario_model extends privilegios_model{
     $header = array('Fecha', 'Folio', 'Proveedor', 'Concepto', 'P. Unitario', 'Impuestos', 'Total');
 
     $familia = '';
-    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
-    foreach($res as $key => $producto){
-      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-        $pdf->AddPage();
+    $total_general = 0;
+    foreach($res as $key22 => $productos)
+    {
+      if(count($productos) > 0)
+      {
 
+        $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+        if($pdf->GetY() >= $pdf->limiteY || $key22==0)
+        {
+          $pdf->AddPage();
+
+        }
+          $datos = array(
+            (isset($productos[0]->nombre)? $productos[0]->nombre: ''),
+          );
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(200));
+          $pdf->Row($datos, false, false);
+        foreach($productos as $key => $producto)
+        {
+          if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+            if($pdf->GetY() >= $pdf->limiteY)
+              $pdf->AddPage();
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+            $pdf->SetY($pdf->GetY()+2);
+          }
+
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFont('Arial','',8);
+          $datos = array($producto->fecha,
+            $producto->serie.' '.$producto->folio,
+            $producto->proveedor,
+            $producto->cantidad.' '.$producto->abreviatura,
+            String::formatoNumero($producto->precio_unitario, 2, '', false),
+            String::formatoNumero($producto->impuestos, 2, '', false),
+            String::formatoNumero(($producto->total), 2, '', false),
+            );
+          $pdf->SetXY(6, $pdf->GetY()-2);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($datos, false, false);
+
+          $proveedor_cantidad  += $producto->cantidad;
+          $proveedor_importe   += $producto->importe;
+          $proveedor_impuestos += $producto->impuestos;
+          $proveedor_total     += $producto->total;
+          $total_general += $producto->total;
+
+        }
         $pdf->SetFont('Arial','B',8);
-        $pdf->SetTextColor(255,255,255);
-        $pdf->SetFillColor(160,160,160);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($header, true);
-        $pdf->SetY($pdf->GetY()+2);
+        $datos = array('Total',
+          String::formatoNumero(($proveedor_total), 2, '', false),
+          );
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'R'));
+        $pdf->SetWidths(array(170, 36));
+        $pdf->Row($datos, false, false);
       }
-
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetFont('Arial','',8);
-      $datos = array($producto->fecha,
-        $producto->serie.' '.$producto->folio,
-        $producto->proveedor,
-        $producto->cantidad.' '.$producto->abreviatura,
-        String::formatoNumero($producto->precio_unitario, 2, '', false),
-        String::formatoNumero($producto->impuestos, 2, '', false),
-        String::formatoNumero(($producto->total), 2, '', false),
-        );
-      $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-      $pdf->Row($datos, false, false);
-
-      $proveedor_cantidad  += $producto->cantidad;
-      $proveedor_importe   += $producto->importe;
-      $proveedor_impuestos += $producto->impuestos;
-      $proveedor_total     += $producto->total;
-
     }
+    $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      String::formatoNumero(($total_general), 2, '', false),
       );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(170, 36));
-    $pdf->Row($datos, false);
+    $pdf->Row($datos, false, false);
 
     $pdf->Output('compras_proveedor.pdf', 'I');
   }

@@ -147,6 +147,14 @@ class cfdi{
     return $datacer;
   }
 
+  public function numero($valor)
+  {
+    $num = explode('.', $valor);
+    if(isset($num[1]))
+      $num[1] = substr($num[1], 0, 6);
+    return implode('.', $num);
+  }
+
   /**
    * Genera la Cadena Original.
    *
@@ -181,7 +189,7 @@ class cfdi{
     // $datos['comprobante']['tipoDeComprobante']    = 'egreso';
     $datos['comprobante']['formaDePago']          = $data['formaDePago'];
     $datos['comprobante']['condicionesDePago']    = $data['condicionesDePago'];
-    $datos['comprobante']['subTotal']             = (float)$data['subTotal'];
+    $datos['comprobante']['subTotal']             = (float)$this->numero($data['subTotal']);
 
     // Nomina
     if (isset($data['descuento']))
@@ -191,7 +199,7 @@ class cfdi{
 
     // $datos['comprobante']['TipoCambio']           = $data['TipoCambio'];
     // $datos['comprobante']['Moneda']               = $data['Moneda'];
-    $datos['comprobante']['total']                = (float)$data['total'];
+    $datos['comprobante']['total']                = (float)$this->numero($data['total']);
     $datos['comprobante']['metodoDePago']         = $data['metodoDePago'];
     $datos['comprobante']['LugarExpedición']      = $this->municipio.', '.$this->estado;
     $datos['comprobante']['NumCtaPago']           = $data['NumCtaPago'];
@@ -323,20 +331,20 @@ class cfdi{
             $producto['idClasificacion'] != '51' AND $producto['idClasificacion'] != '52' AND
             $producto['idClasificacion'] != '53')
         {
-          $datos['concepto'][] = (float)$producto['cantidad'];
+          $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
           $datos['concepto'][] = $producto['unidad'];
           $datos['concepto'][] = $producto['descripcion'];
-          $datos['concepto'][] = (float)$producto['valorUnitario'];
-          $datos['concepto'][] = (float)$producto['importe'];
+          $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
+          $datos['concepto'][] = (float)$this->numero($producto['importe']);
         }
       }
       else
       {
-        $datos['concepto'][] = (float)$producto['cantidad'];
+        $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
         $datos['concepto'][] = $producto['unidad'];
         $datos['concepto'][] = $producto['descripcion'];
-        $datos['concepto'][] = (float)$producto['valorUnitario'];
-        $datos['concepto'][] = (float)$producto['importe'];
+        $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
+        $datos['concepto'][] = (float)$this->numero($producto['importe']);
       }
     }
 
@@ -348,9 +356,9 @@ class cfdi{
     foreach ($data['retencion'] as $key => $retencion)
     {
       $datos['retencion'][] = $retencion['impuesto'];
-      $datos['retencion'][] = (float)$retencion['importe'];
+      $datos['retencion'][] = (float)$this->numero($retencion['importe']);
     }
-    $datos['retencion'][] = (float)$data['totalImpuestosRetenidos'];
+    $datos['retencion'][] = (float)$this->numero($data['totalImpuestosRetenidos']);
 
     // ----------> Nodo traslado
     // Impuesto
@@ -362,9 +370,9 @@ class cfdi{
     {
       $datos['traslado'][] = $traslado['Impuesto'];
       $datos['traslado'][] = $traslado['tasa'];
-      $datos['traslado'][] = (float)$traslado['importe'];
+      $datos['traslado'][] = (float)$this->numero($traslado['importe']);
     }
-    $datos['traslado'][] = (float)$data['totalImpuestosTrasladados'];
+    $datos['traslado'][] = (float)$this->numero($data['totalImpuestosTrasladados']);
 
     // ----------> Nodo Nomina Si es una nomina la que se facturara.
     $datos['nomina'] = array('datos_cadena' => array());
@@ -443,6 +451,9 @@ class cfdi{
 
       if ($totalPercepcion !== floatval(0))
       {
+        $percepcion['ImporteGravado'] = floatval($this->numero($percepcion['ImporteGravado']));
+        $percepcion['ImporteExcento'] = floatval($this->numero($percepcion['ImporteExcento']));
+
         $totalPercepciones['total_gravado'] += floatval($percepcion['ImporteGravado']);
         $totalPercepciones['total_excento'] += floatval($percepcion['ImporteExcento']);
 
@@ -452,6 +463,8 @@ class cfdi{
     }
     if ( floatval($totalPercepciones['total_gravado']+$totalPercepciones['total_excento']) > 0)
     {
+      $totalPercepciones['total_gravado'] = floatval($this->numero($totalPercepciones['total_gravado']));
+      $totalPercepciones['total_excento'] = floatval($this->numero($totalPercepciones['total_excento']));
       $nominaPercepciones = array_merge($totalPercepciones, $percepciones);
       $nomina['Percepciones']['totales'] = $totalPercepciones;
     }
@@ -466,6 +479,9 @@ class cfdi{
       // Si el total de la deduccion no es 0.
       if ($totalDeduccion !== floatval(0))
       {
+        $deduccion['ImporteGravado'] = (float)$this->numero($deduccion['ImporteGravado']);
+        $deduccion['ImporteExcento'] = (float)$this->numero($deduccion['ImporteExcento']);
+
         $totalDeducciones['total_gravado'] += $deduccion['ImporteGravado'];
         $totalDeducciones['total_excento'] += $deduccion['ImporteExcento'];
 
@@ -475,6 +491,8 @@ class cfdi{
     }
     if ( floatval($totalDeducciones['total_gravado']+$totalDeducciones['total_excento']) > 0)
     {
+      $totalDeducciones['total_gravado'] = (float)$this->numero($totalDeducciones['total_gravado']);
+      $totalDeducciones['total_excento'] = (float)$this->numero($totalDeducciones['total_excento']);
       $nominaDeducciones = array_merge($totalDeducciones, array_values($deducciones));
       $nomina['Deducciones']['totales'] = $totalDeducciones;
     }

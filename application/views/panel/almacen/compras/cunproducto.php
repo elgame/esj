@@ -34,14 +34,14 @@
                   <div class="controls">
                     <div class="input-append span12">
                       <input type="text" name="fproducto" value="" id="fproducto" class="span9" placeholder="Buscar">
-                      <!-- <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button> -->
+                      <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
                       <input type="hidden" name="fid_producto" value="" id="fid_producto">
                     </div>
                     <div class="clearfix"></div>
-                    <!-- <div style="height:130px;overflow-y: scroll;background-color:#eee;">
+                    <div style="height:130px;overflow-y: scroll;background-color:#eee;">
                       <ul id="lista_proveedores" style="list-style: none;margin-left: 4px;">
                       </ul>
-                    </div> -->
+                    </div>
                   </div>
                 </div>
 

@@ -54,7 +54,7 @@
                     <tr>
                       <th colspan="7"></th>
                       <th colspan="6" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="2" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="3" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                     </tr>
                     <tr>
@@ -76,6 +76,7 @@
 
                       <!-- Deducciones -->
                       <th style="background-color: #EEBCBC;">ISR</th>
+                      <th style="background-color: #EEBCBC;">Prestamos</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
                       <!-- Total nomina -->
@@ -90,7 +91,8 @@
                                              $empleado[0]->nomina->prima_vacacional +
                                              $empleado[0]->nomina->subsidio +
                                              $empleado[0]->nomina->aguinaldo;
-                        $totalDeducciones = $empleado[0]->nomina->deducciones['isr']['total'];
+                        $totalDeducciones = $empleado[0]->nomina->deducciones['isr']['total'] +
+                                            $empleado[0]->nomina->deducciones['otros']['total'];
                       ?>
                       <tr class="tr-empleado" id="empleado<?php echo $empleado[0]->id ?> ">
                         <td>
@@ -144,9 +146,13 @@
                           <span class="isr-span"><?php echo String::formatoNumero($empleado[0]->nomina->deducciones['isr']['total']) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $empleado[0]->nomina->deducciones['isr']['total'] ?>" class="span12 isr">
                         </td>
+                        <td style="width: 60px; ">
+                          <span class="isr-span"><?php echo String::formatoNumero($empleado[0]->nomina->deducciones['otros']['total']) ?></span>
+                          <input type="hidden" name="otros[]" value="<?php echo $empleado[0]->nomina->deducciones['otros']['total'] ?>" class="span12 isr">
+                        </td>
                         <td>
-                          <span class="total-deducciones-span"><?php echo String::formatoNumero($empleado[0]->nomina->deducciones['isr']['total']) ?></span>
-                          <input type="hidden" value="<?php echo (float)number_format($empleado[0]->nomina->deducciones['isr']['total'], 2, '.', '') ?>" class="span12 total-deducciones">
+                          <span class="total-deducciones-span"><?php echo String::formatoNumero($totalDeducciones) ?></span>
+                          <input type="hidden" value="<?php echo (float)number_format($totalDeducciones, 2, '.', '') ?>" class="span12 total-deducciones">
                         </td>
 
                         <!-- Total Nomina -->

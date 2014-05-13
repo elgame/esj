@@ -190,7 +190,7 @@ class vehiculos_model extends CI_Model {
 		//Gasolina
 		$res = $this->db->query(
 			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total
+				(cvg.litros * cvg.precio) AS total, c.id_empresa
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -207,7 +207,7 @@ class vehiculos_model extends CI_Model {
 		//Disel
 		$res = $this->db->query(
 			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total
+				(cvg.litros * cvg.precio) AS total, c.id_empresa
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
@@ -222,12 +222,12 @@ class vehiculos_model extends CI_Model {
 
 		//Gastos
 		$res = $this->db->query(
-			"SELECT cc.id_orden, cc.folio, Date(cc.fecha) AS fecha, cc.nombre, cc.total, cc.concepto
+			"SELECT cc.id_orden, cc.folio, Date(cc.fecha) AS fecha, cc.nombre, cc.total, cc.concepto, cc.id_empresa
 			FROM (
 				(
 					SELECT c.id_orden, (c.folio) AS folio, c.fecha_aceptacion AS fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre,
 						(SELECT Sum(total) FROM compras_productos WHERE id_orden = c.id_orden) AS total,
-						array_to_string(Array(SELECT descripcion FROM compras_productos WHERE id_orden = c.id_orden), ', ') AS concepto
+						array_to_string(Array(SELECT descripcion FROM compras_productos WHERE id_orden = c.id_orden), ', ') AS concepto, c.id_empresa
 					FROM compras_ordenes AS c
 						INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 					WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql} {$sqlf1}
@@ -235,7 +235,7 @@ class vehiculos_model extends CI_Model {
 				UNION
 				(
 					SELECT c.id_compra AS id_orden, c.folio, c.fecha, (cv.placa || ' ' || cv.modelo || ' ' || cv.marca) AS nombre,
-						c.total, c.concepto
+						c.total, c.concepto, c.id_empresa
 					FROM compras AS c
 						INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 					WHERE c.status<>'ca' AND c.tipo_vehiculo='ot' {$sql} {$sqlf2}
@@ -254,11 +254,21 @@ class vehiculos_model extends CI_Model {
 	 */
 	public function getRCombustiblePdf()
 	{
+    $this->load->model('empresas_model');
 		$res = $this->getRCombustibleData();
+
+    $id_empresa = isset($res['gasolina'][0]->id_empresa)?$res['gasolina'][0]->id_empresa:0;
+    $id_empresa = isset($res['disel'][0]->id_empresa)?$res['disel'][0]->id_empresa: ($id_empresa>0?$id_empresa:0);
+    $id_empresa = isset($res['gastos'][0]->id_empresa)?$res['gastos'][0]->id_empresa: ($id_empresa>0?$id_empresa:0);
+    $empresa22 = $this->empresas_model->getInfoEmpresa($id_empresa);
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
+    if(isset($empresa22['info']->nombre_fiscal)){
+      $pdf->titulo1 = $empresa22['info']->nombre_fiscal;
+      $pdf->logo = $empresa22['info']->logo;
+    }
 		$pdf->titulo2 = 'Reporte de Vehiculo';
 		$pdf->titulo3 = (isset($res['gasolina'][0]->nombre)? $res['gasolina'][0]->nombre: '')."\n";
 		$pdf->titulo3 .= 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
@@ -417,7 +427,8 @@ class vehiculos_model extends CI_Model {
 					), true);
 		}
 
-
+    if($pdf->GetY() == NULL)
+      $pdf->AddPage();
 		//Otros gastos asignados al vehiculo
 		$aligns = array('C', 'L', 'L', 'L', 'R');
 		$widths = array(18, 65, 20, 70, 30);

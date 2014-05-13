@@ -41,6 +41,7 @@ $(function(){
     select: function( event, ui ) {
       $("#fid_producto").val(ui.item.id);
       $("#fproducto").val(ui.item.label).css({'background-color': '#99FF99'});
+      setTimeout(addProducto, 200);
     }
   }).on("keydown", function(event) {
     if(event.which == 8 || event.which == 46) {
@@ -98,10 +99,13 @@ $(function(){
     }
   });
 
+  $("#btnAddProducto").on('click', addProducto);
+  $(document).on('click', '.remove_producto', removeProducto);
+
 });
 
 function cargaListaFamlias ($empresaId) {
-  $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId}, 
+  $.getJSON(base_url+'panel/inventario/ajax_get_familias/', {'fid_empresa': $empresaId},
     function(data){
       var html = '';
       for (var i in data.familias) {
@@ -109,4 +113,22 @@ function cargaListaFamlias ($empresaId) {
       };
       $("#lista_familias").html(html);
   });
+}
+
+function addProducto(event){
+  var $this = $(this), fid_producto = $("#fid_producto"), fproductor = $("#fproducto");
+  if (fid_producto.val() != '') {
+    if ( $('#liprovee'+fid_producto.val()).length == 0) {
+      $("#lista_proveedores").append('<li id="liprovee'+fid_producto.val()+'"><a class="btn btn-link remove_producto" style="padding: 2px 5px;"><i class="icon-minus-sign"></i></a>'+
+              '<input type="hidden" name="ids_productos[]" class="ids_productos" value="'+fid_producto.val()+'"> '+fproductor.val()+'</li>');
+    }else
+      noty({"text":"El Proveedor ya esta seleccionado", "layout":"topRight", "type":"error"});
+    fid_producto.val("");
+    fproductor.val("").css({'background-color': '#fff'}).focus();
+  }else
+    noty({"text":"Selecciona un Producto", "layout":"topRight", "type":"error"});
+}
+
+function removeProducto(event){
+  $(this).parent('li').remove();
 }

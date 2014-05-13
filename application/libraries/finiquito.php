@@ -189,7 +189,7 @@ class finiquito
     // $this->empleado->nomina->deducciones['imss'] = $this->dImss();
     // $this->empleado->nomina->deducciones['rcv'] = $this->dRcv();
     // $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
-    // $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
+    $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
     $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
 
     return $this->empleado;
@@ -729,12 +729,13 @@ class finiquito
    */
   public function dOtros()
   {
-    $otros = floatval($this->empleado->descuento_playeras);
-
-    foreach ($this->empleado->prestamos as $prestamo)
-    {
-      $otros += floatval($prestamo['pago_semana_descontar']);
-    }
+    // $otros = floatval($this->empleado->descuento_playeras);
+    $otros = 0;
+    $otros += $this->empleado->prestamos;
+    // foreach ($this->empleado->prestamos as $prestamo)
+    // {
+    //   $otros += floatval($prestamo['pago_semana_descontar']);
+    // }
 
     return array(
       'TipoDeduccion' => '004',

@@ -27,6 +27,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/recibo_vacaciones_pdf/',
     'nomina_fiscal/recibo_finiquito_pdf/',
     'nomina_fiscal/recibo_incapacidad_pdf/',
+    'nomina_fiscal/recibos_nomina_pdf/',
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
@@ -643,7 +644,7 @@ class nomina_fiscal extends MY_Controller {
   public function nomina_fiscal_banco()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId']);
+    $this->nomina_fiscal_model->descargarTxtBanco($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
   }
 
   public function recibo_nomina_pdf()
@@ -651,6 +652,13 @@ class nomina_fiscal extends MY_Controller {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+  }
+
+  public function recibos_nomina_pdf()
+  {
+    $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfRecibNomin($_GET['semana'], $anio, $_GET['empresaId']);
   }
 
   public function asistencia_pdf()
