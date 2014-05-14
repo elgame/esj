@@ -1454,6 +1454,7 @@ class inventario_model extends privilegios_model{
 	 */
 	public function nivelar()
 	{
+    $fecha = isset($_GET['dfecha']{0})? $_GET['dfecha']: date("Y-m-d");
 		$compra = array();
 		$salida = array();
 		foreach ($_POST['idproducto'] as $key => $produto)
@@ -1469,13 +1470,14 @@ class inventario_model extends privilegios_model{
 			{
 				$presenta = $this->db->query("SELECT id_presentacion FROM productos_presentaciones WHERE status = 'ac' AND id_producto = {$produto} AND cantidad = 1 LIMIT 1")->row();
 				$compra[] = array(
-					'id_producto'     => $produto,
-					'id_presentacion' => (count($presenta)>0? $presenta->id_presentacion: NULL),
-					'descripcion'     => $_POST['descripcion'][$key],
-					'cantidad'        => abs($_POST['diferencia'][$key]),
-					'precio_unitario' => $_POST['precio_producto'][$key],
-					'importe'         => (abs($_POST['diferencia'][$key])*$_POST['precio_producto'][$key]),
-					'status'          => 'a',
+          'id_producto'      => $produto,
+          'id_presentacion'  => (count($presenta)>0? $presenta->id_presentacion: NULL),
+          'descripcion'      => $_POST['descripcion'][$key],
+          'cantidad'         => abs($_POST['diferencia'][$key]),
+          'precio_unitario'  => $_POST['precio_producto'][$key],
+          'importe'          => (abs($_POST['diferencia'][$key])*$_POST['precio_producto'][$key]),
+          'status'           => 'a',
+          'fecha_aceptacion' => $fecha,
 					);
 			}
 		}
@@ -1484,7 +1486,10 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('productos_salidas_model');
 
-			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida) FROM compras_salidas AS cs LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida WHERE status = 'n' AND Date(fecha_creacion) = Date(now()) GROUP BY cs.id_salida")->row();
+			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida)
+          FROM compras_salidas AS cs
+            LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
+          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
 			if (isset($res_salidas->count)) //ya existe una salida nivelacion en el dia
@@ -1499,6 +1504,8 @@ class inventario_model extends privilegios_model{
 						'folio'           => 0,
 						'concepto'        => 'Nivelacion de inventario',
 						'status'          => 'n',
+            'fecha_creacion'  => $fecha,
+            'fecha_registro'  => $fecha,
 					));
 				$id_salida = $res['id_salida'];
 			}
@@ -1515,9 +1522,10 @@ class inventario_model extends privilegios_model{
 		{
 			$this->load->model('compras_ordenes_model');
 
-			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden) FROM compras_ordenes AS cs
-				LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
-				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = Date(now()) GROUP BY cs.id_orden")->row();
+			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden)
+        FROM compras_ordenes AS cs
+				  LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
+				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}' GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
 			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia
@@ -1536,9 +1544,9 @@ class inventario_model extends privilegios_model{
 					'folio'           => 0,
 					'status'          => 'n',
 					'autorizado'      => 't',
-          'fecha_autorizacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
-          'fecha_aceptacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
-          'fecha_creacion' => isset($_GET['dfecha']) ? $_GET['dfecha'] : date('Y-m-d'),
+          'fecha_autorizacion' => $fecha,
+          'fecha_aceptacion' => $fecha,
+          'fecha_creacion' => $fecha,
 				);
 
 				$res = $this->compras_ordenes_model->agregarData($data);

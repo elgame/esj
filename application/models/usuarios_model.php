@@ -390,9 +390,9 @@ class Usuarios_model extends privilegios_model {
   public function getUsuariosAjax(){
     $sql = '';
     if($this->input->get('empleados')!='')
-      $sql = " AND user_nomina = 't'";
+      $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
-      $sql = " AND id_empresa = ".$this->input->get('did_empresa');
+      $sql .= " AND id_empresa = ".$this->input->get('did_empresa');
 
     $res = $this->db->query(
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,

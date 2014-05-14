@@ -259,6 +259,7 @@ class empleados extends MY_Controller {
 
     $this->load->model('usuarios_model');
     $this->load->model('empresas_model');
+    $this->load->model('nomina_fiscal_model');
 
     $this->config_sueldos();
     if ($this->form_validation->run() == FALSE)
@@ -273,6 +274,24 @@ class empleados extends MY_Controller {
     }
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    // Se obtienen los trabajadores de la empresa
+    $filtros = array(
+      'semana'            => '',
+      'anio'              => date("Y"),
+      'empresaId'         => isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $params['empresa']->id_empresa,
+      'puestoId'          => '',
+    );
+    if ($filtros['empresaId'] !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+    $filtros['dia_inicia_semana'] = $dia;
+
+    $_GET['cid_empresa'] = $filtros['empresaId'];
+    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+
+    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros);
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

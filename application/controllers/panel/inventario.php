@@ -355,13 +355,13 @@ class inventario extends MY_Controller {
               'rules'   => 'required|numeric'),
         array('field'   => 'esistema[]',
               'label'   => 'E. Sistema',
-              'rules'   => 'max_length[10]'),
+              'rules'   => 'max_length[18]'),
         array('field'   => 'efisica[]',
               'label'   => 'E. Fisica',
-              'rules'   => 'max_length[10]'),
+              'rules'   => 'max_length[18]'),
         array('field'   => 'diferencia[]',
               'label'   => 'Diferencia',
-              'rules'   => 'max_length[10]'),
+              'rules'   => 'max_length[12]'),
     );
     $this->form_validation->set_rules($rules);
   }

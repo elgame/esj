@@ -20,7 +20,7 @@
               ?>
               </select>
 
-              <label class="control-label" for="dfecha">Fecha Nivelación</label><input type="date" name="dfecha" value="<?php echo date('Y-m-d') ?>" class="input-large">
+              <label class="control-label" for="dfecha">Fecha Nivelación</label><input type="date" name="dfecha" value="<?php echo (isset($_GET['dfecha'])? $_GET['dfecha']: date('Y-m-d')) ?>" class="input-large">
 
               <button type="submit" class="btn">Enviar</button>
             </form> <!-- /form -->
