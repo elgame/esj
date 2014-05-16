@@ -9,6 +9,7 @@ class gastos extends MY_Controller {
   private $excepcion_privilegio = array(
     'gastos/ajax_get_cuentas_proveedor/',
     'gastos/ligar/',
+    'gastos/ajax_get_facturas/',
   );
 
   public function _remap($method){
@@ -172,6 +173,38 @@ class gastos extends MY_Controller {
     $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
 
     $this->load->view('panel/gastos/ligar', $params);
+  }
+
+  public function ligar_facturas()
+  {
+     $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('general/msgbox.js'),
+      array('panel/gastos/ligar_facturas.js')
+    ));
+
+     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Ligar facturas'
+    );
+
+    // $this->load->library('pagination');
+    // $this->load->model('compras_ordenes_model');
+
+    // $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/gastos/ligar_facturas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function ajax_get_facturas()
+  {
+    $this->load->model('gastos_model');
+    $params = $this->gastos_model->getFacturasLibre($_GET);
+
+    echo json_encode($params);
   }
 
   public function agregar_nota_credito()

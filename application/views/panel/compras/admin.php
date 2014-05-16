@@ -138,6 +138,12 @@
                             'attrs' => array('rel' => 'superbox-80x550'))
                           );
 
+                          echo $this->usuarios_model->getLinkPrivSm('gastos/ligar_facturas/', array(
+                            'params'   => 'idc='.$compra->id_compra.'&ide='.$compra->id_empresa,
+                            'btn_type' => 'btn-info',
+                            'attrs' => array(''))
+                          );
+
                           echo $this->usuarios_model->getLinkPrivSm('gastos/agregar_nota_credito/', array(
                             'params'   => 'id='.$compra->id_compra,
                             'btn_type' => '',
