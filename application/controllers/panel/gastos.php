@@ -188,10 +188,9 @@ class gastos extends MY_Controller {
       'titulo' => 'Ligar facturas'
     );
 
-    // $this->load->library('pagination');
-    // $this->load->model('compras_ordenes_model');
+    $this->load->model('gastos_model');
 
-    // $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
+    $params['ordenes'] = $this->gastos_model->getFacturasLigadas($_GET);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);

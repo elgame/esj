@@ -190,6 +190,23 @@ class gastos_model extends privilegios_model{
   }
 
 
+  public function getFacturasLigadas($params)
+  {
+    $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre
+          FROM compras_facturacion_prodc AS cf
+            INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
+            INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
+            INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
+          WHERE cf.id_compra = {$params['idc']}");
+    $response = array();
+    if($result->num_rows() > 0)
+      $response = $result->result();
+
+    $result->free_result();
+
+    return $response;
+  }
+
   public function getFacturasLibre($datos){
     $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, f.fecha, f.cliente
           FROM compras_facturacion_prodc AS cf RIGHT JOIN

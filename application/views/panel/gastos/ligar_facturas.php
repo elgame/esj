@@ -51,13 +51,13 @@
               </fieldset>
 
               <fieldset class="span6 nomarg">
-                <legend>Seleccionadas</legend>
+                <legend>Seleccionadas <button type="submit" id="btn_submit" class="btn btn-primary pull-right">Guardar</button></legend>
                 <input type="hidden" name="id_compra" id="id_compra" value="<?php echo $this->input->get('idc') ?>">
                 <input type="hidden" name="id_empresa" id="id_empresa" value="<?php echo $this->input->get('ide') ?>">
                 <div id="tblsligadas">
                   <table id="tbl" class="table table-striped table-bordered bootstrap-datatable">
                     <thead>
-                      <caption>Monthly savings <input type="hidden" name="idclasif[]" class="idclasif" value=""></caption>
+                      <caption>Monthly savings</caption>
                       <tr>
                         <th style="width:70px;">Fecha</th>
                         <th>Folio</th>
