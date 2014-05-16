@@ -251,14 +251,6 @@ class nomina_fiscal_model extends CI_Model {
             }
           }
         }
-        //quita al trabajador si esta de vacaciones
-        if($empleado->en_vacaciones == '')
-          true;
-        elseif( $diaUltimoDeLaSemana >= $empleado->en_vacaciones  )
-          true;
-        else
-          unset($empleados[$keye]);
-
 
         // Calcula proporcional el septimo dia a los asegurados.
         if ($empleado->esta_asegurado == 't')
@@ -269,6 +261,15 @@ class nomina_fiscal_model extends CI_Model {
         {
           $empleado->dias_trabajados += 1;
         }
+
+        //quita al trabajador si esta de vacaciones
+        if($empleado->en_vacaciones == '')
+          true;
+        elseif( $diaUltimoDeLaSemana >= $empleado->en_vacaciones  )
+          true;
+        elseif($empleado->dias_trabajados == 0)
+          unset($empleados[$keye]);
+
       }
 
     foreach ($empleados as $key => $empleado)
