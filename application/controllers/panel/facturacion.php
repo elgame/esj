@@ -575,7 +575,7 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_dpreciou[]',
               'label'   => 'prod_dpreciou',
-              'rules'   => ''),
+              'rules'   => 'callback_check_max_decimales'),
         array('field'   => 'prod_importe[]',
               'label'   => 'Importe de los productos',
               'rules'   => ''), //greater_than[0]
@@ -805,6 +805,28 @@ class facturacion extends MY_Controller {
     {
       $this->form_validation->set_message('check_existen_pallets', 'Los pallets con los folios '.implode(', ', $palletsYaFacturados).' ya estan facturados.');
       return false;
+    }
+
+    return true;
+  }
+
+   /*
+   |-------------------------------------------------------------------------
+   |  SERIES Y FOLIOS
+   |-------------------------------------------------------------------------
+   */
+
+   public function check_max_decimales($str)
+  {
+    $exp = explode('.', $str);
+
+    if (count($exp) > 1)
+    {
+      if (mb_strlen($exp[1]) > 6)
+      {
+        $this->form_validation->set_message('check_max_decimales', 'Verifique que ninguna cantidad tenga mas de 6 decimales.');
+        return false;
+      }
     }
 
     return true;
