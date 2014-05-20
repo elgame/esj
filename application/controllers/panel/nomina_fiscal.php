@@ -18,6 +18,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/add_finiquito/',
     'nomina_fiscal/ajax_add_prenomina_empleado/',
     'nomina_fiscal/ajax_get_semana/',
+    'nomina_fiscal/ajax_add_nomina_ptu_empleado/',
 
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
@@ -28,6 +29,13 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/recibo_finiquito_pdf/',
     'nomina_fiscal/recibo_incapacidad_pdf/',
     'nomina_fiscal/recibos_nomina_pdf/',
+
+    'nomina_fiscal/recibo_nomina_ptu_pdf/',
+    'nomina_fiscal/recibos_nomina_ptu_pdf/',
+    'nomina_fiscal/nomina_ptu_pdf/',
+    'nomina_fiscal/nomina_ptu_cfdis/',
+    'nomina_fiscal/nomina_ptu_banco/',
+    'nomina_fiscal/nomina_ptu_rpt_pdf/',
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
@@ -142,6 +150,104 @@ class nomina_fiscal extends MY_Controller {
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/nomina_fiscal/nomina', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function ptu()
+  {
+    if (isset($_GET['empresaId']) && $_GET['empresaId'] === '')
+      redirect(base_url('panel/nomina_fiscal?msg=9'));
+
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('libs/jquery.numeric.js'),
+      array('general/util.js'),
+      array('panel/nomina_fiscal/nomina_ptu.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info']; //info empleado
+    $params['opcmenu_active'] = 'Ventas'; //activa la opcion del menu
+    $params['seo']            = array('titulo' => 'Nomina Fiscal');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    $params['empresaDefault'] = $this->empresas_model->getDefaultEmpresa();
+
+    $filtros = array(
+      'semana'    => isset($_GET['semana']) ? $_GET['semana'] : '',
+      'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
+      'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
+      'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+    );
+    if ($filtros['empresaId'] !== '')
+    {
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
+    }
+    else
+    {
+      $dia = '4';
+    }
+    $filtros['dia_inicia_semana'] = $dia;
+
+    $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
+
+    // Datos para la vista.
+    $this->load->model('nomina_fiscal_model');
+    $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
+    $configuraciones = $this->nomina_fiscal_model->configuraciones();
+    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, (isset($_POST['ptu']) ? $_POST['ptu'] : null));
+    $params['empresas'] = $this->empresas_model->getEmpresasAjax();
+    $params['puestos'] = $this->usuarios_model->puestos();
+    // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
+
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
+
+    // Determina cual es la semana que dejara seleccionada en la vista.
+    $semanaActual = $this->nomina_fiscal_model->semanaActualDelMes();
+    $params['numSemanaSelected'] = isset($_GET['semana']) ? $_GET['semana'] : $semanaActual['semana'];
+
+    // Obtiene los rangos de fecha de la semana seleccionada para obtener
+    // las fechas de los 7 dias siguientes.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
+    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
+
+    $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
+
+    // Query para saber si existen nominas generadas para la semana.
+    // $query = $this->db->query(
+    //   "SELECT COUNT(id_empleado) as total_nominas
+    //    FROM nomina_fiscal
+    //    WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana['semana']}"
+    // )->result();
+
+    // Total de nominas de los empleados generadas.
+    $totalGeneradas = 0;
+    $params['nominas_generadas'] = false;
+    foreach ($params['empleados'] as $empleado)
+    {
+      if ($empleado->ptu_generado !== 'false')
+      {
+        $totalGeneradas++;
+        $params['nominas_generadas'] = true;
+      }
+    }
+
+    // Indica si ya se generaron todas las nominas de los empleados de la semana.
+    $params['nominas_finalizadas'] = false;
+    if (count($params['empleados']) == $totalGeneradas && $totalGeneradas != 0)
+    {
+      $params['nominas_finalizadas'] = true;
+    }
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/nomina_fiscal/nomina_ptu', $params);
     $this->load->view('panel/footer');
   }
 
@@ -612,13 +718,25 @@ class nomina_fiscal extends MY_Controller {
     echo json_encode($empleado);
   }
 
+  public function ajax_add_nomina_ptu_empleado()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $empresaDefault = $this->empresas_model->getDefaultEmpresa();
+    $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
+
+    $result = $this->nomina_fiscal_model->add_nominas_ptu($_POST, $empresaId, $_POST['empleado_id']);
+
+    echo json_encode($result);
+  }
+
   public function ajax_get_semana()
   {
     $this->load->model('nomina_fiscal_model');
     $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['did_empresa'])->get()->row()->dia_inicia_semana;
     echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia));
   }
-
 
   public function nomina_fiscal_pdf()
   {
@@ -665,6 +783,41 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->asistencia_pdf($_GET['id'], $_GET['sem'], $_GET['anio']);
+  }
+
+  public function recibo_nomina_ptu_pdf()
+  {
+    $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfReciboNominaFiscalPtu($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+  }
+
+  public function recibos_nomina_ptu_pdf()
+  {
+    $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfRecibNominPtu($_GET['semana'], $anio, $_GET['empresaId']);
+  }
+
+  public function nomina_ptu_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfNominaFiscalPtu($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+  }
+
+  public function nomina_ptu_banco()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->descargarTxtBancoPtu($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+  }
+
+  public function nomina_ptu_rpt_pdf()
+  {
+    $this->load->model('nomina_fiscal_model');
+    if(isset($_POST['xls']{0}))
+      $this->nomina_fiscal_model->xlsRptNominaPtu($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
+    else
+      $this->nomina_fiscal_model->pdfRptNominaPtu($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
   }
 
   /*
