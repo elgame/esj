@@ -549,7 +549,7 @@
   };
 
   var cargaSemanas = function () {
-    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'did_empresa': $("#empresaId").val()},
+    $.getJSON(base_url+'panel/nomina_fiscal/ajax_get_semana/', {'anio': $("#anio").val(), 'did_empresa': $("#empresaId").val()},
       function(data){
         var html = '', i;
         console.log(data);

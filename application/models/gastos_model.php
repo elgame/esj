@@ -190,14 +190,35 @@ class gastos_model extends privilegios_model{
   }
 
 
-  public function getFacturasLigadas($params)
+  public function saveLigarFactura($datos)
   {
-    $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre
+    $data = array();
+    foreach ($datos['idclasif'] as $key => $value)
+    {
+      $data[] = array(
+        'id_compra'        => $datos['id_compra'],
+        'id_factura'       => $datos['idfactura'][$key],
+        'id_clasificacion' => $value,
+        );
+    }
+    if(count($data) > 0){
+      $this->db->delete('compras_facturacion_prodc', "id_compra = {$datos['id_compra']}");
+      $this->db->insert_batch('compras_facturacion_prodc', $data);
+    }
+  }
+
+  public function getFacturasLigadas($params, $multiple=false)
+  {
+    $sql = $multiple? "cf.id_compra IN(".implode(',', $params['idc']).")": "cf.id_compra = {$params['idc']}";
+    $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
+            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva
           FROM compras_facturacion_prodc AS cf
             INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
             INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
             INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
-          WHERE cf.id_compra = {$params['idc']}");
+            INNER JOIN facturacion_productos AS ffp ON f.id_factura = ffp.id_factura AND fp.id_clasificacion = ffp.id_clasificacion
+          WHERE {$sql}
+          ORDER BY fp.id_clasificacion ASC");
     $response = array();
     if($result->num_rows() > 0)
       $response = $result->result();
@@ -218,7 +239,7 @@ class gastos_model extends privilegios_model{
             WHERE f.id_empresa = {$datos['id_empresa']} AND fp.id_clasificacion = {$datos['id_clasificacion']}
             GROUP BY f.id_factura, c.nombre_fiscal
             ORDER BY f.folio DESC
-          ) AS f ON f.id_factura = cf.id_factura AND cf.id_clasificacion = {$datos['id_clasificacion']} AND cf.id_compra = {$datos['id_compra']}
+          ) AS f ON f.id_factura = cf.id_factura AND cf.id_clasificacion = {$datos['id_clasificacion']}
           WHERE cf.id_compra IS NULL");
     $response = array();
     if($result->num_rows() > 0)

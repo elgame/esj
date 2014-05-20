@@ -789,10 +789,12 @@ class compras_ordenes_model extends CI_Model {
   public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo'){
     $sql = '';
 
+    $this->load->model('inventario_model');
     $sqlEmpresa = "";
     if ($idEmpresa)
     {
       $sqlEmpresa = "p.id_empresa = {$idEmpresa} AND";
+      $_GET['did_empresa'] = $idEmpresa;
     }
 
     $res = $this->db->query(
@@ -816,6 +818,13 @@ class compras_ordenes_model extends CI_Model {
     {
       foreach($res->result() as $itm)
       {
+        if(isset($_GET['did_empresa']{0}))
+        {
+          $_GET['fid_producto'] = $itm->id_producto;
+          $itm->inventario = $this->inventario_model->getEPUData();
+          $itm->inventario = isset($itm->inventario[0])? $itm->inventario[0]: false;
+        }
+
         $query = $this->db->select('*')
           ->from("productos_presentaciones")
           ->where("id_producto", $itm->id_producto)

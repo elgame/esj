@@ -55,25 +55,49 @@
                 <input type="hidden" name="id_compra" id="id_compra" value="<?php echo $this->input->get('idc') ?>">
                 <input type="hidden" name="id_empresa" id="id_empresa" value="<?php echo $this->input->get('ide') ?>">
                 <div id="tblsligadas">
-                  <table id="tbl" class="table table-striped table-bordered bootstrap-datatable">
+              <?php
+              $aux_clasif = 0;
+              foreach ($facturas as $key => $value)
+              {
+                $idrow = $value->id_clasificacion.'_'.$value->id_compra.'_'.$value->id_factura;
+                if($aux_clasif != $value->id_clasificacion)
+                {
+              ?>
+                  <table id="tbl<?php echo $value->id_clasificacion ?>" class="table table-striped table-bordered bootstrap-datatable">
+                    <caption><?php echo $value->nombre ?> - <buttom class="btn deleteTblSel"><i class="icon-remove"></i></buttom></caption>
                     <thead>
-                      <caption>Monthly savings</caption>
                       <tr>
                         <th style="width:70px;">Fecha</th>
                         <th>Folio</th>
                         <th>Cliente</th>
-                        <th>Opciones</th>
+                       <th>Opciones</th>
                       </tr>
                     </thead>
-                    <tbody id="tblfacturasligadas">
+                    <tbody class="tblfacturasligadas">
+          <?php } ?>
+                      <tr id="row_sel<?php echo $idrow ?>">
+                        <td style="width:70px;"><?php echo $value->fecha ?>
+                          <input type="hidden" name="idclasif[]" class="idclasif" value="<?php echo $value->id_clasificacion ?>">
+                          <input type="hidden" name="idfactura[]" class="idfactura" value="<?php echo $value->id_factura ?>">
+                        </td>
+                        <td><?php echo $value->serie.$value->folio ?></td>
+                        <td><?php echo $value->cliente ?></td>
+                        <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>
+                      </tr>
+          <?php if($aux_clasif != $value->id_clasificacion)
+                { ?>
                     </tbody>
                   </table>
+              <?php
+                  $aux_clasif = $value->id_clasificacion;
+                }
+              } ?>
                 </div>
               </fieldset>
 
             <div class="form-actions">
               <button type="submit" id="btn_submit" class="btn btn-primary">Guardar</button>
-              <a href="<?php echo base_url('panel/rastreabilidad_pallets/'); ?>" class="btn">Cancelar</a>
+              <a href="<?php echo base_url('panel/compras/'); ?>" class="btn">Cancelar</a>
             </div>
           </div>
         </form>

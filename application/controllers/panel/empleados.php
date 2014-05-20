@@ -10,6 +10,7 @@ class empleados extends MY_Controller {
     'empleados/ajax_get_usuarios/',
     'empleados/ajax_get_depa_pues/',
     'empleados/ajax_get_usuarios2/',
+    'empleados/persep_deduc_pdf/',
   );
 
 	public function _remap($method){
@@ -300,6 +301,45 @@ class empleados extends MY_Controller {
     $this->load->view('panel/general/menu', $params);
     $this->load->view('panel/empleados/sueldos', $params);
     $this->load->view('panel/footer');
+  }
+
+
+  /**
+   * Reporte de resumen de prersepciones y deducciones empleados
+   * @return [type] [description]
+   */
+  public function percep_deduc()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/nomina_fiscal/rpt_perc_deduc.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('nomina_fiscal_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de seguimientos x Producto');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    if ($params['empresa']->id_empresa !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $params['empresa']->id_empresa)->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
+    $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $anio);
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/nomina_fiscal/rpt_recibo_perc_deduc',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function persep_deduc_pdf(){
+    $this->load->model('usuarios_model');
+    $this->usuarios_model->getPercDeducPdf($_GET);
   }
 
 

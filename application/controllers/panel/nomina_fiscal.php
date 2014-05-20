@@ -616,7 +616,8 @@ class nomina_fiscal extends MY_Controller {
   {
     $this->load->model('nomina_fiscal_model');
     $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['did_empresa'])->get()->row()->dia_inicia_semana;
-    echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia));
+    $anio = isset($_GET['anio'])? $_GET['anio']: null;
+    echo json_encode($this->nomina_fiscal_model->semanasDelAno($dia, $anio));
   }
 
 

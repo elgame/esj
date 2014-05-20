@@ -785,8 +785,7 @@ class Bascula_model extends CI_Model {
       $sql = $sql2 = '';
 
       $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
-      $sql .= " AND DATE(b.fecha_tara) = '".$_GET['ffecha1']."' ";
-      $sql2 .= " AND DATE(b.fecha_tara) = '".$_GET['ffecha1']."' ";
+      $fecha_compara = 'fecha_tara';
 
       $this->load->model('areas_model');
       $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
@@ -813,12 +812,18 @@ class Bascula_model extends CI_Model {
       {
         if ($this->input->get('fstatus') === '1')
           if($this->input->get('fefectivo') == 'si')
+          {
             $sql .= " AND b.accion = 'p'";
+            $fecha_compara = 'fecha_pago';
+          }
           else
             $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
         else
           $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
       }
+
+      $sql .= " AND DATE(b.{$fecha_compara}) = '".$_GET['ffecha1']."' ";
+      $sql2 .= " AND DATE(b.{$fecha_compara}) = '".$_GET['ffecha1']."' ";
 
       //Filtros del tipo de pesadas
       if ($this->input->get('ftipo') != '')
@@ -1477,7 +1482,7 @@ class Bascula_model extends CI_Model {
 
   public function pagarBoleta($idBascula)
   {
-    $this->db->update('bascula', array('accion' => 'p'), array('id_bascula' => $idBascula));
+    $this->db->update('bascula', array('accion' => 'p', 'fecha_pago' => date("Y-m-d H:i:s")), array('id_bascula' => $idBascula));
   }
 
   public function logBitacora($idBascula, $data, $usuario_auth, $cajas = null, $all = true)

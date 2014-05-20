@@ -173,7 +173,7 @@
                         );
                       }
 
-                      if ($orden->status === 'a' || $orden->status === 'f')
+                      if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'p')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/imprimir/', array(
                           'params'   => 'id='.$orden->id_orden.'&p=true',

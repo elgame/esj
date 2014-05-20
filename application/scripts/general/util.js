@@ -2,7 +2,8 @@ var util = {
 
   // Trunca a 2 decimales
   trunc2Dec: function (num) {
-    return Math.floor(num * 100) / 100;
+    return Number(num.toString().match(/^\d+(?:\.\d{0,2})?/));
+    // return Math.floor(num * 100) / 100;
   },
 
   // Redondea a 2 decimales

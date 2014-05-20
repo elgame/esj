@@ -124,7 +124,7 @@
                       $total_domingo += $value->domingo;
                       $total_total_lam += $value->total_lam;
                       $total_total_lvrd += $value->total_lvrd;
-                      $total_prestamos += $value->prestamo;
+                      $total_prestamos += $value->prestamo['total'];
                       $total_total_pagar += $value->total_pagar;
                     ?>
                     <tr class="tr_row" id="empleado<?php echo $value->id; ?>" data-generar="1">
@@ -143,7 +143,9 @@
                       <td><input type="text" name="domingo[]" id="domingo" value="<?php echo $value->domingo; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
                       <td><input type="text" name="total_lam[]" id="total_lam" value="<?php echo $value->total_lam; ?>" class="span11" readonly></td>
                       <td><input type="text" name="total_lvrd[]" id="total_lvrd" value="<?php echo $value->total_lvrd; ?>" class="span11" readonly></td>
-                      <td><input type="text" name="prestamo[]" id="prestamo" value="<?php echo $value->prestamo; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
+                      <td><input type="text" name="prestamo[]" id="prestamo" value="<?php echo $value->prestamo['total']; ?>" class="span11 vpositie tchange" readonly>
+                        <input type="hidden" name="prestamos_ids[]" id="prestamos_ids" value="<?php echo $value->prestamo['prestamos_ids']; ?>" class="span11 vpositive tchange">
+                      </td>
                       <td><input type="text" name="total_pagar[]" id="total_pagar" value="<?php echo $value->total_pagar; ?>" class="span11" readonly></td>
                     </tr>
                     <?php

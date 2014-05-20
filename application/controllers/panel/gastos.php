@@ -190,7 +190,19 @@ class gastos extends MY_Controller {
 
     $this->load->model('gastos_model');
 
-    $params['ordenes'] = $this->gastos_model->getFacturasLigadas($_GET);
+    $this->configLigarFacturas();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->gastos_model->saveLigarFactura($_POST);
+
+      $params['frm_errors'] = $this->showMsgs(31);
+    }
+
+    $params['facturas'] = $this->gastos_model->getFacturasLigadas($_GET);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -530,6 +542,28 @@ class gastos extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configLigarFacturas()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'id_compra',
+            'label' => 'compra',
+            'rules' => 'required|numeric'),
+      array('field' => 'id_empresa',
+            'label' => 'empresa',
+            'rules' => 'required|numeric'),
+      array('field' => 'idclasif[]',
+            'label' => 'clasificaciones',
+            'rules' => 'required|numeric'),
+      array('field' => 'idfactura[]',
+            'label' => 'Factura',
+            'rules' => 'required|numeric'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   public function xml_check($file)
   {
     if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
@@ -578,6 +612,10 @@ class gastos extends MY_Controller {
       case 30:
         $txt = 'La cuenta no tiene saldo suficiente.';
         $icono = 'error';
+        break;
+      case 31:
+        $txt = 'Se ligaron las facturas correctamente.';
+        $icono = 'success';
         break;
     }
 

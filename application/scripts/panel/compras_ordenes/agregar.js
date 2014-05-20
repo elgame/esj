@@ -309,6 +309,13 @@
         $funidad.val(ui.item.item.id_unidad);
         $fieps.val(ui.item.item.ieps);
 
+        if (ui.item.item.inventario) {
+          var entradas = parseFloat(ui.item.item.inventario.entradas),
+          salidas = parseFloat(ui.item.item.inventario.salidas),
+          saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior);
+          $("#show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(saldo_anterior+entradas-salidas, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
+        }
+
         var presentaciones = ui.item.item.presentaciones,
             html = '<option value=""></option>';
 
@@ -329,6 +336,7 @@
         $('#funidad').val('');
         $('#ftraslado').val('');
         $('#fpresentacion').html('');
+        $("#show_info_prod").show().find('span').text('');
       }
     });
   };
@@ -515,6 +523,7 @@
         $fpresentacion.html('');
         $fcodigo.val('');
         $ftipo_cambio.val('');
+        $("#show_info_prod").show().find('span').text('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();

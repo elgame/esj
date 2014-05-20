@@ -228,7 +228,7 @@ class compras_ordenes extends MY_Controller {
       {
         $this->compras_ordenes_model->autorizar($_GET['id']);
 
-        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg=4'));
+        redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg=4&print=true'));
       }
 
       // Si esta dando la entrada de una orden.

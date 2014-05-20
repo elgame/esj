@@ -219,7 +219,7 @@
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Productos</h2>
+                <h2><i class="icon-barcode"></i> Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 </div>
