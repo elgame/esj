@@ -193,11 +193,13 @@ class nomina_fiscal extends MY_Controller {
 
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
 
+    $params['ptu'] = isset($_POST['ptu']) ? $_POST['ptu'] : null;
+
     // Datos para la vista.
     $this->load->model('nomina_fiscal_model');
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     $configuraciones = $this->nomina_fiscal_model->configuraciones();
-    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, (isset($_POST['ptu']) ? $_POST['ptu'] : null));
+    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, $params['ptu']);
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();

@@ -183,7 +183,7 @@
 
                       foreach($empleados as $key => $e)
                       {
-                        if ($e->ptu_percepciones_empleado != 0)
+                        if ($e->ptu_percepciones_empleado != 0 && ($ptu !== null || $nominas_generadas))
                         {
                           //Se obtienen lo que se preguardo en hrs_ext y descuentos para q se carguen de nuevo
                           $prenomina = $this->nomina_fiscal_model->getPreNomina($e->id, $_GET['empresaId'], $_GET['anio'], $_GET['semana']);
