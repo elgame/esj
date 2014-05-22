@@ -866,7 +866,7 @@ function calculaTotal () {
 function loadSerieFolio (ide, forceLoad) {
   var objselect = $('#dserie');
   loader.create();
-    $.getJSON(base_url+'panel/facturacion/get_series/?ide='+ide,
+    $.getJSON(base_url+'panel/facturacion/get_series/?tipof=f&ide='+ide,
       function(res){
         if(res.msg === 'ok') {
           var html_option = '<option value="void"></option>',
