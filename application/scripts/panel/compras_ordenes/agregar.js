@@ -27,6 +27,8 @@
 
     eventTipoMonedaChange();
 
+    eventLigarFacturas();
+
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
       source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
@@ -88,7 +90,11 @@
       } else {
         $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
           $folio.val(folio);
-          tipoOrderActual = $this.find('option:selected').val()
+          tipoOrderActual = $this.find('option:selected').val();
+          if(tipoOrderActual == 'f')
+            $("#fletesFactura").show();
+          else
+            $("#fletesFactura").hide();
         });
       }
     });
@@ -416,7 +422,59 @@
       }else
         $("#ftipo_cambio").val('');
     });
-  }
+  };
+
+  var eventLigarFacturas = function () {
+    $("#show-facturas").on('click', function(event) {
+      $(".filTipoFacturas").removeAttr('checked');
+      $(".filTipoFacturas:first").attr('checked', 'checked');
+      $("#filFolio").val("");
+
+      getFacturasRem();
+      $("#modal-facturas").modal('show');
+    });
+
+    $(".filTipoFacturas").on('change', function(event) {
+      getFacturasRem($(this).val());
+    });
+    $("#filFolio").on('change', function(event) {
+      getFacturasRem($(".filTipoFacturas:checked").val());
+    });
+    $("#BtnAddFactura").on('click', function(event) {
+      var selected = $(".radioFactura:checked"),
+      facts = selected.attr("data-tipo")+':'+selected.val()+'|';
+
+      $("#facturaLigada").html(selected.attr("data-folio")+' <input type="hidden" name="remfacs" value="'+facts+'"><input type="hidden" name="remfacs_folio" value="'+selected.attr("data-folio")+'">');
+      $("#modal-facturas").modal('hide');
+    });
+    $("#facturaLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var getFacturasRem = function(tipo){
+    if($("#clienteId").val() !== '')
+    {
+      var params = {
+        clienteId: $("#clienteId").val(),
+        tipo: (tipo? tipo: 'f'),
+        filtro: $("#filFolio").val()
+      };
+      $.getJSON(base_url+"panel/compras_ordenes/ajaxGetFactRem/", params, function(json, textStatus) {
+        var html = '';
+        for (var i in json) {
+          html += '<tr>'+
+          '  <td><input type="radio" name="radioFactura" value="'+json[i].id_factura+'" class="radioFactura" data-tipo="'+json[i].is_factura+'" data-folio="'+json[i].serie+json[i].folio+'"></td>'+
+          '  <td>'+json[i].fecha+'</td>'+
+          '  <td>'+json[i].serie+json[i].folio+'</td>'+
+          '  <td>'+json[i].cliente+'</td>'+
+          '</tr>';
+        }
+        $("#table-facturas tbody").html(html);
+      });
+    }else
+      noty({"text": 'Selecciona un cliente', "layout":"topRight", "type": 'error'});
+  };
 
   var eventBtnAddProducto = function () {
     $('#btnAddProd').on('click', function(event) {

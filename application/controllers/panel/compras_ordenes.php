@@ -14,6 +14,7 @@ class compras_ordenes extends MY_Controller {
 
     'compras_ordenes/ligar/',
     'compras_ordenes/imprimir_recibo_faltantes/',
+    'compras_ordenes/ajaxGetFactRem/',
     );
 
   public function _remap($method){
@@ -451,6 +452,14 @@ class compras_ordenes extends MY_Controller {
     echo $this->compras_ordenes_model->folio($_GET['tipo']);
   }
 
+  public function ajaxGetFactRem()
+  {
+    $this->load->model('compras_ordenes_model');
+    $productos = $this->compras_ordenes_model->getFactRem($_GET);
+
+    echo json_encode($productos);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos con validaciones de formulario.
@@ -619,6 +628,16 @@ class compras_ordenes extends MY_Controller {
                         'label' => 'Precio',
                         'rules' => 'required|numeric');
       }
+    }
+
+    if($this->input->post('tipoOrden') == 'f')
+    {
+      $rules[] = array('field' => 'remfacs',
+                    'label' => 'Factura/Remision',
+                    'rules' => 'required');
+      $rules[] = array('field' => 'remfacs_folio',
+                    'label' => 'Factura/Remision',
+                    'rules' => '');
     }
 
     $this->form_validation->set_rules($rules);
