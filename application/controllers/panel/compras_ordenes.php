@@ -213,7 +213,7 @@ class compras_ordenes extends MY_Controller {
         {
           if (isset($_POST['autorizar']))
           {
-            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c'));
+            redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
           }
           else
           {

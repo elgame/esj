@@ -82,12 +82,14 @@ var abonom = (function($){
   }
 
   function selabono(){
-    var vthis = $(this), ids="", tipos="", total=0
-    url="";
+    var vthis = $(this), ids="", tipos="", total=0,
+    url="", $tr = vthis.parent("tr");
     if(vthis.is(".active")){
       vthis.css("background-color", "transparent").removeClass("active");
+      $tr.find('.change_spago').click();
     }else{
       vthis.css("background-color", "red").addClass("active");
+      $tr.find('.change_spago').click();
     }
 
     $(".sel_abonom.active").each(function(){
@@ -126,21 +128,17 @@ var abonom = (function($){
   function clickPagoBanco(event) {
     var $this = $(this);
     if($this.is(':checked')){
-      msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
-        $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-          function(data, textStatus, xhr) {
-            noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
-      }, function(){ $this.removeAttr('checked') });
+      $.post(base_url + 'panel/banco_pagos/set_compra/',
+        {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
     }else{
-      msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
-        $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-          function(data, textStatus, xhr) {
-            noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
-      }, function(){ $this.attr('checked', 'true') });
+      $.post(base_url + 'panel/banco_pagos/set_compra/',
+        {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
     }
   }
 

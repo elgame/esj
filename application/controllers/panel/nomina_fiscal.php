@@ -243,7 +243,7 @@ class nomina_fiscal extends MY_Controller {
   public function addAsistencias()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['empresaId'], $_GET['anio']);
+    $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['did_empresa'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/asistencia/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }

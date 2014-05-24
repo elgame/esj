@@ -71,10 +71,15 @@
                   <td>
           					<?php
           					echo $this->usuarios_model->getLinkPrivSm('cuentas_pagar/eliminar_movimiento/', array(
-          							'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
-          							'btn_type' => 'btn-danger',
-          							'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
-          						);
+                        'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+                        'btn_type' => 'btn-danger',
+                        'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
+                      );
+                    echo $this->usuarios_model->getLinkPrivSm('cuentas_pagar/imprimir_recibo/', array(
+                        'params'   => 'id_movimiento='.$cuenta->id_movimiento,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => "_blank"))
+                      );
           					?>
                   </td>
                 </tr>

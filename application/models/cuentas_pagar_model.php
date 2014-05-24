@@ -544,52 +544,55 @@ class cuentas_pagar_model extends privilegios_model{
     if($pdf->GetY()+11 >= $pdf->limiteY)
       $pdf->AddPage();
     $this->load->model('gastos_model');
-    $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $comprasids), true);
-    $pdf->SetXY(6, $pdf->GetY()+10);
-    $pdf->SetFont('Arial','B', 10);
-    $pdf->SetTextColor(0,0,0);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(205));
-    $pdf->Row(array('Productos Facturados'), false, false);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-    $pdf->SetWidths(array(23, 23, 120, 30));
-    $pdf->SetFont('Arial','B', 8);
-    $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
-
-    $pdf->SetFont('Arial','', 8);
-    $aux_clasif = 0;
-    $total_producto = $totla_general = 0;
-    foreach ($fac_ligados as $key => $value)
-    {
-      if($value->id_clasificacion != $aux_clasif)
-      {
-        if($key > 0){
-          $pdf->SetAligns(array('R', 'R'));
-          $pdf->SetWidths(array(166, 30));
-          $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-        }
-
-        $pdf->SetAligns(array('L'));
-        $pdf->SetWidths(array(205));
-        $pdf->Row(array($value->nombre), false, false);
-        $aux_clasif = $value->id_clasificacion;
-        $total_producto = 0;
-      }
+    $fac_ligados = array();
+    if(count($comprasids) > 0){
+      $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $comprasids), true);
+      $pdf->SetXY(6, $pdf->GetY()+10);
+      $pdf->SetFont('Arial','B', 10);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(205));
+      $pdf->Row(array('Productos Facturados'), false, false);
       $pdf->SetAligns(array('L', 'L', 'L', 'R'));
       $pdf->SetWidths(array(23, 23, 120, 30));
-      $pdf->Row(array(
-        $value->fecha,
-        $value->serie.$value->folio,
-        $value->cliente,
-        String::formatoNumero($value->importe, 2, '$', false),
-        ), false);
-      $total_producto += $value->importe;
-      $totla_general += $value->importe;
+      $pdf->SetFont('Arial','B', 8);
+      $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
+
+      $pdf->SetFont('Arial','', 8);
+      $aux_clasif = 0;
+      $total_producto = $totla_general = 0;
+      foreach ($fac_ligados as $key => $value)
+      {
+        if($value->id_clasificacion != $aux_clasif)
+        {
+          if($key > 0){
+            $pdf->SetAligns(array('R', 'R'));
+            $pdf->SetWidths(array(166, 30));
+            $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+          }
+
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(205));
+          $pdf->Row(array($value->nombre), false, false);
+          $aux_clasif = $value->id_clasificacion;
+          $total_producto = 0;
+        }
+        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+        $pdf->SetWidths(array(23, 23, 120, 30));
+        $pdf->Row(array(
+          $value->fecha,
+          $value->serie.$value->folio,
+          $value->cliente,
+          String::formatoNumero($value->importe, 2, '$', false),
+          ), false);
+        $total_producto += $value->importe;
+        $totla_general += $value->importe;
+      }
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(166, 30));
+      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+      $pdf->Row(array('Total General', String::formatoNumero($totla_general, 2, '$', false)), false);
     }
-    $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetWidths(array(166, 30));
-    $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-    $pdf->Row(array('Total General', String::formatoNumero($totla_general, 2, '$', false)), false);
 
 		$pdf->Output('cuentas_proveedor.pdf', 'I');
 	}
@@ -1043,6 +1046,64 @@ class cuentas_pagar_model extends privilegios_model{
     return $response;
   }
 
+  /**
+    * Visualiza/Descarga el PDF del abono.
+    *
+    * @return void
+    */
+   public function imprimir_recibo($movimientoId, $path = null)
+   {
+      $orden = $this->getAbonosData($movimientoId);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf();
+      $pdf->show_head = true;
+      $pdf->titulo1 = $orden['abonos'][0]->empresa;
+      $pdf->titulo2 = 'Proveedor: ' . $orden['abonos'][0]->nombre_fiscal;
+      $pdf->titulo3 = 'RECIBO DE PAGO';
+
+      $pdf->logo = $orden['abonos'][0]->logo!=''? (file_exists($orden['abonos'][0]->logo)? $orden['abonos'][0]->logo: '') : '';
+
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+
+      $aligns = array('C', 'C', 'R');
+      $widths = array(25, 25, 40);
+      $header = array('FECHA', 'FOLIO', 'TOTAL');
+
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFillColor(255,255,255);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($header, true, false);
+      $pdf->Line(6, $pdf->GetY()-1, 205, $pdf->GetY()-1);
+      foreach ($orden['facturas'] as $key => $prod)
+      {
+        $pdf->SetFont('Arial','',8);
+        $pdf->SetTextColor(0,0,0);
+        $datos = array(
+          $prod->fecha,
+          $prod->serie.$prod->folio,
+          String::formatoNumero($prod->total, 2, '$', false),
+        );
+        $pdf->SetXY(6, $pdf->GetY()-2);
+        $pdf->Row($datos, false, false);
+      }
+
+      if ($path)
+      {
+        $file = $path.'recibo_pago.pdf';
+        $pdf->Output($file, 'F');
+        return $file;
+      }
+      else
+      {
+        $pdf->Output('recibo_pago.pdf', 'I');
+      }
+   }
 
   /**
    *  ESTADO DE CUENTAS

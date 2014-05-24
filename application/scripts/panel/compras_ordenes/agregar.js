@@ -441,10 +441,14 @@
       getFacturasRem($(".filTipoFacturas:checked").val());
     });
     $("#BtnAddFactura").on('click', function(event) {
-      var selected = $(".radioFactura:checked"),
-      facts = selected.attr("data-tipo")+':'+selected.val()+'|';
+      var selected = $(".radioFactura:checked"), facts = '', folios = '';
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.attr("data-tipo")+':'+$this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
 
-      $("#facturaLigada").html(selected.attr("data-folio")+' <input type="hidden" name="remfacs" value="'+facts+'"><input type="hidden" name="remfacs_folio" value="'+selected.attr("data-folio")+'">');
+      $("#facturaLigada").html(folios+' <input type="hidden" name="remfacs" value="'+facts+'"><input type="hidden" name="remfacs_folio" value="'+folios+'">');
       $("#modal-facturas").modal('hide');
     });
     $("#facturaLigada").on('click', function(event) {
@@ -464,7 +468,7 @@
         var html = '';
         for (var i in json) {
           html += '<tr>'+
-          '  <td><input type="radio" name="radioFactura" value="'+json[i].id_factura+'" class="radioFactura" data-tipo="'+json[i].is_factura+'" data-folio="'+json[i].serie+json[i].folio+'"></td>'+
+          '  <td><input type="checkbox" name="radioFactura" value="'+json[i].id_factura+'" class="radioFactura" data-tipo="'+json[i].is_factura+'" data-folio="'+json[i].serie+json[i].folio+'"></td>'+
           '  <td>'+json[i].fecha+'</td>'+
           '  <td>'+json[i].serie+json[i].folio+'</td>'+
           '  <td>'+json[i].cliente+'</td>'+

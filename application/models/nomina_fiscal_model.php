@@ -143,7 +143,8 @@ class nomina_fiscal_model extends CI_Model {
               nsc.nombre as sat_descripcion
        FROM nomina_asistencia na
        LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
-       WHERE DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}'
+       WHERE (DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}')
        ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
     ");
 
@@ -209,6 +210,9 @@ class nomina_fiscal_model extends CI_Model {
               {
                 // Determina la diferencia de dias entre el primer dia de la incapacidad y el ultimo.
                 $diasIncapacidad = intval(String::diasEntreFechas($fi->fecha_ini, $fi->fecha_fin)) + 1;
+                $diasIncapacidad1 = intval(String::diasEntreFechas($fi->fecha_ini, $diaUltimoDeLaSemana))+1;
+                $diasIncapacidad2 = intval(String::diasEntreFechas($diaPrimeroDeLaSemana, $fi->fecha_fin))+1;
+                $diasIncapacidad = $diasIncapacidad>=$diasIncapacidad1? $diasIncapacidad1: $diasIncapacidad2;
 
                 // Le resta a los dias trabajados los de incapacidad.
                 $empleado->dias_trabajados -= $diasIncapacidad;
@@ -1224,9 +1228,11 @@ class nomina_fiscal_model extends CI_Model {
     $query = $this->db->query(
       "SELECT id_usuario, DATE(fecha_ini) as fecha_ini, DATE(fecha_fin) as fecha_fin, tipo, id_clave
        FROM nomina_asistencia
-       WHERE DATE(fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}'
+       WHERE (DATE(fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}')
        ORDER BY id_usuario, DATE(fecha_ini) ASC
     ");
+
 
     // Si hubo al menos una falta o incapacidad en la semana.
     if ($query->num_rows() > 0)
@@ -3902,8 +3908,9 @@ class nomina_fiscal_model extends CI_Model {
         'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
       );
       $empleados_rancho = $this->nomina_ranchos_model->nomina($filtros);
-      foreach ($empleados_rancho as $key => $value)
-        $total_prestamos_limon += $value->prestamo;
+      foreach ($empleados_rancho as $key => $value){
+        $total_prestamos_limon += $value->prestamo['total'];
+      }
     }
     // Si es diferente a sanjorge agrega empleados ficticios para recuperar los prestamos
     // Se registran como otro departamento y empleados
@@ -4063,7 +4070,7 @@ class nomina_fiscal_model extends CI_Model {
           String::formatoNumero($value->domingo, 2, ''),
           String::formatoNumero($value->total_lam, 2, ''),
           String::formatoNumero($value->total_lvrd, 2, ''),
-          String::formatoNumero($value->prestamo, 2, '$', false),
+          String::formatoNumero($value->prestamo['total'], 2, '$', false),
           String::formatoNumero($value->total_pagar, 2, '$', false),
         ), false, true, null, 2, 1);
         $totales_rancho[0] += $value->total_lam;
@@ -4076,7 +4083,7 @@ class nomina_fiscal_model extends CI_Model {
         $totales_rancho[7] += $value->domingo;
         $totales_rancho[8] += $value->total_lam;
         $totales_rancho[9] += $value->total_lvrd;
-        $totales_rancho[10] += $value->prestamo;
+        $totales_rancho[10] += $value->prestamo['total'];
         $totales_rancho[11] += $value->total_pagar;
         $totales_rancho[12] += $value->cajas_cargadas;
       }

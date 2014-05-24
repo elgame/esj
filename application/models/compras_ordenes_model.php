@@ -1068,7 +1068,7 @@ class compras_ordenes_model extends CI_Model {
           {
             $facturaa = explode(':', $value);
             $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1], true);
-            $pdf->SetX(6);
+            $pdf->SetXY(6, $pdf->GetY()-2);
             $pdf->Row(array(
               ($facturaa['info']->is_factura=='t'? 'FACTURA: ': 'REMISION: ').$facturaa['info']->serie.$facturaa['info']->folio,
               '', '',

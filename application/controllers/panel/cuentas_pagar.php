@@ -282,6 +282,15 @@ class cuentas_pagar extends MY_Controller {
     }else
       redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
+  public function imprimir_recibo()
+  {
+    $this->load->model('cuentas_pagar_model');
+
+    if (isset($_GET['id_movimiento']))
+    {
+      $this->cuentas_pagar_model->imprimir_recibo($_GET['id_movimiento']);
+    }
+  }
 
 
 
