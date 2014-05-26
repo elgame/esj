@@ -80,6 +80,25 @@ class nomina_ranchos_model extends CI_Model {
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
     $query->free_result();
+
+    // Prestamos
+    foreach ($empleados as $key => $value)
+    {
+      if ($value->prestamo == 0)
+      {
+        $value->prestamo = array('total' => 0, 'prestamos_ids' => array());
+        $prestamos = $this->getPrestamosEmpleado($value->id, " AND pausado = 'f' AND Date(inicio_pago) <= '{$diaUltimoDeLaSemana}'");
+        foreach ($prestamos as $keyp => $prestamo)
+        {
+          $saldo = $prestamo->prestado - $prestamo->pagado;
+          $value->prestamo['total'] += ($saldo>=$prestamo->pago_semana? $prestamo->pago_semana: $saldo);
+          $value->prestamo['prestamos_ids'][] = $prestamo->id_prestamo;
+        }
+         $value->prestamo['prestamos_ids'] = implode(',',  $value->prestamo['prestamos_ids']);
+      }else
+        $value->prestamo = array('total' => $value->prestamo, 'prestamos_ids' => '');
+    }
+
     // echo "<pre>";
     //   var_dump($empleados);
     // echo "</pre>";exit;
@@ -143,6 +162,30 @@ class nomina_ranchos_model extends CI_Model {
             AND id_empresa = {$value['id_empresa']} AND anio = {$value['anio']} AND semana = {$value['semana']}");
         }
       }
+
+      // Inserta los prestamos
+      $this->deletePrestamos(array(
+        'id_empleado' => $datos['id_empleado'], 'id_empresa' => $datos['id_empresa'],
+        'anio' => $fechasSemana['anio'], 'semana' => $fechasSemana['semana']
+        ));
+      $prestamos = $this->getPrestamosEmpleado($datos['id_empleado'], " AND pausado = 'f' AND Date(inicio_pago) <= '{$fechasSemana['fecha_final']}'");
+      foreach ($prestamos as $keyp => $prestamo)
+      {
+        $saldo = $prestamo->prestado - $prestamo->pagado;
+        $pagar = ($saldo>=$prestamo->pago_semana? $prestamo->pago_semana: $saldo);
+        $this->db->insert('nomina_fiscal_prestamos', array(
+          'id_prestamo' => $prestamo->id_prestamo,
+          'id_empleado' => $datos['id_empleado'],
+          'id_empresa'  => $datos['id_empresa'],
+          'anio'        => $fechasSemana['anio'],
+          'semana'      => $fechasSemana['semana'],
+          'monto'       => $pagar,
+          ));
+
+        if( ($saldo - $pagar) == 0 ) // se pago el prestamo
+          $this->db->update('nomina_prestamos', array('status' => 'f'), "id_prestamo = {$prestamo->id_prestamo}");
+      }
+
     // }
 
     // echo "<pre>";
@@ -150,6 +193,90 @@ class nomina_ranchos_model extends CI_Model {
     // echo "</pre>";exit;
 
     return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => null);
+  }
+
+  public function deletePrestamos($params)
+  {
+    $prestamos = $this->db->select('id_prestamo')->from('nomina_fiscal_prestamos')->where($params)->get();
+    foreach ($prestamos->result() as $key => $value)
+      $this->db->update('nomina_prestamos', array('status' => 't'), "id_prestamo = {$value->id_prestamo}");
+    $this->db->delete('nomina_fiscal_prestamos', $params);
+  }
+
+  /**
+   * Obtiene los prestamos de un empleado en dicha semana.
+   *
+   * @param  string $empleadoId
+   * @param  string $numSemana
+   * @return array
+   */
+  public function getPrestamosEmpleado($empleadoId, $sql='')
+  {
+    $query = $this->db->query("SELECT id_prestamo, prestado, pago_semana, status, DATE(fecha) as fecha, DATE(inicio_pago) as inicio_pago, pausado,
+                                (SELECT Sum(monto) FROM nomina_fiscal_prestamos WHERE id_prestamo = nomina_prestamos.id_prestamo ) AS pagado
+                               FROM nomina_prestamos
+                               WHERE id_usuario = {$empleadoId} AND status = 't' {$sql}
+                               ORDER BY DATE(fecha) ASC");
+
+    $prestamos = array();
+    if ($query->num_rows() > 0)
+    {
+      $prestamos = $query->result();
+    }
+
+    return $prestamos;
+  }
+
+  /**
+   * Agrega los prestamos.
+   *
+   * @param string $empleadoId
+   * @param array  $datos
+   * @param string $numSemana
+   * @return array
+   */
+  public function addPrestamos($empleadoId, array $datos)
+  {
+    $anio = $anio==null? date("Y"): $anio;
+    $this->load->model('usuarios_model');
+    $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
+    if (isset($datos['prestamos_existentes']))
+    {
+      if(count($datos['eliminar_prestamo']) > 0)
+        $this->db->delete('nomina_prestamos', "id_prestamo IN(".implode(',', $datos['eliminar_prestamo']).") AND id_usuario = {$empleadoId}");
+    }
+
+    $insertData = array();
+    foreach ($datos['cantidad'] as $key => $cantidad)
+    {
+      if($datos['id_prestamo'][$key] > 0)
+      {
+        $this->db->update('nomina_prestamos', array(
+          'id_usuario'  => $empleadoId,
+          'prestado'    => $datos['cantidad'][$key],
+          'pago_semana' => $datos['pago_semana'][$key],
+          'fecha'       => $datos['fecha'][$key],
+          'inicio_pago' => $datos['fecha_inicia_pagar'][$key],
+          'pausado' => $datos['pausarp'][$key],
+        ), "id_prestamo = {$datos['id_prestamo'][$key]}");
+      }else{
+        $insertData[] = array(
+          'id_usuario'  => $empleadoId,
+          'prestado'    => $datos['cantidad'][$key],
+          'pago_semana' => $datos['pago_semana'][$key],
+          'fecha'       => $datos['fecha'][$key],
+          'inicio_pago' => $datos['fecha_inicia_pagar'][$key],
+          'pausado'     => $datos['pausarp'][$key],
+        );
+      }
+    }
+
+    if (count($insertData) > 0)
+    {
+      $this->db->insert_batch('nomina_prestamos', $insertData);
+    }
+
+    return array('passes' => true);
   }
 
   public function listadoAsistenciaPdf($datos)

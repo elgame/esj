@@ -480,8 +480,9 @@ class cuentas_pagar_model extends privilegios_model{
 			$res['anterior']->saldo = 0;
 		}
 		$res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
-
+    $comprasids = array();
 		foreach($res['cuentas'] as $key => $item){
+      $comprasids[] = $item->id_compra;
 			$band_head = false;
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
 				$pdf->AddPage();
@@ -538,6 +539,57 @@ class cuentas_pagar_model extends privilegios_model{
 				String::formatoNumero($total_cargo, 2, '$', false),
 				String::formatoNumero($total_abono, 2, '$', false),
 				String::formatoNumero($total_saldo, 2, '$', false)), true);
+
+    // Productos ligados de facturacion
+    if($pdf->GetY()+11 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $this->load->model('gastos_model');
+    $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $comprasids), true);
+    $pdf->SetXY(6, $pdf->GetY()+10);
+    $pdf->SetFont('Arial','B', 10);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(205));
+    $pdf->Row(array('Productos Facturados'), false, false);
+    $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+    $pdf->SetWidths(array(23, 23, 120, 30));
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
+
+    $pdf->SetFont('Arial','', 8);
+    $aux_clasif = 0;
+    $total_producto = $totla_general = 0;
+    foreach ($fac_ligados as $key => $value)
+    {
+      if($value->id_clasificacion != $aux_clasif)
+      {
+        if($key > 0){
+          $pdf->SetAligns(array('R', 'R'));
+          $pdf->SetWidths(array(166, 30));
+          $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+        }
+
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(205));
+        $pdf->Row(array($value->nombre), false, false);
+        $aux_clasif = $value->id_clasificacion;
+        $total_producto = 0;
+      }
+      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(23, 23, 120, 30));
+      $pdf->Row(array(
+        $value->fecha,
+        $value->serie.$value->folio,
+        $value->cliente,
+        String::formatoNumero($value->importe, 2, '$', false),
+        ), false);
+      $total_producto += $value->importe;
+      $totla_general += $value->importe;
+    }
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(166, 30));
+    $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+    $pdf->Row(array('Total General', String::formatoNumero($totla_general, 2, '$', false)), false);
 
 		$pdf->Output('cuentas_proveedor.pdf', 'I');
 	}

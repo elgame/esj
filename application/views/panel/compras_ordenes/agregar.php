@@ -151,6 +151,19 @@
                 </div>
               </div>
 
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"'? '': 'style="display:none;"'); ?> id="fletesFactura">
+                <label class="control-label" for="tipoPago">Ligar Factura/Remision</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-facturas">Buscar</button>
+                  <span id="facturaLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['remfacs'])){
+                      echo $_POST['remfacs_folio'].' <input type="hidden" name="remfacs" value="'.$_POST['remfacs'].'"><input type="hidden" name="remfacs_folio" value="'.$_POST['remfacs_folio'].'">';
+                    }
+                    ?>
+                  </span>
+                </div>
+              </div>
+
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
@@ -219,7 +232,7 @@
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Productos</h2>
+                <h2><i class="icon-barcode"></i> Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 </div>
@@ -434,6 +447,45 @@
   </div><!--/row-->
 
 </div>
+
+  <!-- Modal -->
+  <div id="modal-facturas" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Facturas y Remisiones</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" id="filFolio" class="pull-left" placeholder="Folio"> <span class="pull-left"> | </span>
+        <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="f" checked>Facturas</label>
+        <label class="pull-left"><input type="radio" name="filTipoFacturas" class="filTipoFacturas" value="r">Remision</label>
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-facturas">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Clientes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){

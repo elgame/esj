@@ -103,6 +103,7 @@
         total_lvrd: $tr.find('#total_lvrd').val(),
         total_lam: $tr.find('#total_lam').val(),
         prestamo: $tr.find('#prestamo').val(),
+        prestamos_ids: $tr.find('#prestamos_ids').val(),
         total_pagar: $tr.find('#total_pagar').val(),
         generada: $tr.find('#generada').val(),
         cajas_cargadas: $tr.find('#cajas_cargadas').val(),

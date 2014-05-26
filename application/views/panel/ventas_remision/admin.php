@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/ventas/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/ventas/'.$method); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters center">
                 <label for="ffolio">Folio</label>
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>

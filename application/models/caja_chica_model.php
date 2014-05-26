@@ -71,7 +71,7 @@ class caja_chica_model extends CI_Model {
       "SELECT b.folio, pr.nombre_fiscal as proveedor, b.importe
        FROM bascula b
        INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-       WHERE DATE(b.fecha_tara) = '$fecha' AND b.accion = 'p' AND b.status = 't'
+       WHERE DATE(b.fecha_pago) = '$fecha' AND b.accion = 'p' AND b.status = 't'
        ORDER BY (b.folio) ASC"
     );
 

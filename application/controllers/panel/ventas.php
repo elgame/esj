@@ -49,9 +49,10 @@ class ventas extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Ventas de remisión');
 
-    $params['datos_s'] = $this->ventas_model->getVentas();
+    $params['datos_s'] = $this->ventas_model->getVentas(40, " AND f.id_nc IS NULL");
 
     $params['fecha']  = date("Y-m-d");
+    $params['method']  = '';
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -61,6 +62,35 @@ class ventas extends MY_Controller {
     $this->load->view('panel/ventas_remision/admin',$params);
     $this->load->view('panel/footer',$params);
   }
+
+  public function notas_credito()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('panel/ventas_remision/admin.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('ventas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Notas de credito de Ventas de remisión');
+
+    $params['datos_s'] = $this->ventas_model->getVentas(40, " AND f.id_nc IS NOT NULL");
+
+    $params['fecha']  = date("Y-m-d");
+    $params['method']  = 'notas_credito';
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/ventas_remision/admin',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
   /**
    * Agrega una venta de remision a la bd
    *

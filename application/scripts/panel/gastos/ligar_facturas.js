@@ -7,6 +7,8 @@
 
     //Asigna evento para los checks de los rendimientos
     $(document).on("click", ".cajasdisponibles", addFacturaSel);
+    $(document).on("click", ".deleteFacturaSel", deleteFacturaSel);
+    $(document).on("click", ".deleteTblSel", deleteTblSel);
   });
 
 
@@ -20,13 +22,13 @@
       var html = '', idrow;
       if (resp.length > 0) {
         for (var i = 0; i < resp.length; i++) {
-          idrow = datavar.id_clasificacion+'_'+datavar.id_clasificacion+'_'+resp[i].id_factura;
+          idrow = datavar.id_clasificacion+'_'+datavar.id_compra+'_'+resp[i].id_factura;
           html += '<tr id="row_rend'+idrow+'">'+
             '<td class="fecha">'+resp[i].fecha+'</td>'+
             '<td class="folio">'+resp[i].serie+resp[i].folio+'</td>'+
             '<td class="cliente">'+resp[i].cliente+'</td>'+
             '<td><buttom class="btn rendimientos cajasdisponibles"'+
-            '  data-id="'+idrow+'"><i class="icon-angle-right"></i></buttom></td>'+
+            '  data-id="'+idrow+'" data-idFactura="'+resp[i].id_factura+'"><i class="icon-angle-right"></i></buttom></td>'+
           '</tr>';
         }
         $("#tblfacturaslibres").html(html);
@@ -38,52 +40,26 @@
     });
   };
 
-  var addFacturaSel = function(e){
-    var vthis = $(this), idrow = "#row_rend"+vthis.attr("data-id"), html;
-    var row_rendsel = $('#row_rendsel'+vthis.attr("data-id"), tbodysel),
-        //ids = id_rendimiento, id_unidad, id_calibre, id_etiqueta
-        ids = vthis.attr("data-id").split('_');
+  var deleteFacturaSel = function(e){
+    $(this).parents("tr[id^=row_sel]").remove();
+  };
+  var deleteTblSel = function(e){
+    $(this).parents("table[id^=tbl]").remove();
+  };
 
-    if( $("#tbl"+$("#fid_clasificacion").val()).length === 0 )
+  var addFacturaSel = function(e){
+    var $vthis = $(this), $clasificacion = $("#fid_clasificacion");
+    if( $("#tbl"+$clasificacion.val()).length === 0 )
     {
       renderTableDatos();
-      if(row_rendsel.length == 0){
-        html = '<tr id="row_rendsel'+vthis.attr("data-id")+'">'+
-            '<td class="fecha">'+$(idrow+" .fecha").text()+'</td>'+
-            '<td class="lote">'+$(idrow+" .lote").text()+'</td>'+
-            '<td class="clsif">'+fclasificacion.val()+'</td>'+
-            '<td class="mas">'+$(idrow+" .unidad").text()+'|'+$(idrow+" .calibre").text()+'|'+$(idrow+" .etiqueta").text()+'</td>'+
-            '<td><input type="number" class="span12 cajasel" name="rendimientos[]" value="'+calcRestaCajasSel($(idrow+" .libres").text())+'" min="1" max="'+calcRestaCajasSel($(idrow+" .libres").text())+'"></td>'+
-            '<td><input type="hidden" name="idrendimientos[]" value="'+ids[0]+'">'+
-            '   <input type="hidden" name="idclasificacion[]" value="'+fid_clasificacion.val()+'">'+
-            '   <input type="hidden" name="idunidad[]" value="'+ids[1]+'">'+
-            '   <input type="hidden" name="idcalibre[]" value="'+ids[2]+'">'+
-            '   <input type="hidden" name="idetiqueta[]" value="'+ids[3]+'">'+
-            '   <input type="hidden" name="idsize[]" value="'+ids[5]+'">'+
-            '   <input type="hidden" name="dkilos[]" value="'+(ids[6].replace('-', '.'))+'">'+
-
-            '   <buttom class="btn btn-danger remove_cajassel" data-idrow="'+vthis.attr("data-id")+'"><i class="icon-remove"></i></buttom></td>'+
-          '</tr>';
-        tbodysel.append(html);
-        row_rendsel = $('#row_rendsel'+vthis.attr("data-id"), tbodysel);
-      }else{
-          var cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + parseInt($(idrow+" .libres").text());
-          cajas_agregadas = parseInt($(".cajasel", row_rendsel).val()) + calcRestaCajasSel(cajas_agregadas);
-          if( cajas_agregadas > parseInt(vthis.attr("data-totales")) )
-            cajas_agregadas = parseInt(vthis.attr("data-totales"));
-
-          $(".cajasel", row_rendsel).val( cajas_agregadas ).attr('max', cajas_agregadas);;
-      }
-      calculaCajasSel();
-    }else
-      noty({"text":"El pallet esta completo.", "layout":"topRight", "type":"error"});
-    $("input.cajasel", row_rendsel).focus();
+    }
+    renderRowDatos($clasificacion.val(), $vthis);
   };
 
   var renderTableDatos = function(){
-    var html = '<table id="tbl" class="table table-striped table-bordered bootstrap-datatable">'+
+    var html = '<table id="tbl'+$("#fid_clasificacion").val()+'" class="table table-striped table-bordered bootstrap-datatable">'+
+                '  <caption>'+$("#fclasificacion").val()+' - <buttom class="btn deleteTblSel"><i class="icon-remove"></i></buttom></caption>'+
                 '  <thead>'+
-                '    <caption>'+$("#fclasificacion").val()+'</caption>'+
                 '    <tr>'+
                 '      <th style="width:70px;">Fecha</th>'+
                 '      <th>Folio</th>'+
@@ -91,10 +67,30 @@
                 '     <th>Opciones</th>'+
                 '    </tr>'+
                 '  </thead>'+
-                '  <tbody id="tblfacturasligadas">'+
+                '  <tbody class="tblfacturasligadas">'+
                 '  </tbody>'+
                 '</table>';
     $("#tblsligadas").append(html);
+  };
+
+  var renderRowDatos = function(idClasif, $factura){
+    var tbl = $("#tbl"+idClasif+" .tblfacturasligadas"),
+    data_factura = $("#row_rend"+$factura.attr('data-id')),
+    idrow = idClasif+'_'+$("#id_compra").val()+'_'+$factura.attr('data-idFactura');
+    if($("#row_sel"+idrow).length === 0)
+    {
+      var html = '<tr id="row_sel'+idrow+'">'+
+                  '  <td style="width:70px;">'+data_factura.find('.fecha').text()+
+                  '    <input type="hidden" name="idclasif[]" class="idclasif" value="'+idClasif+'">'+
+                  '    <input type="hidden" name="idfactura[]" class="idfactura" value="'+$factura.attr('data-idFactura')+'">'+
+                  '  </td>'+
+                  '  <td>'+data_factura.find('.folio').text()+'</td>'+
+                  '  <td>'+data_factura.find('.cliente').text()+'</td>'+
+                  '  <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>'+
+                  '</tr>';
+      tbl.append(html);
+    }else
+      noty({"text": 'Ya esta agregada esa factura', "layout":"topRight", "type": 'error'});
   };
 
   var asignaAutocomplets = function(){

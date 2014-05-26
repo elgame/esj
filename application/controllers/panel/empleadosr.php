@@ -9,6 +9,8 @@ class empleadosr extends MY_Controller {
 	private $excepcion_privilegio = array(
     'empleadosr/ajax_get_usuarios/',
     'empleadosr/ajax_get_depa_pues/',
+    'empleadosr/show_otros/',
+    'empleadosr/add_prestamos/',
   );
 
 	public function _remap($method){
@@ -30,7 +32,8 @@ class empleadosr extends MY_Controller {
   {
 		$this->carabiner->js(array(
         array('general/msgbox.js'),
-				array('panel/clientes/agregar.js'),
+        array('general/supermodal.js'),
+        array('panel/clientes/agregar.js'),
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -193,6 +196,48 @@ class empleadosr extends MY_Controller {
 		else
 			redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
+
+  public function show_otros()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros_ranchos.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Rancho'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Rancho - Prestamos');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('nomina_ranchos_model');
+    $this->load->model('usuarios_model');
+
+    // Obtiene la informacion del empleado.
+    $params['empleado'] = $this->usuarios_model->get_usuario_info($_GET['eid']);
+
+    // Obtiene los prestamos que se hicieron en la semana cargada.
+    $params['prestamos'] = $this->nomina_ranchos_model->getPrestamosEmpleado($_GET['eid']);
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '3')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/nomina_fiscal/ranchos/bonos_otros', $params);
+  }
+
+  public function add_prestamos()
+  {
+    $this->load->model('nomina_ranchos_model');
+    $this->nomina_ranchos_model->addPrestamos($_GET['eid'], $_POST);
+
+    redirect(base_url('panel/empleadosr/show_otros/?'.String::getVarsLink(array('msg')).'&msg=20'));
+  }
 
   /*
    |------------------------------------------------------------------------
@@ -443,6 +488,11 @@ class empleadosr extends MY_Controller {
 				$txt = 'El usuario se activó correctamente.';
 				$icono = 'success';
 				break;
+
+      case 20:
+        $txt = 'El prestamo se registro correctamente.';
+        $icono = 'success';
+        break;
 		}
 
 		return array(

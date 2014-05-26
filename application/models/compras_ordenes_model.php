@@ -118,6 +118,11 @@ class compras_ordenes_model extends CI_Model {
       $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
       $data['id_vehiculo'] = $_POST['vehiculoId'];
     }
+    //si es flete
+    if ($_POST['tipoOrden'] == 'f')
+    {
+      $data['ids_facrem'] = $_POST['remfacs'];
+    }
     $this->db->insert('compras_ordenes', $data);
     $ordenId = $this->db->insert_id();
 
@@ -268,6 +273,12 @@ class compras_ordenes_model extends CI_Model {
         $data['tipo_vehiculo'] = 'ot';
         $data['id_vehiculo'] = null;
       }
+      //si es flete
+      if ($_POST['tipoOrden'] == 'f')
+      {
+        $data['ids_facrem'] = $_POST['remfacs'];
+      }
+
       $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
 
       //si se registra a un vehiculo
@@ -496,7 +507,8 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.placa, null) as placa,
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
-              COALESCE(cv.color, null) as color
+              COALESCE(cv.color, null) as color,
+              co.ids_facrem
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -549,6 +561,20 @@ class compras_ordenes_model extends CI_Model {
           if ($query->num_rows() > 0)
           {
             $data['info'][0]->gasolina = $query->result();
+          }
+        }
+
+        // facturas ligadas
+        $data['info'][0]->facturasligadas = array();
+        $this->load->model('facturacion_model');
+        $facturasss = explode('|', $data['info'][0]->ids_facrem);
+        if (count($facturasss) > 0)
+        {
+          array_pop($facturasss);
+          foreach ($facturasss as $key => $value)
+          {
+            $facturaa = explode(':', $value);
+            $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1], true)['info'];
           }
         }
       }
@@ -789,10 +815,12 @@ class compras_ordenes_model extends CI_Model {
   public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo'){
     $sql = '';
 
+    $this->load->model('inventario_model');
     $sqlEmpresa = "";
     if ($idEmpresa)
     {
       $sqlEmpresa = "p.id_empresa = {$idEmpresa} AND";
+      $_GET['did_empresa'] = $idEmpresa;
     }
 
     $res = $this->db->query(
@@ -816,6 +844,13 @@ class compras_ordenes_model extends CI_Model {
     {
       foreach($res->result() as $itm)
       {
+        if(isset($_GET['did_empresa']{0}))
+        {
+          $_GET['fid_producto'] = $itm->id_producto;
+          $itm->inventario = $this->inventario_model->getEPUData();
+          $itm->inventario = isset($itm->inventario[0])? $itm->inventario[0]: false;
+        }
+
         $query = $this->db->select('*')
           ->from("productos_presentaciones")
           ->where("id_producto", $itm->id_producto)
@@ -889,6 +924,22 @@ class compras_ordenes_model extends CI_Model {
     }
 
     return $prod;
+  }
+
+  public function getFactRem($datos)
+  {
+    $tipo = $datos['tipo'] == 'f'? 't': 'f';
+    $filtro = isset($datos['filtro']{0})? " AND f.folio = '{$datos['filtro']}'": '';
+    $query = $this->db->query("SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, f.is_factura, c.nombre_fiscal AS cliente
+                               FROM facturacion AS f INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+                               WHERE c.id_cliente = {$datos['clienteId']} AND f.is_factura = '{$tipo}' AND f.status IN('p', 'pa') AND f.id_nc IS NULL
+                                {$filtro} AND f.fecha >= (now() - interval '5 months')
+                               ORDER BY f.fecha DESC, f.folio DESC");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
   }
 
   /*
@@ -1007,6 +1058,25 @@ class compras_ordenes_model extends CI_Model {
         String::formatoNumero($total, 2, '$', false),
       ), false, false);
 
+      if($orden['info'][0]->tipo_orden == 'f'){
+        $this->load->model('facturacion_model');
+        $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+        if (count($facturasss) > 0)
+        {
+          array_pop($facturasss);
+          foreach ($facturasss as $key => $value)
+          {
+            $facturaa = explode(':', $value);
+            $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1], true);
+            $pdf->SetX(6);
+            $pdf->Row(array(
+              ($facturaa['info']->is_factura=='t'? 'FACTURA: ': 'REMISION: ').$facturaa['info']->serie.$facturaa['info']->folio,
+              '', '',
+            ), false, false);
+          }
+        }
+      }
+
       $x = $pdf->GetX();
       $y = $pdf->GetY();
 
@@ -1019,7 +1089,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetY($y + 11);
       $pdf->SetFont('helvetica', 'B', 8);
       $pdf->Row(array(
-        'SOLICITA',
+        ($orden['info'][0]->tipo_orden == 'f'? 'CHOFER': 'SOLICITA'),
         'AUTORIZA',
         'REGISTRO',
       ), false, false);

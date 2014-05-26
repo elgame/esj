@@ -415,7 +415,7 @@ function calculaTotalProducto ($tr) {
       totalIva       = trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
       totalRetencion = trunc2Dec(totalImporte * parseFloat($retencion.find('option:selected').val()));
       // totalRetencion = trunc2Dec(totalIva * parseFloat($retencion.find('option:selected').val()));
-      
+
   $totalIva.val(totalIva);
   $totalRetencion.val(totalRetencion);
   $importe.val(totalImporte);
@@ -681,7 +681,7 @@ function calculaTotal () {
 function loadSerieFolio (ide, forceLoad) {
   var objselect = $('#dserie');
   loader.create();
-    $.getJSON(base_url+'panel/facturacion/get_series/?ide='+ide,
+    $.getJSON(base_url+'panel/facturacion/get_series/?tipof=r&ide='+ide,
       function(res){
         if(res.msg === 'ok') {
           var html_option = '<option value="void"></option>',
@@ -863,7 +863,7 @@ function trunc2Dec(num, digits) {
   digits = digits? digits: 2;
   var result = Math.round(num*Math.pow(10,digits))/Math.pow(10,digits);
   return result;
-   
+
   var numS = num.toString(),
       decPos = numS.indexOf('.'),
       result;
