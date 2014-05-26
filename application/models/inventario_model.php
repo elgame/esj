@@ -1209,6 +1209,187 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('epc.pdf', 'I');
 	}
 
+  /**
+   * Reporte de existencias por costo
+   * @return [type] [description]
+   */
+  public function getHistorialNivData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+
+    if($this->input->get('fid_producto') != ''){
+      $sql .= " WHERE p.id_producto = ".$this->input->get('fid_producto');
+    }
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    // if($this->input->get('did_empresa') != ''){
+    //   $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    // }
+
+    $res = $this->db->query(
+      "SELECT DISTINCT(fecha), u.nombre
+      FROM (
+        SELECT Date(fecha_creacion) AS fecha, id_empleado FROM compras_salidas WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+          AND Date(fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        UNION
+        SELECT Date(fecha_aceptacion) AS fecha, id_empleado FROM compras_ordenes WHERE status = 'n' AND id_empresa = {$_GET['did_empresa']}
+          AND Date(fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+      ) t
+      INNER JOIN usuarios u ON u.id = t.id_empleado
+      ORDER BY fecha ASC");
+
+    $response = array();
+    if($res->num_rows() > 0)
+    {
+      $response = $res->result();
+      foreach ($response as $key => $value)
+      {
+        $res_cosa = $this->db->query("SELECT p.id_producto, p.nombre, es.entrada, es.salida, pu.abreviatura
+            FROM
+            (
+              SELECT id_producto, Sum(entrada) AS entrada, Sum(salida) AS salida
+              FROM
+              (
+                SELECT cp.id_producto, cp.cantidad AS entrada, 0 AS salida
+                FROM compras_ordenes co
+                  INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}' AND co.id_empresa = {$_GET['did_empresa']}
+                UNION
+                SELECT cp.id_producto, 0 AS entrada, cp.cantidad AS salida
+                FROM compras_salidas cs
+                  INNER JOIN compras_salidas_productos cp ON cs.id_salida = cp.id_salida
+                WHERE cs.status = 'n' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}
+              ) es
+              GROUP BY id_producto
+            ) AS es
+            INNER JOIN productos p ON p.id_producto = es.id_producto
+            INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+            {$sql}");
+        $value->datos = $res_cosa->result();
+        $res_cosa->free_result();
+        // $res_compra = $this->db->query("SELECT co.id_orden, p.id_producto, p.nombre, cp.cantidad, pu.abreviatura
+        //   FROM compras_ordenes co
+        //     INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+        //     INNER JOIN productos p ON p.id_producto = cp.id_producto
+        //     INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        //   WHERE co.status = 'n' AND Date(co.fecha_aceptacion) = '{$value->fecha}' AND co.id_empresa = {$_GET['did_empresa']}");
+        // $value->compras = $res_compra->result();
+
+        // $res_salidas = $this->db->query("SELECT cs.id_salida, p.id_producto, p.nombre, cp.cantidad, pu.abreviatura
+        //   FROM compras_salidas cs
+        //     INNER JOIN compras_salidas_productos cp ON cs.id_salida = cp.id_salida
+        //     INNER JOIN productos p ON p.id_producto = cp.id_producto
+        //     INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        //   WHERE cs.status = 'n' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}");
+        // $value->salidas = $res_salidas->result();
+
+        // $res_salidas->free_result();
+        // $res_compra->free_result();
+        if(count($value->datos) === 0)
+          unset($response[$key]);
+      }
+    }
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por costo pdf
+   */
+  public function getHistorialNivPdf()
+  {
+    $res = $this->getHistorialNivData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Historial de nivelaciones';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'R', 'R', 'R', 'R');
+    $widths = array(80, 35, 35, 35, 35);
+    $header = array('Producto', 'Entradas', 'Salidas');
+
+    $familia = '';
+    $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',9);
+        // $pdf->SetTextColor(255,255,255);
+        // $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false, false);
+      }
+
+      $pdf->SetFont('Arial', 'B', 11);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(30, 50));
+      $pdf->Row(array($item->fecha, $item->nombre), false, false);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      foreach ($item->datos as $key2 => $prod)
+      {
+        $datos = array($prod->nombre.' ('.$prod->abreviatura.')',
+          String::formatoNumero($prod->entrada, 2, '', false),
+          String::formatoNumero($prod->salida, 2, '', false),
+          );
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
+      }
+    }
+
+    // $pdf->SetX(6);
+    // $pdf->SetAligns($aligns);
+    // $pdf->SetWidths($widths);
+    // $pdf->SetMyLinks(array());
+    // $pdf->Row(array('TOTAL',
+    //   String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+    //   ), false, false);
+
+    // $pdf->SetXY(6, $pdf->GetY()+5);
+    // $pdf->Row(array('TOTAL GENERAL',
+    //   String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+    //   String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+    //   ), false);
+
+    $pdf->Output('epc.pdf', 'I');
+  }
+
 	/**
 	 * Reporte costos promedio productos
 	 * @param  [type] $id_producto [description]

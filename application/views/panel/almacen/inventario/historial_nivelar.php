@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/inventario/epu_pdf/'); ?>" method="GET" class="form-search" target="frame_reporte">
+            <form action="<?php echo base_url('panel/inventario/historial_nivelar_pdf/'); ?>" method="GET" class="form-search" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -30,31 +30,12 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fproducto">Familias</label>
-                  <div class="controls" style="height:150px;overflow-y: scroll;background-color:#eee;">
-                    <ul id="lista_familias" style="list-style: none;">
-                  <?php foreach ($data['familias'] as $key => $value)
-                  {
-                  ?>
-                    <li><label><input type="checkbox" name="ffamilias[]" value="<?php echo $value->id_familia; ?>" checked> <?php echo $value->nombre; ?></label></li>
-                  <?php
-                  } ?>
-                    </ul>
-                  </div>
-                </div>
-
-                <div class="control-group">
                   <label class="control-label" for="fproducto">Producto</label>
                   <div class="controls">
                     <input type="text" name="fproducto" data-add="false"
                       value="<?php echo set_value_get('fproducto', $this->input->get('fproducto')) ?>" id="fproducto" class="span12" placeholder="Nombre">
                     <input type="hidden" name="fid_producto" value="<?php echo set_value_get('fid_producto', $this->input->get('fid_producto')) ?>" id="fid_producto">
                   </div>
-                </div>
-
-                <div>
-                  <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> |
-                  <label for="con_movimiento">Con Movimientos <input type="checkbox" name="con_movimiento" id="con_movimiento" value="si"> </label>
                 </div>
 
                 <div class="form-actions">
@@ -72,7 +53,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/inventario/epu_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" src="<?php echo base_url('panel/inventario/historial_nivelar_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

@@ -19,7 +19,7 @@ $(function(){
   //Autocomplete productos
   $("#fproducto").autocomplete({
     source: function (request, response) {
-      if ($('#did_empresa').val()!='') {
+      if ($('#did_empresa').val() !== '') {
         $.ajax({
           url: base_url + 'panel/compras_ordenes/ajax_producto/',
           dataType: 'json',
@@ -29,7 +29,7 @@ $(function(){
             tipo: 'p'
           },
           success: function (data) {
-            response(data)
+            response(data);
           }
         });
       } else {
@@ -41,7 +41,8 @@ $(function(){
     select: function( event, ui ) {
       $("#fid_producto").val(ui.item.id);
       $("#fproducto").val(ui.item.label).css({'background-color': '#99FF99'});
-      setTimeout(addProducto, 200);
+      if($("#fproducto").attr('data-add') === undefined)
+        setTimeout(addProducto, 200);
     }
   }).on("keydown", function(event) {
     if(event.which == 8 || event.which == 46) {
