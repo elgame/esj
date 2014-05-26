@@ -211,7 +211,6 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
-
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
@@ -317,9 +316,7 @@ class nomina_fiscal extends MY_Controller {
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
-    // echo "<pre>";
-    //   var_dump($params['empleados']);
-    // echo "</pre>";exit;
+
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 
     // Determina cual es la semana que dejara seleccionada en la vista.
@@ -875,7 +872,7 @@ class nomina_fiscal extends MY_Controller {
   public function nomina_fiscal_cfdis()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->descargarZipNomina($_GET['semana'], $_GET['empresaId']);
+    $this->nomina_fiscal_model->descargarZipNomina($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
   }
 
   public function nomina_fiscal_banco()
