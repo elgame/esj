@@ -16,11 +16,11 @@ class inventario extends MY_Controller {
     'inventario/epc_pdf/',
     'inventario/promedio_pdf/',
     'inventario/eclasif_pdf/',
+    'inventario/historial_nivelar_pdf/',
 
     'inventario/ajax_get_familias/',
 
     'cuentas_pagar/saldos_xls/',
-
   );
 
 
@@ -236,6 +236,38 @@ class inventario extends MY_Controller {
       $this->load->model('inventario_model');
       $this->inventario_model->getPromediodf();
     }
+  }
+
+  /**
+   * Reporte de costos
+   * @return [type] [description]
+   */
+  public function historial_nivelar()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Historial de nivelaciones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/inventario/historial_nivelar',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function historial_nivelar_pdf(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getHistorialNivPdf();
+
   }
 
 

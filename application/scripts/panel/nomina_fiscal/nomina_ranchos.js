@@ -5,6 +5,7 @@
   $(function () {
     changeValuesEvent();
     guardarNominaEvent();
+    calculaTotales();
   });
 
   var changeValuesEvent = function(){

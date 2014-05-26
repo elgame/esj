@@ -46,14 +46,14 @@
                 <div class="control-group">
                   <label class="control-label" for="fproducto">Producto</label>
                   <div class="controls">
-                    <input type="text" name="fproducto"
+                    <input type="text" name="fproducto" data-add="false"
                       value="<?php echo set_value_get('fproducto', $this->input->get('fproducto')) ?>" id="fproducto" class="span12" placeholder="Nombre">
                     <input type="hidden" name="fid_producto" value="<?php echo set_value_get('fid_producto', $this->input->get('fid_producto')) ?>" id="fid_producto">
                   </div>
                 </div>
 
                 <div>
-                  <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> | 
+                  <label for="con_existencia">Con Existencia <input type="checkbox" name="con_existencia" id="con_existencia" value="si"> </label> |
                   <label for="con_movimiento">Con Movimientos <input type="checkbox" name="con_movimiento" id="con_movimiento" value="si"> </label>
                 </div>
 

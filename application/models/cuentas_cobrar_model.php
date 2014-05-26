@@ -1133,7 +1133,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
-      $pdf = new MYpdf('L', 'mm', array(70, 215.9));
+      $pdf = new MYpdf();
       $pdf->show_head = false;
       $pdf->titulo1 = $orden['abonos'][0]->empresa;
       $pdf->titulo2 = 'Cliente: ' . $orden['abonos'][0]->nombre_fiscal;
@@ -1598,6 +1598,8 @@ class cuentas_cobrar_model extends privilegios_model{
           $total_cargo += $factura->total;
           $total_saldo += $factura->saldo;
 
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
 
   				$datos = array(String::fechaATexto($factura->fecha, '/c'),
   								$factura->serie,
@@ -1626,6 +1628,9 @@ class cuentas_cobrar_model extends privilegios_model{
 
   				foreach ($factura->abonos as $keya => $abono)
   				{
+            if($pdf->GetY() >= $pdf->limiteY)
+              $pdf->AddPage();
+
   					$total_abono += $abono->abono;
   					$datos = array('   '.String::fechaATexto($abono->fecha, '/c'),
   								$abono->serie,

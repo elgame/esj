@@ -217,25 +217,39 @@ class banco_pagos extends MY_Controller {
 	{
 		$this->load->library('form_validation');
 		$rules = array(
-			array('field' => 'id_pago[]',
+			array('field' => 'id_pago',
 						'label' => 'Pago',
-						'rules' => 'required|numeric'),
-      array('field' => 'monto[]',
+						'rules' => 'callback_validafield[id_pago]'),
+      array('field' => 'monto',
             'label' => 'Monto',
-            'rules' => 'required|numeric'),
-			array('field' => 'cuenta_proveedor[]',
+            'rules' => 'callback_validafield[monto]'),
+			array('field' => 'cuenta_proveedor',
 						'label' => 'Cuenta Proveedor',
-						'rules' => 'required'),
-			array('field' => 'ref_alfanumerica[]',
+						'rules' => ''),
+			array('field' => 'ref_alfanumerica',
 						'label' => 'Referencia 1',
-						'rules' => 'required|max_length[40]'),
-      array('field' => 'ref_numerica[]',
+						'rules' => ''),
+      array('field' => 'ref_numerica',
             'label' => 'Referencia 2',
-            'rules' => 'required|max_length[7]'),
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
 	}
+  public function validafield($val, $param)
+  {
+    if(is_array($val))
+      foreach ($val as $key => $value)
+      {
+        foreach ($value as $key2 => $value2)
+        {
+          if($value2 == ''){
+            $this->form_validation->set_message('validafield', 'El valor es requerido del campo '.$param);
+            return FALSE;
+          }
+        }
+      }
+  }
 
 	public function configAddModPagosBascula($accion='agregar')
   {

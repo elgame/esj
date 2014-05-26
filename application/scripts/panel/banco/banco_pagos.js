@@ -1,6 +1,6 @@
 $(function(){
 
-  $('.ref_numerica').numeric({ decimal: false, negative: false })
+  $('.ref_numerica').numeric({ decimal: false, negative: false });
   $(".tipo_cuenta").on('change', function(event) {
     event.preventDefault();
     var $this = $(this), datos = $this.val().split('-'), $tr = $this.parents("tr");
@@ -14,6 +14,7 @@ $(function(){
       $tr.find('.ref_alfa').attr('maxlength', '40').removeNumeric();
     }
   });
+  $(".tipo_cuenta").change();
 
   $(".monto").on('change', function(event) {
     var suma = 0;

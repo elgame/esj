@@ -226,7 +226,7 @@
                     $folios = '';
                     foreach ($orden['info'][0]->facturasligadas as $key => $value)
                     {
-                      $folios .= $value->serie.$value->folio.' ';
+                      $folios .= $value->serie.$value->folio.' | ';
                     }
                       echo $folios.' <input type="hidden" name="remfacs" value="'.$orden['info'][0]->ids_facrem.'"><input type="hidden" name="remfacs_folio" value="'.$folios.'">';
                     ?>
