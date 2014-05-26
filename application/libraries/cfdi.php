@@ -565,7 +565,7 @@ class cfdi{
     $this->cp             = $data->cp;
 	}
 
-	public function generaArchivos($data, $isNomina = false, $semana = null, $path = null)
+	public function generaArchivos($data, $isNomina = false, $semana = null, $path = null, $nameAppend = null)
   {
 		$this->cargaDatosFiscales($data['id'], $data['table']);
     $this->isNomina = $isNomina;
@@ -582,7 +582,7 @@ class cfdi{
       {
         $this->anio = $semana['anio'];
         $this->semana = $semana['semana'];
-        $pathXML = $this->guardarXMLNomina($data);
+        $pathXML = $this->guardarXMLNomina($data, $nameAppend);
       }
     }
     else
@@ -810,7 +810,7 @@ class cfdi{
    * @param  boolean $update
    * @return void
    */
-  private function guardarXMLNomina($data)
+  private function guardarXMLNomina($data, $nameAppend)
   {
     $vers = str_replace('.', '_', $this->version);
     $xml  = $this->{'generarXML'.$vers}($data, true);
@@ -819,7 +819,7 @@ class cfdi{
     $dir_anio = $this->validaDir('anio', 'NominasXML/'.$empresa.'/');
     $dir_semana = $this->validaDir('semana', 'NominasXML/'.$empresa.'/'.$dir_anio.'/');
 
-    $path_guardar = APPPATH.'media/cfdi/NominasXML/'.$empresa.'/'.$dir_anio.'/'.$dir_semana.'/'.$data['receptor']['rfc'].'.xml';
+    $path_guardar = APPPATH.'media/cfdi/NominasXML/'.$empresa.'/'.$dir_anio.'/'.$dir_semana.'/'.$data['receptor']['rfc'].$nameAppend.'.xml';
 
     $fp = fopen($path_guardar, 'w');
     fwrite($fp, $xml);

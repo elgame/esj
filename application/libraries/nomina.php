@@ -488,12 +488,15 @@ class nomina
     $gravado = 0;
     $excento = 0;
 
-    if ($this->empleado->utilidad_empresa > 0)
+    // echo "<pre>";
+    //   var_dump($this->empleado->utilidad_empresa);
+    // echo "</pre>";exit;
+
+    if ($this->empleado->utilidad_empresa > 0 && $this->empleado->ptu_percepciones_empleados > 0 && $this->empleado->ptu_dias_trabajados_empleados > 0)
     {
       $ptu = $this->empleado->utilidad_empresa / 2;
 
       $percepciones = round((floatval($this->empleado->ptu_percepciones_empleado) * $ptu) / floatval($this->empleado->ptu_percepciones_empleados), 2);
-
       $dias = round((floatval($this->empleado->ptu_dias_trabajados_empleado) * $ptu) / floatval($this->empleado->ptu_dias_trabajados_empleados), 2);
 
       $ptuTrabajador = $percepciones + $dias;
