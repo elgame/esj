@@ -5,14 +5,14 @@
   $(function () {
     autocompleteEmpresas();
 
-    // eventOnChangeHorasExtras();
-    // eventOnChangeDescuentoPlayeras();
-    // eventOnChangeDescuentoOtros();
-    // eventClickCheckVacaciones();
-    // eventClickCheckAguinaldo();
+    eventOnChangeHorasExtras();
+    eventOnChangeDescuentoPlayeras();
+    eventOnChangeDescuentoOtros();
+    eventClickCheckVacaciones();
+    eventClickCheckAguinaldo();
     eventOnSubmitForm();
-    // eventOnClickButtonPtu();
-    // eventOnKeyPressUtilidadEmpresas();
+    eventOnClickButtonPtu();
+    eventOnKeyPressUtilidadEmpresas();
 
     // if (parseFloat($('#totales-ptu-input').val()) > 0) {
     //   $('#ptu').val($('#totales-ptu-input').val());
@@ -472,7 +472,7 @@
   var guardaNominaEmpleado = function ($tr) {
     loader.create();
     $.ajax({
-      url: base_url + 'panel/nomina_fiscal/ajax_add_nomina_ptu_empleado/',
+      url: base_url + 'panel/nomina_fiscal/ajax_add_nomina_aguinaldo_empleado/',
       type: 'POST',
       dataType: 'json',
       data: {
@@ -488,7 +488,7 @@
         isr: $tr.find('.isr').val(),
         utilidad_empresa: $('#ptu').val(),
         con_vacaciones: $tr.find('.con-vacaciones').val(),
-        con_aguinaldo: $('#con-aguinaldo').val(),
+        con_aguinaldo: '1',
         total_no_fiscal: $tr.find('.total-complemento').val(),
         ultimo_no_generado: $('#ultimo-no-generado').val(),
         esta_asegurado: $tr.find('.empleado-esta_asegurado').val(),

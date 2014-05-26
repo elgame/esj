@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Nomina PTU
+            Nomina Aguinaldo
           </li>
         </ul>
       </div>
@@ -16,13 +16,13 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-list-alt"></i> Nomina PTU</h2>
+            <h2><i class="icon-list-alt"></i> Nomina Aguinaldo</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
           <div class="box-content" style="overflow-x: auto; max-height: 600px; font-size: 0.9em;">
-            <form action="<?php echo base_url('panel/nomina_fiscal/ptu'); ?>" method="GET" class="form-search" id="form">
+            <form action="<?php echo base_url('panel/nomina_fiscal/aguinaldo'); ?>" method="GET" class="form-search" id="form">
               <div class="form-actions form-filters">
                 <label for="anio">Año</label>
                 <input type="number" name="anio" class="search-query" id="anio" value="<?php echo set_value_get('anio', date("Y")); ?>">
@@ -66,15 +66,15 @@
                       Aguinaldo <input type="checkbox" id="check-aguinaldo" value="1" <?php echo $nominas_generadas ? 'disabled' : ''?>>
                       <input type="hidden" name="con_aguinaldo" value="0" class="span12" id="con-aguinaldo">
                     </div>
-                    <form action="<?php echo base_url('panel/nomina_fiscal/ptu/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+                    <form action="<?php echo base_url('panel/nomina_fiscal/ptu/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" style="display: none;">
                       <div class="span8">
-                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo $empleados[0]->ptu_generado === 'false' ? $ptu : $empleados[0]->utilidad_empresa_ptu ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
+                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo $empleados[0]->ptu_generado === 'false' ? '' : $empleados[0]->utilidad_empresa_ptu ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
                         <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
                       </div>
                     </form>
 
                     <?php if ( $nominas_finalizadas){ ?>
-                      <a href="<?php echo base_url('panel/nomina_fiscal/recibos_nomina_ptu_pdf/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Recibos Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
+                      <a href="<?php echo base_url('panel/nomina_fiscal/recibos_nomina_aguinaldo_pdf/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Recibos Nomina"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                     <?php } ?>
 
                   </div>
@@ -84,7 +84,7 @@
                     <?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?>
                   </div>
                 </div>
-                <form action="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_rpt_pdf/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" target="_blank">
+                <form action="<?php echo base_url('panel/nomina_fiscal/nomina_aguinaldo_rpt_pdf/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" target="_blank">
                   <div class="span3">
                       <div class="input-prepend input-append">
                         <span class="add-on"><input type="checkbox" value="si" name="xls"> En Excel</span>
@@ -95,9 +95,9 @@
                       <button type="button" name="guardar" class="btn btn-success" style="float: right;" id="guardarNomina">Guardar</button>
                     <?php } else { ?>
                       <span class="label label-success" style="font-size: 1.3em;">Nominas generadas</span>
-                      <a href="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_pdf/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
+                      <a href="<?php echo base_url('panel/nomina_fiscal/nomina_aguinaldo_pdf/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="40" height="40"></a>
                       <a href="<?php echo base_url('panel/nomina_fiscal/nomina_fiscal_cfdis/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar XML"><img src="<?php echo base_url('application/images/otros/doc_xml.png') ?>" width="40" height="40"></a>
-                      <a href="<?php echo base_url('panel/nomina_fiscal/nomina_ptu_banco/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar Archivo Banco"><img src="<?php echo base_url('application/images/otros/creditcard.png') ?>" width="40" height="40"></a>
+                      <a href="<?php echo base_url('panel/nomina_fiscal/nomina_aguinaldo_banco/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="Descargar Archivo Banco"><img src="<?php echo base_url('application/images/otros/creditcard.png') ?>" width="40" height="40"></a>
                     <?php } ?>
                   </div>
               </div>
@@ -106,7 +106,7 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <th colspan="5"></th>
+                      <th colspan="6"></th>
                       <th colspan="2" style="text-align: center;background-color: #BEEEBC;">PERCEPCIONES</th>
                       <th colspan="2" style="text-align: center;background-color: #EEBCBC;">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
@@ -119,16 +119,16 @@
                       <th>PUESTO</th>
                       <th>SALARIO</th>
                       <th>SDI</th>
-                      <!-- <th>DIAS TRAB.</th> -->
+                      <th>DIAS TRAB.</th>
 
                       <!-- Percepciones -->
                       <!-- <th style="background-color: #BEEEBC;">SUELDO</th> -->
                       <!-- <th id="head-vacaciones" style="display: none;background-color: #BEEEBC;">VACACIONES</th>
                       <th id="head-prima-vacacional" style="display: none;background-color: #BEEEBC;">P. VACACIONAL</th>
-                      <th style="background-color: #BEEEBC;">HRS. EXT.</th>
-                      <th id="head-aguinaldo" style="display: none;background-color: #BEEEBC;">AGUINALDO</th>
-                      <th style="background-color: #BEEEBC;">SUBSIDIO</th> -->
-                      <th style="background-color: #BEEEBC;">PTU</th>
+                      <th style="background-color: #BEEEBC;">HRS. EXT.</th> -->
+                      <th id="head-aguinaldo" style="display:;background-color: #BEEEBC;">AGUINALDO</th>
+                      <!-- <th style="background-color: #BEEEBC;">SUBSIDIO</th>  -->
+                      <!-- <th style="background-color: #BEEEBC;">PTU</th> -->
                       <th style="background-color: #BEEEBC;">TOTAL</th>
 
                       <!-- Deducciones -->
@@ -183,8 +183,6 @@
 
                       foreach($empleados as $key => $e)
                       {
-                        if ($e->ptu_percepciones_empleado != 0 && ($ptu !== null || $nominas_generadas))
-                        {
                           //Se obtienen lo que se preguardo en hrs_ext y descuentos para q se carguen de nuevo
                           $prenomina = $this->nomina_fiscal_model->getPreNomina($e->id, $_GET['empresaId'], $_GET['anio'], $_GET['semana']);
                           $e->nomina->percepciones['horas_extras']['total'] = $e->nomina->percepciones['horas_extras']['total']==0?$prenomina['horas_extras']: $e->nomina->percepciones['horas_extras']['total'];
@@ -222,34 +220,34 @@
                           $isrEmpleado = $e->nomina->deducciones['isr']['total'];
                           $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
                           // Si ya hay nominas generadas y la de este empleado tambien se genero.
-                          if ($nominas_generadas && $e->ptu_generado !== 'false')
+                          if ($nominas_generadas && $e->aguinaldo_generado !== 'false')
                           {
                             $readonly = 'readonly';
                             $disabled = 'disabled';
                             $generarNomina = '0';
                             $subsidioEmpleado = $e->nomina_fiscal_subsidio;
-                            $isrEmpleado = $e->nomina_fiscal_ptu_isr;
+                            $isrEmpleado = $e->nomina_fiscal_aguinaldo_isr;
                             $ptuEmpleado = $e->nomina_fiscal_ptu;
                           }
 
-                          if ($nominas_generadas && $e->ptu_generado !== 'false')
+                          if ($nominas_generadas && $e->aguinaldo_generado !== 'false')
                           {
                             $bgColor = 'background-color: #EEBCBC;';
                           }
 
                           $activaVacaciones = 0;
-                          if ($e->nomina_fiscal_vacaciones !== '0' && $e->ptu_generado !== 'false')
+                          if ($e->nomina_fiscal_vacaciones !== '0' && $e->aguinaldo_generado !== 'false')
                           {
                             $activaVacaciones = 1;
                           }
 
                           $activaAguinaldo = 0;
-                          if ($e->nomina_fiscal_aguinaldo !== '0' && $e->ptu_generado !== 'false')
+                          if ($e->nomina_fiscal_aguinaldo !== '0' && $e->aguinaldo_generado !== 'false')
                           {
                             $activaAguinaldo = 1;
                           }
 
-                          if ($e->ptu_generado === 'false')
+                          if ($e->aguinaldo_generado === 'false')
                           {
                             $ultimoNoGenerado = $e->id;
                           }
@@ -258,8 +256,8 @@
                           //   var_dump($totalPercepcionesEmpleado, $ptuEmpleado);
                           // echo "</pre>";exit;
 
-                          // $totalPercepcionesEmpleado += $subsidioEmpleado + $ptuEmpleado;
-                          $totalPercepcionesEmpleado += $ptuEmpleado;
+                          // $totalPercepcionesEmpleado += $subsidioEmpleado + $ptuEmpleadoa;
+                          $totalPercepcionesEmpleado += $e->nomina->aguinaldo;
                           $totalDeduccionesEmpleado += $isrEmpleado;
 
                           $utilidadEmpresa = $e->utilidad_empresa;
@@ -273,7 +271,7 @@
                       <tr class="tr-empleado" id="empleado<?php echo $e->id ?>">
                         <td style="<?php echo $bgColor ?>">
                           <?php if($nominas_finalizadas){ ?>
-                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
+                          <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_aguinaldo_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php } ?>
                         </td>
                         <td style="display: none;<?php echo $bgColor ?>">
@@ -304,7 +302,7 @@
                         <td style="<?php echo $bgColor ?>">
                           <?php echo $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado ?>
                         </td>
-                        <td style="display: none; <?php echo $bgColor ?>">
+                        <td style="display:; <?php echo $bgColor ?>">
                           <?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>
                           <input type="hidden" name="dias_trabajados[]" value="<?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>" class="span12 dias-trabajados">
                         </td>
@@ -324,15 +322,15 @@
                           <input type="hidden" value="<?php echo $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional ?>" class="span12 prima-vacacional">
                         </td>
                         <td style="display: none; width: 60px; <?php echo $bgColor?>"><input type="text" name="horas_extras[]" class="span12 vpositive horas-extras" value="<?php echo $e->horas_extras_dinero ?>" <?php echo $e->esta_asegurado=='f'?'readonly':$readonly ?>></td>
-                        <td id="td-aguinaldo" style="display: none; <?php echo $bgColor ?>">
+                        <td id="td-aguinaldo" style="display:; <?php echo $bgColor ?>">
                           <span class="aguinaldo-span"><?php echo String::formatoNumero($e->nomina->aguinaldo) ?></span>
-                          <input type="hidden" value="<?php echo $e->esta_asegurado=='f'?0:$e->nomina->aguinaldo ?>" class="span12 aguinaldo">
+                          <input type="hidden" value="<?php echo $e->esta_asegurado=='f'?0:$e->nomina->aguinaldo ?>" class="span12 aguinaldo" name="aguinaldo[]">
                         </td>
                         <td id="td-subsidio" style="display: none; <?php echo $bgColor ?>">
                           <span class="subsidio-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$subsidioEmpleado) ?></span>
                           <input type="hidden" name="subsidio[]" value="<?php echo $e->esta_asegurado=='f'?0:$subsidioEmpleado ?>" class="span12 subsidio">
                         </td>
-                        <td id="td-ptu" style="<?php echo $bgColor ?>">
+                        <td id="td-ptu" style="display: none;<?php echo $bgColor ?>">
                           <span class="ptu-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$ptuEmpleado) ?></span>
                           <input type="hidden" name="ptu[]" value="<?php echo $e->esta_asegurado=='f'?0:$ptuEmpleado ?>" class="span12 ptu">
                         </td>
@@ -364,7 +362,7 @@
                                   }
                                 }
 
-                                $totalDeduccionesEmpleado += floatval($totalPrestamosEmpleado);
+                                // $totalDeduccionesEmpleado += floatval($totalPrestamosEmpleado);
                           ?>
                           <?php echo String::formatoNumero($totalPrestamosEmpleado) ?>
                           <input type="hidden" name="total_prestamos[]" value="<?php echo $totalPrestamosEmpleado ?>" class="span12 prestamos">
@@ -382,6 +380,7 @@
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-nomina-span"><?php
                             $ttotal_nomina = $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
+
                             $ttotal_nomina_cheques = 0;
                             if($e->cuenta_banco == ''){
                               $ttotal_nomina_cheques = $ttotal_nomina;
@@ -450,19 +449,19 @@
                       $totalOtras              += $e->otros;
                       $totalDomingos           += $e->domingo;
                       $totalComplementos       += $totalComplementoEmpleado;
-                    }} ?>
+                    } ?>
                     <tr>
                       <td colspan="3" style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
                       <td id="totales-salarios" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSalarios) ?></td>
                       <td id="totales-sdi" style="background-color: #BCD4EE;"><?php echo $totalSdi ?></td>
-                      <td id="totales-dias-trabajados" style="display: none;background-color: #BCD4EE;"><?php echo $totalDiasTrabajados ?></td>
+                      <td id="totales-dias-trabajados" style="display:;background-color: #BCD4EE;"><?php echo $totalDiasTrabajados ?></td>
                       <td id="totales-sueldos" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSueldos) ?></td>
                       <td id="totales-vacaciones" style="display: none;background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalVacaciones) ?></td>
                       <td id="totales-prima-vacacional" style="display: none;background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalPrimasVacacionales) ?></td>
                       <td id="totales-horas-extras" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalHorasExtras) ?></td>
-                      <td id="totales-aguinaldo" style="display: none;background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalAguinaldos) ?></td>
+                      <td id="totales-aguinaldo" style="display: ;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalAguinaldos) ?></td>
                       <td id="totales-subsidios" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSubsidios) ?></td>
-                      <td id="totales-ptus" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPtu) ?><input type="hidden" id="totales-ptu-input" value="<?php echo $utilidadEmpresa?>"></td>
+                      <td id="totales-ptus" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPtu) ?><input type="hidden" id="totales-ptu-input" value="<?php echo $utilidadEmpresa?>"></td>
                       <td id="totales-percepciones" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPercepciones) ?></td>
                       <td id="totales-infonavit" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalInfonavit) ?></td>
                       <td id="totales-imss" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalImss) ?></td>

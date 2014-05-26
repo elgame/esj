@@ -27,7 +27,7 @@ class nomina_fiscal_model extends CI_Model {
   }
 
   public function nomina($configuraciones, array $filtros = array(), $empleadoId = null, $horasExtrasDinero = null, $descuentoPlayeras = null,
-                         $subsidio = null, $isr = null, $utilidadEmpresa = null, $descuentoOtros = null)
+                         $subsidio = null, $isr = null, $utilidadEmpresa = null, $descuentoOtros = null, $tipo = null)
   {
     $this->load->library('nomina');
 
@@ -79,6 +79,11 @@ class nomina_fiscal_model extends CI_Model {
     $descuentoOtros = $descuentoOtros ?: 0;
     $utilidadEmpresa = $utilidadEmpresa ?: 0;
 
+    if ($tipo === null)
+    {
+      $sql .= " AND u.status = 't' ";
+    }
+
     // Query para obtener los empleados de la semana de la nomina.
     $query = $this->db->query(
       "SELECT u.id,
@@ -115,29 +120,36 @@ class nomina_fiscal_model extends CI_Model {
               COALESCE(nf.total_neto, 0) as nomina_fiscal_total_neto,
               COALESCE(nf.uuid, 'false') as esta_generada,
               COALESCE(nf.utilidad_empresa, {$utilidadEmpresa}) as utilidad_empresa,
-              -- (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
-              (SELECT COALESCE(SUM(total_percepcion), 2000000) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
-              (SELECT COALESCE(SUM(dias_trabajados), 330) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
-              -- (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
-              (SELECT COALESCE(SUM(total_percepcion), 6000) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
-              (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
+              (SELECT COALESCE(SUM(total_percepcion), 200000) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
+              (SELECT COALESCE(SUM(dias_trabajados), 3000) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
+              (SELECT COALESCE(SUM(total_percepcion), 10000) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
+              (SELECT COALESCE(SUM(dias_trabajados), 365) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
               u.rfc,
               u.cuenta_banco,
               u.no_seguro,
               (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
               (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
+
               COALESCE(nptu.uuid, 'false') AS ptu_generado,
               COALESCE(nptu.ptu, 0) AS nomina_fiscal_ptu,
               COALESCE(nptu.utilidad_empresa, 0) AS utilidad_empresa_ptu,
               COALESCE(nptu.isr, 0) as nomina_fiscal_ptu_isr,
               COALESCE(nptu.total_percepcion, 0) as nomina_fiscal_ptu_total_percepciones,
               COALESCE(nptu.total_deduccion, 0) as nomina_fiscal_ptu_total_deducciones,
-              COALESCE(nptu.total_neto, 0) as nomina_fiscal_ptu_total_neto
+              COALESCE(nptu.total_neto, 0) as nomina_fiscal_ptu_total_neto,
+
+              COALESCE(nagui.uuid, 'false') AS aguinaldo_generado,
+              COALESCE(nagui.aguinaldo, 0) AS nomina_fiscal_aguinaldo,
+              COALESCE(nagui.isr, 0) as nomina_fiscal_aguinaldo_isr,
+              COALESCE(nagui.total_percepcion, 0) as nomina_fiscal_aguinaldo_total_percepciones,
+              COALESCE(nagui.total_deduccion, 0) as nomina_fiscal_aguinaldo_total_deducciones,
+              COALESCE(nagui.total_neto, 0) as nomina_fiscal_aguinaldo_total_neto
        FROM usuarios u
        LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
        LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
        LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
-       WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' AND u.status = 't' {$sql}
+       LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
+       WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
        {$ordenar}
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
@@ -1964,9 +1976,6 @@ class nomina_fiscal_model extends CI_Model {
     return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
 
-
-
-
   /*
    |------------------------------------------------------------------------
    | Catalos del SAT
@@ -2100,7 +2109,7 @@ class nomina_fiscal_model extends CI_Model {
     unlink(APPPATH."media/Nomina-{$semana['anio']}-{$semana['semana']}.zip");
   }
 
-  public function descargarTxtBancoPtu($semana, $empresaId, $anio=null)
+  public function descargarTxtBanco($semana, $empresaId, $anio=null)
   {
     $anio = $anio==null?date("Y"):$anio;
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
@@ -2113,8 +2122,7 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
     $empleados = $this->nomina($configuraciones, $filtros);
-    // $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
-    $nombre = "PAGO-PTU-{$semana['anio']}.txt";
+    $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
 
     $content = array();
     $contador = 1;
@@ -2125,8 +2133,26 @@ class nomina_fiscal_model extends CI_Model {
                     $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
                     $this->formatoBanco('99', ' ', 2, 'I') .
                     $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
-                    $this->formatoBanco($empleado->nomina_fiscal_ptu_total_neto, '0', 15, 'I', true) .
+                    $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 15, 'I', true) .
                     $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D');
+        $contador++;
+      }
+    }
+
+    //Finiquito
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+    foreach ($finiquitos as $key => $empleado)
+    {
+      if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
+        $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
+                    $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
+                    $this->formatoBanco('99', ' ', 2, 'I') .
+                    $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
+                    $this->formatoBanco($empleado->total_neto, '0', 15, 'I', true) .
+                    $this->formatoBanco($this->removeTrash($empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre), ' ', 40, 'D') .
                     $this->formatoBanco('001', ' ', 3, 'D') .
                     $this->formatoBanco('001', ' ', 3, 'D');
         $contador++;
@@ -6184,6 +6210,12 @@ class nomina_fiscal_model extends CI_Model {
     }
   }
 
+  /*
+   |------------------------------------------------------------------------
+   | PTU
+   |------------------------------------------------------------------------
+   */
+
   public function add_nominas_ptu($datos, $empresaId, $empleadoId)
   {
     // echo "<pre>";
@@ -6243,7 +6275,8 @@ class nomina_fiscal_model extends CI_Model {
           null,
           null,
           $datos['utilidad_empresa'],
-          null
+          null,
+          'ptu'
         );
 
         $valorUnitario = 0; // Total de las Percepciones.
@@ -6422,7 +6455,7 @@ class nomina_fiscal_model extends CI_Model {
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
-    $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
+    $empleados = $this->nomina($configuraciones, $filtros, $empleadoId, null, null, null, null, null, null, 'ptu');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
     // echo "<pre>";
@@ -6774,7 +6807,7 @@ class nomina_fiscal_model extends CI_Model {
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
-    $empleados = $this->nomina($configuraciones, $filtros);
+    $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
 
     $pdf = new MYpdf('P', 'mm', 'Letter');
 
@@ -6797,7 +6830,7 @@ class nomina_fiscal_model extends CI_Model {
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
     $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC");
-    $empleados = $this->nomina($configuraciones, $filtros);
+    $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
     $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
       WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
@@ -7154,10 +7187,11 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
-    $columnas = array('n' => array(), 'w' => array(6, 220, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(6, 200, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
     $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'PTU';
+    $columnas['n'][] = 'ISR';
     $columnas['n'][] = 'TOTAL A PAGAR';
 
     $pdf->SetFont('Helvetica','B', 8);
@@ -7173,8 +7207,14 @@ class nomina_fiscal_model extends CI_Model {
     $_GET['did_empresa'] = $empresaId;
     $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
 
+    $ptuTtotal = 0;
+    $isrTtotal = 0;
+    $tTotal    = 0;
+
     $numero_empleado = 0;
     $ptuTotal = 0;
+    $isrTotal = 0;
+    $ttotal_pagar = 0;
     foreach ($departamentos as $keyd => $departamento)
     {
       $ptu = 0;
@@ -7216,12 +7256,14 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['ptu'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
+          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
+          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
-          $ptu += $_POST['ptu'][$key];
-          $ptuTotal += $_POST['ptu'][$key];
-          $ttotal_pagar        += $total_pagar;
+
+          $ptuTotal     += $_POST['ptu'][$key];
+          $isrTotal     += $_POST['isr'][$key];
+          $ttotal_pagar += $_POST['ttotal_nomina'][$key];
         }
       }
 
@@ -7233,9 +7275,17 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($ptu, 2, '$', false);
-      $datatto[] = String::formatoNumero($ptu, 2, '$', false);
+      $datatto[] = String::formatoNumero($ptuTotal, 2, '$', false);
+      $datatto[] = String::formatoNumero($isrTotal, 2, '$', false);
+      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
+
+      $ptuTtotal += $ptuTotal;
+      $isrTtotal += $isrTotal;
+
+      $ptuTotal     = 0;
+      $isrTotal     = 0;
+      $ttotal_pagar = 0;
     }
 
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -7245,8 +7295,9 @@ class nomina_fiscal_model extends CI_Model {
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($ptuTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ptuTotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($ptuTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
     $pdf->Row($datatto, false, true, null, 2, 1);
 
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -7256,14 +7307,14 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetAligns(array('L', 'L', 'L'));
     $pdf->SetWidths(array(50, 50, 50));
 
-    if ($empresa['info']->rfc === 'ESJ97052763A')
-    {
-      $pdf->Row(array(
-        'NOMINA FISCAL: '.String::formatoNumero($ptuTotal, 2, '$', false),
-        'TRANSFERIDO: '.String::formatoNumero($ptuTotal, 2, '$', false),
-        'CHEQUE FISCAL: '.String::formatoNumero(($ptuTotal), 2, '$', false),
-        ), false, true, null, 2, 1);
-    }
+    // if ($empresa['info']->rfc === 'ESJ97052763A')
+    // {
+    //   $pdf->Row(array(
+    //     'NOMINA FISCAL: '.String::formatoNumero($ptuTotal, 2, '$', false),
+    //     'TRANSFERIDO: '.String::formatoNumero($ptuTotal, 2, '$', false),
+    //     'CHEQUE FISCAL: '.String::formatoNumero(($ptuTotal), 2, '$', false),
+    //     ), false, true, null, 2, 1);
+    // }
 
     $pdf->Output('Nomina.pdf', 'I');
   }
@@ -7288,6 +7339,7 @@ class nomina_fiscal_model extends CI_Model {
     $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'PTU';
+    $columnas['n'][] = 'ISR';
     $columnas['n'][] = 'TOTAL A PAGAR';
 
     $ptu = 0;
@@ -7299,7 +7351,13 @@ class nomina_fiscal_model extends CI_Model {
     $numero_empleado = 0;
     $html .= $this->rowXls($columnas['n']);
     $html .= $this->rowXls(array(''));
+
+    $ptuTtotal = 0;
+    $isrTtotal = 0;
+    $tTotal    = 0;
+
     $ptuTotal = 0;
+    $isrTotal = 0;
     $ttotal_pagar = 0;
     foreach ($departamentos as $keyd => $departamento)
     {
@@ -7322,29 +7380,1284 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['ptu'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
 
           $html .= $this->rowXls($dataarr);
-          $ptu += $_POST['ptu'][$key];
-          $ptuTotal += $_POST['ptu'][$key];
-          $ttotal_pagar += $total_pagar;
+          $ptuTotal     += $_POST['ptu'][$key];
+          $isrTotal     += $_POST['isr'][$key];
+          $ttotal_pagar += $_POST['ttotal_nomina'][$key];
         }
       }
 
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($ptu, 2, '', false);
-      $datatto[] = String::formatoNumero($ptu, 2, '', false);
+      $datatto[] = String::formatoNumero($ptuTotal, 2, '', false);
+      $datatto[] = String::formatoNumero($isrTotal, 2, '', false);
+      $datatto[] = String::formatoNumero($ptuTotal - $isrTotal, 2, '$', false);
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
+
+      $ptuTtotal += $ptuTotal;
+      $isrTtotal += $isrTotal;
+
+      $ptuTotal     = 0;
+      $isrTotal     = 0;
+      $ttotal_pagar = 0;
     }
 
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($ptuTotal, 2, '', false);
-    $datatto[] = String::formatoNumero($ptuTotal, 2, '', false);
+    $datatto[] = String::formatoNumero($ptuTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
+
+    $html .= $this->rowXls($datatto);
+    $html .= $this->rowXls(array(''));
+
+    // if ($empresa['info']->rfc === 'ESJ97052763A')
+    // {
+    //   $html .= $this->rowXls(array(
+    //     'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
+    //     'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '', false),
+    //     'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
+    //     ), 'style="font-weight:bold;font-size:14px;"');
+    //   $html .= $this->rowXls(array(''));
+    // }
+
+    //Si es la empresa es gomez gudiño pone la nomina de limon (o ranchos), se obtiene de la bd
+    $html .= '</table>';
+
+    header("Content-type: application/vnd.ms-excel; name='excel'");
+    header("Content-Disposition: filename=nomina.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+    echo $html;
+  }
+
+  public function descargarTxtBancoPtu($semana, $empresaId, $anio=null)
+  {
+    $anio = $anio==null?date("Y"):$anio;
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    if ($empresaId !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+
+    $configuraciones = $this->configuraciones();
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
+    $empleados = $this->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ptu');
+    // $nombre = "PAGO-{$semana['anio']}-SEM-{$semana['semana']}.txt";
+    $nombre = "PAGO-PTU-{$semana['anio']}.txt";
+
+    $content = array();
+    $contador = 1;
+    foreach ($empleados as $key => $empleado)
+    {
+      if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
+        $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
+                    $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
+                    $this->formatoBanco('99', ' ', 2, 'I') .
+                    $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
+                    $this->formatoBanco($empleado->nomina_fiscal_ptu_total_neto, '0', 15, 'I', true) .
+                    $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D');
+        $contador++;
+      }
+    }
+
+    $content[] = '';
+    $content = implode("\r\n", $content);
+
+    $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
+    fwrite($fp,$content);
+    fclose($fp);
+
+    header('Content-Type: text/plain');
+    header("Content-disposition: attachment; filename={$nombre}");
+    readfile(APPPATH."media/temp/{$nombre}");
+    unlink(APPPATH."media/temp/{$nombre}");
+  }
+
+  /*
+   |------------------------------------------------------------------------
+   | AGUINALDO
+   |------------------------------------------------------------------------
+   */
+
+  public function add_nominas_aguinaldo($datos, $empresaId, $empleadoId)
+  {
+    // echo "<pre>";
+    //   var_dump($datos, $empresaId, $empleadoId);
+    // echo "</pre>";exit;
+    // $startTime = new DateTime(date('Y-m-d H:i:s'));
+
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    // Obtiene la informacion de la empresa.
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+
+    // Obtiene el certificado.
+    $certificado = $this->cfdi->obtenCertificado($this->db
+      ->select('cer')
+      ->from("empresas")
+      ->where("id_empresa", $empresaId)
+      ->get()->row()->cer
+    );
+
+    // Obtiene las configuraciones.
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    $configuraciones = $this->configuraciones();
+
+    // Almacenara los datos de las nominas de cada empleado para despues
+    // insertarlas.
+    $nominasEmpleados = array();
+
+    // Almacenara los datos de los prestamos de cada empleado para despues
+    // insertarlos.
+    $prestamosEmpleados = array();
+
+    // Obtiene el rango de fechas de la semana.
+    $fechasSemana = $this->fechasDeUnaSemana($datos['numSemana'], $datos['anio'], $empresa['info']->dia_inicia_semana );
+
+    // Auxiliar para saber si hubo un error al momento de timbrar alguna nomina.
+    $errorTimbrar = false;
+
+    // Recorre los empleados para agregar y timbrar sus nominas.
+    // foreach ($datos['empleado_id'] as $key => $empleadoId)
+    // {
+      // Si la nomina del empleado no se ha generado entonces entra.
+      if ($datos['generar_nomina'] === '1')
+      {
+        // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+        $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
+
+        $empleadoNomina = $this->nomina(
+          $configuraciones,
+          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'], 'dia_inicia_semana' => $empresa['info']->dia_inicia_semana ),
+          $empleadoId,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        );
+
+        $valorUnitario = 0; // Total de las Percepciones.
+
+        // Recorre las percepciones del empleado.
+        foreach ($empleadoNomina[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
+        {
+          // Si activaron las vacaciones entonces suma las vacaciones y la prima vacacional.
+          if ($tipoPercepcion === 'aguinaldo')
+          {
+            $valorUnitario += $percepcion['total'];
+            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
+          }
+          else
+          {
+            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
+          }
+        }
+
+        $isr = 0; // retenciones
+        $descuento = 0; // Total de las deducciones(gravado + excento) excepto el ISR.
+        // Recorre las deducciones del empleado.
+        foreach ($empleadoNomina[0]->nomina->deducciones as $tipoDeduccion => $deduccion)
+        {
+          if ($tipoDeduccion === 'isr')
+          {
+            $isr = $deduccion['total'];
+            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]['total']);
+          }
+          else
+          {
+            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]);
+          }
+        }
+
+        $result = array('xml' => '', 'uuid' => '');
+        if($datos['esta_asegurado'] == 't')
+        {
+          // Obtiene los datos para la cadena original.
+          $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
+          $datosCadenaOriginal['subTotal'] = $valorUnitario;
+          $datosCadenaOriginal['descuento'] = $descuento;
+          $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
+          $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
+          $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
+
+          // Concepto de la nomina.
+          $concepto = array(array(
+            'cantidad'         => 1,
+            'unidad'           => 'Servicio',
+            'descripcion'      => 'Aguinaldo',
+            'valorUnitario'    => $valorUnitario,
+            'importe'          => $valorUnitario,
+            'idClasificacion' => null,
+          ));
+
+          $datosCadenaOriginal['concepto'] = $concepto;
+
+          // Obtiene la cadena original para la nomina.
+          $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadenaOriginal, true, $empleadoNomina);
+
+          // Genera el sello en base a la cadena original.
+          $sello = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
+
+          // Construye los datos para el xml.
+          $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
+          $datosXML['concepto'] = $concepto;
+
+          $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana, null, ' - Aguinaldo');
+
+          $result = $this->timbrar($archivo['pathXML']);
+          // echo "<pre>";
+          //   var_dump($archivo, $result, base64_encode($result['xml']), $cadenaOriginal);
+          // echo "</pre>";exit;
+
+          // Si la nomina se timbro entonces agrega al array nominas la nomina del
+          // empleado para despues insertarla en la bdd.
+          if (isset($result['result']->status) && $result['result']->status==true)
+          {
+            $aguinaldoGravado = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
+              ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteGravado']
+              : 0;
+
+            $aguinaldoExcento = isset($empleadoNomina[0]->nomina->percepciones['aguinaldo'])
+              ? $empleadoNomina[0]->nomina->percepciones['aguinaldo']['ImporteExcento']
+              : 0;
+
+            $aguinaldo = $aguinaldoGravado + $aguinaldoExcento;
+
+            $nominasEmpleados[] = array(
+              'id_empleado' => $empleadoId,
+              'id_empresa' => $empresaId,
+              'anio' => $fechasSemana['anio'],
+              'semana' => $datos['numSemana'],
+              'fecha_inicio' => $fechasSemana['fecha_inicio'],
+              'fecha_final' => $fechasSemana['fecha_final'],
+              'dias_trabajados' => $empleadoNomina[0]->dias_trabajados,
+              'salario_diario' => $empleadoNomina[0]->salario_diario,
+              'salario_integral' => $empleadoNomina[0]->nomina->salario_diario_integrado,
+              'aguinaldo_grabable' => $aguinaldoGravado,
+              'aguinaldo_exento' => $aguinaldoExcento,
+              'aguinaldo' => $aguinaldo,
+              'total_percepcion' => $valorUnitario,
+              'isr' => $datos['isr'],
+              'total_deduccion' => $descuento + $isr,
+              'total_neto' => $valorUnitario - $descuento - $isr,
+              'id_empleado_creador' => $this->session->userdata('id_usuario'),
+              'id_puesto' => $empleadoNomina[0]->id_puesto,
+              'xml' => $result['xml'],
+              'uuid' => $result['uuid'],
+              'esta_asegurado' => $datos['esta_asegurado'],
+            );
+          }
+          else
+          {
+            $errorTimbrar = true;
+          }
+
+          // echo "<pre>";
+          //   var_dump($datosXML, $archivo);
+          // echo "</pre>";exit;
+
+          // echo "<pre>";
+          //   var_dump($empleado, $cadenaOriginal, $sello, $certificado);
+          // echo "</pre>";exit;
+        }
+      }
+    // }
+
+    // Inserta las nominas.
+    if (count($nominasEmpleados) > 0)
+    {
+      $this->db->insert_batch('nomina_aguinaldo', $nominasEmpleados);
+    }
+
+    return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
+  }
+
+  public function pdfReciboNominaFiscalAguinaldo($empleadoId, $semana, $anio, $empresaId, $pdf=null)
+  {
+    $this->load->model('empresas_model');
+
+    if ($empresaId !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    $configuraciones = $this->configuraciones();
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
+    $empleados = $this->nomina($configuraciones, $filtros, $empleadoId);
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+
+    // echo "<pre>";
+    //   var_dump($empleados);
+    // echo "</pre>";exit;
+
+    include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+    $nomina = $this->db->query("SELECT uuid, xml FROM nomina_aguinaldo WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
+
+    $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
+
+    // echo "<pre>";
+    //   var_dump($nomina, $xml);
+    // echo "</pre>";exit;
+
+    $show = false;
+    if ($pdf == null)
+    {
+      $show = true;
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+    }
+
+    $pdf->show_head = true;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->logo = $empresa['info']->logo;
+    // $pdf->titulo2 = "Recibo de PTU de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
+    $pdf->titulo2 = "Aguinaldo";
+    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $total_gral = array( 'aguinaldo' => 0, 'isr' => 0, 'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0);
+    $total_dep = array( 'aguinaldo' => 0, 'isr' => 0, 'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0);
+
+    $dep_tiene_empleados = true;
+    $y = $pdf->GetY();
+    foreach ($empleados as $key => $empleado)
+    {
+      if($dep_tiene_empleados)
+      {
+        $pdf->SetFont('Helvetica','', 10);
+        $pdf->SetXY(6, $pdf->GetY() + 4);
+        $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+        $pdf->Row(array('', 'Percepción', 'Importe', '', 'Deducción', 'Importe'), false, false, null, 2, 1);
+
+        $pdf->SetFont('Helvetica','', 10);
+        $pdf->SetXY(6, $pdf->GetY() - 2);
+        $pdf->Cell(200, 2, "________________________________________________________________________________________________________", 0, 0, 'L', 0);
+        $dep_tiene_empleados = false;
+      }
+
+      $pdf->SetFont('Helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(15, 100));
+      $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica','', 9);
+      $pdf->SetXY(6, $pdf->GetY() + 0);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(50, 70, 50));
+      $pdf->Row(array($empleado->puesto, "RFC: {$empleado->rfc}", "Afiliciación IMSS: {$empleado->no_seguro}"), false, false, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $pdf->SetXY(6, $pdf->GetY() + 0);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(50, 35, 35, 35, 30));
+      $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $horasExtras = 0;
+      if ($empleado->horas_extras_dinero > 0)
+      {
+        $pagoXHora = $empleado->salario_diario / 8;
+        $horasExtras = $empleado->horas_extras_dinero / $pagoXHora;
+      }
+
+      $pdf->SetXY(6, $pdf->GetY() + 0);
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetWidths(array(70));
+      $pdf->Row(array("CURP: {$empleado->curp}"), false, false, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $y2 = $pdf->GetY();
+
+      // Percepciones
+      $percepciones = $empleado->nomina->percepciones;
+
+      // AGUINALDO
+      if ($empleado->nomina_fiscal_ptu > 0)
+      {
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'AGUINALDO', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
+        $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
+      $y = $pdf->GetY();
+
+      // Deducciones
+      $deducciones = $empleado->nomina->deducciones;
+      $pdf->SetFont('Helvetica','', 9);
+
+      $pdf->SetY($y2);
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $y = $pdf->GetY();
+      }
+
+      if ($empleado->nomina_fiscal_aguinaldo_isr > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
+        $total_gral['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
+
+      if ($y < $pdf->GetY())
+      {
+        $y = $pdf->GetY();
+      }
+
+      // Total percepciones y deducciones
+      $pdf->SetXY(6, $y + 2);
+      $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+
+      $total_dep['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
+      $total_gral['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
+      $total_dep['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
+      $total_gral['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
+      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25));
+      $total_dep['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
+      $total_gral['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
+      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica', '', 9);
+      $pdf->SetXY(120, $pdf->GetY()+3);
+      $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+    }
+
+    if($xml === false)
+      true;
+    else
+    {
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      $pdf->Cell(78, 4, 'RFC EMISOR: '.$xml->Emisor[0]['rfc'], 0, 0, 'L', 0);
+
+      $pdf->SetXY(86, $pdf->GetY());
+      $pdf->Cell(78, 4, 'Forma de Pago: '.$xml[0]['formaDePago'], 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(158, $pdf->GetY());
+      $pdf->Cell(78, 4, 'Condicion de Pago: Contado', 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(86, $pdf->GetY()+5);
+      $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 0);
+
+      $cuenta_banco = substr($empleado->cuenta_banco, -4);
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(158, $pdf->GetY());
+      $pdf->Cell(76, 4, "Cuenta de Pago: {$cuenta_banco}", 0, 0, 'L', 0);
+      ////////////////////
+      // Timbrado Datos //
+      ////////////////////
+      if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(10, $pdf->GetY() + 5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
+
+      $pdf->SetFont('helvetica', '', 8);
+      $pdf->SetY($pdf->GetY() - 3);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['selloCFD']), false, 0);
+
+      if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(10, $pdf->GetY() - 2);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array('Sello Digital del SAT:'), false, 0);
+
+      $pdf->SetFont('helvetica', '', 8);
+      $pdf->SetY($pdf->GetY() - 3);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['selloSAT']), false, 0);
+
+      /////////////
+      // QR CODE //
+      /////////////
+
+      // formato
+      // ?re=XAXX010101000&rr=XAXX010101000&tt=1234567890.123456&id=ad662d33-6934-459c-a128-BDf0393f0f44
+      // 0000001213.520000
+
+      $total = explode('.', $xml[0]['total']);
+
+      // Obtiene la diferencia de caracteres en la parte entera.
+      $diff = 10 - strlen($total[0]);
+
+      // Agrega los 0 faltantes  a la parte entera.
+      for ($i=0; $i < $diff; $i++)
+        $total[0] = "0{$total[0]}";
+
+      // Si el total no contiene decimales le asigna en la parte decimal 6 ceros.
+      if (count($total) === 1)
+      {
+        $total[1] = '000000';
+      }
+      else
+      {
+        // Obtiene la diferencia de caracteres en la parte decimal.
+        $diff = 6 - strlen($total[1]);
+
+        // Agregar los 0 restantes en la parte decimal.
+        for ($i=0; $i < $diff; $i++)
+          $total[1] = "{$total[1]}0";
+      }
+
+      $code = "?re={$xml->Emisor[0]['rfc']}";
+      $code .= "&rr={$xml->Receptor[0]['rfc']}";
+      $code .= "&tt={$total[0]}.{$total[1]}";
+      $code .= "&id={$xml->Complemento->TimbreFiscalDigital[0]['UUID']}";
+
+      // echo "<pre>";
+      //   var_dump($code, $total, $diff);
+      // echo "</pre>";exit;
+
+      QRcode::png($code, APPPATH.'media/qrtemp.png', 'H', 3);
+
+      if($pdf->GetY() + 50 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Image(APPPATH.'media/qrtemp.png', null, null, 40);
+
+      // Elimina el QR generado temporalmente.
+      unlink(APPPATH.'media/qrtemp.png');
+
+      ////////////////////
+      // Timbrado Datos //
+      ////////////////////
+
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(45, $pdf->GetY() - 39);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(160));
+      $pdf->Row(array('Cadena Original del complemento de certificación digital del SAT:'), false, 0);
+
+      $pdf->SetFont('helvetica', '', 8);
+      $cadenaOriginalSAT = "||{$xml->Complemento->TimbreFiscalDigital[0]['version']}|{$xml->Complemento->TimbreFiscalDigital[0]['UUID']}|{$xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado']}|{$xml->Complemento->TimbreFiscalDigital[0]['selloCFD']}|{$xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT']}||";
+      $pdf->SetXY(45, $pdf->GetY() - 3);
+      $pdf->Row(array($cadenaOriginalSAT), false, 0);
+
+      $pdf->SetFont('helvetica', 'B', 10);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 171, 72);
+      $pdf->SetXY(45, $pdf->GetY() + 1);
+      $pdf->Cell(68, 6, "Folio Fiscal:", 0, 0, 'R', 1);
+
+      $pdf->SetXY(125, $pdf->GetY());
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
+
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 171, 72);
+      $pdf->SetXY(45, $pdf->GetY() + 7);
+      $pdf->Cell(68, 6, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+
+      $pdf->SetXY(125, $pdf->GetY());
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['noCertificadoSAT'], 0, 0, 'C', 0);
+
+      $pdf->SetFont('helvetica', 'B', 10);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 171, 72);
+      $pdf->SetXY(45, $pdf->GetY() + 7);
+      $pdf->Cell(68, 6, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+
+      $pdf->SetXY(125, $pdf->GetY());
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
+
+      $pdf->SetXY(0, $pdf->GetY()+13);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
+    }
+
+    if($show)
+      $pdf->Output('AGUINALDO_'.strtoupper($empleado->nombre).'.pdf', 'I');
+  }
+
+  public function pdfRecibNominAguinaldo($semana, $anio, $empresaId)
+  {
+    $this->load->library('mypdf');
+    $this->load->model('empresas_model');
+
+    if ($empresaId !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    $configuraciones = $this->configuraciones();
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
+    $empleados = $this->nomina($configuraciones, $filtros);
+
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    foreach ($empleados as $key => $value)
+    {
+      if ($value->esta_asegurado == 't')
+        $this->pdfReciboNominaFiscalAguinaldo($value->id, $semana['semana'], $anio, $empresaId, $pdf);
+    }
+
+    $pdf->Output('AGUINALDOS.pdf', 'I');
+  }
+
+  public function pdfNominaFiscalAguinaldo($semana, $empresaId, $anio=null, $diaComienza=4)
+  {
+    $anio = $anio==null? date("Y"): $anio;
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_departamentos_model');
+
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    $configuraciones = $this->configuraciones();
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'asegurado' => 'si', 'ordenar' => "ORDER BY u.id ASC");
+    $empleados = $this->nomina($configuraciones, $filtros);
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+
+    // echo "<pre>";
+    //   var_dump($empleados);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    // $pdf->titulo2 = "Lista de Raya de {$semana['fecha_inicio']} al {$semana['fecha_final']}";
+    $pdf->titulo2 = "Aguinaldo";
+    // $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->SetFont('Helvetica','', 10);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(6, 27);
+    $pdf->Cell(100, 6, "Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+
+    $pdf->SetFont('Helvetica','B', 10);
+    $pdf->SetXY(6, $pdf->GetY() + 6);
+    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+
+    $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
+      'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'isr' => 0,
+      'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0);
+
+    // $departamentos = $this->usuarios_model->departamentos();
+    $_GET['did_empresa'] = $empresaId;
+    $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    foreach ($departamentos as $keyd => $departamento)
+    {
+      $total_dep = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
+        'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'isr' => 0,
+        'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0);
+
+      $dep_tiene_empleados = true;
+      $y = $pdf->GetY();
+      foreach ($empleados as $key => $empleado)
+      {
+        if($departamento->id_departamento == $empleado->id_departamente)
+        {
+          if($dep_tiene_empleados)
+          {
+            $pdf->SetFont('Helvetica','B', 10);
+            $pdf->SetXY(6, $pdf->GetY()+6);
+            $pdf->Cell(130, 6, $departamento->nombre, 0, 0, 'L', 0);
+
+            $pdf->SetFont('Helvetica','', 10);
+            $pdf->SetXY(6, $pdf->GetY() + 8);
+            $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+            $pdf->Row(array('', 'Percepción', 'Importe', '', 'Deducción', 'Importe'), false, false, null, 2, 1);
+
+            $pdf->SetFont('Helvetica','', 10);
+            $pdf->SetXY(6, $pdf->GetY() - 2);
+            $pdf->Cell(200, 2, "________________________________________________________________________________________________________", 0, 0, 'L', 0);
+            $dep_tiene_empleados = false;
+          }
+
+          $pdf->SetFont('Helvetica','B', 9);
+          $pdf->SetXY(6, $pdf->GetY() + 4);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(15, 100));
+          $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Helvetica','', 9);
+          $pdf->SetXY(6, $pdf->GetY() + 0);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(50, 70, 50));
+          $pdf->Row(array($empleado->puesto, "RFC: {$empleado->rfc}", "Afiliciación IMSS: {$empleado->no_seguro}"), false, false, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetXY(6, $pdf->GetY() + 0);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(50, 35, 35, 35, 30));
+          $pdf->Row(array("Fecha Ingr: {$empleado->fecha_entrada}", "Sal. diario: {$empleado->salario_diario}", "S.D.I: {$empleado->nomina->salario_diario_integrado}", "S.B.C: {$empleado->nomina->salario_diario_integrado}", 'Cotiza fijo'), false, false, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $horasExtras = 0;
+          if ($empleado->horas_extras_dinero > 0)
+          {
+            $pagoXHora = $empleado->salario_diario / 8;
+            $horasExtras = $empleado->horas_extras_dinero / $pagoXHora;
+          }
+
+          $pdf->SetXY(6, $pdf->GetY() + 0);
+          $pdf->SetAligns(array('L', 'L'));
+          $pdf->SetWidths(array(70));
+          // $pdf->Row(array("Dias Pagados: {$empleado->dias_trabajados}", "Tot Hrs trab: " . $empleado->dias_trabajados * 8, 'Hrs dia: 8.00', "Hrs extras: " . number_format($horasExtras, 2), "CURP: {$empleado->curp}"), false, false, null, 1, 1);
+          $pdf->Row(array("CURP: {$empleado->curp}"), false, false, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $y2 = $pdf->GetY();
+
+          // Percepciones
+          $percepciones = $empleado->nomina->percepciones;
+
+          // Aguinaldo
+          if ($empleado->nomina_fiscal_aguinaldo > 0)
+          {
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+            $total_dep['ptu'] += $empleado->nomina_fiscal_aguinaldo;
+            $total_gral['ptu'] += $empleado->nomina_fiscal_aguinaldo;
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y2 = $pdf->GetY();
+            }
+          }
+
+          $y = $pdf->GetY();
+
+          // Deducciones
+          $deducciones = $empleado->nomina->deducciones;
+          $pdf->SetFont('Helvetica','', 9);
+
+          $pdf->SetY($y2);
+
+          if ($empleado->nomina_fiscal_aguinaldo_isr > 0)
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
+            $total_dep['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
+            $total_gral['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y = $pdf->GetY();
+            }
+          }
+
+          if ($y < $pdf->GetY())
+          {
+            $y = $pdf->GetY();
+          }
+
+          // Total percepciones y deducciones
+          $pdf->SetXY(6, $y + 2);
+          $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+          $total_dep['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
+          $total_gral['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
+          $total_dep['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
+          $total_gral['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
+          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+              $pdf->AddPage();
+
+          $pdf->SetFont('Helvetica','B', 9);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $total_dep['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
+          $total_gral['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
+          $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+              $pdf->AddPage();
+
+          $pdf->SetFont('Helvetica', '', 9);
+          $pdf->SetXY(120, $pdf->GetY()+3);
+          $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+        }
+      }
+
+      //****** Total departamento ******
+      if($dep_tiene_empleados == false)
+      {
+        if($pdf->GetY()+10 >= $pdf->limiteY)
+          $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 10);
+        $pdf->SetXY(6, $pdf->GetY()+2);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(200));
+        $pdf->Row(array("Total Departamento {$departamento->nombre}"), false, 0, null, 1, 1);
+        $pdf->Row(array("____________________________________________________________________________________________________"), false, 0, null, 1, 1);
+
+        $pdf->SetFont('Helvetica','', 9);
+        $y2 = $pdf->GetY();
+
+        // Aguinaldo
+        if ($total_dep['aguinaldo'] > 0)
+        {
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y2 = $pdf->GetY();
+          }
+        }
+
+        $y = $pdf->GetY();
+
+        // Deducciones
+        $deducciones = $empleado->nomina->deducciones;
+        $pdf->SetFont('Helvetica','', 9);
+
+        $pdf->SetY($y2);
+        if ($total_dep['isr'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y = $pdf->GetY();
+          }
+        }
+
+        if ($y < $pdf->GetY())
+        {
+          $y = $pdf->GetY();
+        }
+
+        // Total percepciones y deducciones
+        $pdf->SetXY(6, $y + 2);
+        $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+        $pdf->SetFont('Helvetica','B', 9);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+      }
+
+      $pdf->SetFont('Helvetica','', 10);
+    }
+
+    //********* Total general ***************
+    if($pdf->GetY()+10 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('Helvetica','B', 10);
+    $pdf->SetXY(6, $pdf->GetY()+2);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(200));
+    $pdf->Row(array("Total General"), false, 0, null, 1, 1);
+    $pdf->Row(array("____________________________________________________________________________________________________"), false, 0, null, 1, 1);
+
+    $pdf->SetFont('Helvetica','', 9);
+    $y2 = $pdf->GetY();
+    // Sueldo
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(15, 62, 25));
+    $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+    if($pdf->GetY() >= $pdf->limiteY)
+    {
+      $pdf->AddPage();
+      $y2 = $pdf->GetY();
+    }
+
+    // PTU
+    if ($total_gral['ptu'] > 0)
+    {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25));
+      $pdf->Row(array('', 'PTU', String::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $y2 = $pdf->GetY();
+      }
+    }
+
+    $y = $pdf->GetY();
+
+    // Deducciones
+    // $deducciones = $empleado->nomina->deducciones;
+    $pdf->SetFont('Helvetica','', 9);
+
+    $pdf->SetY($y2);
+    if ($total_gral['isr'] > 0)
+    {
+      $pdf->SetXY(108, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25));
+      $pdf->Row(array('', 'ISR', String::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $y = $pdf->GetY();
+      }
+    }
+
+    if ($y < $pdf->GetY())
+    {
+      $y = $pdf->GetY();
+    }
+
+    // Total percepciones y deducciones
+    $pdf->SetXY(6, $y + 2);
+    $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
+    $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+    $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+    if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+    $pdf->SetFont('Helvetica','B', 9);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'R'));
+    $pdf->SetWidths(array(15, 62, 25));
+    $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+
+    $pdf->Output('PTU.pdf', 'I');
+  }
+
+  public function pdfRptNominaAguinaldo($semana, $empresaId, $anio)
+  {
+    // var_dump($_POST);
+    // exit();
+    // $empleados = $this->pdfRptDataNominaFiscal($_POST, $empresaId);
+    $this->load->model('usuarios_model');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_departamentos_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+    $pdf->show_head = true;
+    $pdf->logo = $empresa['info']->logo;
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "AGUINALDO";
+    $pdf->titulo3 = "Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}";
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $columnas = array('n' => array(), 'w' => array(6, 200, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas['n'][] = 'No';
+    $columnas['n'][] = 'NOMBRE';
+    $columnas['n'][] = 'AGUINALDO';
+    $columnas['n'][] = 'ISR';
+    $columnas['n'][] = 'TOTAL A PAGAR';
+
+    $pdf->SetFont('Helvetica','B', 8);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($columnas['a']);
+    $pdf->SetWidths($columnas['w']);
+    $pdf->Row($columnas['n'], false, false, null, 2, 1);
+
+    $ttotal_aseg_no_trs = $sueldo_semanal_real = $otras_percepciones = $domingo = $total_prestamos = $total_infonavit = $descuento_playeras = $descuento_otros = $ttotal_pagar = $ttotal_nomina = $total_no_fiscal = 0;
+    $aguinaldo = 0;
+    $y = $pdf->GetY();
+
+    $_GET['did_empresa'] = $empresaId;
+    $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    $aguinaldoTtotal = 0;
+    $isrTtotal       = 0;
+    $tTotal         = 0;
+
+    $numero_empleado = 0;
+    $aguinaldoTotal = 0;
+    $isrTotal = 0;
+    foreach ($departamentos as $keyd => $departamento)
+    {
+      $aguinaldo = 0;
+
+      if($pdf->GetY()+8 >= $pdf->limiteY){
+        $pdf->AddPage();
+        $pdf->SetFont('Helvetica','B', 8);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row($columnas['n'], false, false, null, 2, 1);
+      }
+
+      $pdf->SetFont('Helvetica','B', 10);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Cell(130, 6, $departamento->nombre, 0, 0, 'L', 0);
+
+      $pdf->SetXY(6, $pdf->GetY()+6);
+      foreach ($_POST['empleado_id'] as $key => $empleado)
+      {
+        if($departamento->id_departamento == $_POST['departamento_id'][$key])
+        {
+          $numero_empleado++;
+          $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+
+          $pdf->SetFont('Helvetica','', 8);
+          if($pdf->GetY()+8 >= $pdf->limiteY){
+            $pdf->AddPage();
+            $pdf->SetFont('Helvetica','B', 8);
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->Row($columnas['n'], false, false, null, 2, 1);
+          }
+
+          $pdf->SetFont('Helvetica','', 8);
+
+          $total_pagar = $_POST['aguinaldo'][$key];
+
+          $pdf->SetXY(6, $pdf->GetY());
+
+          $dataarr = array();
+          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+          $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '$', false);
+          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
+          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+
+          $pdf->Row($dataarr, false, true, null, 2, 1);
+          $aguinaldoTotal += $_POST['aguinaldo'][$key];
+          $isrTotal       += $_POST['isr'][$key];
+          $ttotal_pagar   += $_POST['ttotal_nomina'][$key];
+        }
+      }
+
+      if($pdf->GetY()+10 >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $pdf->SetFont('Helvetica','B', 8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $datatto = array();
+      $datatto[] = '';
+      $datatto[] = 'TOTAL';
+      $datatto[] = String::formatoNumero($aguinaldoTotal, 2, '$', false);
+      $datatto[] = String::formatoNumero($isrTotal, 2, '$', false);
+      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '$', false);
+      $pdf->Row($datatto, false, true, null, 2, 1);
+
+      $aguinaldoTtotal += $aguinaldoTotal;
+      $isrTtotal       += $isrTotal;
+
+      $aguinaldoTotal = 0;
+      $isrTotal       = 0;
+      $ttotal_pagar   = 0;
+    }
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetFont('Helvetica','B', 8);
+    if($pdf->GetY()+8 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $datatto = array();
+    $datatto[] = '';
+    $datatto[] = 'TOTAL';
+    $datatto[] = String::formatoNumero($aguinaldoTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($aguinaldoTtotal - $isrTtotal, 2, '$', false);
+    $pdf->Row($datatto, false, true, null, 2, 1);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->SetFont('Helvetica','B', 8);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetWidths(array(50, 50, 50));
+
+    // if ($empresa['info']->rfc === 'ESJ97052763A')
+    // {
+    //   $pdf->Row(array(
+    //     'NOMINA FISCAL: '.String::formatoNumero($aguinaldoTotal, 2, '$', false),
+    //     'TRANSFERIDO: '.String::formatoNumero($aguinaldoTotal, 2, '$', false),
+    //     'CHEQUE FISCAL: '.String::formatoNumero(($aguinaldoTotal), 2, '$', false),
+    //     ), false, true, null, 2, 1);
+    // }
+
+    $pdf->Output('AGUINALDOS.pdf', 'I');
+  }
+
+  public function xlsRptNominaAguinaldo($semana, $empresaId, $anio)
+  {
+    $this->load->model('usuarios_model');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_departamentos_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $empresa['info']->dia_inicia_semana);
+    $finiquitos = $this->db->query("SELECT * FROM usuarios AS u INNER JOIN finiquito AS f ON u.id = f.id_empleado
+      WHERE f.fecha_salida BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'")->result();
+
+    $html = '<table>';
+    $html .= $this->rowXls( array($empresa['info']->nombre_fiscal) );
+    $html .= $this->rowXls( array("AGUINALDO") );
+    $html .= $this->rowXls( array("Periodo Semanal No. {$semana['semana']} del Año {$semana['anio']}") );
+    $html .= $this->rowXls( array() );
+
+    $columnas = array('n' => array(), 'w' => array(5, 64, 20, 20), 'a' => array('L', 'L', 'R', 'R'));
+    $columnas['n'][] = 'No';
+    $columnas['n'][] = 'NOMBRE';
+    $columnas['n'][] = 'AUGINALDO';
+    $columnas['n'][] = 'ISR';
+    $columnas['n'][] = 'TOTAL A PAGAR';
+
+    $aguinaldo = 0;
+
+    $aguinaldoTtotal = 0;
+    $isrTtotal       = 0;
+    $tTotal         = 0;
+
+    // $departamentos = $this->usuarios_model->departamentos();
+    $_GET['did_empresa'] = $empresaId;
+    $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
+
+    $numero_empleado = 0;
+    $html .= $this->rowXls($columnas['n']);
+    $html .= $this->rowXls(array(''));
+    $aguinaldoTotal = 0;
+    $ttotal_pagar = 0;
+
+    $aguinaldoTotal = 0;
+    $isrTotal = 0;
+    foreach ($departamentos as $keyd => $departamento)
+    {
+      $aguinaldo = 0;
+
+      // $sueldo_semanal_real1 = $otras_percepciones1 = $domingo1 = $total_prestamos1 = $total_infonavit1 = $descuento_playeras1 = $descuento_otros1 = $ttotal_pagar1 = $ttotal_nomina1 = $total_no_fiscal1 = 0;
+
+      $html .= '<tr><td style="font-size:14px;">'.$departamento->nombre.'</td></tr>';
+
+      // $pdf->SetXY(6, $pdf->GetY()+6);
+      foreach ($_POST['empleado_id'] as $key => $empleado)
+      {
+        if($departamento->id_departamento == $_POST['departamento_id'][$key])
+        {
+          $numero_empleado++;
+          $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
+          $total_pagar = $_POST['aguinaldo'][$key];
+
+          $dataarr = array();
+          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
+          $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);
+          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
+
+          $html .= $this->rowXls($dataarr);
+
+          $aguinaldoTotal += $_POST['aguinaldo'][$key];
+          $isrTotal       += $_POST['isr'][$key];
+          $ttotal_pagar   += $_POST['ttotal_nomina'][$key];
+        }
+      }
+
+      $datatto = array();
+      $datatto[] = '';
+      $datatto[] = 'TOTAL';
+      $datatto[] = String::formatoNumero($aguinaldoTotal, 2, '', false);
+      $datatto[] = String::formatoNumero($isrTotal, 2, '', false);
+      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '', false);
+      $html .= $this->rowXls($datatto);
+      $html .= $this->rowXls(array(''));
+
+      $aguinaldoTtotal += $aguinaldoTotal;
+      $isrTtotal       += $isrTotal;
+
+      $aguinaldoTotal = 0;
+      $isrTotal       = 0;
+      $ttotal_pagar   = 0;
+    }
+
+    $datatto = array();
+    $datatto[] = '';
+    $datatto[] = 'TOTAL';
+    $datatto[] = String::formatoNumero($aguinaldoTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = String::formatoNumero($aguinaldoTtotal - $isrTtotal, 2, '$', false);
 
     $html .= $this->rowXls($datatto);
     $html .= $this->rowXls(array(''));
@@ -7363,10 +8676,55 @@ class nomina_fiscal_model extends CI_Model {
     $html .= '</table>';
 
     header("Content-type: application/vnd.ms-excel; name='excel'");
-    header("Content-Disposition: filename=nomina.xls");
+    header("Content-Disposition: filename=Aguinaldos.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
     echo $html;
+  }
+
+  public function descargarTxtBancoAguinaldo($semana, $empresaId, $anio=null)
+  {
+    $anio = $anio==null?date("Y"):$anio;
+    $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
+    if ($empresaId !== '')
+      $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $dia = '4';
+
+    $configuraciones = $this->configuraciones();
+    $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
+    $empleados = $this->nomina($configuraciones, $filtros);
+    $nombre = "PAGO-AGUINALDO-{$semana['anio']}.txt";
+
+    $content = array();
+    $contador = 1;
+    foreach ($empleados as $key => $empleado)
+    {
+      if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
+        $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
+                    $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
+                    $this->formatoBanco('99', ' ', 2, 'I') .
+                    $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
+                    $this->formatoBanco($empleado->nomina_fiscal_aguinaldo_total_neto, '0', 15, 'I', true) .
+                    $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D') .
+                    $this->formatoBanco('001', ' ', 3, 'D');
+        $contador++;
+      }
+    }
+
+    $content[] = '';
+    $content = implode("\r\n", $content);
+
+    $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
+    fwrite($fp,$content);
+    fclose($fp);
+
+    header('Content-Type: text/plain');
+    header("Content-disposition: attachment; filename={$nombre}");
+    readfile(APPPATH."media/temp/{$nombre}");
+    unlink(APPPATH."media/temp/{$nombre}");
   }
 }
 /* End of file nomina_fiscal_model.php */
