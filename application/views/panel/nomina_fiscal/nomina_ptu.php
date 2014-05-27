@@ -68,7 +68,7 @@
                     </div>
                     <form action="<?php echo base_url('panel/nomina_fiscal/ptu/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
                       <div class="span8">
-                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo $empleados[0]->ptu_generado === 'false' ? $ptu : $empleados[0]->utilidad_empresa_ptu ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
+                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo count($empleados) > 0 ? ($empleados[0]->ptu_generado === 'false' ? $ptu : $empleados[0]->utilidad_empresa_ptu) : '' ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
                         <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
                       </div>
                     </form>
@@ -232,7 +232,7 @@
                             $ptuEmpleado = $e->nomina_fiscal_ptu;
                           }
 
-                          if ($nominas_generadas && $e->ptu_generado !== 'false')
+                          if ($nominas_generadas && $e->ptu_generado == 'false')
                           {
                             $bgColor = 'background-color: #EEBCBC;';
                           }

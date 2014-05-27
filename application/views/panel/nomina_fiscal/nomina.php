@@ -239,7 +239,7 @@
                         $activaAguinaldo = 0;
                         if ($e->nomina_fiscal_aguinaldo !== '0' && $e->esta_generada !== 'false')
                         {
-                          $activaAguinaldo = 1;
+                          $activaAguinaldo = 0;
                         }
 
                         if ($e->esta_generada === 'false')

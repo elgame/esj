@@ -68,7 +68,7 @@
                     </div>
                     <form action="<?php echo base_url('panel/nomina_fiscal/ptu/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" style="display: none;">
                       <div class="span8">
-                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo $empleados[0]->ptu_generado === 'false' ? '' : $empleados[0]->utilidad_empresa_ptu ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
+                        PTU <input type="text" name="ptu" id="ptu" value="<?php echo count($empleados) > 0 ? ($empleados[0]->ptu_generado === 'false' ? '' : $empleados[0]->utilidad_empresa_ptu) : '' ?>" class="input-small vpositive" <?php echo $nominas_generadas ? 'readonly' : ''?> style="margin-bottom: 0;">
                         <button type="submit" class="btn btn-success"><i class="icon-refresh"></i></button>
                       </div>
                     </form>
@@ -230,7 +230,7 @@
                             $ptuEmpleado = $e->nomina_fiscal_ptu;
                           }
 
-                          if ($nominas_generadas && $e->aguinaldo_generado !== 'false')
+                          if ($nominas_generadas && $e->aguinaldo_generado == 'false')
                           {
                             $bgColor = 'background-color: #EEBCBC;';
                           }
@@ -303,7 +303,7 @@
                           <?php echo $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado ?>
                         </td>
                         <td style="display:; <?php echo $bgColor ?>">
-                          <?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>
+                          <?php echo $e->esta_asegurado=='f'?(365 - $e->dias_faltados_anio)-1:(365 - $e->dias_faltados_anio) ?>
                           <input type="hidden" name="dias_trabajados[]" value="<?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>" class="span12 dias-trabajados">
                         </td>
 
@@ -382,7 +382,7 @@
                             $ttotal_nomina = $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
 
                             $ttotal_nomina_cheques = 0;
-                            if($e->cuenta_banco == ''){
+                            if($e->cuenta_banco !== ''){
                               $ttotal_nomina_cheques = $ttotal_nomina;
                               $ttotal_nomina = 0;
                             }
