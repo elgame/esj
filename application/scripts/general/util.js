@@ -163,7 +163,7 @@ var util = {
 			final_string = string_hundreds+string_tens+string_units;
 			return final_string ;
 		},
-		covertirNumLetras: function (number){
+		covertirNumLetras: function (number, tipoMoneda){
 			number1=number;
 			cent = number1.split('.');
 			centavos = cent[1];
@@ -230,13 +230,65 @@ var util = {
 
 
 			/* Asigna el tipo de moneda, para 1 = PESO, para distinto de 1 = PESOS*/
-			if (number == 1){
-				moneda = " PESO ";
-			}else{
-				moneda = " PESOS ";
-			}
+			tipoMoneda = tipoMoneda?tipoMoneda:'M.N.';
+      tipoMonedaCodigo = this.obtenerTipoMoneda(tipoMoneda);
+      moneda = number == 1 ? tipoMonedaCodigo[0] : tipoMonedaCodigo[1];
+
 			/* Regresa el número en cadena entre paréntesis y con tipo de moneda y la fase M.N.*/
-			return $.trim(cad)+" "+$.trim(moneda)+" "+$.trim(centavos)+" M.N.";
-		}
+			return $.trim(cad)+" "+$.trim(moneda)+" "+$.trim(centavos)+" "+tipoMoneda;
+		},
+    obtenerTipoMoneda: function (codigo) {
+      // Almacena todas los codigos de monedas que son de dolar.
+      var codigosTiposDolares = {
+        'AUD': 1, 'BBD': 1, 'BMD': 1, 'BND': 1, 'BSD': 1, 'BZD': 1, 'CAD': 1, 'FJD': 1, 'GYD': 1, 'HKD': 1, 'JMD': 1, 'KYD': 1, 'LRD': 1, 'NAD': 1, 'NZD': 1, 'SBD': 1, 'SGD': 1, 'SRD': 1, 'TTD': 1, 'TWD': 1, 'USD': 1, 'ZWL': 1
+      },
+
+      codigoTipoFrancos = { 'BIF': 1, 'CDF': 1, 'CHF': 1, 'DJF': 1, 'GNF': 1, 'RWF': 1 },
+
+      codigoTipoPesos = { 'ARS': 1, 'CLP': 1, 'COP': 1, 'CUP': 1, 'DOP': 1, 'M.N.': 1, 'PHP': 1 },
+
+      codigoTipoLibras = { 'EGP': 1, 'FKP': 1, 'GBP': 1, 'LBP': 1, 'SHP': 1, 'SYP': 1 },
+
+      codigoTipoChelines = { 'KES': 1, 'SOS': 1, 'TZS': 1, 'UGX': 1 },
+
+      codigoTipoRupias = { 'IDR': 1, 'INR': 1, 'LKR': 1, 'MUR': 1, 'NPR': 1, 'PKR': 1, 'SCR': 1 },
+
+      codigoTipoEuro = { 'EUR': 1 };
+
+      // Dolares
+      if (codigosTiposDolares.hasOwnProperty(codigo)) {
+        return ['DOLAR', 'DOLARES'];
+      }
+
+      // Francos
+      if (codigoTipoFrancos.hasOwnProperty(codigo)) {
+        return ['FRANCO', 'FRANCOS'];
+      }
+
+      // Pesos
+      if (codigoTipoPesos.hasOwnProperty(codigo)) {
+        return ['PESO', 'PESOS'];
+      }
+
+      // Libras
+      if (codigoTipoLibras.hasOwnProperty(codigo)) {
+        return ['LIBRA', 'LIBRAS'];
+      }
+
+      // Chelines
+      if (codigoTipoChelines.hasOwnProperty(codigo)) {
+        return ['CHELIN', 'CHELINES'];
+      }
+
+      // Rupias
+      if (codigoTipoRupias.hasOwnProperty(codigo)) {
+        return ['RUPIA', 'RUPIAS'];
+      }
+
+      // Euro
+      if (codigoTipoEuro.hasOwnProperty(codigo)) {
+        return ['EURO', 'EUROS'];
+      }
+    }
 	}
 };

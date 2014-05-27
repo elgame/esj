@@ -653,9 +653,10 @@ class Bascula_model extends CI_Model {
     {
 
       $bascula_pagos = array(
-        'tipo_pago' => $datos['fmetodo_pago'],
-        'monto'     => $datos['dmonto'],
-        'concepto'  => $datos['dconcepto'],
+        'tipo_pago'  => $datos['fmetodo_pago'],
+        'monto'      => $datos['dmonto'],
+        'concepto'   => $datos['dconcepto'],
+        'id_cuenta'  => $datos['dcuenta'],
       );
 
       $this->db->insert('bascula_pagos', $bascula_pagos);

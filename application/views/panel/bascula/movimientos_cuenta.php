@@ -158,7 +158,7 @@
                           <th>TOTAL</th>
                           <th>TIPO PAGO</th>
                           <th>CONCEPTO</th>
-                          <th style="width:15px;"></th>
+                          <th style="width:15px;"><input type="checkbox" id="checkPesadas2"></th>
                         </tr>
                       </thead>
                       <tbody>

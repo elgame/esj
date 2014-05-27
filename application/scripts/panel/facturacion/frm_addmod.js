@@ -445,7 +445,18 @@ $(function(){
       $('.cporte').css({display: 'none'});
     }
   });
+
+  EventOnChangeMoneda();
 });
+
+var EventOnChangeMoneda = function () {
+  $('#moneda').on('change', function(event) {
+    if($(this).val() !== 'M.N.')
+      $("#tipoCambio").show().focus();
+    else
+      $("#tipoCambio").val().hide();
+  });
+};
 
 var EventKeyPressFolioPallet = function () {
   $('#folioPallet').on('keypress', function(event) {
@@ -860,7 +871,7 @@ function calculaTotal () {
   $('#totfac-format').html(util.darFormatoNum(total_factura));
   $('#total_totfac').val(total_factura);
 
-  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()));
+  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()) );
 }
 
 function loadSerieFolio (ide, forceLoad) {
