@@ -213,7 +213,9 @@
 
                         $subsidioEmpleado = $e->nomina->percepciones['subsidio']['total'];
                         $isrEmpleado = $e->nomina->deducciones['isr']['total'];
-                        $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
+                        // $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
+                        $ptuEmpleado = 0;
+
                         // Si ya hay nominas generadas y la de este empleado tambien se genero.
                         if ($nominas_generadas && $e->esta_generada !== 'false')
                         {
@@ -222,7 +224,7 @@
                           $generarNomina = '0';
                           $subsidioEmpleado = $e->nomina_fiscal_subsidio;
                           $isrEmpleado = $e->nomina_fiscal_isr;
-                          $ptuEmpleado = $e->nomina_fiscal_ptu;
+                          // $ptuEmpleado = $e->nomina_fiscal_ptu;
                         }
 
                         if ($nominas_generadas && $e->esta_generada === 'false')
@@ -315,8 +317,8 @@
                         </td>
                         <td style="width: 60px; <?php echo $bgColor?>"><input type="text" name="horas_extras[]" class="span12 vpositive horas-extras" value="<?php echo $e->horas_extras_dinero ?>" <?php echo $e->esta_asegurado=='f'?'readonly':$readonly ?>></td>
                         <td id="td-aguinaldo" style="display: none; <?php echo $bgColor ?>">
-                          <span class="aguinaldo-span"><?php echo String::formatoNumero($e->nomina->aguinaldo) ?></span>
-                          <input type="hidden" value="<?php echo $e->esta_asegurado=='f'?0:$e->nomina->aguinaldo ?>" class="span12 aguinaldo">
+                          <span class="aguinaldo-span"><?php echo String::formatoNumero(0) ?></span>
+                          <input type="hidden" value="<?php echo $e->esta_asegurado=='f'?0:0 ?>" class="span12 aguinaldo">
                         </td>
                         <td id="td-subsidio" style="<?php echo $bgColor ?>">
                           <span class="subsidio-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$subsidioEmpleado) ?></span>
@@ -424,7 +426,7 @@
                       $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
                       $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
                       $totalHorasExtras        += $e->horas_extras_dinero;
-                      $totalAguinaldos         += $e->esta_asegurado=='f'?0:$e->nomina->aguinaldo;
+                      $totalAguinaldos         += $e->esta_asegurado=='f'?0:0;
                       $totalSubsidios          += $e->esta_asegurado=='f'?0:$subsidioEmpleado;
                       $totalPtu                += $e->esta_asegurado=='f'?0:$ptuEmpleado;
                       $totalPercepciones       += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;

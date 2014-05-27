@@ -262,7 +262,7 @@
                           $totalPercepcionesEmpleado += $ptuEmpleado;
                           $totalDeduccionesEmpleado += $isrEmpleado;
 
-                          $utilidadEmpresa = $e->utilidad_empresa;
+                          $utilidadEmpresa = $e->utilidad_empresa_ptu;
 
                           //vacaciones agregadas de asistencia
                           if($e->dias_vacaciones_fijo > 0)

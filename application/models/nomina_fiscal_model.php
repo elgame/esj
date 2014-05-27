@@ -136,7 +136,7 @@ class nomina_fiscal_model extends CI_Model {
 
               COALESCE(nptu.uuid, 'false') AS ptu_generado,
               COALESCE(nptu.ptu, 0) AS nomina_fiscal_ptu,
-              COALESCE(nptu.utilidad_empresa, 0) AS utilidad_empresa_ptu,
+              COALESCE(nptu.utilidad_empresa, {$utilidadEmpresa}) AS utilidad_empresa_ptu,
               COALESCE(nptu.isr, 0) as nomina_fiscal_ptu_isr,
               COALESCE(nptu.total_percepcion, 0) as nomina_fiscal_ptu_total_percepciones,
               COALESCE(nptu.total_deduccion, 0) as nomina_fiscal_ptu_total_deducciones,
@@ -159,6 +159,10 @@ class nomina_fiscal_model extends CI_Model {
        {$ordenar}
     ");
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
+
+    // echo "<pre>";
+    //   var_dump($empleados);
+    // echo "</pre>";exit;
 
     $query->free_result();
     // Query para obtener las faltas o incapacidades de la semana.
