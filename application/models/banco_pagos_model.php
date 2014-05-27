@@ -244,14 +244,18 @@ class banco_pagos_model extends CI_Model {
 
   public function actualizarPagosBascula($datos)
   {
-    foreach ($datos['id_pago'] as $key => $id_pago)
+    foreach ($datos['cuenta_proveedor'] as $keyp => $value)
     {
-      $cuenta = explode('-', $datos['cuenta_proveedor'][$key]);
-      $this->db->update('banco_pagos_bascula', array(
-        'id_cuenta'        => $cuenta[0],
-        'referencia'       => $datos['ref_numerica'][$key],
-        'ref_alfanumerica' => $datos['ref_alfanumerica'][$key],
-        ), "id_pago = {$id_pago}");
+      $cuenta = explode('-', $datos['cuenta_proveedor'][$keyp][0]);
+      foreach ($datos['id_pago'][$keyp] as $key => $id_pago)
+      {
+        $this->db->update('banco_pagos_bascula', array(
+          'id_cuenta'        => $cuenta[0],
+          'referencia'       => $datos['ref_numerica'][$keyp][0],
+          'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
+          'monto'            => $datos['monto'][$keyp][$key],
+          ), "id_pago = {$id_pago}");
+      }
     }
   }
 
@@ -266,12 +270,17 @@ class banco_pagos_model extends CI_Model {
     $total_pagar = $num_cargos = 0;
     foreach ($pagos as $key => $pago)
     {
+      $total_proveedor = 0;
       foreach ($pago->pagos as $keyp => $value)
       {
         $total_pagar += $value->monto;
+        $total_proveedor += $value->monto;
+      }
+      if ($total_proveedor > 0)
+      {
         $num_cargos++;
         $pagos_archivo[] = array(
-          'monto' => $value->monto,
+          'monto' => $total_proveedor,
           'proveedor_sucursal' => $value->sucursal,
           'proveedor_cuenta' => $value->cuenta,
           'ref_alfanumerica' => $value->ref_alfanumerica,

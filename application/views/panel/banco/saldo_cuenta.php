@@ -142,13 +142,13 @@
             		<td><?php
             			if(count($status)>0)
             			{
-            // 				if($movimiento->status == 't')
-		          //   			echo $this->usuarios_model->getLinkPrivSm('banco/cancelar_movimiento/', array(
-    								// 	'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
-    								// 	'btn_type' => 'btn-danger',
-    								// 	'text_link'=> 'hidden',
-    								// 	'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
-    								// );
+            				if($movimiento->status == 't')
+		            			echo $this->usuarios_model->getLinkPrivSm('banco/cancelar_movimiento/', array(
+    									'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+    									'btn_type' => 'btn-danger',
+    									'text_link'=> 'hidden',
+    									'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la operación?<br>Nota: Se eliminara tambien en cobranza o cuentas por pagar si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
+    								);
     							echo $this->usuarios_model->getLinkPrivSm('banco/eliminar_movimiento/', array(
     								'params'   => 'id_movimiento='.$movimiento->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
     								'btn_type' => 'btn-danger',

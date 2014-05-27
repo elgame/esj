@@ -5,21 +5,21 @@ $(function(){
   $(".change_spago").on('click', function(event) {
     var $this = $(this);
     if($this.is(':checked')){
-      msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
-        $.post(base_url + 'panel/banco_pagos/set_bascula/',
-          {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-          function(data, textStatus, xhr) {
-            noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
-      }, function(){ $this.removeAttr('checked') });
+      $.post(base_url + 'panel/banco_pagos/set_bascula/',
+        {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+      // msb.confirm("Se agregara la compra al listado de pagos, esta seguro?", "", $this, function(){
+      // }, function(){ $this.removeAttr('checked'); });
     }else{
-      msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
-        $.post(base_url + 'panel/banco_pagos/set_bascula/',
-          {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-          function(data, textStatus, xhr) {
-            noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
-        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
-      }, function(){ $this.attr('checked', 'true') });
+      $.post(base_url + 'panel/banco_pagos/set_bascula/',
+        {id_bascula: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+        function(data, textStatus, xhr) {
+          noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+      }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      // msb.confirm("Se quitara la compra al listado de pagos, esta seguro?", "", $this, function(){
+      // }, function(){ $this.attr('checked', 'true'); });
     }
   });
 
@@ -65,6 +65,23 @@ $(function(){
       });
 
     });
+
+    $('#checkPesadas2').on('change', function(event) {
+      var check = '';
+
+      if ($(this).is(':checked')) check = "checked";
+      else check = "";
+
+      $('input.change_spago').each(function(index) {
+        // $(this).prop('checked', check);
+        if( !$(this).is(':checked') && check == "checked")
+          $(this).trigger('click');
+        else if($(this).is(':checked') && check === "")
+          $(this).trigger('click');
+      });
+
+    });
+
   });
 
   $('input#pesadas').on('change', function(event) {

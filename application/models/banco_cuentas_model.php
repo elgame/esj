@@ -846,7 +846,7 @@ class banco_cuentas_model extends banco_model {
 		$this->load->model('bascula_model');
 		if(count($data_bascula) > 0){
 			foreach ($data_bascula as $key => $value) {
-				$this->bascula_model->cancelar_pago($value->id_bascula_pago, true);
+				$this->bascula_model->cancelar_pago($value->id_bascula_pago, !$cancelar);
 			}
 		}
 

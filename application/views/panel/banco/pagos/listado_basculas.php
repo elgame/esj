@@ -103,7 +103,7 @@
                 <tbody>
               <?php
               $total_pagar = 0;
-              foreach($pagos as $pago){
+              foreach($pagos as $keyp => $pago){
                 $total_pagar_proveedor = 0;
                 $html = '';
 
@@ -112,35 +112,33 @@
                   $total_pagar += $value->monto;
                   $total_pagar_proveedor += $value->monto;
                   $html .= '<tr>
-                    <td>'.$value->fecha.'</td>
-                    <td>'.$value->folio.'
-                      <input type="hidden" name="id_pago[]" value="'.$value->id_pago.'">
-                    </td>
-                    <td>'.String::formatoNumero($value->monto, 2, '$', false).'</td>
-                    <td>
-                      <select name="cuenta_proveedor[]" class="tipo_cuenta" required>
-                        <option value=""></option>';
-                      foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
-                      {
-                        $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
-                        $html .= '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
-                      }
-                    $html .= '</select>
-                    </td>
-                    <td><input type="text" name="ref_alfanumerica[]" value="'.$value->ref_alfanumerica.'" class="ref_alfa" required></td>
-                    <td><input type="text" name="ref_numerica[]" value="'.$value->referencia.'" class="input-small ref_numerica" maxlength="7" required></td>
-                    <td>
-                      '.$this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago_bascula/', array(
-                          'params'   => "id_pago={$value->id_pago}",
-                          'btn_type' => 'btn-danger pull-right',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Quitar el pago?', 'Facturas', this); return false;") )
-                      ).'
-                    </td>
-                  </tr>';
+                            <td>'.$value->fecha.'</td>
+                            <td>'.$value->folio.'
+                              <input type="hidden" name="id_pago['.$keyp.'][]" value="'.$value->id_pago.'">
+                            </td>
+                            <td colspan="4"><input type="text" name="monto['.$keyp.'][]" value="'.$value->monto.'" class="monto vpositive" required readonly></td>
+                            <td>
+                              '.$this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago/', array(
+                                  'params'   => "id_pago={$value->id_pago}",
+                                  'btn_type' => 'btn-danger pull-right',
+                                  'attrs' => array('onclick' => "msb.confirm('Estas seguro de Quitar el pago?', 'Facturas', this); return false;") )
+                              ).'
+                            </td>
+                          </tr>';
                 }
                 echo '<tr>
-                    <td colspan="5">'.$pago->nombre_fiscal.'</td>
-                    <td colspan="2">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                    <td colspan="3">'.$pago->nombre_fiscal.'</td>
+                    <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta" required>
+                                <option value=""></option>';
+                          foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
+                          {
+                            $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
+                            echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
+                          }
+                              echo '</select></td>
+                    <td><input type="text" name="ref_alfanumerica['.$keyp.'][]" value="'.$value->ref_alfanumerica.'" class="ref_alfa" required></td>
+                    <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="input-small ref_numerica" maxlength="7" required></td>
+                    <td>'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
                   </tr>'.$html;
               } ?>
                   <tr style="background-color:#ccc;font-weight: bold;">

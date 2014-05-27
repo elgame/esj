@@ -197,8 +197,11 @@ class cfdi{
       $datos['comprobante']['descuento'] = $data['descuento'];
     }
 
-    // $datos['comprobante']['TipoCambio']           = $data['TipoCambio'];
-    // $datos['comprobante']['Moneda']               = $data['Moneda'];
+    if (isset($data['Moneda']) && $data['Moneda'] !== '' && $data['Moneda'] !== 'M.N.')
+    {
+      $datos['comprobante']['TipoCambio']           = $data['TipoCambio'];
+      $datos['comprobante']['Moneda']               = $data['Moneda'];
+    }
     $datos['comprobante']['total']                = (float)$this->numero($data['total']);
     $datos['comprobante']['metodoDePago']         = $data['metodoDePago'];
     $datos['comprobante']['LugarExpedición']      = $this->municipio.', '.$this->estado;
@@ -916,6 +919,11 @@ class cfdi{
     {
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬descuento="'.(float)$data['comprobante']['descuento'].'" ';
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬motivoDescuento="Deducciones nómina" ';
+    }
+
+    if (isset($data['comprobante']['Moneda']) && $data['comprobante']['Moneda'] !== '' && $data['comprobante']['Moneda'] !== 'M.N.'){
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬TipoCambio="'.$data['comprobante']['TipoCambio'].'" ';
+      $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬Moneda="'.$data['comprobante']['Moneda'].'" ';
     }
 
     $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬total="'.(float)$data['comprobante']['total'].'" ';

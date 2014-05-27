@@ -297,6 +297,8 @@ class facturacion_model extends privilegios_model{
           'id'                => $this->input->post('did_empresa'),
           'table'             => 'empresas',
 
+          'Moneda'            => $this->input->post('moneda'),
+          'TipoCambio'        => $this->input->post('tipoCambio'),
           'version'           => $this->input->post('dversion'),
           'serie'             => $this->input->post('dserie'),
           'folio'             => $this->input->post('dfolio'),
@@ -428,7 +430,14 @@ class facturacion_model extends privilegios_model{
           // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
           'retencion_iva'       => $this->input->post('total_retiva'),
           'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
+          'moneda'              => $_POST['moneda'],
         );
+
+        // Tipo de cambio y moneda
+        if ($datosFactura['moneda'] !== 'M.N.')
+          $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
+        else
+          $datosFactura['tipo_cambio'] = '1';
 
         // Si el tipo de comprobante es "egreso" o una nota de credito.
         if ($_POST['dtipo_comprobante'] === 'egreso')
@@ -704,6 +713,26 @@ class facturacion_model extends privilegios_model{
           $xmlName = explode('/', $archivos['pathXML']);
 
           copy($archivos['pathXML'], $pathDocs.end($xmlName));
+
+          //Si es otra moneda actualiza al tipo de cambio
+          if($datosFactura['moneda'] !== 'M.N.')
+          {
+            $datosFactura1 = array();
+            $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
+            $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
+            $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+            $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+            $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
+
+            foreach ($productosFactura as $key => $value)
+            {
+              $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
+              $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
+              $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+              $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+              $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+            }
+          }
 
           // Elimina el borrador.
           // if (isset($_GET['idb']))
@@ -2750,6 +2779,18 @@ class facturacion_model extends privilegios_model{
             $pdf->Row(array($factura['info']->observaciones), true, 1);
         }
 
+        if (isset($xml[0]['TipoCambio']))
+        {
+          if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+              $pdf->AddPage();
+          $pdf->SetFont('helvetica', 'B', 8);
+          $pdf->SetXY(10, $pdf->GetY() + 5);
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(196));
+          $pdf->Row(array('Tasa de Cambio: '.String::formatoNumero($xml[0]['TipoCambio'], 4) ), false, 0);
+        }else
+          $pdf->SetXY(10, $pdf->GetY() + 5);
+
         ////////////////////
         // Timbrado Datos //
         ////////////////////
@@ -2758,7 +2799,7 @@ class facturacion_model extends privilegios_model{
             $pdf->AddPage();
 
         $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->SetXY(10, $pdf->GetY() + 5);
+        $pdf->SetXY(10, $pdf->GetY());
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(196));
         $pdf->Row(array('Sello Digital del CFDI:'), false, 0);

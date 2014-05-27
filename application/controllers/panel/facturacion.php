@@ -667,6 +667,20 @@ class facturacion extends MY_Controller {
       );
     }
 
+    $requerido_moneda = '';
+    if (isset($_POST['moneda']) && $_POST['moneda'] !== 'M.N.' )
+      $requerido_moneda = 'required|';
+    $rules[] = array(
+        'field'   => 'moneda',
+        'label'   => 'Moneda',
+        'rules'   => $requerido_moneda.'max_length[6]'
+      );
+    $rules[] = array(
+        'field'   => 'tipoCambio',
+        'label'   => 'Tipo de Cambio',
+        'rules'   => $requerido_moneda.'numeric'
+      );
+
     $this->form_validation->set_rules($rules);
   }
 
