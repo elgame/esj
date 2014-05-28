@@ -409,6 +409,8 @@
                                 <?php echo $_POST['codigo'][$key] ?>
                                 <input type="hidden" name="codigo[]" value="<?php echo $_POST['codigo'][$key] ?>" class="span12">
                                 <input type="hidden" name="tipo_cambio[]" value="<?php echo $_POST['tipo_cambio'][$key] ?>" class="span12">
+                                <input type="hidden" name="prodIdOrden[]" value="<?php echo $_POST['prodIdOrden'][$key] ?>" class="span12">
+                                <input type="hidden" name="prodIdNumRow[]" value="<?php echo $_POST['prodIdNumRow'][$key] ?>" class="span12">
                               </td>
                               <td>
                                   <?php echo $concepto ?>
@@ -484,7 +486,7 @@
                                     $pu       = $prod->precio_unitario;
                                   }
 
-                                  $readonly = $prod->status === 'a' ? '' : '';
+                                  $readonly = $prod->status === 'a' ? 'readonly' : '';
                                   $disabled = $prod->status === 'a' ? '' : '';
 
                                   $redBg    = $prod->status === 'r' ? 'background-color: #FFE5E5;' : '';
@@ -522,6 +524,8 @@
                                    <?php echo $prod->codigo?>
                                    <input type="hidden" name="codigo[]" value="<?php echo $prod->codigo || '' ?>" class="span12">
                                    <input type="hidden" name="tipo_cambio[]" value="<?php echo $prod->tipo_cambio ?>" class="span12">
+                                   <input type="hidden" name="prodIdOrden[]" value="<?php echo $prod->id_orden ?>" class="span12">
+                                   <input type="hidden" name="prodIdNumRow[]" value="<?php echo $prod->num_row ?>" class="span12">
                                  </td>
                                  <td style="<?php echo $redBg ?>">
                                      <?php echo $prod->descripcion ?>
@@ -544,7 +548,7 @@
                                     <?php } ?>
                                  </td>
                                  <td style="width: 120px;<?php echo $redBg ?>">
-                                   <select name="unidad[]" id="unidad" class="span12" <?php echo $disabled ?>>
+                                   <select name="unidad[]" id="unidad" class="span12" <?php echo $disabled.' '.$readonly ?>>
                                      <?php foreach ($unidades as $unidad) { ?>
                                        <option value="<?php echo $unidad->id_unidad ?>" <?php echo $prod->id_unidad == $unidad->id_unidad ? 'selected' : ''; ?>><?php echo $unidad->nombre ?></option>
                                      <?php } ?>
@@ -560,7 +564,7 @@
                                      <input type="text" name="valorUnitario[]" value="<?php echo $pu ?>" id="valorUnitario" class="span12 vpositive" <?php echo $readonly ?>>
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">
-                                     <select name="traslado[]" id="traslado" class="span12" <?php echo $disabled ?>>
+                                     <select name="traslado[]" id="traslado" class="span12" <?php echo $disabled.' '.$readonly ?>>
                                        <option value="0" <?php echo $prod->porcentaje_iva === '0' ? 'selected' : '' ?>>0%</option>
                                        <option value="11" <?php echo $prod->porcentaje_iva === '11' ? 'selected' : ''?>>11%</option>
                                        <option value="16" <?php echo $prod->porcentaje_iva === '16' ? 'selected' : ''?>>16%</option>
@@ -569,7 +573,7 @@
                                      <input type="hidden" name="trasladoPorcent[]" value="<?php echo $prod->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
                                  </td>
                                  <td style="width: 66px;">
-                                   <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
+                                   <input type="text" name="iepsPorcent[]" value="<?php echo $prod->porcentaje_ieps ?>" id="iepsPorcent" <?php echo $readonly ?> class="span12">
                                    <input type="hidden" name="iepsTotal[]" value="<?php echo $prod->ieps ?>" id="iepsTotal" class="span12">
                                  </td>
                                  <td style="width: 66px;<?php echo $redBg ?>">

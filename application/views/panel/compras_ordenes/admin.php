@@ -86,10 +86,10 @@
                 </tr>
               </thead>
               <tbody>
-            <?php foreach($ordenes['ordenes'] as $orden) {?>
+            <?php foreach($ordenes['ordenes'] as $orden) { ?>
                 <tr>
                   <td>
-                    <?php if ($orden->status === 'a' && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== '' &&
+                    <?php if (($orden->status === 'a' || $orden->status === 'r') && isset($_GET['did_proveedor']) && $_GET['did_proveedor'] !== '' &&
                               isset($_GET['did_empresa']) && $_GET['did_empresa'] !== ''){ ?>
                       <input type="checkbox" class="addToFactura" value="<?php echo $orden->id_orden ?>" data-total="<?php echo $orden->total; ?>">
                     <?php } ?>
@@ -182,7 +182,7 @@
                         );
                       }
 
-                      if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca')
+                      if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca' && $orden->prod_sincompras == 0)
                       {
                         echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/cancelar/', array(
                           'params'   => 'id='.$orden->id_orden.'&w='.($requisicion ? 'r' : 'c'),

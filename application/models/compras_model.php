@@ -180,9 +180,14 @@ class compras_model extends privilegios_model{
 
     // recorre las ordenes y les cambia el status a aceptadas para que esten
     // disponibles y puedan ser ligadas a otra compra.
+    $this->load->model('compras_ordenes_model');
     foreach ($ordenes as $orden)
     {
-      $this->db->update('compras_ordenes', array('status' => 'a'), array('id_orden' => $orden->id_orden));
+      $orden_prods = $this->compras_ordenes_model->info($orden->id_orden, true, false, $compraId);
+      if(count($orden_prods['info'][0]->productos) > 0){
+        $this->db->update('compras_ordenes', array('status' => 'a'), array('id_orden' => $orden->id_orden));
+        $this->db->update('compras_productos', array('id_compra' => NULL), array('id_orden' => $orden->id_orden, 'id_compra' => $compraId));
+      }
     }
 
     //si es una nota de credito la que se cancela, cambia de estado la compra a pendiente

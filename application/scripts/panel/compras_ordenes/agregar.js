@@ -607,6 +607,11 @@
       var $tr = $(this).parent().parent();
       calculaTotalProducto($tr);
     });
+
+    $("input.chkproducto").on('click', function(event) {
+      var $tr = $(this).parent().parent();
+      calculaTotalProducto($tr);
+    });
   };
 
   // Evento onchange del select iva en la tabla.
@@ -752,6 +757,8 @@
                     producto.codigo +
                     '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
                     '<input type="hidden" name="tipo_cambio[]" value="'+(producto.tipo_cambio || 0)+'" class="span12">' +
+                    '<input type="hidden" name="prodIdOrden[]" value="'+(producto.id_orden || 0)+'" class="span12">' +
+                    '<input type="hidden" name="prodIdNumRow[]" value="'+(producto.num_row || 0)+'" class="span12">' +
                   '</td>' +
                   '<td>' +
                     producto.concepto +
@@ -830,28 +837,52 @@
         total_ivas     = 0,
         total_ieps     = 0,
         total_ret      = 0,
-        total_orden    = 0;
+        total_orden    = 0,
+        chkproducto    = $('.chkproducto');
 
      $('input#importe').each(function(i, e) {
-       total_importes += parseFloat($(this).val());
+        var $tr = $(this).parents("tr");
+        if(chkproducto.length > 0){
+          if($tr.find('.chkproducto').is(':checked')){
+            total_importes += parseFloat($(this).val());
+          }
+        }else
+          total_importes += parseFloat($(this).val());
      });
-
      total_importes = util.trunc2Dec(total_importes);
 
      var total_subtotal = util.trunc2Dec(parseFloat(total_importes));
 
      $('input#trasladoTotal').each(function(i, e) {
-       total_ivas += parseFloat($(this).val());
+        var $tr = $(this).parents("tr");
+        if(chkproducto.length > 0){
+          if($tr.find('.chkproducto').is(':checked')){
+            total_ivas += parseFloat($(this).val());
+          }
+        }else
+          total_ivas += parseFloat($(this).val());
      });
      total_ivas = util.trunc2Dec(total_ivas);
 
      $('input#iepsTotal').each(function(i, e) {
-       total_ieps += parseFloat($(this).val());
+        var $tr = $(this).parents("tr");
+        if(chkproducto.length > 0){
+          if($tr.find('.chkproducto').is(':checked')){
+            total_ieps += parseFloat($(this).val());
+          }
+        }else
+          total_ieps += parseFloat($(this).val());
      });
      total_ieps = util.trunc2Dec(total_ieps);
 
      $('input#retTotal').each(function(i, e) {
-       total_ret += parseFloat($(this).val());
+        var $tr = $(this).parents("tr");
+        if(chkproducto.length > 0){
+          if($tr.find('.chkproducto').is(':checked')){
+            total_ret += parseFloat($(this).val());
+          }
+        }else
+          total_ret += parseFloat($(this).val());
      });
      total_ret = util.trunc2Dec(total_ret);
 

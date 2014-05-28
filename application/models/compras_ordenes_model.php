@@ -66,7 +66,11 @@ class compras_ordenes_model extends CI_Model {
                 co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
                 co.autorizado,
                 (SELECT SUM(faltantes) FROM compras_productos WHERE id_orden = co.id_orden) as faltantes,
-                (SELECT SUM(total) FROM compras_productos WHERE id_orden = co.id_orden) as total
+                (SELECT SUM(total) FROM compras_productos WHERE id_orden = co.id_orden) as total,
+                (
+                  (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden) -
+                  (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden AND id_compra IS NULL)
+                ) as prod_sincompras
         FROM compras_ordenes AS co
         INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
         INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -301,6 +305,8 @@ class compras_ordenes_model extends CI_Model {
         $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
       }
 
+      $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
+              WHERE id_orden = {$idOrden}")->result();
       $productos = array();
       foreach ($_POST['concepto'] as $key => $concepto)
       {
@@ -316,6 +322,12 @@ class compras_ordenes_model extends CI_Model {
           $pu       = $_POST['valorUnitario'][$key];
         }
 
+        $prod_id_compra = NULL;
+        foreach ($res_prodc_orden as $keyor => $ord)
+        {
+          if($_POST['prodIdOrden'][$key] == $ord->id_orden && $_POST['prodIdNumRow'][$key] == $ord->num_row)
+            $prod_id_compra = $ord->id_compra;
+        }
         $productos[] = array(
           'id_orden'        => $idOrden,
           'num_row'         => $key,
@@ -336,6 +348,7 @@ class compras_ordenes_model extends CI_Model {
           'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+          'id_compra'        => $prod_id_compra,
         );
       }
 
@@ -438,6 +451,44 @@ class compras_ordenes_model extends CI_Model {
     //   $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
     // }
 
+    // Actualiza los productos.
+    $productos_compra = $productos_compra2 = array();
+    foreach ($_POST['concepto'] as $key => $producto)
+    {
+      if(isset($productos_compra[$_POST['ordenId'][$key]]))
+        $productos_compra[$_POST['ordenId'][$key]]++;
+      else{
+        $productos_compra[$_POST['ordenId'][$key]] = 1;
+        $productos_compra2[$_POST['ordenId'][$key]] = 0;
+      }
+
+      foreach ($_POST['productoCom'] as $keyp => $produc)
+      {
+        $produc = explode('|', $produc);
+        if($_POST['ordenId'][$key] === $produc[0] && $_POST['row'][$key] === $produc[1]){
+          $productos_compra2[$_POST['ordenId'][$key]]++;
+          $prodData = array(
+            'precio_unitario'      => $_POST['valorUnitario'][$key],
+            'importe'              => $_POST['importe'][$key],
+            'iva'                  => $_POST['trasladoTotal'][$key],
+            'retencion_iva'        => $_POST['retTotal'][$key],
+            'total'                => $_POST['total'][$key],
+            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+            'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+            'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+            'id_compra'            => $compraId,
+          );
+
+          $this->db->update('compras_productos', $prodData, array(
+            'id_orden' => $_POST['ordenId'][$key],
+            'num_row'  => $_POST['row'][$key]
+          ));
+        }
+      }
+
+    }
+
     // construye el array de las ordenes a ligar con la compra.
     $ordenes = array();
     foreach ($ordenesIds as $ordenId)
@@ -447,32 +498,12 @@ class compras_ordenes_model extends CI_Model {
         'id_orden'  => $ordenId,
       );
 
-      $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $ordenId));
+      // Cambia a facturada hasta q todos los productos se ligan a las compras
+      if($productos_compra[$ordenId] == $productos_compra2[$ordenId])
+        $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $ordenId));
     }
-
     // inserta los ids de las ordenes.
     $this->db->insert_batch('compras_facturas', $ordenes);
-
-    // Actualiza los productos.
-    foreach ($_POST['concepto'] as $key => $producto)
-    {
-      $prodData = array(
-        'precio_unitario' => $_POST['valorUnitario'][$key],
-        'importe'         => $_POST['importe'][$key],
-        'iva'             => $_POST['trasladoTotal'][$key],
-        'retencion_iva'   => $_POST['retTotal'][$key],
-        'total'           => $_POST['total'][$key],
-        'porcentaje_iva'  => $_POST['trasladoPorcent'][$key],
-        'porcentaje_retencion'  => $_POST['retTotal'][$key] == '0' ? '0' : '4',
-        'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
-        'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-      );
-
-      $this->db->update('compras_productos', $prodData, array(
-        'id_orden' => $_POST['ordenId'][$key],
-        'num_row'  => $_POST['row'][$key]
-      ));
-    }
 
     $respons['passes'] = true;
 
@@ -487,7 +518,7 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true);
   }
 
-  public function info($idOrden, $full = false)
+  public function info($idOrden, $full = false, $prodAcep=false, $idCompra=NULL)
   {
     $query = $this->db->query(
       "SELECT co.id_orden,
@@ -527,6 +558,8 @@ class compras_ordenes_model extends CI_Model {
       $query->free_result();
       if ($full)
       {
+        $sql_produc = $prodAcep? " AND cp.status = 'a' AND cp.id_compra IS NULL": '';
+        $sql_produc .= $idCompra!==NULL? " AND cp.id_compra = {$idCompra}": '';
         $query = $this->db->query(
           "SELECT cp.id_orden, cp.num_row,
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
@@ -539,7 +572,7 @@ class compras_ordenes_model extends CI_Model {
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           WHERE id_orden = {$data['info'][0]->id_orden}");
+           WHERE id_orden = {$data['info'][0]->id_orden} {$sql_produc}");
 
         $data['info'][0]->productos = array();
         if ($query->num_rows() > 0)
@@ -652,10 +685,10 @@ class compras_ordenes_model extends CI_Model {
 
   public function entrada($idOrden)
   {
-    $this->db->delete('compras_productos', array('id_orden' => $idOrden));
-
     $ordenRechazada = false;
 
+    $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
+              WHERE id_orden = {$idOrden}")->result();
     $productos = array();
     $faltantes = false;
     foreach ($_POST['concepto'] as $key => $concepto)
@@ -674,6 +707,12 @@ class compras_ordenes_model extends CI_Model {
 
       $faltantesProd = $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key];
 
+      $prod_id_compra = NULL;
+      foreach ($res_prodc_orden as $keyor => $ord)
+      {
+        if($_POST['prodIdOrden'][$key] == $ord->id_orden && $_POST['prodIdNumRow'][$key] == $ord->num_row)
+          $prod_id_compra = $ord->id_compra;
+      }
       $productos[] = array(
         'id_orden'        => $idOrden,
         'num_row'         => $key,
@@ -695,6 +734,7 @@ class compras_ordenes_model extends CI_Model {
         'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
         'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
         'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+        'id_compra'        => $prod_id_compra,
       );
 
       if ($faltantesProd !== '0')
@@ -707,6 +747,7 @@ class compras_ordenes_model extends CI_Model {
         $ordenRechazada = true;
       }
     }
+    $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     // Si todos los productos fueron aceptados entonces la orden se marca
     // como aceptada.

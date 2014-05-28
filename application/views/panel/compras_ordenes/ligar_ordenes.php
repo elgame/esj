@@ -187,6 +187,7 @@
                           <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
                             <thead>
                               <tr>
+                                <th></th>
                                 <th>NOMBRE</th>
                                 <th>CANT.</th>
                                 <th>P.U.</th>
@@ -210,6 +211,7 @@
                                           $pu       = $prod->precio_unitario;
                                         ?>
                                        <tr>
+                                        <td style="width:15px;"><input type="checkbox" class="chkproducto" name="productoCom[]" value="<?php echo $prod->id_orden.'|'.$prod->num_row ?>" checked data-uniform="false"></td>
                                          <td style="">
                                             <?php echo $prod->descripcion ?>
                                             <input type="hidden" name="concepto[]" value="<?php echo $prod->descripcion ?>" id="concepto" class="span12">
