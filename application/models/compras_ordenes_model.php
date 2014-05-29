@@ -559,7 +559,7 @@ class compras_ordenes_model extends CI_Model {
       if ($full)
       {
         $sql_produc = $prodAcep? " AND cp.status = 'a' AND cp.id_compra IS NULL": '';
-        $sql_produc .= $idCompra!==NULL? " AND cp.id_compra = {$idCompra}": '';
+        $sql_produc .= $idCompra!==NULL? " AND (cp.id_compra = {$idCompra} OR (cp.id_compra IS NULL AND Date(cp.fecha_aceptacion) <= '2014-05-26'))": '';
         $query = $this->db->query(
           "SELECT cp.id_orden, cp.num_row,
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,

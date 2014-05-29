@@ -4626,7 +4626,8 @@ class nomina_fiscal_model extends CI_Model {
     $semana = $this->fechasDeUnaSemana($semana, $anio, $dia);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
-    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia);
+    $filtros = array('semana' => $semana['semana'], 'empresaId' => $empresaId, 'dia_inicia_semana' => $dia,
+      'ordenar' => " ORDER BY u.id ASC");
     $empleados = $this->nomina($configuraciones, $filtros);
 
     $pdf = new MYpdf('P', 'mm', 'Letter');
@@ -4649,6 +4650,7 @@ class nomina_fiscal_model extends CI_Model {
 
   public function pdfReciboNominaFiscal($empleadoId, $semana, $anio, $empresaId, $pdf=null)
   {
+    $pdfuno = $pdf==null? true: false;
     $this->load->model('empresas_model');
 
     if ($empresaId !== '')
@@ -5132,7 +5134,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
     }
 
-    if($pdf == null)
+    if($pdfuno)
       $pdf->Output('Nomina.pdf', 'I');
   }
 
@@ -6175,7 +6177,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetX(33);
       $pdf->SetAligns(array('L', 'l'));
       $pdf->SetWidths(array(50, 60));
-      $pdf->Row(array("INICIO A PARTIR DE: ", $fechaInicio->format('d') .' DE '. mb_strtoupper(String::mes(9)). ' DEL '. $fechaInicio->format('Y')), false, false);
+      $pdf->Row(array("INICIO A PARTIR DE: ", mb_strtoupper(String::fechaATexto($filtros['ffecha_inicio'])) ), false, false);
+      // $pdf->Row(array("INICIO A PARTIR DE: ", $fechaInicio->format('d') .' DE '. mb_strtoupper(String::mes(9)). ' DEL '. $fechaInicio->format('Y')), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 4);
       $pdf->Row(array("EMPRESA", ""), false, false);
