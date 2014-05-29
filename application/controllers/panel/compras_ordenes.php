@@ -303,6 +303,7 @@ class compras_ordenes extends MY_Controller {
       array('general/keyjump.js'),
       array('general/msgbox.js'),
       array('panel/compras_ordenes/agregar.js'),
+      array('panel/compras/ligar_ordenes.js'),
     ));
 
     $this->load->model('proveedores_model');
@@ -342,7 +343,7 @@ class compras_ordenes extends MY_Controller {
     $params['productos'] = array();
     foreach ($ids as $key => $ordenId)
     {
-      $orden = $this->compras_ordenes_model->info($ordenId, true);
+      $orden = $this->compras_ordenes_model->info($ordenId, true, true);
 
       foreach ($orden['info'][0]->productos as $prod)
       {

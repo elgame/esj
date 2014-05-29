@@ -1719,6 +1719,7 @@ class polizas_model extends CI_Model {
         'ieps_acreditar'   => array('cuenta_cpi' => $this->getCuentaIvaRetPagado(), 'importe' => 0, 'tipo' => '1'), );
 
       $folio = $this->input->get('ffolio');
+      $aux_idmovimiento = 0;
       //Contenido de la Poliza de las facturas de compra
       foreach ($data as $key => $value)
       {
@@ -1728,7 +1729,8 @@ class polizas_model extends CI_Model {
         if ($value->tipoo == 'facturas')
         {
           //Agregamos el header de la poliza
-          $response['data'] .= $this->setEspacios('P',2).
+          if($aux_idmovimiento != $value->id_movimiento)
+            $response['data'] .= $this->setEspacios('P',2).
                               $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('2',4,'r').  //tipo poliza = 2 poliza egreso
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
@@ -1933,7 +1935,11 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
 
-        $folio++;
+        if($aux_idmovimiento != $value->id_movimiento)
+        {
+          $aux_idmovimiento = $value->id_movimiento;
+          $folio++;
+        }
       }
 
       // exit;

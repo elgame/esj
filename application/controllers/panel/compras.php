@@ -82,7 +82,7 @@ class compras extends MY_Controller {
     $params['productos'] = array();
     foreach ($ordenes as $key => $orden)
     {
-      $orden = $this->compras_ordenes_model->info($orden->id_orden, true);
+      $orden = $this->compras_ordenes_model->info($orden->id_orden, true, false, $_GET['id']);
 
       foreach ($orden['info'][0]->productos as $prod)
       {
