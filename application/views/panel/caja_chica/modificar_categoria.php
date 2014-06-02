@@ -44,6 +44,14 @@
                   </div>
                 </div>
               </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="pempresa">Empresa</label>
+                <div class="controls">
+                  <input type="text" name="pempresa" value="<?php echo set_value('pempresa', (isset($_POST['pempresa']) ? $_POST['pempresa'] : $categoria['info'][0]->empresa)) ?>" id="pempresa" class="span11 next" placeholder="Empresa">
+                  <input type="hidden" name="pid_empresa" value="<?php echo set_value('pid_empresa', (isset($_POST['pid_empresa']) ? $_POST['pid_empresa'] : $categoria['info'][0]->id_empresa)) ?>" id="pid_empresa">
+                </div>
+              </div>
             </div>
 
             <div class="span6">
