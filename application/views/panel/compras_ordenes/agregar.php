@@ -105,7 +105,7 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group" id="verVehiculoChk" <?php echo (set_select('tipoOrden', 'd')==' selected="selected"'? '': 'style="display:none;"'); ?>>
                 <label class="control-label" for="descripcion">Vehiculo</label>
                 <div class="controls">
                   <div class="input-append span12">
@@ -128,7 +128,7 @@
                 <div class="controls">
                   <select name="tipoOrden" class="span9" id="tipoOrden">
                     <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Descripciones</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios</option>
                     <option value="f" <?php echo set_select('tipoOrden', 'f'); ?>>Fletes</option>
                   </select>
                 </div>

@@ -95,6 +95,11 @@
             $("#fletesFactura").show();
           else
             $("#fletesFactura").hide();
+
+          if(tipoOrderActual == 'd')
+            $("#verVehiculoChk").show();
+          else
+            $("#verVehiculoChk").hide();
         });
       }
     });
