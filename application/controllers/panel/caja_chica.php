@@ -35,9 +35,11 @@ class caja_chica extends MY_Controller {
     // ));
 
     $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Caja chica');
+    $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -76,9 +78,14 @@ class caja_chica extends MY_Controller {
     $params['seo']        = array('titulo' => 'Caja chica');
 
     $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
+    $_GET['ffecha'] = $fecha;
+
     $params['caja'] = $this->caja_chica_model->get($fecha);
 
     $params['remisiones'] = $this->caja_chica_model->getRemisiones();
+    $params['movimientos'] = $this->caja_chica_model->getMovimientos();
+    $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
+
     // echo "<pre>";
     //   var_dump($params['remisiones']);
     // echo "</pre>";exit;
@@ -103,6 +110,22 @@ class caja_chica extends MY_Controller {
 
     if (isset($_POST['ingreso_concepto']))
     {
+      $rules[] = array('field' => 'ingreso_empresa[]',
+                      'label' => 'Ingreso Emprea',
+                      'rules' => '');
+      $rules[] = array('field' => 'ingreso_empresa_id[]',
+                      'label' => 'Ingreso Emprea',
+                      'rules' => 'required');
+      $rules[] = array('field' => 'ingreso_nomenclatura[]',
+                      'label' => 'Ingreso Nomenclatura',
+                      'rules' => 'required');
+      $rules[] = array('field' => 'ingreso_poliza[]',
+                      'label' => 'Ingreso Poliza',
+                      'rules' => '');
+      $rules[] = array('field' => 'ingreso_concepto_id[]',
+                      'label' => 'Ingreso Conceptos',
+                      'rules' => '');
+
       $rules[] = array('field' => 'ingreso_concepto[]',
                       'label' => 'Ingreso Conceptos',
                       'rules' => 'required');
@@ -112,27 +135,26 @@ class caja_chica extends MY_Controller {
                       'rules' => 'required|numeric');
     }
 
-    if (isset($_POST['otros_concepto']))
-    {
-      $rules[] = array('field' => 'otros_concepto[]',
-                        'label' => 'Concepto Otros',
-                        'rules' => 'required');
-
-      $rules[] = array('field' => 'otros_monto[]',
-                        'label' => 'Importe',
-                        'rules' => 'required|numeric');
-    }
-
     if (isset($_POST['remision_concepto']))
     {
-      $rules[] = array('field' => 'remision_concepto[]',
-                        'label' => 'Observacion Remisiones',
+      $rules[] = array('field' => 'remision_empresa[]',
+                        'label' => 'Concepto Otros',
+                        'rules' => '');
+      $rules[] = array('field' => 'remision_empresa_id[]',
+                        'label' => 'Empresa Remisiones',
                         'rules' => 'required');
-
+      $rules[] = array('field' => 'remision_numero[]',
+                        'label' => 'Remision Remisiones',
+                        'rules' => '');
+      $rules[] = array('field' => 'remision_folio[]',
+                        'label' => 'Folio Remisiones',
+                        'rules' => '');
+      $rules[] = array('field' => 'remision_concepto[]',
+                        'label' => 'Concepto Remisiones',
+                        'rules' => 'required');
       $rules[] = array('field' => 'remision_importe[]',
-                        'label' => 'Importe',
+                        'label' => 'Importe Remisiones',
                         'rules' => 'required|numeric');
-
       $rules[] = array('field' => 'remision_id[]',
                         'label' => 'Remision',
                         'rules' => 'required');
@@ -148,12 +170,24 @@ class caja_chica extends MY_Controller {
 
     if (isset($_POST['gasto_concepto']))
     {
+      $rules[] = array('field' => 'gasto_empresa[]',
+                        'label' => 'Concepto Gastos',
+                        'rules' => '');
+      $rules[] = array('field' => 'gasto_empresa_id[]',
+                        'label' => 'Empresa Gastos',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'gasto_nomenclatura[]',
+                        'label' => 'Nomenclatura Gastos',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'gasto_folio[]',
+                        'label' => 'Folio Gastos',
+                        'rules' => '');
+      $rules[] = array('field' => 'gasto_empresa_id[]',
+                        'label' => 'Empresa Gastos',
+                        'rules' => 'required');
       $rules[] = array('field' => 'gasto_concepto[]',
                       'label' => 'Concepto Gastos',
                       'rules' => 'required|max_length[500]');
-      $rules[] = array('field' => 'gasto_cargo_id[]',
-                      'label' => 'Cargo Gastos',
-                      'rules' => 'required');
       $rules[] = array('field' => 'gasto_importe[]',
                       'label' => 'Importe Gastos',
                       'rules' => 'required|numeric');
@@ -203,6 +237,7 @@ class caja_chica extends MY_Controller {
 
     $this->carabiner->js(array(
       array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
     ));
 
     $this->load->model('caja_chica_model');
@@ -227,6 +262,12 @@ class caja_chica extends MY_Controller {
       }
     }
 
+    $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
+      ->from("empresas")
+      ->where("predeterminado", "t")
+      ->get()
+      ->row();
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -244,6 +285,7 @@ class caja_chica extends MY_Controller {
 
     $this->carabiner->js(array(
       array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
     ));
 
     $this->load->model('caja_chica_model');
@@ -270,6 +312,12 @@ class caja_chica extends MY_Controller {
 
     $params['categoria'] = $this->caja_chica_model->info($_GET['id'], true);
 
+    $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
+      ->from("empresas")
+      ->where("predeterminado", "t")
+      ->get()
+      ->row();
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -290,6 +338,12 @@ class caja_chica extends MY_Controller {
       array('field' => 'abreviatura',
             'label' => 'Abreviatura',
             'rules' => 'required|max_length[20]'),
+      array('field' => 'pempresa',
+            'label' => 'Empresa',
+            'rules' => ''),
+      array('field' => 'pid_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required'),
     );
 
     $this->form_validation->set_rules($rules);

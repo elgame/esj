@@ -428,7 +428,7 @@
                     <?php
                       $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
                       $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
-                      $totalDiasTrabajados     += $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
+                      $totalDiasTrabajados     += $e->esta_asegurado=='f'?(365 - $e->dias_faltados_anio)-1:(365 - $e->dias_faltados_anio);
                       $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
                       $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
                       $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;

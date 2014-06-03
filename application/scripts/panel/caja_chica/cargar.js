@@ -4,6 +4,7 @@
   $(function () {
 
     btnAddIngreso();
+    // btnAddMovimientos();
     btnDelIngreso();
 
     btnAddOtros();
@@ -27,6 +28,9 @@
     onChanceImporteGastos();
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
+
+    cargaMovimientos();
+    searchModalMovimientos();
   });
 
   var btnAddIngreso = function () {
@@ -42,11 +46,33 @@
     });
   };
 
-  var agregarIngreso = function () {
+  var agregarIngreso = function (movimiento) {
+
+    var poliza = '', concepto = '', id = '', abono = '0';
+    if (movimiento) {
+      poliza   = movimiento.poliza;
+      concepto = movimiento.proveedor;
+      id       = movimiento.id;
+      abono    = movimiento.total;
+    }
+
     var $table = $('#table-ingresos').find('tbody'),
         tr =  '<tr>' +
-                '<td><input type="text" name="ingreso_concepto[]" value="" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required></td>' +
-                '<td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="0" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
+                '<td style="width: 100px;">' +
+                  '<input type="text" name="ingreso_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
+                  '<input type="hidden" name="ingreso_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+                '</td>' +
+                '<td style="width: 40px;">' +
+                  '<select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
+                    $('#nomeclaturas_base').html() +
+                  '</select>' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;"></td>' +
+                '<td>' +
+                  '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
+                  '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
@@ -61,21 +87,41 @@
   };
 
   var btnDelOtros = function () {
-    $('#table-otros').on('click', '.btn-del-otros', function(event) {
+    $('#table-remisiones').on('click', '.btn-del-otros', function(event) {
       $(this).parents('tr').remove();
       calculaTotalIngresos();
     });
   };
 
-  var agregarOtros = function () {
-    var $table = $('#table-otros').find('tbody'),
-        tr =  '<tr>' +
-                '<td><input type="text" name="otros_concepto[]" value="" class="otros-concepto span12" maxlength="500" placeholder="Concepto" required></td>' +
-                '<td style="width: 100px;"><input type="text" name="otros_monto[]" value="0" class="otros-monto vpositive input-small" placeholder="Monto" required></td>' +
-                '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
-              '</tr>';
+  var agregarRemisiones = function (remision) {
+    var $table = $('#table-remisiones').find('tbody .row-total'),
+        tr;
 
-    $(tr).appendTo($table);
+    var numRemision = '', folio = '', id = '', abono = '0', concepto = '';
+    if (remision) {
+      id           = remision.id;
+      numRemision  = remision.numremision;
+      abono        = remision.total;
+      foliofactura = remision.foliofactura;
+      concepto     = remision.concepto;
+    }
+
+    tr =  '<tr>' +
+            '<td style="width: 100px;">' +
+              '<input type="text" name="remision_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
+              '<input type="hidden" name="remision_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+            '</td>' +
+            '<td style="width: 70px;"><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;"></td>' +
+            '<td style="width: 100px;"><input type="text" name="remision_folio[]" value="'+foliofactura+'" class="remision_folio" placeholder="Folio" style="width: 100px;"></td>' +
+            '<td>' +
+              '<input type="text" name="remision_concepto[]" value="'+concepto+'" class="remision-concepto span12" maxlength="500" placeholder="Nombre" required>' +
+              '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
+            '</td>' +
+            '<td style="width: 100px;"><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive input-small" placeholder="Importe" required></td>' +
+            '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+          '</tr>';
+
+    $(tr).insertBefore($table);
     $(".vpositive").numeric({ negative: false }); //Numero positivo
   };
 
@@ -96,7 +142,7 @@
     $('#total-ingresos').val(total);
 
     var saldo_inicial = parseFloat($('#saldo_inicial').val());
-    $('#total-saldo-ingresos').val(saldo_inicial + total);
+    $('input#total-saldo-ingresos').val(saldo_inicial + total);
 
     calculaCorte();
   };
@@ -123,18 +169,21 @@
       if ($('.chk-remision:checked').length > 0) {
         $('.chk-remision:checked').each(function(index, el) {
           $this = $(this);
-          html += '<tr>' +
-                    '<td>' +
-                      '<input type="text" name="remision_concepto[]" value="" class="remision-concepto span12" maxlength="500" placeholder="Observacion" required>' +
-                      '<input type="hidden" name="remision_id[]" value="'+$this.attr('data-id')+'" class="remision-id span12" required>' +
-                    '</td>' +
-                    '<td><input type="text" name="remision_numero[]" value="'+$this.attr('data-folio')+'" class="remision-numero vpositive input-small" placeholder="#" readonly style="width: 45px;"></td>' +
-                    '<td><input type="text" name="remision_importe[]" value="'+$this.attr('data-total')+'" class="remision-importe vpositive input-small" placeholder="Importe" required style="width: 55px;text-align: right;"></td>' +
-                    '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
-                  '</tr>';
+
+          agregarRemisiones({id: $this.attr('data-id'), numremision: $this.attr('data-numremision'), total: $this.attr('data-total'), foliofactura: $this.attr('data-foliofactura'), concepto: $this.attr('data-concepto')});
+
+          // html += '<tr>' +
+          //           '<td>' +
+          //             '<input type="text" name="remision_concepto[]" value="" class="remision-concepto span12" maxlength="500" placeholder="Observacion" required>' +
+          //             '<input type="hidden" name="remision_id[]" value="'+$this.attr('data-id')+'" class="remision-id span12" required>' +
+          //           '</td>' +
+          //           '<td><input type="text" name="remision_numero[]" value="'+$this.attr('data-folio')+'" class="remision-numero vpositive input-small" placeholder="#" readonly style="width: 45px;"></td>' +
+          //           '<td><input type="text" name="remision_importe[]" value="'+$this.attr('data-total')+'" class="remision-importe vpositive input-small" placeholder="Importe" required style="width: 55px;text-align: right;"></td>' +
+          //           '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-remision" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+          //         '</tr>';
         });
 
-        $(html).appendTo($table);
+        // $(html).appendTo($table);
         calculaTotalRemisiones();
 
         $('#modal-remisiones').modal('hide');
@@ -221,18 +270,26 @@
   };
 
   var agregarGasto = function () {
-    var $table = $('#table-gastos').find('tbody'),
+    var $table = $('#table-gastos').find('tbody .row-total'),
         tr =  '<tr>' +
-                '<td><input type="text" name="gasto_concepto[]" value="" class="input-xlarge span12 gasto-concepto"></td>' +
                 '<td style="width: 100px;">' +
-                  '<input type="text" name="gasto_cargo[]" value="" class="input-small gasto-cargo" style="width: 150px;">' +
-                  '<input type="hidden" name="gasto_cargo_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+                  '<input type="text" name="gasto_empresa[]" value="" class="gasto-cargo" style="width: 200px;">' +
+                  '<input type="hidden" name="gasto_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
                 '</td>' +
-                '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="input-small vpositive gasto-importe" style="text-align: right;"></td>' +
+                '<td style="width: 40px;">' +
+                  '<select name="gasto_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
+                    $('#nomeclaturas_base').html() +
+                  '</select>' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="input-xlarge span12 gasto-folio" style="width: 100px;"></td>' +
+                '<td style="">' +
+                  '<input type="text" name="gasto_concepto[]" value="" class="gasto-concepto">' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="input-small vpositive gasto-importe"></td>' +
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
-    $(tr).appendTo($table);
+    $(tr).insertBefore($table);
     $(".vpositive").numeric({ negative: false }); //Numero positivo
   };
 
@@ -326,7 +383,7 @@
     });
 
     $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
-    $('#ttotal-gastos').val(total.toFixed(2));
+    $('input#ttotal-gastos').val(total.toFixed(2));
   };
 
   var calculaCorte = function () {
@@ -334,5 +391,45 @@
 
     total = parseFloat($('#total-saldo-ingresos').val() || 0) - parseFloat($('#total-boletas').val() || 0) - parseFloat($('#ttotal-gastos').val() || 0);
     $('#ttotal-corte').val(total.toFixed(2));
+  };
+
+  var cargaMovimientos = function () {
+    $('#carga-movimientos').on('click', function(event) {
+      var $table = $('#table-modal-movimientos'),
+          html = '',
+          $this;
+
+      if ($('.chk-movimiento:checked').length > 0) {
+        $('.chk-movimiento:checked').each(function(index, el) {
+          $this = $(this);
+
+          agregarIngreso({id: $this.attr('data-id'), total: $this.attr('data-total'), proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza')});
+        });
+
+        calculaTotalIngresos();
+
+        $('#modal-movimientos').modal('hide');
+      } else {
+        noty({"text": 'Seleccione al menos un movimiento.', "layout":"topRight", "type": 'error'});
+      }
+    });
+  };
+
+  var searchModalMovimientos = function () {
+    $("#search-movimientos").on("keyup", function() {
+      var value = $(this).val();
+      $("#table-modal-movimientos tr").each(function(index) {
+        if (index !== 0) {
+          $row = $(this);
+          var id = $row.find("td.search-field").text();
+          if (id.indexOf(value) !== 0) {
+            $row.hide();
+          }
+          else {
+            $row.show();
+          }
+        }
+      });
+    });
   };
 });

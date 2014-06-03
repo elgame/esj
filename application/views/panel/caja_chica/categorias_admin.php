@@ -48,6 +48,7 @@
                 <tr>
                   <th>Nombre</th>
                   <th>Abreviatura</th>
+                  <th>Empresa</th>
                   <th>Estado</th>
                   <th>Opc</th>
                 </tr>
@@ -57,6 +58,7 @@
                 <tr>
                   <td><?php echo $categoria->nombre; ?></td>
                   <td><?php echo $categoria->abreviatura; ?></td>
+                  <td><?php echo $categoria->empresa; ?></td>
                   <td><?php
                           $texto = 'ELIMINADA';
                           $label = 'warning';

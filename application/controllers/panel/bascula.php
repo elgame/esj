@@ -1097,6 +1097,12 @@ class bascula extends MY_Controller {
     else
     {
       $this->load->model('bascula_model');
+
+      $bascula = $this->bascula_model->getBasculaInfo($_GET['idb']);
+
+      // Determina si se hara el registro en la bitacora.
+      $regBitacora = $bascula['info'][0]->no_lote === null ? false : true;
+
       $res_mdl = $this->bascula_model->updateBascula(
         $_GET['idb'],
         array(
@@ -1104,7 +1110,7 @@ class bascula extends MY_Controller {
           'chofer_es_productor' => isset($_POST['pchofer_es_productor']) ? 't' : 'f'
         ),
         null,
-        true,
+        $regBitacora,
         $this->session->userdata['id_usuario'],
         false
       );
