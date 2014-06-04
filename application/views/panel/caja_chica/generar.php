@@ -505,7 +505,7 @@
                             </tr>
                             <tr>
                               <td>PAGO TOTAL LIMON:</td>
-                              <td><input type="text" name="" value="<?php echo $totalBoletas ?>" class="input-small vpositive" id="total-saldo-ingresos" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $totalBoletas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>PAGO TOTAL GASTOS:</td>
@@ -513,8 +513,8 @@
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletas - $totalGastos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletas - $totalGastos) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $caja['saldo_inicial'] + $totalReporteCaja - $totalBoletas - $totalGastos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($caja['saldo_inicial'] + $totalReporteCaja - $totalBoletas - $totalGastos) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>

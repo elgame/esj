@@ -347,7 +347,8 @@ class caja_chica_model extends CI_Model {
        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
        LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
        INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
-       WHERE bm.tipo = 'f' AND bc.id_empresa = {$defaultEmpresa->id_empresa}
+       LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
+       WHERE bm.tipo = 'f' AND bc.id_empresa = {$defaultEmpresa->id_empresa} AND COALESCE(ci.id_ingresos, 0) = 0
        ORDER BY bm.fecha DESC
     ");
 
@@ -780,7 +781,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$')), false, true);
 
     $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($ttotalIngresos - $totalBoletas - $ttotalGastos) , 2, '$', null, true)), false, false);
+    $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] - $ttotalIngresos - $totalBoletas - $ttotalGastos) , 2, '$', null, true)), false, false);
 
     $pdf->SetFont('Arial', 'B', 6);
     $pdf->SetXY(168, $pdf->GetY() - 32);
@@ -795,7 +796,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos * -1, 2, '$', null, true)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($ttotalIngresos - $totalBoletas - $ttotalGastos, 2, '$', null, true)), false, false);
+    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $ttotalIngresos - $totalBoletas - $ttotalGastos, 2, '$', null, true)), false, false);
 
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }

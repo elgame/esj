@@ -139,10 +139,14 @@
       total += parseFloat($(this).val() || 0);
     });
 
+    total = parseFloat(total.toFixed(2));
+
     $('#total-ingresos').val(total);
 
-    var saldo_inicial = parseFloat($('#saldo_inicial').val());
-    $('input#total-saldo-ingresos').val(saldo_inicial + total);
+    var saldo_inicial = parseFloat($('#saldo_inicial').val()),
+        totalSaldoIngresos = saldo_inicial + total;
+
+    $('input#total-saldo-ingresos').val(totalSaldoIngresos.toFixed(2));
 
     calculaCorte();
   };
