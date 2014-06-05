@@ -66,7 +66,7 @@ class banco_layout_model extends banco_cuentas_model {
     foreach ($data['pagos'] as $key => $value)
     {
       $this->row_control .= '3'; //tipo de registro
-      $this->row_control .= '1'; //Tipo de operación, 1:Si es Cargo
+      $this->row_control .= '0'; //Tipo de operación, 1:Si es Cargo
       $this->row_control .= '001'; //Clave de la moneda
       $this->row_control .= $this->numero($value['monto'], 18, true); //Importe a abonar o cargar
       $tipo_cuenta = '01';
@@ -94,8 +94,8 @@ class banco_layout_model extends banco_cuentas_model {
   {
     $this->row_control .= '4'; //tipo de registro
     $this->row_control .= '001'; //Clave de la moneda
-    $this->row_control .= $this->numero('0', 6); //Número de abonos
-    $this->row_control .= $this->numero('0', 18, true); //Importe total de abonos
+    $this->row_control .= $this->numero($data['num_abonos'], 6); //Número de abonos
+    $this->row_control .= $this->numero($data['total_retiro'], 18, true); //Importe total de abonos
     $this->row_control .= $this->numero($data['num_cargos'], 6); //Número de cargos
     $this->row_control .= $this->numero($data['total_retiro'], 18, true)."\r\n"; //Importe total de cargos
   }

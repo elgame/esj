@@ -65,7 +65,7 @@ class banco_pagos_model extends CI_Model {
     $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
 
     $pagos_archivo = array();
-    $total_pagar = $num_cargos = 0;
+    $total_pagar = $num_abonos = 0;
     foreach ($pagos as $key => $pago)
     {
       $total_proveedor = 0;
@@ -76,7 +76,7 @@ class banco_pagos_model extends CI_Model {
       }
       if ($total_proveedor > 0)
       {
-        $num_cargos++;
+        $num_abonos++;
         $pagos_archivo[] = array(
           'monto' => $total_proveedor,
           'proveedor_sucursal' => $value->sucursal,
@@ -105,7 +105,8 @@ class banco_pagos_model extends CI_Model {
       //Reg Individual
       'pagos' => $pagos_archivo,
       //Reg Totales
-      'num_cargos' => $num_cargos,
+      'num_abonos' => $num_abonos,
+      'num_cargos' => 1,
       );
 
     $this->banco_layout_model->get($data);
@@ -267,7 +268,7 @@ class banco_pagos_model extends CI_Model {
     $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
 
     $pagos_archivo = array();
-    $total_pagar = $num_cargos = 0;
+    $total_pagar = $num_abonos = 0;
     foreach ($pagos as $key => $pago)
     {
       $total_proveedor = 0;
@@ -278,7 +279,7 @@ class banco_pagos_model extends CI_Model {
       }
       if ($total_proveedor > 0)
       {
-        $num_cargos++;
+        $num_abonos++;
         $pagos_archivo[] = array(
           'monto' => $total_proveedor,
           'proveedor_sucursal' => $value->sucursal,
@@ -307,7 +308,8 @@ class banco_pagos_model extends CI_Model {
       //Reg Individual
       'pagos' => $pagos_archivo,
       //Reg Totales
-      'num_cargos' => $num_cargos,
+      'num_abonos' => $num_abonos,
+      'num_cargos' => 1,
       );
 
     $this->banco_layout_model->get($data);
