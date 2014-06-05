@@ -139,12 +139,10 @@ class facturartebarato_api {
           $incidencias['codigo'] = 'ERR_INTERNET_DISCONNECTED';
           $incidencias['mensaje'] = 'Error: Internet Desconectado. Verifique su conexión.';
           break;
-        case 500:
-          $incidencias['codigo'] = '500';
-          $incidencias['mensaje'] = 'Error en el servidor.';
-          break;
         default:
-          break;
+          $incidencias['codigo'] = $this->statusRequest['http_code'];
+          $incidencias['mensaje'] = 'Error en el servidor.';
+        break;
       }
     }
     else

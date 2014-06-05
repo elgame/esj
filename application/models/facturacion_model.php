@@ -386,547 +386,548 @@ class facturacion_model extends privilegios_model{
       }
       return array('passes' => true, 'msg' => 'Se ligaron las remisiones correctamente');
     }
-	/**
+
+  /**
 	 * Agrega una Factura.
-     *
-     * @return  array
+   *
+   * @return  array
 	 */
-    public function addFactura($borrador = false)
+  public function addFactura($borrador = false)
+  {
+    $this->load->library('cfdi');
+    $this->load->model('clientes_model');
+
+    $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+
+    // Obtiene la forma de pago, si es en parcialidades entonces la forma de
+    // pago son las parcialidades "Parcialidad 1 de X".
+    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    $datosFactura = array(
+      'id_cliente'          => $this->input->post('did_cliente'),
+      'id_empresa'          => $this->input->post('did_empresa'),
+      'version'             => $this->input->post('dversion'),
+      'serie'               => $this->input->post('dserie'),
+      'folio'               => $this->input->post('dfolio'),
+      'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
+      'subtotal'            => $this->input->post('total_subtotal'),
+      'importe_iva'         => $this->input->post('total_iva'),
+      'total'               => $this->input->post('total_totfac'),
+      'total_letra'         => $this->input->post('dttotal_letra'),
+      'no_aprobacion'       => $this->input->post('dno_aprobacion'),
+      'ano_aprobacion'      => $anoAprobacion[0],
+      'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
+      'forma_pago'          => $formaPago,
+      'metodo_pago'         => $this->input->post('dmetodo_pago'),
+      'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
+      'no_certificado'      => $this->input->post('dno_certificado'),
+      'cadena_original'     => '',
+      'sello'               => '',
+      'certificado'         => '',
+      'condicion_pago'      => $this->input->post('dcondicion_pago'),
+      'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
+      'observaciones'       => $this->input->post('dobservaciones'),
+      'status'              => $borrador ? 'b' : 'p',
+      // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
+      'retencion_iva'       => $this->input->post('total_retiva'),
+      'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
+      'moneda'              => $_POST['moneda'],
+    );
+
+    // Tipo de cambio y moneda
+    if ($datosFactura['moneda'] !== 'M.N.')
+      $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
+    else
+      $datosFactura['tipo_cambio'] = '1';
+
+    // Si el tipo de comprobante es "egreso" o una nota de credito.
+    if ($_POST['dtipo_comprobante'] === 'egreso')
+      $datosFactura['id_nc'] = $_GET['id'];
+
+    // Inserta los datos de la factura y obtiene el Id. Este en caso
+    // de que se este timbrando una factura que no sea un borrador.
+    if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
     {
-        $this->load->library('cfdi');
-        $this->load->model('clientes_model');
+      $this->db->insert('facturacion', $datosFactura);
+      $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+    }
 
-        $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
+    // Si es un borrador que se esta timbrando entonces actualiza sus datos.
+    else
+    {
+      $idFactura = $_GET['idb'];
+      $this->db->update('facturacion', $datosFactura, array('id_factura' => $idFactura));
+    }
 
-        // Obtiene la forma de pago, si es en parcialidades entonces la forma de
-        // pago son las parcialidades "Parcialidad 1 de X".
-        $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+    // Productos e Impuestos
+    $productosCadOri    = array(); // Productos para la CadOriginal
+    $productosFactura   = array(); // Productos para la Factura
 
-        $datosFactura = array(
-          'id_cliente'          => $this->input->post('did_cliente'),
-          'id_empresa'          => $this->input->post('did_empresa'),
-          'version'             => $this->input->post('dversion'),
-          'serie'               => $this->input->post('dserie'),
-          'folio'               => $this->input->post('dfolio'),
-          'fecha'               => str_replace('T', ' ', $_POST['dfecha']),
-          'subtotal'            => $this->input->post('total_subtotal'),
-          'importe_iva'         => $this->input->post('total_iva'),
-          'total'               => $this->input->post('total_totfac'),
-          'total_letra'         => $this->input->post('dttotal_letra'),
-          'no_aprobacion'       => $this->input->post('dno_aprobacion'),
-          'ano_aprobacion'      => $anoAprobacion[0],
-          'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-          'forma_pago'          => $formaPago,
-          'metodo_pago'         => $this->input->post('dmetodo_pago'),
-          'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
-          'no_certificado'      => $this->input->post('dno_certificado'),
-          'cadena_original'     => '',
-          'sello'               => '',
-          'certificado'         => '',
-          'condicion_pago'      => $this->input->post('dcondicion_pago'),
-          'plazo_credito'       => $_POST['dcondicion_pago'] === 'co' ? 0 : $this->input->post('dplazo_credito'),
-          'observaciones'       => $this->input->post('dobservaciones'),
-          'status'              => $borrador ? 'b' : 'p',
-          // 'status'              => $_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
-          'retencion_iva'       => $this->input->post('total_retiva'),
-          'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
-          'moneda'              => $_POST['moneda'],
+    $impuestosTraslados = array(); // Traslados
+    $traslado0  = false; // Total de traslado 0%
+    $traslado11 = 0; // Total de traslado 11%
+    $traslado16 = 0; // Total de traslado 16%
+
+    // Ciclo para obtener los impuestos traslados, tambien construye
+    // los datos de  los productos a insertar tanto en la cadena original como
+    // en la factura.
+    foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+    {
+      if ($_POST['prod_importe'][$key] != 0)
+      {
+        $productosCadOri[] = array(
+          'cantidad'         => $_POST['prod_dcantidad'][$key],
+          'unidad'           => $_POST['prod_dmedida'][$key],
+          'descripcion'      => $descripcion . ((isset($_POST['prod_dclase'][$key]) && $_POST['prod_dclase'][$key] !== '') ? ' Clase '.$_POST['prod_dclase'][$key] : '') . ((isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '0' && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key] : ''),
+          'valorUnitario'    => $_POST['prod_dpreciou'][$key],
+          'importe'          => $_POST['prod_importe'][$key],
+          'idClasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          // 'clase'           => isset($_POST['prod_dclase'][$key]) ? ' Clase '.$_POST['prod_dclase'][$key] : '',
+          // 'peso'            => (isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key].' '.$_POST['prod_dmedida'][$key] : '',
         );
 
-        // Tipo de cambio y moneda
-        if ($datosFactura['moneda'] !== 'M.N.')
-          $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
+        if ($_POST['prod_diva_porcent'][$key] == '11')
+          $traslado11 += floatval($_POST['prod_diva_total'][$key]);
+        else if ($_POST['prod_diva_porcent'][$key] == '16')
+          $traslado16 += floatval($_POST['prod_diva_total'][$key]);
         else
-          $datosFactura['tipo_cambio'] = '1';
+          $traslado0 = true;
 
-        // Si el tipo de comprobante es "egreso" o una nota de credito.
-        if ($_POST['dtipo_comprobante'] === 'egreso')
-          $datosFactura['id_nc'] = $_GET['id'];
-
-        // Inserta los datos de la factura y obtiene el Id. Este en caso
-        // de que se este timbrando una factura que no sea un borrador.
-        if (( ! isset($_GET['idb']) && ! $borrador) || $borrador)
-        {
-          $this->db->insert('facturacion', $datosFactura);
-          $idFactura = $this->db->insert_id('facturacion', 'id_factura');
-        }
-
-        // Si es un borrador que se esta timbrando entonces actualiza sus datos.
-        else
-        {
-          $idFactura = $_GET['idb'];
-          $this->db->update('facturacion', $datosFactura, array('id_factura' => $idFactura));
-        }
-
-        // Productos e Impuestos
-        $productosCadOri    = array(); // Productos para la CadOriginal
-        $productosFactura   = array(); // Productos para la Factura
-
-        $impuestosTraslados = array(); // Traslados
-        $traslado0  = false; // Total de traslado 0%
-        $traslado11 = 0; // Total de traslado 11%
-        $traslado16 = 0; // Total de traslado 16%
-
-        // Ciclo para obtener los impuestos traslados, tambien construye
-        // los datos de  los productos a insertar tanto en la cadena original como
-        // en la factura.
-        foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
-        {
-          if ($_POST['prod_importe'][$key] != 0)
-          {
-            $productosCadOri[] = array(
-              'cantidad'         => $_POST['prod_dcantidad'][$key],
-              'unidad'           => $_POST['prod_dmedida'][$key],
-              'descripcion'      => $descripcion . ((isset($_POST['prod_dclase'][$key]) && $_POST['prod_dclase'][$key] !== '') ? ' Clase '.$_POST['prod_dclase'][$key] : '') . ((isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '0' && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key] : ''),
-              'valorUnitario'    => $_POST['prod_dpreciou'][$key],
-              'importe'          => $_POST['prod_importe'][$key],
-              'idClasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-              // 'clase'           => isset($_POST['prod_dclase'][$key]) ? ' Clase '.$_POST['prod_dclase'][$key] : '',
-              // 'peso'            => (isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key].' '.$_POST['prod_dmedida'][$key] : '',
-            );
-
-            if ($_POST['prod_diva_porcent'][$key] == '11')
-              $traslado11 += floatval($_POST['prod_diva_total'][$key]);
-            else if ($_POST['prod_diva_porcent'][$key] == '16')
-              $traslado16 += floatval($_POST['prod_diva_total'][$key]);
-            else
-              $traslado0 = true;
-
-            $productosFactura[] = array(
-              'id_factura'       => $idFactura,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-              'num_row'          => intval($key),
-              'cantidad'         => $_POST['prod_dcantidad'][$key],
-              'descripcion'      => $descripcion,
-              'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-              'importe'          => $_POST['prod_importe'][$key],
-              'iva'              => $_POST['prod_diva_total'][$key],
-              'unidad'           => $_POST['prod_dmedida'][$key],
-              'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
-              'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
-              'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-              'ids_pallets' => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-              'ids_remisiones' => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
-              'kilos' => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
-              'cajas' => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
-              'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
-              'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
-              'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : '',
-              'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : 0,
-            );
-          }
-        }
-
-        if (count($productosFactura) > 0)
-        {
-          if ((isset($_GET['idb']) && ! $borrador) || $borrador)
-          {
-            $this->db->delete('facturacion_productos', array('id_factura' => $idFactura));
-          }
-
-          $this->db->insert_batch('facturacion_productos', $productosFactura);
-        }
-
-        // Inserta los pallests y las remisiones a la factura
-        $this->addPallestRemisiones($idFactura, $borrador);
-
-        if (isset($_POST['es_carta_porte']))
-        {
-          if (isset($_POST['es_carta_porte']) || $borrador)
-          {
-            $this->db->delete('facturacion_remitente', array('id_factura' => $idFactura));
-            $this->db->delete('facturacion_destinatario', array('id_factura' => $idFactura));
-          }
-
-          $remitente = array(
-            'id_factura' => $idFactura,
-            'nombre'    => $_POST['remitente_nombre'],
-            'rfc'       => $_POST['remitente_rfc'],
-            'direccion' => $_POST['remitente_domicilio'],
-            'chofer'    => $_POST['remitente_chofer'],
-            'marca'     => $_POST['remitente_marca'],
-            'modelo'    => $_POST['remitente_modelo'],
-            'placas'    => $_POST['remitente_placas'],
-          );
-
-          $destinatario = array(
-            'id_factura' => $idFactura,
-            'nombre'    => $_POST['destinatario_nombre'],
-            'rfc'       => $_POST['destinatario_rfc'],
-            'direccion' => $_POST['destinatario_domicilio'],
-          );
-
-          $this->db->insert('facturacion_remitente', $remitente);
-          $this->db->insert('facturacion_destinatario', $destinatario);
-        }
-
-        // Si es un borrador
-        if ($borrador) return true;
-
-        // Obtiene los datos para la cadena original
-        $datosCadOrig = $this->datosCadenaOriginal();
-        $datosCadOrig['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
-
-        // Si es un ingreso o una factura.
-        if ($_POST['dtipo_comprobante'] === 'ingreso')
-        {
-          // Obtiene los documentos que el cliente tiene asignados.
-          $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
-
-          $this->load->model('documentos_model');
-          $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-
-          // Inserta los documentos del cliente con un status false.
-          if ($docsCliente)
-            $this->db->insert_batch('facturacion_documentos', $docsCliente);
-          else
-            $datosFactura['docs_finalizados'] = 't';
-        }
-        else
-        {
-            $this->load->model('documentos_model');
-            $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
-            $datosFactura['docs_finalizados'] = 't';
-        }
-
-        $dataCliente = array(
-          'id_factura'  => $idFactura,
-          'nombre'      => $datosCadOrig['nombre'],
-          'rfc'         => $datosCadOrig['rfc'],
-          'calle'       => $datosCadOrig['calle'],
-          'no_exterior' => $datosCadOrig['noExterior'],
-          'no_interior' => $datosCadOrig['noInterior'],
-          'colonia'     => $datosCadOrig['colonia'],
-          'localidad'   => $datosCadOrig['localidad'],
-          'municipio'   => $datosCadOrig['municipio'],
-          'estado'      => $datosCadOrig['estado'],
-          'cp'          => $datosCadOrig['codigoPostal'],
-          'pais'        => $datosCadOrig['pais'],
+        $productosFactura[] = array(
+          'id_factura'       => $idFactura,
+          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          'num_row'          => intval($key),
+          'cantidad'         => $_POST['prod_dcantidad'][$key],
+          'descripcion'      => $descripcion,
+          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
+          'importe'          => $_POST['prod_importe'][$key],
+          'iva'              => $_POST['prod_diva_total'][$key],
+          'unidad'           => $_POST['prod_dmedida'][$key],
+          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
+          'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
+          'ids_pallets' => isset($_POST['pallets_id'][$key]) && $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+          'ids_remisiones' => isset($_POST['remisiones_id'][$key]) && $_POST['remisiones_id'][$key] !== '' ? $_POST['remisiones_id'][$key] : null,
+          'kilos' => isset($_POST['prod_dkilos'][$key]) ? $_POST['prod_dkilos'][$key] : 0,
+          'cajas' => isset($_POST['prod_dcajas'][$key]) ? $_POST['prod_dcajas'][$key] : 0,
+          'id_unidad_rendimiento' => isset($_POST['id_unidad_rendimiento'][$key]) && $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
+          'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
+          'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : '',
+          'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : 0,
         );
-        // Inserta los datos del cliente.
-        $this->db->insert('facturacion_cliente', $dataCliente);
+      }
+    }
 
-        // Asignamos los productos o conceptos a los datos de la cadena original.
-        $datosCadOrig['concepto']  = $productosCadOri;
+    if (count($productosFactura) > 0)
+    {
+      if ((isset($_GET['idb']) && ! $borrador) || $borrador)
+      {
+        $this->db->delete('facturacion_productos', array('id_factura' => $idFactura));
+      }
 
-        // Asignamos las retenciones a los datos de la cadena original.
-         $impuestosRetencion = array(
-          'impuesto' => 'IVA',
-          'importe'  => $this->input->post('total_retiva'),
-        );
+      $this->db->insert_batch('facturacion_productos', $productosFactura);
+    }
 
-        $datosCadOrig['retencion'][] = $impuestosRetencion;
-        $datosCadOrig['totalImpuestosRetenidos'] = $this->input->post('total_retiva');
+    // Inserta los pallests y las remisiones a la factura
+    $this->addPallestRemisiones($idFactura, $borrador);
 
-        // Si hay conceptos con traslado 0% lo agrega.
-        if ($traslado0 && $traslado11 === 0 && $traslado16 === 0)
-        {
-            $impuestosTraslados[] = array(
-                'Impuesto' => 'IVA',
-                'tasa'     => '0',
-                'importe'  => '0',
-            );
-        }
+    if (isset($_POST['es_carta_porte']))
+    {
+      if (isset($_POST['es_carta_porte']) || $borrador)
+      {
+        $this->db->delete('facturacion_remitente', array('id_factura' => $idFactura));
+        $this->db->delete('facturacion_destinatario', array('id_factura' => $idFactura));
+      }
 
-        // Si hay conceptos con traslado 11% lo agrega.
-        if ($traslado11 !== 0)
-        {
-          $impuestosTraslados[] = array(
+      $remitente = array(
+        'id_factura' => $idFactura,
+        'nombre'    => $_POST['remitente_nombre'],
+        'rfc'       => $_POST['remitente_rfc'],
+        'direccion' => $_POST['remitente_domicilio'],
+        'chofer'    => $_POST['remitente_chofer'],
+        'marca'     => $_POST['remitente_marca'],
+        'modelo'    => $_POST['remitente_modelo'],
+        'placas'    => $_POST['remitente_placas'],
+      );
+
+      $destinatario = array(
+        'id_factura' => $idFactura,
+        'nombre'    => $_POST['destinatario_nombre'],
+        'rfc'       => $_POST['destinatario_rfc'],
+        'direccion' => $_POST['destinatario_domicilio'],
+      );
+
+      $this->db->insert('facturacion_remitente', $remitente);
+      $this->db->insert('facturacion_destinatario', $destinatario);
+    }
+
+    // Si es un borrador
+    if ($borrador) return true;
+
+    // Obtiene los datos para la cadena original
+    $datosCadOrig = $this->datosCadenaOriginal();
+    $datosCadOrig['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
+
+    // Si es un ingreso o una factura.
+    if ($_POST['dtipo_comprobante'] === 'ingreso')
+    {
+      // Obtiene los documentos que el cliente tiene asignados.
+      $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
+
+      $this->load->model('documentos_model');
+      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+
+      // Inserta los documentos del cliente con un status false.
+      if ($docsCliente)
+        $this->db->insert_batch('facturacion_documentos', $docsCliente);
+      else
+        $datosFactura['docs_finalizados'] = 't';
+    }
+    else
+    {
+        $this->load->model('documentos_model');
+        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosCadOrig['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+        $datosFactura['docs_finalizados'] = 't';
+    }
+
+    $dataCliente = array(
+      'id_factura'  => $idFactura,
+      'nombre'      => $datosCadOrig['nombre'],
+      'rfc'         => $datosCadOrig['rfc'],
+      'calle'       => $datosCadOrig['calle'],
+      'no_exterior' => $datosCadOrig['noExterior'],
+      'no_interior' => $datosCadOrig['noInterior'],
+      'colonia'     => $datosCadOrig['colonia'],
+      'localidad'   => $datosCadOrig['localidad'],
+      'municipio'   => $datosCadOrig['municipio'],
+      'estado'      => $datosCadOrig['estado'],
+      'cp'          => $datosCadOrig['codigoPostal'],
+      'pais'        => $datosCadOrig['pais'],
+    );
+    // Inserta los datos del cliente.
+    $this->db->insert('facturacion_cliente', $dataCliente);
+
+    // Asignamos los productos o conceptos a los datos de la cadena original.
+    $datosCadOrig['concepto']  = $productosCadOri;
+
+    // Asignamos las retenciones a los datos de la cadena original.
+     $impuestosRetencion = array(
+      'impuesto' => 'IVA',
+      'importe'  => $this->input->post('total_retiva'),
+    );
+
+    $datosCadOrig['retencion'][] = $impuestosRetencion;
+    $datosCadOrig['totalImpuestosRetenidos'] = $this->input->post('total_retiva');
+
+    // Si hay conceptos con traslado 0% lo agrega.
+    if ($traslado0 && $traslado11 === 0 && $traslado16 === 0)
+    {
+        $impuestosTraslados[] = array(
             'Impuesto' => 'IVA',
-            'tasa'     => '11',
-            'importe'  => $traslado11,
-          );
-        }
-
-        // Si hay conceptos con traslado 16% lo agrega.
-        if ($traslado16 !== 0)
-        {
-          $impuestosTraslados[] = array(
-            'Impuesto' => 'IVA',
-            'tasa'     => '16',
-            'importe'  => $traslado16,
-          );
-        }
-
-        // Asigna los impuestos traslados.
-        $datosCadOrig['traslado']  = $impuestosTraslados;
-        $datosCadOrig['totalImpuestosTrasladados'] = $this->input->post('total_iva');
-
-        // Genera la cadena original y el sello.
-        $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
-        $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
-
-        // Obtiene el contentido del certificado.
-        $certificado = $this->cfdi->obtenCertificado($this->db
-          ->select('cer')
-          ->from("empresas")
-          ->where("id_empresa", $_POST['did_empresa'])
-          ->get()->row()->cer
+            'tasa'     => '0',
+            'importe'  => '0',
         );
+    }
 
-        // Datos que actualizara de la factura
-        $updateFactura = array(
-          'cadena_original' => $cadenaOriginal['cadenaOriginal'],
-          'sello'           => $sello,
-          'certificado'     => $certificado,
-        );
-        $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
+    // Si hay conceptos con traslado 11% lo agrega.
+    if ($traslado11 !== 0)
+    {
+      $impuestosTraslados[] = array(
+        'Impuesto' => 'IVA',
+        'tasa'     => '11',
+        'importe'  => $traslado11,
+      );
+    }
 
-        // Datos para el XML3.2
-        $datosXML               = $cadenaOriginal['datos'];
-        $datosXML['id']         = $this->input->post('did_empresa');
-        $datosXML['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
-        $datosXML['table']      = 'empresas';
-        $datosXML['comprobante']['serie']         = $this->input->post('dserie');
-        $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
-        $datosXML['comprobante']['sello']         = $sello;
-        $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
-        $datosXML['comprobante']['certificado']   = $certificado;
-        $datosXML['concepto']                     = $productosCadOri;
+    // Si hay conceptos con traslado 16% lo agrega.
+    if ($traslado16 !== 0)
+    {
+      $impuestosTraslados[] = array(
+        'Impuesto' => 'IVA',
+        'tasa'     => '16',
+        'importe'  => $traslado16,
+      );
+    }
 
-        $datosXML['domicilio']['calle']        = $dataCliente['calle'];
-        $datosXML['domicilio']['noExterior']   = $dataCliente['no_exterior'];
-        $datosXML['domicilio']['noInterior']   = $dataCliente['no_interior'];
-        $datosXML['domicilio']['colonia']      = $dataCliente['colonia'];
-        $datosXML['domicilio']['localidad']    = $dataCliente['localidad'];
-        $datosXML['domicilio']['municipio']    = $dataCliente['municipio'];
-        $datosXML['domicilio']['estado']       = $dataCliente['estado'];
-        $datosXML['domicilio']['pais']         = $dataCliente['pais'];
-        $datosXML['domicilio']['codigoPostal'] = $dataCliente['cp'];
+    // Asigna los impuestos traslados.
+    $datosCadOrig['traslado']  = $impuestosTraslados;
+    $datosCadOrig['totalImpuestosTrasladados'] = $this->input->post('total_iva');
 
-        $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
-        $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+    // Genera la cadena original y el sello.
+    $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadOrig);
+    $sello          = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
 
-        $datosXML['retencion'] = $impuestosRetencion;
-        $datosXML['traslado']  = $impuestosTraslados;
+    // Obtiene el contentido del certificado.
+    $certificado = $this->cfdi->obtenCertificado($this->db
+      ->select('cer')
+      ->from("empresas")
+      ->where("id_empresa", $_POST['did_empresa'])
+      ->get()->row()->cer
+    );
 
-        // Genera el archivo XML y lo guarda en disco.
-        $archivos = $this->cfdi->generaArchivos($datosXML);
+    // Datos que actualizara de la factura
+    $updateFactura = array(
+      'cadena_original' => $cadenaOriginal['cadenaOriginal'],
+      'sello'           => $sello,
+      'certificado'     => $certificado,
+    );
+    $this->db->update('facturacion', $updateFactura, array('id_factura' => $idFactura));
 
-        // Timbrado de la factura.
-        $result = $this->timbrar($archivos['pathXML'], $idFactura);
+    // Datos para el XML3.2
+    $datosXML               = $cadenaOriginal['datos'];
+    $datosXML['id']         = $this->input->post('did_empresa');
+    $datosXML['sinCosto']   =  isset($_POST['dsincosto']) ? true : false;
+    $datosXML['table']      = 'empresas';
+    $datosXML['comprobante']['serie']         = $this->input->post('dserie');
+    $datosXML['comprobante']['folio']         = $this->input->post('dfolio');
+    $datosXML['comprobante']['sello']         = $sello;
+    $datosXML['comprobante']['noCertificado'] = $this->input->post('dno_certificado');
+    $datosXML['comprobante']['certificado']   = $certificado;
+    $datosXML['concepto']                     = $productosCadOri;
 
-        if ($result['passes'])
+    $datosXML['domicilio']['calle']        = $dataCliente['calle'];
+    $datosXML['domicilio']['noExterior']   = $dataCliente['no_exterior'];
+    $datosXML['domicilio']['noInterior']   = $dataCliente['no_interior'];
+    $datosXML['domicilio']['colonia']      = $dataCliente['colonia'];
+    $datosXML['domicilio']['localidad']    = $dataCliente['localidad'];
+    $datosXML['domicilio']['municipio']    = $dataCliente['municipio'];
+    $datosXML['domicilio']['estado']       = $dataCliente['estado'];
+    $datosXML['domicilio']['pais']         = $dataCliente['pais'];
+    $datosXML['domicilio']['codigoPostal'] = $dataCliente['cp'];
+
+    $datosXML['totalImpuestosRetenidos']   = $this->input->post('total_retiva');
+    $datosXML['totalImpuestosTrasladados'] = $this->input->post('total_iva');
+
+    $datosXML['retencion'] = $impuestosRetencion;
+    $datosXML['traslado']  = $impuestosTraslados;
+
+    // Genera el archivo XML y lo guarda en disco.
+    $archivos = $this->cfdi->generaArchivos($datosXML);
+
+    // Timbrado de la factura.
+    $result = $this->timbrar($archivos['pathXML'], $idFactura);
+
+    if ($result['passes'])
+    {
+      $this->generaFacturaPdf($idFactura, $pathDocs);
+
+      $xmlName = explode('/', $archivos['pathXML']);
+
+      copy($archivos['pathXML'], $pathDocs.end($xmlName));
+
+      //Si es otra moneda actualiza al tipo de cambio
+      if($datosFactura['moneda'] !== 'M.N.')
+      {
+        $datosFactura1 = array();
+        $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
+
+        foreach ($productosFactura as $key => $value)
         {
-          $this->generaFacturaPdf($idFactura, $pathDocs);
+          $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
+          $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
+          $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+        }
+      }
 
-          $xmlName = explode('/', $archivos['pathXML']);
+      // Elimina el borrador.
+      // if (isset($_GET['idb']))
+      //   $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
 
-          copy($archivos['pathXML'], $pathDocs.end($xmlName));
+      // Procesa la salida
+      $this->load->model('unidades_model');
+      $this->load->model('productos_salidas_model');
+      $this->load->model('inventario_model');
 
-          //Si es otra moneda actualiza al tipo de cambio
-          if($datosFactura['moneda'] !== 'M.N.')
+      $infoSalida      = array();
+      $productosSalida = array(); // contiene los productos que se daran salida.
+
+      $infoSalida = array(
+        'id_empresa'      => $_POST['did_empresa'],
+        'id_empleado'     => $this->session->userdata('id_usuario'),
+        'folio'           => $this->productos_salidas_model->folio(),
+        'fecha_creacion'  => date('Y-m-d H:i:s'),
+        'fecha_registro'  => date('Y-m-d H:i:s'),
+        'status'          => 's',
+      );
+
+      $res = $this->productos_salidas_model->agregar($infoSalida);
+
+      $row = 0;
+      foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+      {
+        if ($_POST['prod_importe'][$key] != 0)
+        {
+          if (isset($_POST['prod_dmedida_id'][$key]) && $_POST['prod_dmedida_id'][$key] !== '')
           {
-            $datosFactura1 = array();
-            $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
+            $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
 
-            foreach ($productosFactura as $key => $value)
+            foreach ($unidad['info'][0]->productos as $uniProd)
             {
-              $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+              $inv   = $this->inventario_model->promedioData($uniProd->id_producto, date('Y-m-d'), date('Y-m-d'));
+              $saldo = array_shift($inv);
+
+              $productosSalida[] = array(
+                'id_salida'       => $res['id_salida'],
+                'id_producto'     => $uniProd->id_producto,
+                'no_row'          => $row,
+                'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
+                'precio_unitario' => $saldo['saldo'][1],
+              );
+
+              $row++;
             }
           }
-
-          // Elimina el borrador.
-          // if (isset($_GET['idb']))
-          //   $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
-
-          // Procesa la salida
-          $this->load->model('unidades_model');
-          $this->load->model('productos_salidas_model');
-          $this->load->model('inventario_model');
-
-          $infoSalida      = array();
-          $productosSalida = array(); // contiene los productos que se daran salida.
-
-          $infoSalida = array(
-            'id_empresa'      => $_POST['did_empresa'],
-            'id_empleado'     => $this->session->userdata('id_usuario'),
-            'folio'           => $this->productos_salidas_model->folio(),
-            'fecha_creacion'  => date('Y-m-d H:i:s'),
-            'fecha_registro'  => date('Y-m-d H:i:s'),
-            'status'          => 's',
-          );
-
-          $res = $this->productos_salidas_model->agregar($infoSalida);
-
-          $row = 0;
-          foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
-          {
-            if ($_POST['prod_importe'][$key] != 0)
-            {
-              if (isset($_POST['prod_dmedida_id'][$key]) && $_POST['prod_dmedida_id'][$key] !== '')
-              {
-                $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
-
-                foreach ($unidad['info'][0]->productos as $uniProd)
-                {
-                  $inv   = $this->inventario_model->promedioData($uniProd->id_producto, date('Y-m-d'), date('Y-m-d'));
-                  $saldo = array_shift($inv);
-
-                  $productosSalida[] = array(
-                    'id_salida'       => $res['id_salida'],
-                    'id_producto'     => $uniProd->id_producto,
-                    'no_row'          => $row,
-                    'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
-                    'precio_unitario' => $saldo['saldo'][1],
-                  );
-
-                  $row++;
-                }
-              }
-            }
-          }
-
-          // Si hay al menos 1 producto para las salidas lo inserta.
-          if (count($productosSalida) > 0)
-          {
-            $this->productos_salidas_model->agregarProductos(null, $productosSalida);
-          }
-
-          // Si no hay productos para ninguna de las medidas elimina la salida.
-          else
-          {
-            $this->db->delete('compras_salidas', array('id_salida' => $res['id_salida']));
-          }
         }
-        else
-        {
-          rmdir($pathDocs);
-        }
+      }
 
-        // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
-        // echo "<pre>";
-        //   var_dump($datosXML);
-        // echo "</pre>";exit;
+      // Si hay al menos 1 producto para las salidas lo inserta.
+      if (count($productosSalida) > 0)
+      {
+        $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+      }
 
-        return $result;
+      // Si no hay productos para ninguna de las medidas elimina la salida.
+      else
+      {
+        $this->db->delete('compras_salidas', array('id_salida' => $res['id_salida']));
+      }
+    }
+    else
+    {
+      rmdir($pathDocs);
+    }
+
+    // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
+    // echo "<pre>";
+    //   var_dump($datosXML);
+    // echo "</pre>";exit;
+
+    return $result;
 	}
 
-    /**
-    * Realiza el timbrado de una factura.
-    *
-    * @param  string $xml
-    * @param  string $idFactura
-    * @param  boolean $delFiles
-    * @return void
-    */
-    private function timbrar($pathXML, $idFactura, $delFiles = true)
+  /**
+  * Realiza el timbrado de una factura.
+  *
+  * @param  string $xml
+  * @param  string $idFactura
+  * @param  boolean $delFiles
+  * @return void
+  */
+  private function timbrar($pathXML, $idFactura, $delFiles = true)
+  {
+    $this->load->library('facturartebarato_api');
+
+    $this->facturartebarato_api->setPathXML($pathXML);
+
+    // Realiza el timbrado usando la libreria.
+    $timbrado = $this->facturartebarato_api->timbrar();
+
+    // echo "<pre>";
+    //   var_dump($timbrado);
+    // echo "</pre>";exit;
+
+    $result = array(
+      'id_factura' => $idFactura,
+      'codigo'     => $timbrado->codigo
+    );
+
+    // Si no hubo errores al momento de realizar el timbrado.
+    if ($timbrado->status)
     {
-        $this->load->library('facturartebarato_api');
+      // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
+      // significa que el timbrado esta pendiente.
+      if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
+      {
+        // Se coloca el status de timbre de la factura como pendiente.
+        $statusTimbrado = 'p';
+      }
+      else
+      {
+        // Si el timbrado se realizo correctamente.
 
-        $this->facturartebarato_api->setPathXML($pathXML);
+        // Se coloca el status de timbre de la factura como timbrado.
+        $statusTimbrado = 't';
+      }
 
-        // Realiza el timbrado usando la libreria.
-        $timbrado = $this->facturartebarato_api->timbrar();
+      // Actualiza los datos en la BDD.
+      $dataTimbrado = array(
+        'xml'             => $this->facturartebarato_api->getXML(),
+        'status_timbrado' => $statusTimbrado,
+        'uuid'            => $this->facturartebarato_api->getUUID(),
+      );
 
-        // echo "<pre>";
-        //   var_dump($timbrado);
-        // echo "</pre>";exit;
+      $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
 
-        $result = array(
-          'id_factura' => $idFactura,
-          'codigo'     => $timbrado->codigo
+      $result['passes'] = true;
+    }
+    else
+    {
+      // Si es true $delFile entonces elimina todo lo relacionado con la factura.
+      if ($delFiles)
+      {
+        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        unlink($pathXML);
+      }
+
+      // Entra si hubo un algun tipo de error de conexion a internet.
+      if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
+        $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
+      elseif ($timbrado->codigo === '500')
+        $result['msg'] = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
+      else
+        $result['msg'] = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
+
+      $result['passes'] = false;
+      }
+
+      // echo "<pre>";
+      //   var_dump($timbrado);
+      // echo "</pre>";exit;
+
+      return $result;
+  }
+
+  /**
+  * Verifica que el timbrado de la factura se ha realiza. Esto es en caso
+  * de que el timbrado alla quedado pendiente.
+  *
+  * @param  string $idFactura
+  * @return boolean
+  */
+  public function verificarTimbrePendiente($idFactura)
+  {
+      $this->load->library('facturartebarato_api');
+
+      // Obtenemos el uuid de la factura pendiente a timbrar.
+      $uuid = $this->db
+        ->select('uuid')
+        ->from('facturacion')
+        ->where('id_factura', $idFactura)
+        ->get()->row()->uuid;
+
+      $this->facturartebarato_api->setUUID($uuid);
+
+      // Reliza la peticion para verificar el stutus de la factura.
+      $result = $this->facturartebarato_api->verificarPendiente();
+
+      // Si el status es Finished entonces ya se timbro correctamente.
+      if ($result->data->status === 'F')
+      {
+        $this->db->update('facturacion',
+          array('status_timbrado' => 't'),
+          array('id_factura' => $idFactura)
         );
+      }
 
-        // Si no hubo errores al momento de realizar el timbrado.
-        if ($timbrado->status)
-        {
-          // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
-          // significa que el timbrado esta pendiente.
-          if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
-          {
-            // Se coloca el status de timbre de la factura como pendiente.
-            $statusTimbrado = 'p';
-          }
-          else
-          {
-            // Si el timbrado se realizo correctamente.
-
-            // Se coloca el status de timbre de la factura como timbrado.
-            $statusTimbrado = 't';
-          }
-
-          // Actualiza los datos en la BDD.
-          $dataTimbrado = array(
-            'xml'             => $this->facturartebarato_api->getXML(),
-            'status_timbrado' => $statusTimbrado,
-            'uuid'            => $this->facturartebarato_api->getUUID(),
-          );
-
-          $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
-
-          $result['passes'] = true;
-        }
-        else
-        {
-          // Si es true $delFile entonces elimina todo lo relacionado con la factura.
-          if ($delFiles)
-          {
-            $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-            $this->db->delete('facturacion', array('id_factura' => $idFactura));
-            unlink($pathXML);
-          }
-
-          // Entra si hubo un algun tipo de error de conexion a internet.
-          if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
-            $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
-          elseif ($timbrado->codigo === '500')
-            $result['msg'] = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
-          else
-            $result['msg'] = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
-
-          $result['passes'] = false;
-        }
-
-        // echo "<pre>";
-        //   var_dump($timbrado);
-        // echo "</pre>";exit;
-
-        return $result;
-    }
-
-    /**
-    * Verifica que el timbrado de la factura se ha realiza. Esto es en caso
-    * de que el timbrado alla quedado pendiente.
-    *
-    * @param  string $idFactura
-    * @return boolean
-    */
-    public function verificarTimbrePendiente($idFactura)
-    {
-        $this->load->library('facturartebarato_api');
-
-        // Obtenemos el uuid de la factura pendiente a timbrar.
-        $uuid = $this->db
-          ->select('uuid')
-          ->from('facturacion')
-          ->where('id_factura', $idFactura)
-          ->get()->row()->uuid;
-
-        $this->facturartebarato_api->setUUID($uuid);
-
-        // Reliza la peticion para verificar el stutus de la factura.
-        $result = $this->facturartebarato_api->verificarPendiente();
-
-        // Si el status es Finished entonces ya se timbro correctamente.
-        if ($result->data->status === 'F')
-        {
-          $this->db->update('facturacion',
-            array('status_timbrado' => 't'),
-            array('id_factura' => $idFactura)
-          );
-        }
-
-        return $result->data->status === 'F' ? true : false;
-    }
+      return $result->data->status === 'F' ? true : false;
+  }
 
 	/**
 	 * Cancela una factura. Cambia el status a 'ca'.
@@ -1138,8 +1139,11 @@ class facturacion_model extends privilegios_model{
 
             $correoDestino = array();
 
-            if ($_POST['pextras'] !== '')
-              $correoDestino += explode(',', $_POST['pextras']);
+            if (isset($_POST['pextras']))
+            {
+              if ($_POST['pextras'] !== '')
+                $correoDestino += explode(',', $_POST['pextras']);
+            }
 
             if (isset($_POST['emails']))
             {
@@ -1582,15 +1586,15 @@ class facturacion_model extends privilegios_model{
    * @return array
 	 */
 	public function addSerieFolio()
-    {
-        $data = array(
-    		'id_empresa'     => $this->input->post('fid_empresa'),
-    		'serie'          => strtoupper($this->input->post('fserie')),
-    		'no_aprobacion'  => $this->input->post('fno_aprobacion'),
-    		'folio_inicio'   => $this->input->post('ffolio_inicio'),
-    		'folio_fin'      => $this->input->post('ffolio_fin'),
-    		'ano_aprobacion' => $this->input->post('fano_aprobacion'),
-    	);
+  {
+    $data = array(
+  		'id_empresa'     => $this->input->post('fid_empresa'),
+  		'serie'          => strtoupper($this->input->post('fserie')),
+  		'no_aprobacion'  => $this->input->post('fno_aprobacion'),
+  		'folio_inicio'   => $this->input->post('ffolio_inicio'),
+  		'folio_fin'      => $this->input->post('ffolio_fin'),
+  		'ano_aprobacion' => $this->input->post('fano_aprobacion'),
+    );
 
 		if($this->input->post('fleyenda') !== '')
 			$data['leyenda'] = $this->input->post('fleyenda');

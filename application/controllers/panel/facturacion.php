@@ -557,7 +557,7 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_dcantidad[]',
               'label'   => 'prod_dcantidad',
-              'rules'   => ''),
+              'rules'   => 'callback_check_max_decimales'),
         array('field'   => 'prod_dkilos[]',
               'label'   => 'prod_dkilos',
               'rules'   => ''),
@@ -830,7 +830,7 @@ class facturacion extends MY_Controller {
    |-------------------------------------------------------------------------
    */
 
-   public function check_max_decimales($str)
+  public function check_max_decimales($str)
   {
     $exp = explode('.', $str);
 
