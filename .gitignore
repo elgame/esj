@@ -10,3 +10,4 @@ Todos los Productos2.txt
 *.pem
 *.csv
 *.sql
+application/logs
