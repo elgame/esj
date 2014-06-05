@@ -104,6 +104,8 @@ class facturartebarato_api {
 
       $checkResult = $this->checkResultTimbrado();
 
+      log_message('error', 'Timbre ==> Status: ' . $checkResult->status . ' || Codigo: ' . $checkResult->codigo . ' || Mensaje: ' . $checkResult->mensaje . ' || XML: ' . $this->xml);
+
       // echo "<pre>";
       //   var_dump($this->resultAPI, $postData, $this->xml);
       // echo "</pre>";exit;
