@@ -344,7 +344,7 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
           'faltantes' => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
           'observacion'     => $_POST['observacion'][$key],
-          'status' => isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1' ? 'a' : 'p',
+          'status' => (isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1') || $status === 'a' ? 'a' : 'p',
           'ieps'             => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
@@ -1010,11 +1010,11 @@ class compras_ordenes_model extends CI_Model {
       $pdf = new MYpdf('P', 'mm', 'Letter');
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
-      $tipo_orden = 'ORDER DE COMPRA';
+      $tipo_orden = 'ORDEN DE COMPRA';
       if($orden['info'][0]->tipo_orden == 'd')
-        $tipo_orden = 'ORDER DE SERVICIO';
+        $tipo_orden = 'ORDEN DE SERVICIO';
       elseif($orden['info'][0]->tipo_orden == 'f')
-        $tipo_orden = 'ORDER DE FLETE';
+        $tipo_orden = 'ORDEN DE FLETE';
       // $pdf->titulo2 = $tipo_orden;
       // $pdf->titulo2 = 'Proveedor: ' . $orden['info'][0]->proveedor;
       // $pdf->titulo3 = " Fecha: ". date('Y-m-d') . ' Orden: ' . $orden['info'][0]->folio;
