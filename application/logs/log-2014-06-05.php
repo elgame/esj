@@ -49,3 +49,13 @@ ERROR - 2014-06-05 13:08:46 --> Could not find the language line "v_first"
 ERROR - 2014-06-05 13:08:46 --> Could not find the language line "v_last"
 ERROR - 2014-06-05 13:37:07 --> Could not find the language line "v_first"
 ERROR - 2014-06-05 13:37:07 --> Could not find the language line "v_last"
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_dia /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 16
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_dia /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 19
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_semana /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 22
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_semana /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 25
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_mes /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 28
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: venta_mes /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 31
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: bajos_inventario /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 36
+ERROR - 2014-06-05 15:14:22 --> Severity: Notice  --> Undefined variable: bajos_inventario /opt/lampp/htdocs/sanjorge/application/views/panel/general/home.php 39
+ERROR - 2014-06-05 15:14:25 --> Could not find the language line "v_first"
+ERROR - 2014-06-05 15:14:25 --> Could not find the language line "v_last"
