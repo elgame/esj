@@ -232,6 +232,7 @@ class banco_cuentas_model extends banco_model {
 		$data_anterior->cli_pro        = '';
 		$data_anterior->metodo_pago    = '';
 		$data_anterior->entransito     = '';
+    $data_anterior->salvo_buen_cobro     = '';
 		$data_anterior->entransito_chk = '';
 		$data_anterior->status         = '';
 		$data_anterior->concepto       = '<strong>Saldo anterior al '.$fecha1.'</strong>';
@@ -261,6 +262,7 @@ class banco_cuentas_model extends banco_model {
 				m.tipo,
 				m.status,
 				m.entransito,
+        m.salvo_buen_cobro,
 				m.metodo_pago,
 				m.id_cuenta_proveedor,
         m.desglosar_iva
@@ -473,8 +475,9 @@ class banco_cuentas_model extends banco_model {
 		// $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. pago', 'Retiro', 'Deposito', 'Estado');
     $header = array('FECHA', 'REF', 'BENEFICIARIO', 'CONCEPTO', 'M. PAGO', 'IMPORTE', 'IVA', 'Ret IVA');
 
-		$total_retiro   = 0;
-		$total_deposito = 0;
+		$total_retiro = $total_retiro_sbc = 0;
+		$total_deposito = $total_deposito_sbc = 0;
+    $salvo_bc = array();
 
 		foreach($res['movimientos'] as $key => $item){
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
@@ -505,7 +508,7 @@ class banco_cuentas_model extends banco_model {
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 
-			if(substr($item->entransito, 0, 5) == 'Trans')
+			if(substr($item->entransito, 0, 5) == 'Trans' || $item->salvo_buen_cobro == 't')
 			{
         $monto_r = $item->retiro;
         $iva_r = $ret_iva_r = 0;
@@ -546,13 +549,20 @@ class banco_cuentas_model extends banco_model {
 								String::formatoNumero($ret_iva_r, 2, '$', false),
 								);
 
-				$pdf->SetX(6);
-				$pdf->SetAligns($aligns);
-				$pdf->SetWidths($widths);
-				$pdf->Row($datos, false);
+        if(substr($item->entransito, 0, 5) == 'Trans'){
+  				$pdf->SetX(6);
+  				$pdf->SetAligns($aligns);
+  				$pdf->SetWidths($widths);
+  				$pdf->Row($datos, false);
 
-				$total_retiro   += $item->retiro;
-				$total_deposito += $item->deposito;
+  				$total_retiro   += $item->retiro;
+  				$total_deposito += $item->deposito;
+        }elseif($item->salvo_buen_cobro == 't'){
+          $salvo_bc[] = $datos;
+
+          $total_retiro_sbc   += $item->retiro;
+          $total_deposito_sbc += $item->deposito;
+        }
 			}
 		}
 
@@ -566,9 +576,30 @@ class banco_cuentas_model extends banco_model {
 					// String::formatoNumero($total_deposito, 2, '$', false),
 				), false);
 
+    if(count($salvo_bc) > 0)
+    {
+      $pdf->MultiCell(160, 8, "MAS: ", '', "L", false);
+      foreach ($salvo_bc as $key => $value)
+      {
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($value, false);
+      }
+      $pdf->SetX(6);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetAligns(array('R', 'R', 'R'));
+      $pdf->SetWidths(array(142, 25, 20));
+      $pdf->Row(array('SUMA SALVO BUEN COBRO:',
+            String::formatoNumero($total_retiro_sbc, 2, '$', false),
+            // String::formatoNumero($total_deposito, 2, '$', false),
+          ), false);
+    }
+
 
 		// $conciliado = $res['total_saldos']+$total_retiro-$total_deposito;
-    $conciliado = $_GET['saldob']-$total_retiro;
+    $conciliado = $_GET['saldob']-$total_retiro+$total_retiro_sbc;
 		$pdf->SetFont('Arial','B',10);
 		$pdf->SetAligns(array('L', 'R'));
 		$pdf->SetWidths(array(142, 50));

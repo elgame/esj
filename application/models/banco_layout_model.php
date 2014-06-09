@@ -71,21 +71,35 @@ class banco_layout_model extends banco_cuentas_model {
       $this->row_control .= $this->numero($value['monto'], 18, true); //Importe a abonar o cargar
       $tipo_cuenta = '01';
       if ($data['toperacion']=='ba') //banamex
-        $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
-      else //interbancaria
       {
+        $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
+        $ref_alfanumerica = $value['ref_numerica'];
+        $instrucciones = $value['ref_alfanumerica'];
+        $descripcion = $value['descripcion'];
+        $ref_numerica = '';
+      }else //interbancaria
+      {
+        if($value['es_moral'] == 'f')
+        {
+          $new_nombre = $this->getNombre($value['beneficiario']);
+          $value['beneficiario'] = $new_nombre[0].','.$new_nombre[1].'/'.$new_nombre[2];
+        }else
+          $value['beneficiario'] = ','.$value['beneficiario'].'/';
         $cuenta = $value['proveedor_cuenta'];
         if(strlen($cuenta) == 16) //Tarjeta de debito o credito
           $tipo_cuenta = '03';
+        $ref_alfanumerica = $value['ref_alfanumerica'];
+        $instrucciones = $descripcion = '';
+        $ref_numerica = $value['ref_numerica'];
       }
       $this->row_control .= $tipo_cuenta; //Tipo de cuenta
       $this->row_control .= $this->numero($cuenta, 20); //Número de cuenta
-      $this->row_control .= $this->string($value['ref_alfanumerica'], 40); //Referencia  Alfanumérica
+      $this->row_control .= $this->string($ref_alfanumerica, 40); //Referencia  Alfanumérica/Numerica
       $this->row_control .= $this->string( $this->cleanStr($value['beneficiario']), 55); //Beneficiario
-      $this->row_control .= $this->string($value['instrucciones'], 40); //Instrucciones
-      $this->row_control .= $this->string('', 24); //Descripción TEF
+      $this->row_control .= $this->string($instrucciones, 40); //Instrucciones
+      $this->row_control .= $this->string($descripcion, 24); //Descripción TEF
       $this->row_control .= $this->numero($value['clave_banco'], 4); //Clave de Banco
-      $this->row_control .= $this->numero( $value['ref_numerica'] , 7); //Referencia Numérica
+      $this->row_control .= $this->numero( $ref_numerica , 7); //Referencia Numérica
       $this->row_control .= "00\r\n"; //Plazo
     }
   }
@@ -257,6 +271,46 @@ class banco_layout_model extends banco_cuentas_model {
   private function cleanStr($string)
   {
     return str_replace(array('ñ','Ñ','*','#','$','%','=','+'), array('n','N','','','','','',''), $string);
+  }
+
+  function getNombre($nombre){
+    $arreglo = explode(' ', $nombre);
+    $size = count($arreglo);
+
+    //si el nombre tiene solo 2 palabras
+    if($size==2){
+      //el primero es nombre
+      $nombre =$arreglo[0];
+      //el segundo es apellido
+      $apellidop = $arreglo[1];
+      $apellidom = "";
+    }else{
+      //los tokens se utilizan para crear apellidos compuestos
+      $tokens = "de la del las los mac mc van von y i san santa ";
+      $nombre ="";
+      $apellidop = "";
+      $apellidom = "";
+      $token = 'am';
+
+      for ($contz=$size-1; $contz>=0; $contz--)
+      {
+        if(!$this->buscarCadena($tokens, $arreglo[$contz]))
+          $token = $token=='am'? 'ap': 'n';
+
+        if($token == 'am')
+          $apellidom = $arreglo[$contz].' '.$apellidom;
+        elseif($token == 'ap')
+          $apellidop = $arreglo[$contz].' '.$apellidop;
+        elseif($token == 'n')
+          $nombre = $arreglo[$contz].' '.$nombre;
+      }
+    }
+    return array(trim($nombre), trim($apellidop), trim($apellidom));
+  }
+
+  function buscarCadena($cadena, $palabra){
+    if(stristr($cadena,$palabra)) return true;
+    else return false;
   }
 
 }

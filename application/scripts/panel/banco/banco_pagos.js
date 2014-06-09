@@ -6,12 +6,14 @@ $(function(){
     var $this = $(this), datos = $this.val().split('-'), $tr = $this.parents("tr");
     if(datos[1] == 't') // es banamex
     {
-      $tr.find('.ref_alfa').attr('maxlength', '10').numeric({ decimal: false, negative: false });
-      if( !$.isNumeric($tr.find('.ref_alfa').val()) )
-        $tr.find('.ref_alfa').val("");
+      $tr.find('.ref_numerica').attr('maxlength', '10');
+      $tr.find('.ref_alfa').attr('maxlength', '40');
+      $tr.find('.ref_descripcion').attr('maxlength', '24').attr('required', 'required').removeAttr('readonly');
     }else // es interbancario
     {
-      $tr.find('.ref_alfa').attr('maxlength', '40').removeNumeric();
+      $tr.find('.ref_alfa').attr('maxlength', '40');
+      $tr.find('.ref_numerica').attr('maxlength', '7');
+      $tr.find('.ref_descripcion').val('').attr('readonly', 'readonly').removeAttr('required');
     }
   });
   $(".tipo_cuenta").change();

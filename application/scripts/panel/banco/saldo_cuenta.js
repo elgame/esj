@@ -6,12 +6,25 @@ $(function(){
 			function(obj){
 				window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
 			}, function(obj){
-				if (vt.attr('data-status') == 'Trans')
+				if (vt.attr('data-status') != 'Trans')
 					vt.removeAttr("checked");
 				else
 					vt.attr('checked', 'true');
 			});
 	});
+
+  $(".sbc_chekrs").on('click', function() {
+    var vt = $(this);
+    msb.confirm('Esta seguro de cambiar el estado de "Salvo buen cobro"?', 'cuentas', this,
+      function(obj){
+        window.location = base_url+"panel/banco/cambia_salvo_bc?sbcstatus="+vt.is(':checked')+"&"+vt.val();
+      }, function(obj){
+        if (vt.attr('data-status') == 'f')
+          vt.removeAttr("checked");
+        else
+          vt.attr('checked', 'true');
+      });
+  });
 
 	$(".no_print.del_operation:first a").remove();
 

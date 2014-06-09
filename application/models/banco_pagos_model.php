@@ -17,17 +17,17 @@ class banco_pagos_model extends CI_Model {
       $sql .= " AND pc.is_banamex = '{$datos['tipo_cuenta']}'";
 
 		$response = array();
-    $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal
+    $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal, bpc.es_moral
             FROM banco_pagos_compras AS bpc INNER JOIN proveedores AS p ON p.id_proveedor = bpc.id_proveedor
             WHERE bpc.status = 'f'
-            GROUP BY p.id_proveedor
+            GROUP BY p.id_proveedor, bpc.es_moral
             ORDER BY p.nombre_fiscal ASC");
     $response = $res_proveedores->result();
     foreach ($response as $key => $value)
     {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.serie, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra
+                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion
                                FROM banco_pagos_compras AS bpc
                                INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
                                LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
@@ -52,6 +52,8 @@ class banco_pagos_model extends CI_Model {
           'referencia'       => $datos['ref_numerica'][$keyp][0],
           'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
           'monto'            => $datos['monto'][$keyp][$key],
+          'descripcion'      => $datos['descripcion'][$keyp][0],
+          'es_moral'         => ($datos['es_moral'][$keyp][0]=='si'? 't': 'f'),
           ), "id_pago = {$id_pago}");
       }
     }
@@ -78,30 +80,31 @@ class banco_pagos_model extends CI_Model {
       {
         $num_abonos++;
         $pagos_archivo[] = array(
-          'monto' => $total_proveedor,
+          'monto'              => $total_proveedor,
           'proveedor_sucursal' => $value->sucursal,
-          'proveedor_cuenta' => $value->cuenta,
-          'ref_alfanumerica' => $value->ref_alfanumerica,
-          'beneficiario' => $pago->nombre_fiscal.'/',
-          'instrucciones' => '',
-          'clave_banco' => $value->codigo_banco,
-          'ref_numerica' => $value->referencia,
+          'proveedor_cuenta'   => $value->cuenta,
+          'ref_alfanumerica'   => $value->ref_alfanumerica,
+          'beneficiario'       => $pago->nombre_fiscal,
+          'es_moral'           => $pago->es_moral,
+          'clave_banco'        => $value->codigo_banco,
+          'ref_numerica'       => $value->referencia,
+          'descripcion'        => $value->descripcion,
           );
       }
     }
 
     $data = array(
       //Reg de Control
-      'id_cuenta' => $cuenta_retiro->id_cuenta,
+      'id_cuenta'      => $cuenta_retiro->id_cuenta,
       'numero_cliente' => $cuenta_retiro->no_cliente,
       'fecha_pago'     => date("Y-m-d"),
-      'nombre_empresa'  => $cuenta_retiro->nombre_fiscal,
-      'description'  => 'Pago a proveedores',
-      'toperacion'  => $_GET['tipo'],
+      'nombre_empresa' => $cuenta_retiro->nombre_fiscal,
+      'description'    => 'Pago a proveedores',
+      'toperacion'     => $_GET['tipo'],
       //Reg Global
       'total_retiro' => $total_pagar,
-      'sucursal' => $cuenta_retiro->sucursal,
-      'cuenta' => $cuenta_retiro->cuenta,
+      'sucursal'     => $cuenta_retiro->sucursal,
+      'cuenta'       => $cuenta_retiro->cuenta,
       //Reg Individual
       'pagos' => $pagos_archivo,
       //Reg Totales
@@ -220,17 +223,17 @@ class banco_pagos_model extends CI_Model {
       $sql .= " AND pc.is_banamex = '{$datos['tipo_cuenta']}'";
 
     $response = array();
-    $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal
+    $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal, bpc.es_moral
             FROM banco_pagos_bascula AS bpc INNER JOIN proveedores AS p ON p.id_proveedor = bpc.id_proveedor
             WHERE bpc.status = 'f'
-            GROUP BY p.id_proveedor
+            GROUP BY p.id_proveedor, bpc.es_moral
             ORDER BY p.nombre_fiscal ASC");
     $response = $res_proveedores->result();
     foreach ($response as $key => $value)
     {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha_bruto) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula
+                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula, bpc.descripcion
                                FROM banco_pagos_bascula AS bpc
                                INNER JOIN bascula AS c ON c.id_bascula = bpc.id_bascula
                                LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
@@ -255,6 +258,8 @@ class banco_pagos_model extends CI_Model {
           'referencia'       => $datos['ref_numerica'][$keyp][0],
           'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
           'monto'            => $datos['monto'][$keyp][$key],
+          'descripcion'      => $datos['descripcion'][$keyp][0],
+          'es_moral'         => ($datos['es_moral'][$keyp][0]=='si'? 't': 'f'),
           ), "id_pago = {$id_pago}");
       }
     }
@@ -281,14 +286,15 @@ class banco_pagos_model extends CI_Model {
       {
         $num_abonos++;
         $pagos_archivo[] = array(
-          'monto' => $total_proveedor,
+          'monto'              => $total_proveedor,
           'proveedor_sucursal' => $value->sucursal,
-          'proveedor_cuenta' => $value->cuenta,
-          'ref_alfanumerica' => $value->ref_alfanumerica,
-          'beneficiario' => $pago->nombre_fiscal.'/'.'/',
-          'instrucciones' => '',
-          'clave_banco' => $value->codigo_banco,
-          'ref_numerica' => $value->referencia,
+          'proveedor_cuenta'   => $value->cuenta,
+          'ref_alfanumerica'   => $value->ref_alfanumerica,
+          'beneficiario'       => $pago->nombre_fiscal,
+          'es_moral'           => $pago->es_moral,
+          'clave_banco'        => $value->codigo_banco,
+          'ref_numerica'       => $value->referencia,
+          'descripcion'        => $value->descripcion,
           );
       }
     }

@@ -921,6 +921,7 @@ class cuentas_pagar_model extends privilegios_model{
 		//se inserta el abono
 		$this->db->insert($camps[1], $data);
 		$data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
+    $this->db->update('banco_pagos_compras', array('status' => 't'), array($camps[0] => $id));
 
 		//verifica si la factura se pago, se cambia el status
 		if($pagada){

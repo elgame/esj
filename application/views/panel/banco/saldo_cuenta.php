@@ -121,11 +121,25 @@
             ?>
             	<tr>
             		<td><?php
+                  $opc_html = '';
             			if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
-            				echo '<input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
+            				$opc_html .= '<li><input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
             					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
-            					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'">';
-            		?></td>
+            					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Transito</li>';
+                  if(count($status) > 0)
+                  {
+                    $opc_html .= '<li><input type="checkbox" class="sbc_chekrs" id="sbc'.$movimiento->id_movimiento.'"
+                      value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
+                      data-status="'.$movimiento->salvo_buen_cobro.'" '.($movimiento->salvo_buen_cobro=='t'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Salvo buen cobro</li>';
+            		?>
+                  <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <?php echo $opc_html; ?>
+                    </ul>
+                  </div>
+              <?php } ?>
+                </td>
             		<td><div style="width: 80px;"><?php echo $movimiento->fecha; ?></div></td>
             		<td><?php echo $movimiento->numero_ref; ?></td>
             		<td><div style="width: 200px;"><?php echo $movimiento->cli_pro; ?></div></td>
