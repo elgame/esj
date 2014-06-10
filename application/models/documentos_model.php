@@ -65,8 +65,9 @@ class documentos_model extends CI_Model {
    *
    * @return mixed array|boolean
    */
-  public function getClienteDocs($idFactura)
+  public function getClienteDocs($idFactura, $id_documento=null)
   {
+    $sql = ($id_documento!==null? " AND fd.id_documento = {$id_documento}": '');
     $query = $this->db->query(
       "SELECT fd.id_documento,
               fd.data,
@@ -78,7 +79,7 @@ class documentos_model extends CI_Model {
               rd.orden
        FROM rastria_documentos AS rd
        INNER JOIN facturacion_documentos AS fd ON fd.id_documento = rd.id_documento
-       WHERE fd.id_factura = {$idFactura} AND rd.status = true
+       WHERE fd.id_factura = {$idFactura} AND rd.status = true {$sql}
        ORDER BY rd.orden ASC"
     );
 
