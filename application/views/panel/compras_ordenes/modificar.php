@@ -497,8 +497,8 @@
                                     if ($prod->status === 'a')
                                     {
                                       if ($prodOk)
-                                      {
-                                        $htmlProdOk = '<input type="checkbox" value="1" class="prodOk" checked><input type="hidden" name="isProdOk[]" value="1" id="idProdOk">';
+                                      { //<input type="checkbox" value="1" class="prodOk" checked>
+                                        $htmlProdOk = '<input type="hidden" name="isProdOk[]" value="1" id="idProdOk">';
                                       }
                                       else
                                       {
@@ -588,7 +588,7 @@
                                     <input type="text" name="observacion[]" value="<?php echo $prod->observacion ?>" id="observacion" class="span12" <?php echo $readonly ?>>
                                 </td>
                                  <td style="width: 35px;<?php echo $redBg ?>">
-                                  <?php if ($showButton){ ?>
+                                  <?php if ($showButton && $prod->status != 'a'){ ?>
                                     <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
                                   <?php } ?>
                                 </td>

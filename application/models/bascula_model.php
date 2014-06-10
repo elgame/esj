@@ -674,6 +674,7 @@ class Bascula_model extends CI_Model {
           'id_pago' => $id_bascula_pagos,
           'id_bascula' => $pesada['id_bascula']
         );
+        $this->db->update('banco_pagos_bascula', array('status' => 't'), array('id_bascula' => $pesada['id_bascula']));
       }
 
       $this->db->insert_batch('bascula_pagos_basculas', $pesadas);

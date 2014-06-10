@@ -1090,28 +1090,16 @@ class compras_ordenes_model extends CI_Model {
 
       $yy = $pdf->GetY();
 
-      //Totales
-      $pdf->SetX(160);
-      $pdf->SetAligns(array('L', 'R'));
-      $pdf->SetWidths(array(25, 25));
-      $pdf->Row(array('SUB-TOTAL', String::formatoNumero($subtotal, 2, '$', false)), false, false);
-      $pdf->SetX(160);
-      $pdf->Row(array('IVA', String::formatoNumero($iva, 2, '$', false)), false, false);
-      if ($retencion > 0)
-      {
-        $pdf->SetX(160);
-        $pdf->Row(array('Ret. IVA', String::formatoNumero($retencion, 2, '$', false)), false, false);
-      }
-      $pdf->SetX(160);
-      $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, false);
-
       //Otros datos
-      $pdf->SetXY(6, $yy);
+      // $pdf->SetXY(6, $yy);
+      $pdf->SetX(6);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(154));
       if($orden['info'][0]->tipo_orden == 'f'){
         $this->load->model('facturacion_model');
+        $this->load->model('documentos_model');
         $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+        $info_bascula = false;
         if (count($facturasss) > 0)
         {
           $clientessss = $facturassss = '';
@@ -1122,6 +1110,13 @@ class compras_ordenes_model extends CI_Model {
             $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
             $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio;
             $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
+
+            if($info_bascula === false)
+            {
+              $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
+              if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+                $info_bascula = false;
+            }
           }
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->Row(array('FOLIO: '.substr($facturassss, 1) ), false, false);
@@ -1135,6 +1130,8 @@ class compras_ordenes_model extends CI_Model {
       }else
       {
         $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado)), false, false);
+        $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
       }
 
@@ -1142,19 +1139,19 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('________________________________________________________________________________________________'), false, false);
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->Row(array('AUTORIZA: '.strtoupper($orden['info'][0]->autorizo)), false, false);
-      $yy = $pdf->GetY();
+      $yy2 = $pdf->GetY();
       if($orden['info'][0]->tipo_orden != 'f'){
-        $yy -= 9;
-        $pdf->SetXY(160, $yy);
+        $yy2 -= 9;
+        $pdf->SetXY(160, $yy2);
         $pdf->Row(array('_______________________________'), false, false);
-        $yy = $pdf->GetY();
+        $yy2 = $pdf->GetY();
         $pdf->SetXY(160, $pdf->GetY());
         $pdf->SetWidths(array(60));
         $pdf->Row(array('COD/AREA: ' . $orden['info'][0]->departamento), false, false);
       }
       // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
 
-      $pdf->SetXY(6, $yy+2);
+      $pdf->SetXY(6, $yy2+2);
       $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
       if($orden['info'][0]->tipo_orden == 'f'){
         $pdf->SetWidths(array(205));
@@ -1163,6 +1160,30 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY()-3);
         $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
       }
+
+      //Totales
+      $pdf->SetXY(160, $yy);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(25, 25));
+      $pdf->Row(array('SUB-TOTAL', String::formatoNumero($subtotal, 2, '$', false)), false, true);
+      $pdf->SetX(160);
+      $pdf->Row(array('IVA', String::formatoNumero($iva, 2, '$', false)), false, true);
+      if ($retencion > 0)
+      {
+        $pdf->SetX(160);
+        $pdf->Row(array('Ret. IVA', String::formatoNumero($retencion, 2, '$', false)), false, true);
+      }
+      $pdf->SetX(160);
+      $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+      //Boleta si es flete
+      if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula)){
+        $pdf->SetX(160);
+
+        $info_bascula = json_decode($info_bascula[0]->data);
+        $pdf->Row(array('Ticket', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
+        // $pdf->Row(array('Ticket', String::formatoNumero($total, 2, '$', false)), false, true);
+      }
+
       $pdf->SetWidths(array(154));
 
       if($orden['info'][0]->status == 'f'){

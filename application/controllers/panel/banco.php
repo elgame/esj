@@ -9,6 +9,7 @@ class banco extends MY_Controller {
 	private $excepcion_privilegio = array(
 		'banco/get_cuentas_banco/',
 		'banco/cambia_entransito/',
+    'banco/cambia_salvo_bc/',
 		'banco/conciliacion/',
 		'banco/cheque/',
 		'banco/cuenta_banamex/',
@@ -353,6 +354,17 @@ class banco extends MY_Controller {
 		}else
 			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=1'));
 	}
+
+  public function cambia_salvo_bc(){
+    if (isset($_GET['id_movimiento']{0}))
+    {
+      $this->load->model('banco_cuentas_model');
+      $response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'],
+        array('salvo_buen_cobro' => ($this->input->get('sbcstatus')=='false'? 'f' : 't') ));
+      redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=11'));
+    }else
+      redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus', 'sbcstatus')).'&msg=1'));
+  }
 
 
 

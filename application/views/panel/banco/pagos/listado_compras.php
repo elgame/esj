@@ -95,9 +95,10 @@
                     <th>Serie/Folio</th>
                     <th>Monto</th>
                     <th>Cuentas</th>
-                    <th>Ref 1</th>
-                    <th>Ref 2</th>
-                    <th></th>
+                    <th style="width:20px;">Numerica</th>
+                    <th>Alfanumerica</th>
+                    <th>Descripcion</th>
+                    <th>Persona moral?</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -116,7 +117,7 @@
                             <td>'.$value->serie.$value->folio.'
                               <input type="hidden" name="id_pago['.$keyp.'][]" value="'.$value->id_pago.'">
                             </td>
-                            <td colspan="4"><input type="text" name="monto['.$keyp.'][]" value="'.$value->monto.'" class="monto vpositive" required readonly></td>
+                            <td colspan="5"><input type="text" name="monto['.$keyp.'][]" value="'.$value->monto.'" class="monto vpositive" required readonly></td>
                             <td>
                               '.$this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago/', array(
                                   'params'   => "id_pago={$value->id_pago}",
@@ -127,8 +128,9 @@
                           </tr>';
                 }
                 echo '<tr>
-                    <td colspan="3">'.$pago->nombre_fiscal.'</td>
-                    <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta" required>
+                    <td colspan="2">'.$pago->nombre_fiscal.'</td>
+                    <td>'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                    <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta span12" required>
                                 <option value=""></option>';
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
                           {
@@ -136,14 +138,20 @@
                             echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
                           }
                               echo '</select></td>
-                    <td><input type="text" name="ref_alfanumerica['.$keyp.'][]" value="'.$value->ref_alfanumerica.'" class="ref_alfa" required></td>
-                    <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="input-small ref_numerica" maxlength="7" required></td>
-                    <td>'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                    <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="span12 ref_numerica" maxlength="7" required></td>
+                    <td><input type="text" name="ref_alfanumerica['.$keyp.'][]" value="'.$value->ref_alfanumerica.'" class="ref_alfa span12" required></td>
+                    <td><input type="text" name="descripcion['.$keyp.'][]" value="'.$value->descripcion.'" class="ref_descripcion span12" required></td>
+                    <td><label></label>
+                      <select name="es_moral['.$keyp.'][]" class="span12">
+                        <option value="si" '.($pago->es_moral=='t'? 'selected': '').'>Si</option>
+                        <option value="no" '.($pago->es_moral=='f'? 'selected': '').'>No</option>
+                      </select>
+                    </td>
                   </tr>'.$html;
               } ?>
                   <tr style="background-color:#ccc;font-weight: bold;">
                     <td style="text-align: right" colspan="2">Total:</td>
-                    <td id="total_pagar"><?php echo String::formatoNumero($total_pagar, 2, '$', false); ?></td>
+                    <td id="total_pagar" colspan="2"><?php echo String::formatoNumero($total_pagar, 2, '$', false); ?></td>
                     <td colspan="4"></td>
                   </tr>
                 </tbody>
