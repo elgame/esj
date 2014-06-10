@@ -1,6 +1,8 @@
 $(function(){
 
   $('#form').keyJump();
+  $('#modal-seguro').keyJump();
+  $('#modal-certificado').keyJump();
 
   $("#dcliente").autocomplete({
     source: function(request, response) {
@@ -447,6 +449,16 @@ $(function(){
   });
 
   EventOnChangeMoneda();
+
+  $('#modal-seguro, #modal-certificado').modal({
+    backdrop: 'static',
+    keyboard: false,
+    show: false
+  });
+
+  autocompleteProveedores();
+  enabledCloseModal('#modal-seguro');
+  enabledCloseModal('#modal-certificado');
 });
 
 var EventOnChangeMoneda = function () {
@@ -967,13 +979,13 @@ function createInfoCliente(item){
   $("#dcliente_ciudad").val(info2);
 }
 
-
 function autocompleteClasifi () {
- $("input#prod_ddescripcion").autocomplete({
+  $("input#prod_ddescripcion").autocomplete({
     source: base_url+'panel/facturacion/ajax_get_clasificaciones/',
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {
+
       var $this = $(this),
           $tr = $this.parent().parent();
 
@@ -984,9 +996,11 @@ function autocompleteClasifi () {
       $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
       $tr.find('#prod_dmedida_id').val(ui.item.item.id_unidad);
       $tr.find('#diva').val(ui.item.item.iva).trigger('change');
+
+      loadModalSegCert(ui.item.item.id_clasificacion);
     }
   }).keydown(function(event){
-      if(event.which == 8 || event == 46){
+      if(event.which == 8 || event == 46) {
         var $tr = $(this).parent().parent();
 
         $(this).css("background-color", "#FFD9B3");
@@ -1012,6 +1026,8 @@ function autocompleteClasifiLive () {
 
         $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
         $tr.find('#diva').val(ui.item.item.iva).trigger('change');
+
+        loadModalSegCert(ui.item.item.id_clasificacion);
       }
     }).keydown(function(event){
       if(event.which == 8 || event == 46) {
@@ -1091,3 +1107,83 @@ function loadDatosRemitente(data) {
 
   return d.join(' ');
 }
+
+var loadModalSegCert = function (idClasificacion) {
+  // Si la clasificacion es el seguro muestra el seguro para agregar
+  // sus datos.
+  if (idClasificacion === '49') {
+    $('#modal-seguro').modal('show');
+  }
+
+  // Si la clasificacion es el certificado de origin o fitosanitario.
+  // muestra el modal para agregar sus datos.
+  if (idClasificacion === '51' || idClasificacion === '52') {
+    $('#modal-certificado').modal('show');
+  }
+};
+
+// Autocomplete Proveedor
+var autocompleteProveedores = function () {
+  $("#pproveedor_seguro, #pproveedor_certificado").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val(), 10) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+        url: base_url + 'panel/bascula/ajax_get_proveedores/',
+        dataType: "json",
+        data: params,
+        success: function(data) {
+          response(data);
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      var $this = $(this);
+      $this.val(ui.item.label).css({'background-color': '#99FF99'});
+
+      if ($this[0].id === 'pproveedor_seguro') {
+        $("#seg_id_proveedor").val(ui.item.id).trigger('keyup');
+      } else {
+        $('#cert_id_proveedor').val(ui.item.id).trigger('keyup');
+      }
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      var $this = $(this);
+
+      $this.css({'background-color': '#FFD9B3'});
+
+      if ($this[0].id === 'pproveedor_seguro') {
+        $('#seg_id_proveedor').val('');
+      } else {
+        $('#cert_id_proveedor').val('');
+      }
+    }
+  });
+};
+
+// Verifica si los campos del modal estan todos llenos
+// si es true entonces habilita el boton para cerrarlo.
+var enabledCloseModal = function (idModal) {
+    var $modal = $(idModal),
+        $fields = $modal.find('.field-check');
+
+  $fields.keyup(function(event) {
+    var close = true;
+
+    $fields.each(function(index, el) {
+      if ($(this).val() === '') {
+        close = false;
+      }
+    });
+
+    if (close) {
+      $modal.find('#btnClose').prop('disabled', '');
+    } else {
+      $modal.find('#btnClose').prop('disabled', 'disabled');
+    }
+  });
+};

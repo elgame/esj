@@ -6,7 +6,10 @@ class proveedores extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('proveedores/ajax_get_proveedores/');
+	private $excepcion_privilegio = array(
+    'proveedores/ajax_get_proveedores/',
+    'proveedores/rpt_seg_cert_pdf/',
+  );
 
 	public function _remap($method){
 
@@ -327,6 +330,34 @@ class proveedores extends MY_Controller {
 		$this->form_validation->set_rules($rules);
 	}
 
+  public function rpt_seg_cert()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/proveedores/rpt_seg_cert.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas remisiones');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/proveedores/rpt_seg_cert',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_seg_cert_pdf()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->reporteSegCert();
+  }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
 	{

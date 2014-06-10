@@ -315,7 +315,6 @@ class proveedores_model extends CI_Model {
 		return $response;
 	}
 
-
 	/**
 	 * ******* CUENTAS DE PROVEEDORES ****************
 	 * ***********************************************
@@ -370,6 +369,192 @@ class proveedores_model extends CI_Model {
 
 		return $response;
 	}
+
+  protected function getSegurosCertificados()
+  {
+    $sql = '';
+
+    $_GET['ffecha1'] = isset($_GET['ffecha1']) ? $_GET['ffecha1'] : date('Y-m-01');
+    $_GET['ffecha2'] = isset($_GET['ffecha2']) ? $_GET['ffecha2'] : date('Y-m-d');
+
+    if (strtotime($_GET['ffecha1']) > strtotime($_GET['ffecha2']))
+    {
+      $aux = $_GET['ffecha1'];
+      $_GET['ffecha1'] = $_GET['ffecha2'];
+      $_GET['ffecha2'] = $aux;
+    }
+
+    $sql .= " AND (DATE(f.fecha) >= '" . $_GET['ffecha1'] . "' AND DATE(f.fecha) <= '" . $_GET['ffecha2'] . "')";
+
+    $this->load->model('empresas_model');
+    $empresaDefault = $this->empresas_model->getDefaultEmpresa();
+
+    $empresa = isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $empresaDefault->id_empresa;
+    $sql .= " AND f.id_empresa = {$empresa}";
+
+    if (isset($_GET['pid_proveedor']) && $_GET['pid_proveedor'] !== '')
+    {
+      $sql .= " AND p.id_proveedor = " . $_GET['pid_proveedor'];
+    }
+
+    if (isset($_GET['pproducto_id']) && $_GET['pproducto_id'] !== '')
+    {
+      $sql .= " AND fsc.id_clasificacion = " . $_GET['pproducto_id'];
+    }
+
+    $query = $this->db->query(
+      "SELECT p.nombre_fiscal as proveedor,
+              DATE(f.fecha) as fecha,
+              fsc.pol_seg,
+              fsc.certificado,
+              fsc.folio,
+              fsc.bultos,
+              c.nombre_fiscal as cliente,
+              fp.importe
+       FROM facturacion_seg_cert fsc
+       INNER JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
+       INNER JOIN facturacion f ON f.id_factura = fsc.id_factura
+       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+       INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura AND fp.id_clasificacion = fsc.id_clasificacion
+       WHERE 1=1 {$sql}
+      ");
+
+    // echo "<pre>";
+    //   var_dump($query->result());
+    // echo "</pre>";exit;
+
+    return $query->result();
+  }
+
+  /**
+  * Reporte de Certificados y Seguro.
+  */
+  public function reporteSegCert(){
+    if (isset($_GET['pproducto_id']) && $_GET['pproducto_id'] !== '')
+    {
+      $res = $this->getSegurosCertificados();
+
+      // echo "<pre>";
+      //   var_dump($res);
+      // echo "</pre>";exit;
+
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $this->load->model('proveedores_model');
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if ($empresa['info']->logo !== '')
+        $pdf->logo = $empresa['info']->logo;
+
+      $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+      if (isset($_GET['pid_proveedor']) && $_GET['pid_proveedor'] !== '')
+      {
+        $proveedor = $this->proveedores_model->getProveedorInfo($_GET['pid_proveedor']);
+        $pdf->titulo2 = 'PROVEEDOR : ' . $proveedor['info']->nombre_fiscal;
+      }
+
+      $pdf->titulo3 = 'PERIODO: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->AliasNbPages();
+      // $pdf->AddPage();
+      $pdf->SetFont('Arial','',8);
+
+      $aligns = array('C');
+      $widths = array(25);
+      $header = array('FECHA');
+      $aligns2 = array('L');
+
+      $tipo = '';
+      if ($_GET['pproducto_id'] === '49')
+      {
+        $header[] = 'POL/SEG';
+        $aligns[] = 'C';
+        $aligns2[] = 'L';
+        $widths[] = 25;
+        $tipo = 'seguro';
+      }
+
+      if ($_GET['pproducto_id'] === '51' || $_GET['pproducto_id'] === '52')
+      {
+        $header[] = 'CERTF';
+        $header[] = 'BULTOS';
+
+        $aligns[] = 'C';
+        $aligns[] = 'C';
+
+        $aligns2[] = 'L';
+        $aligns2[] = 'R';
+
+        $widths[] = 25;
+        $widths[] = 25;
+
+        $tipo = 'certificado';
+      }
+
+      $header = array_merge($header, array('FOLIO', 'CLIENTE', 'IMPORTE'));
+      $widths = array_merge($widths, array(15, ($tipo === 'seguro' ? 110 : 85), 30));
+      $aligns = array_merge($aligns, array('C', 'C', 'C'));
+      $aligns2 = array_merge($aligns2, array('L', 'L', 'R'));
+
+      $total = 0;
+
+      foreach($res as $key => $data)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key == 0)
+        {
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial', 'B', 9);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, false, true);
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+
+        $total += floatval($data->importe);
+
+        if ($tipo === 'seguro')
+        {
+          $datos = array(
+            String::fechaATexto($data->fecha, '/c'),
+            $data->pol_seg,
+            $data->folio,
+            $data->cliente,
+            String::formatoNumero($data->importe, 2, '', false),
+          );
+        }
+        elseif ($tipo === 'certificado')
+        {
+          $datos = array(
+            String::fechaATexto($data->fecha, '/c'),
+            $data->certificado,
+            $data->bultos,
+            $data->folio,
+            $data->cliente,
+            String::formatoNumero($data->importe, 2, '', false),
+          );
+        }
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false, true);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(175, 30));
+
+      $pdf->Row(array(' TOTAL:',  String::formatoNumero($total, 2, '', false)), false);
+
+      $pdf->Output('Reporte.pdf', 'I');
+    }
+  }
 
 }
 /* End of file usuarios_model.php */

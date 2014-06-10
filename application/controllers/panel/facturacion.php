@@ -681,6 +681,43 @@ class facturacion extends MY_Controller {
         'rules'   => $requerido_moneda.'numeric'
       );
 
+    $rules[] = array(
+      'field'   => 'pproveedor_seguro',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_poliza',
+      'label'   => '',
+      'rules'   => ''
+    );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_certificado',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_certificado',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_bultos',
+      'label'   => '',
+      'rules'   => ''
+    );
+
     $this->form_validation->set_rules($rules);
   }
 

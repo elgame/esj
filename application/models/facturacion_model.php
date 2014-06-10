@@ -94,10 +94,10 @@ class facturacion_model extends privilegios_model{
 	public function getInfoFactura($idFactura, $info_basic=false)
   {
 		$res = $this->db
-            ->select("*")
-            ->from('facturacion')
-            ->where("id_factura = {$idFactura}")
-            ->get();
+      ->select("*")
+      ->from('facturacion')
+      ->where("id_factura = {$idFactura}")
+      ->get();
 
     if($res->num_rows() > 0)
     {
@@ -193,6 +193,24 @@ class facturacion_model extends privilegios_model{
       {
         $response['carta_porte']['remitente'] = $remitente->result();
         $response['carta_porte']['destinatario'] = $destinatario->result();
+      }
+
+      $res->free_result();
+      $res = $this->db->query("SELECT fsc.*, p.nombre_fiscal as proveedor
+         FROM facturacion_seg_cert fsc
+         INNER JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
+         WHERE id_factura = {$idFactura}");
+
+      foreach ($res->result() as $tipo)
+      {
+        if ($tipo->certificado === null)
+        {
+          $response['seguro'] = $tipo;
+        }
+        else
+        {
+          $response['certificado'] = $tipo;
+        }
       }
 
       // echo "<pre>";
@@ -468,6 +486,9 @@ class facturacion_model extends privilegios_model{
     $traslado11 = 0; // Total de traslado 11%
     $traslado16 = 0; // Total de traslado 16%
 
+    $dataSeguroCerti = array();
+    $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
+
     // Ciclo para obtener los impuestos traslados, tambien construye
     // los datos de  los productos a insertar tanto en la cadena original como
     // en la factura.
@@ -515,6 +536,32 @@ class facturacion_model extends privilegios_model{
           'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : '',
           'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : 0,
         );
+
+        if ($_POST['prod_did_prod'][$key] === '49')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $idFactura,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['seg_id_proveedor'],
+            'pol_seg'          => $_POST['seg_poliza'],
+            'folio'            => $serieFolio,
+            'bultos'           => 0,
+            'certificado'      => null,
+          );
+        }
+
+        if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $idFactura,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['cert_id_proveedor'],
+            'certificado'      => $_POST['cert_certificado'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['cert_bultos'],
+            'pol_seg'          => null,
+          );
+        }
       }
     }
 
@@ -559,6 +606,12 @@ class facturacion_model extends privilegios_model{
 
       $this->db->insert('facturacion_remitente', $remitente);
       $this->db->insert('facturacion_destinatario', $destinatario);
+    }
+
+    if (count($dataSeguroCerti) > 0)
+    {
+      $this->db->delete('facturacion_seg_cert', array('id_factura' => $idFactura));
+      $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
     }
 
     // Si es un borrador
@@ -1317,6 +1370,9 @@ class facturacion_model extends privilegios_model{
       $pallets = array(); // Ids de los pallets cargados en la factura.
       $lastPalletId = 0;
 
+      $dataSeguroCerti = array();
+      $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
+
       foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
       {
         if ($_POST['prod_importe'][$key] != 0)
@@ -1340,13 +1396,41 @@ class facturacion_model extends privilegios_model{
             'cajas'             => $_POST['prod_dcajas'][$key],
             'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
             'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : null,
-            'peso' => isset($_POST['prod_dpeso'][$key]) ? $_POST['prod_dpeso'][$key] : null,
+            'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : null,
           );
+
+          if ($_POST['prod_did_prod'][$key] === '49')
+          {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idBorrador,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'id_proveedor'     => $_POST['seg_id_proveedor'],
+              'pol_seg'          => $_POST['seg_poliza'],
+              'folio'            => $serieFolio,
+              'bultos'           => 0,
+              'certificado'      => null,
+            );
+          }
+
+          if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+          {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idBorrador,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'id_proveedor'     => $_POST['cert_id_proveedor'],
+              'certificado'      => $_POST['cert_certificado'],
+              'folio'            => $serieFolio,
+              'bultos'           => $_POST['cert_bultos'],
+              'pol_seg'          => null,
+            );
+          }
         }
       }
+
       $this->db->delete('facturacion_productos', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_pallets', array('id_factura' => $idBorrador));
       $this->db->delete('facturacion_ventas_remision_pivot', array('id_factura' => $idBorrador));
+      $this->db->delete('facturacion_seg_cert', array('id_factura' => $idBorrador));
 
       if (count($productosFactura) > 0)
         $this->db->insert_batch('facturacion_productos', $productosFactura);
@@ -1407,6 +1491,11 @@ class facturacion_model extends privilegios_model{
 
         $this->db->insert('facturacion_remitente', $remitente);
         $this->db->insert('facturacion_destinatario', $destinatario);
+      }
+
+      if (count($dataSeguroCerti) > 0)
+      {
+        $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
       }
     }
 
