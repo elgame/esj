@@ -459,6 +459,17 @@ $(function(){
   autocompleteProveedores();
   enabledCloseModal('#modal-seguro');
   enabledCloseModal('#modal-certificado');
+
+  $('#btn-timbrar').on('click', function(event) {
+    event.preventDefault();
+
+    $('#modal-orden-flete').modal('show');
+  });
+
+  $('#btnOrdenFleteSi').on('click', function(event) {
+    $('#new_orden_flete').val('1');
+    $('#form').submit();
+  });
 });
 
 var EventOnChangeMoneda = function () {
@@ -1168,8 +1179,8 @@ var autocompleteProveedores = function () {
 // Verifica si los campos del modal estan todos llenos
 // si es true entonces habilita el boton para cerrarlo.
 var enabledCloseModal = function (idModal) {
-    var $modal = $(idModal),
-        $fields = $modal.find('.field-check');
+  var $modal = $(idModal),
+      $fields = $modal.find('.field-check');
 
   $fields.keyup(function(event) {
     var close = true;

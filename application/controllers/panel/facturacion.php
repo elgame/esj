@@ -141,7 +141,7 @@ class facturacion extends MY_Controller {
         $respons = $this->facturacion_model->addFactura();
 
         if($respons['passes'])
-          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura'].'&of='.$_POST['new_orden_flete']));
         else
           $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
       }

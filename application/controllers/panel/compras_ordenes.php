@@ -159,10 +159,29 @@ class compras_ordenes extends MY_Controller {
       ->get()
       ->row();
 
-    $this->load->view('panel/header', $params);
-    $this->load->view('panel/general/menu', $params);
-    $this->load->view('panel/compras_ordenes/agregar', $params);
-    $this->load->view('panel/footer');
+    if (isset($_GET['idf']) && $_GET['idf'] !== '')
+    {
+      $this->load->model('facturacion_model');
+      $params['factura'] = $this->facturacion_model->getInfoFactura($_GET['idf']);
+      $params['ordenFlete'] = true;
+      $params['next_folio'] = $this->compras_ordenes_model->folio('f');
+      $params['noHeader'] = true;
+      // echo "<pre>";
+      //   var_dump($params['factura']);
+      // echo "</pre>";exit;
+
+      $this->load->view('panel/header', $params);
+      // $this->load->view('panel/general/menu', $params);
+      $this->load->view('panel/compras_ordenes/agregar', $params);
+      $this->load->view('panel/footer');
+    }
+    else
+    {
+      $this->load->view('panel/header', $params);
+      $this->load->view('panel/general/menu', $params);
+      $this->load->view('panel/compras_ordenes/agregar', $params);
+      $this->load->view('panel/footer');
+    }
   }
 
   /**

@@ -302,7 +302,7 @@
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br>
-                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Timbrar</button>
+                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="btn-timbrar">Timbrar</button>
                   </div>
                 </div>
               </div>
@@ -561,7 +561,6 @@
             </div>
           </div>
 
-
           <!-- Modal Remitente-->
           <div id="modal-remitente" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-remitente" aria-hidden="true">
             <div class="modal-header">
@@ -703,6 +702,22 @@
             </div>
             <div class="modal-footer">
               <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Orden Flete -->
+          <div id="modal-orden-flete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Desea agregar una Orden de Flete?</h3>
+            </div>
+            <div class="modal-body center">
+              <input type="hidden" name="new_orden_flete" value="0" id="new_orden_flete" class="span12">
+              <button class="btn btn-large btn-success cboot-btn" id="btnOrdenFleteSi">SI</button>
+              <button class="btn btn-large btn-warning" id="btnOrdenFleteNo">NO</button>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
             </div>
           </div>
         </form>
