@@ -239,6 +239,10 @@
                     <div class="controls">
                       <div class="well span9">
                           <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;"><?php echo $txtButton ?></button><br><br>
+                          <?php if($orden['info'][0]->status == 'a' && isset($orden['info'][0]->entrada_almacen->folio_almacen)){ ?>
+                            <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$orden['info'][0]->entrada_almacen->folio_almacen.'&ide='.$orden['info'][0]->id_empresa); ?>"
+                              onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir (entrada almacen)</a>
+                          <?php } ?>
                           <?php if ($this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/") && isset($_GET['mod'])) { ?>
                             <label style="font-weight: bold;"><input type="checkbox" name="autorizar" value="1"> AUTORIZAR ENTRADA</label>
                           <?php } ?>
@@ -309,7 +313,7 @@
           <div class="row-fluid">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Productos</h2>
+                <h2><i class="icon-barcode"></i> Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 </div>
@@ -696,8 +700,22 @@
   </div><!--/modal pallets -->
 
 
-<?php if (isset($print)) { ?>
+<?php if (isset($print)) {
+    if($orden['info'][0]->tipo_orden === 'p' && isset($_GET['entrada'])){ ?>
+  <!-- Modal ingreso almacen -->
+  <div id="modalIngresoAlmacen" class="modal hide fade" tabindex="-1" role="dialog">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalIngresoAlmacenLbl">Imprimir Ingreso Almacen?</h3>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$_GET['entrada'].'&ide='.$orden['info'][0]->id_empresa); ?>" onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir</a>
+    </div>
+  </div>
+  <?php } ?>
   <script>
+    $('#modalIngresoAlmacen').modal('show');
     var win=window.open(<?php echo "'".base_url('panel/compras_ordenes/imprimir/?id=' . $_GET['id'].'&p=true'."'") ?>, '_blank');
     win.focus();
   </script>

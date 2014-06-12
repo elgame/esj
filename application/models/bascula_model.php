@@ -101,6 +101,7 @@ class Bascula_model extends CI_Model {
 
   public function addBascula($data=null, $bonificacion=false, $logBitacora = false, $usuario_auth = false)
   {
+    $new_boleta = false;
     if (is_null($data))
     {
       $idb = isset($_POST['pidb']) ? $_POST['pidb'] : '';
@@ -155,6 +156,7 @@ class Bascula_model extends CI_Model {
 
         $this->db->insert('bascula', $data);
         $idb = $this->db->insert_id();
+        $new_boleta = true;
       }
 
       $data2 = array(
@@ -238,7 +240,7 @@ class Bascula_model extends CI_Model {
       if ($bonificacion)
         $msg = '12';
 
-      return array('passes'=>true, 'msg'=>$msg, 'idb' => $idb);
+      return array('passes'=>true, 'msg'=>$msg, 'idb' => $idb, 'new_boleta' => $new_boleta);
     }
 
     $this->db->insert('bascula', $data);
@@ -425,6 +427,68 @@ class Bascula_model extends CI_Model {
     $pdf->AddPage();
 
     $pdf->printTicket($data['info'][0], $data['cajas']);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
+  public function imprimir_boletaR($id_boleta)
+  {
+    $data = $this->getBasculaInfo($id_boleta);
+    $data = $data['info'][0];
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetXY(0, 1);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(43, 20));
+    $pdf->Row(array('BOLETA DE RECEPCION', String::formatoNumero($data->folio, 2, '') ), false, false);
+    $pdf->Line(43, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array($data->empresa), false, false);
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(30, 30));
+    $pdf->Row(array('FECHA: '.String::fechaATexto(substr($data->fecha_bruto, 0, 10), '/c'), 'HORA: '.substr($data->fecha_bruto, 11, 8)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('Prov. '.$data->proveedor), false, false);
+    $pdf->SetXY(2, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L', 'C', 'C'));
+    $pdf->SetWidths(array(14, 22, 22));
+    $pdf->Row(array('', 'CAJAS', 'PRECIO'), false, false);
+    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetXY(2, $pdf->GetY());
+    $pdf->Row(array('IND', '', ''), false, true);
+    $pdf->SetXY(2, $pdf->GetY());
+    $pdf->Row(array('ALIM', '', ''), false, true);
+    $pdf->SetXY(2, $pdf->GetY());
+    $pdf->Row(array('FRUTA', '', ''), false, true);
+    $pdf->SetXY(2, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(14, 44));
+    $pdf->Row(array('LOTE', ''), false, true);
+    $pdf->SetXY(2, $pdf->GetY());
+    $pdf->Row(array('OBSERV', ''), false, true);
+    $pdf->SetXY(0, $pdf->GetY()+4);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('RECIBI: '), false, false);
+    $pdf->SetFont('helvetica','', 7);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('REG. ESJ97052763A0620061646'), false, false);
+
+    $pdf->Rect(0.5, 0.5, 62, $pdf->GetY());
 
     $pdf->AutoPrint(true);
     $pdf->Output();

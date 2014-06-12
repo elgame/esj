@@ -15,6 +15,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ligar/',
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
+    'compras_ordenes/imprimir_entrada/',
     );
 
   public function _remap($method){
@@ -259,6 +260,7 @@ class compras_ordenes extends MY_Controller {
         if ($response['msg'] === 5)
         {
           $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
+          $printFaltantes .= (is_array($response['entrada'])) ? '&entrada='.$response['entrada']['folio'] : '';
 
           redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
         }
@@ -404,6 +406,12 @@ class compras_ordenes extends MY_Controller {
     {
       $this->load->view('panel/compras_ordenes/print_orden_compra');
     }
+  }
+
+  public function imprimir_entrada()
+  {
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->imprimir_entrada($_GET['folio'], $_GET['ide']);
   }
 
   public function email()

@@ -585,6 +585,13 @@
   </script>
 <?php } ?>
 
+<?php if (isset($_GET['br']{0})) { ?>
+  <script>
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_recepcion/?id=' . $_GET['br']."'") ?>, '_blank');
+    win.focus();
+  </script>
+<?php } ?>
+
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){

@@ -84,6 +84,7 @@ class productos_model extends CI_Model {
 				'codigo'     => '',
 				'nombre'     => $this->input->post('fnombre'),
 				'tipo'       => $this->input->post('ftipo'),
+        'almacen'    => $this->input->post('falmacen'),
 				);
 		}
 
@@ -109,6 +110,7 @@ class productos_model extends CI_Model {
 				'codigo'     => '',
 				'nombre'     => $this->input->post('fnombre'),
 				'tipo'       => $this->input->post('ftipo'),
+        'almacen'    => $this->input->post('falmacen'),
 				);
 		}
 
@@ -127,7 +129,7 @@ class productos_model extends CI_Model {
 	{
 		$id_familia = ($id_familia==FALSE)? $_GET['id']: $id_familia;
 
-		$sql_res = $this->db->select("id_familia, id_empresa, codigo, nombre, tipo, status" )
+		$sql_res = $this->db->select("id_familia, id_empresa, codigo, nombre, tipo, status, almacen" )
 												->from("productos_familias")
 												->where("id_familia", $id_familia)
 												->get();
@@ -325,9 +327,10 @@ class productos_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getProductoInfo($id_producto=FALSE, $basic_info=FALSE)
+	public function getProductoInfo($id_producto=FALSE, $basic_info=FALSE, $id2_producto=NULL)
 	{
 		$id_producto = (isset($_GET['id']))? $_GET['id']: $id_producto;
+    $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
 									ubicacion, precio_promedio, status, cuenta_cpi, ieps" )
@@ -346,6 +349,8 @@ class productos_model extends CI_Model {
     	if (!$basic_info)
     	{
     		$data['presentaciones'] = $this->getPresentaciones($id_producto);
+
+        $data['familia'] = $this->getFamiliaInfo($data['info']->id_familia, true)['info'];
     	}
 
 		return $data;
