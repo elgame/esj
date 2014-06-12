@@ -29,7 +29,9 @@
             <a href="<?php echo base_url('panel/cuentas_pagar/estado_cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Estado cuenta</a> |
             <a href="<?php echo base_url('panel/cuentas_pagar/estado_cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Estado cuenta</a>
+              <i class="icon-table"></i> Estado cuenta</a> |
+            <a href="<?php echo base_url('panel/cuentas_pagar/rpt_compras_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+              <i class="icon-table"></i> Compras</a>
 
             <form action="<?php echo base_url('panel/cuentas_pagar/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">

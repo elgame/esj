@@ -379,6 +379,9 @@ class productos extends MY_Controller {
 			array('field' => 'ftipo',
 						'label' => 'Tipo empresa',
 						'rules' => 'required|max_length[2]'),
+      array('field' => 'falmacen',
+            'label' => 'Almacen',
+            'rules' => 'required|max_length[40]'),
 
 			array('field' => 'fempresa',
 						'label' => 'Empresa',

@@ -17,6 +17,7 @@ class cuentas_pagar extends MY_Controller {
 
     'cuentas_pagar/estado_cuenta_pdf/',
     'cuentas_pagar/estado_cuenta_xls/',
+    'cuentas_pagar/rpt_compras_xls/',
   );
 
 
@@ -290,6 +291,14 @@ class cuentas_pagar extends MY_Controller {
     {
       $this->cuentas_pagar_model->imprimir_recibo($_GET['id_movimiento']);
     }
+  }
+
+  /**
+   * RPTS
+   */
+  public function rpt_compras_xls(){
+    $this->load->model('cuentas_pagar_model');
+    $this->cuentas_pagar_model->rptComprasXls();
   }
 
 

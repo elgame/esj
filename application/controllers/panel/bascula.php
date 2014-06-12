@@ -46,7 +46,9 @@ class bascula extends MY_Controller {
     'bascula/rmc_pdf2/',
 
     'bascula/bonificaciones_pdf/',
-    'bascula/bitacora_pdf/'
+    'bascula/bitacora_pdf/',
+
+    'bascula/imprimir_recepcion/'
     );
 
   public function _remap($method){
@@ -155,8 +157,9 @@ class bascula extends MY_Controller {
         $ticket = '&p=t';
 
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
+      $boletar = $res_mdl['new_boleta']? '&br='.$res_mdl['idb']: '';
       if( ! $res_mdl['error'])
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$ticket));
+        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
     }
 
     $params['accion']      = 'n'; // indica que es nueva entrada
@@ -364,6 +367,19 @@ class bascula extends MY_Controller {
 
     $params['data'] = $data = $this->bascula_model->getBasculaInfo($this->input->get('id'));
     $this->load->view('panel/bascula/print_ticket2', $params);
+  }
+
+  /**
+   * Muestra el pdf de BOLETA DE RECEPCION.
+   * @return void
+   */
+  public function imprimir_recepcion()
+  {
+    $this->load->model('bascula_model');
+    if($this->input->get('p') == 'true')
+      $this->bascula_model->imprimir_boletaR($this->input->get('id'));
+    else
+      $this->load->view('panel/bascula/print_boleta_recepcion');
   }
 
   /**

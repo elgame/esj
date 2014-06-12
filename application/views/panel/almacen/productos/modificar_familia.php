@@ -42,7 +42,7 @@
     <div id="content" class="span10">
       <!-- content starts -->
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -55,7 +55,7 @@
           <div class="box-content">
 
             <form action="<?php echo base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
-              
+
               <div class="control-group">
                 <label class="control-label" for="fempresa">Empresa </label>
                 <div class="controls">
@@ -67,7 +67,7 @@
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40" 
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="40"
                   value="<?php echo set_value('fnombre', (isset($data['info']->nombre)? $data['info']->nombre: '') ); ?>" required placeholder="Material empaque, Insumos">
                 </div>
               </div>
@@ -80,6 +80,14 @@
                     <option value="d" <?php echo set_select('ftipo', 'd', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Servicios</option>
                     <option value="f" <?php echo set_select('ftipo', 'f', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Fletes</option>
                   </select>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="falmacen">Nombre almacen </label>
+                <div class="controls">
+                  <input type="text" name="falmacen" id="falmacen" class="span6" maxlength="40"
+                  value="<?php echo set_value('falmacen', (isset($data['info']->almacen)? $data['info']->almacen: '') ); ?>" required placeholder="1, Ranchito 1">
                 </div>
               </div>
 

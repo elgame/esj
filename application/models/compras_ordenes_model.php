@@ -617,6 +617,10 @@ class compras_ordenes_model extends CI_Model {
                                    FROM compras_facturas
                                    WHERE id_orden = {$data['info'][0]->id_orden}");
         $data['info'][0]->compras = $compras_data->result();
+
+        //eNTRADA ALMACEN
+        $data['info'][0]->entrada_almacen = array();
+        $data['info'][0]->entrada_almacen = $this->getInfoEntrada(0,0, $data['info'][0]->id_orden);
       }
     }
     return $data;
@@ -694,6 +698,9 @@ class compras_ordenes_model extends CI_Model {
   {
     $ordenRechazada = false;
 
+    $this->load->model('productos_model');
+
+    $almacen = array();
     $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
               WHERE id_orden = {$idOrden}")->result();
     $productos = array();
@@ -753,9 +760,14 @@ class compras_ordenes_model extends CI_Model {
       {
         $ordenRechazada = true;
       }
+
+      $producto_dd = $this->productos_model->getProductoInfo(false, false, $_POST['productoId'][$key]);
+      if(count($producto_dd['info']) > 0 && !in_array($producto_dd['familia']->almacen, $almacen))
+        $almacen[] = $producto_dd['familia']->almacen;
     }
     $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
+    $data_almacen = null;
     // Si todos los productos fueron aceptados entonces la orden se marca
     // como aceptada.
     if ( ! $ordenRechazada)
@@ -766,6 +778,18 @@ class compras_ordenes_model extends CI_Model {
       );
 
       $msg = 5;
+
+      // se registra la entrada al almacen
+      $getFolio = $this->db->query("SELECT (coalesce((SELECT folio FROM compras_entradas_almacen WHERE status = 't' AND id_empresa = {$_POST['empresaId']} ORDER BY folio DESC LIMIT 1),0)+1) AS folio")->row();
+      $data_almacen = array(
+        'id_orden'   => $idOrden,
+        'id_empresa' => $_POST['empresaId'],
+        'id_recibio' => $this->session->userdata('id_usuario'),
+        'folio'      => $getFolio->folio,
+        'fecha'      => date('Y-m-d H:i:s'),
+        'almacen'    => implode('|', $almacen),
+        );
+      $this->db->insert('compras_entradas_almacen', $data_almacen);
     }
 
     // Si al menos un producto no fue aceptado entonces la orden es
@@ -821,7 +845,7 @@ class compras_ordenes_model extends CI_Model {
     //   }
     // }
 
-    return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes);
+    return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes, 'entrada' => $data_almacen);
   }
 
   /*
@@ -1176,12 +1200,20 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetX(160);
       $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
       //Boleta si es flete
-      if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula)){
-        $pdf->SetX(160);
-
+      if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){
         $info_bascula = json_decode($info_bascula[0]->data);
-        $pdf->Row(array('Ticket', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
-        // $pdf->Row(array('Ticket', String::formatoNumero($total, 2, '$', false)), false, true);
+        $this->load->model('bascula_model');
+        $id_bascula = $this->bascula_model->getIdfolio($info_bascula->no_ticket, 'sa', $info_bascula->area_id);
+        $data_bascula = $this->bascula_model->getBasculaInfo($id_bascula);
+
+        $pdf->SetX(160);
+        $pdf->Row(array('Ticket No', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
+        $pdf->SetX(160);
+        $pdf->Row(array('Bruto', String::formatoNumero($data_bascula['info'][0]->kilos_bruto, 2, '', false)), false, false);
+        $pdf->SetX(160);
+        $pdf->Row(array('Tara', String::formatoNumero($data_bascula['info'][0]->kilos_tara, 2, '', false)), false, false);
+        $pdf->SetX(160);
+        $pdf->Row(array('Neto', String::formatoNumero($data_bascula['info'][0]->kilos_neto, 2, '', false)), false, false);
       }
 
       $pdf->SetWidths(array(154));
@@ -1223,6 +1255,63 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
       }
    }
+
+  public function getInfoEntrada($folio, $empresa, $id_orden=null)
+  {
+    $sql = $id_orden? " AND cea.id_orden = {$id_orden} ": " AND cea.folio = {$folio} AND cea.id_empresa = {$empresa} ";
+    $query = $this->db->query("SELECT cea.folio AS folio_almacen, Date(cea.fecha) AS fecha, cea.almacen,
+                                  co.folio, e.nombre_fiscal AS empresa, p.nombre_fiscal AS proveeor,
+                                  (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS recibio,
+                                  (SELECT Coalesce(Sum(total), 0) FROM compras_productos WHERE id_orden = co.id_orden GROUP BY id_orden) AS total
+                               FROM compras_entradas_almacen cea
+                                INNER JOIN compras_ordenes co ON co.id_orden = cea.id_orden
+                                INNER JOIN empresas e ON e.id_empresa = cea.id_empresa
+                                INNER JOIN proveedores p ON p.id_proveedor = co.id_proveedor
+                                INNER JOIN usuarios u ON u.id = cea.id_recibio
+                               WHERE cea.status = 't' {$sql} ")->row();
+    return $query;
+  }
+
+  public function imprimir_entrada($folio, $empresa)
+  {
+    $data = $this->getInfoEntrada($folio, $empresa);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetXY(0, 1);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('INGRESO ALMACEN '.$data->almacen), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($data->empresa), false, false);
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(30, 30));
+    $pdf->Row(array('FECHA: '.String::fechaATexto($data->fecha, '/c'), 'REG. No '.$data->folio_almacen), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array($data->proveeor), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(25, 40));
+    $pdf->Row(array('FOLIO: '.String::formatoNumero($data->folio, 2, ''), 'IMPORTE: '.String::formatoNumero($data->total)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('RECIBI: '.$data->recibio), false, false);
+
+    $pdf->Rect(0.5, 0.5, 62, $pdf->GetY()+4);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
 
    /**
     * Visualiza/Descarga el PDF de la orden de compra.
