@@ -21,52 +21,26 @@
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>
           </div>
+          <?php $id_empresa = set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>
           <div class="box-content">
-            <!-- <a href="<?php echo base_url('panel/banco/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Imprimir</a> |
-            <a href="<?php echo base_url('panel/banco/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Excel</a>
-
-            <form action="<?php echo base_url('panel/banco/'); ?>" method="GET" class="form-search">
+            <form action="<?php echo base_url('panel/banco_pagos/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">
-                <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
-                <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
-
-                <label for="vertodos">Tipo:</label>
-                <select name="vertodos" id="vertodos" class="input-large search-query">
-                  <option value="" <?php echo set_select_get('vertodos', ''); ?>>Todas</option>
-                  <option value="tran" <?php echo set_select_get('vertodos', 'tran'); ?>>En transito</option>
-                  <option value="notran" <?php echo set_select_get('vertodos', 'notran'); ?>>Cobrados (no transito)</option>
-                </select><br>
-
-                <label for="fid_banco">Banco:</label>
-                <select name="fid_banco" id="fid_banco" class="input-large search-query">
-                  <option value="" <?php echo set_select_get('fid_banco', ''); ?>></option>
-              <?php
-              foreach ($bancos['bancos'] as $key => $banco) {
-              ?>
-                  <option value="<?php echo $banco->id_banco; ?>" <?php echo set_select_get('fid_banco', $banco->id_banco); ?>><?php echo $banco->nombre; ?></option>
-              <?php
-              } ?>
-                </select>
-
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
-                <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa', (isset($empresa->id_empresa)? $empresa->id_empresa: '')); ?>">
+                <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo $id_empresa; ?>">
 
-                <button type="submit" class="btn">Enviar</button>
+                <button type="submit" class="btn">Cargar</button>
               </div>
-            </form> -->
+            </form>
 
             <form action="<?php echo base_url('panel/banco_pagos/'); ?>" method="post">
+              <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo $id_empresa; ?>">
               <div class="row-fluid">
                 <div class="span12">
                   <button type="submit" class="btn btn-success pull-right">Guardar</button>
               <?php if ($rows_completos)
               { ?>
-                  <select name="cuenta_retiro" id="cuenta_retiro">
+                  <select name="cuenta_retiro" id="cuenta_retiro" required>
                   <?php
                   $primera_cuenta = null;
                   foreach ($data['cuentas'] as $keyc => $cuentasp)
@@ -80,9 +54,9 @@
                     }
                   } ?>
                   </select>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=ba&cuentaretiro='.$primera_cuenta); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
-                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=in&cuentaretiro='.$primera_cuenta); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
-                  <a href="<?php echo base_url('panel/banco_pagos/aplica_pagos/?cuentaretiro='.$primera_cuenta); ?>" id="aplicarPagos" class="btn"
+                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=ba&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadBanamex" class="btn"><i class="icon-download-alt"></i> Banamex</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/layout/?tipo=in&cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="downloadInterban" class="btn"><i class="icon-download-alt"></i> Interbancarios</a>
+                  <a href="<?php echo base_url('panel/banco_pagos/aplica_pagos/?cuentaretiro='.$primera_cuenta.'&ide='.$id_empresa); ?>" id="aplicarPagos" class="btn"
                     onclick="msb.confirm('Estas seguro de Aplicar los Pagos?', 'Facturas', this); return false;"><i class="icon-tag"></i> Aplicar pagos</a>
               <?php
               } ?>
@@ -107,11 +81,13 @@
               foreach($pagos as $keyp => $pago){
                 $total_pagar_proveedor = 0;
                 $html = '';
+                $facturas_desc = array();
 
                 foreach ($pago->pagos as $key => $value)
                 {
                   $total_pagar += $value->monto;
                   $total_pagar_proveedor += $value->monto;
+                  $facturas_desc[] = $value->serie.$value->folio;
                   $html .= '<tr>
                             <td>'.$value->fecha.'</td>
                             <td>'.$value->serie.$value->folio.'
@@ -121,26 +97,26 @@
                             <td>
                               '.$this->usuarios_model->getLinkPrivSm('banco_pagos/eliminar_pago/', array(
                                   'params'   => "id_pago={$value->id_pago}",
-                                  'btn_type' => 'btn-danger pull-right',
-                                  'attrs' => array('onclick' => "msb.confirm('Estas seguro de Quitar el pago?', 'Facturas', this); return false;") )
+                                  'btn_type' => 'btn-danger pull-right', )
                               ).'
                             </td>
                           </tr>';
                 }
                 echo '<tr>
-                    <td colspan="2">'.$pago->nombre_fiscal.'</td>
-                    <td>'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
-                    <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta span12" required>
+                    <td style="font-weight:bold" colspan="2">'.$pago->nombre_fiscal.'</td>
+                    <td style="font-weight:bold">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                    <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta span12">
                                 <option value=""></option>';
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
                           {
                             $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
-                            echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
+                            echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'
+                            data-ref="'.$cuentasp->referencia.'" data-descrip="'.implode(' -', $facturas_desc).'">'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
                           }
                               echo '</select></td>
-                    <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="span12 ref_numerica" maxlength="7" required></td>
-                    <td><input type="text" name="ref_alfanumerica['.$keyp.'][]" value="'.$value->ref_alfanumerica.'" class="ref_alfa span12" required></td>
-                    <td><input type="text" name="descripcion['.$keyp.'][]" value="'.$value->descripcion.'" class="ref_descripcion span12" required></td>
+                    <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="span12 ref_numerica" maxlength="7"></td>
+                    <td><input type="text" name="ref_alfanumerica['.$keyp.'][]" value="'.$value->ref_alfanumerica.'" class="ref_alfa span12"></td>
+                    <td><input type="text" name="descripcion['.$keyp.'][]" value="'.$value->descripcion.'" class="ref_descripcion span12"></td>
                     <td><label></label>
                       <select name="es_moral['.$keyp.'][]" class="span12">
                         <option value="si" '.($pago->es_moral=='t'? 'selected': '').'>Si</option>

@@ -15,6 +15,10 @@ class banco_pagos_model extends CI_Model {
 		// //Filtros para buscar
 		if(isset($datos['tipo_cuenta']))
       $sql .= " AND pc.is_banamex = '{$datos['tipo_cuenta']}'";
+    if(isset($datos['con_cuenta']))
+      $sql .= " AND bpc.id_cuenta IS NOT NULL";
+    if(isset($datos['did_empresa']))
+      $sql .= " AND c.id_empresa = '{$datos['did_empresa']}'";
 
 		$response = array();
     $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal, bpc.es_moral
@@ -29,12 +33,15 @@ class banco_pagos_model extends CI_Model {
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
                                   COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion
                                FROM banco_pagos_compras AS bpc
-                               INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
-                               LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
-                               LEFT JOIN banco_bancos AS b ON b.id_banco = pc.id_banco
+                                 INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
+                                 LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
+                                 LEFT JOIN banco_bancos AS b ON b.id_banco = pc.id_banco
                                WHERE bpc.status = 'f' AND bpc.id_proveedor = {$value->id_proveedor} {$sql}
                                ORDER BY c.folio ASC")->result();
-      $value->cuentas_proveedor = $this->proveedores_model->getCuentas($value->id_proveedor);
+      if(count($value->pagos) > 0)
+        $value->cuentas_proveedor = $this->proveedores_model->getCuentas($value->id_proveedor);
+      else
+        unset($response[$key]);
     }
 
 		return $response;
@@ -48,7 +55,7 @@ class banco_pagos_model extends CI_Model {
       foreach ($datos['id_pago'][$keyp] as $key => $id_pago)
       {
         $this->db->update('banco_pagos_compras', array(
-          'id_cuenta'        => $cuenta[0],
+          'id_cuenta'        => ($cuenta[0]{0}? $cuenta[0]: NULL),
           'referencia'       => $datos['ref_numerica'][$keyp][0],
           'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
           'monto'            => $datos['monto'][$keyp][$key],
@@ -63,7 +70,10 @@ class banco_pagos_model extends CI_Model {
   {
     $this->load->model('banco_cuentas_model');
     $this->load->model('banco_layout_model');
-    $pagos = $this->getPagos(array('tipo_cuenta' => ($_GET['tipo']=='ba'? 't': 'f') ));
+    $pagos = $this->getPagos(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'tipo_cuenta' => ($_GET['tipo']=='ba'? 't': 'f'),
+        'con_cuenta' => 'true' ));
     $cuenta_retiro = $this->banco_cuentas_model->getCuentaInfo($_GET['cuentaretiro'])['info'];
 
     $pagos_archivo = array();
@@ -119,7 +129,9 @@ class banco_pagos_model extends CI_Model {
   {
     $this->load->model('cuentas_pagar_model');
     $this->load->model('banco_cuentas_model');
-    $pagos = $this->getPagos();
+    $pagos = $this->getPagos(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'con_cuenta' => 'true' ));
 
     $pagos_archivo = array();
     foreach ($pagos as $key => $pago)
@@ -144,11 +156,11 @@ class banco_pagos_model extends CI_Model {
         $_POST['ids'][]          = $value->id_compra;
         $_POST['tipos'][]        = 'f';
         $_POST['montofv'][]      = $value->monto;
+        $this->db->update('banco_pagos_compras', array('status' => 't'), array('id_compra' => $value->id_compra));
       }
       $_POST['dmonto'] = $total_pagar;
       $this->cuentas_pagar_model->addAbonoMasivo();
 
-      $this->db->update('banco_pagos_compras', array('status' => 't'));
     }
   }
 

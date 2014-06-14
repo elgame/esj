@@ -1816,6 +1816,7 @@ class polizas_model extends CI_Model {
           if ($value->desglosar_iva == 't')
           {
             $impuestos2['iva_activo']['importe'] = $value->total-($value->total/1.16);
+            $total_retiro_banco = $value->total;
             if($value->cuenta_cpi_proveedor == $value->banco_cuenta_contpaq)
               $value->total -= $impuestos2['iva_activo']['importe'];
           }
@@ -1877,7 +1878,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                             $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
-                            $this->setEspacios( $this->numero($value->total) , 20).  //importe movimiento
+                            $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)) , 20).  //importe movimiento
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto

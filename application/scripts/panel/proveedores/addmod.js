@@ -36,9 +36,11 @@ var cuentas = (function($){
 		if ($this.is(":checked")) {
 			$tr.find('input.cuentas_banamex').val('true');
 			$tr.find('input.cuentas_sucursal').removeAttr('readonly');
+      $tr.find('input.cuentas_ref').attr('maxlength', '7');
 		}else{
 			$tr.find('input.cuentas_banamex').val('false');
 			$tr.find('input.cuentas_sucursal').val('').attr('readonly', 'readonly');
+      $tr.find('input.cuentas_ref').attr('maxlength', '10');
 		}
 	}
 
@@ -81,6 +83,7 @@ var cuentas = (function($){
 				    '<td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 				    '<td><input type="text" name="cuentas_sucursal[]" value="" class="cuentas_sucursal vpos-int jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 				    '<td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int jump'+jumpIndex+'"></td>'+
+            '<td><input type="text" name="cuentas_ref[]" value="" class="cuentas_ref vpos-int jump'+jumpIndex+'" maxlength="7"></td>'+
 				    '<td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>'+
 				'</tr>';
 		$(trhtml).appendTo($tbody);

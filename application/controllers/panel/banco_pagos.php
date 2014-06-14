@@ -60,20 +60,23 @@ class banco_pagos extends MY_Controller {
       redirect(base_url('panel/banco_pagos/?msg=4'));
     }
 
-		$params['data']    = $this->banco_cuentas_model->getSaldosCuentasData();
-		// $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
-		$params['pagos']  = $this->banco_pagos_model->getPagos();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $empresaD = array('did_empresa' => (isset($_GET['did_empresa'])? $_GET['did_empresa']: $params['empresa']->id_empresa));
+    $_GET['did_empresa'] = $empresaD['did_empresa'];
+    $params['data']    = $this->banco_cuentas_model->getSaldosCuentasData();
+    $params['pagos']  = $this->banco_pagos_model->getPagos( $empresaD );
     $params['rows_completos'] = true;
-    foreach($params['pagos'] as $pago){
-      foreach ($pago->pagos as $key => $value)
-      {
-        if ( $value->id_cuenta<=0 || $value->ref_alfanumerica=='' || $value->referencia=='' )
-        {
-          $params['rows_completos'] = false;
-          break;
-        }
-      }
-    }
+    // foreach($params['pagos'] as $pago){
+    //   foreach ($pago->pagos as $key => $value)
+    //   {
+    //     if ( $value->id_cuenta<=0 || $value->ref_alfanumerica=='' || $value->referencia=='' )
+    //     {
+    //       $params['rows_completos'] = false;
+    //       break;
+    //     }
+    //   }
+    // }
+
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -87,12 +90,14 @@ class banco_pagos extends MY_Controller {
   public function layout()
   {
     $this->load->model('banco_pagos_model');
+    $_GET['did_empresa'] = $_GET['ide'];
     $this->banco_pagos_model->layoutBanamex();
   }
 
   public function aplica_pagos()
   {
     $this->load->model('banco_pagos_model');
+    $_GET['did_empresa'] = $_GET['ide'];
     $this->banco_pagos_model->aplicarPagos();
     redirect(base_url('panel/banco_pagos/?msg=5'));
   }

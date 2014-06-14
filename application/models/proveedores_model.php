@@ -329,11 +329,12 @@ class proveedores_model extends CI_Model {
 			foreach ($this->input->post('cuentas_alias') as $key => $value)
 			{
 				$data = array('id_proveedor' => $id_proveedor,
-								'is_banamex' => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'),
-								'alias'      => $_POST['cuentas_alias'][$key],
-								'sucursal'   => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]),
-								'cuenta'     => $_POST['cuentas_cuenta'][$key],
-								'id_banco'   => $_POST['fbanco'][$key],
+								'is_banamex'   => ($_POST['cuentas_banamex'][$key]=='true'? 't': 'f'),
+								'alias'        => $_POST['cuentas_alias'][$key],
+								'sucursal'     => ($_POST['cuentas_sucursal'][$key]==''? NULL: $_POST['cuentas_sucursal'][$key]),
+								'cuenta'       => $_POST['cuentas_cuenta'][$key],
+								'id_banco'     => $_POST['fbanco'][$key],
+                'referencia'   => $_POST['cuentas_ref'][$key],
 							);
 				if (is_numeric($_POST['cuentas_id'][$key]))  //update
 				{
@@ -357,7 +358,7 @@ class proveedores_model extends CI_Model {
 		$sql = ($id_cuenta==null? '': ' AND pc.id_cuenta = '.$id_cuenta);
 		$res = $this->db->query("
 				SELECT pc.id_cuenta, pc.id_proveedor, pc.is_banamex, pc.alias, pc.sucursal, pc.cuenta, pc.status,
-					(pc.alias || ' *' || substring(pc.cuenta from '....$')) AS full_alias, bb.id_banco, bb.nombre AS banco, bb.codigo
+					(pc.alias || ' *' || substring(pc.cuenta from '....$')) AS full_alias, bb.id_banco, bb.nombre AS banco, bb.codigo, pc.referencia
 				FROM proveedores_cuentas AS pc
 					LEFT JOIN banco_bancos AS bb ON pc.id_banco = bb.id_banco
 				WHERE pc.status = 't' AND pc.id_proveedor = {$id_proveedor} {$sql}

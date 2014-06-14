@@ -1199,21 +1199,24 @@ class compras_ordenes_model extends CI_Model {
       }
       $pdf->SetX(160);
       $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
-      //Boleta si es flete
+      //a si es flete
       if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){
         $info_bascula = json_decode($info_bascula[0]->data);
-        $this->load->model('bascula_model');
-        $id_bascula = $this->bascula_model->getIdfolio($info_bascula->no_ticket, 'sa', $info_bascula->area_id);
-        $data_bascula = $this->bascula_model->getBasculaInfo($id_bascula);
+        if(isset($info_bascula->no_ticket{0}))
+        {
+          $this->load->model('bascula_model');
+          $id_bascula = $this->bascula_model->getIdfolio($info_bascula->no_ticket, 'sa', $info_bascula->area_id);
+          $data_bascula = $this->bascula_model->getBasculaInfo($id_bascula);
 
-        $pdf->SetX(160);
-        $pdf->Row(array('Ticket No', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
-        $pdf->SetX(160);
-        $pdf->Row(array('Bruto', String::formatoNumero($data_bascula['info'][0]->kilos_bruto, 2, '', false)), false, false);
-        $pdf->SetX(160);
-        $pdf->Row(array('Tara', String::formatoNumero($data_bascula['info'][0]->kilos_tara, 2, '', false)), false, false);
-        $pdf->SetX(160);
-        $pdf->Row(array('Neto', String::formatoNumero($data_bascula['info'][0]->kilos_neto, 2, '', false)), false, false);
+          $pdf->SetX(160);
+          $pdf->Row(array('Ticket No', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
+          $pdf->SetX(160);
+          $pdf->Row(array('Bruto', String::formatoNumero($data_bascula['info'][0]->kilos_bruto, 2, '', false)), false, false);
+          $pdf->SetX(160);
+          $pdf->Row(array('Tara', String::formatoNumero($data_bascula['info'][0]->kilos_tara, 2, '', false)), false, false);
+          $pdf->SetX(160);
+          $pdf->Row(array('Neto', String::formatoNumero($data_bascula['info'][0]->kilos_neto, 2, '', false)), false, false);
+        }
       }
 
       $pdf->SetWidths(array(154));

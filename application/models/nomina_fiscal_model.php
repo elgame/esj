@@ -940,11 +940,12 @@ class nomina_fiscal_model extends CI_Model {
       $valorUnitario += $percepcion['total'];
       unset($empleadoFiniquito[0]->nomina->percepciones[$tipoPercepcion]['total']);
     }
+    $valorUnitario = str_replace(',', '', (String::formatoNumero($valorUnitario, 4, '')));
 
     // Descuento seria 0 pq no hay otra deducciones aparte del isr.
     $descuento = 0;
-    $isr = $empleadoFiniquito[0]->nomina->deducciones['isr']['total'];
-    $otros = $empleadoFiniquito[0]->nomina->deducciones['otros']['total'];
+    $isr = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['isr']['total'], 4, '')) );
+    $otros = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['otros']['total'], 4, '')) );
     unset($empleadoFiniquito[0]->nomina->deducciones['isr']['total']);
     unset($empleadoFiniquito[0]->nomina->deducciones['otros']['total']);
 

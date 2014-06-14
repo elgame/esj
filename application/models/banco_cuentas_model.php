@@ -512,8 +512,12 @@ class banco_cuentas_model extends banco_model {
 			{
         $monto_r = $item->retiro;
         $iva_r = $ret_iva_r = 0;
-        if ($item->desglosar_iva == 't')
+        $monto_d = $item->deposito;
+        $iva_d = $ret_iva_d = 0;
+        if ($item->desglosar_iva == 't'){
           $iva_r = $item->retiro-($item->retiro/1.16);
+          $iva_d = $item->deposito-($item->deposito/1.16);
+        }
         else
         {
           $info_compras = $this->db->query("SELECT
@@ -536,6 +540,8 @@ class banco_cuentas_model extends banco_model {
           {
             $iva_r = $info_compras->importe_iva;
             $ret_iva_r = $info_compras->retencion_iva;
+            $iva_d = $info_compras->importe_iva;
+            $ret_iva_d = $info_compras->retencion_iva;
           }
         }
 
@@ -558,6 +564,31 @@ class banco_cuentas_model extends banco_model {
   				$total_retiro   += $item->retiro;
   				$total_deposito += $item->deposito;
         }elseif($item->salvo_buen_cobro == 't'){
+          $info_compras = $this->db->query("SELECT
+            bmc.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
+            bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
+            Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
+            c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq
+          FROM facturacion AS f
+            INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+            INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+            INNER JOIN banco_movimientos_facturas AS bmc ON bmc.id_abono_factura = fa.id_abono
+            INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
+          WHERE f.status <> 'ca' AND bm.id_movimiento = {$item->id_movimiento}
+          GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha)
+          ORDER BY bmc.id_movimiento ASC")->row();
+          if(isset($info_compras->importe_iva))
+          {
+            $iva_d = $info_compras->importe_iva;
+            $ret_iva_d = $info_compras->retencion_iva;
+          }
+
+          $datos[5] = String::formatoNumero($item->deposito, 2, '$', false);
+          $datos[6] = String::formatoNumero($iva_d, 2, '$', false);
+          $datos[7] = String::formatoNumero($ret_iva_d, 2, '$', false);
           $salvo_bc[] = $datos;
 
           $total_retiro_sbc   += $item->retiro;
@@ -592,14 +623,14 @@ class banco_cuentas_model extends banco_model {
       $pdf->SetAligns(array('R', 'R', 'R'));
       $pdf->SetWidths(array(142, 25, 20));
       $pdf->Row(array('SUMA SALVO BUEN COBRO:',
-            String::formatoNumero($total_retiro_sbc, 2, '$', false),
+            String::formatoNumero($total_deposito_sbc, 2, '$', false),
             // String::formatoNumero($total_deposito, 2, '$', false),
           ), false);
     }
 
 
 		// $conciliado = $res['total_saldos']+$total_retiro-$total_deposito;
-    $conciliado = $_GET['saldob']-$total_retiro+$total_retiro_sbc;
+    $conciliado = $_GET['saldob']-$total_retiro+$total_deposito_sbc;
 		$pdf->SetFont('Arial','B',10);
 		$pdf->SetAligns(array('L', 'R'));
 		$pdf->SetWidths(array(142, 50));

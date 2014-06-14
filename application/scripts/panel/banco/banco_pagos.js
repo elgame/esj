@@ -4,17 +4,30 @@ $(function(){
   $(".tipo_cuenta").on('change', function(event) {
     event.preventDefault();
     var $this = $(this), datos = $this.val().split('-'), $tr = $this.parents("tr");
+    console.log(datos[1]);
     if(datos[1] == 't') // es banamex
     {
-      $tr.find('.ref_numerica').attr('maxlength', '10');
-      $tr.find('.ref_alfa').attr('maxlength', '40');
+      $tr.find('.ref_numerica').attr('maxlength', '10').attr('required', 'required');
+      $tr.find('.ref_alfa').attr('maxlength', '40').attr('required', 'required');
       $tr.find('.ref_descripcion').attr('maxlength', '24').attr('required', 'required').removeAttr('readonly');
-    }else // es interbancario
+      if($tr.find('.ref_descripcion').val() === '')
+        $tr.find('.ref_descripcion').val($this.find('option:selected').attr('data-descrip').substr(0, 24));
+      if($tr.find('.ref_alfa').val() === '')
+        $tr.find('.ref_alfa').val($this.find('option:selected').attr('data-ref'));
+    }else if(datos[1] == 'f') // es interbancario
     {
-      $tr.find('.ref_alfa').attr('maxlength', '40');
-      $tr.find('.ref_numerica').attr('maxlength', '7');
+      $tr.find('.ref_alfa').attr('maxlength', '40').attr('required', 'required');
+      $tr.find('.ref_numerica').attr('maxlength', '7').attr('required', 'required');
       $tr.find('.ref_descripcion').val('').attr('readonly', 'readonly').removeAttr('required');
+      if($tr.find('.ref_alfa').val() === '')
+        $tr.find('.ref_alfa').val($this.find('option:selected').attr('data-descrip').substr(0, 40));
+    }else{
+      $tr.find('.ref_alfa').removeAttr('required');
+      $tr.find('.ref_numerica').removeAttr('required');
+      $tr.find('.ref_descripcion').removeAttr('required');
     }
+    if($tr.find('.ref_numerica').val() === '')
+      $tr.find('.ref_numerica').val($this.find('option:selected').attr('data-ref'));
   });
   $(".tipo_cuenta").change();
 
