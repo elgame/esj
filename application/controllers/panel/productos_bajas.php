@@ -139,7 +139,26 @@ class productos_bajas extends MY_Controller {
       'titulo' => 'Ver salida'
     );
 
+    $this->configModBaja();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->productos_bajas_model->modificarProductos($_GET['id']);
+
+      if ($res_mdl['passes'])
+      {
+        redirect(base_url('panel/productos_bajas/ver/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+      }
+    }
+
     $params['salida'] = $this->productos_bajas_model->info($_GET['id'], true);
+    $params['modificar'] = $this->usuarios_model->tienePrivilegioDe('', 'productos_bajas/modificar/');
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -198,6 +217,19 @@ class productos_bajas extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configModBaja()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'cantidad[]',
+            'label' => 'Cantidad',
+            'rules' => 'required|[0]')
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Mensajes.
@@ -220,6 +252,10 @@ class productos_bajas extends MY_Controller {
         break;
       case 4:
         $txt = 'La baja se cancelo correctamente.';
+        $icono = 'success';
+      break;
+      case 5:
+        $txt = 'La baja se modifico correctamente.';
         $icono = 'success';
       break;
     }

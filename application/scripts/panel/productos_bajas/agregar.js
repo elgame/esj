@@ -257,7 +257,7 @@
                     '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
                   '<td style="width: 65px;">' +
-                      '<input type="number" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="1" data-next="jump'+(++jumpIndex)+'">' +
+                      '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0.01" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +
                 '</tr>');

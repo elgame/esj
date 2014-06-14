@@ -167,9 +167,13 @@ class compras_ordenes extends MY_Controller {
       $params['ordenFlete'] = true;
       $params['next_folio'] = $this->compras_ordenes_model->folio('f');
       $params['noHeader'] = true;
-      // echo "<pre>";
-      //   var_dump($params['factura']);
-      // echo "</pre>";exit;
+
+      $params['empresa_default'] = new StdClass;
+      $params['empresa_default']->id_empresa = $params['factura']['info']->empresa->id_empresa;
+      $params['empresa_default']->nombre_fiscal = $params['factura']['info']->empresa->nombre_fiscal;
+      $params['empresa_default']->cer_caduca = $params['factura']['info']->empresa->cer_caduca;
+      $params['empresa_default']->cfdi_version = $params['factura']['info']->empresa->cfdi_version;
+      $params['empresa_default']->cer_org = $params['factura']['info']->empresa->cer_org;
 
       $this->load->view('panel/header', $params);
       // $this->load->view('panel/general/menu', $params);
