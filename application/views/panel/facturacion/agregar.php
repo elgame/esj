@@ -302,7 +302,7 @@
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br>
-                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Timbrar</button>
+                      <button type="submit" name="timbrar" class="btn btn-success btn-large btn-block" style="width:100%;" id="btn-timbrar">Timbrar</button>
                   </div>
                 </div>
               </div>
@@ -561,7 +561,6 @@
             </div>
           </div>
 
-
           <!-- Modal Remitente-->
           <div id="modal-remitente" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-remitente" aria-hidden="true">
             <div class="modal-header">
@@ -648,8 +647,80 @@
             </div>
           </div>
 
-        </form>
+          <!-- Modal Seguro-->
+          <div id="modal-seguro" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Seguro</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_seguro" value="<?php echo set_value('pproveedor_seguro', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->proveedor : '') ?>" id="pproveedor_seguro" class="span12 sikey field-check" placeholder="Proveedor" data-next="seg_poliza">
+                  <input type="hidden" name="seg_id_proveedor" value="<?php echo set_value('seg_id_proveedor', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->id_proveedor : '') ?>" id="seg_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="seg_poliza" class="span12 sikey field-check" id="seg_poliza" value="<?php echo set_value('seg_poliza', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->pol_seg : ''); ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['seguro']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
 
+          <!-- Modal Certificados -->
+          <div id="modal-certificado" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Certificado</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_certificado" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_certificado" value="<?php echo set_value('pproveedor_certificado', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->proveedor : '') ?>" id="pproveedor_certificado" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado">
+                  <input type="hidden" name="cert_id_proveedor" value="<?php echo set_value('cert_id_proveedor', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->id_proveedor : '') ?>" id="cert_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_certificado" style="width: auto;">CERTIFICADO</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_certificado" class="span12 sikey field-check" id="cert_certificado" value="<?php echo set_value('cert_certificado', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_bultos" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_bultos" class="span12 vpositive sikey field-check" id="cert_bultos" value="<?php echo set_value('cert_bultos', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Orden Flete -->
+          <div id="modal-orden-flete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Desea agregar una Orden de Flete?</h3>
+            </div>
+            <div class="modal-body center">
+              <input type="hidden" name="new_orden_flete" value="0" id="new_orden_flete" class="span12">
+              <button class="btn btn-large btn-success cboot-btn" id="btnOrdenFleteSi">SI</button>
+              <button class="btn btn-large btn-warning" id="btnOrdenFleteNo">NO</button>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+          </div>
+        </form>
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->

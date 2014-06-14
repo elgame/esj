@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_bajas/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_bajas/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -55,6 +55,15 @@
                 </div>
               </div>
 
+              <?php if ($modificar){ ?>
+                <div class="control-group">
+                  <div class="controls">
+                    <div class="well span9">
+                        <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                    </div>
+                  </div>
+                </div>
+              <?php } ?>
             </div>
           </div>
 
@@ -84,12 +93,13 @@
                             <tr>
                               <td style="width: 70px;">
                                 <?php echo $concepto->codigo ?>
+                                <input type="hidden" value="<?php echo $concepto->id_producto ?>" name="id_producto[]">
                               </td>
                               <td>
                                   <?php echo $concepto->producto ?>
                               </td>
                               <td style="width: 65px;">
-                                  <input type="number" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" readonly>
+                                  <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $modificar ? '' : 'readonly' ?>>
                               </td>
                               <td style="width: 90px;">
                                   <input type="text" name="valorUnitario[]" value="<?php echo $concepto->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" readonly>

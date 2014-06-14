@@ -141,7 +141,7 @@ class facturacion extends MY_Controller {
         $respons = $this->facturacion_model->addFactura();
 
         if($respons['passes'])
-          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura']));
+          redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_factura'].'&of='.$_POST['new_orden_flete']));
         else
           $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
       }
@@ -680,6 +680,43 @@ class facturacion extends MY_Controller {
         'label'   => 'Tipo de Cambio',
         'rules'   => $requerido_moneda.'numeric'
       );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_seguro',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_poliza',
+      'label'   => '',
+      'rules'   => ''
+    );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_certificado',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_certificado',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_bultos',
+      'label'   => '',
+      'rules'   => ''
+    );
 
     $this->form_validation->set_rules($rules);
   }

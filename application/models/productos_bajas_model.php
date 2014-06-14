@@ -120,6 +120,16 @@ class productos_bajas_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
+  public function modificarProductos($idSalida)
+  {
+    foreach ($_POST['id_producto'] as $key => $producto)
+    {
+      $this->db->update('compras_salidas_productos', array('cantidad' => $_POST['cantidad'][$key]), array('id_salida' => $idSalida, 'id_producto' => $producto));
+    }
+
+    return array('passes' => true, 'msg' => 5);
+  }
+
   public function cancelar($idOrden)
   {
     $this->db->update('compras_salidas', array('status' => 'ca'), array('id_salida' => $idOrden));

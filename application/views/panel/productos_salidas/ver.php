@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_salidas/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_salidas/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -61,6 +61,16 @@
                   <input type="text" name="folio" class="span9" id="folio" value="<?php echo set_value('folio', $salida['info'][0]->folio); ?>" readonly>
                 </div>
               </div>
+
+              <?php if ($modificar){ ?>
+                <div class="control-group">
+                  <div class="controls">
+                    <div class="well span9">
+                        <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                    </div>
+                  </div>
+                </div>
+              <?php } ?>
             </div>
           </div>
 
@@ -87,20 +97,21 @@
                       <tbody>
 
                         <?php foreach ($salida['info'][0]->productos as $key => $concepto) { ?>
-                            <tr>
-                              <td style="width: 70px;">
-                                <?php echo $concepto->codigo ?>
-                              </td>
-                              <td>
-                                  <?php echo $concepto->producto ?>
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" readonly>
-                              </td>
-                              <td style="width: 90px;">
-                                  <input type="text" name="valorUnitario[]" value="<?php echo $concepto->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" readonly>
-                              </td>
-                            </tr>
+                          <tr>
+                            <td style="width: 70px;">
+                              <?php echo $concepto->codigo ?>
+                              <input type="hidden" value="<?php echo $concepto->id_producto ?>" name="id_producto[]">
+                            </td>
+                            <td>
+                              <?php echo $concepto->producto ?>
+                            </td>
+                            <td style="width: 65px;">
+                              <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $modificar ? '' : 'readonly' ?>>
+                            </td>
+                            <td style="width: 90px;">
+                              <input type="text" name="valorUnitario[]" value="<?php echo $concepto->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" readonly>
+                            </td>
+                          </tr>
                          <?php } ?>
                       </tbody>
                     </table>

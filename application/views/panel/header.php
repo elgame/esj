@@ -32,48 +32,50 @@
 </head>
 <body>
 
-	<!-- topbar starts -->
-	<div class="navbar">
-		<div class="navbar-inner navinner">
-			<div class="container-fluid">
-				<a class="btn btn-navbar" data-toggle="collapse" data-target=".top-nav.nav-collapse,.nav-collapse.sidebar-nav">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</a>
+  <?php if ( ! isset($noHeader)){ ?>
+  	<!-- topbar starts -->
+  	<div class="navbar">
+  		<div class="navbar-inner navinner">
+  			<div class="container-fluid">
+  				<a class="btn btn-navbar" data-toggle="collapse" data-target=".top-nav.nav-collapse,.nav-collapse.sidebar-nav">
+  					<span class="icon-bar"></span>
+  					<span class="icon-bar"></span>
+  					<span class="icon-bar"></span>
+  				</a>
 
-				<a class="brand" href="<?php echo base_url('panel/home/'); ?>">
-					<img alt="logo" src="<?php echo base_url('application/images/logo.png'); ?>" height="54">
-					<span>
+  				<a class="brand" href="<?php echo base_url('panel/home/'); ?>">
+  					<img alt="logo" src="<?php echo base_url('application/images/logo.png'); ?>" height="54">
+  					<span>
 
-					</span>
-				</a>
+  					</span>
+  				</a>
 
-				<div class="pull-right">
-			<?php if ($this->session->userdata('usuario')!='') { ?>
-					<!-- user dropdown starts -->
-					<div class="btn-group pull-right" >
-						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-							<i class="icon-user"></i><span class="hidden-phone"> <?php echo $this->session->userdata('usuario'); ?></span>
-							<span class="caret"></span>
-						</a>
-						<ul class="dropdown-menu">
-							<li><a href="<?php echo base_url('panel/home/logout'); ?>">Cerrar sesión</a></li>
-						</ul>
-					</div>
-					<!-- user dropdown ends -->
-			<?php } ?>
+  				<div class="pull-right">
+  			<?php if ($this->session->userdata('usuario')!='') { ?>
+  					<!-- user dropdown starts -->
+  					<div class="btn-group pull-right" >
+  						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+  							<i class="icon-user"></i><span class="hidden-phone"> <?php echo $this->session->userdata('usuario'); ?></span>
+  							<span class="caret"></span>
+  						</a>
+  						<ul class="dropdown-menu">
+  							<li><a href="<?php echo base_url('panel/home/logout'); ?>">Cerrar sesión</a></li>
+  						</ul>
+  					</div>
+  					<!-- user dropdown ends -->
+  			<?php } ?>
 
-					<div style="clear: both;"></div>
-					<div class="brand2 pull-right">
-						<?php echo $seo['titulo'];?>
-					</div>
-				</div>
+  					<div style="clear: both;"></div>
+  					<div class="brand2 pull-right">
+  						<?php echo $seo['titulo'];?>
+  					</div>
+  				</div>
 
-			</div>
-		</div>
-	</div>
-	<!-- topbar ends -->
+  			</div>
+  		</div>
+  	</div>
+  	<!-- topbar ends -->
+  <?php } ?>
 
 	<div id="content" class="container-fluid">
 		<div class="row-fluid">

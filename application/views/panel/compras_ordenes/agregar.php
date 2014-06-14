@@ -1,24 +1,28 @@
-<div id="content" class="span10">
+<div id="content" class="span<?php echo isset($_GET['idf']) ? '12' : '10' ?>">
 
-  <div>
-    <ul class="breadcrumb">
-      <li>
-        <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
-      </li>
-      <li>
-        <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'r'){
-                  $titulo = 'Agregar orden de requisición';
-        ?>
-          <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
-        <?php } else {
-                  $titulo = 'Agregar orden de compra';
+  <?php
+    $titulo = 'Agregar orden de compra';
+    if (! isset($_GET['idf'])){ ?>
+    <div>
+      <ul class="breadcrumb">
+        <li>
+          <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
+        </li>
+        <li>
+          <?php if ( ! isset($_GET['w']) || $_GET['w'] === 'r'){
+                    $titulo = 'Agregar orden de requisición';
           ?>
-          <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
-        <?php } ?>
-      </li>
-      <li>Agregar</li>
-    </ul>
-  </div>
+            <a href="<?php echo base_url('panel/compras_ordenes/requisicion'); ?>">Ordenes de Requisicion</a> <span class="divider">/</span>
+          <?php } else {
+                    $titulo = 'Agregar orden de compra';
+            ?>
+            <a href="<?php echo base_url('panel/compras_ordenes/'); ?>">Ordenes de Compras</a> <span class="divider">/</span>
+          <?php } ?>
+        </li>
+        <li>Agregar</li>
+      </ul>
+    </div>
+  <?php } ?>
 
   <div class="row-fluid">
     <div class="box span12">
@@ -90,10 +94,10 @@
                 <label class="control-label" for="cliente">Cliente</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="cliente" class="span11" id="cliente" value="<?php echo set_value('cliente') ?>" placeholder="">
+                    <input type="text" name="cliente" class="span11" id="cliente" value="<?php echo set_value('cliente', isset($factura) ? $factura['info']->cliente->nombre_fiscal : '') ?>" placeholder="">
                   </div>
                 </div>
-                  <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId') ?>">
+                  <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId', isset($factura) ? $factura['info']->cliente->id_cliente : '') ?>">
               </div>
 
               <div class="control-group">
@@ -129,7 +133,7 @@
                   <select name="tipoOrden" class="span9" id="tipoOrden">
                     <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
                     <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios</option>
-                    <option value="f" <?php echo set_select('tipoOrden', 'f'); ?>>Fletes</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f'); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes</option>
                   </select>
                 </div>
               </div>
@@ -151,15 +155,16 @@
                 </div>
               </div>
 
-              <div class="control-group" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"'? '': 'style="display:none;"'); ?> id="fletesFactura">
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="fletesFactura">
                 <label class="control-label" for="tipoPago">Ligar Factura/Remision</label>
                 <div class="controls">
                   <button type="button" class="btn btn-info" id="show-facturas">Buscar</button>
                   <span id="facturaLigada" style="cursor:pointer;">
                     <?php if(isset($_POST['remfacs'])){
                       echo $_POST['remfacs_folio'].' <input type="hidden" name="remfacs" value="'.$_POST['remfacs'].'"><input type="hidden" name="remfacs_folio" value="'.$_POST['remfacs_folio'].'">';
-                    }
-                    ?>
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="remfacs" value="t:'.$factura['info']->id_factura.'|"><input type="hidden" name="remfacs_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
                   </span>
                 </div>
               </div>
