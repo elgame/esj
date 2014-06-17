@@ -1074,6 +1074,7 @@ class compras_ordenes_model extends CI_Model {
 
       foreach ($orden['info'][0]->productos as $key => $prod)
       {
+        $tipoCambio = 1;
         if ($prod->tipo_cambio != 0)
         {
           $tipoCambio = $prod->tipo_cambio;
@@ -1099,17 +1100,17 @@ class compras_ordenes_model extends CI_Model {
           $prod->cantidad.' '.$prod->abreviatura,
           $prod->codigo,
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          String::formatoNumero($prod->precio_unitario, 2, '$', false),
-          String::formatoNumero($prod->importe, 2, '$', false),
+          String::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
+          String::formatoNumero($prod->importe/$tipoCambio, 2, '$', false),
         );
 
         $pdf->SetX(6);
         $pdf->Row($datos, false);
 
-        $subtotal += floatval($prod->importe);
-        $iva      += floatval($prod->iva);
-        $total    += floatval($prod->total);
-        $retencion += floatval($prod->retencion_iva);
+        $subtotal += floatval($prod->importe/$tipoCambio);
+        $iva      += floatval($prod->iva/$tipoCambio);
+        $total    += floatval($prod->total/$tipoCambio);
+        $retencion += floatval($prod->retencion_iva/$tipoCambio);
       }
 
       $yy = $pdf->GetY();
@@ -1153,8 +1154,12 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Row(array('CHOFER: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
       }else
       {
+        $pdf->SetAligns(array('L', 'R'));
+        $pdf->SetWidths(array(104, 50));
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado)), false, false);
+        $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), ($tipoCambio>1 ? "TIPO DE CAMBIO: " . $tipoCambio : '') ), false, false);
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(154));
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
       }
@@ -1184,6 +1189,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY()-3);
         $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
       }
+      $y_compras = $pdf->GetY();
 
       //Totales
       $pdf->SetXY(160, $yy);
@@ -1223,6 +1229,7 @@ class compras_ordenes_model extends CI_Model {
 
       if($orden['info'][0]->status == 'f'){
         $pdf->SetAligns(array('C'));
+        $pdf->SetY($y_compras);
         foreach ($orden['info'][0]->compras as $key => $value)
          {
            $query = $this->db->query("SELECT c.id_compra, c.serie, c.folio, c.total, Date(ca.fecha) AS fecha_pago, ca.ref_movimiento, bc.alias, Sum(ca.total) AS pagado

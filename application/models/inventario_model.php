@@ -1013,6 +1013,422 @@ class inventario_model extends privilegios_model{
 	}
 
 
+  /**
+   * Reporte costos ueps
+   * @param  [type] $id_producto [description]
+   * @param  [type] $fecha1      [description]
+   * @param  [type] $fecha2      [description]
+   * @return [type]              [description]
+   */
+  public function uepsData($id_producto, $fecha1, $fecha2)
+  {
+    $res = $this->db->query(
+    "SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
+    FROM
+      (
+        (
+        SELECT cp.id_producto, cp.num_row, cp.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+        FROM compras_ordenes AS co
+        INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
+          AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
+        )
+        UNION ALL
+        (
+        SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
+        )
+      ) AS t
+    ORDER BY fecha ASC");
+
+    $result   = array();
+    $result[] = array('fecha' => 'S. Anterior',
+            'entrada' => array(0, 0, 0, 0),
+            'salida' => array(0, 0, 0, 0),
+            'saldo' => array(0, 0, 0, 0), );
+    foreach ($res->result() as $key => $value)
+    {
+      $row = array('fecha' => $value->fecha, 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+      if ($value->tipo == 'c')
+      {
+        $row['entrada'][0] = $value->cantidad;
+        $row['entrada'][1] = $value->precio_unitario;
+        $row['entrada'][2] = $value->cantidad*$value->precio_unitario;
+        $row['entrada'][3] = $value->cantidad;
+
+        $row['saldo'][0] = $value->cantidad+$result[count($result)-1]['saldo'][0];
+        $row['saldo'][2] = $row['entrada'][2]+$result[count($result)-1]['saldo'][2];
+        $row['saldo'][1] = $value->precio_unitario; //$row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
+        $result[] = $row;
+      }elseif ($value->tipo == 's')
+      {
+        $aux_cantidad = $value->cantidad;
+        $row = NULL;
+        for ($ci = count($result)-1; $ci >= 0; --$ci)
+        {
+          $row = array('fecha' => $value->fecha, 'misma_salida' => ($row==NULL? '' : '&&'), 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+          if($aux_cantidad >= floatval($result[$ci]['entrada'][3]) && floatval($result[$ci]['entrada'][3]) > 0)
+          {
+            $row['salida'][0] = $result[$ci]['entrada'][3];
+            $row['salida'][1] = $result[$ci]['entrada'][1];
+            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
+            // resta las cantidades diponibles de las entradas y el total de salida
+            $result[$ci]['entrada'][3] = 0;
+            $aux_cantidad -= $row['salida'][0];
+          }elseif(floatval($result[$ci]['entrada'][3]) > 0)
+          {
+            $row['salida'][0] = $aux_cantidad;
+            $row['salida'][1] = $result[$ci]['entrada'][1];
+            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
+            // resta las cantidades diponibles de las entradas y el total de salida
+            $result[$ci]['entrada'][3] -= $aux_cantidad;
+            $aux_cantidad = 0;
+          }
+          //saldos cuando son salidas
+          $row['saldo'][0] = $result[count($result)-1]['saldo'][0]-$row['salida'][0];
+          $row['saldo'][1] = $row['salida'][1];
+          $row['saldo'][2] = $result[count($result)-1]['saldo'][2]-$row['salida'][2];
+
+          $result[] = $row;
+          if(floatval(String::formatoNumero($aux_cantidad, 2, '', true)) == 0)
+            break;
+        }
+      }
+
+    }
+
+    $valkey = $entro = 0;
+    foreach ($result as $key => $value)
+    {
+      if(strtotime($fecha1) > strtotime($value['fecha']))
+      {
+        $valkey = $key-1;
+        unset($result[$valkey]);
+        $entro = 1;
+      }
+    }
+    if($entro == 1)
+    {
+      $result[$valkey+1] = array('fecha' => 'S. Anterior', 'entrada' => array('', '', ''), 'salida' => array('', '', ''),
+            'saldo' => $result[$valkey+1]['saldo'] );
+    }
+
+    $keyconta = $entrada_cantidad = $entrada_importe = $salida_cantidad = $salida_importe = $entrada_cantidadt1 = $entrada_importet1 = 0;
+    foreach ($result as $key => $value)
+    {
+      if(strlen($value['saldo'][1]) == 0)
+        unset($result[$key]);
+      else
+      {
+        if(isset($value['misma_salida']) && $value['misma_salida'] == '&&')
+          $result[$key]['fecha'] = '-';
+        $entrada_cantidad += $value['entrada'][0];
+        $entrada_importe += $value['entrada'][2];
+
+        $entrada_cantidadt1 += $value['entrada'][0];
+        $entrada_importet1 += $value['entrada'][2];
+        if ($keyconta > 0)
+        {
+          $salida_cantidad += $value['salida'][0];
+          $salida_importe += $value['salida'][2];
+        }else
+        {
+          $entrada_cantidad += $value['saldo'][0];
+          $entrada_importe += $value['saldo'][2];
+        }
+        $keyconta++;
+      }
+    }
+    $result[] = array('fecha' => 'Total', 'entrada' => array($entrada_cantidadt1, '', $entrada_importet1), 'salida' => array($salida_cantidad, '', $salida_importe),
+            'saldo' => array('', '', '') );
+
+    $result[] = array('fecha' => 'Total General', 'entrada' => array($entrada_cantidad, '', $entrada_importe), 'salida' => array($salida_cantidad, '', $salida_importe),
+            'saldo' => array(($entrada_cantidad-$salida_cantidad), '',($entrada_importe-$salida_importe)) );
+
+    return $result;
+  }
+  /**
+   * Reporte de existencias por costo
+   * @return [type] [description]
+   */
+  public function getUEPSData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+
+    if(is_array($this->input->get('ffamilias'))){
+      $sql .= " AND pf.id_familia IN (".implode(',', $this->input->get('ffamilias')).")";
+    }
+    if($this->input->get('fid_producto') != ''){
+      $sql .= " AND p.id_producto = ".$this->input->get('fid_producto');
+    }
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if($this->input->get('did_empresa') != ''){
+        $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+      }
+
+    $res = $this->db->query(
+      "SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
+      FROM productos AS p
+        INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
+        INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
+      WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
+      ORDER BY nombre, nombre_producto ASC
+      ");
+
+    $response = array();
+    if($res->num_rows() > 0)
+    {
+      $response = $res->result();
+      foreach ($response as $key => $value)
+      {
+        $data = $this->uepsData($value->id_producto, $_GET['ffecha1'], $fecha);
+        $value->data       = array_pop($data);
+        $value->data_saldo = array_shift($data);
+        $response[$key]    = $value;
+      }
+    }
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por costo UEPS
+   */
+  public function getUEPSPdf()
+  {
+    $res = $this->getUEPSData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Existencia por costos UEPS';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'R', 'R', 'R', 'R');
+    $widths = array(65, 35, 35, 35, 35);
+    $header = array('Producto', 'Saldo', 'Entradas', 'Salidas', 'Existencia');
+
+    $familia = '';
+    $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        if ($key == 0)
+        {
+          $pdf->SetFont('Arial','B',11);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths(array(150));
+          $pdf->Row(array($item->nombre), false, false);
+          $familia = $item->nombre;
+        }
+
+        $pdf->SetFont('Arial','B',9);
+        // $pdf->SetTextColor(255,255,255);
+        // $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false, false);
+      }
+
+      if ($familia <> $item->nombre)
+      {
+        if ($key > 0)
+        {
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->SetMyLinks(array());
+          $pdf->Row(array('TOTAL',
+            String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+            String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+            String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+            String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+            ), false, false);
+        }
+        $totaltes['familia'] = array(0,0,0,0);
+
+        $pdf->SetFont('Arial','B',11);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths(array(150));
+        $pdf->Row(array($item->nombre), false, false);
+        $familia = $item->nombre;
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $imprimir = true;
+      if($this->input->get('con_existencia') == 'si')
+        if($item->data['saldo'][2] <= 0)
+          $imprimir = false;
+      if($this->input->get('con_movimiento') == 'si')
+        if($item->data['salida'][2] <= 0 && ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        $totaltes['familia'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['familia'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['familia'][2] += $item->data['salida'][2];
+        $totaltes['familia'][3] += $item->data['saldo'][2];
+
+        $totaltes['general'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['general'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['general'][2] += $item->data['salida'][2];
+        $totaltes['general'][3] += $item->data['saldo'][2];
+
+        $datos = array($item->nombre_producto.' ('.$item->abreviatura.')',
+          String::formatoNumero($item->data_saldo['saldo'][2], 2, '$', false),
+          String::formatoNumero( ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) , 2, '$', false),
+          String::formatoNumero($item->data['salida'][2], 2, '$', false),
+          String::formatoNumero(($item->data['saldo'][2]), 2, '$', false),
+          );
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->SetMyLinks(array(base_url('panel/inventario/pueps_pdf?id_producto='.$item->id_producto.'&id_empresa='.$empresa['info']->id_empresa.
+                  '&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
+        $pdf->Row($datos, false);
+      }
+
+      $pdf->SetMyLinks(array());
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->SetMyLinks(array());
+    $pdf->Row(array('TOTAL',
+      String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+      String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+      String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+      String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+      ), false, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+5);
+    $pdf->Row(array('TOTAL GENERAL',
+      String::formatoNumero($totaltes['familia'][0], 2, '$', false),
+      String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
+      String::formatoNumero($totaltes['familia'][2], 2, '$', false),
+      String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+      ), false);
+
+    $pdf->Output('epc.pdf', 'I');
+  }
+
+  public function getPUEPSPdf()
+  {
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+
+    $res = $this->uepsData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('id_empresa'));
+
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = 'Reporte de inventario costo UEPS';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(20, 18, 18, 26, 18, 18, 26, 18, 18, 26);
+    $header = array('Fecha', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.', 'CANT.', 'P.U.', 'P.T.');
+
+    $familia = '';
+    $keyconta = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $keyconta==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(26);
+        $pdf->SetAligns(array('C', 'C', 'C'));
+        $pdf->SetWidths(array(62, 62, 62));
+        $pdf->Row(array('Entradas', 'Salidas', 'Saldo'), true);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $keyconta++;
+
+      if(strpos($item['fecha'], 'Total') !== false)
+      {
+        $pdf->SetFont('Arial','B',8);
+      }else
+        $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array(
+        $item['fecha'],
+
+        $item['entrada'][0]!=''? String::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
+        $item['entrada'][1]!=''? String::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
+        $item['entrada'][2]!=''? String::formatoNumero($item['entrada'][2], 2, '$', false): $item['entrada'][2],
+
+        $item['salida'][0]!=''? String::formatoNumero($item['salida'][0], 2, '', false): $item['salida'][0],
+        $item['salida'][1]!=''? String::formatoNumero($item['salida'][1], 2, '$', false): $item['salida'][1],
+        $item['salida'][2]!=''? String::formatoNumero($item['salida'][2], 2, '$', false): $item['salida'][2],
+
+        $item['saldo'][0]!=''? String::formatoNumero($item['saldo'][0], 2, '', false): $item['saldo'][0],
+        $item['saldo'][1]!=''? String::formatoNumero($item['saldo'][1], 2, '$', false): $item['saldo'][1],
+        $item['saldo'][2]!=''? String::formatoNumero($item['saldo'][2], 2, '$', false): $item['saldo'][2],
+        );
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->Output('pueps.pdf', 'I');
+  }
+
+
 	/**
 	 * Reporte de existencias por costo
 	 * @return [type] [description]
