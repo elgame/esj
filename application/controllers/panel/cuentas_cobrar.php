@@ -19,6 +19,8 @@ class cuentas_cobrar extends MY_Controller {
 
     'cuentas_cobrar/estado_cuenta_pdf/',
     'cuentas_cobrar/estado_cuenta_xls/',
+    'cuentas_cobrar/rpt_ventas_xls/',
+    'cuentas_cobrar/rpt_ventas2_xls/',
   );
 
 
@@ -282,7 +284,17 @@ class cuentas_cobrar extends MY_Controller {
       redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
 
-
+  /**
+   * RPTS
+   */
+  public function rpt_ventas_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->rptVentasXls();
+  }
+  public function rpt_ventas2_xls(){
+    $this->load->model('cuentas_cobrar_model');
+    $this->cuentas_cobrar_model->rptVentasClienteXls();
+  }
 
   /**
    * Configura los metodos de agregar y modificar

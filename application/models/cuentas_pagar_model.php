@@ -455,7 +455,7 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$pdf->titulo2 = 'Cuenta de '.$res['proveedor']->nombre_fiscal;
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
-		$pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+		$pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
@@ -615,7 +615,7 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$xls->titulo2 = 'Cuenta de '.$res['proveedor']->nombre_fiscal;
 		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
-		$xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+		$xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
 
 		if(is_array($res['anterior'])){
 			$res['anterior'] = new stdClass();
@@ -1710,16 +1710,46 @@ class cuentas_pagar_model extends privilegios_model{
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
+    $sql .= " AND f.status = 'pa'";
+
     $response = array();
     $response = $this->db->query(
         "SELECT p.id_proveedor, p.rfc, p.nombre_fiscal, Sum(f.subtotal) AS subtotal, Sum(f.importe_iva) AS importe_iva, Sum(f.total) AS total
           FROM compras as f
             INNER JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+            LEFT JOIN (
+              SELECT id_compra, Sum(abono) AS abono
+              FROM (
+                (
+                  SELECT
+                    id_compra,
+                    Sum(total) AS abono
+                  FROM
+                    compras_abonos as fa
+                  WHERE Date(fecha) <= '{$fecha2}'
+                  GROUP BY id_compra
+                )
+                UNION
+                (
+                  SELECT
+                    id_nc AS id_compra,
+                    Sum(total) AS abonos
+                  FROM
+                    compras
+                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+                    AND Date(fecha) <= '{$fecha2}'
+                  GROUP BY id_nc
+                )
+              ) AS ffs
+              GROUP BY id_compra
+            ) AS ac ON f.id_compra = ac.id_compra
           WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
             AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+            AND f.total = ac.abono
             {$sql}
           GROUP BY p.id_proveedor
           ORDER BY p.nombre_fiscal ASC")->result();
+
     return $response;
   }
 

@@ -29,7 +29,11 @@
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Estado cuenta</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/estado_cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-table"></i> Estado cuenta</a>
+              <i class="icon-table"></i> Estado cuenta</a> |
+            <a href="<?php echo base_url('panel/cuentas_cobrar/rpt_ventas_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+              <i class="icon-table"></i> Ventas pagadas</a> |
+            <a href="<?php echo base_url('panel/cuentas_cobrar/rpt_ventas2_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+              <i class="icon-table"></i> Ventas pagadas Prov</a>
 
             <form action="<?php echo base_url('panel/cuentas_cobrar/'); ?>" method="GET" class="form-search">
               <div class="form-actions form-filters">

@@ -1849,4 +1849,212 @@ class cuentas_cobrar_model extends privilegios_model{
 		echo $html;
 	}
 
+
+  public function getRptventasData($order_by='fecha ASC, fecha2 ASC')
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha1 = $fecha2 = '';
+    if($_GET['ffecha1'] > $_GET['ffecha2']){
+      $fecha2 = $_GET['ffecha1'];
+      $fecha1 = $_GET['ffecha2'];
+    }else{
+      $fecha2 = $_GET['ffecha2'];
+      $fecha1 = $_GET['ffecha1'];
+    }
+
+    $sql = $sqlt = $sql2 = '';
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    $sql .= " AND f.status = 'pa'";
+
+    $response = array();
+    $response = $this->db->query(
+        "SELECT f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva, f.total,
+          (SELECT Date(fecha) FROM facturacion_abonos WHERE id_factura = f.id_factura ORDER BY fecha DESC LIMIT 1) AS fecha,
+          (SELECT Date(fecha) FROM facturacion WHERE id_nc = f.id_factura ORDER BY fecha DESC LIMIT 1) AS fecha2
+          FROM facturacion as f
+            INNER JOIN clientes p ON p.id_cliente = f.id_cliente
+            LEFT JOIN (
+              SELECT id_factura, Sum(abono) AS abono
+              FROM (
+                (
+                  SELECT
+                    id_factura,
+                    Sum(total) AS abono
+                  FROM
+                    facturacion_abonos as fa
+                  WHERE Date(fecha) <= '{$fecha2}'
+                  GROUP BY id_factura
+                )
+                UNION
+                (
+                  SELECT
+                    id_nc AS id_factura,
+                    Sum(total) AS abono
+                  FROM
+                    facturacion
+                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+                    AND Date(fecha) <= '{$fecha2}'
+                  GROUP BY id_nc
+                )
+              ) AS ffs
+              GROUP BY id_factura
+            ) AS ac ON f.id_factura = ac.id_factura
+          WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
+            AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+            AND f.total = ac.abono
+            {$sql}
+          ORDER BY {$order_by}")->result();
+      foreach ($response as $key => $value)
+      {
+        $value->fecha_pago = $value->fecha2;
+        if(strtotime($value->fecha) >= strtotime($value->fecha2))
+          $value->fecha_pago = $value->fecha;
+      }
+
+    return $response;
+  }
+
+  public function rptVentasXls()
+  {
+    header('Content-type: application/vnd.ms-excel');
+    header("Content-Disposition: attachment; filename=compras.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptventasData();
+
+    $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "RELACION A DETALLE DE FACTURAS COBRADAS";
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="5" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SERIE</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FOLIO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA DE PAGO</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CLIENTE</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">IVA</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+        </tr>';
+    $total_importe = $total_iva = 0;
+    foreach ($res as $key => $value)
+    {
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$value->serie.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$value->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$value->fecha_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$value->rfc.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$value->subtotal.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$value->importe_iva.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($value->subtotal+$value->importe_iva).'</td>
+        </tr>';
+        $total_importe += $value->subtotal;
+        $total_iva += $value->importe_iva;
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="5">TOTALES</td>
+          <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_iva.'</td>
+          <td style="border:1px solid #000;">'.($total_importe+$total_iva).'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  public function rptVentasClienteXls()
+  {
+    header('Content-type: application/vnd.ms-excel');
+    header("Content-Disposition: attachment; filename=compras.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptventasData('p.nombre_fiscal ASC');
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "INTEGRACION DE OPERACIONES EFECTUADAS AL 100% DE LOS ACTOS GRAVADOS POR LOS CLIENTES";
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="5" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="5" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CLIENTE</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TOTAL</td>
+        </tr>';
+    $total_importe = $total_iva = $total_proveedor = 0;
+    $grupo_cliente = '';
+    foreach ($res as $key => $value)
+    {
+      if($value->nombre_fiscal !== $grupo_cliente)
+      {
+        if($key > 0){
+          $html .= '<tr style="font-weight:bold;">
+            <td style="width:150px;border:1px solid #000;"></td>
+            <td style="width:500px;border:1px solid #000;">Total '.$grupo_cliente.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$total_proveedor.'</td>
+          </tr>';
+        }
+        $total_proveedor = 0;
+        $grupo_cliente = $value->nombre_fiscal;
+      }
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$value->rfc.'</td>
+          <td style="width:500px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.($value->subtotal+$value->importe_iva).'</td>
+        </tr>';
+        $total_importe += $value->subtotal;
+        $total_iva += $value->importe_iva;
+        $total_proveedor += $value->subtotal+$value->importe_iva;
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="1">TOTALES</td>
+          <td style="border:1px solid #000;">'.($total_importe+$total_iva).'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
