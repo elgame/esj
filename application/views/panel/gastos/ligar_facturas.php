@@ -31,10 +31,18 @@
                 <div class="row-fluid">
                   <div class="span5">
                     <input type="text" name="fclasificacion" id="fclasificacion" class="span12" value="<?php echo set_value('fclasificacion'); ?>"
-                      maxlength="100" placeholder="Clasificación" data-next="funidad">
+                      maxlength="100" placeholder="Clasificación" data-next="fcliente">
                     <input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
                   </div>
-
+                  <div class="span5">
+                    <input type="text" name="fcliente" id="fcliente" class="span12" value="<?php echo set_value('fcliente'); ?>"
+                      maxlength="200" placeholder="Cliente" data-next="ffolio">
+                    <input type="hidden" name="fid_cliente" id="fid_cliente" value="<?php echo set_value('fid_cliente'); ?>">
+                  </div>
+                  <div class="span2">
+                    <input type="text" name="ffolio" id="ffolio" class="span12" value="<?php echo set_value('ffolio'); ?>"
+                      maxlength="200" placeholder="Folio" data-next="funidad">
+                  </div>
                 </div>
                 <table class="table table-striped table-bordered bootstrap-datatable">
                   <thead>

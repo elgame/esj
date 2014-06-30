@@ -250,12 +250,12 @@
                       {
                     ?>
                       <tr>
-                          <td><input type="checkbox" class="chk_banamex" value="si" <?php echo ($value->is_banamex=='t'? 'checked': ''); ?> data-uniform="false">
+                          <td><input type="checkbox" class="chk_banamex" value="si" <?php echo ($value->is_banamex=='t'? 'checked': ''); ?> data-uniform="false" <?php echo $editar_cuenta ?> <?php echo $editar_cuenta==''? '': 'style="display:none"'; ?>>
                             <input type="hidden" name="cuentas_banamex[]" value="<?php echo ($value->is_banamex=='t'? 'true': 'false'); ?>" class="cuentas_banamex">
                             <input type="hidden" name="cuentas_id[]" value="<?php echo $value->id_cuenta; ?>" class="cuentas_id">
                           </td>
                           <td>
-                            <select name="fbanco[]" class="fbanco">
+                            <select name="fbanco[]" class="fbanco" <?php echo $editar_cuenta ?>>
                             <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
                             ?>
                                 <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco, false, $value->id_banco); ?>><?php echo $valueb->nombre; ?></option>
@@ -263,11 +263,15 @@
                             }?>
                             </select>
                           </td>
-                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $value->alias; ?>" class="cuentas_alias"></td>
-                          <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $value->sucursal; ?>" class="cuentas_sucursal vpos-int" <?php echo ($value->is_banamex=='t'? '': 'readonly'); ?>></td>
-                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $value->cuenta; ?>" class="cuentas_cuenta vpos-int"></td>
-                          <td><input type="text" name="cuentas_ref[]" value="<?php echo $value->referencia; ?>" class="cuentas_ref vpos-int" maxlength="<?php echo ($value->is_banamex=='t'? '7': '10'); ?>"></td>
-                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $value->alias; ?>" class="cuentas_alias" <?php echo $editar_cuenta ?>></td>
+                          <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $value->sucursal; ?>" class="cuentas_sucursal vpos-int" <?php echo ($value->is_banamex=='t'? '': 'readonly'); ?> <?php echo $editar_cuenta ?>></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $value->cuenta; ?>" class="cuentas_cuenta vpos-int" <?php echo $editar_cuenta ?>></td>
+                          <td><input type="text" name="cuentas_ref[]" value="<?php echo $value->referencia; ?>" class="cuentas_ref vpos-int" maxlength="<?php echo ($value->is_banamex=='t'? '7': '10'); ?>" <?php echo $editar_cuenta ?>></td>
+                          <td>
+                             <?php if($editar_cuenta !== 'readonly'){ ?>
+                              <button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button>
+                            <?php } ?>
+                          </td>
                       </tr>
                     <?php
                       }

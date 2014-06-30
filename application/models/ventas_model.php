@@ -1425,21 +1425,41 @@ class Ventas_model extends privilegios_model{
         // $pdf->SetTextColor(255,255,255);
       }
 
-      $pdf->SetX(80);
       $pdf->SetFont('Arial','B',8);
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(60, 40));
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(80);
       $pdf->Row(array('FACTURAS ADMIN', String::formatoNumero( $total_factura+$total_factura_cancel , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA ADMIN', String::formatoNumero( $total_iva+$total_iva_cancel , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('FACT  CANCELADAS', String::formatoNumero( $total_factura_cancel , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA CANCELADO', String::formatoNumero( $total_iva_cancel , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('FACT. CONTAB', String::formatoNumero( $total_factura-$total_iva , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA TRASLADADO CONTAB', String::formatoNumero( $total_iva , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(80);
+      $pdf->Row(array('NOTAS DE CREDITO', String::formatoNumero( $total_nc , 2, '', false) ), false);
+      if($pdf->GetY()+8 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(80);
+      $pdf->Row(array('NC CANCELADAS', String::formatoNumero( $total_nc_cancel , 2, '', false) ), false);
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');

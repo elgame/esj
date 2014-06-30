@@ -158,19 +158,19 @@ class banco_pagos extends MY_Controller {
     }
 
     $params['data']    = $this->banco_cuentas_model->getSaldosCuentasData();
-    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
     $params['pagos']  = $this->banco_pagos_model->getPagosBascula();
     $params['rows_completos'] = true;
-    foreach($params['pagos'] as $pago){
-      foreach ($pago->pagos as $key => $value)
-      {
-        if ( $value->id_cuenta<=0 || $value->ref_alfanumerica=='' || $value->referencia=='' )
-        {
-          $params['rows_completos'] = false;
-          break;
-        }
-      }
-    }
+    // foreach($params['pagos'] as $pago){
+    //   foreach ($pago->pagos as $key => $value)
+    //   {
+    //     if ( $value->id_cuenta<=0 || $value->ref_alfanumerica=='' || $value->referencia=='' )
+    //     {
+    //       $params['rows_completos'] = false;
+    //       break;
+    //     }
+    //   }
+    // }
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -190,6 +190,7 @@ class banco_pagos extends MY_Controller {
   public function aplica_pagos_bascula()
   {
     $this->load->model('banco_pagos_model');
+    $_GET['did_empresa'] = $_GET['ide'];
     $this->banco_pagos_model->aplicarPagosBascula();
     redirect(base_url('panel/banco_pagos/bascula/?msg=5'));
   }

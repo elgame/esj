@@ -2196,7 +2196,12 @@ class facturacion_model extends privilegios_model{
       $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cantidad', 'Neto', 'Impuesto', 'Total', 'Saldo');
       $links = array('', '', '', '', '', '', '', '', '');
 
-      $total_saldo_cliente = 0;
+      $total_subtotal_g = 0;
+      $total_impuesto_g = 0;
+      $total_total_g = 0;
+      $total_cantidad_g = 0;
+      $total_saldo_g = 0;
+      $total_saldo_cliente_g = 0;
       foreach($res as $key => $item){
         if (count($item->facturas) > 0 || $con_mov)
         {
@@ -2206,7 +2211,7 @@ class facturacion_model extends privilegios_model{
           $total_cantidad = 0;
           $total_saldo = 0;
 
-          if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+          if($pdf->GetY()+10 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
             $pdf->AddPage();
 
             $pdf->SetFont('Arial','B',8);
@@ -2238,6 +2243,12 @@ class facturacion_model extends privilegios_model{
             $total_impuesto += $factura->importe_iva;
             $total_total += $factura->total;
 
+            $total_subtotal_g += $factura->subtotal;
+            $total_saldo_g += $factura->saldo;
+            $total_cantidad_g += $factura->cantidad_productos;
+            $total_impuesto_g += $factura->importe_iva;
+            $total_total_g += $factura->total;
+
             $links[3] = base_url('panel/facturacion/rventasc_detalle_pdf?venta='.$factura->id_factura.'&did_empresa='.$empresa['info']->id_empresa);
             $datos = array(String::fechaATexto($factura->fecha, '/c'),
                     $factura->serie,
@@ -2251,6 +2262,8 @@ class facturacion_model extends privilegios_model{
                     // String::fechaATexto($factura->fecha_vencimiento, '/c'),
                   );
 
+            if($pdf->GetY()+10 >= $pdf->limiteY)
+              $pdf->AddPage();
             $pdf->SetXY(6, $pdf->GetY()-1);
             $pdf->SetAligns($aligns);
             $pdf->SetWidths($widths);
@@ -2259,6 +2272,8 @@ class facturacion_model extends privilegios_model{
           }
           $pdf->SetMyLinks(array());
 
+          if($pdf->GetY()+10 >= $pdf->limiteY)
+            $pdf->AddPage();
           $pdf->SetX(93);
           $pdf->SetFont('Arial','B',8);
           // $pdf->SetTextColor(255,255,255);
@@ -2274,6 +2289,18 @@ class facturacion_model extends privilegios_model{
           // $total_saldo_cliente += $saldo_cliente;
         }
       }
+
+      if($pdf->GetY()+10 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(93);
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(23, 23, 23, 23, 23));
+      $pdf->Row(array(
+          String::formatoNumero($total_cantidad_g, 2, '', false),
+          String::formatoNumero($total_subtotal_g, 2, '', false),
+          String::formatoNumero($total_impuesto_g, 2, '', false),
+          String::formatoNumero($total_total_g, 2, '', false),
+          String::formatoNumero($total_saldo_g, 2, '', false)), false);
 
       // $pdf->SetXY(66, $pdf->GetY()+4);
       // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);

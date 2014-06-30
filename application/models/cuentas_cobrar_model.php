@@ -1850,7 +1850,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	}
 
 
-  public function getRptventasData($order_by='fecha ASC, fecha2 ASC')
+  public function getRptventasData($order_by='fa.fecha ASC')
   {
     $sql = '';
 
@@ -1875,48 +1875,23 @@ class cuentas_cobrar_model extends privilegios_model{
 
     $response = array();
     $response = $this->db->query(
-        "SELECT f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva, f.total,
-          (SELECT Date(fecha) FROM facturacion_abonos WHERE id_factura = f.id_factura ORDER BY fecha DESC LIMIT 1) AS fecha,
-          (SELECT Date(fecha) FROM facturacion WHERE id_nc = f.id_factura ORDER BY fecha DESC LIMIT 1) AS fecha2
-          FROM facturacion as f
-            INNER JOIN clientes p ON p.id_cliente = f.id_cliente
-            LEFT JOIN (
-              SELECT id_factura, Sum(abono) AS abono
-              FROM (
-                (
-                  SELECT
-                    id_factura,
-                    Sum(total) AS abono
-                  FROM
-                    facturacion_abonos as fa
-                  WHERE Date(fecha) <= '{$fecha2}'
-                  GROUP BY id_factura
-                )
-                UNION
-                (
-                  SELECT
-                    id_nc AS id_factura,
-                    Sum(total) AS abono
-                  FROM
-                    facturacion
-                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-                    AND Date(fecha) <= '{$fecha2}'
-                  GROUP BY id_nc
-                )
-              ) AS ffs
-              GROUP BY id_factura
-            ) AS ac ON f.id_factura = ac.id_factura
-          WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
-            AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-            AND f.total = ac.abono
-            {$sql}
+        "SELECT
+            f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva, f.total, Date(fa.fecha) AS fecha_pago,
+            fa.total AS total_abono, ((fa.total*100/f.total)*f.importe_iva/100) AS importe_iva
+          FROM facturacion AS f
+            INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+            INNER JOIN clientes AS p ON p.id_cliente = f.id_cliente
+            INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+          WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
+            AND (Date(fa.fecha) >= '{$fecha1}' AND Date(fa.fecha) <= '{$fecha2}')
+            {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
           ORDER BY {$order_by}")->result();
-      foreach ($response as $key => $value)
-      {
-        $value->fecha_pago = $value->fecha2;
-        if(strtotime($value->fecha) >= strtotime($value->fecha2))
-          $value->fecha_pago = $value->fecha;
-      }
+      // foreach ($response as $key => $value)
+      // {
+      //   $value->fecha_pago = $value->fecha2;
+      //   if(strtotime($value->fecha) >= strtotime($value->fecha2))
+      //     $value->fecha_pago = $value->fecha;
+      // }
 
     return $response;
   }
@@ -1967,11 +1942,11 @@ class cuentas_cobrar_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$value->fecha_pago.'</td>
           <td style="width:150px;border:1px solid #000;">'.$value->rfc.'</td>
           <td style="width:400px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$value->subtotal.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$value->total_abono.'</td>
           <td style="width:100px;border:1px solid #000;">'.$value->importe_iva.'</td>
-          <td style="width:150px;border:1px solid #000;">'.($value->subtotal+$value->importe_iva).'</td>
+          <td style="width:150px;border:1px solid #000;">'.($value->total_abono+$value->importe_iva).'</td>
         </tr>';
-        $total_importe += $value->subtotal;
+        $total_importe += $value->total_abono;
         $total_iva += $value->importe_iva;
     }
 
@@ -2039,11 +2014,11 @@ class cuentas_cobrar_model extends privilegios_model{
       $html .= '<tr>
           <td style="width:150px;border:1px solid #000;">'.$value->rfc.'</td>
           <td style="width:500px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
-          <td style="width:150px;border:1px solid #000;">'.($value->subtotal+$value->importe_iva).'</td>
+          <td style="width:150px;border:1px solid #000;">'.($value->total_abono+$value->importe_iva).'</td>
         </tr>';
-        $total_importe += $value->subtotal;
+        $total_importe += $value->total_abono;
         $total_iva += $value->importe_iva;
-        $total_proveedor += $value->subtotal+$value->importe_iva;
+        $total_proveedor += $value->total_abono+$value->importe_iva;
     }
 
     $html .= '

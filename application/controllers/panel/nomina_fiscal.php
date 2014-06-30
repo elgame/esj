@@ -48,6 +48,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
     'nomina_fiscal/asistencia_pdf/',
+    'nomina_fiscal/cancelar/'
   );
 
   public function _remap($method)
@@ -936,6 +937,17 @@ class nomina_fiscal extends MY_Controller {
       $this->nomina_fiscal_model->pdfRptNominaPtu($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
   }
 
+  public function cancelar()
+  {
+    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}))
+    {
+      $this->load->model('nomina_fiscal_model');
+      $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
+
+      redirect(base_url("panel/nomina_fiscal/?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
+    }
+  }
+
   /*
    |------------------------------------------------------------------------
    | aguinaldo
@@ -1043,6 +1055,27 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 9:
         $txt = 'Favor de especificar una empresa para generar su nomina.';
+        $icono = 'error';
+        break;
+
+      case 102:
+        $txt = 'El timbrado aun esta pendiente.';
+        $icono = 'error';
+        break;
+      case 201:
+        $txt = 'El Recibo se cancelo correctamente.';
+        $icono = 'success';
+        break;
+      case 202:
+        $txt = 'El Recibo se cancelo correctamente.';
+        $icono = 'success';
+        break;
+      case 205:
+        $txt = 'Error al intentar cancelar: UUID No existente.';
+        $icono = 'error';
+        break;
+      case 708:
+        $txt = 'No se pudo conectar al SAT para realizar la cancelación de El Recibo, intentelo mas tarde.';
         $icono = 'error';
         break;
     }

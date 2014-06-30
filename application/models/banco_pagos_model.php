@@ -233,6 +233,10 @@ class banco_pagos_model extends CI_Model {
     // //Filtros para buscar
     if(isset($datos['tipo_cuenta']))
       $sql .= " AND pc.is_banamex = '{$datos['tipo_cuenta']}'";
+    if(isset($datos['con_cuenta']))
+      $sql .= " AND bpc.id_cuenta IS NOT NULL";
+    if(isset($datos['did_empresa']))
+      $sql .= " AND c.id_empresa = '{$datos['did_empresa']}'";
 
     $response = array();
     $res_proveedores = $this->db->query("SELECT p.id_proveedor, p.nombre_fiscal, bpc.es_moral
@@ -266,7 +270,7 @@ class banco_pagos_model extends CI_Model {
       foreach ($datos['id_pago'][$keyp] as $key => $id_pago)
       {
         $this->db->update('banco_pagos_bascula', array(
-          'id_cuenta'        => $cuenta[0],
+          'id_cuenta'        => ($cuenta[0]{0}? $cuenta[0]: NULL),
           'referencia'       => $datos['ref_numerica'][$keyp][0],
           'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
           'monto'            => $datos['monto'][$keyp][$key],
@@ -337,7 +341,10 @@ class banco_pagos_model extends CI_Model {
   {
     $this->load->model('bascula_model');
     $this->load->model('banco_cuentas_model');
-    $pagos = $this->getPagosBascula();
+    $this->load->model('bascula_facturas_model');
+    $pagos = $this->getPagosBascula(array(
+        'did_empresa' => $_GET['did_empresa'],
+        'con_cuenta' => 'true' ));
 
     foreach ($pagos as $key => $pago)
     {
@@ -353,6 +360,15 @@ class banco_pagos_model extends CI_Model {
         'dmonto' => 0,
         'descrip' => '',
       );
+      $datos_factura = array(
+        'did_empresa'   => $_GET['did_empresa'],
+        'did_proveedor' => $pago->id_proveedor,
+        'dserie'        => '',
+        'dfolio'        => 0,
+        'dsubtotal'     => 0,
+        'dtotal'        => 0,
+        'boletas'      => array(),
+      );
       foreach ($pago->pagos as $keyp => $value)
       {
         $total_pagar += $value->monto;
@@ -361,12 +377,19 @@ class banco_pagos_model extends CI_Model {
           'id_bascula' => $value->id_bascula,
           'monto' => $value->monto,
           );
+        $datos_factura['boletas'][] = $value->id_bascula;
         $datos['descrip'] .= '|'.$value->folio.' => '.String::formatoNumero($value->monto, 2, '', false);
+        $this->db->update('banco_pagos_bascula', array('status' => 't'), array('id_bascula' => $value->id_bascula));
       }
+      $_GET['did_empresa'] = $_GET['did_empresa'];
       $datos['dmonto'] = $total_pagar;
-      $this->bascula_model->pago_basculas_banco($datos);
+      $datos_factura['dtotal'] = $datos_factura['dsubtotal'] = $total_pagar;
+      if(count($pago->pagos) > 0){
+        $this->bascula_model->pago_basculas_banco($datos);
+        $this->bascula_facturas_model->crearFactura($datos_factura);
+      }
 
-      $this->db->update('banco_pagos_bascula', array('status' => 't'));
+      // $this->db->update('banco_pagos_bascula', array('status' => 't'));
     }
   }
 

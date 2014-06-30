@@ -48,7 +48,8 @@ class bascula extends MY_Controller {
     'bascula/bonificaciones_pdf/',
     'bascula/bitacora_pdf/',
 
-    'bascula/imprimir_recepcion/'
+    'bascula/imprimir_recepcion/',
+    'bascula/get_boleta/'
     );
 
   public function _remap($method){
@@ -149,17 +150,19 @@ class bascula extends MY_Controller {
 
       $res_mdl = $this->bascula_model->addBascula(null, false, $log, $authId);
 
-      $ticket = '';
+      $boletar = $ticket = '';
       // if (isset($_POST['pstatus']))
       //   $ticket = '&p=t';
 
       if (isset($_GET['p']))
         $ticket = '&p=t';
 
+      if ($this->input->post('ptipo') === 'en')
+        $boletar = $res_mdl['new_boleta']? '&br='.$res_mdl['idb']: '';
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
-      $boletar = $res_mdl['new_boleta']? '&br='.$res_mdl['idb']: '';
-      if( ! $res_mdl['error'])
+      if( ! $res_mdl['error']){
         redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
+      }
     }
 
     $params['accion']      = 'n'; // indica que es nueva entrada
@@ -1331,6 +1334,7 @@ class bascula extends MY_Controller {
       $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
         WHERE folio = {$folio} AND tipo = '{$this->input->post('ptipo')}'
         AND id_area = {$this->input->post('parea')}")->row();
+      // var_dump($result->num);exit();
       if($result->num > 0){
         $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
         return false;
@@ -1770,6 +1774,11 @@ class bascula extends MY_Controller {
         $txt = 'El lote se agrego correctamente!';
         $icono = 'success';
         break;
+
+      case 20:
+        $txt = 'Se modifico correctamente la compra!';
+        $icono = 'success';
+        break;
     }
 
     return array(
@@ -1908,6 +1917,160 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->bitacora_pdf();
+  }
+
+  /**
+   * ***************************************************************
+   * ************* FACTURAS *******************
+   * @return [type] [description]
+   */
+  public function facturas()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/compras_ordenes/admin.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Compras'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('bascula_model');
+
+    $params['compras'] = $this->bascula_model->getFacturas();
+
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/admin_facturas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function facturas_agregar()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('general/util.js'),
+      array('panel/bascula/admin_facturas.js'),
+    ));
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Factura'
+    );
+
+    $this->load->model('proveedores_model');
+    $this->load->model('bascula_model');
+    $this->load->model('compras_ordenes_model');
+    $this->load->model('areas_model');
+    $this->load->model('empresas_model');
+
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->bascula_model->addFactura($_POST, $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(20);
+    }
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['areas']  = $this->areas_model->getAreas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/agregar_facturas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function facturas_ver()
+  {
+    $this->carabiner->js(array(
+      array('general/supermodal.js'),
+      array('general/msgbox.js'),
+      array('panel/bascula/admin_facturas.js'),
+    ));
+
+    $this->load->model('proveedores_model');
+    $this->load->model('bascula_model');
+    $this->load->model('compras_ordenes_model');
+
+    $this->configUpdateXml();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->bascula_model->updateFactura($_GET['id'], $_GET['idp'], $_FILES['xml']);
+
+      $params['frm_errors'] = $this->showMsgs(20);
+    }
+
+    $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
+
+    $params['compra'] = $this->bascula_model->getInfoFactura($_GET['id'], true);
+
+    $this->load->view('panel/bascula/ver_facturas', $params);
+  }
+
+  public function facturas_cancelar()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->cancelarFactura($_GET['id']);
+
+    redirect(base_url('panel/bascula/facturas/?' . String::getVarsLink(array('id')).'&msg=3'));
+  }
+
+  public function get_boleta()
+  {
+    $this->load->model('bascula_model');
+    $res = $this->bascula_model->getBasculaInfo(false, $_GET['pfolio'], false, array('b.tipo' => $_GET['ptipo'], 'b.id_area' => $_GET['parea']));
+    echo json_encode($res);
+  }
+
+  public function configUpdateXml()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'xml',
+            'label' => 'XML',
+            'rules' => 'callback_xml_check'),
+      array('field' => 'aux',
+            'label' => '',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+  public function xml_check($file)
+  {
+    if ($_FILES['xml']['type'] !== '' && $_FILES['xml']['type'] !== 'text/xml')
+    {
+      $this->form_validation->set_message('xml_check', 'El %s debe ser un archivo XML.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
   }
 
 }

@@ -169,6 +169,10 @@ class proveedores extends MY_Controller {
     		//bancos
     		$params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
+      $params['editar_cuenta'] = 'readonly';
+      if($this->usuarios_model->tienePrivilegioDe('', 'proveedores/editar_cuentas/'))
+        $params['editar_cuenta'] = '';
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

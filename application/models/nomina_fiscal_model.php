@@ -7708,6 +7708,55 @@ class nomina_fiscal_model extends CI_Model {
     return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
   }
 
+  /**
+   * Cancela una factura. Cambia el status a 'ca'.
+   *
+   * @return array
+   */
+  public function cancelaFactura($idEmpleado, $anio, $semana, $idEmpresa)
+  {
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('documentos_model');
+
+    // Obtenemos la info de la factura a cancelar.
+    $query = $this->db->query("SELECT nf.uuid, e.rfc, e.id_empresa, e.nombre_fiscal
+                               FROM nomina_fiscal AS nf
+                                INNER JOIN empresas AS e ON e.id_empresa = nf.id_empresa
+                               WHERE nf.id_empleado = {$idEmpleado} AND nf.id_empresa = {$idEmpresa} AND nf.anio = '{$anio}' AND nf.semana = '{$semana}'")->row();
+
+    // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+    $this->cfdi->cargaDatosFiscales($query->id_empresa);
+
+    // Parametros que necesita el webservice para la cancelacion.
+    $params = array(
+      'rfc'   => $query->rfc,
+      'uuids' => $query->uuid,
+      'cer'   => $this->cfdi->obtenCer(),
+      'key'   => $this->cfdi->obtenKey(),
+    );
+
+    // Lama el metodo cancelar para que realiza la peticion al webservice.
+    $result = $this->facturartebarato_api->cancelar($params);
+
+    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    {
+      $this->db->delete('nomina_fiscal', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
+      $query1 = $this->db->query("SELECT id_prestamo
+                                 FROM nomina_fiscal_prestamos
+                                 WHERE id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
+      if($query1->num_rows() > 0){
+        $this->db->delete('nomina_fiscal_prestamos', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
+        foreach ($query1->result() as $key => $value)
+        {
+          $this->db->update('nomina_prestamos', array('status' => 't'), "id_prestamo = {$value->id_prestamo}");
+        }
+      }
+    }
+
+    return array('msg' => $result->data->status_uuid, 'empresa' => $query->nombre_fiscal);
+  }
+
   public function pdfReciboNominaFiscalAguinaldo($empleadoId, $semana, $anio, $empresaId, $pdf=null)
   {
     $this->load->model('empresas_model');

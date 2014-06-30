@@ -149,9 +149,6 @@
                              echo $set_select.($set_select==' selected="selected"'? '': $bmod['area']); ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
                       </select>
-                      <!-- <span class="help-inline">
-                        <a href="<?php// echo base_url('panel/areas/agregar') ?>" class="btn" rel="superbox-80x500">Agregar</a>
-                      </span> -->
                     </div>
                   </div>
 

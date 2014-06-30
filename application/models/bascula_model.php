@@ -285,10 +285,12 @@ class Bascula_model extends CI_Model {
    * @param  boolean $basic_info
    * @return array
    */
-  public function getBasculaInfo($id=false, $folio=0, $basic_info=false)
+  public function getBasculaInfo($id=false, $folio=0, $basic_info=false, $sql_ext=array())
   {
     $id = (isset($_GET['id']))? $_GET['id']: $id;
 
+    if(count($sql_ext) > 0)
+      $this->db->where($sql_ext);
     $sql_res = $this->db
       ->select("b.*,
                 e.nombre_fiscal AS empresa,
@@ -2034,6 +2036,204 @@ class Bascula_model extends CI_Model {
     }
 
     $pdf->Output('BITACORA_BASCULA_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+
+
+  public function getFacturas($perpage = '40', $autorizadas = true)
+  {
+    $sql = '';
+    //paginacion
+    $params = array(
+        'result_items_per_page' => $perpage,
+        'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+    );
+
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+    //Filtros para buscar
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql = " AND Date(co.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    elseif($this->input->get('ffecha1') != '')
+      $sql = " AND Date(co.fecha) = '".$this->input->get('ffecha1')."'";
+    elseif($this->input->get('ffecha2') != '')
+      $sql = " AND Date(co.fecha) = '".$this->input->get('ffecha2')."'";
+
+
+    if($this->input->get('ffolio') != '')
+    {
+      $sql .= " AND co.folio = '".$this->input->get('ffolio')."'";
+    }
+
+    if($this->input->get('did_proveedor') != '')
+    {
+      $sql .= " AND p.id_proveedor = '".$this->input->get('did_proveedor')."'";
+    }
+
+    if($this->input->get('did_empresa') != '')
+    {
+      $sql .= " AND e.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if($this->input->get('fstatus') != '')
+    {
+      $sql .= " AND co.status = '".$this->input->get('fstatus')."'";
+    }
+
+    $query = BDUtil::pagination(
+        "SELECT co.id_factura,
+                co.id_proveedor, p.nombre_fiscal AS proveedor,
+                co.id_empresa, e.nombre_fiscal as empresa,
+                co.serie, co.folio, co.fecha, co.status, co.xml, co.total
+        FROM bascula_facturas AS co
+        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
+        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
+        WHERE 1 = 1 {$sql}
+        ORDER BY (co.fecha, co.folio) DESC
+        ", $params, true);
+
+    $res = $this->db->query($query['query']);
+
+    $response = array(
+        'compras'           => array(),
+        'total_rows'     => $query['total_rows'],
+        'items_per_page' => $params['result_items_per_page'],
+        'result_page'    => $params['result_page']
+    );
+    if($res->num_rows() > 0)
+      $response['compras'] = $res->result();
+
+    return $response;
+  }
+
+  public function cancelarFactura($id_factura)
+  {
+    $this->db->update('bascula_facturas', array('status' => 'ca'), "id_factura = {$id_factura}");
+  }
+
+  public function getInfoFactura($id_factura)
+  {
+    $res = $this->db->query("SELECT *
+                               FROM bascula_facturas
+                               WHERE id_factura = {$id_factura}");
+    $response = array('info' => array(), 'boletas' => array());
+    if ($res->num_rows() > 0) {
+      $response['info'] = $res->row();
+
+      $res = $this->db->query("SELECT b.id_bascula, b.folio, b.fecha_bruto, b.importe
+                                 FROM bascula_facturas_boletas bf
+                                  INNER JOIN bascula b ON b.id_bascula = bf.id_bascula
+                                 WHERE bf.id_factura = {$id_factura}");
+      $response['boletas'] = $res->result();
+    }
+    return $response;
+  }
+
+  public function updateFactura($compraId, $proveedorId, $xml)
+  {
+    $compra = array(
+      'subtotal'      => String::float($this->input->post('totalImporte')),
+      'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
+      'total'         => String::float($this->input->post('totalOrden')),
+      'fecha'         => $this->input->post('fecha'),
+      'serie'         => $this->input->post('serie'),
+      'folio'         => $this->input->post('folio'),
+    );
+
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+      $this->load->model('compras_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+      $path      = $this->compras_model->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+
+      $compra['xml'] = 'application'.$xmlFile[1];
+    }
+    $this->db->update('bascula_facturas', $compra, array('id_factura' => $compraId));
+
+    if (is_array($this->input->post('pid_bascula'))) {
+      $this->db->delete('bascula_facturas_boletas', "id_factura = {$compraId}");
+      foreach ($_POST['pid_bascula'] as $key => $value)
+      {
+        $this->db->insert('bascula_facturas_boletas', array(
+          'id_factura' => $compraId,
+          'id_bascula' => $value,
+          ));
+      }
+    }
+  }
+
+  public function addFactura($datos, $xml)
+  {
+    $compra = array(
+      'id_empresa'    => $datos['empresaId'],
+      'id_proveedor'  => $datos['proveedorId'],
+      'subtotal'      => String::float($datos['totalImporte']),
+      'importe_iva'   => String::float($datos['totalImpuestosTrasladados']),
+      'total'         => String::float($datos['totalOrden']),
+      'fecha'         => $datos['fecha'],
+      'serie'         => $datos['serie'],
+      'folio'         => $datos['folio'],
+    );
+
+    // Realiza el upload del XML.
+    if ($xml && $xml['tmp_name'] !== '')
+    {
+      $this->load->library("my_upload");
+      $this->load->model('proveedores_model');
+      $this->load->model('compras_model');
+
+      $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+      $path      = $this->compras_model->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+      $xmlName   = ($datos['serie'] !== '' ? $datos['serie'].'-' : '') . $datos['folio'].'.xml';
+
+      $config_upload = array(
+        'upload_path'     => $path,
+        'allowed_types'   => '*',
+        'max_size'        => '2048',
+        'encrypt_name'    => FALSE,
+        'file_name'       => $xmlName,
+      );
+      $this->my_upload->initialize($config_upload);
+
+      $xmlData = $this->my_upload->do_upload('xml');
+
+      $xmlFile     = explode('application', $xmlData['full_path']);
+
+      $compra['xml'] = 'application'.$xmlFile[1];
+    }
+    $this->db->insert('bascula_facturas', $compra);
+    $compraId = $this->db->insert_id();
+
+    if (is_array($this->input->post('pid_bascula'))) {
+      $this->db->delete('bascula_facturas_boletas', "id_factura = {$compraId}");
+      foreach ($_POST['pid_bascula'] as $key => $value)
+      {
+        $this->db->insert('bascula_facturas_boletas', array(
+          'id_factura' => $compraId,
+          'id_bascula' => $value,
+          ));
+      }
+    }
   }
 
 }

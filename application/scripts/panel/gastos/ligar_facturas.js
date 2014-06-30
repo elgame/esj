@@ -3,12 +3,20 @@
 })(function ($, window) {
 
   $(function () {
+    $('#form').keyJump();
     asignaAutocomplets();
 
     //Asigna evento para los checks de los rendimientos
     $(document).on("click", ".cajasdisponibles", addFacturaSel);
     $(document).on("click", ".deleteFacturaSel", deleteFacturaSel);
     $(document).on("click", ".deleteTblSel", deleteTblSel);
+
+    $("#ffolio, #fcliente").on('keypress', function(event) {
+      if ( event.which == 13 ) {
+        getFacturasLibres();
+        event.preventDefault();
+      }
+    });
   });
 
 
@@ -17,27 +25,31 @@
       id_clasificacion: $("#fid_clasificacion").val(),
       id_empresa: $("#id_empresa").val(),
       id_compra: $("#id_compra").val(),
+      id_cliente: $("#fid_cliente").val(),
+      folio: $("#ffolio").val(),
     };
-    $.getJSON(base_url+"panel/gastos/ajax_get_facturas", datavar, function(resp){
-      var html = '', idrow;
-      if (resp.length > 0) {
-        for (var i = 0; i < resp.length; i++) {
-          idrow = datavar.id_clasificacion+'_'+datavar.id_compra+'_'+resp[i].id_factura;
-          html += '<tr id="row_rend'+idrow+'">'+
-            '<td class="fecha">'+resp[i].fecha+'</td>'+
-            '<td class="folio">'+resp[i].serie+resp[i].folio+'</td>'+
-            '<td class="cliente">'+resp[i].cliente+'</td>'+
-            '<td><buttom class="btn rendimientos cajasdisponibles"'+
-            '  data-id="'+idrow+'" data-idFactura="'+resp[i].id_factura+'"><i class="icon-angle-right"></i></buttom></td>'+
-          '</tr>';
+    if (datavar.id_clasificacion !== '') {
+      $.getJSON(base_url+"panel/gastos/ajax_get_facturas", datavar, function(resp){
+        var html = '', idrow;
+        if (resp.length > 0) {
+          for (var i = 0; i < resp.length; i++) {
+            idrow = datavar.id_clasificacion+'_'+datavar.id_compra+'_'+resp[i].id_factura;
+            html += '<tr id="row_rend'+idrow+'">'+
+              '<td class="fecha">'+resp[i].fecha+'</td>'+
+              '<td class="folio">'+resp[i].serie+resp[i].folio+'</td>'+
+              '<td class="cliente">'+resp[i].cliente+'</td>'+
+              '<td><buttom class="btn rendimientos cajasdisponibles"'+
+              '  data-id="'+idrow+'" data-idFactura="'+resp[i].id_factura+'"><i class="icon-angle-right"></i></buttom></td>'+
+            '</tr>';
+          }
+          $("#tblfacturaslibres").html(html);
+        }else
+        {
+          $("#tblfacturaslibres").html("");
+          noty({"text":"No hay Facturas libres en la clasificacion seleccionada.", "layout":"topRight", "type":"error"});
         }
-        $("#tblfacturaslibres").html(html);
-      }else
-      {
-        $("#tblfacturaslibres").html("");
-        noty({"text":"No hay Facturas libres en la clasificacion seleccionada.", "layout":"topRight", "type":"error"});
-      }
-    });
+      });
+    }
   };
 
   var deleteFacturaSel = function(e){
@@ -110,6 +122,34 @@
         $(this).css({'background-color': '#FFD9B3'});
         $("#fid_clasificacion").val('');
       }
+    });
+    // Autocomplete Clientes
+    $("#fcliente").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#id_empresa").val()) > 0)
+          params.did_empresa = $("#id_empresa").val();
+        $.ajax({
+            url: base_url+'panel/clientes/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#fid_cliente").val(ui.item.id);
+        $("#fcliente").css("background-color", "#B0FFB0");
+        getFacturasLibres();
+      }
+    }).on("keydown", function(event){
+        if(event.which == 8 || event == 46){
+          $("#fcliente").val("").css("background-color", "#FFD9B3");
+          $("#fid_cliente").val("");
+        }
     });
   };
 

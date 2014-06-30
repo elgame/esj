@@ -485,7 +485,7 @@
                     </div>
 
                     <!--Totales -->
-                    <div class="span4">
+                    <div class="span4 pull-right">
                       <div class="row-fluid">
                         <table class="table table-striped table-bordered table-hover table-condensed">
                           <thead>
