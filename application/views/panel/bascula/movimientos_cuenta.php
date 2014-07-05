@@ -170,7 +170,7 @@
                               <?php if ($mov->status === 'b' || $mov->status === 'p') { ?>
                                 <span class="badge badge-important"><?php echo strtoupper($mov->status) ?></span>
                               <?php } else { ?>
-                                <input type="checkbox" name="ppagos[]" value="<?php echo $mov->id_bascula ?>" checked id="pesadas" data-monto="<?php echo $mov->importe_todas ?>">
+                                <!-- <input type="checkbox" name="ppagos[]" value="<?php echo $mov->id_bascula ?>" checked id="pesadas" data-monto="<?php echo $mov->importe_todas ?>"> -->
                               <?php }} ?>
                           </td>
                           <td>

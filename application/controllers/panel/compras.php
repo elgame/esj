@@ -9,6 +9,8 @@ class compras extends MY_Controller {
   private $excepcion_privilegio = array(
   'compras/ajax_producto_by_codigo/',
   'compras/ajax_producto/',
+  'compras/rpt_compras_pdf/',
+  'compras/rpt_compras_productos_pdf/',
   );
 
   public function _remap($method){
@@ -209,6 +211,63 @@ class compras extends MY_Controller {
     $this->load->view('panel/compras/ver_nota_credito', $params);
     $this->load->view('panel/footer');
   }
+
+
+  public function rpt_compras()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Compras');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/rptcompras',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_compras_pdf(){
+    $this->load->model('compras_model');
+    $this->compras_model->getRptComprasPdf();
+  }
+
+  public function rpt_compras_productos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_compras.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte Compras y productos');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacen/compras/rptcompras_productos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_compras_productos_pdf(){
+    $this->load->model('compras_model');
+    $this->compras_model->getRptComprasProductosPdf();
+  }
+
+
 
   public function configUpdateXml()
   {

@@ -110,7 +110,8 @@
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
                           {
                             $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
-                            echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'>'.$cuentasp->alias.' *'.substr($cuentasp->cuenta, -4).'</option>';
+                            echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'
+                            data-ref="EMPAQUE SAN JORGE" data-descrip="PAGO DE LIMON" data-tipo="b">'.$cuentasp->banco.' - '.$cuentasp->alias.'</option>';
                           }
                               echo '</select></td>
                     <td><input type="text" name="ref_numerica['.$keyp.'][]" value="'.$value->referencia.'" class="span12 ref_numerica" maxlength="7" required></td>

@@ -1662,7 +1662,7 @@ class polizas_model extends CI_Model {
             bm.id_movimiento, bm.numero_ref AS ref_movimiento, bm.concepto, bm.monto AS total_abono, 0 AS retencion_isr,
             bc.cuenta_cpi, bm.monto AS subtotal, bm.monto AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps,
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
-            COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha_registro) AS fecha,
+            COALESCE(c.cuenta_cpi, bm.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
             bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq
           FROM banco_movimientos AS bm
@@ -1672,9 +1672,9 @@ class polizas_model extends CI_Model {
             LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
           WHERE bm.status = 't' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon' {$sql2}
           GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
-            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha_registro), bm.id_traspaso, cc.nombre
+            bm.monto, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso, cc.nombre
           HAVING Count(bmc.id_movimiento) = 0
-          ORDER BY bm.fecha_registro ASC
+          ORDER BY bm.fecha ASC
         )
         {$sql_union_bascula}
       ) AS t
@@ -1723,9 +1723,6 @@ class polizas_model extends CI_Model {
       //Contenido de la Poliza de las facturas de compra
       foreach ($data as $key => $value)
       {
-        // echo "<pre>";
-        //   var_dump($value);
-        // echo "</pre>";
         if ($value->tipoo == 'facturas')
         {
           //Agregamos el header de la poliza
@@ -1803,6 +1800,7 @@ class polizas_model extends CI_Model {
             }
           }
         }else if($value->tipoo == 'banco'){ //Contenido de la Poliza de los movimientos directos de banco
+          $total_retiro_banco = NULL;
           //Es traspaso entre cuentas bancarias, se cambian los numeros
           if($value->es_traspaso > 0)
           {

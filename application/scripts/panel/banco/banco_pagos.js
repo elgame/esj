@@ -26,7 +26,7 @@ $(function(){
       $tr.find('.ref_numerica').removeAttr('required');
       $tr.find('.ref_descripcion').removeAttr('required');
     }
-    if($tr.find('.ref_numerica').val() === '')
+    if($tr.find('.ref_numerica').val() === '' && $this.find('option:selected').attr('data-tipo') != 'b')
       $tr.find('.ref_numerica').val($this.find('option:selected').attr('data-ref'));
   });
   $(".tipo_cuenta").change();

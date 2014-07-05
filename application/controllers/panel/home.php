@@ -101,7 +101,25 @@ class home extends MY_Controller {
 		// echo $this->cfdi->obtenCertificado($this->cfdi->path_certificado, false);
 		// echo $this->cfdi->obtenLlave($this->cfdi->path_key);
 
-		$this->load->view('panel/header', $params);
+    $this->load->model('inventario_model');
+    $this->load->model('empresas_model');
+    $empresas = $this->empresas_model->getEmpresas();
+    foreach ($empresas['empresas'] as $keye => $empresa)
+    {
+      $_GET['did_empresa'] = $empresa->id_empresa;
+      $productos = $this->inventario_model->getEPUData();
+      $empresa->productos = array();
+      foreach ($productos as $key => $value)
+      {
+        if($value->stock_min > ($value->saldo_anterior + $value->entradas - $value->salidas) )
+          $empresa->productos[] = $value;
+      }
+      if(count($empresa->productos) == 0)
+        unset($empresas['empresas'][$keye]);
+    }
+    $params['empresas'] = $empresas['empresas'];
+
+    $this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/general/home', $params);
 		$this->load->view('panel/footer');

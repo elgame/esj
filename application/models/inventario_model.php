@@ -761,7 +761,7 @@ class inventario_model extends privilegios_model{
    * @return
 	 */
 	public function getEPUData()
-  	{
+  {
 		$sql = '';
 
 		//Filtros para buscar
@@ -785,7 +785,7 @@ class inventario_model extends privilegios_model{
 
 		$res = $this->db->query(
 			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura, COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
-				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior
+				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
 			FROM productos AS p
 			INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 			INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad

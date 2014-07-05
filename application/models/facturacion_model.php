@@ -509,8 +509,15 @@ class facturacion_model extends privilegios_model{
 
         if ($_POST['prod_diva_porcent'][$key] == '11')
           $traslado11 += floatval($_POST['prod_diva_total'][$key]);
-        else if ($_POST['prod_diva_porcent'][$key] == '16')
-          $traslado16 += floatval($_POST['prod_diva_total'][$key]);
+        else if ($_POST['prod_diva_porcent'][$key] == '16'){
+          if($datosFactura['sin_costo'] == 't'){
+            if ($_POST['prod_did_prod'][$key] != '49' AND $_POST['prod_did_prod'][$key] != '50' AND
+                $_POST['prod_did_prod'][$key] != '51' AND $_POST['prod_did_prod'][$key] != '52' AND
+                $_POST['prod_did_prod'][$key] != '53')
+              $traslado16 += floatval($_POST['prod_diva_total'][$key]);
+          }else
+            $traslado16 += floatval($_POST['prod_diva_total'][$key]);
+        }
         else
           $traslado0 = true;
 

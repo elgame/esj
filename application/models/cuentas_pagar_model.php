@@ -1714,39 +1714,21 @@ class cuentas_pagar_model extends privilegios_model{
 
     $response = array();
     $response = $this->db->query(
-        "SELECT p.id_proveedor, p.rfc, p.nombre_fiscal, Sum(f.subtotal) AS subtotal, Sum(f.importe_iva) AS importe_iva, Sum(f.total) AS total
-          FROM compras as f
-            INNER JOIN proveedores p ON p.id_proveedor = f.id_proveedor
-            LEFT JOIN (
-              SELECT id_compra, Sum(abono) AS abono
-              FROM (
-                (
-                  SELECT
-                    id_compra,
-                    Sum(total) AS abono
-                  FROM
-                    compras_abonos as fa
-                  WHERE Date(fecha) <= '{$fecha2}'
-                  GROUP BY id_compra
-                )
-                UNION
-                (
-                  SELECT
-                    id_nc AS id_compra,
-                    Sum(total) AS abonos
-                  FROM
-                    compras
-                  WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
-                    AND Date(fecha) <= '{$fecha2}'
-                  GROUP BY id_nc
-                )
-              ) AS ffs
-              GROUP BY id_compra
-            ) AS ac ON f.id_compra = ac.id_compra
-          WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
-            AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-            AND f.total = ac.abono
-            {$sql}
+        "SELECT p.id_proveedor, p.rfc, p.nombre_fiscal, Sum(ac.subtotal) AS subtotal, Sum(ac.importe_iva) AS importe_iva,
+            Sum(ac.total_abono) AS total
+          FROM proveedores p
+          INNER JOIN (
+            SELECT
+              p.id_proveedor, Sum(fa.total) AS total_abono, Sum(((fa.total*100/f.total)*f.subtotal/100)) AS subtotal, Sum(f.total) AS total,
+              Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva
+              FROM compras AS f
+                INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
+                INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+                INNER JOIN proveedores p ON p.id_proveedor = f.id_proveedor
+              WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL
+                  {$sql}
+              GROUP BY p.id_proveedor
+          ) AS ac ON p.id_proveedor = ac.id_proveedor
           GROUP BY p.id_proveedor
           ORDER BY p.nombre_fiscal ASC")->result();
 

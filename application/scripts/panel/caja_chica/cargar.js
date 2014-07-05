@@ -31,6 +31,8 @@
 
     cargaMovimientos();
     searchModalMovimientos();
+
+    $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
   });
 
   var btnAddIngreso = function () {
@@ -144,9 +146,10 @@
     $('#total-ingresos').val(total);
 
     var saldo_inicial = parseFloat($('#saldo_inicial').val()),
-        totalSaldoIngresos = saldo_inicial + total;
+        totalSaldoIngresos =  saldo_inicial + total; //saldo_inicial +
 
-    $('input#total-saldo-ingresos').val(totalSaldoIngresos.toFixed(2));
+    $('input#total-saldo-ingresos.span12').val(totalSaldoIngresos.toFixed(2));
+    $('input#total-saldo-ingresos.vpositive').val((totalSaldoIngresos - saldo_inicial).toFixed(2));
 
     calculaCorte();
   };
@@ -277,19 +280,19 @@
     var $table = $('#table-gastos').find('tbody .row-total'),
         tr =  '<tr>' +
                 '<td style="width: 100px;">' +
-                  '<input type="text" name="gasto_empresa[]" value="" class="gasto-cargo" style="width: 200px;">' +
+                  '<input type="text" name="gasto_empresa[]" value="" class="span12 gasto-cargo">' +
                   '<input type="hidden" name="gasto_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
                 '</td>' +
                 '<td style="width: 40px;">' +
-                  '<select name="gasto_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
+                  '<select name="gasto_nomenclatura[]" class="span12 ingreso_nomenclatura">' +
                     $('#nomeclaturas_base').html() +
                   '</select>' +
                 '</td>' +
-                '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="input-xlarge span12 gasto-folio" style="width: 100px;"></td>' +
+                '<td style="width: 100px;"><input type="text" name="gasto_folio[]" value="" class="span12 gasto-folio"></td>' +
                 '<td style="">' +
-                  '<input type="text" name="gasto_concepto[]" value="" class="gasto-concepto">' +
+                  '<input type="text" name="gasto_concepto[]" value="" class="span12 gasto-concepto">' +
                 '</td>' +
-                '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="input-small vpositive gasto-importe"></td>' +
+                '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
@@ -324,7 +327,7 @@
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
-        $(".gasto-cargo-id").val(ui.item.id);
+        $(this).parents('tr').find(".gasto-cargo-id").val(ui.item.id);
         $(this).css("background-color", "#B0FFB0");
       }
     }).on("keydown", function(event){

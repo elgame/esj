@@ -53,6 +53,7 @@ class caja_chica extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('libs/jquery.numeric.js'),
+      array('libs/jquery.filtertable.min.js'),
       array('general/msgbox.js'),
       array('general/util.js'),
       array('panel/caja_chica/cargar.js'),
@@ -343,7 +344,7 @@ class caja_chica extends MY_Controller {
             'rules' => ''),
       array('field' => 'pid_empresa',
             'label' => 'Empresa',
-            'rules' => 'required'),
+            'rules' => ''),
     );
 
     $this->form_validation->set_rules($rules);

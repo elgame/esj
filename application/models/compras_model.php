@@ -716,4 +716,226 @@ class compras_model extends privilegios_model{
 
     return $prod;
   }
+
+  public function getRptComprasData()
+  {
+    $sql = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $sql .= " AND Date(c.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+      $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+      $response = array();
+      $productos = $this->db->query("SELECT
+          c.id_compra, c.serie, c.folio, Date(c.fecha) AS fecha, p.nombre_fiscal, c.total, c.status, array_to_string(array_agg(cea.folio), ',') AS folio_almacen
+        FROM compras c
+          INNER JOIN compras_facturas cf ON c.id_compra = cf.id_compra
+          INNER JOIN compras_entradas_almacen cea ON cf.id_orden = cea.id_orden
+          INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+        WHERE c.status <> 'ca' {$sql}
+        GROUP BY c.id_compra, c.serie, c.folio, Date(c.fecha), p.nombre_fiscal, c.total, c.status
+        ORDER BY fecha ASC, folio ASC");
+      $response = $productos->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptComprasPdf(){
+    $res = $this->getRptComprasData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Compras';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'R', 'L', 'R');
+    $widths = array(20, 25, 80, 30, 20, 30);
+    $header = array('Fecha', 'Factura', 'Proveedor', 'Importe', 'Estado', 'Folio Almacen');
+
+    $familia = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $factura){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array(String::fechaATexto($factura->fecha, '/c'),
+        $factura->serie.$factura->folio,
+        $factura->nombre_fiscal,
+        String::formatoNumero($factura->total, 2, '', false),
+        ($factura->status=='p'? 'Pendiente': 'Pagada'),
+        $factura->folio_almacen,
+        );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      $proveedor_importe   += $factura->total;
+
+    }
+    $datos = array('Total General',
+      '', '',
+      String::formatoNumero($proveedor_importe, 2, '', false),
+      '', '',
+      );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($datos, false);
+
+    $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+
+  public function getRptComprasProductosData()
+  {
+    $sql = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+    $sql .= " AND Date(c.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+      $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+      $response = array();
+      $productos = $this->db->query("SELECT
+          c.id_compra, c.serie, c.folio, Date(c.fecha) AS fecha, p.nombre_fiscal, c.total, c.status, cea.folio AS folio_almacen,
+          pr.nombre, cp.cantidad, cp.precio_unitario, cp.importe, pu.abreviatura AS unidad
+        FROM compras c
+          INNER JOIN compras_facturas cf ON c.id_compra = cf.id_compra
+          INNER JOIN compras_entradas_almacen cea ON cf.id_orden = cea.id_orden
+          INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+          INNER JOIN compras_productos cp ON c.id_compra = cp.id_compra
+          INNER JOIN productos pr ON pr.id_producto = cp.id_producto
+          INNER JOIN productos_unidades pu ON pu.id_unidad = pr.id_unidad
+        WHERE c.status <> 'ca' {$sql}
+        ORDER BY fecha ASC, id_compra ASC, folio ASC");
+      $response = $productos->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptComprasProductosPdf(){
+    $res = $this->getRptComprasProductosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Compras y Productos';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'L', 'R', 'R');
+    $widths = array(19, 20, 40, 40, 15, 12, 16, 20, 15, 12);
+    $header = array('Fecha', 'Factura', 'Proveedor', 'Producto', 'Cantidad', 'Unidad', 'P.U.', 'Importe', 'Estado', 'Folio A');
+
+    $compra_aux = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $factura){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array( ($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): ''),
+        ($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: ''),
+        ($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: ''),
+        $factura->nombre,
+        String::formatoNumero($factura->cantidad, 2, '', false),
+        $factura->unidad,
+        String::formatoNumero($factura->precio_unitario, 2, '', false),
+        String::formatoNumero($factura->importe, 2, '', false),
+        ($compra_aux !== $factura->id_compra? ($factura->status=='p'? 'Pendiente': 'Pagada'): ''),
+        $factura->folio_almacen,
+        );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      if($compra_aux !== $factura->id_compra )
+        $compra_aux = $factura->id_compra;
+      $proveedor_importe   += $factura->importe;
+
+    }
+    $datos = array('Total General',
+      String::formatoNumero($proveedor_importe, 2, '', false),
+      );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(162, 20));
+    $pdf->Row($datos, false);
+
+    $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+
 }
