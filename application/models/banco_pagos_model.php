@@ -31,7 +31,7 @@ class banco_pagos_model extends CI_Model {
     {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.serie, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion
+                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion, bpc.modificado_banco
                                FROM banco_pagos_compras AS bpc
                                  INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
                                  LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
@@ -61,6 +61,7 @@ class banco_pagos_model extends CI_Model {
           'monto'            => $datos['monto'][$keyp][$key],
           'descripcion'      => $datos['descripcion'][$keyp][0],
           'es_moral'         => ($datos['es_moral'][$keyp][0]=='si'? 't': 'f'),
+          'modificado_banco' => 't',
           ), "id_pago = {$id_pago}");
       }
     }
@@ -249,7 +250,7 @@ class banco_pagos_model extends CI_Model {
     {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha_bruto) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula, bpc.descripcion
+                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_bascula, bpc.descripcion, bpc.modificado_banco
                                FROM banco_pagos_bascula AS bpc
                                INNER JOIN bascula AS c ON c.id_bascula = bpc.id_bascula
                                LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
@@ -276,6 +277,7 @@ class banco_pagos_model extends CI_Model {
           'monto'            => $datos['monto'][$keyp][$key],
           'descripcion'      => $datos['descripcion'][$keyp][0],
           'es_moral'         => ($datos['es_moral'][$keyp][0]=='si'? 't': 'f'),
+          'modificado_banco' => 't',
           ), "id_pago = {$id_pago}");
       }
     }
@@ -353,7 +355,7 @@ class banco_pagos_model extends CI_Model {
         'dcuenta' => $_GET['cuentaretiro'],
         'dfecha' => date("Y-m-d"),
         'dreferencia' => '',
-        'dconcepto' => $pago->nombre_fiscal,
+        'dconcepto' => 'PAGO LIQ. '.$this->getRangoPagoLiq($pago->pagos),
         'fmetodo_pago' => 'transferencia',
         'fcuentas_proveedor' => '',
         'boletas' => array(),
@@ -391,6 +393,23 @@ class banco_pagos_model extends CI_Model {
 
       // $this->db->update('banco_pagos_bascula', array('status' => 't'));
     }
+  }
+
+  public function getRangoPagoLiq($pagos)
+  {
+    $fecha_min = '';
+    $fecha_max = '';
+    foreach ($pagos as $keyp => $value)
+    {
+      if ( $fecha_min == '' || strtotime($fecha_min) > strtotime($value->fecha) )
+        $fecha_min = $value->fecha;
+      if ( $fecha_max == '' || strtotime($fecha_max) < strtotime($value->fecha) )
+        $fecha_max = $value->fecha;
+    }
+    $str = str_replace('-', '/', $fecha_min).'-'.str_replace('-', '/', $fecha_max);
+    if(strtotime($fecha_max) == strtotime($fecha_min))
+      $str = str_replace('-', '/', $fecha_max);
+    return $str;
   }
 
   /**

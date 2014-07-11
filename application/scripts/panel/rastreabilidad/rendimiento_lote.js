@@ -26,10 +26,10 @@
       function($obj, $otro)
       {
         // si
-        $.post(base_url + 'panel/rastreabilidad/ajax_actualiza_lote/', 
+        $.post(base_url + 'panel/rastreabilidad/ajax_actualiza_lote/',
           {
             'id_rendimiento': $("#id_lote_actual").val(),
-            'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote"))}, 
+            'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote"))},
           function(data) {
               window.location.reload(true);
         }, "json");
@@ -38,7 +38,7 @@
       {
         // no
       });
-      
+
     });
 
     // Asigna evento click a los botones "Guardar"
@@ -109,7 +109,7 @@
         ajaxGetExistente($('#glote').find('option:selected').val(), $tr);
     });
 
-    //Para guardar 
+    //Para guardar
     $('#tableClasif').live('keypress', 'input#funidad, input#fcalibre, input#fetiqueta', function(event) {
       var $this = $(this),
           $tr =  $this.parent().parent();
@@ -155,7 +155,7 @@
 
         // Si la clasificacion que se esta agregando no existe
         // idUnidad, idCalibre, idEtiqueta
-        if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+        if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
 
           $tr.find("#fidclasificacion").val(ui.item.id); // Asigna el id al input
@@ -195,7 +195,7 @@
 
             // Si la clasificacion que se esta agregando no existe
             // idUnidad, idCalibre, idEtiqueta
-            if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+            if (validExisClasifi(ui.item.id, $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(),
                 $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
 
               $tr.find("#fidclasificacion").val(ui.item.id); // Asigna el id al input
@@ -267,7 +267,7 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), ui.item.id, $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), ui.item.id, $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidunidad").val(ui.item.id); // Asigna el id al input
       $tr.find("#funidad").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -316,7 +316,7 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(), 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidcalibre").val(ui.item.id); // Asigna el id al input
       $tr.find("#fcalibre").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -365,7 +365,7 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(), 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), ui.item.id, $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidsize").val(ui.item.id); // Asigna el id al input
       $tr.find("#fsize").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -412,7 +412,7 @@
 
     // Si la clasificacion que se esta agregando no existe
     // idUnidad, idCalibre, idEtiqueta
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), ui.item.id, 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), ui.item.id,
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val() )) {
       $tr.find("#fidetiqueta").val(ui.item.id); // Asigna el id al input
       $tr.find("#fetiqueta").val(ui.item.label).css({'background-color': '#99FF99'});
@@ -438,8 +438,8 @@
   var ajaxGetExistente = function (id, $tr) {
     var loteActual = $('#loteActual').val(),
     dataPost = {
-      'id_rendimiento': id, 
-      'id_clasificacion': $tr.find('#fidclasificacion').val(), 
+      'id_rendimiento': id,
+      'id_clasificacion': $tr.find('#fidclasificacion').val(),
       'loteActual': loteActual,
       'id_unidad': $tr.find('#fidunidad').val(),
       'id_calibre': $tr.find('#fidcalibre').val(),
@@ -455,7 +455,7 @@
         if (val == '') enviar = false;
     });
 
-    if (enviar) 
+    if (enviar)
     {
       $.get(base_url + 'panel/rastreabilidad/ajax_get_prev_clasifi/', dataPost, function(data) {
         // Colocar el existente anterior
@@ -481,7 +481,7 @@
     postData.linea2           = $tr.find('#flinea2').val();
     postData.total            = $tr.find('#ftotal').val();
     postData.rendimiento      = $tr.find('#frd').val();
-    
+
     postData.fcalibre         = $tr.find('#fcalibre').val();
     postData.fsize            = $tr.find('#fsize').val();
     //campos del Pk
@@ -492,7 +492,7 @@
     postData.id_etiqueta_old      = $tr.find('#fidetiqueta_old').val();
     postData.kilos_old            = $tr.find('#fkilos_old').val();
 
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
 
         if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
@@ -511,7 +511,7 @@
 
               $tr.find('#ftotal').attr('data-valor', postData.total);
 
-              asignaValoresOld($tr); //actualiza los campos del pk 
+              asignaValoresOld($tr); //actualiza los campos del pk
             }else{
               noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
               $tr.remove();
@@ -556,7 +556,7 @@
     postData.id_etiqueta_old      = $tr.find('#fidetiqueta_old').val();
     postData.kilos_old            = $tr.find('#fkilos_old').val();
 
-    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(), 
+    if (validExisClasifi($tr.find('input#fidclasificacion').val(), $tr.find('input#fidunidad').val(), $tr.find('input#fidcalibre').val(), $tr.find('input#fidetiqueta').val(),
            $tr.find('input#fidsize').val(), $tr.find('input#fkilos').val(), $tr )) {
 
         if (postData.id_clasificacion != '' && postData.id_unidad != '' && (postData.id_calibre != '' || postData.fcalibre != '')
@@ -577,7 +577,7 @@
 
               $tr.next().find('#fclasificacion').focus();
 
-              asignaValoresOld($tr); //actualiza los campos del pk 
+              asignaValoresOld($tr); //actualiza los campos del pk
             }else{
               noty({"text": 'La clasificación, unidad, calibre, size y etiqueta que selecciono ya existe en el listado!', "layout":"topRight", "type": 'error'});
               $tr.find('#fclasificacion').focus();
@@ -600,8 +600,8 @@
     {
       // si
       postData = {
-        'id_rendimiento': $('#glote').find('option:selected').val(), 
-        'id_clasificacion': $tr.find('#fidclasificacion').val(), 
+        'id_rendimiento': $('#glote').find('option:selected').val(),
+        'id_clasificacion': $tr.find('#fidclasificacion').val(),
         'id_unidad': $tr.find('#fidunidad').val(),
         'id_calibre': $tr.find('#fidcalibre').val(),
         'id_etiqueta': $tr.find('#fidetiqueta').val(),
@@ -634,14 +634,14 @@
     var isValid = true, $trdata = $trdata? $trdata: undefined;
     $('input#fidclasificacion').each(function (e, i) {
       $this = $(this), $tr = $this.parent().parent();
-      
+
       if($tr.is($trdata) == false)
       {
-        if (parseInt($this.val(), 10) === parseInt(idClasifi, 10) && 
-            parseInt($tr.find('input#fidunidad').val(), 10) === parseInt(idUnidad, 10) && 
-            parseInt($tr.find('input#fidcalibre').val(), 10) === parseInt(idCalibre, 10) && 
-            parseInt($tr.find('input#fidetiqueta').val(), 10) === parseInt(idEtiqueta, 10) && 
-            parseInt($tr.find('input#fidsize').val(), 10) === parseInt(idSize, 10) && 
+        if (parseInt($this.val(), 10) === parseInt(idClasifi, 10) &&
+            parseInt($tr.find('input#fidunidad').val(), 10) === parseInt(idUnidad, 10) &&
+            parseInt($tr.find('input#fidcalibre').val(), 10) === parseInt(idCalibre, 10) &&
+            parseInt($tr.find('input#fidetiqueta').val(), 10) === parseInt(idEtiqueta, 10) &&
+            parseInt($tr.find('input#fidsize').val(), 10) === parseInt(idSize, 10) &&
             parseFloat($tr.find('input#fkilos').val(), 10) === parseFloat(idKilos, 10)
           ) {
           isValid = false;

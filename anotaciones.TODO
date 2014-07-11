@@ -1,3 +1,24 @@
+-Dieron un finiquito a un empleado, le desconto lo que debia en un prestamo,
+  despues lo dieron de alta de nuevo y en la nomina le sigio descontando
+-De repente tienen problemas al agregar incapacidades y faltas no las toma en la nomina, creo q es cuando se cruzan 2 semanas
+-Poner un consecutivo para los empleados de cada empresa, q se incremente solo cuando se inserte uno nuevo
+-Historial de modificaciones en empleados, sueldos, altas, bajas, etc
+-Traspaso de productos entre empresas, el reporte de seguimiento x producto las salidas
+  tipo traspaso que no afecte el precio solo la existencia, imprimir una orden de donde salio
+  y adonde entro, con una descripcion
+-Ordenes de requisicion hacerlo como la señora quiere
+-Archivo Dim Aun no pasa nada
+-Reporte de historial de nivelacion que ponga, como estaba, la fisica y como quedo
+-Poliza de diario de ventas los productos sin costo en la factura salen q no salgan
+-Caja chica que ordene los registros como se agregaron.
+-*En pallets poner presentacion directo en modificar y que se imprima ese en el recibo
+-*Pallets En los clientes autocomplete ponerle la ciudad para diferenciarlo
+-*Pago masivo si le quitan la cuenta q la deje en blanco
+-*En banco movimientos ordenar x fecha y id_mov
+-*cambiar fecha de la factura 20498 por 2 de julio blanca
+
+
+
 Furby:
   ✔ Agregar factura proveedor, en empresa cargar por default la marcada default @done (13-09-09 11:14)
   ✔ Al gregar los tickets a la factura, al ir dando enter se queda en el select de calidad, al dar enter en el select que pase el foco al btn "cargar" y al dar enter en ese btn que se agregue el ticket, y que regrese el foco al campo ticket si se agrego bien o si marco error @done (13-09-09 11:18)

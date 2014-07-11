@@ -81,6 +81,16 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						LEFT JOIN calibres AS sz ON rpr.id_size = sz.id_calibre
 					WHERE id_pallet = {$id_pallet}");
 				$response['rendimientos'] = $result->result();
+        if($response['info']->calibre_fijo == '')
+        {
+          $nombre_calibres = array();
+          foreach ($response['rendimientos'] as $key => $value)
+          {
+            if( ! isset($nombre_calibres[$value->size]) )
+              $nombre_calibres[$value->size] = 1;
+          }
+          $response['info']->calibre_fijo = implode(',', array_keys($nombre_calibres));
+        }
 
 				// if($cajas_libres){
 				// 	$rendimientos_libres     = $this->getRendimientoLibre($response['info']->id_clasificacion);
@@ -210,6 +220,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'no_cajas'     => $this->input->post('fcajas'),
 						'no_hojas'     => $this->input->post('fhojaspapel'),
 						'kilos_pallet' => $this->input->post('fkilos'),
+            'calibre_fijo' => $this->input->post('fcalibre_fijo'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -401,14 +412,18 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$pdf->SetXY(9, 70);
 		$pdf->Cell(90, 10, 'SIZE/ CALIBRE', 0);
 		$nombre_calibres = array();
-		foreach ($data['rendimientos'] as $key => $value)
-		{
-			if( ! isset($nombre_calibres[$value->size]) )
-				$nombre_calibres[$value->size] = 1;
-		}
+    if($data['info']->calibre_fijo == '')
+    {
+  		foreach ($data['rendimientos'] as $key => $value)
+  		{
+  			if( ! isset($nombre_calibres[$value->size]) )
+  				$nombre_calibres[$value->size] = 1;
+  		}
+      $data['info']->calibre_fijo = implode(',', array_keys($nombre_calibres));
+    }
 		$pdf->SetFont('helvetica','B', 22);
 		$pdf->SetXY(9, 80);
-		$pdf->Row(array( implode(',', array_keys($nombre_calibres)) ), false, false);
+		$pdf->Row(array( $data['info']->calibre_fijo ), false, false);
 		$pdf->SetFont('helvetica','B', 14);
 
 		$pdf->Rect(6, 108, 100, 40, '');

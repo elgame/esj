@@ -82,9 +82,9 @@ class banco_layout_model extends banco_cuentas_model {
         if($value['es_moral'] == 'f')
         {
           $new_nombre = $this->getNombre($value['beneficiario']);
-          $value['beneficiario'] = $new_nombre[0].','.$new_nombre[1].'/'.$new_nombre[2];
+          $value['beneficiario'] = $this->string( $this->cleanStr($new_nombre[0].','.$new_nombre[1].'/'.$new_nombre[2]), 55);
         }else
-          $value['beneficiario'] = ','.$value['beneficiario'].'/';
+          $value['beneficiario'] = ','.$this->string( $this->cleanStr($value['beneficiario']), 53).'/';
         $cuenta = $value['proveedor_cuenta'];
         if(strlen($cuenta) == 16) //Tarjeta de debito o credito
           $tipo_cuenta = '03';
@@ -95,7 +95,7 @@ class banco_layout_model extends banco_cuentas_model {
       $this->row_control .= $tipo_cuenta; //Tipo de cuenta
       $this->row_control .= $this->numero($cuenta, 20); //Número de cuenta
       $this->row_control .= $this->string($ref_alfanumerica, 40); //Referencia  Alfanumérica/Numerica
-      $this->row_control .= $this->string( $this->cleanStr($value['beneficiario']), 55); //Beneficiario
+      $this->row_control .= $value['beneficiario']; //Beneficiario
       $this->row_control .= $this->string($instrucciones, 40); //Instrucciones
       $this->row_control .= $this->string($descripcion, 24); //Descripción TEF
       $this->row_control .= $this->numero($value['clave_banco'], 4); //Clave de Banco

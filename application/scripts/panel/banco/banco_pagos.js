@@ -26,8 +26,12 @@ $(function(){
       $tr.find('.ref_numerica').removeAttr('required');
       $tr.find('.ref_descripcion').removeAttr('required');
     }
-    if($tr.find('.ref_numerica').val() === '' && $this.find('option:selected').attr('data-tipo') != 'b')
-      $tr.find('.ref_numerica').val($this.find('option:selected').attr('data-ref'));
+
+    if($tr.find('.ref_numerica').val() === '' && $this.find('option:selected').attr('data-tipo') != 'b'){
+        $tr.find('.ref_numerica').val($this.find('option:selected').attr('data-ref'));
+    }else if($tr.find('.ref_numerica').val() === ''){
+      $tr.find('.ref_numerica').val('1');
+    }
   });
   $(".tipo_cuenta").change();
 

@@ -273,7 +273,7 @@ class banco_cuentas_model extends banco_model {
 				AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha2}'
 				AND (m.tipo = 't' OR (m.tipo = 'f' {$sql_todos}))
 				{$sqloperacion}
-			ORDER BY m.fecha ASC");
+			ORDER BY m.fecha ASC, m.id_movimiento ASC");
 
 		if($res->num_rows() > 0)
 		{

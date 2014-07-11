@@ -6,7 +6,7 @@ $(function(){
 
   addpallets.init();
 
-  
+
 });
 
 var addpallets = (function($){
@@ -45,6 +45,19 @@ var addpallets = (function($){
   }
 
   function asignaAutocomplets(){
+    $("input#fcalibre_fijo").autocomplete({
+      source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
+      minLength: 1,
+      selectFirst: true,
+      select: function(event, ui) {
+        $("#fcalibre_fijo").val(ui.item.label);//.css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        // $(this).css({'background-color': '#FFD9B3'});
+      }
+    });
+
     // Autocomplete clasificaciones
     $("#fclasificacion").autocomplete({
       source: base_url + 'panel/areas/ajax_get_clasificaciones/',
@@ -159,7 +172,7 @@ var addpallets = (function($){
         //ids = id_rendimiento, id_unidad, id_calibre, id_etiqueta
         ids = vthis.attr("data-id").split('_');
 
-    if(parseInt(total_cajas_sel.text()) < parseInt(fcajas.val()) ) 
+    if(parseInt(total_cajas_sel.text()) < parseInt(fcajas.val()) )
     {
       if(row_rendsel.length == 0){
         html = '<tr id="row_rendsel'+vthis.attr("data-id")+'">'+
@@ -234,7 +247,7 @@ var addpallets = (function($){
             '<td class="etiqueta">'+resp.rendimientos[i].kilos+'</td>'+
 
             '<td class="libres">'+resp.rendimientos[i].libres+'</td>'+
-            '<td><buttom class="btn rendimientos cajasdisponibles"'+ 
+            '<td><buttom class="btn rendimientos cajasdisponibles"'+
             '  data-id="'+idrow+'" data-libres="'+resp.rendimientos[i].libres+'" data-totales="'+resp.rendimientos[i].rendimiento+'"><i class="icon-angle-right"></i></buttom></td>'+
           '</tr>';
         };

@@ -109,7 +109,7 @@
                                 <option value=""></option>';
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
                           {
-                            $select = $value->id_cuenta==$cuentasp->id_cuenta? 'selected': '';
+                            $select = (($value->id_cuenta==$cuentasp->id_cuenta || ($keyc==0 && $value->modificado_banco=='f'))? 'selected': '');
                             echo '<option value="'.$cuentasp->id_cuenta.'-'.$cuentasp->is_banamex.'" '.$select.'
                             data-ref="EMPAQUE SAN JORGE" data-descrip="PAGO DE LIMON" data-tipo="b">'.$cuentasp->banco.' - '.$cuentasp->alias.'</option>';
                           }

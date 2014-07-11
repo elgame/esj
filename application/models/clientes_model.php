@@ -238,10 +238,11 @@ class clientes_model extends CI_Model {
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
+        $dato_ext = $itm->municipio==''? ($itm->estado==''? '': ' - '.$itm->estado): ' - '.$itm->municipio;
 				$response[] = array(
 						'id'    => $itm->id_cliente,
-						'label' => $itm->nombre_fiscal,
-						'value' => $itm->nombre_fiscal,
+						'label' => $itm->nombre_fiscal.$dato_ext,
+						'value' => $itm->nombre_fiscal.$dato_ext,
 						'item'  => $itm,
 				);
 			}
