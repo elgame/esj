@@ -172,7 +172,8 @@ class caja_chica_model extends CI_Model {
        FROM cajachica_gastos cg
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
        INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
-       WHERE fecha = '$fecha'"
+       WHERE fecha = '$fecha'
+       ORDER BY cg.id_gasto ASC"
     );
 
     if ($gastos->num_rows() > 0)
@@ -354,7 +355,7 @@ class caja_chica_model extends CI_Model {
        INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
        LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
        WHERE bm.tipo = 'f' AND bc.id_empresa = {$defaultEmpresa->id_empresa} AND COALESCE(ci.id_ingresos, 0) = 0
-       ORDER BY bm.fecha DESC
+       ORDER BY ci.id_ingresos ASC
     ");
 
     return $movimientos->result();

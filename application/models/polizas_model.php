@@ -534,17 +534,22 @@ class polizas_model extends CI_Model {
             //Colocamos los Ingresos de la factura (41040000)
             foreach ($inf_factura['productos'] as $key => $value)
             {
-              $impuestos['iva_trasladar']['importe'] += $value->iva;
-              $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
-              $response['data'] .= $this->setEspacios('M',2).
-                              $this->setEspacios(($value->cuenta_cpi!=''? $value->cuenta_cpi: '41040000'),30).
-                              $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
-                              $this->setEspacios('1',1).  //clientes es un abono = 1
-                              $this->setEspacios( $this->numero($value->importe) , 20).
-                              $this->setEspacios('0',10).
-                              $this->setEspacios('0.0',20).
-                              $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
-                              $this->setEspacios('',4)."\r\n";
+              if ( ($inf_factura['info']->sin_costo == 't' && $value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+                  $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+                  $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
+              {
+                $impuestos['iva_trasladar']['importe'] += $value->iva;
+                $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
+                $response['data'] .= $this->setEspacios('M',2).
+                                $this->setEspacios(($value->cuenta_cpi!=''? $value->cuenta_cpi: '41040000'),30).
+                                $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
+                                $this->setEspacios('1',1).  //clientes es un abono = 1
+                                $this->setEspacios( $this->numero($value->importe) , 20).
+                                $this->setEspacios('0',10).
+                                $this->setEspacios('0.0',20).
+                                $this->setEspacios('FAC No. '.$inf_factura['info']->serie.$inf_factura['info']->folio,100).
+                                $this->setEspacios('',4)."\r\n";
+              }
             }
             //Colocamos los impuestos de la factura
             foreach ($impuestos as $key => $impuesto)

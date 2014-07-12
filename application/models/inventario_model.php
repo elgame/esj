@@ -1689,6 +1689,11 @@ class inventario_model extends privilegios_model{
             INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
             {$sql}");
         $value->datos = $res_cosa->result();
+        foreach ($value->datos as $keypr => $prodcts)
+        {
+          $prodcts->inventario = $this->getNivelarData(NULL, $prodcts->id_producto);
+          $prodcts->inventario = $prodcts->inventario['productos'][0];
+        }
         $res_cosa->free_result();
         // $res_compra = $this->db->query("SELECT co.id_orden, p.id_producto, p.nombre, cp.cantidad, pu.abreviatura
         //   FROM compras_ordenes co
@@ -1740,9 +1745,9 @@ class inventario_model extends privilegios_model{
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'R', 'R', 'R', 'R');
-    $widths = array(80, 35, 35, 35, 35);
-    $header = array('Producto', 'Entradas', 'Salidas');
+    $aligns = array('L', 'R', 'R', 'R', 'R', 'R', 'R');
+    $widths = array(80, 30, 30, 30, 30, 30, 30);
+    $header = array('Producto', 'Anterior', 'Entradas', 'Salidas', 'Existencia');
 
     $familia = '';
     $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
@@ -1773,8 +1778,10 @@ class inventario_model extends privilegios_model{
       foreach ($item->datos as $key2 => $prod)
       {
         $datos = array($prod->nombre.' ('.$prod->abreviatura.')',
+          String::formatoNumero(($prod->inventario->data[0]+$prod->salida-$prod->entrada), 2, '', false),
           String::formatoNumero($prod->entrada, 2, '', false),
           String::formatoNumero($prod->salida, 2, '', false),
+          String::formatoNumero($prod->inventario->data[0], 2, '', false),
           );
 
         $pdf->SetX(6);
@@ -1995,7 +2002,7 @@ class inventario_model extends privilegios_model{
 	}
 
 
-	public function getNivelarData($id_familia)
+	public function getNivelarData($id_familia, $id_producto=NULL)
 	{
 		$this->load->library('pagination');
 		$params = array(
@@ -2008,7 +2015,11 @@ class inventario_model extends privilegios_model{
 		$sql = '';
 
 		//Filtros para buscar
-		$sql .= " AND p.id_familia = ".$id_familia;
+		if($id_familia != NULL)
+      $sql .= " AND p.id_familia = ".$id_familia;
+
+    if($id_producto != NULL)
+      $sql .= " AND p.id_producto = ".$id_producto;
 
 	    $query = BDUtil::pagination(
 	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
