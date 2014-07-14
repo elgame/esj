@@ -91,6 +91,7 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener los empleados de la semana de la nomina.
     $query = $this->db->query(
       "SELECT u.id,
+              u.no_empleado,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.esta_asegurado,
               u.curp,
@@ -7830,7 +7831,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(15, 100));
-      $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+      $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -8216,7 +8217,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 4);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(15, 100));
-          $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+          $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -8549,7 +8550,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
-          $numero_empleado++;
+          // $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
 
           $pdf->SetFont('Helvetica','', 8);
@@ -8567,7 +8568,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
 
           $dataarr = array();
-          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->no_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '$', false);
           $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
@@ -8686,12 +8687,12 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
-          $numero_empleado++;
+          // $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
           $total_pagar = $_POST['aguinaldo'][$key];
 
           $dataarr = array();
-          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->no_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '', false);
           $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);

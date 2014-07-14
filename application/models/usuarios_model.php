@@ -65,6 +65,15 @@ class Usuarios_model extends privilegios_model {
 	{
 		if ($data == NULL)
 		{
+      $query = $this->db->select('no_empleado')
+        ->from('usuarios')
+        ->where('id_empresa', $this->input->post('did_empresa'))
+        ->order_by('no_empleado', 'DESC')
+        ->limit(1)
+        ->get();
+
+      $noEmpleado = $query->num_rows === 0 ? 1 : ++$query->row()->no_empleado;
+
 			$data = array(
 						'nombre'           => mb_strtoupper($this->input->post('fnombre'), 'utf-8'),
 						'apellido_paterno' => mb_strtoupper($this->input->post('fapellido_paterno'), 'utf-8'),
@@ -103,6 +112,8 @@ class Usuarios_model extends privilegios_model {
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+
+            'no_empleado' => $noEmpleado,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -200,7 +211,7 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status,
+		$sql_res = $this->db->select("u.id, u.no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
