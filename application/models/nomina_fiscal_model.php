@@ -820,6 +820,7 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener el empleado.
     $query = $this->db->query(
       "SELECT u.id,
+              u.no_empleado,
               u.id_empresa,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.curp,
@@ -889,6 +890,9 @@ class nomina_fiscal_model extends CI_Model {
                                FROM nomina_prestamos
                                WHERE id_usuario = {$empleadoId} AND status = 't'
                                ORDER BY DATE(fecha) ASC")->result();
+
+    $empleado[0]->prestamos_pendientes = $prestamos;
+
     $empleado[0]->prestamos = 0;
     foreach ($prestamos as $key => $value)
     {
@@ -904,9 +908,9 @@ class nomina_fiscal_model extends CI_Model {
       ->setTablasIsr($tablas)
       ->procesar();
 
-      // echo "<pre>";
-      //   var_dump($empleado);
-      // echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($empleado);
+    // echo "</pre>";exit;
     return $empleado;
   }
 
@@ -1004,6 +1008,33 @@ class nomina_fiscal_model extends CI_Model {
 
       $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo + $subsidio;
       $totalDeducciones = $descuento + $isr + $otros;
+
+      // Compara que halla prestamos.
+      if (floatval($empleadoFiniquito[0]->prestamos) > 0)
+      {
+        $semana = $this->semanaActualDelMes(date('y'));
+
+        // Recorre los prestamos del empleado para
+        foreach ($empleadoFiniquito[0]->prestamos_pendientes as $prestamo)
+        {
+          $prestamosEmpleados[] = array(
+            'id_empleado' => $empleadoId,
+            'id_empresa'  => $empleadoFiniquito[0]->id_empresa,
+            'anio'        => date('Y'),
+            'semana'      => $semana['semana'],
+            'id_prestamo' => $prestamo->id_prestamo,
+            'monto'       => floatval($prestamo->prestado) - floatval($prestamo->pagado),
+          );
+
+          $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo->id_prestamo));
+        }
+
+        // Inserta los abonos de los prestamos.
+        if (count($prestamosEmpleados) > 0)
+        {
+          $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+        }
+      }
 
       $totalNeto = $totalPercepciones - $totalDeducciones;
 
