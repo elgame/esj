@@ -420,7 +420,9 @@ class nomina_fiscal extends MY_Controller {
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
     );
+
     $_GET['anio'] = $filtros['anio'];
+
     if ($filtros['empresaId'] !== '')
     {
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $filtros['empresaId'])->get()->row()->dia_inicia_semana;
@@ -438,7 +440,6 @@ class nomina_fiscal extends MY_Controller {
 
     $_GET['did_empresa'] = $filtros['empresaId'];
     $params['puestos'] = $this->usuarios_departamentos_model->getPuestos(false); //puestos();
-
 
     $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 

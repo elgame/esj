@@ -177,7 +177,8 @@ class nomina_fiscal_model extends CI_Model {
        FROM nomina_asistencia na
        LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
        WHERE (DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}')
+        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
        ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
     ");
 
@@ -241,11 +242,13 @@ class nomina_fiscal_model extends CI_Model {
               // Si es una incapacidad entra.
               else
               {
-                // Determina la diferencia de dias entre el primer dia de la incapacidad y el ultimo.
-                $diasIncapacidad = intval(String::diasEntreFechas($fi->fecha_ini, $fi->fecha_fin)) + 1;
-                $diasIncapacidad1 = intval(String::diasEntreFechas($fi->fecha_ini, $diaUltimoDeLaSemana))+1;
-                $diasIncapacidad2 = intval(String::diasEntreFechas($diaPrimeroDeLaSemana, $fi->fecha_fin))+1;
-                $diasIncapacidad = $diasIncapacidad>=$diasIncapacidad1? $diasIncapacidad1: $diasIncapacidad2;
+                // Obtiene el primer dia de incapacidad para la semana
+                $diaIniciaIncapacidad = strtotime($fi->fecha_ini) > strtotime($diaPrimeroDeLaSemana) ? $fi->fecha_ini : $diaPrimeroDeLaSemana;
+
+                // Obtiene el ultimo dia de incapacidad para la semana
+                $diaTerminaIncapacidad = strtotime($fi->fecha_fin) < strtotime($diaUltimoDeLaSemana) ? $fi->fecha_fin : $diaUltimoDeLaSemana;
+
+                $diasIncapacidad = intval(String::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
 
                 // Le resta a los dias trabajados los de incapacidad.
                 $empleado->dias_trabajados -= $diasIncapacidad;
@@ -1294,10 +1297,10 @@ class nomina_fiscal_model extends CI_Model {
       "SELECT id_usuario, DATE(fecha_ini) as fecha_ini, DATE(fecha_fin) as fecha_fin, tipo, id_clave
        FROM nomina_asistencia
        WHERE (DATE(fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}')
+        (DATE(fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
        ORDER BY id_usuario, DATE(fecha_ini) ASC
     ");
-
 
     // Si hubo al menos una falta o incapacidad en la semana.
     if ($query->num_rows() > 0)
@@ -1314,7 +1317,7 @@ class nomina_fiscal_model extends CI_Model {
           // Si la falta o incapacidad pertenece al usuario actual.
           if ($fi->id_usuario === $empleado->id)
           {
-            // Si es una falta entra.s
+            // Si es una falta entra.
             if ($fi->tipo === 'f')
             {
               // Agrega la falta al array.
