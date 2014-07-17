@@ -196,6 +196,13 @@ class empleados extends MY_Controller {
 			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
 
+  public function historial()
+  {
+    $this->load->model('usuario_historial_model');
+
+    $this->usuario_historial_model->printHistorialDeEmpleado($_GET['id']);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -302,7 +309,6 @@ class empleados extends MY_Controller {
     $this->load->view('panel/empleados/sueldos', $params);
     $this->load->view('panel/footer');
   }
-
 
   /**
    * Reporte de resumen de prersepciones y deducciones empleados

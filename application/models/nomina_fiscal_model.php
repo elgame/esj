@@ -1067,7 +1067,16 @@ class nomina_fiscal_model extends CI_Model {
         'deduccion_otros'           => $otros,
       );
 
-      $this->db->update('usuarios', array('status' => 'f'), array('id' => $empleadoFiniquito[0]->id));
+      $fechaSalida = date('Y-m-d H:i:s');
+
+      $this->db->update('usuarios', array('status' => 'f', 'fecha_salida' => $fechaSalida), array('id' => $empleadoFiniquito[0]->id));
+
+      $this->load->model('usuario_historial_model');
+      $this->usuario_historial_model->setIdUsuario($empleadoFiniquito[0]->id);
+
+      $this->usuario_historial_model->make(array(
+        array('evento' => 'Finiquito', 'campo' => 'fecha_salida', 'valor_nuevo' => $fechaSalida)
+      ));
 
       $this->db->insert('finiquito', $data);
     }
