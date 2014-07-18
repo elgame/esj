@@ -91,6 +91,13 @@
 										}
                     echo '<a class="btn btn-info" href="'.base_url('panel/empleadosr/show_otros/?eid='.$usuario->id_usuario).'" title="Prestamos" rel="superbox-50x450">
                             <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Prestamos</span></a>';
+
+
+                      echo $this->usuarios_model->getLinkPrivSm('empleados/historial/', array(
+                        'params'   => 'id='.$usuario->id_usuario,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => '_BLANK')
+                      ))
 										?>
 								</td>
 							</tr>

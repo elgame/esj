@@ -65,6 +65,15 @@ class Usuarios_model extends privilegios_model {
 	{
 		if ($data == NULL)
 		{
+      $query = $this->db->select('no_empleado')
+        ->from('usuarios')
+        ->where('id_empresa', $this->input->post('did_empresa'))
+        ->order_by('no_empleado', 'DESC')
+        ->limit(1)
+        ->get();
+
+      $noEmpleado = $query->num_rows === 0 ? 1 : ++$query->row()->no_empleado;
+
 			$data = array(
 						'nombre'           => mb_strtoupper($this->input->post('fnombre'), 'utf-8'),
 						'apellido_paterno' => mb_strtoupper($this->input->post('fapellido_paterno'), 'utf-8'),
@@ -103,9 +112,12 @@ class Usuarios_model extends privilegios_model {
 						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+
+            'no_empleado' => $noEmpleado,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
+
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
@@ -175,8 +187,21 @@ class Usuarios_model extends privilegios_model {
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
-		if ($data['password'] == '')
-			unset($data['password']);
+    if ($data['password'] == '')
+      unset($data['password']);
+
+    if (count($data) > 0)
+    {
+      $this->load->model('usuario_historial_model');
+      $this->usuario_historial_model->setIdUsuario($id_usuario);
+
+      $camposHistorial = array(
+        array('evento' => 'Cambio de Salario Diario', 'campo' => 'salario_diario', 'valor_nuevo' => $data['salario_diario']),
+        array('evento' => 'Cambio de Salario Diario Real', 'campo' => 'salario_diario_real', 'valor_nuevo' => $data['salario_diario_real']),
+      );
+
+      $this->usuario_historial_model->make($camposHistorial);
+    }
 
 		$this->db->update('usuarios', $data, array('id'=>$id_usuario));
 
@@ -200,7 +225,7 @@ class Usuarios_model extends privilegios_model {
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
-		$sql_res = $this->db->select("u.id, u.nombre, u.usuario, u.email, u.tipo, u.status,
+		$sql_res = $this->db->select("u.id, u.no_empleado, u.nombre, u.usuario, u.email, u.tipo, u.status,
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
@@ -238,7 +263,15 @@ class Usuarios_model extends privilegios_model {
 	 */
 	public function eliminar_usuario($id_usuario)
 	{
+    $this->load->model('usuario_historial_model');
+    $this->usuario_historial_model->setIdUsuario($id_usuario);
+
+    $evento = array('evento' => 'Desactivado del listado de empleados', 'valor_anterior' => null, 'valor_nuevo' => null);
+    $historial = $this->usuario_historial_model->buildEvent($evento);
+    $this->usuario_historial_model->guardaHistorial(array($historial));
+
 		$this->db->update('usuarios', array('status' => 'f'), array('id' => $id_usuario));
+
 		return TRUE;
 	}
 
@@ -247,7 +280,17 @@ class Usuarios_model extends privilegios_model {
 	 */
 	public function activar_usuario($id_usuario)
 	{
-		$this->db->update('usuarios', array('status' => 't'), array('id' => $id_usuario));
+    $fechaEntrada = date('Y-m-d H:i:s');
+
+		$this->db->update('usuarios', array('status' => 't', 'fecha_entrada' => $fechaEntrada, 'fecha_salida' => null), array('id' => $id_usuario));
+
+    $this->load->model('usuario_historial_model');
+    $this->usuario_historial_model->setIdUsuario($id_usuario);
+
+    $evento = array('evento' => 'Activado del listado de empleados', 'valor_anterior' => null, 'valor_nuevo' => null);
+    $historial = $this->usuario_historial_model->buildEvent($evento);
+    $this->usuario_historial_model->guardaHistorial(array($historial));
+
 		return TRUE;
 	}
 
@@ -264,11 +307,22 @@ class Usuarios_model extends privilegios_model {
   {
     if (count($datos['id_empledo']) > 0)
     {
+      $this->load->model('usuario_historial_model');
+
       foreach ($datos['id_empledo'] as $key => $value)
       {
         $sd = 0;
         if ($datos['tipo'][$key] == 't') //asegurados
           $sd = number_format($datos['sueldo_diario'][$key] / $datos['factor_integracion'][$key], 4, '.', '');
+
+        $this->usuario_historial_model->setIdUsuario($value);
+
+        $camposHistorial = array(
+          array('evento' => 'Cambio de Salario Diario', 'campo' => 'salario_diario', 'valor_nuevo' => $sd),
+          array('evento' => 'Cambio de Salario Diario Real', 'campo' => 'salario_diario_real', 'valor_nuevo' => $datos['sueldo_real'][$key]),
+        );
+
+        $this->usuario_historial_model->make($camposHistorial);
 
         $this->db->update('usuarios', array(
           'salario_diario' => $sd,

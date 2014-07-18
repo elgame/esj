@@ -91,6 +91,7 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener los empleados de la semana de la nomina.
     $query = $this->db->query(
       "SELECT u.id,
+              u.no_empleado,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.esta_asegurado,
               u.curp,
@@ -176,7 +177,8 @@ class nomina_fiscal_model extends CI_Model {
        FROM nomina_asistencia na
        LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
        WHERE (DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}')
+        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
        ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
     ");
 
@@ -240,11 +242,13 @@ class nomina_fiscal_model extends CI_Model {
               // Si es una incapacidad entra.
               else
               {
-                // Determina la diferencia de dias entre el primer dia de la incapacidad y el ultimo.
-                $diasIncapacidad = intval(String::diasEntreFechas($fi->fecha_ini, $fi->fecha_fin)) + 1;
-                $diasIncapacidad1 = intval(String::diasEntreFechas($fi->fecha_ini, $diaUltimoDeLaSemana))+1;
-                $diasIncapacidad2 = intval(String::diasEntreFechas($diaPrimeroDeLaSemana, $fi->fecha_fin))+1;
-                $diasIncapacidad = $diasIncapacidad>=$diasIncapacidad1? $diasIncapacidad1: $diasIncapacidad2;
+                // Obtiene el primer dia de incapacidad para la semana
+                $diaIniciaIncapacidad = strtotime($fi->fecha_ini) > strtotime($diaPrimeroDeLaSemana) ? $fi->fecha_ini : $diaPrimeroDeLaSemana;
+
+                // Obtiene el ultimo dia de incapacidad para la semana
+                $diaTerminaIncapacidad = strtotime($fi->fecha_fin) < strtotime($diaUltimoDeLaSemana) ? $fi->fecha_fin : $diaUltimoDeLaSemana;
+
+                $diasIncapacidad = intval(String::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
 
                 // Le resta a los dias trabajados los de incapacidad.
                 $empleado->dias_trabajados -= $diasIncapacidad;
@@ -819,6 +823,7 @@ class nomina_fiscal_model extends CI_Model {
     // Query para obtener el empleado.
     $query = $this->db->query(
       "SELECT u.id,
+              u.no_empleado,
               u.id_empresa,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.curp,
@@ -888,6 +893,9 @@ class nomina_fiscal_model extends CI_Model {
                                FROM nomina_prestamos
                                WHERE id_usuario = {$empleadoId} AND status = 't'
                                ORDER BY DATE(fecha) ASC")->result();
+
+    $empleado[0]->prestamos_pendientes = $prestamos;
+
     $empleado[0]->prestamos = 0;
     foreach ($prestamos as $key => $value)
     {
@@ -903,9 +911,9 @@ class nomina_fiscal_model extends CI_Model {
       ->setTablasIsr($tablas)
       ->procesar();
 
-      // echo "<pre>";
-      //   var_dump($empleado);
-      // echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($empleado);
+    // echo "</pre>";exit;
     return $empleado;
   }
 
@@ -1004,6 +1012,33 @@ class nomina_fiscal_model extends CI_Model {
       $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo + $subsidio;
       $totalDeducciones = $descuento + $isr + $otros;
 
+      // Compara que halla prestamos.
+      if (floatval($empleadoFiniquito[0]->prestamos) > 0)
+      {
+        $semana = $this->semanaActualDelMes(date('y'));
+
+        // Recorre los prestamos del empleado para
+        foreach ($empleadoFiniquito[0]->prestamos_pendientes as $prestamo)
+        {
+          $prestamosEmpleados[] = array(
+            'id_empleado' => $empleadoId,
+            'id_empresa'  => $empleadoFiniquito[0]->id_empresa,
+            'anio'        => date('Y'),
+            'semana'      => $semana['semana'],
+            'id_prestamo' => $prestamo->id_prestamo,
+            'monto'       => floatval($prestamo->prestado) - floatval($prestamo->pagado),
+          );
+
+          $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo->id_prestamo));
+        }
+
+        // Inserta los abonos de los prestamos.
+        if (count($prestamosEmpleados) > 0)
+        {
+          $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+        }
+      }
+
       $totalNeto = $totalPercepciones - $totalDeducciones;
 
       $data = array(
@@ -1032,7 +1067,16 @@ class nomina_fiscal_model extends CI_Model {
         'deduccion_otros'           => $otros,
       );
 
-      $this->db->update('usuarios', array('status' => 'f'), array('id' => $empleadoFiniquito[0]->id));
+      $fechaSalida = date('Y-m-d H:i:s');
+
+      $this->db->update('usuarios', array('status' => 'f', 'fecha_salida' => $fechaSalida), array('id' => $empleadoFiniquito[0]->id));
+
+      $this->load->model('usuario_historial_model');
+      $this->usuario_historial_model->setIdUsuario($empleadoFiniquito[0]->id);
+
+      $this->usuario_historial_model->make(array(
+        array('evento' => 'Finiquito', 'campo' => 'fecha_salida', 'valor_nuevo' => $fechaSalida)
+      ));
 
       $this->db->insert('finiquito', $data);
     }
@@ -1262,10 +1306,10 @@ class nomina_fiscal_model extends CI_Model {
       "SELECT id_usuario, DATE(fecha_ini) as fecha_ini, DATE(fecha_fin) as fecha_fin, tipo, id_clave
        FROM nomina_asistencia
        WHERE (DATE(fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}')
+        (DATE(fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
+        (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
        ORDER BY id_usuario, DATE(fecha_ini) ASC
     ");
-
 
     // Si hubo al menos una falta o incapacidad en la semana.
     if ($query->num_rows() > 0)
@@ -1282,7 +1326,7 @@ class nomina_fiscal_model extends CI_Model {
           // Si la falta o incapacidad pertenece al usuario actual.
           if ($fi->id_usuario === $empleado->id)
           {
-            // Si es una falta entra.s
+            // Si es una falta entra.
             if ($fi->tipo === 'f')
             {
               // Agrega la falta al array.
@@ -7830,7 +7874,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(15, 100));
-      $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+      $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -8216,7 +8260,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY() + 4);
           $pdf->SetAligns(array('L', 'L'));
           $pdf->SetWidths(array(15, 100));
-          $pdf->Row(array($empleado->id, $empleado->nombre), false, false, null, 1, 1);
+          $pdf->Row(array($empleado->no_empleado, $empleado->nombre), false, false, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -8549,7 +8593,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
-          $numero_empleado++;
+          // $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
 
           $pdf->SetFont('Helvetica','', 8);
@@ -8567,7 +8611,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
 
           $dataarr = array();
-          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->no_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '$', false);
           $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
@@ -8686,12 +8730,12 @@ class nomina_fiscal_model extends CI_Model {
       {
         if($departamento->id_departamento == $_POST['departamento_id'][$key])
         {
-          $numero_empleado++;
+          // $numero_empleado++;
           $empleado = $this->usuarios_model->get_usuario_info($empleado, true)['info'][0];
           $total_pagar = $_POST['aguinaldo'][$key];
 
           $dataarr = array();
-          $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->no_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '', false);
           $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);

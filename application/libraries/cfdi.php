@@ -418,7 +418,7 @@ class cfdi{
     $nominaDatos = array(
       'Version'                => '1.1',
       // 'RegistroPatronal'       => '', // opcional
-      'NumEmpleado'            => $empleado[0]->id,
+      'NumEmpleado'            => $empleado[0]->no_empleado,
       'CURP'                   => $empleado[0]->curp,
       'TipoRegimen'            => $empleado[0]->regimen_contratacion,
       // 'NumSeguridadSocial'     => '123456789', // opcional
