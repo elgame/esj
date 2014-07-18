@@ -39,7 +39,7 @@ class caja_chica extends MY_Controller {
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Caja chica');
-    $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -364,6 +364,146 @@ class caja_chica extends MY_Controller {
     echo json_encode($this->caja_chica_model->ajaxCategorias());
   }
 
+
+  /*
+   |------------------------------------------------------------------------
+   | Nomenclaturas
+   |------------------------------------------------------------------------
+   */
+
+  public function nomenclaturas()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Administración de Nomenclaturas'
+    );
+
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/caja_chica/nomenclaturas_admin', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function nomenclaturas_agregar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
+    ));
+
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar Nomenclatura'
+    );
+
+    $this->configAddNomenclaturas();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->caja_chica_model->agregarNomenclaturas($_POST);
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/caja_chica/nomenclaturas_agregar/?'.String::getVarsLink(array('msg')).'&msg=8'));
+      }
+    }
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/caja_chica/agregar_nomenclatura', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function nomenclaturas_modificar()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/categorias.js'),
+    ));
+
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Modificar Nomenclatura'
+    );
+
+    $this->configAddNomenclaturas();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->caja_chica_model->modificarNomenclaturas($_GET['id'], $_POST);
+
+      if ($res_mdl)
+      {
+        redirect(base_url('panel/caja_chica/nomenclaturas_modificar/?'.String::getVarsLink(array('msg')).'&msg=9'));
+      }
+    }
+
+    $params['nomenclatura'] = $this->caja_chica_model->infoNomenclaturas($_GET['id']);
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/caja_chica/modificar_nomenclatura', $params);
+    $this->load->view('panel/footer');
+  }
+
+  public function nomenclaturas_eliminar()
+  {
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->elimimnarNomenclaturas($_GET['id'], (isset($_GET['activar'])? $_GET['activar']: 'f') );
+
+    redirect(base_url('panel/caja_chica/nomenclaturas/?&msg=10'));
+  }
+
+  public function configAddNomenclaturas()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'nombre',
+            'label' => 'Nombre',
+            'rules' => 'required|max_length[30]')
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
+
   public function cerrar_caja()
   {
     $this->load->model('caja_chica_model');
@@ -407,6 +547,19 @@ class caja_chica extends MY_Controller {
         break;
       case 7:
         $txt = 'La caja chica se cerro correctamente!';
+        $icono = 'success';
+        break;
+
+      case 8:
+        $txt = 'La nomenclatura se agrego correctamente!';
+        $icono = 'success';
+        break;
+      case 9:
+        $txt = 'La nomenclatura se modifico correctamente!';
+        $icono = 'success';
+        break;
+      case 10:
+        $txt = 'La nomenclatura se elimino correctamente!';
         $icono = 'success';
         break;
     }

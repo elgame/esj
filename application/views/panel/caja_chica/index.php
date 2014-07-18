@@ -17,11 +17,16 @@
     <div class="span1">
       Nomenclatura Ingresos
     </div>
-    <div class="span3">
-      <ul>
-        <?php foreach ($nomenclaturas as $n) { ?>
+    <div class="span6">
+    <?php $key=0; foreach ($nomenclaturas as $n) {
+      if($key == 0){ ?>
+      <ul class="span4">
+      <?php } ?>
           <ol><?php echo $n->nomenclatura." ".$n->nombre ?></ol>
-        <?php } ?>
+      <?php if($key == 5){ $key=0; ?>
+      </ul>
+    <?php }else $key++;
+    } ?>
       </ul>
     </div>
   </div>

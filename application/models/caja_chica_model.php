@@ -480,6 +480,89 @@ class caja_chica_model extends CI_Model {
     return $response;
   }
 
+
+  /**
+   * NOMENCLATURAS
+   */
+  public function getNomenclaturas($perpage = '40')
+  {
+    $sql = '';
+    // //paginacion
+    // $params = array(
+    //     'result_items_per_page' => $perpage,
+    //     'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+    // );
+
+    // if($params['result_page'] % $params['result_items_per_page'] == 0)
+    //   $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+
+    //Filtros para buscar
+    if ($this->input->get('fstatus') == '')
+      $sql .= " AND cc.status = 't'";
+    else
+      $sql .= " AND cc.status = '".$this->input->get('fstatus')."'";
+
+    $res = $this->db->query("SELECT cc.id, cc.nombre, cc.status, cc.nomenclatura
+        FROM cajachica_nomenclaturas cc
+        WHERE 1 = 1 {$sql}
+        ORDER BY cc.nomenclatura::integer ASC
+        ");
+
+    $response = $res->result();
+
+    return $response;
+  }
+
+  public function agregarNomenclaturas($data)
+  {
+    $nom_res = $this->db->query("SELECT nomenclatura
+                               FROM cajachica_nomenclaturas
+                               ORDER BY nomenclatura::integer DESC LIMIT 1")->row();
+    $insertData = array(
+      'nombre' => $data['nombre'],
+      'nomenclatura' => $nom_res->nomenclatura+1,
+    );
+
+    $this->db->insert('cajachica_nomenclaturas', $insertData);
+
+    return true;
+  }
+
+  public function infoNomenclaturas($idNomenclatura)
+  {
+    $query = $this->db->query(
+      "SELECT cc.*
+        FROM cajachica_nomenclaturas cc
+        WHERE id = {$idNomenclatura}");
+
+    $data = array();
+    if ($query->num_rows() > 0)
+    {
+      $data['info'] = $query->result();
+    }
+
+    return $data;
+  }
+
+  public function modificarNomenclaturas($idNomenclatura, $data)
+  {
+    $updateData = array(
+      'nombre'      => $data['nombre'],
+    );
+
+    $this->db->update('cajachica_nomenclaturas', $updateData, array('id' => $idNomenclatura));
+
+    return true;
+  }
+
+  public function elimimnarNomenclaturas($idNomenclatura, $val)
+  {
+    $this->db->update('cajachica_nomenclaturas', array('status' => $val), array('id' => $idNomenclatura));
+
+    return true;
+  }
+
+
   public function cerrarCaja($idCaja)
   {
     $this->db->update('cajachica_efectivo', array('status' => 'f'), array('id_efectivo' => $idCaja));
