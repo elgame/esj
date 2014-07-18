@@ -301,6 +301,16 @@ $(function(){
     }
   });
 
+  $('#table_prod').on('click', '.is-cert-check', function(event) {
+    var $this = $(this),
+        $td = $this.parent();
+
+    if ($this.is(':checked')) {
+      $td.find('.certificado').val('1');
+    } else {
+      $td.find('.certificado').val('0');
+    }
+  });
 });
 
 var EventKeyPressFolioPallet = function () {
@@ -580,9 +590,9 @@ function addProducto(unidades, prod) {
                 '<td>' +
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
+                '<td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>' +
                 '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
               '</tr>';
-
 
     $(trHtml).appendTo($tabla.find('tbody'));
 

@@ -282,6 +282,7 @@ class bascula extends MY_Controller {
 
         // Indicara si se necesita autorizacion para modificar.
         $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
+        $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
       }
       else
       {
@@ -1166,6 +1167,9 @@ class bascula extends MY_Controller {
     $this->load->library('form_validation');
 
     $rules = array(
+      array('field' => 'certificado',
+            'label' => 'Certificado',
+            'rules' => ''),
       array('field' => 'ptipo',
             'label' => 'Tipo',
             'rules' => 'required'),
@@ -1328,7 +1332,8 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
-    public function chkfolio($folio){
+  public function chkfolio($folio)
+  {
     if ( ! isset($_GET['idb']) && ! isset($_GET['e']))
     {
       $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula

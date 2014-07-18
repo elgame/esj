@@ -67,8 +67,8 @@ class rastreabilidad_model extends CI_Model {
       $passess = true;
     }
 
-    return array('passess' => $passess, 
-            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''), 
+    return array('passess' => $passess,
+            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''),
             'id_size' => (isset($data_size['id'])? $data_size['id']: '') );
   }
 
@@ -77,19 +77,19 @@ class rastreabilidad_model extends CI_Model {
     $data = $this->db->query(
       "SELECT Count(*) AS num
         FROM rastria_rendimiento_clasif
-        WHERE id_rendimiento = '{$data['id_rendimiento']}' 
-          AND id_clasificacion = '{$data['id_clasificacion']}' 
-          AND id_unidad = '{$data['id_unidad']}' 
-          AND id_calibre = '{$data['id_calibre']}' 
-          AND id_etiqueta = '{$data['id_etiqueta']}' 
-          AND id_size = '{$data['id_size']}' 
+        WHERE id_rendimiento = '{$data['id_rendimiento']}'
+          AND id_clasificacion = '{$data['id_clasificacion']}'
+          AND id_unidad = '{$data['id_unidad']}'
+          AND id_calibre = '{$data['id_calibre']}'
+          AND id_etiqueta = '{$data['id_etiqueta']}'
+          AND id_size = '{$data['id_size']}'
           AND kilos = '{$data['kilos']}'
       ")->row();
     if($tipo=='add')
       return ($data->num>0? true: false);
 
     //si se actualiza
-    if($data->num <= 1) 
+    if($data->num <= 1)
       return false;
     return true;
   }
@@ -195,8 +195,8 @@ class rastreabilidad_model extends CI_Model {
       $passess = true;
     }
 
-    return array('passess' => $passess, 
-            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''), 
+    return array('passess' => $passess,
+            'id_calibre' => (isset($data_calibre['id'])? $data_calibre['id']: ''),
             'id_size' => (isset($data_size['id'])? $data_size['id']: '') );
   }
 
@@ -249,8 +249,8 @@ class rastreabilidad_model extends CI_Model {
           "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                   total, rendimiento
             FROM rastria_rendimiento_clasif
-            WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
-              AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}' 
+            WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}'
+              AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}'
               AND id_etiqueta = '{$_POST['id_etiqueta']}' AND id_size = '{$_POST['id_size']}'
               AND kilos = '{$_POST['kilos']}'
         ");
@@ -294,8 +294,8 @@ class rastreabilidad_model extends CI_Model {
         "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                 total, rendimiento
         FROM rastria_rendimiento_clasif
-        WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
-            AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}' 
+        WHERE id_clasificacion = '{$_POST['id_clasificacion']}' AND id_rendimiento = '{$lote->id_rendimiento}'
+            AND id_unidad = '{$_POST['id_unidad']}' AND id_calibre = '{$_POST['id_calibre']}'
             AND id_etiqueta = '{$_POST['id_etiqueta']}' AND id_size = '{$_POST['id_size']}'
             AND kilos = '{$_POST['kilos']}'
       ");
@@ -304,8 +304,8 @@ class rastreabilidad_model extends CI_Model {
         "SELECT id_rendimiento, id_clasificacion, existente, linea1, linea2,
                 total, rendimiento
         FROM rastria_rendimiento_clasif
-        WHERE id_clasificacion = '{$_POST['id_clasificacion_old']}' AND id_rendimiento = '{$lote->id_rendimiento}' 
-            AND id_unidad = '{$_POST['id_unidad_old']}' AND id_calibre = '{$_POST['id_calibre_old']}' 
+        WHERE id_clasificacion = '{$_POST['id_clasificacion_old']}' AND id_rendimiento = '{$lote->id_rendimiento}'
+            AND id_unidad = '{$_POST['id_unidad_old']}' AND id_calibre = '{$_POST['id_calibre_old']}'
             AND id_etiqueta = '{$_POST['id_etiqueta_old']}' AND id_size = '{$_POST['id_size_old']}'
             AND kilos = '{$_POST['kilos_old']}'
       ");
@@ -322,7 +322,7 @@ class rastreabilidad_model extends CI_Model {
         if ($sql2->num_rows() > 0)
         {
           $clasifi2 = $sql2->row();
-          
+
           // $campos['existente']        = $_POST['existente'];
           $campos['linea1']      = $clasifi->linea1+$clasifi2->linea1;
           $campos['linea2']      = $clasifi->linea2+$clasifi2->linea2;
@@ -330,11 +330,11 @@ class rastreabilidad_model extends CI_Model {
           $campos['rendimiento'] = $campos['linea1']+$campos['linea2'];
 
           if (
-            $_POST['id_clasificacion'] != $_POST['id_clasificacion_old'] || 
-            $_POST['id_unidad'] != $_POST['id_unidad_old'] || 
-            $_POST['id_calibre'] != $_POST['id_calibre_old'] || 
-            $_POST['id_etiqueta'] != $_POST['id_etiqueta_old'] || 
-            $_POST['id_size'] != $_POST['id_size_old'] || 
+            $_POST['id_clasificacion'] != $_POST['id_clasificacion_old'] ||
+            $_POST['id_unidad'] != $_POST['id_unidad_old'] ||
+            $_POST['id_calibre'] != $_POST['id_calibre_old'] ||
+            $_POST['id_etiqueta'] != $_POST['id_etiqueta_old'] ||
+            $_POST['id_size'] != $_POST['id_size_old'] ||
             $_POST['kilos'] != $_POST['kilos_old'] )
           {
             //Elimina el rendimiento viejo
@@ -450,12 +450,13 @@ class rastreabilidad_model extends CI_Model {
     }
   }
 
-  public function createLote($fecha, $lote, $lote_ext)
+  public function createLote($fecha, $lote, $lote_ext, $certificado = 'f')
   {
     $this->db->insert('rastria_rendimiento', array(
       'lote'     => $lote,
       'fecha'    => $fecha,
       'lote_ext' => $lote_ext,
+      'certificado' => $certificado,
     ));
 
     $id = $this->db->insert_id();
@@ -483,7 +484,7 @@ class rastreabilidad_model extends CI_Model {
 
   public function getLoteInfo($id_rendimiento, $full_info = true)
   {
-    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext")
+    $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext, certificado")
       ->from("rastria_rendimiento")
       ->where("id_rendimiento", $id_rendimiento)
       ->get();
@@ -503,15 +504,15 @@ class rastreabilidad_model extends CI_Model {
 
         $sql = $this->db->query(
           "SELECT rrc.id_rendimiento, rrc.id_clasificacion, rrc.existente, rrc.kilos, rrc.linea1, rrc.linea2,
-                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion, 
-                  u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre, 
+                  rrc.total, rrc.rendimiento, cl.nombre as clasificacion,
+                  u.id_unidad, u.nombre AS unidad, ca.id_calibre, ca.nombre AS calibre,
                   e.id_etiqueta, e.nombre AS etiqueta, cas.id_calibre AS id_size, cas.nombre AS size
           FROM rastria_rendimiento_clasif AS rrc
             INNER JOIN clasificaciones AS cl ON cl.id_clasificacion = rrc.id_clasificacion
-            LEFT JOIN unidades AS u ON u.id_unidad = rrc.id_unidad 
-            LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre 
-            LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta 
-            LEFT JOIN calibres AS cas ON cas.id_calibre = rrc.id_size 
+            LEFT JOIN unidades AS u ON u.id_unidad = rrc.id_unidad
+            LEFT JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre
+            LEFT JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
+            LEFT JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
           WHERE
             rrc.id_rendimiento = {$id_rendimiento}
           ORDER BY (rrc.id_rendimiento, cl.nombre, u.nombre, ca.nombre, e.nombre) ASC
@@ -540,9 +541,9 @@ class rastreabilidad_model extends CI_Model {
     return intval($lote)+1;
   }
 
-  public function actualizaLoteExt($id_rendimiento, $lote_ext)
+  public function actualizaLoteExt($id_rendimiento, $lote_ext, $estaCertificado)
   {
-    $this->db->update('rastria_rendimiento', array('lote_ext' => $lote_ext), "id_rendimiento = {$id_rendimiento}");
+    $this->db->update('rastria_rendimiento', array('lote_ext' => $lote_ext, 'certificado' => $estaCertificado), "id_rendimiento = {$id_rendimiento}");
     return array('passess' => true);
   }
 
@@ -553,8 +554,8 @@ class rastreabilidad_model extends CI_Model {
    * @param  string $id_clasificacion
    * @return array
    */
-  public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote, 
-                                        $id_unidad, $id_calibre, $id_etiqueta, 
+  public function getPrevClasificacion($id_rendimiento, $id_clasificacion, $lote,
+                                        $id_unidad, $id_calibre, $id_etiqueta,
                                         $id_size, $kilos)
   {
 
@@ -613,7 +614,7 @@ class rastreabilidad_model extends CI_Model {
           $sql = $this->db->query(
             "SELECT total AS existentes
               FROM rastria_rendimiento_clasif
-              WHERE id_clasificacion = '{$id_clasificacion}' AND id_rendimiento = '{$lotee->id_rendimiento}' 
+              WHERE id_clasificacion = '{$id_clasificacion}' AND id_rendimiento = '{$lotee->id_rendimiento}'
                     AND id_unidad = '{$id_unidad}' AND id_calibre = '{$id_calibre}'
                     AND id_etiqueta = '{$id_etiqueta}' AND id_size = '{$id_size}' AND kilos = '{$kilos}'
           ");

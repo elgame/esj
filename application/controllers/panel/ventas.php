@@ -451,6 +451,9 @@ class ventas extends MY_Controller {
         array('field'   => 'prod_dmedida[]',
               'label'   => 'prod_dmedida',
               'rules'   => ''),
+        array('field'   => 'isCert[]',
+              'label'   => 'Certificado',
+              'rules'   => ''),
 
         array('field'   => 'dversion',
               'label'   => '',

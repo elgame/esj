@@ -121,6 +121,7 @@ class Bascula_model extends CI_Model {
           'accion'       => 'en',
           'tipo'         => $this->input->post('ptipo'),
           'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'],
+          'certificado' => isset($_POST['certificado']) ? 't' : 'f',
         );
 
         if ($this->input->post('ptipo') === 'en')
@@ -164,6 +165,7 @@ class Bascula_model extends CI_Model {
         'total_cajas'   => empty($_POST['ptotal_cajas']) ? 0 : $_POST['ptotal_cajas'],
         'obcervaciones' => $this->input->post('pobcervaciones'),
         'rancho'       => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
+        'certificado' => isset($_POST['certificado']) ? 't' : 'f',
       );
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
@@ -303,7 +305,8 @@ class Bascula_model extends CI_Model {
                 cl.nombre_fiscal as cliente,
                 cl.cuenta_cpi AS cpi_cliente,
                 b.tipo,
-                b.no_impresiones")
+                b.no_impresiones,
+                b.certificado")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
@@ -418,9 +421,6 @@ class Bascula_model extends CI_Model {
         $data['cajas'][$key]->calidad = 'BONIF.';
     }
 
-    // echo "<pre>";
-    //   var_dump($data);
-    // echo "</pre>";exit;
     $pdf = new mypdf_ticket();
     $pdf->titulo1 = $data['info'][0]->empresa;
     if($data['info'][0]->id_empresa != 2)
@@ -1587,6 +1587,7 @@ class Bascula_model extends CI_Model {
       'total_cajas'     => 'Total Cajas',
       'obcervaciones'   => 'Observaciones',
       'accion'          => 'Accion',
+      'certificado'     => 'Certificado',
     );
 
     // Campos que son ids, para facilitar la busqueda de sus valores.

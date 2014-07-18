@@ -175,6 +175,7 @@ class rastreabilidad extends MY_Controller {
 
       // Si no existe entonces crea el lote.
       $lote_ext = $this->rastreabilidad_model->getLoteExt($_GET['gfecha'], intval($_GET['glote'])-1 );
+
       $id_rendimiento = $this->rastreabilidad_model->createLote($_GET['gfecha'], $_GET['glote'], $lote_ext);
 
       // Redirecciona con el nuevo lote.
@@ -224,8 +225,8 @@ class rastreabilidad extends MY_Controller {
 
   public function ajax_save_clasifi()
   {
-  $this->load->model('rastreabilidad_model');
-  echo json_encode($this->rastreabilidad_model->saveClasificacion());
+    $this->load->model('rastreabilidad_model');
+    echo json_encode($this->rastreabilidad_model->saveClasificacion());
   }
 
   public function ajax_edit_clasifi()
@@ -243,15 +244,17 @@ class rastreabilidad extends MY_Controller {
   public function ajax_get_prev_clasifi()
   {
     $this->load->model('rastreabilidad_model');
-    echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'], 
-      $_GET['id_clasificacion'], $_GET['loteActual'], $_GET['id_unidad'], $_GET['id_calibre'], 
+    echo json_encode($this->rastreabilidad_model->getPrevClasificacion($_GET['id_rendimiento'],
+      $_GET['id_clasificacion'], $_GET['loteActual'], $_GET['id_unidad'], $_GET['id_calibre'],
       $_GET['id_etiqueta'], $_GET['id_size'], $_GET['kilos']));
   }
 
   public function ajax_actualiza_lote()
   {
+    $estaCertificado = $_POST['es_certificado'] == 1 ? 't' : 'f';
+
     $this->load->model('rastreabilidad_model');
-    echo json_encode($this->rastreabilidad_model->actualizaLoteExt($_POST['id_rendimiento'], $_POST['lote_ext']) );
+    echo json_encode($this->rastreabilidad_model->actualizaLoteExt($_POST['id_rendimiento'], $_POST['lote_ext'], $estaCertificado));
   }
 
 

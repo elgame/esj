@@ -35,6 +35,7 @@
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Actualizar</th>
+                        <th style="background-color: #FFF; text-align: center;">Certificado</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -60,6 +61,10 @@
                             <button class="btn" type="button" id="btnActualizaLote">Ok</button>
                             <input type="hidden" id="id_lote_actual" value="<?php echo $id_lote_actual; ?>">
                           </span>
+                        </td>
+
+                        <td style="text-align: center;">
+                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
                         </td>
 
                       </tr>
