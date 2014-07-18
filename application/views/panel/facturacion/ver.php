@@ -241,6 +241,7 @@
                     <th>Retención</th>
                     <th>Importe</th>
                     <th>Total</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -274,6 +275,9 @@
                               <td>
                                 <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
                               </td>
+                              <td>
+                                <?php echo $concepto->certificado === 't' ? '<span class="label label-success">Certificado</span>' : '' ?>
+                              </td>
                             </tr>
                   <?php } else {
 
@@ -306,8 +310,11 @@
                               <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_importe" readonly>
                             </td>
                             <td>
-                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
-                              </td>
+                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
+                            </td>
+                            <td>
+                              <?php echo $concepto->certificado === 't' ? '<span class="label label-success">Certificado</span>' : '' ?>
+                            </td>
                           </tr>
 
                 <?php } }}} ?>

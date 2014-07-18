@@ -594,6 +594,9 @@ class facturacion extends MY_Controller {
         array('field'   => 'prod_dmedida[]',
               'label'   => 'prod_dmedida',
               'rules'   => ''),
+        array('field'   => 'isCert[]',
+              'label'   => 'Cert.',
+              'rules'   => ''),
 
         array('field'   => 'dversion',
               'label'   => '',

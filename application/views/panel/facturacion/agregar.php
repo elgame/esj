@@ -325,6 +325,7 @@
                     <th>IVA</th>
                     <th>Retención</th>
                     <th>Importe</th>
+                    <th>Cert.</th>
                     <th>Accion</th>
                   </tr>
                 </thead>
@@ -348,10 +349,10 @@
                             $_POST['prod_dkilos'][$key]     = $p->kilos;
                             $_POST['prod_dcajas'][$key]     = $p->cajas;
                             $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
-                            $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
 
                             $_POST['prod_dclase'][$key] = $p->clase;
                             $_POST['prod_dpeso'][$key] = $p->peso;
+                            $_POST['isCert'][$key] = $p->certificado === 't' ? '1' : '0';
                           }
                         } ?>
 
@@ -375,11 +376,12 @@
                                 </td>
                                 <td>
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
-                                    <?php foreach ($unidades as $key => $u) { ?>
+                                    <?php foreach ($unidades as $key => $u) {
+                                      if ($_POST['prod_dmedida'][$k] == $u->nombre) $uid = $u->id_unidad; ?>
                                       <option value="<?php echo $u->nombre ?>" <?php echo $_POST['prod_dmedida'][$k] == $u->nombre ? 'selected' : '' ?> data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
                                     <?php } ?>
                                   </select>
-                                  <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $_POST['prod_dmedida_id'][$k] ?>" id="prod_dmedida_id" class="span12 vpositive">
+                                  <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uid ?>" id="prod_dmedida_id" class="span12 vpositive">
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
@@ -415,6 +417,10 @@
                                 </td>
                                  <td>
                                   <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $_POST['prod_importe'][$k]?>" id="prod_importe">
+                                </td>
+                                <td>
+                                  <input type="checkbox" class="is-cert-check" <?php echo ($_POST['isCert'][$k] == '1' ? 'checked' : '') ?>>
+                                  <input type="hidden" name="isCert[]" value="<?php echo $_POST['isCert'][$k] ?>" class="certificado">
                                 </td>
                                 <td>
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
@@ -481,6 +487,7 @@
                           <td>
                             <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
                           </td>
+                          <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
                           <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
                         </tr>
                 </tbody>

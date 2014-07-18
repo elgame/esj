@@ -128,10 +128,18 @@
             <div class="box-content">
               <div class="row-fluid">
                 <div class="span7">
+
+                  <div class="control-group">
+                    <label class="control-label" for="ptipo">Certificado</label>
+                    <div class="controls">
+                      <input type="checkbox" name="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                    </div>
+                  </div>
+
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
-                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled; ?> autofocus>
+                      <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled; ?>>
                         <option value="en" <?php $set_select=set_select('ptipo', 'en', false, $this->input->post('ptipo')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['tipo']); ?>>Entrada</option>
                         <option value="sa" <?php $set_select=set_select('ptipo', 'sa', false, $this->input->post('ptipo')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['tipo']); ?>>Salida</option>
                       </select>

@@ -7,7 +7,7 @@ class mypdf_ticket extends FPDF {
     var $font_size = 8;
 
     var $fount_txt = 'helvetica';
-    var $fount_num = 'SciFly-Sans';
+    var $fount_num = 'SciFly-Sans'; // SciFly-Sans
 
     var $pag_size = array();
 
@@ -22,10 +22,10 @@ class mypdf_ticket extends FPDF {
 	function __construct($orientation='P', $unit='mm', $size=array(63, 130)){
 		parent::__construct($orientation, $unit, $size);
 		$this->limiteY = 50;
-        $this->pag_size = $size;
+    $this->pag_size = $size;
 
-        $this->SetMargins(0, 0, 0);
-        $this->SetAutoPageBreak(false);
+    $this->SetMargins(0, 0, 0);
+    $this->SetAutoPageBreak(false);
 	}
 
     //Page header
@@ -140,12 +140,18 @@ class mypdf_ticket extends FPDF {
         $this->SetAligns(array('L'));
         $this->Row(array( strtoupper($nombreCpi) ), false, false);
 
-
         $this->SetY($this->GetY()-1);
         $this->MultiCell($this->pag_size[0], 3, 'RANCHO: ' . strtoupper($data->rancho), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');
+
+        if ($data->certificado == 't')
+        {
+          $this->SetY($this->GetY() + 1);
+          $this->MultiCell($this->pag_size[0], 3, 'GGN4052852866927 PRODUCTO CERTIFICADO', 0, 'L');
+        }
+
     }
 
     public function pieTicket($data){
@@ -174,9 +180,9 @@ class mypdf_ticket extends FPDF {
     }
 
     public function printTicket($data, $data_prod){
-        $this->datosTicket($data);
-        $this->productosTicket($data, $data_prod);
-        $this->pieTicket($data);
+      $this->datosTicket($data);
+      $this->productosTicket($data, $data_prod);
+      $this->pieTicket($data);
     }
 
 
