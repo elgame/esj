@@ -3,11 +3,18 @@
 -Poner un consecutivo para los empleados de cada empresa, q se incremente solo cuando se inserte uno nuevo, cambiar en los reportes de nomina poner ese campo en lugar del id
 -Historial de modificaciones en empleados, sueldos, altas, bajas, etc, checar si al despedir (finiquito) se registra la fecha de salida, al activar cambiar la fecha de entrada y de salida ponerla en null, los sueldos se modifica tambien en apartado de sueldos
 
+
 -Traspaso de productos entre empresas, el reporte de seguimiento x producto las salidas
   tipo traspaso que no afecte el precio solo la existencia, imprimir una orden de donde salio
   y adonde entro, con una descripcion
+-Incapacidades dobles en una misma semana, empleados nomina
+-Facturacion productos certificados
 -Ordenes de requisicion hacerlo como la señora quiere
 -Archivo Dim Aun no pasa nada
+-Orden de servicio agregar orden de compra
+-*Caja chica agregar nomenclaturas
+-*Remisiones los productos que cargue el iva e impuestos si tiene
+-*Checar pago masivo de limon en tarjetas debito banamex, y cambiar la funcion de obtener apellidos, y de error del nombre
 -*Reporte de historial de nivelacion que ponga, como estaba, la fisica y como quedo
 -*Poliza de diario de ventas los productos sin costo en la factura salen q no salgan
 -*Caja chica que ordene los registros como se agregaron.

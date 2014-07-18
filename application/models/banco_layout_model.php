@@ -72,7 +72,11 @@ class banco_layout_model extends banco_cuentas_model {
       $tipo_cuenta = '01';
       if ($data['toperacion']=='ba') //banamex
       {
-        $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
+        if(strlen($value['proveedor_cuenta']) == 16){ //Tarjeta de debito o credito
+          $cuenta = $value['proveedor_cuenta'];
+          $tipo_cuenta = '03';
+        }else
+          $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
         $ref_alfanumerica = $value['ref_numerica'];
         $instrucciones = $value['ref_alfanumerica'];
         $descripcion = $value['descripcion'];
@@ -84,7 +88,7 @@ class banco_layout_model extends banco_cuentas_model {
           $new_nombre = $this->getNombre($value['beneficiario']);
           $value['beneficiario'] = $this->string( $this->cleanStr($new_nombre[0].','.$new_nombre[1].'/'.$new_nombre[2]), 55);
         }else
-          $value['beneficiario'] = ','.$this->string( $this->cleanStr($value['beneficiario']), 53).'/';
+          $value['beneficiario'] = ','.$this->string( $this->cleanStr($value['beneficiario']), 53, '/');
         $cuenta = $value['proveedor_cuenta'];
         if(strlen($cuenta) == 16) //Tarjeta de debito o credito
           $tipo_cuenta = '03';
@@ -258,14 +262,19 @@ class banco_layout_model extends banco_cuentas_model {
 
 		return $numero;
 	}
-	private function string($str, $pos)
+	private function string($str, $pos, $end='')
 	{
 		$leng = strlen($str);
 		$datos = $pos-$leng;
-		for ($i = 1; $i <= $datos; $i++)
-		{
-			$str .= ' ';
-		}
+    if($datos > 0){
+      $str .= $end;
+  		for ($i = 1; $i <= $datos; $i++)
+  		{
+  			$str .= ' ';
+  		}
+    }else{
+      $str = substr($str, 0, $pos).$end;
+    }
 		return $str;
 	}
   private function cleanStr($string)
@@ -280,9 +289,9 @@ class banco_layout_model extends banco_cuentas_model {
     //si el nombre tiene solo 2 palabras
     if($size==2){
       //el primero es nombre
-      $nombre =$arreglo[0];
+      $nombre =$arreglo[1];
       //el segundo es apellido
-      $apellidop = $arreglo[1];
+      $apellidop = $arreglo[0];
       $apellidom = "";
     }else{
       //los tokens se utilizan para crear apellidos compuestos
@@ -292,17 +301,24 @@ class banco_layout_model extends banco_cuentas_model {
       $apellidom = "";
       $token = 'am';
 
-      for ($contz=$size-1; $contz>=0; $contz--)
+      // for ($contz=$size-1; $contz>=0; $contz--)
+      for ($contz=0; $contz<$size; $contz++)
       {
-        if(!$this->buscarCadena($tokens, $arreglo[$contz]))
-          $token = $token=='am'? 'ap': 'n';
-
-        if($token == 'am')
-          $apellidom = $arreglo[$contz].' '.$apellidom;
-        elseif($token == 'ap')
-          $apellidop = $arreglo[$contz].' '.$apellidop;
-        elseif($token == 'n')
+        if($contz == 0)
+          $apellidop = $arreglo[$contz];
+        elseif($contz == 1)
+          $apellidom = $arreglo[$contz];
+        else
           $nombre = $arreglo[$contz].' '.$nombre;
+        // if(!$this->buscarCadena($tokens, $arreglo[$contz]))
+        //   $token = $token=='am'? 'ap': 'n';
+
+        // if($token == 'am')
+        //   $apellidom = $arreglo[$contz].' '.$apellidom;
+        // elseif($token == 'ap')
+        //   $apellidop = $arreglo[$contz].' '.$apellidop;
+        // elseif($token == 'n')
+        //   $nombre = $arreglo[$contz].' '.$nombre;
       }
     }
     return array(trim($nombre), trim($apellidop), trim($apellidom));

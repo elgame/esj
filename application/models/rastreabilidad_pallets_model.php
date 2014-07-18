@@ -269,6 +269,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 	{
 		if ($data==NULL)
 		{
+      $data = array();
 			if(is_array($this->input->post('idcalibre')))
 			{
 				foreach ($this->input->post('idcalibre') as $key => $calibre)

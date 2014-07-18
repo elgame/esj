@@ -125,6 +125,7 @@ class privilegios_model extends CI_Model{
 		$priv = $this->tienePrivilegioDe('', $url_accion, true);
 		if(is_object($priv)){
 			$conf = array(
+        'nombre'    => $priv->nombre,
 				'params'    => '',
 				'btn_type'  => '',
 				'icon_type' => 'icon-white',
@@ -140,7 +141,7 @@ class privilegios_model extends CI_Model{
 			}
 
 			$txt = '<a class="btn '.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
-							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$priv->nombre.'</span>'.$conf['html'].'</a>';
+							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>';
 		}
 		return $txt;
 	}
