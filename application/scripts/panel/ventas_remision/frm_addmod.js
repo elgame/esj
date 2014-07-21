@@ -290,6 +290,7 @@ $(function(){
               'id_unidad_clasificacion': jsonObj[i]['id_unidad_clasificacion'],
               'iva_clasificacion': jsonObj[i]['iva_clasificacion'],
               'kilos': jsonObj[i]['kilos'],
+              'certificado': jsonObj[i]['certificado'],
             });
           }
         });
@@ -366,6 +367,7 @@ function loadPalletByFolio() {
                     'id_unidad_clasificacion': data['rendimientos'][i]['id_unidad_clasificacion'],
                     'iva_clasificacion': data['rendimientos'][i]['iva_clasificacion'],
                     'kilos': data['rendimientos'][i]['kilos'],
+                    'certificado': data['rendimientos'][i]['certificado'],
                   });
                 }
               }, 'json');
@@ -449,10 +451,11 @@ function addProducto(unidades, prod) {
       $tr, addInputPalletId = true;
 
   var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
-      ivaSelected = '0', prod_kilos = 0, cantidad = 0;
+      ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false;;
 
   if (prod) {
     // Verificar si existe la clasificacion...
+    var estaCertificado;
     $tabla.find('input#prod_did_prod').each(function(index, el) {
       var $prodIdInput = $(this), // input hidde prod id.
           $medidaInput; // input hidde medida.
@@ -460,9 +463,10 @@ function addProducto(unidades, prod) {
       $tr = $prodIdInput.parents('tr'); // tr parent.
       $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
       $idUnidadRendimiento = $tr.find('#id_unidad_rendimiento');
+      estaCertificado = $tr.find('.is-cert-check').is(':checked') ? 't' : 'f';
 
       // console.log($prodIdInput.val(), prod.id, $medidaInput.val(), prod.id_unidad);
-      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad) {
+      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad && estaCertificado === prod.certificado) {
         existe = true;
         return false;
       }
@@ -479,6 +483,8 @@ function addProducto(unidades, prod) {
 
     idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
+    prod_certificado =  prod.certificado === 't' ? true : false;
+
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
@@ -546,6 +552,7 @@ function addProducto(unidades, prod) {
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
+                  // '<input type="hidden" name="id_size_rendimiento[]" value="'+idSize+'" id="id_size_rendimiento" class="span12">' +
                 '</td>' +
                 '<td>' +
                   '<select name="prod_dmedida[]" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -590,7 +597,7 @@ function addProducto(unidades, prod) {
                 '<td>' +
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
-                '<td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>' +
+                '<td><input type="checkbox" class="is-cert-check" ' + (prod_certificado ? 'checked' : '')  + ' ><input type="hidden" name="isCert[]" value="' + (prod_certificado ? '1' : '0') + '" class="certificado"></td>' +
                 '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
