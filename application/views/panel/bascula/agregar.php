@@ -132,7 +132,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ptipo">Certificado</label>
                     <div class="controls">
-                      <input type="checkbox" name="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
+                      <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
                     </div>
                   </div>
 

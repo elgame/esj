@@ -2770,14 +2770,26 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
       $pdf->SetAligns($aligns2);
       $pdf->SetWidths($widths);
-      $pdf->Row(array(
-        String::formatoNumero($item->cantidad, 2, ''),
-        $item->unidad,
-        $item->descripcion,
-        $item->certificado === 't' ? 'Certificado' : '',
-        String::formatoNumero($item->precio_unitario, 2, '$', false),
-        String::formatoNumero($item->importe, 2, '$', false),
-      ), false, true, null, 2, 1);
+      
+      
+      $printRow = true;
+      if($factura['info']->sin_costo == 't')
+      {
+        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+            $item->id_clasificacion == '53')
+          $printRow = false;
+      }
+      
+      if($printRow)
+        $pdf->Row(array(
+          String::formatoNumero($item->cantidad, 2, ''),
+          $item->unidad,
+          $item->descripcion,
+          $item->certificado === 't' ? 'Certificado' : '',
+          String::formatoNumero($item->precio_unitario, 2, '$', false),
+          String::formatoNumero($item->importe, 2, '$', false),
+        ), false, true, null, 2, 1);
     }
 
     // foreach($conceptos as $key => $item)

@@ -106,13 +106,6 @@ class home extends MY_Controller {
     $empresas = $this->empresas_model->getEmpresas();
     foreach ($empresas['empresas'] as $keye => $empresa)
     {
-    	// Parche empleados
-    	$res = $this->db->query("SELECT * FROM usuarios WHERE user_nomina = 't' AND id_empresa = {$empresa->id_empresa} ORDER BY id ASC");
-    	foreach ($res->result() as $key => $value) {
-    		$this->db->update('usuarios', array('no_empleado' => $key+1), "id = {$value->id}");
-    	}
-
-
       $_GET['did_empresa'] = $empresa->id_empresa;
       $productos = $this->inventario_model->getEPUData();
       $empresa->productos = array();

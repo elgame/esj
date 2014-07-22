@@ -14,6 +14,7 @@
 
     eventCodigoBarras();
     eventBtnAddProducto();
+    eventBtnListaOtros();
     eventTipoCambioKeypress();
     eventKeyUpCantPrecio();
     eventOnChangeTraslado();
@@ -28,6 +29,15 @@
     eventTipoMonedaChange();
 
     eventLigarFacturas();
+
+    btnAutorizarClick();
+
+    if($("#form-modif").length > 0)
+    {
+      calculaTotal(1);
+      calculaTotal(2);
+      calculaTotal(3);
+    }
 
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
@@ -68,6 +78,41 @@
         $("#group_gasolina").hide();
     });
   });
+
+
+  var btnAutorizarClick = function(){
+    $("#btnAutorizar").on('click', function(e) {
+      var passes = true;
+      $(".prodSelOrden:checked").each(function(index, el) {
+        if (($(this).val() != $('#proveedorId1').val() && 
+            $(this).val() != $('#proveedorId2').val() &&
+            $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
+          passes = false;
+          noty({"text": 'Esta seleccionado un producto sin proveedor asignado', "layout":"topRight", "type": 'error'});
+        }
+      });
+
+      $(".prodIdOrden").each(function(index, el) {
+        if ($(this).val() == '' || $(this).val() == '0') {
+          passes = false;
+          noty({"text": 'Hay nuevos productos, guarde la orden y despues la autoriza', "layout":"topRight", "type": 'error'});
+        }
+      });
+
+      if($("#autorizoId").val() == ''){
+        noty({"text": 'Tiene que seleccionar la persona que autoriza', "layout":"topRight", "type": 'error'});
+        passes = false;
+        $("#autorizo").focus();
+      }
+
+
+      // Envia el form para autorizar
+      if (passes){
+        $("#txtBtnAutorizar").val('true');
+        setTimeout(function(){ $("#form").submit(); }, 100)
+      }
+    });
+  }
 
   /*
    |------------------------------------------------------------------------
@@ -156,6 +201,9 @@
         // $proveedor.val(ui.item.id);
         $("#proveedorId"+idval).val(ui.item.id);
         $proveedor.css("background-color", "#A1F57A");
+
+        // Asigna el nuevo id a los productos de la columna de ese proveedor
+        $('.prodSelOrden'+idval).val(ui.item.id);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -206,7 +254,7 @@
   };
   // Autocomplete para el codigo.
   var autocompleteCodigo = function () {
-    $("#productos1 #fcodigo, #productos2 #fcodigo, #productos3 #fcodigo").autocomplete({
+    $("#productos #fcodigo").autocomplete({
       source: function (request, response) {
         if (isEmpresaSelected()) {
           $.ajax({
@@ -231,13 +279,13 @@
 
         var $fcodigo    = $(this),
             idval = $fcodigo.parents("div[id^=productos]").attr('id').replace("productos", ""),
-            $fconcepto     = $('#productos'+idval+' #fconcepto'),
-            $fconceptoId   = $('#productos'+idval+' #fconceptoId'),
-            $fcantidad     = $('#productos'+idval+' #fcantidad'),
-            $fprecio       = $('#productos'+idval+' #fprecio'),
-            $fpresentacion = $('#productos'+idval+' #fpresentacion'),
-            $funidad       = $('#productos'+idval+' #funidad'),
-            $ftraslado     = $('#productos'+idval+' #ftraslado');
+            $fconcepto     = $('#productos #fconcepto'),
+            $fconceptoId   = $('#productos #fconceptoId'),
+            $fcantidad     = $('#productos #fcantidad'),
+            $fprecio       = $('#productos #fprecio'),
+            $fpresentacion = $('#productos #fpresentacion'),
+            $funidad       = $('#productos #funidad'),
+            $ftraslado     = $('#productos #ftraslado');
 
         var presentaciones = ui.item.item.presentaciones,
             selectHtml = '<select name="presentacion[]" id="presentacion"><option value=""></option>';
@@ -270,20 +318,20 @@
       if(event.which == 8 || event.which == 46) {
         $(this).css("background-color", "#FDFC9A");
         var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", "");
-        $("#productos"+idval+" #fconcepto").val("");
-        $('#productos'+idval+' #fconceptoId').val('');
-        $('#productos'+idval+' #fcantidad').val('');
-        $('#productos'+idval+' #fprecio').val('');
-        $('#productos'+idval+' #funidad').val('');
-        $('#productos'+idval+' #ftraslado').val('');
-        $('#productos'+idval+' #fpresentacion').html('');
+        $("#productos #fconcepto").val("");
+        $('#productos #fconceptoId').val('');
+        $('#productos #fcantidad').val('');
+        $('#productos #fprecio').val('');
+        $('#productos #funidad').val('');
+        $('#productos #ftraslado').val('');
+        $('#productos #fpresentacion').html('');
       }
     });
   };
 
   // Autocomplete para el codigo.
   var autocompleteConcepto = function () {
-    $("#productos1 #fconcepto, #productos2 #fconcepto, #productos3 #fconcepto").autocomplete({
+    $("#productos #fconcepto").autocomplete({
       source: function (request, response) {
         if (isEmpresaSelected()) {
           $.ajax({
@@ -307,14 +355,14 @@
       select: function( event, ui ) {
         var $fconcepto    = $(this),
             idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", ""),
-            $fcodigo     = $('#productos'+idval+' #fcodigo'),
-            $fconceptoId   = $('#productos'+idval+' #fconceptoId'),
-            $fcantidad     = $('#productos'+idval+' #fcantidad'),
-            $fprecio       = $('#productos'+idval+' #fprecio'),
-            $fpresentacion = $('#productos'+idval+' #fpresentacion'),
-            $funidad       = $('#productos'+idval+' #funidad'),
-            $fieps         = $('#productos'+idval+' #fieps'),
-            $ftraslado     = $('#productos'+idval+' #ftraslado');
+            $fcodigo     = $('#productos #fcodigo'),
+            $fconceptoId   = $('#productos #fconceptoId'),
+            $fcantidad     = $('#productos #fcantidad'),
+            $fprecio       = $('#productos #fprecio'),
+            $fpresentacion = $('#productos #fpresentacion'),
+            $funidad       = $('#productos #funidad'),
+            $fieps         = $('#productos #fieps'),
+            $ftraslado     = $('#productos #ftraslado');
 
 
         $fconcepto.css("background-color", "#B6E7FF");
@@ -329,7 +377,7 @@
           var entradas = parseFloat(ui.item.item.inventario.entradas),
           salidas = parseFloat(ui.item.item.inventario.salidas),
           saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior);
-          $("#productos"+idval+" #show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(saldo_anterior+entradas-salidas, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
+          $("#productos #show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(saldo_anterior+entradas-salidas, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
         }
 
         var presentaciones = ui.item.item.presentaciones,
@@ -347,14 +395,14 @@
         var idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", "");
 
         $(this).css("background-color", "#FDFC9A");
-        $("#productos"+idval+" #fcodigo").val("");
-        $('#productos'+idval+' #fconceptoId').val('');
-        $('#productos'+idval+' #fcantidad').val('');
-        $('#productos'+idval+' #fprecio').val('');
-        $('#productos'+idval+' #funidad').val('');
-        $('#productos'+idval+' #ftraslado').val('');
-        $('#productos'+idval+' #fpresentacion').html('');
-        $("#productos"+idval+" #show_info_prod").show().find('span').text('');
+        $("#productos #fcodigo").val("");
+        $('#productos #fconceptoId').val('');
+        $('#productos #fcantidad').val('');
+        $('#productos #fprecio').val('');
+        $('#productos #funidad').val('');
+        $('#productos #ftraslado').val('');
+        $('#productos #fpresentacion').html('');
+        $("#productos #show_info_prod").show().find('span').text('');
       }
     });
   };
@@ -365,7 +413,7 @@
    |------------------------------------------------------------------------
    */
   var eventCodigoBarras = function () {
-    $('#productos1 #fcodigo, #productos2 #fcodigo, #productos3 #fcodigo').on('keypress', function(event) {
+    $('#productos #fcodigo').on('keypress', function(event) {
       var $codigo = $(this);
       if (isEmpresaSelected()) {
         if (event.which === 13 && $codigo.val() !== '') {
@@ -409,11 +457,11 @@
   };
 
   var eventTipoCambioKeypress = function () {
-    $('#productos1 #ftipo_cambio, #productos2 #ftipo_cambio, #productos3 #ftipo_cambio').on('keypress', function(event) {
+    $('#productos #ftipo_cambio').on('keypress', function(event) {
       if (event.which === 13) {
         var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", "");
 
-        $('#productos'+idval+' #btnAddProd').click();
+        $('#productos #btnAddProd').click();
       }
     });
   };
@@ -496,19 +544,19 @@
   };
 
   var eventBtnAddProducto = function () {
-    $('#productos1 #btnAddProd, #productos2 #btnAddProd, #productos3 #btnAddProd').on('click', function(event) {
+    $('#productos #btnAddProd').on('click', function(event) {
       var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", ""),
-          $fcodigo     = $('#productos'+idval+' #fcodigo').css({'background-color': '#FFF'}),
-          $fconcepto     = $('#productos'+idval+' #fconcepto').css({'background-color': '#FFF'}),
-          $fconceptoId   = $('#productos'+idval+' #fconceptoId'),
-          $fcantidad     = $('#productos'+idval+' #fcantidad').css({'background-color': '#FFF'}),
-          $fprecio       = $('#productos'+idval+' #fprecio').css({'background-color': '#FFF'}),
-          $fpresentacion = $('#productos'+idval+' #fpresentacion'),
-          $funidad       = $('#productos'+idval+' #funidad'),
-          $fieps         = $('#productos'+idval+' #fieps'),
-          $ftipo_moneda  = $('#productos'+idval+' #ftipo_moneda'),
-          $ftipo_cambio  = $('#productos'+idval+' #ftipo_cambio'),
-          $ftraslado     = $('#productos'+idval+' #ftraslado'),
+          $fcodigo     = $('#productos #fcodigo').css({'background-color': '#FFF'}),
+          $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
+          $fconceptoId   = $('#productos #fconceptoId'),
+          $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
+          $fprecio       = $('#productos #fprecio').css({'background-color': '#FFF'}),
+          $fpresentacion = $('#productos #fpresentacion'),
+          $funidad       = $('#productos #funidad'),
+          $fieps         = $('#productos #fieps'),
+          $ftipo_moneda  = $('#productos #ftipo_moneda'),
+          $ftipo_cambio  = $('#productos #ftipo_cambio'),
+          $ftraslado     = $('#productos #ftraslado'),
 
           campos = [$fcantidad, $fprecio],
           producto = {},
@@ -601,7 +649,7 @@
         $fpresentacion.html('');
         $fcodigo.val('');
         $ftipo_cambio.val('');
-        $("#productos"+idval+" #show_info_prod").show().find('span').text('');
+        $("#productos #show_info_prod").show().find('span').text('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
         $fconcepto.focus();
@@ -609,32 +657,42 @@
     });
   };
 
+  var eventBtnListaOtros = function () {
+    $('#productos').on('click', "#btnListOtros", function(event) {
+      var $this = $(this), $parent = $this.parents("div:first");
+      if ($parent.find(".popover").is(":hidden"))
+        $parent.find(".popover").show(80);
+      else
+        $parent.find(".popover").hide(80);
+    });
+  };
+
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
-    $('#productos1 #table-productos, #productos2 #table-productos, #productos3 #table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent', function(e) {
+    $('#productos #table-productos').on('keyup', '#cantidad, #valorUnitario1, #valorUnitario2, #valorUnitario3, #iepsPorcent', function(e) {
       var key = e.which,
           $this = $(this),
-          $tr = $this.parent().parent();
+          $tr = $this.parents("tr.rowprod");
 
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotalProducto($tr);
       }
-    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent', function(event) {
-      var $tr = $(this).parent().parent();
+    }).on('change', '#cantidad, #valorUnitario1, #valorUnitario2, #valorUnitario3, #iepsPorcent', function(event) {
+      var $tr = $(this).parents("tr.rowprod");
       calculaTotalProducto($tr);
     });
 
     $("input.chkproducto").on('click', function(event) {
-      var $tr = $(this).parent().parent();
+      var $tr = $(this).parents("tr.rowprod");
       calculaTotalProducto($tr);
     });
   };
 
   // Evento onchange del select iva en la tabla.
   var eventOnChangeTraslado = function () {
-    $('#productos1 #table-productos, #productos2 #table-productos, #productos3 #table-productos').on('change', '#traslado', function(event) {
+    $('#productos #table-productos').on('change', '#traslado', function(event) {
       var $this = $(this),
-          $tr   = $this.parent().parent();
+          $tr   = $this.parents("tr.rowprod");
 
       $tr.find('#trasladoPorcent').val($this.find('option:selected').val());
       calculaTotalProducto($tr);
@@ -643,20 +701,22 @@
 
   // Evento click para el boton eliminar producto.
   var eventBtnDelProducto = function () {
-    var $table = $('#productos1 #table-productos, #productos2 #table-productos, #productos3 #table-productos');
+    var $table = $('#productos #table-productos');
 
     $table.on('click', 'button#btnDelProd', function(event) {
       var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", ""),
-      $parent = $(this).parent().parent();
+      $parent = $(this).parents("tr.rowprod");
       $parent.remove();
 
-      calculaTotal(idval);
+      calculaTotal(1);
+      calculaTotal(2);
+      calculaTotal(3);
     });
   };
 
   var eventCheckboxProducto = function () {
     $('.prodOk').on('click', function(event) {
-      var $parent = $(this).parents('tr');
+      var $parent = $(this).parents("tr.rowprod");
 
       if ($(this).is(':checked')) {
         $parent.find('#idProdOk').val('1');
@@ -669,7 +729,7 @@
   var eventOnChangePresentacionTable = function () {
     $('#table-productos').on('change', 'select#presentacion', function(event) {
       var $select = $(this),
-          $parent = $select.parents('tr');
+          $parent = $select.parents("tr.rowprod");
 
       $parent.find('#presentacionCant').val($select.find('option:selected').attr('data-cantidad') || '');
       $parent.find('#presentacionText').val($select.find('option:selected').text() || '');
@@ -719,10 +779,11 @@
 
   var jumpIndex = 0;
   function addProducto(producto, idval) {
-    var $tabla    = $('#productos'+idval+' #table-productos'),
-        trHtml    = '',
-        indexJump = jumpIndex + 1,
-        exist     = false;
+    var $tabla            = $('#productos #table-productos'),
+        trHtml            = '',
+        indexJump         = jumpIndex + 1,
+        exist             = false,
+        $autorizar_active = $("#btnAutorizar").length>0?true:false;
 
     // Si el dato "id" es diferente de nada entonces es un producto seleccionado
     // del catalogo.
@@ -761,7 +822,7 @@
         producto.precio_unitario = parseFloat(producto.precio_unitario)*parseFloat(producto.tipo_cambio);
       }
 
-      var htmlUnidad = '<select name="unidad'+idval+'[]" class="span12" id="unidad">';
+      var htmlUnidad = '<select name="unidad[]" class="span12" id="unidad">';
       $('#funidad').find('option').each(function(index, el) {
         var selected = $(this).val() == producto.unidad ? 'selected' : '';
 
@@ -769,67 +830,107 @@
       });
       htmlUnidad += '</select>';
 
-      $trHtml = $('<tr>' +
-                  '<td style="width: 70px;">' +
+      $trHtml = $('<tr class="rowprod">' +
+                  '<td style="width: 60px;">' +
                     producto.codigo +
-                    '<input type="hidden" name="codigo'+idval+'[]" value="'+producto.codigo+'" class="span12">' +
-                    '<input type="hidden" name="tipo_cambio'+idval+'[]" value="'+(producto.tipo_cambio || 0)+'" class="span12">' +
-                    '<input type="hidden" name="prodIdOrden'+idval+'[]" value="'+(producto.id_orden || 0)+'" class="span12">' +
-                    '<input type="hidden" name="prodIdNumRow'+idval+'[]" value="'+(producto.num_row || 0)+'" class="span12">' +
+                    '<input type="hidden" name="codigoArea[]" value="" id="codigoArea" class="span12">' +
+                  '</td>' +
+                  '<td style="width: 60px;">' +
+                    producto.codigo +
+                    '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
+                    '<input type="hidden" name="tipo_cambio[]" value="'+(producto.tipo_cambio || 0)+'" class="span12">' +
+                    '<input type="hidden" name="prodIdOrden[]" value="'+(producto.id_orden || 0)+'" class="span12 prodIdOrden">' +
+                    '<input type="hidden" name="prodIdNumRow[]" value="'+(producto.num_row || 0)+'" class="span12">' +
+                  '</td>' +
+                  '<td style="width: 65px;">' +
+                      '<input type="number" step="any" name="cantidad[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
+                  '</td>' +
+                  '<td style="width: 70px;">' +
+                    $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
+                    $(producto.presentacion).addClass('span12 jump'+(jumpIndex)).attr({
+                      'name': 'presentacion[]',
+                      'data-next': "jump"+(++jumpIndex)
+                    }).get(0).outerHTML +
+                    '<input type="hidden" name="presentacionCant[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
+                    '<input type="hidden" name="presentacionText[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
                   '</td>' +
                   '<td>' +
                     producto.concepto +
-                    '<input type="hidden" name="concepto'+idval+'[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
-                    '<input type="hidden" name="productoId'+idval+'[]" value="'+producto.id+'" id="productoId" class="span12">' +
+                    '<input type="hidden" name="concepto[]" value="'+producto.concepto+'" id="concepto" class="span12">' +
+                    '<input type="hidden" name="productoId[]" value="'+producto.id+'" id="productoId" class="span12">' +
                   '</td>' +
-                  '<td style="width: 160px;">' +
-                    $(producto.presentacion).addClass('jump'+(jumpIndex)).attr({
-                      'name': 'presentacion'+idval+'[]',
-                      'data-next': "jump"+(++jumpIndex)
-                    }).get(0).outerHTML +
-                    '<input type="hidden" name="presentacionCant'+idval+'[]" value="'+producto.presentacionCantidad+'" id="presentacionCant" class="span12">' +
-                    '<input type="hidden" name="presentacionText'+idval+'[]" value="'+$(producto.presentacion).find('option:selected').text()+'" id="presentacionText" class="span12">' +
-                  '</td>' +
-                  '<td style="width: 150px;">' +
-                    $(htmlUnidad).addClass('jump'+(jumpIndex)).attr('data-next', "jump"+(++jumpIndex)).get(0).outerHTML +
-                  '</td>' +
-                  '<td style="width: 65px;">' +
-                      '<input type="number" step="any" name="cantidad'+idval+'[]" value="'+producto.cantidad+'" id="cantidad" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td style="width: 65px;">' +
-                      '<input type="number" name="faltantes'+idval+'[]" value="0" id="faltantes" class="span12 vpositive jump'+jumpIndex+'" min="0" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
+                  ($autorizar_active? '<td style="width: 10px;"></td>': '')+
                   '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario'+idval+'[]" value="'+producto.precio_unitario+'" id="valorUnitario" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                  '</td>' +
-                  '<td style="width: 66px;">' +
-                      '<select name="traslado'+idval+'[]" id="traslado" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
-                        '<option value="0" '+(producto.traslado === '0' ? "selected" : "")+'>0%</option>' +
-                        '<option value="11" '+(producto.traslado === '11' ? "selected" : "")+'>11%</option>' +
-                        '<option value="16" '+(producto.traslado === '16' ? "selected" : "")+'>16%</option>' +
-                      '</select>' +
-                      '<input type="hidden" name="trasladoTotal'+idval+'[]" value="" id="trasladoTotal" class="span12">' +
-                      '<input type="hidden" name="trasladoPorcent'+idval+'[]" value="'+producto.traslado+'" id="trasladoPorcent" class="span12">' +
-                  '</td>' +
-                  '<td style="width: 66px;">' +
-                      '<input type="text" name="iepsPorcent'+idval+'[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
-                      '<input type="hidden" name="iepsTotal'+idval+'[]" value="0" id="iepsTotal" class="span12">' +
-                  '</td>' +
-                  '<td style="width: 66px;">' +
-                      '<input type="text" name="retTotal'+idval+'[]" value="0" id="retTotal" class="span12" readonly>' +
+                    '<input type="text" name="valorUnitario1[]" value="'+producto.precio_unitario+'" id="valorUnitario1" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
                     '<span>'+util.darFormatoNum('0')+'</span>' +
-                    '<input type="hidden" name="importe'+idval+'[]" value="0" id="importe" class="span12 vpositive">' +
-                    '<input type="hidden" name="total'+idval+'[]" value="0" id="total" class="span12 vpositive">' +
+                    '<input type="hidden" name="importe1[]" value="0" id="importe1" class="span12 provimporte vpositive">' +
+                    '<input type="hidden" name="total1[]" value="0" id="total1" class="span12 provtotal vpositive">' +
+                    '<input type="hidden" name="trasladoTotal1[]" value="" id="trasladoTotal1" class="span12">' +
+                    '<input type="hidden" name="iepsTotal1[]" value="0" id="iepsTotal1" class="span12">' +
+                    '<input type="hidden" name="retTotal1[]" value="0" id="retTotal1" class="span12" readonly>' +
+                  '</td>' +
+                  ($autorizar_active? '<td style="width: 10px;"></td>': '')+
+                  '<td style="width: 90px;">' +
+                    '<input type="text" name="valorUnitario2[]" value="'+producto.precio_unitario+'" id="valorUnitario2" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
-                    '<input type="text" name="observacion'+idval+'[]" value="" id="observacion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<span>'+util.darFormatoNum('0')+'</span>' +
+                    '<input type="hidden" name="importe2[]" value="0" id="importe2" class="span12 provimporte vpositive">' +
+                    '<input type="hidden" name="total2[]" value="0" id="total2" class="span12 provtotal vpositive">' +
+                    '<input type="hidden" name="trasladoTotal2[]" value="" id="trasladoTotal2" class="span12">' +
+                    '<input type="hidden" name="iepsTotal2[]" value="0" id="iepsTotal2" class="span12">' +
+                    '<input type="hidden" name="retTotal2[]" value="0" id="retTotal2" class="span12" readonly>' +
                   '</td>' +
-                  '<td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>' +
+                  ($autorizar_active? '<td style="width: 10px;"></td>': '')+
+                  '<td style="width: 90px;">' +
+                    '<input type="text" name="valorUnitario3[]" value="'+producto.precio_unitario+'" id="valorUnitario3" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '</td>' +
+                  '<td>' +
+                    '<span>'+util.darFormatoNum('0')+'</span>' +
+                    '<input type="hidden" name="importe3[]" value="0" id="importe3" class="span12 provimporte vpositive">' +
+                    '<input type="hidden" name="total3[]" value="0" id="total3" class="span12 provtotal vpositive">' +
+                    '<input type="hidden" name="trasladoTotal3[]" value="" id="trasladoTotal3" class="span12">' +
+                    '<input type="hidden" name="iepsTotal3[]" value="0" id="iepsTotal3" class="span12">' +
+                    '<input type="hidden" name="retTotal3[]" value="0" id="retTotal3" class="span12" readonly>' +
+                  '</td>' +
+                  '<td style="width: 35px;">'+
+                    '<div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>'+
+                      '<div class="popover fade left in" style="top:-55.5px;left:-411px;">'+
+                        '<div class="arrow"></div><h3 class="popover-title">Otros</h3>'+
+                        '<div class="popover-content">'+
+                          '<table>'+
+                            '<tr>'+
+                              '<td style="width: 66px;">IVA</td>' +
+                              '<td style="width: 66px;">IEPS</td>' +
+                              '<td>DESCRIP</td>' +
+                            '</tr>'+
+                            '<tr>'+
+                              '<td style="width: 66px;">' +
+                                  '<select name="traslado[]" id="traslado" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                                    '<option value="0" '+(producto.traslado === '0' ? "selected" : "")+'>0%</option>' +
+                                    '<option value="11" '+(producto.traslado === '11' ? "selected" : "")+'>11%</option>' +
+                                    '<option value="16" '+(producto.traslado === '16' ? "selected" : "")+'>16%</option>' +
+                                  '</select>' +
+                                  '<input type="hidden" name="trasladoPorcent[]" value="'+producto.traslado+'" id="trasladoPorcent" class="span12">' +
+                              '</td>' +
+                              '<td style="width: 66px;">' +
+                                  '<input type="text" name="iepsPorcent[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
+                              '</td>' +
+                              '<td>' +
+                                '<input type="text" name="observacion[]" value="" id="observacion" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                              '</td>' +
+                            '</tr>'+
+                          '</table>'+
+                        '</div>'+
+                      '</div>'+
+                    '</div>'+
+                    '<button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>'+
+                  '</td>' +
                 '</tr>');
 
-      $($trHtml).appendTo($tabla.find('tbody'));
+      $($trHtml).appendTo($tabla.find('tbody.bodyproducs'));
       calculaTotalProducto($trHtml);
 
       for (i = indexJump, max = jumpIndex; i <= max; i += 1) {
@@ -860,7 +961,7 @@
         total_orden    = 0,
         chkproducto    = $('.chkproducto');
 
-     $('#productos'+idval+' input#importe').each(function(i, e) {
+     $('#productos input#importe'+idval).each(function(i, e) {
         var $tr = $(this).parents("tr");
         if(chkproducto.length > 0){
           if($tr.find('.chkproducto').is(':checked')){
@@ -873,7 +974,7 @@
 
      var total_subtotal = util.trunc2Dec(parseFloat(total_importes));
 
-     $('#productos'+idval+' input#trasladoTotal').each(function(i, e) {
+     $('#productos input#trasladoTotal'+idval).each(function(i, e) {
         var $tr = $(this).parents("tr");
         if(chkproducto.length > 0){
           if($tr.find('.chkproducto').is(':checked')){
@@ -884,7 +985,7 @@
      });
      total_ivas = util.trunc2Dec(total_ivas);
 
-     $('#productos'+idval+' input#iepsTotal').each(function(i, e) {
+     $('#productos input#iepsTotal'+idval).each(function(i, e) {
         var $tr = $(this).parents("tr");
         if(chkproducto.length > 0){
           if($tr.find('.chkproducto').is(':checked')){
@@ -895,7 +996,7 @@
      });
      total_ieps = util.trunc2Dec(total_ieps);
 
-     $('#productos'+idval+' input#retTotal').each(function(i, e) {
+     $('#productos input#retTotal'+idval).each(function(i, e) {
         var $tr = $(this).parents("tr");
         if(chkproducto.length > 0){
           if($tr.find('.chkproducto').is(':checked')){
@@ -908,55 +1009,66 @@
 
      total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_ret);
 
-    $('#productos'+idval+' #importe-format').html(util.darFormatoNum(total_subtotal));
-     $('#productos'+idval+' #totalImporte').val(total_subtotal);
+    $('#productos #importe-format'+idval).html(util.darFormatoNum(total_subtotal));
+    $('#productos #totalImporte'+idval).val(total_subtotal);
 
-     $('#productos'+idval+' #traslado-format').html(util.darFormatoNum(total_ivas));
-     $('#productos'+idval+' #totalImpuestosTrasladados').val(total_ivas);
+    $('#productos #traslado-format'+idval).html(util.darFormatoNum(total_ivas));
+    $('#productos #totalImpuestosTrasladados'+idval).val(total_ivas);
 
-     $('#productos'+idval+' #ieps-format').html(util.darFormatoNum(total_ieps));
-     $('#productos'+idval+' #totalIeps').val(total_ieps);
+    $('#productos #ieps-format'+idval).html(util.darFormatoNum(total_ieps));
+    $('#productos #totalIeps'+idval).val(total_ieps);
 
-     $('#productos'+idval+' #retencion-format').html(util.darFormatoNum(total_ret));
-     $('#productos'+idval+' #totalRetencion').val(total_ret);
+    $('#productos #retencion-format'+idval).html(util.darFormatoNum(total_ret));
+    $('#productos #totalRetencion'+idval).val(total_ret);
 
-     $('#productos'+idval+' #total-format').html(util.darFormatoNum(total_orden));
-     $('#productos'+idval+' #totalOrden').val(total_orden);
+    $('#productos #total-format'+idval).html(util.darFormatoNum(total_orden));
+    $('#productos #totalOrden'+idval).val(total_orden);
 
-     $('#productos'+idval+' #totalLetra').val(util.numeroToLetra.covertirNumLetras(total_orden.toString()));
+    $('#productos #totalLetra'+idval).val(util.numeroToLetra.covertirNumLetras(total_orden.toString()));
   }
 
   // Realiza los calculos del producto: iva, importe total.
   function calculaTotalProducto ($tr) {
     var idval = $tr.parents("div[id^=productos]").attr('id').replace("productos", "");
-        $cantidad          = $tr.find('#cantidad'), // Input cantidad
-        $precio_uni        = $tr.find('#valorUnitario'), // Input precio u.
-        $iva               = $tr.find('#traslado'), // Select iva
-        $importe           = $tr.find('#importe'), // Input hidden importe
-        $totalIva          = $tr.find('#trasladoTotal'), // Input hidden iva total
-        $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
-        $total             = $tr.find('#total'), // Input hidden iva total
-        $ieps             = $tr.find('#iepsPorcent'), // Input hidden iva total
-        $iepsTotal        = $tr.find('#iepsTotal'), // Input hidden iva total
+        $cantidad    = $tr.find('#cantidad'), // Input cantidad
+        $precio_uni  = [$tr.find('#valorUnitario1'), $tr.find('#valorUnitario2'), $tr.find('#valorUnitario3')], // Input precio u.
+        $importe     = [$tr.find('#importe1'), $tr.find('#importe2'), $tr.find('#importe3')], // Input hidden importe
+        $total       = [$tr.find('#total1'), $tr.find('#total2'), $tr.find('#total3')], // Input hidden iva total
+        $totalIva    = [$tr.find('#trasladoTotal1'), $tr.find('#trasladoTotal2'), $tr.find('#trasladoTotal3')], // Input hidden iva total
+        $totalRet    = [$tr.find('#retTotal1'), $tr.find('#retTotal2'), $tr.find('#retTotal3')], // Input hidden ret iva total
+        $iepsTotal   = [$tr.find('#iepsTotal1'), $tr.find('#iepsTotal2'), $tr.find('#iepsTotal3')], // Input hidden ieps total
+        $iva         = $tr.find('#traslado'), // Select iva
+        $ieps        = $tr.find('#iepsPorcent'), // Input hidden iva total
+        totalImporte = 0,
+        totalIva     = 0,
+        totalIeps    = 0,
+        totalRet     = 0,
+        total        = 0;
+    
+    for (var i = 0; i < $precio_uni.length; i++) {
 
-        totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
-        totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
-        totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100),
-        totalRet     = util.trunc2Dec(totalImporte * 0.04),
-        total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
+      totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni[i].val() || 0)));
+      totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
+      totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100);
+      totalRet     = util.trunc2Dec(totalImporte * 0.04);
+      total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
+      console.log(totalImporte);
+      console.log(totalIva);
 
-    if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
-      total -= parseFloat(totalRet);
-      $totalRet.val(totalRet);
+      if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
+        total -= parseFloat(totalRet);
+        $totalRet[i].val(totalRet);
+      }
+
+      $totalIva[i].val(totalIva);
+      $iepsTotal[i].val(totalIeps);
+      $importe[i].parent().find('span').text(util.darFormatoNum(totalImporte)); 
+      $importe[i].val(totalImporte);
+      $total[i].val(total);
+      
+      calculaTotal(i+1);
     }
 
-    $totalIva.val(totalIva);
-    $iepsTotal.val(totalIeps);
-    $importe.parent().find('span').text(util.darFormatoNum(totalImporte));
-    $importe.val(totalImporte);
-    $total.val(total);
-
-    calculaTotal(idval);
   }
   /*
    |------------------------------------------------------------------------
