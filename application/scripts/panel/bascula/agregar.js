@@ -6,7 +6,14 @@ $(function(){
 
   $.ajaxSetup({ cache: false });
 
-  actualFolio = $('#pfolio').val();
+  actualFolio = $('#pfolio').focusin(function(){
+    if (this.setSelectionRange)
+    {
+      var len = $(this).val().length;
+      this.setSelectionRange(len, len);
+    }else
+      $(this).val($(this).val());
+  }).val();
   autoFocus = $('#kjfocus').length === 0 ? '' : $('#kjfocus').val();
 
   // //Fotos
@@ -266,6 +273,18 @@ $(function(){
   });
 
   // Evento keypress para el input del folio.
+  $('#certificado').on('keypress', function(e) {
+    var $this = $(this);
+    if (e.charCode == '32') {
+      e.preventDefault();
+      if ($this.is(':checked'))
+        $this.removeAttr("checked");
+      else
+        $this.attr("checked", "checked");
+    }
+  });
+
+  // Evento keypress para el input del folio.
   $('#pfolio').on('keypress', function(e) {
     var $this = $(this);
     if (e.charCode == '13' && (actualFolio != $this.val())) {
@@ -422,6 +441,13 @@ $(function(){
       calculaKilosNeto();
       calculaTotales();
     }
+  }).focusin(function(){
+    if (this.setSelectionRange)
+    {
+      var len = $(this).val().length;
+      this.setSelectionRange(len, len);
+    }else
+      $(this).val($(this).val());
   });
 
   // Obtiene el pesaje de los brutos al tener el foco el input.

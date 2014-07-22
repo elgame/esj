@@ -131,11 +131,11 @@
                           );
                         }
 
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/autorizar/', array(
-                          'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
-                          'btn_type' => 'btn-info',
-                          'attrs' => array())
-                        );
+                        // echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/autorizar/', array(
+                        //   'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
+                        //   'btn_type' => 'btn-info',
+                        //   'attrs' => array())
+                        // );
                       }
 
                       if ($orden->status === 'p' && $orden->autorizado === 't')
@@ -173,7 +173,7 @@
 
                       if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'p')
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/imprimir/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('compras_requisicion/imprimir/', array(
                           'params'   => 'id='.$orden->id_requisicion.'&p=true',
                           'btn_type' => 'btn-success',
                           'attrs' => array('target' => '_BLANK'))

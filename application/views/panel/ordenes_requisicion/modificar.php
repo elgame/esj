@@ -1,6 +1,7 @@
 <div id="content" class="span<?php echo isset($_GET['idf']) ? '12' : '10' ?>">
 
   <?php
+    $autorizar_active = $this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/");
     $titulo = 'Agregar orden de compra';
     if (! isset($_GET['idf'])){ ?>
     <div>
@@ -34,7 +35,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_requisicion/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_requisicion/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -57,16 +58,7 @@
                   </div>
                 </div>
               </div>
-
-              <!-- <div class="control-group">
-                <label class="control-label" for="autorizo">Autorizo</label>
-                <div class="controls">
-                  <div class="input-append span12">
-                    <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo') ?>" placeholder="" required>
-                  </div>
-                </div>
-                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId') ?>" required>
-              </div> -->
+              <input type="hidden" id="form-modif" value="true">
 
               <div class="control-group">
                 <label class="control-label" for="departamento">Departamento</label>
@@ -84,7 +76,7 @@
                 <label class="control-label" for="cliente">Cliente</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="cliente" class="span11" id="cliente" value="<?php echo set_value('cliente', , $orden['info'][0]->cliente) ?>" placeholder="">
+                    <input type="text" name="cliente" class="span11" id="cliente" value="<?php echo set_value('cliente', $orden['info'][0]->cliente) ?>" placeholder="">
                   </div>
                 </div>
                   <input type="hidden" name="clienteId" id="clienteId" value="<?php echo set_value('clienteId', $orden['info'][0]->id_cliente) ?>">
@@ -103,10 +95,21 @@
                 <label class="control-label" for="descripcion">Vehiculo</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="fecha" <?php echo set_checkbox('es_vehiculo', 'si', $orden['info'][0]->id_vehiculo > 0 ? true : false); ?>></label>
+                    <input type="checkbox" name="es_vehiculo" id="es_vehiculo" data-uniform="false" value="si" data-next="fecha" <?php echo set_checkbox('es_vehiculo', 'si', $orden['info'][0]->id_vehiculo > 0 ? true : false); ?>>
                   </div>
                 </div>
               </div>
+              
+            <?php if ($autorizar_active){ ?>
+              <div class="control-group">
+                <label class="control-label" for="autorizo">Autoriza</label>
+                <div class="controls">
+                  <input type="text" name="autorizo" class="span11" id="autorizo" value="<?php echo set_value('autorizo', $orden['info'][0]->autorizo) ?>">
+                  <input type="hidden" name="autorizoId" id="autorizoId" value="<?php echo set_value('autorizoId', $orden['info'][0]->id_autorizo) ?>" required>
+                </div>
+              </div>
+            <?php } ?>
+
             </div>
 
             <div class="span6">
@@ -166,6 +169,10 @@
                 <div class="controls">
                   <div class="well span9">
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+                <?php if ($autorizar_active){ ?>
+                      <br><br><button type="button" id="btnAutorizar" class="btn btn-info btn-large btn-block" style="width:100%;">Autorizar - Crear O. Compras</button>
+                      <input type="hidden" name="txtBtnAutorizar" id="txtBtnAutorizar" value="false"> 
+                <?php } ?>
                   </div>
                 </div>
               </div>
@@ -203,21 +210,21 @@
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        Kilometros <input type="text" name="dkilometros" class="span12 sikey vpos-int" id="dkilometros" value="<?php echo set_value('dkilometros', ''); ?>" maxlength="10" data-next="dlitros">
+                        Kilometros <input type="text" name="dkilometros" class="span12 sikey vpos-int" id="dkilometros" value="<?php echo set_value('dkilometros', isset($orden['info'][0]->gasolina[0]->kilometros) ? $orden['info'][0]->gasolina[0]->kilometros : ''); ?>" maxlength="10" data-next="dlitros">
                       </div>
                     </div>
                   </div>
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        Litros <input type="text" name="dlitros" class="span12 sikey vpositive" id="dlitros" value="<?php echo set_value('dlitros', ''); ?>" maxlength="10" data-next="dprecio">
+                        Litros <input type="text" name="dlitros" class="span12 sikey vpositive" id="dlitros" value="<?php echo set_value('dlitros', isset($orden['info'][0]->gasolina[0]->litros) ? $orden['info'][0]->gasolina[0]->litros : ''); ?>" maxlength="10" data-next="dprecio">
                       </div>
                     </div>
                   </div>
                   <div class="span4">
                     <div class="control-group">
                       <div class="controls span9">
-                        Precio <input type="text" name="dprecio" class="span12 sikey vpositive" id="dprecio" value="<?php echo set_value('dprecio', ''); ?>" maxlength="10" data-next="fconcepto">
+                        Precio <input type="text" name="dprecio" class="span12 sikey vpositive" id="dprecio" value="<?php echo set_value('dprecio', isset($orden['info'][0]->gasolina[0]->precio) ? $orden['info'][0]->gasolina[0]->precio : ''); ?>" maxlength="10" data-next="fconcepto">
                       </div>
                     </div>
                   </div>
@@ -226,27 +233,17 @@
                </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
+          
 
-          <div class="row-fluid" id="productos1">  <!-- Box Productos -->
+          <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Proveedor 1 - Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
+                <h2><i class="icon-barcode"></i> Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
                 <div class="box-icon">
                   <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 </div>
               </div><!--/box-header -->
               <div class="box-content">
-                <div class="row-fluid">
-                  <div class="control-group">
-                    <label class="control-label" for="proveedor1">Proveedor</label>
-                    <div class="controls">
-                      <div class="input-append span12">
-                        <input type="text" name="proveedor1" class="span11" id="proveedor1" value="<?php echo set_value('proveedor1') ?>" placeholder=""><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                      </div>
-                    </div>
-                      <input type="hidden" name="proveedorId1" id="proveedorId1" value="<?php echo set_value('proveedorId1') ?>">
-                  </div>
-                </div>
 
                 <div class="row-fluid">
 
@@ -317,587 +314,218 @@
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
                       <thead>
                         <tr>
-                          <th>CODIGO</th>
-                          <th>PRODUCTO</th>
-                          <th>PRESEN.</th>
-                          <th>UNIDAD</th>
-                          <th>CANT.</th>
-                          <th>FALTANTES</th>
-                          <th>P.U.</th>
-                          <th>IVA</th>
-                          <th>IEPS (%)</th>
-                          <th>RET 4%</th>
+                          <th rowspan="2" style="vertical-align: middle;">CODIGO AREA</th>
+                          <th rowspan="2" style="vertical-align: middle;">CODIGO PROD.</th>
+                          <th rowspan="2" style="vertical-align: middle;">CANT.</th>
+                          <th rowspan="2" style="vertical-align: middle;">UNIDAD PRESEN.</th>
+                          <th rowspan="2" style="vertical-align: middle;">PRODUCTO</th>
+                          <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
+                            <div class="input-append span12">
+                              <input type="text" name="proveedor1" class="span10" id="proveedor1" value="<?php echo set_value('proveedor1', $orden['info'][0]->proveedores[0]['nombre_fiscal']) ?>" placeholder="Proveedor 1"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId1" id="proveedorId1" value="<?php echo set_value('proveedorId1', $orden['info'][0]->proveedores[0]['id_proveedor']) ?>">
+                            </div>
+                          </th>
+                          <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
+                            <div class="input-append span12">
+                              <input type="text" name="proveedor2" class="span10" id="proveedor2" value="<?php echo set_value('proveedor2', $orden['info'][0]->proveedores[1]['nombre_fiscal']) ?>" placeholder="Proveedor 2"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId2" id="proveedorId2" value="<?php echo set_value('proveedorId2', $orden['info'][0]->proveedores[1]['id_proveedor']) ?>">
+                            </div>
+                          </th>
+                          <th colspan="<?php echo $autorizar_active?'3':'2'; ?>">
+                            <div class="input-append span12">
+                              <input type="text" name="proveedor3" class="span10" id="proveedor3" value="<?php echo set_value('proveedor3', $orden['info'][0]->proveedores[2]['nombre_fiscal']) ?>" placeholder="Proveedor 3"><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
+                              <input type="hidden" name="proveedorId3" id="proveedorId3" value="<?php echo set_value('proveedorId3', $orden['info'][0]->proveedores[2]['id_proveedor']) ?>">
+                            </div>
+                          </th>
+                          <th></th>
+                        </tr>
+                        <tr>
+                          <th <?php echo $autorizar_active? 'colspan="2"': ''; ?>>P.U.</th>
                           <th>IMPORTE</th>
-                          <th>DESCRIP</th>
+                          <th <?php echo $autorizar_active? 'colspan="2"': ''; ?>>P.U.</th>
+                          <th>IMPORTE</th>
+                          <th <?php echo $autorizar_active? 'colspan="2"': ''; ?>>P.U.</th>
+                          <th>IMPORTE</th>
                           <th></th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody class="bodyproducs">
+                        <?php if (isset($orden['info'][0]->productos)) {
+                              foreach ($orden['info'][0]->productos as $key => $concepto) { ?>
 
-                        <?php if (isset($_POST['concepto1'])) {
-                              foreach ($_POST['concepto1'] as $key => $concepto) { ?>
-                            <tr>
-                              <td style="width: 70px;">
-                                <?php echo $_POST['codigo1'][$key] ?>
-                                <input type="hidden" name="codigo1[]" value="<?php echo $_POST['codigo1'][$key] ?>" class="span12">
-                                <input type="hidden" name="tipo_cambio1[]" value="<?php echo $_POST['tipo_cambio1'][$key] ?>" class="span12">
-                              </td>
-                              <td>
-                                  <?php echo $concepto ?>
-                                  <input type="hidden" name="concepto1[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
-                                  <input type="hidden" name="productoId1[]" value="<?php echo $_POST['productoId1'][$key] ?>" id="productoId" class="span12">
-                              </td>
-                              <td style="width: 160px;">
-                                <select name="presentacion1[]">
-                                  <option value="<?php echo $_POST['presentacion1'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant1'][$key] ?>"><?php echo $_POST['presentacionText1'][$key] ?></option>
-                                </select>
-                                <input type="hidden" name="presentacionCant1[]" value="<?php echo $_POST['presentacionCant1'][$key] ?>" id="presentacionCant" class="span12">
-                                <input type="hidden" name="presentacionText1[]" value="<?php echo $_POST['presentacionText1'][$key] ?>" id="presentacionText" class="span12">
-                              </td>
-                              <td style="width: 120px;">
-                                <select name="unidad1[]" id="unidad" class="span12">
-                                  <?php foreach ($unidades as $unidad) { ?>
-                                    <option value="<?php echo $unidad->id_unidad ?>" <?php echo $_POST['unidad1'][$key] == $unidad->id_unidad ? 'selected' : ''; ?>><?php echo $unidad->nombre ?></option>
-                                  <?php } ?>
-                                </select>
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="cantidad1[]" value="<?php echo $_POST['cantidad1'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="faltantes1[]" value="<?php echo $_POST['faltantes1'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
-                              </td>
-                              <td style="width: 90px;">
-                                  <input type="text" name="valorUnitario1[]" value="<?php echo $_POST['valorUnitario1'][$key] ?>" id="valorUnitario" class="span12 vpositive">
-                              </td>
-                              <td style="width: 66px;">
-                                  <select name="traslado1[]" id="traslado" class="span12">
-                                    <option value="0" <?php echo $_POST['traslado1'][$key] === '0' ? 'selected' : '' ?>>0%</option>
-                                    <option value="11" <?php echo $_POST['traslado1'][$key] === '11' ? 'selected' : ''?>>11%</option>
-                                    <option value="16" <?php echo $_POST['traslado1'][$key] === '16' ? 'selected' : ''?>>16%</option>
-                                  </select>
-                                  <input type="hidden" name="trasladoTotal1[]" value="<?php echo $_POST['trasladoTotal1'][$key] ?>" id="trasladoTotal" class="span12">
-                                  <input type="hidden" name="trasladoPorcent1[]" value="<?php echo $_POST['trasladoPorcent1'][$key] ?>" id="trasladoPorcent" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                <input type="text" name="iepsPorcent1[]" value="<?php echo $_POST['iepsPorcent1'][$key] ?>" id="iepsPorcent" class="span12">
-                                <input type="hidden" name="iepsTotal1[]" value="<?php echo $_POST['iepsTotal1'][$key] ?>" id="iepsTotal" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                  <input type="text" name="retTotal1[]" value="<?php echo $_POST['retTotal1'][$key] ?>" id="retTotal" class="span12" readonly>
-                              </td>
-                              <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe1'][$key]) ?></span>
-                                  <input type="hidden" name="importe1[]" value="<?php echo $_POST['importe1'][$key] ?>" id="importe" class="span12 vpositive">
-                                  <input type="hidden" name="total1[]" value="<?php echo $_POST['total1'][$key] ?>" id="total" class="span12 vpositive">
-                              </td>
-                              <td>
-                                  <input type="text" name="observacion1[]" value="<?php echo $_POST['observacion1'][$key] ?>" id="observacion" class="span12">
-                              </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
-                            </tr>
+                            
+                          <tr class="rowprod">
+                            <td style="width: 60px;">
+                              <?php echo $concepto->codigo ?>
+                              <input type="hidden" name="codigoArea[]" value="" id="codigoArea" class="span12">
+                            </td>
+                            <td style="width: 60px;">
+                              <?php echo $concepto->codigo ?>
+                              <input type="hidden" name="codigo[]" value="<?php echo $concepto->codigo ?>" class="span12">
+                              <input type="hidden" name="tipo_cambio[]" value="<?php echo $concepto->tipo_cambio ?>" class="span12">
+                              <input type="hidden" name="prodIdOrden[]" value="<?php echo $concepto->id_requisicion ?>" class="span12 prodIdOrden">
+                              <input type="hidden" name="prodIdNumRow[]" value="<?php echo $concepto->num_row ?>" class="span12">
+                            </td>
+                            <td style="width: 65px;">
+                                <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="0">
+                            </td>
+                            <td style="width: 70px;">
+                              <select name="unidad[]" id="unidad" class="span12">
+                                <?php foreach ($unidades as $unidad) { ?>
+                                  <option value="<?php echo $unidad->id_unidad ?>" <?php echo $concepto->id_unidad == $unidad->id_unidad ? 'selected' : ''; ?>><?php echo $unidad->nombre ?></option>
+                                <?php } ?>
+                              </select>
+                              <select name="presentacion[]" class="span12">
+                                <option value="<?php echo $concepto->id_presentacion ?>" data-cantidad="<?php echo $concepto->presen_cantidad ?>"><?php echo $concepto->presentacion ?></option>
+                              </select>
+                              <input type="hidden" name="presentacionCant[]" value="<?php echo $concepto->presen_cantidad ?>" id="presentacionCant" class="span12">
+                              <input type="hidden" name="presentacionText[]" value="<?php echo $concepto->presentacion ?>" id="presentacionText" class="span12">
+                            </td>
+                            <td>
+                              <?php echo $concepto->descripcion ?>
+                              <input type="hidden" name="concepto[]" value="<?php echo $concepto->descripcion ?>" id="concepto" class="span12">
+                              <input type="hidden" name="productoId[]" value="<?php echo $concepto->id_producto ?>" id="productoId" class="span12">
+                            </td>
+                          <?php if ($autorizar_active){ ?>
+                            <td style="width: 10px;">
+                              <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $orden['info'][0]->proveedores[0]['id_proveedor'] ?>" class="prodSelOrden prodSelOrden1" checked data-uniform="false">
+                            </td>
+                          <?php } ?>
+                            <td style="width: 90px;">
+                              <input type="text" name="valorUnitario1[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
+                            </td>
+                            <td>
+                              <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}, 2, '$', false); ?></span>
+                              <input type="hidden" name="importe1[]" value="<?php echo $concepto->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="importe1" class="span12 provimporte vpositive">
+                              <input type="hidden" name="total1[]" value="<?php echo $concepto->{'total'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="total1" class="span12 provtotal vpositive">
+                              <input type="hidden" name="trasladoTotal1[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="trasladoTotal1" class="span12">
+                              <input type="hidden" name="iepsTotal1[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="iepsTotal1" class="span12">
+                              <input type="hidden" name="retTotal1[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retTotal1" class="span12" readonly>
+                            </td>
+                          <?php if ($autorizar_active){ ?>
+                            <td style="width: 10px;">
+                              <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $orden['info'][0]->proveedores[1]['id_proveedor'] ?>" class="prodSelOrden prodSelOrden2" data-uniform="false">
+                            </td>
+                          <?php } ?>
+                            <td style="width: 90px;">
+                              <input type="text" name="valorUnitario2[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="valorUnitario2" class="span12 provvalorUnitario vpositive">
+                            </td>
+                            <td>
+                              <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}, 2, '$', false); ?></span>
+                              <input type="hidden" name="importe2[]" value="<?php echo $concepto->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="importe2" class="span12 provimporte vpositive">
+                              <input type="hidden" name="total2[]" value="<?php echo $concepto->{'total'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="total2" class="span12 provtotal vpositive">
+                              <input type="hidden" name="trasladoTotal2[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="trasladoTotal2" class="span12">
+                              <input type="hidden" name="iepsTotal2[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="iepsTotal2" class="span12">
+                              <input type="hidden" name="retTotal2[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="retTotal2" class="span12" readonly>
+                            </td>
+                          <?php if ($autorizar_active){ ?>
+                            <td style="width: 10px;">
+                              <input type="radio" name="prodSelOrden<?php echo $concepto->num_row; ?>[]" value="<?php echo $orden['info'][0]->proveedores[2]['id_proveedor'] ?>" class="prodSelOrden prodSelOrden3" data-uniform="false">
+                            </td>
+                          <?php } ?>
+                            <td style="width: 90px;">
+                              <input type="text" name="valorUnitario3[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="valorUnitario3" class="span12 provvalorUnitario vpositive">
+                            </td>
+                            <td>
+                              <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}, 2, '$', false); ?></span>
+                              <input type="hidden" name="importe3[]" value="<?php echo $concepto->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="importe3" class="span12 provimporte vpositive">
+                              <input type="hidden" name="total3[]" value="<?php echo $concepto->{'total'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="total3" class="span12 provtotal vpositive">
+                              <input type="hidden" name="trasladoTotal3[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="trasladoTotal3" class="span12">
+                              <input type="hidden" name="iepsTotal3[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="iepsTotal3" class="span12">
+                              <input type="hidden" name="retTotal3[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="retTotal3" class="span12" readonly>
+                            </td>
+                            <td style="width: 35px;">
+                              <div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>
+                                <div class="popover fade left in" style="top:-55.5px;left:-411px;">
+                                  <div class="arrow"></div><h3 class="popover-title">Otros</h3>
+                                  <div class="popover-content">
+                                    <table>
+                                      <tr>
+                                        <td style="width: 66px;">IVA</td>
+                                        <td style="width: 66px;">IEPS</td>
+                                        <td>DESCRIP</td>
+                                      </tr>
+                                      <tr>
+                                        <td style="width: 66px;">
+                                            <select name="traslado[]" id="traslado" class="span12">
+                                              <option value="0" <?php echo $concepto->porcentaje_iva === '0' ? 'selected' : '' ?>>0%</option>
+                                              <option value="11" <?php echo $concepto->porcentaje_iva === '11' ? 'selected' : ''?>>11%</option>
+                                              <option value="16" <?php echo $concepto->porcentaje_iva === '16' ? 'selected' : ''?>>16%</option>
+                                            </select>
+                                            <input type="hidden" name="trasladoPorcent[]" value="<?php echo $concepto->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
+                                        </td>
+                                        <td style="width: 66px;">
+                                            <input type="text" name="iepsPorcent[]" value="<?php echo $concepto->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
+                                        </td>
+                                        <td>
+                                          <input type="text" name="observacion[]" value="<?php echo $concepto->observacion ?>" id="observacion" class="span12">
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                              <button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button>
+                            </td>
+                          </tr>
                          <?php }} ?>
+
+                        <tfoot>
+                          <tr>
+                              <td colspan="5" style="text-align: right;"><em>Subtotal</em></td>
+                              <td id="importe-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte1', 0))?></td>
+                                <input type="hidden" name="totalImporte1" id="totalImporte1" value="<?php echo set_value('totalImporte1', 0); ?>">
+                              <td id="importe-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte2', 0))?></td>
+                                <input type="hidden" name="totalImporte2" id="totalImporte2" value="<?php echo set_value('totalImporte2', 0); ?>">
+                              <td id="importe-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte3', 0))?></td>
+                                <input type="hidden" name="totalImporte3" id="totalImporte3" value="<?php echo set_value('totalImporte3', 0); ?>">
+                            </tr>
+                            <tr>
+                              <td colspan="5" style="text-align: right;">IVA</td>
+                              <td id="traslado-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados1', 0))?></td>
+                                <input type="hidden" name="totalImpuestosTrasladados1" id="totalImpuestosTrasladados1" value="<?php echo set_value('totalImpuestosTrasladados1', 0); ?>">
+                              <td id="traslado-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados2', 0))?></td>
+                                <input type="hidden" name="totalImpuestosTrasladados2" id="totalImpuestosTrasladados2" value="<?php echo set_value('totalImpuestosTrasladados2', 0); ?>">
+                              <td id="traslado-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados3', 0))?></td>
+                                <input type="hidden" name="totalImpuestosTrasladados3" id="totalImpuestosTrasladados3" value="<?php echo set_value('totalImpuestosTrasladados3', 0); ?>">
+                            </tr>
+                            <tr>
+                              <td colspan="5" style="text-align: right;">IEPS</td>
+                              <td id="ieps-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps1', 0))?></td>
+                                <input type="hidden" name="totalIeps1" id="totalIeps1" value="<?php echo set_value('totalIeps1', 0); ?>">
+                              <td id="ieps-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps2', 0))?></td>
+                                <input type="hidden" name="totalIeps2" id="totalIeps2" value="<?php echo set_value('totalIeps2', 0); ?>">
+                              <td id="ieps-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps3', 0))?></td>
+                                <input type="hidden" name="totalIeps3" id="totalIeps3" value="<?php echo set_value('totalIeps3', 0); ?>">
+                            </tr>
+                            <tr>
+                              <td colspan="5" style="text-align: right;">RET.</td>
+                              <td id="retencion-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion1', 0))?></td>
+                                <input type="hidden" name="totalRetencion1" id="totalRetencion1" value="<?php echo set_value('totalRetencion1', 0); ?>">
+                              <td id="retencion-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion2', 0))?></td>
+                                <input type="hidden" name="totalRetencion2" id="totalRetencion2" value="<?php echo set_value('totalRetencion2', 0); ?>">
+                              <td id="retencion-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion3', 0))?></td>
+                                <input type="hidden" name="totalRetencion3" id="totalRetencion3" value="<?php echo set_value('totalRetencion3', 0); ?>">
+                            </tr>
+                            <tr style="font-weight:bold;font-size:1.2em;">
+                              <td colspan="5" style="text-align: right;">TOTAL</td>
+                              <td id="total-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden1', 0))?></td>
+                                <input type="hidden" name="totalOrden1" id="totalOrden1" value="<?php echo set_value('totalOrden1', 0); ?>">
+                              <td id="total-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden2', 0))?></td>
+                                <input type="hidden" name="totalOrden2" id="totalOrden2" value="<?php echo set_value('totalOrden2', 0); ?>">
+                              <td id="total-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden3', 0))?></td>
+                                <input type="hidden" name="totalOrden3" id="totalOrden3" value="<?php echo set_value('totalOrden3', 0); ?>">
+                            </tr>
+                        </tfoot>
                       </tbody>
                     </table>
                   </div>
                 </div>
 
-                <div class="row-fluid">
-                  <div class="span12">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th style="background-color:#FFF !important;">TOTAL CON LETRA</th>
-                          <th style="background-color:#FFF !important;">TOTALES</th>
-                          <th style="background-color:#FFF !important;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td rowspan="7">
-                              <textarea name="totalLetra1" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('1totalLetra', '');?></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><em>Subtotal</em></td>
-                          <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte1', 0))?></td>
-                          <input type="hidden" name="totalImporte1" id="totalImporte" value="<?php echo set_value('totalImporte1', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IVA</td>
-                          <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados1', 0))?></td>
-                          <input type="hidden" name="totalImpuestosTrasladados1" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados1', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IEPS</td>
-                          <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps1', 0))?></td>
-                          <input type="hidden" name="totalIeps1" id="totalIeps" value="<?php echo set_value('totalIeps1', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>RET.</td>
-                          <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion1', 0))?></td>
-                          <input type="hidden" name="totalRetencion1" id="totalRetencion" value="<?php echo set_value('totalRetencion1', 0); ?>">
-                        </tr>
-                        <tr style="font-weight:bold;font-size:1.2em;">
-                          <td>TOTAL</td>
-                          <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden1', 0))?></td>
-                          <input type="hidden" name="totalOrden1" id="totalOrden" value="<?php echo set_value('totalOrden1', 0); ?>">
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
                </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
-
-          <div class="row-fluid" id="productos2">  <!-- Box Productos -->
-            <div class="box span12">
-              <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Proveedor 2 - Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
-                <div class="box-icon">
-                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                </div>
-              </div><!--/box-header -->
-              <div class="box-content">
-                <div class="row-fluid">
-                  <div class="control-group">
-                    <label class="control-label" for="proveedor2">Proveedor</label>
-                    <div class="controls">
-                      <div class="input-append span12">
-                        <input type="text" name="proveedor2" class="span11" id="proveedor2" value="<?php echo set_value('proveedor2') ?>" placeholder=""><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                      </div>
-                    </div>
-                      <input type="hidden" name="proveedorId2" id="proveedorId2" value="<?php echo set_value('proveedorId2') ?>">
-                  </div>
-                </div>
-
-                <div class="row-fluid">
-
-                  <div class="span12 mquit">
-                    <div class="span3">
-                      <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
-                    </div><!--/span3s -->
-                    <div class="span6">
-                      <div class="input-append span12">
-                        <input type="text" class="span12" id="fconcepto" placeholder="Producto / Descripción">
-                        <!-- <a href="" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a> -->
-                      </div>
-                      <input type="hidden" class="span1" id="fconceptoId">
-                    </div><!--/span3s -->
-                    <div class="span1">
-                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
-                    </div><!--/span3s -->
-                    <div class="span2">
-                      <input type="text" class="span12 vpositive" id="fprecio" placeholder="Precio Unitario">
-                    </div><!--/span3s -->
-
-                  </div><!--/span12 -->
-                  <br><br>
-                  <div class="span12 mquit">
-                    <div class="span3">
-                      <label for="fpresentacion" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">PRESENTACION</label>
-                      <select class="span12" id="fpresentacion">
-                      </select>
-                    </div><!--/span3 -->
-                     <div class="span2">
-                      <label for="funidad" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">UNIDAD</label>
-                      <select class="span12" id="funidad">
-                        <?php foreach ($unidades as $key => $unidad) { ?>
-                          <option value="<?php echo $unidad->id_unidad ?>"><?php echo $unidad->nombre ?></option>
-                        <?php } ?>
-                      </select>
-                    </div><!--/span2 -->
-                    <div class="span1">
-                      <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
-                      <select class="span12" id="ftraslado">
-                        <option value="0">0%</option>
-                        <option value="11">11%</option>
-                        <option value="16">16%</option>
-                      </select>
-                    </div><!--/span1 -->
-                    <div class="span1">
-                      <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
-                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
-                    </div><!--/span1 -->
-                    <div class="span2">
-                      <label for="ftipo_moneda" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Tipo de cambio</label>
-                      <select class="span7 pull-left" id="ftipo_moneda">
-                        <option value="peso">Pesos</option>
-                        <option value="dolar">Dolares</option>
-                      </select>
-                      <input type="text" class="span5 vpositive" id="ftipo_cambio" placeholder="12.45">
-                    </div><!--/span2 -->
-                    <div class="span2 offset1">
-                      <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
-                    </div><!--/span2 -->
-                  </div><!--/span12 -->
-
-                </div><!--/row-fluid -->
-                <br>
-                <div class="row-fluid">
-                  <div class="span12 mquit">
-                    <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
-                      <thead>
-                        <tr>
-                          <th>CODIGO</th>
-                          <th>PRODUCTO</th>
-                          <th>PRESEN.</th>
-                          <th>UNIDAD</th>
-                          <th>CANT.</th>
-                          <th>FALTANTES</th>
-                          <th>P.U.</th>
-                          <th>IVA</th>
-                          <th>IEPS (%)</th>
-                          <th>RET 4%</th>
-                          <th>IMPORTE</th>
-                          <th>DESCRIP</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-
-                        <?php if (isset($_POST['concepto2'])) {
-                              foreach ($_POST['concepto2'] as $key => $concepto) { ?>
-                            <tr>
-                              <td style="width: 70px;">
-                                <?php echo $_POST['codigo2'][$key] ?>
-                                <input type="hidden" name="codigo2[]" value="<?php echo $_POST['codigo2'][$key] ?>" class="span12">
-                                <input type="hidden" name="tipo_cambio2[]" value="<?php echo $_POST['tipo_cambio2'][$key] ?>" class="span12">
-                              </td>
-                              <td>
-                                  <?php echo $concepto ?>
-                                  <input type="hidden" name="concepto2[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
-                                  <input type="hidden" name="productoId2[]" value="<?php echo $_POST['productoId2'][$key] ?>" id="productoId" class="span12">
-                              </td>
-                              <td style="width: 160px;">
-                                <select name="presentacion2[]">
-                                  <option value="<?php echo $_POST['presentacion2'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant2'][$key] ?>"><?php echo $_POST['presentacionText2'][$key] ?></option>
-                                </select>
-                                <input type="hidden" name="presentacionCant2[]" value="<?php echo $_POST['presentacionCant2'][$key] ?>" id="presentacionCant" class="span12">
-                                <input type="hidden" name="presentacionText2[]" value="<?php echo $_POST['presentacionText2'][$key] ?>" id="presentacionText" class="span12">
-                              </td>
-                              <td style="width: 120px;">
-                                <select name="unidad2[]" id="unidad" class="span12">
-                                  <?php foreach ($unidades as $unidad) { ?>
-                                    <option value="<?php echo $unidad->id_unidad ?>" <?php echo $_POST['unidad2'][$key] == $unidad->id_unidad ? 'selected' : ''; ?>><?php echo $unidad->nombre ?></option>
-                                  <?php } ?>
-                                </select>
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="cantidad2[]" value="<?php echo $_POST['cantidad2'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="faltantes2[]" value="<?php echo $_POST['faltantes2'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
-                              </td>
-                              <td style="width: 90px;">
-                                  <input type="text" name="valorUnitario2[]" value="<?php echo $_POST['valorUnitario2'][$key] ?>" id="valorUnitario" class="span12 vpositive">
-                              </td>
-                              <td style="width: 66px;">
-                                  <select name="traslado2[]" id="traslado" class="span12">
-                                    <option value="0" <?php echo $_POST['traslado2'][$key] === '0' ? 'selected' : '' ?>>0%</option>
-                                    <option value="11" <?php echo $_POST['traslado2'][$key] === '11' ? 'selected' : ''?>>11%</option>
-                                    <option value="16" <?php echo $_POST['traslado2'][$key] === '16' ? 'selected' : ''?>>16%</option>
-                                  </select>
-                                  <input type="hidden" name="trasladoTotal2[]" value="<?php echo $_POST['trasladoTotal2'][$key] ?>" id="trasladoTotal" class="span12">
-                                  <input type="hidden" name="trasladoPorcent2[]" value="<?php echo $_POST['trasladoPorcent2'][$key] ?>" id="trasladoPorcent" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                <input type="text" name="iepsPorcent2[]" value="<?php echo $_POST['iepsPorcent2'][$key] ?>" id="iepsPorcent" class="span12">
-                                <input type="hidden" name="iepsTotal2[]" value="<?php echo $_POST['iepsTotal2'][$key] ?>" id="iepsTotal" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                  <input type="text" name="retTotal2[]" value="<?php echo $_POST['retTotal2'][$key] ?>" id="retTotal" class="span12" readonly>
-                              </td>
-                              <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe2'][$key]) ?></span>
-                                  <input type="hidden" name="importe2[]" value="<?php echo $_POST['importe2'][$key] ?>" id="importe" class="span12 vpositive">
-                                  <input type="hidden" name="total2[]" value="<?php echo $_POST['total2'][$key] ?>" id="total" class="span12 vpositive">
-                              </td>
-                              <td>
-                                  <input type="text" name="observacion2[]" value="<?php echo $_POST['observacion2'][$key] ?>" id="observacion" class="span12">
-                              </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
-                            </tr>
-                         <?php }} ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div class="row-fluid">
-                  <div class="span12">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th style="background-color:#FFF !important;">TOTAL CON LETRA</th>
-                          <th style="background-color:#FFF !important;">TOTALES</th>
-                          <th style="background-color:#FFF !important;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td rowspan="7">
-                              <textarea name="totalLetra2" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra2', '');?></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><em>Subtotal</em></td>
-                          <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte2', 0))?></td>
-                          <input type="hidden" name="totalImporte2" id="totalImporte" value="<?php echo set_value('totalImporte2', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IVA</td>
-                          <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados2', 0))?></td>
-                          <input type="hidden" name="totalImpuestosTrasladados2" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados2', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IEPS</td>
-                          <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps2', 0))?></td>
-                          <input type="hidden" name="totalIeps2" id="totalIeps" value="<?php echo set_value('totalIeps2', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>RET.</td>
-                          <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion2', 0))?></td>
-                          <input type="hidden" name="totalRetencion2" id="totalRetencion" value="<?php echo set_value('totalRetencion2', 0); ?>">
-                        </tr>
-                        <tr style="font-weight:bold;font-size:1.2em;">
-                          <td>TOTAL</td>
-                          <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden2', 0))?></td>
-                          <input type="hidden" name="totalOrden2" id="totalOrden" value="<?php echo set_value('totalOrden2', 0); ?>">
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-               </div> <!-- /box-body -->
-            </div> <!-- /box -->
-          </div><!-- /row-fluid -->
-
-          <div class="row-fluid" id="productos3">  <!-- Box Productos -->
-            <div class="box span12">
-              <div class="box-header well" data-original-title>
-                <h2><i class="icon-barcode"></i> Proveedor 3 - Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
-                <div class="box-icon">
-                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                </div>
-              </div><!--/box-header -->
-              <div class="box-content">
-                <div class="row-fluid">
-                  <div class="control-group">
-                    <label class="control-label" for="proveedor3">Proveedor</label>
-                    <div class="controls">
-                      <div class="input-append span12">
-                        <input type="text" name="proveedor3" class="span11" id="proveedor3" value="<?php echo set_value('proveedor3') ?>" placeholder=""><a href="<?php echo base_url('panel/proveedores/agregar') ?>" rel="superbox-80x550" class="btn btn-info" type="button"><i class="icon-plus" ></i></a>
-                      </div>
-                    </div>
-                      <input type="hidden" name="proveedorId3" id="proveedorId3" value="<?php echo set_value('proveedorId3') ?>">
-                  </div>
-                </div>
-
-                <div class="row-fluid">
-
-                  <div class="span12 mquit">
-                    <div class="span3">
-                      <!-- data-next="fcodigo" -->
-                      <input type="text" class="span12" id="fcodigo" placeholder="Codigo" data-next="fcodigo">
-                    </div><!--/span3s -->
-                    <div class="span6">
-                      <div class="input-append span12">
-                        <input type="text" class="span12" id="fconcepto" placeholder="Producto / Descripción">
-                        <!-- <a href="" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a> -->
-                      </div>
-                      <input type="hidden" class="span1" id="fconceptoId">
-                    </div><!--/span3s -->
-                    <div class="span1">
-                      <input type="number" step="any" value="" class="span12 vpositive" id="fcantidad" min="0.01" placeholder="Cant.">
-                    </div><!--/span3s -->
-                    <div class="span2">
-                      <input type="text" class="span12 vpositive" id="fprecio" placeholder="Precio Unitario">
-                    </div><!--/span3s -->
-
-                  </div><!--/span12 -->
-                  <br><br>
-                  <div class="span12 mquit">
-                    <div class="span3">
-                      <label for="fpresentacion" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">PRESENTACION</label>
-                      <select class="span12" id="fpresentacion">
-                      </select>
-                    </div><!--/span3 -->
-                     <div class="span2">
-                      <label for="funidad" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">UNIDAD</label>
-                      <select class="span12" id="funidad">
-                        <?php foreach ($unidades as $key => $unidad) { ?>
-                          <option value="<?php echo $unidad->id_unidad ?>"><?php echo $unidad->nombre ?></option>
-                        <?php } ?>
-                      </select>
-                    </div><!--/span2 -->
-                    <div class="span1">
-                      <label for="ftraslado" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IVA</label>
-                      <select class="span12" id="ftraslado">
-                        <option value="0">0%</option>
-                        <option value="11">11%</option>
-                        <option value="16">16%</option>
-                      </select>
-                    </div><!--/span1 -->
-                    <div class="span1">
-                      <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
-                      <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
-                    </div><!--/span1 -->
-                    <div class="span2">
-                      <label for="ftipo_moneda" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Tipo de cambio</label>
-                      <select class="span7 pull-left" id="ftipo_moneda">
-                        <option value="peso">Pesos</option>
-                        <option value="dolar">Dolares</option>
-                      </select>
-                      <input type="text" class="span5 vpositive" id="ftipo_cambio" placeholder="12.45">
-                    </div><!--/span2 -->
-                    <div class="span2 offset1">
-                      <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
-                    </div><!--/span2 -->
-                  </div><!--/span12 -->
-
-                </div><!--/row-fluid -->
-                <br>
-                <div class="row-fluid">
-                  <div class="span12 mquit">
-                    <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
-                      <thead>
-                        <tr>
-                          <th>CODIGO</th>
-                          <th>PRODUCTO</th>
-                          <th>PRESEN.</th>
-                          <th>UNIDAD</th>
-                          <th>CANT.</th>
-                          <th>FALTANTES</th>
-                          <th>P.U.</th>
-                          <th>IVA</th>
-                          <th>IEPS (%)</th>
-                          <th>RET 4%</th>
-                          <th>IMPORTE</th>
-                          <th>DESCRIP</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-
-                        <?php if (isset($_POST['concepto3'])) {
-                              foreach ($_POST['concepto3'] as $key => $concepto) { ?>
-                            <tr>
-                              <td style="width: 70px;">
-                                <?php echo $_POST['codigo3'][$key] ?>
-                                <input type="hidden" name="codigo3[]" value="<?php echo $_POST['codigo3'][$key] ?>" class="span12">
-                                <input type="hidden" name="tipo_cambio3[]" value="<?php echo $_POST['tipo_cambio3'][$key] ?>" class="span12">
-                              </td>
-                              <td>
-                                  <?php echo $concepto ?>
-                                  <input type="hidden" name="concepto3[]" value="<?php echo $concepto ?>" id="concepto" class="span12">
-                                  <input type="hidden" name="productoId3[]" value="<?php echo $_POST['productoId3'][$key] ?>" id="productoId" class="span12">
-                              </td>
-                              <td style="width: 160px;">
-                                <select name="presentacion3[]">
-                                  <option value="<?php echo $_POST['presentacion3'][$key]?>" data-cantidad="<?php echo $_POST['presentacionCant3'][$key] ?>"><?php echo $_POST['presentacionText3'][$key] ?></option>
-                                </select>
-                                <input type="hidden" name="presentacionCant3[]" value="<?php echo $_POST['presentacionCant3'][$key] ?>" id="presentacionCant" class="span12">
-                                <input type="hidden" name="presentacionText3[]" value="<?php echo $_POST['presentacionText3'][$key] ?>" id="presentacionText" class="span12">
-                              </td>
-                              <td style="width: 120px;">
-                                <select name="unidad3[]" id="unidad" class="span12">
-                                  <?php foreach ($unidades as $unidad) { ?>
-                                    <option value="<?php echo $unidad->id_unidad ?>" <?php echo $_POST['unidad3'][$key] == $unidad->id_unidad ? 'selected' : ''; ?>><?php echo $unidad->nombre ?></option>
-                                  <?php } ?>
-                                </select>
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="cantidad3[]" value="<?php echo $_POST['cantidad3'][$key] ?>" id="cantidad" class="span12 vpositive" min="1">
-                              </td>
-                              <td style="width: 65px;">
-                                  <input type="number" name="faltantes3[]" value="<?php echo $_POST['faltantes3'][$key] ?>" id="faltantes" class="span12 vpositive" min="0">
-                              </td>
-                              <td style="width: 90px;">
-                                  <input type="text" name="valorUnitario3[]" value="<?php echo $_POST['valorUnitario3'][$key] ?>" id="valorUnitario" class="span12 vpositive">
-                              </td>
-                              <td style="width: 66px;">
-                                  <select name="traslado3[]" id="traslado" class="span12">
-                                    <option value="0" <?php echo $_POST['traslado3'][$key] === '0' ? 'selected' : '' ?>>0%</option>
-                                    <option value="11" <?php echo $_POST['traslado3'][$key] === '11' ? 'selected' : ''?>>11%</option>
-                                    <option value="16" <?php echo $_POST['traslado3'][$key] === '16' ? 'selected' : ''?>>16%</option>
-                                  </select>
-                                  <input type="hidden" name="trasladoTotal3[]" value="<?php echo $_POST['trasladoTotal3'][$key] ?>" id="trasladoTotal" class="span12">
-                                  <input type="hidden" name="trasladoPorcent3[]" value="<?php echo $_POST['trasladoPorcent3'][$key] ?>" id="trasladoPorcent" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                <input type="text" name="iepsPorcent3[]" value="<?php echo $_POST['iepsPorcent3'][$key] ?>" id="iepsPorcent" class="span12">
-                                <input type="hidden" name="iepsTotal3[]" value="<?php echo $_POST['iepsTotal3'][$key] ?>" id="iepsTotal" class="span12">
-                              </td>
-                              <td style="width: 66px;">
-                                  <input type="text" name="retTotal3[]" value="<?php echo $_POST['retTotal3'][$key] ?>" id="retTotal" class="span12" readonly>
-                              </td>
-                              <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe3'][$key]) ?></span>
-                                  <input type="hidden" name="importe3[]" value="<?php echo $_POST['importe3'][$key] ?>" id="importe" class="span12 vpositive">
-                                  <input type="hidden" name="total3[]" value="<?php echo $_POST['total3'][$key] ?>" id="total" class="span12 vpositive">
-                              </td>
-                              <td>
-                                  <input type="text" name="observacion3[]" value="<?php echo $_POST['observacion3'][$key] ?>" id="observacion" class="span12">
-                              </td>
-                              <td style="width: 35px;"><button type="button" class="btn btn-danger" id="btnDelProd"><i class="icon-remove"></i></button></td>
-                            </tr>
-                         <?php }} ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div class="row-fluid">
-                  <div class="span12">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th style="background-color:#FFF !important;">TOTAL CON LETRA</th>
-                          <th style="background-color:#FFF !important;">TOTALES</th>
-                          <th style="background-color:#FFF !important;"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td rowspan="7">
-                              <textarea name="totalLetra3" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra3', '');?></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td><em>Subtotal</em></td>
-                          <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte3', 0))?></td>
-                          <input type="hidden" name="totalImporte3" id="totalImporte" value="<?php echo set_value('totalImporte3', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IVA</td>
-                          <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados3', 0))?></td>
-                          <input type="hidden" name="totalImpuestosTrasladados3" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados3', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>IEPS</td>
-                          <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps3', 0))?></td>
-                          <input type="hidden" name="totalIeps3" id="totalIeps" value="<?php echo set_value('totalIeps3', 0); ?>">
-                        </tr>
-                        <tr>
-                          <td>RET.</td>
-                          <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion3', 0))?></td>
-                          <input type="hidden" name="totalRetencion3" id="totalRetencion" value="<?php echo set_value('totalRetencion3', 0); ?>">
-                        </tr>
-                        <tr style="font-weight:bold;font-size:1.2em;">
-                          <td>TOTAL</td>
-                          <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden3', 0))?></td>
-                          <input type="hidden" name="totalOrden3" id="totalOrden" value="<?php echo set_value('totalOrden3', 0); ?>">
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-               </div> <!-- /box-body -->
-            </div> <!-- /box -->
-          </div><!-- /row-fluid -->
+        
 
         </form>
 

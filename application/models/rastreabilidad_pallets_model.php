@@ -427,7 +427,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
       $this->mergePalletsPdf($pdf, $certificados, true);
     }
 
-    if (count($noCertificados['rendimientos']) > 0)
+    if (count($noCertificados['rendimientos']) > 0 && count($certificados['rendimientos']) > 0)
     {
       $this->mergePalletsPdf($pdf, $noCertificados);
     }
@@ -533,8 +533,14 @@ class rastreabilidad_pallets_model extends privilegios_model {
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(90));
 
+    $pdf->Rect(6, 8, 100, 20, '');
+    $pdf->SetXY(35, 10);
+    $pdf->Cell(45, 10, 'BITACORA 19A', 0);
+    $pdf->SetXY(8, 16);
+    $pdf->Cell(100, 10, 'CONTROL DE PRODUCTO EMPACADO', 0);
+
     $pdf->Rect(6, 8, 100, 60, '');
-    $pdf->SetXY(23, 23);
+    $pdf->SetXY(23, 38);
     $pdf->Image(APPPATH.'images/logo.png', null, null, 65);
 
     $pdf->Rect(106, 8, 100, 20, '');
@@ -600,7 +606,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
     if ($certificado)
     {
       $pdf->SetFont('helvetica','B', 15);
-      $pdf->RotatedText(22, 230, 'CERTIFICADO', 90);
+      $pdf->RotatedText(22, 237, 'PROD. CERTIFICADO', 90);
     }
 
     $pdf->SetFont('helvetica','B', 14);

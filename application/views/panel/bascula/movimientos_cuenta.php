@@ -131,7 +131,7 @@
                     <div class="row-fluid">
                       <div class="span12">
                         <!-- <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button> -->
-                        <!-- <a href="#modalPagos" class="btn btn-success span3 pull-right" role="button" data-toggle="modal">Pagar</a> -->
+                        <a href="#modalPagos" class="btn btn-success span3 pull-right" role="button" data-toggle="modal">Pagar</a>
                         <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
                       </div>
                     </div>
@@ -170,7 +170,7 @@
                               <?php if ($mov->status === 'b' || $mov->status === 'p') { ?>
                                 <span class="badge badge-important"><?php echo strtoupper($mov->status) ?></span>
                               <?php } else { ?>
-                                <!-- <input type="checkbox" name="ppagos[]" value="<?php echo $mov->id_bascula ?>" checked id="pesadas" data-monto="<?php echo $mov->importe_todas ?>"> -->
+                                <input type="checkbox" name="ppagos[]" value="<?php echo $mov->id_bascula ?>" checked id="pesadas" data-monto="<?php echo $mov->importe_todas ?>">
                               <?php }} ?>
                           </td>
                           <td>

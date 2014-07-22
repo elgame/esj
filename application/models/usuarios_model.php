@@ -28,6 +28,8 @@ class Usuarios_model extends privilegios_model {
 		//Filtros para buscar
 		if($this->input->get('fnombre') != '')
 			$sql .= " AND ( lower(u.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+                lower(u.apellido_paterno) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+                lower(u.apellido_materno) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(u.usuario) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 								lower(u.email) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%')";
 
@@ -42,7 +44,7 @@ class Usuarios_model extends privilegios_model {
 					u.status, u.rfc, u.cuenta_banco, u.no_seguro
 				FROM usuarios u
 				".$sql."
-				ORDER BY u.usuario ASC
+				ORDER BY (u.nombre || u.apellido_paterno || u.apellido_materno) ASC
 				", $params, true);
 		$res = $this->db->query($query['query']);
 
