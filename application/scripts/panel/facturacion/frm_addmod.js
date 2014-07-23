@@ -274,7 +274,8 @@ $(function(){
             htmlTd = '',
             disabled = '',
             bgcolor = '',
-            jsonStr = '',rnd_txt;
+            jsonStr = '',
+            rnd_txt;
 
         if (pallets.length > 0) {
           for (var i in pallets) {
@@ -351,6 +352,7 @@ $(function(){
               'kilos': jsonObj[i]['kilos'],
               'id_size': jsonObj[i]['id_size'],
               'size': jsonObj[i]['size'],
+              'certificado': jsonObj[i]['certificado'],
             });
           }
         });
@@ -547,6 +549,7 @@ function loadPalletByFolio() {
                     'kilos': data['rendimientos'][i]['kilos'],
                     'id_size': data['rendimientos'][i]['id_size'],
                     'size': data['rendimientos'][i]['size'],
+                    'certificado': data['rendimientos'][i]['certificado'],
                   });
                 }
               }, 'json');
@@ -630,11 +633,12 @@ function addProducto(unidades, prod) {
       $tr, addInputPalletId = true;
 
   var prod_nombre = '', prod_id = '', pallet = '', remision = '', prod_cajas = 0,
-      ivaSelected = '0', prod_kilos = 0, cantidad = 0;
+      ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false;
 
   if (prod) {
     // console.log(prod);
     // Verificar si existe la clasificacion...
+    var estaCertificado;
     $tabla.find('input#prod_did_prod').each(function(index, el) {
       var $prodIdInput = $(this), // input hidde prod id.
           $medidaInput; // input hidde medida.
@@ -643,9 +647,10 @@ function addProducto(unidades, prod) {
       $medidaInput = $tr.find('#prod_dmedida_id'); // input hidde medida.
       $idUnidadRendimiento = $tr.find('#id_unidad_rendimiento');
       $idSizeRendimiento = $tr.find('#id_size_rendimiento');
+      estaCertificado = $tr.find('.is-cert-check').is(':checked') ? 't' : 'f';
 
-      // console.log($prodIdInput.val(), prod.id, $idUnidadRendimiento.val(), prod.id_unidad, $idSizeRendimiento.val(), prod.id_size);
-      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad && $idSizeRendimiento.val() == prod.id_size) {
+      // console.log($prodIdInput.val(), prod.id, $idUnidadRendimiento.val(), prod.id_unidad, $idSizeRendimiento.val(), prod.id_size, estaCertificado, prod.certificado);
+      if ($prodIdInput.val() == prod.id && $idUnidadRendimiento.val() == prod.id_unidad && $idSizeRendimiento.val() == prod.id_size && estaCertificado === prod.certificado) {
         existe = true;
         return false;
       }
@@ -656,7 +661,7 @@ function addProducto(unidades, prod) {
     prod_cajas  = prod.cajas;
     prod_kilos  = prod.kilos;
     pallet      = prod.id_pallet;
-    remision    = prod.id_remision;
+    remision    = prod.id_remision ? prod.id_remision : '';
     idUnidad    = prod.id_unidad ? prod.id_unidad : ''; // id_unidad del rendimiento.
     idSize      = prod.id_size ? prod.id_size : ''; // id_size del rendimiento.
     unidad      = prod.unidad ? prod.unidad : ''; // nombre de la unidad del rendimiento.
@@ -665,6 +670,8 @@ function addProducto(unidades, prod) {
 
     idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
+    prod_certificado =  prod.certificado === 't' ? true : false;
+
   } else {
     idUnidad = unidades[0].id_unidad;
     unidad = unidades[0].nombre;
@@ -809,7 +816,7 @@ function addProducto(unidades, prod) {
                 '<td>' +
                   '<input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive jump'+jumpIndex+'">' +
                 '</td>' +
-                '<td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>' +
+                '<td><input type="checkbox" class="is-cert-check" ' + (prod_certificado ? 'checked' : '')  + ' ><input type="hidden" name="isCert[]" value="' + (prod_certificado ? '1' : '0') + '" class="certificado"></td>' +
                 '<td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>' +
               '</tr>';
 
