@@ -120,9 +120,11 @@ class compras_requisicion extends MY_Controller {
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
     $this->load->model('compras_requisicion_model');
+    $this->load->model('compras_areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -151,6 +153,8 @@ class compras_requisicion extends MY_Controller {
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     // Obtiene los datos de la empresa predeterminada.
     $params['empresa_default'] = $this->db
@@ -209,9 +213,11 @@ class compras_requisicion extends MY_Controller {
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('panel/compras_ordenes/agregar_requisicion.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
     $this->load->model('compras_requisicion_model');
+    $this->load->model('compras_areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -235,9 +241,9 @@ class compras_requisicion extends MY_Controller {
 
         if ($response['passes'])
         {
-          if (isset($_POST['autorizar']))
+          if ($response['autorizado'])
           {
-            redirect(base_url('panel/compras_requisicion/modificar/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
+            redirect(base_url('panel/compras_ordenes/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
           }
           else
           {
@@ -272,6 +278,7 @@ class compras_requisicion extends MY_Controller {
     //   }
     // }
 
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_requisicion_model->info($_GET['id'], true);
 
     if (isset($_GET['msg']))

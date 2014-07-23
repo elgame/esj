@@ -346,6 +346,7 @@ class caja_chica_model extends CI_Model {
     $this->load->model('empresas_model');
 
     $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
+    //  AND bc.id_empresa = {$defaultEmpresa->id_empresa}
 
     $movimientos = $this->db->query(
       "SELECT bm.id_movimiento, COALESCE(p.nombre_fiscal, bm.a_nombre_de) as proveedor, bm.numero_ref, ba.nombre as banco, bm.monto, DATE(bm.fecha) as fecha
@@ -354,7 +355,7 @@ class caja_chica_model extends CI_Model {
        LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
        INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
        LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
-       WHERE bm.tipo = 'f' AND bc.id_empresa = {$defaultEmpresa->id_empresa} AND COALESCE(ci.id_ingresos, 0) = 0
+       WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0
        ORDER BY ci.id_ingresos ASC
     ");
 

@@ -832,8 +832,8 @@
 
       $trHtml = $('<tr class="rowprod">' +
                   '<td style="width: 60px;">' +
-                    producto.codigo +
-                    '<input type="hidden" name="codigoArea[]" value="" id="codigoArea" class="span12">' +
+                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoArea" readonly>' +
+                    '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" readonly>' +
                   '</td>' +
                   '<td style="width: 60px;">' +
                     producto.codigo +

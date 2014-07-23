@@ -1612,6 +1612,7 @@ class polizas_model extends CI_Model {
     }
 
     if($tipo_movimientos == 'cheque'){
+      $order_by = 't.id_movimiento';
       $sql_union_bascula = "UNION
         (
           SELECT
@@ -1633,6 +1634,7 @@ class polizas_model extends CI_Model {
       $sql .= " AND LOWER(bm.metodo_pago) = 'cheque' ";
       $sql2 .= " AND LOWER(bm.metodo_pago) = 'cheque' ";
     }else{
+      $order_by = 't.fecha';
       $sql .= " AND LOWER(bm.metodo_pago) <> 'cheque' ";
       $sql2 .= " AND LOWER(bm.metodo_pago) <> 'cheque' ";
     }
@@ -1683,7 +1685,7 @@ class polizas_model extends CI_Model {
         )
         {$sql_union_bascula}
       ) AS t
-      ORDER BY id_movimiento ASC
+      ORDER BY {$order_by} ASC
       ");
 
     // $cuenta_cuadre = $this->getCuentaCuadreGasto();

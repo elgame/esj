@@ -2746,7 +2746,7 @@ class facturacion_model extends privilegios_model{
     $pdf->limiteY = 250;
 
     $pdf->setY($pdf->GetY() + 1);
-
+    $hay_prod_certificados = false;
     foreach($factura['productos'] as $key => $item)
     {
       $band_head = false;
@@ -2780,6 +2780,9 @@ class facturacion_model extends privilegios_model{
             $item->id_clasificacion == '53')
           $printRow = false;
       }
+
+      if ($item->certificado === 't')
+        $hay_prod_certificados = true;
       
       if($printRow)
         $pdf->Row(array(
@@ -2966,6 +2969,20 @@ class facturacion_model extends privilegios_model{
       $pdf->Row(array('Tasa de Cambio: '.String::formatoNumero($xml[0]['TipoCambio'], 4) ), false, 0);
     }else
       $pdf->SetXY(10, $pdf->GetY() + 5);
+
+
+    if($hay_prod_certificados)
+    {
+      if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(10, $pdf->GetY());
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
+    }
+    
 
     ////////////////////
     // Timbrado Datos //
