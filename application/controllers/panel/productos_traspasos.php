@@ -9,6 +9,7 @@ class productos_traspasos extends MY_Controller {
     private $excepcion_privilegio = array(
         'productos_traspasos/ajax_get_productos/',
         'productos_traspasos/ajax_verifica_producto/',
+        'productos_traspasos/print_orden/',
     );
 
     public function _remap($method){
@@ -59,6 +60,10 @@ class productos_traspasos extends MY_Controller {
             $params['frm_errors'] = $this->showMsgs($_GET['msg']);
         }
 
+        if (isset($_GET['idt'])) {
+            $params['openTraspaso'] = $_GET['idt'];
+        }
+
         $this->load->view('panel/header', $params);
         $this->load->view('panel/general/menu', $params);
         $this->load->view('panel/almacen/productos/traspasos/traspasos', $params);
@@ -93,13 +98,51 @@ class productos_traspasos extends MY_Controller {
     {
         $this->load->model('productos_traspasos_model');
 
-        $this->productos_traspasos_model->agregarTraspaso($_POST);
+        $id = $this->productos_traspasos_model->make($_POST);
 
-        echo json_encode(array('passes' => true));
+        echo json_encode(array('passes' => true, 'id' => $id));
     }
 
-      private function showMsgs($tipo, $msg='', $title='Facturacion!')
-      {
+    public function print_orden()
+    {
+
+        $this->load->model('productos_traspasos_model');
+
+        $traspasoId = $_GET['idt'];
+
+        $this->productos_traspasos_model->printOrden($traspasoId);
+    }
+
+
+   // public function reporte_producto()
+   //  {
+   //      echo "<pre>";
+   //        var_dump('hola');
+   //      echo "</pre>";exit;
+
+   //      $this->carabiner->js(array(
+   //        array('general/msgbox.js'),
+   //        array('panel/almacen/rpt_compras.js'),
+   //      ));
+
+   //      $this->load->library('pagination');
+   //      $this->load->model('empresas_model');
+
+   //      $params['info_empleado']  = $this->info_empleado['info'];
+   //      $params['seo']        = array('titulo' => 'Reporte Compras y productos');
+
+   //      $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+   //      if(isset($_GET['msg']{0}))
+   //        $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+   //      $this->load->view('panel/header',$params);
+   //      $this->load->view('panel/almacen/compras/rptcompras_productos',$params);
+   //      $this->load->view('panel/footer',$params);
+   //  }
+
+    private function showMsgs($tipo, $msg='', $title='Facturacion!')
+    {
         switch($tipo)
         {
             case 1:

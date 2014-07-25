@@ -96,14 +96,28 @@ class productos_traspasos_model extends CI_Model {
         return array('existe' => $existe, 'producto' => $producto);
     }
 
-    public function agregarTraspaso($data)
+    public function make($data)
     {
-        $this->agregarSalidaAEmpresa($data);
+        $salida = $this->storeSalidaAEmpresa($data);
 
-        $this->agregarOrdenAEmpresa($data);
+        $orden = $this->storeOrdenAEmpresa($data);
+
+        $traspaso = array(
+            'id_empresa_de' => $data['empresa_id_de'],
+            'id_empresa_para' => $data['empresa_id_para'],
+            'id_salida' => $salida['id_salida'],
+            'id_orden' => $orden['id_orden'],
+            'id_usuario' => $this->session->userdata('id_usuario'),
+            'fecha' => date('Y-m-d'),
+            'descripcion' => $data['descripcion'],
+        );
+
+        $traspasoId = $this->storeTraspaso($traspaso);
+
+        return $traspasoId;
     }
 
-    private function agregarSalidaAEmpresa($data)
+    private function storeSalidaAEmpresa($data)
     {
         $this->load->model('productos_salidas_model');
 
@@ -126,14 +140,16 @@ class productos_traspasos_model extends CI_Model {
                 'no_row'          => $key,
                 'id_producto'     => $productoId,
                 'cantidad'        => abs($data['productos_cantidad'][$key]),
-                'precio_unitario' => $data['productos_precio'][$key],
+                'precio_unitario' => 0, //$data['productos_precio'][$key],
             );
         }
 
         $this->productos_salidas_model->agregarProductos($salida['id_salida'], $productosSalida);
+
+        return $salida;
     }
 
-    private function agregarOrdenAEmpresa($data)
+    private function storeOrdenAEmpresa($data)
     {
         $this->load->model('compras_ordenes_model');
 
@@ -170,7 +186,7 @@ class productos_traspasos_model extends CI_Model {
                 'descripcion' => $data['productos_nombre'][$key],
                 'cantidad' => abs($data['productos_cantidad'][$key]),
                 'precio_unitario'  => 0,
-                'importe' => (abs($data['productos_cantidad'][$key]) * $data['productos_precio'][$key]),
+                'importe' => 0, //(abs($data['productos_cantidad'][$key]) * $data['productos_precio'][$key]),
                 'status' => 'a',
                 'fecha_aceptacion' => $fecha,
                 'observacion' => $data['productos_descripcion'][$key],
@@ -178,5 +194,124 @@ class productos_traspasos_model extends CI_Model {
         }
 
         $this->compras_ordenes_model->agregarProductosData($ordenProductos);
+
+        return $orden;
+    }
+
+    private function storeTraspaso($data)
+    {
+        $this->db->insert('productos_traspasos', $data);
+
+        return $this->db->insert_id();
+    }
+
+    private function getInfoTraspaso($traspasoId)
+    {
+        $info = array();
+
+        $this->load->model('empresas_model');
+        $this->load->model('compras_ordenes_model');
+        $this->load->model('productos_salidas_model');
+
+        $traspasoData = $this->db->select("id_empresa_de, id_empresa_para, id_salida, id_orden, DATE(fecha) as fecha, descripcion")
+            ->from('productos_traspasos')
+            ->where('id', $traspasoId)
+            ->get()
+            ->row();
+
+        if (count($traspasoData) > 0)
+        {
+            $info['fecha'] = $traspasoData->fecha;
+            $info['descripcion'] = $traspasoData->descripcion;
+            $info['empresa_de'] = $this->empresas_model->getInfoEmpresa($traspasoData->id_empresa_de, true);
+            $info['empresa_para'] = $this->empresas_model->getInfoEmpresa($traspasoData->id_empresa_para, true);
+            $info['orden'] = $this->compras_ordenes_model->info($traspasoData->id_orden, true);
+            $info['salida'] = $this->productos_salidas_model->info($traspasoData->id_salida, true);
+        }
+
+        return $info;
+    }
+
+    public function printOrden($traspasoId)
+    {
+        $traspaso = $this->getInfoTraspaso($traspasoId);
+
+        if (count($traspaso) === 0) {
+            return false;
+        }
+
+        $this->load->library('mypdf');
+        // Creación del objeto de la clase heredada
+        $pdf = new MYpdf('P', 'mm', 'Letter');
+
+        $pdf->titulo1 = $traspaso['empresa_de']['info']->nombre_fiscal;
+        $pdf->titulo2 = 'Traspaso de productos el ' . $traspaso['fecha'];
+        $pdf->titulo3 = '';
+        // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+        // $pdf->AliasNbPages();
+        $pdf->AddPage();
+        // $pdf->SetFont('Arial','',8);
+
+        $pdf->SetX(6);
+
+        $pdf->SetFont('Arial','B', 9);
+        $pdf->SetAligns(array('L', 'L'));
+        $pdf->SetWidths(array(100, 100));
+        $pdf->Row(array('Salio de la empresa:', 'Entro a la empresa:'), false, false);
+
+        $pdf->SetFont('Arial', '', 9);
+        $pdf->SetX(6);
+        $pdf->Row(array($traspaso['empresa_de']['info']->nombre_fiscal, $traspaso['empresa_para']['info']->nombre_fiscal), false, false);
+
+        $pdf->SetX(6);
+        $pdf->SetFont('Arial','B', 9);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(200));
+        $pdf->Row(array('Descripcion: ' . $traspaso['descripcion']), false, false);
+
+        $pdf->SetXY(6, $pdf->GetY() + 5);
+        $aligns = array('L', 'L');
+        $widths = array(150, 50);
+        $header = array('Productos', 'Cantidad');
+
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, false, true);
+
+        foreach($traspaso['orden']['info'][0]->productos as $key => $producto)
+        {
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+
+              $pdf->SetFont('Arial','B',9);
+              $pdf->SetX(6);
+              $pdf->SetAligns($aligns);
+              $pdf->SetWidths($widths);
+              $pdf->Row($header, false, true);
+            }
+
+            $pdf->SetFont('Arial','',8);
+
+            $datos = array(
+                "$producto->producto ($producto->abreviatura)",
+                $producto->cantidad,
+            );
+
+            $pdf->SetX(6);
+            $pdf->SetFont('Arial','',9);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($datos, false, false);
+        }
+
+            // $pdf->SetX(146);
+            // $pdf->SetFont('Arial','B',8);
+            // $pdf->SetAligns(array('R', 'R'));
+            // $pdf->SetWidths(array(30, 30));
+            // $pdf->Row(array(
+            //   String::formatoNumero($total_total, 2, '', false),
+            //   String::formatoNumero($total_saldo, 2, '', false)), false);
+
+        $pdf->Output('orden_traspaso.pdf', 'I');
     }
 }

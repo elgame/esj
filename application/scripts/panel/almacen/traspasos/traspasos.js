@@ -83,19 +83,25 @@ var productos = (function($) {
     }
 
     function checkIfAvailable (productoName, elem) {
-        var getData = {
-            empresa_id: $('#fid_empresa_to').val(),
-            producto: productoName
-        };
+        var $btn = $(elem)
+            $tr = $btn.parents('tr'),
+            getData = {
+                empresa_id: $('#fid_empresa_to').val(),
+                producto: productoName
+            };
 
-        $.getJSON(base_url + 'panel/productos_traspasos/ajax_verifica_producto/', getData, function(response, textStatus) {
-            if (response.existe) {
-                var cantidad = $(elem).parents('tr').find('.prod-cantidad').val(),
-                    precio = $(elem).parents('tr').find('.precio_producto').val();
+        if (isCantidadPermitida($tr)) {
+            $.getJSON(base_url + 'panel/productos_traspasos/ajax_verifica_producto/', getData, function(response, textStatus) {
+                if (response.existe) {
+                    var cantidad = $tr.find('.prod-cantidad').val(),
+                        precio = $tr.find('.precio_producto').val();
 
-                add(response.producto, cantidad, precio);
-            }
-        });
+                    add(response.producto, cantidad, precio);
+                }
+            });
+        } else {
+            noty({"text": 'La cantidad a traspasar es mayor a la existente.', "layout":"topRight", "type": 'error'});
+        }
     }
 
     function add (producto, cantidad, precio) {
@@ -107,7 +113,7 @@ var productos = (function($) {
                             ' <input type="hidden" name="producto_id[]" value="' + producto.id_producto + '" class="input traspaso-id">' +
                             ' <input type="hidden" name="producto_precio[]" value="' + (precio || 0) + '" class="input traspaso-precio">' +
                         '</td>' +
-                        '<td><input type="text" name="producto_cantidad[]" value="' + (cantidad || 0) + '" class="input traspaso-cantidad" style="width: 50px;"></td>' +
+                        '<td><input type="text" name="producto_cantidad[]" value="' + (cantidad || 0) + '" class="input traspaso-cantidad" style="width: 50px;" readonly></td>' +
                         '<td><input type="text" name="producto_desc[]" value="Traspaso ' + producto.nombre_producto + '" class="input traspaso-desc" max-length="254" style="width: 220px;"></td>' +
                         '<td><button type="button" class="btn btn-danger del-prod" onclick="productos.del(this)"><i class="icon-remove"></i></button></td>' +
                     '</tr>';
@@ -143,6 +149,7 @@ var productos = (function($) {
             data: {
                 empresa_id_de: $('#fid_empresa').val(),
                 empresa_id_para: $('#fid_empresa_to').val(),
+                descripcion: $('#descripcion').val(),
                 productos_nombre: productos_nombre,
                 productos_id: productos_id,
                 productos_cantidad: productos_cantidad,
@@ -152,7 +159,7 @@ var productos = (function($) {
         })
         .done(function(response) {
             if (response.passes) {
-                window.location = base_url + 'panel/productos_traspasos/?msg=3';
+                window.location = base_url + 'panel/productos_traspasos/?msg=3&idt=' + response.id;
             };
         }).always(function() {
             loader.close();
@@ -167,6 +174,10 @@ var productos = (function($) {
         });
 
         return x_array;
+    }
+
+    function  isCantidadPermitida($btn) {
+        return parseFloat($btn.find('.esistema').val()) >= parseFloat($btn.find('.prod-cantidad').val());
     }
 
     objr.init = init;

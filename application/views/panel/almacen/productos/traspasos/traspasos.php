@@ -56,6 +56,8 @@
                                 ));
                              ?>
 
+                            <input type="text" name="descripcion" value="<?php echo set_value_get('descripcion') ?>" id="descripcion" class="span12" placeholder="Descripcion del Traspaso" maxlength="255">
+
                         <div id="content_productos">
                             <table class="table table-striped table-bordered bootstrap-datatable" id="table-productos-traspasar">
                                 <thead>
@@ -85,6 +87,10 @@
 <script type="text/javascript" charset="UTF-8">
     $(document).ready(function(){
         noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
+
+        <?php if(isset($openTraspaso)){?>
+            window.open(base_url + 'panel/productos_traspasos/print_orden/?idt=<?php echo $openTraspaso; ?>');
+        <?php } ?>
     });
 </script>
 <?php }
