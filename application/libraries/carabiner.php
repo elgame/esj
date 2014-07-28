@@ -1001,8 +1001,10 @@ class Carabiner {
 			case 'js':
 				
 				$dir = ( $this->isURL($ref) ) ? '' : ( ($cache) ? $this->cache_uri : $this->script_uri );
-				
-				return '<script type="text/javascript" src="'.$dir.$ref.'" charset="'.$this->CI->config->item('charset').'"></script>'."\r\n";
+
+				$ci =& get_instance();
+
+				return '<script type="text/javascript" src="'.$dir.$ref.'?v='.$ci->config->item('jsv').'" charset="'.$this->CI->config->item('charset').'"></script>'."\r\n";
 			
 			break;
 		

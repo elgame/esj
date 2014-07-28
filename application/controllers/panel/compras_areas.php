@@ -33,21 +33,22 @@ class compras_areas extends MY_Controller {
 				array('general/msgbox.js')
 		));
 		
+		$this->load->model('compras_areas_model');
 		$this->load->library('pagination');
 		
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Administrar privilegios'
+			'titulo' => 'Administrar Catalogo'
 		);
 		
-		$params['privilegios'] = $this->usuarios_model->obtenPrivilegios();
+		$params['areas'] = $this->compras_areas_model->obtenAreas();
 		
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 		
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/privilegios/listado', $params);
+		$this->load->view('panel/almacen/compras_areas/listado', $params);
 		$this->load->view('panel/footer');
 	}
 	
@@ -61,12 +62,15 @@ class compras_areas extends MY_Controller {
 		));
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
-			array('libs/jquery.treeview.js')
+			array('libs/jquery.treeview.js'),
+			array('panel/compras_ordenes/areas_requisicion_frm.js'),
 		));
+
+		$this->load->model('compras_areas_model');
 		
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Agregar privilegio'
+			'titulo' => 'Agregar area'
 		);
 		
 		$this->configAddModPriv();
@@ -74,18 +78,20 @@ class compras_areas extends MY_Controller {
 		if($this->form_validation->run() == FALSE){
 			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 		}else{
-			$respons = $this->usuarios_model->addPrivilegio();
+			$respons = $this->compras_areas_model->addArea();
 			
 			if($respons[0])
-				redirect(base_url('panel/privilegios/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/compras_areas/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
 		}
+
+		$params['t_areas'] = $this->compras_areas_model->getTipoAreas();
 		
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 		
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/privilegios/agregar', $params);
+		$this->load->view('panel/almacen/compras_areas/agregar', $params);
 		$this->load->view('panel/footer');
 	}
 	
@@ -99,12 +105,15 @@ class compras_areas extends MY_Controller {
 		));
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
-			array('libs/jquery.treeview.js')
+			array('libs/jquery.treeview.js'),
+			array('panel/compras_ordenes/areas_requisicion_frm.js'),
 		));
+
+		$this->load->model('compras_areas_model');
 		
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
-			'titulo' => 'Modificar privilegio'
+			'titulo' => 'Modificar areas'
 		);
 		
 		if(isset($_GET['id']{0})){
@@ -113,15 +122,17 @@ class compras_areas extends MY_Controller {
 			if($this->form_validation->run() == FALSE){
 				$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 			}else{
-				$respons = $this->usuarios_model->updatePrivilegio();
+				$respons = $this->compras_areas_model->updateArea($_GET['id']);
 				
 				if($respons[0])
-					redirect(base_url('panel/privilegios/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/compras_areas/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 			
-			$params['privilegio'] = $this->usuarios_model->getInfoPrivilegio($_GET['id']);
-			if(!is_object($params['privilegio']))
-				unset($params['privilegio']);
+			$params['areas'] = $this->compras_areas_model->getInfo($_GET['id']);
+			$params['t_areas'] = $this->compras_areas_model->getTipoAreas();
+
+			if(!is_object($params['areas']))
+				unset($params['areas']);
 			
 			if(isset($_GET['msg']{0}))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -130,7 +141,7 @@ class compras_areas extends MY_Controller {
 		
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
-		$this->load->view('panel/privilegios/modificar', $params);
+		$this->load->view('panel/almacen/compras_areas/modificar', $params);
 		$this->load->view('panel/footer');
 	}
 	
@@ -164,22 +175,36 @@ class compras_areas extends MY_Controller {
 		$rules = array(
 			array('field'	=> 'dnombre',
 					'label'		=> 'Nombre',
-					'rules'		=> 'required|max_length[100]'),
-			array('field'	=> 'durl_accion',
-					'label'		=> 'Url accion',
-					'rules'		=> 'required|max_length[100]'),
-			array('field'	=> 'durl_icono',
-					'label'		=> 'Url icono',
-					'rules'		=> 'max_length[100]'),
-			array('field'	=> 'dmostrar_menu',
-					'label'		=> 'Mostrar menu',
+					'rules'		=> 'required|max_length[70]'),
+			array('field'	=> 'dcodigo',
+					'label'		=> 'Codigo',
+					'rules'		=> 'required|max_length[10]|callback_val_codigo'),
+			array('field'	=> 'did_tipo',
+					'label'		=> 'Tipo',
 					'rules'		=> ''),
-			array('field'	=> 'dtarget_blank',
-					'label'		=> 'Target blank',
+			array('field'	=> 'dareas',
+					'label'		=> 'Catalogo',
 					'rules'		=> '')
 		);
 		$this->form_validation->set_rules($rules);
 	}
+
+	public function val_codigo($codigo)
+  {
+  	$sql = isset($_GET['id']{0})? " AND id_area <> ".$_GET['id']: '';
+  	$datos = $this->db->query("SELECT Count(id_area) AS num from compras_areas 
+  		where id_padre = ".$_POST['dareas']." 
+  			AND lower(codigo) = '".mb_strtolower($codigo, 'UTF-8')."'".$sql)->row();
+    if ($datos->num > 0)
+    {
+      $this->form_validation->set_message('val_codigo', 'El codigo ya existe en ese nivel del catalogo.');
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
 	
 	/**
 	 * Muestra mensajes cuando se realiza alguna accion

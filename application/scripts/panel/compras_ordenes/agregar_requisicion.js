@@ -108,8 +108,10 @@
 
       // Envia el form para autorizar
       if (passes){
-        $("#txtBtnAutorizar").val('true');
-        setTimeout(function(){ $("#form").submit(); }, 100)
+        msb.confirm('Estas seguro de Autorizar y crear la(s) ordenes?', 'Ordenes de Compras', this, function(){
+          $("#txtBtnAutorizar").val('true');
+          setTimeout(function(){ $("#form").submit(); }, 100);
+        });
       }
     });
   }

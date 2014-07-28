@@ -13,7 +13,7 @@ class compras_ordenes_model extends CI_Model {
    * @return
    */
   public function getOrdenes($perpage = '100', $autorizadas = true)
-    {
+  {
     $sql = '';
     //paginacion
     $params = array(
@@ -187,11 +187,18 @@ class compras_ordenes_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  public function agregarData($data)
+  public function agregarData($data, $dataVeiculo=array())
   {
     $this->db->insert('compras_ordenes', $data);
+    $id_orden = $this->db->insert_id();
 
-    return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
+    if(is_array($dataVeiculo) && count($dataVeiculo) > 0)
+    {
+      $dataVeiculo['id_orden'] = $id_orden;
+      $this->db->insert('compras_vehiculos_gasolina', $dataVeiculo);
+    }      
+
+    return array('passes' => true, 'msg' => 3, 'id_orden' => $id_orden);
   }
 
   public function agregarProductosData($data)
@@ -390,6 +397,7 @@ class compras_ordenes_model extends CI_Model {
       'subtotal'       => $_POST['totalImporte'],
       'importe_iva'    => $_POST['totalImpuestosTrasladados'],
       'importe_ieps'   => $_POST['totalIeps'],
+      'retencion_iva'  => $_POST['totalRetencion'],
       'total'          => $_POST['totalOrden'],
       'concepto'       => 'Concepto',
       'isgasto'        => 'f',
@@ -567,11 +575,12 @@ class compras_ordenes_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
+           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area 
            WHERE id_orden = {$data['info'][0]->id_orden} {$sql_produc}");
 
         $data['info'][0]->productos = array();
@@ -1027,6 +1036,8 @@ class compras_ordenes_model extends CI_Model {
     */
    public function print_orden_compra($ordenId, $path = null)
    {
+      $this->load->model('compras_areas_model');
+
       $orden = $this->info($ordenId, true);
 
       $this->load->library('mypdf');
@@ -1068,9 +1079,10 @@ class compras_ordenes_model extends CI_Model {
       $widths = array(35, 25, 94, 25, 25);
       $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
 
-      $subtotal = $iva = $total = $retencion = 0;
+      $subtotal = $iva = $total = $retencion = $ieps = 0;
 
       $tipoCambio = 0;
+      $codigoAreas = array();
 
       foreach ($orden['info'][0]->productos as $key => $prod)
       {
@@ -1098,7 +1110,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetTextColor(0,0,0);
         $datos = array(
           $prod->cantidad.' '.$prod->abreviatura,
-          $prod->codigo,
+          $prod->codigo.'/'.$prod->codigo_fin,
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
           String::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
           String::formatoNumero($prod->importe/$tipoCambio, 2, '$', false),
@@ -1107,10 +1119,14 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetX(6);
         $pdf->Row($datos, false);
 
-        $subtotal += floatval($prod->importe/$tipoCambio);
-        $iva      += floatval($prod->iva/$tipoCambio);
-        $total    += floatval($prod->total/$tipoCambio);
+        $subtotal  += floatval($prod->importe/$tipoCambio);
+        $iva       += floatval($prod->iva/$tipoCambio);
+        $total     += floatval($prod->total/$tipoCambio);
         $retencion += floatval($prod->retencion_iva/$tipoCambio);
+        $ieps      += floatval($prod->ieps/$tipoCambio);
+
+        if($prod->id_area != '')
+          $codigoAreas[] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
       }
 
       $yy = $pdf->GetY();
@@ -1169,18 +1185,18 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->Row(array('AUTORIZA: '.strtoupper($orden['info'][0]->autorizo)), false, false);
       $yy2 = $pdf->GetY();
-      if($orden['info'][0]->tipo_orden != 'f'){
-        $yy2 -= 9;
-        $pdf->SetXY(160, $yy2);
-        $pdf->Row(array('_______________________________'), false, false);
+      if(count($codigoAreas) > 0){
+        // $yy2 -= 9;
+        // $pdf->SetXY(160, $yy2);
+        // $pdf->Row(array('_______________________________'), false, false);
         $yy2 = $pdf->GetY();
-        $pdf->SetXY(160, $pdf->GetY());
-        $pdf->SetWidths(array(60));
-        $pdf->Row(array('COD/AREA: ' . $orden['info'][0]->departamento), false, false);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetWidths(array(155));
+        $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
       }
       // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
 
-      $pdf->SetXY(6, $yy2+2);
+      $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
       if($orden['info'][0]->tipo_orden == 'f'){
         $pdf->SetWidths(array(205));
@@ -1198,6 +1214,11 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('SUB-TOTAL', String::formatoNumero($subtotal, 2, '$', false)), false, true);
       $pdf->SetX(160);
       $pdf->Row(array('IVA', String::formatoNumero($iva, 2, '$', false)), false, true);
+      if ($ieps > 0)
+      {
+        $pdf->SetX(160);
+        $pdf->Row(array('IEPS', String::formatoNumero($ieps, 2, '$', false)), false, true);
+      }
       if ($retencion > 0)
       {
         $pdf->SetX(160);

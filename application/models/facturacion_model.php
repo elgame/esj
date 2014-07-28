@@ -2959,22 +2959,9 @@ class facturacion_model extends privilegios_model{
         $pdf->Row(array($factura['info']->observaciones), true, 1);
     }
 
-    if (isset($xml[0]['TipoCambio']))
-    {
-      if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
-          $pdf->AddPage();
-      $pdf->SetFont('helvetica', 'B', 8);
-      $pdf->SetXY(10, $pdf->GetY() + 5);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(196));
-      $pdf->Row(array('Tasa de Cambio: '.String::formatoNumero($xml[0]['TipoCambio'], 4) ), false, 0);
-    }else
-      $pdf->SetXY(10, $pdf->GetY() + 5);
-
-
     if($hay_prod_certificados)
     {
-      if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+      if($pdf->GetY() + 10 >= $pdf->limiteY) //salta de pagina si exede el max
           $pdf->AddPage();
 
       $pdf->SetFont('helvetica', 'B', 8);
@@ -2983,6 +2970,19 @@ class facturacion_model extends privilegios_model{
       $pdf->SetWidths(array(196));
       $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
     }
+
+    if (isset($xml[0]['TipoCambio']))
+    {
+      if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(10, $pdf->GetY() + 5 );
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array('Tasa de Cambio: '.String::formatoNumero($xml[0]['TipoCambio'], 4) ), false, 0);
+    }else
+      $pdf->SetXY(10, $pdf->GetY() + 5);
+
     
 
     ////////////////////

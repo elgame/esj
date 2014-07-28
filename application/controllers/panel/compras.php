@@ -79,7 +79,7 @@ class compras extends MY_Controller {
 
     $params['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['idp'], true);
 
-    $params['compra'] = $this->compras_model->getInfoCompra($_GET['id'], true);
+    $params['compra'] = $this->compras_model->getInfoCompra($_GET['id'], false);
 
     $params['productos'] = array();
     foreach ($ordenes as $key => $orden)

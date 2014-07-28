@@ -16,7 +16,7 @@ class compras_areas_model extends CI_Model{
 	/**
 	 * Obtiene el listado de todos los privilegios paginados
 	 */
-	public function obtenPrivilegios(){
+	public function obtenAreas(){
 		$sql = '';
 		//paginacion
 		$params = array(
@@ -27,26 +27,35 @@ class compras_areas_model extends CI_Model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		//Filtros para buscar
-		if($this->input->get('fnombre') != '')
-			$sql = "WHERE ( lower(nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
-				lower(url_accion) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+		
+		if($this->input->get('status') != '')
+		{
+			$sql .= " ca.status = '".$this->input->get('status')."'";
+		}else
+			$sql .= " ca.status = 't'";
 
-		$query = BDUtil::pagination("
-			SELECT id AS id_privilegio, id_padre, nombre, mostrar_menu, url_accion
-			FROM privilegios
-			".$sql."
-			ORDER BY url_accion ASC
+		if($this->input->get('fnombre') != '')
+			$sql = " AND ( lower(ca.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
+				lower(ca.codigo_fin) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+
+		$query = BDUtil::pagination(
+			"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
+				cat.nombre AS tipo
+			FROM compras_areas ca 
+				INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
+			WHERE {$sql}
+			ORDER BY ca.codigo_fin ASC
 		", $params, true);
 		$res = $this->db->query($query['query']);
 
 		$response = array(
-				'privilegios' => array(),
+				'areas' => array(),
 				'total_rows' 		=> $query['total_rows'],
 				'items_per_page' 	=> $params['result_items_per_page'],
 				'result_page' 		=> $params['result_page']
 		);
 		if($res->num_rows() > 0)
-			$response['privilegios'] = $res->result();
+			$response['areas'] = $res->result();
 
 		return $response;
 	}
@@ -55,12 +64,14 @@ class compras_areas_model extends CI_Model{
 	 * Obtiene toda la informacion de un privilegio
 	 * @param unknown_type $id
 	 */
-	public function getInfoPrivilegio($id){
-		$res = $this->db
-			->select('*')
-			->from('privilegios')
-			->where("id = '".$id."'")
-		->get();
+	public function getInfo($id){
+		$res = $this->db->query(
+				"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
+					cat.nombre AS tipo
+				FROM compras_areas ca 
+					INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
+				WHERE ca.id_area = {$id}
+				ORDER BY ca.codigo_fin ASC");
 		if($res->num_rows() > 0)
 			return $res->row();
 		else
@@ -70,32 +81,38 @@ class compras_areas_model extends CI_Model{
 	/**
 	 * Modifica la informacion de un privilegio
 	 */
-	public function updatePrivilegio(){
+	public function updateArea($id_area){
 		$data = array(
-			'nombre'       => $this->input->post('dnombre'),
-			'id_padre'     => ($this->input->post('dprivilegios')!=''? $this->input->post('dprivilegios'): '0'),
-			'mostrar_menu' => ($this->input->post('dmostrar_menu')=='si'? 't': 'f'),
-			'url_accion'   => $this->input->post('durl_accion'),
-			'url_icono'    => $this->input->post('durl_icono'),
-			'target_blank' => ($this->input->post('dtarget_blank')=='si'? 't': 'f')
+			'nombre'     => $this->input->post('dnombre'),
+			'id_padre'   => (intval($this->input->post('dareas'))>0? $this->input->post('dareas'): NULL),
+			'id_tipo'    => $this->input->post('did_tipo'),
+			'codigo'     => $this->input->post('dcodigo'),
+			'codigo_fin' => $this->input->post('dcodigo'),
 		);
-		$this->db->update('privilegios', $data, "id = '".$_GET['id']."'");
+
+		if ($data['id_padre'] !== NULL)
+			$data['codigo_fin'] = $this->getDescripCodigo($data['id_padre'], 'codigo').$data['codigo'];
+
+		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");
 		return array(true, '');
 	}
 
 	/**
 	 * Agrega un privilegio a la bd
 	 */
-	public function addPrivilegio(){
+	public function addArea(){
 		$data = array(
-			'nombre'       => $this->input->post('dnombre'),
-			'id_padre'     => ($this->input->post('dprivilegios')!=''? $this->input->post('dprivilegios'): '0'),
-			'mostrar_menu' => ($this->input->post('dmostrar_menu')=='si'? 't': 'f'),
-			'url_accion'   => $this->input->post('durl_accion'),
-			'url_icono'    => $this->input->post('durl_icono'),
-			'target_blank' => ($this->input->post('dtarget_blank')=='si'? 't': 'f')
+			'nombre'     => $this->input->post('dnombre'),
+			'id_padre'   => (intval($this->input->post('dareas'))>0? $this->input->post('dareas'): NULL),
+			'id_tipo'    => $this->input->post('did_tipo'),
+			'codigo'     => $this->input->post('dcodigo'),
+			'codigo_fin' => $this->input->post('dcodigo'),
 		);
-		$this->db->insert('privilegios', $data);
+
+		if ($data['id_padre'] !== NULL)
+			$data['codigo_fin'] = $this->getDescripCodigo($data['id_padre'], 'codigo').$data['codigo'];
+
+		$this->db->insert('compras_areas', $data);
 		return array(true, '');
 	}
 
@@ -120,154 +137,79 @@ class compras_areas_model extends CI_Model{
 	}
 
 
-	public function getDescripCodigo($id_area)
+	public function getDescripCodigo($id_area, $tipo='nombre')
 	{
 		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
 		                           FROM compras_areas 
 		                           WHERE id_area = {$id_area}")->row();
-		if($data->id_padre != '')
-			$nombre = $this->getDescripCodigo($data->id_padre).'/'.$data->nombre;
-		else
-			$nombre = $data->nombre;
-		return $nombre;
-	}
-
-
-
-
-	/**
-		* Verifica si el usuairo tiene ese privilegio, si lo tiene genera un link para accederlo
-		* @param unknown_type $url_accion
-		* @param unknown_type $config = array(
-		*			'params'    => 'id=1&tipo=2',
-		*			'btn_type'  => 'btn-danger',
-		*			'icon_type' => 'icon-white',
-		*			'attrs'     => array('onclick' => "msb.confirm('Estas seguro de eliminar el artículo?', 'Publicaciones', this); return false;")
-		*			);
-		*/
-	public function getLinkPrivSm($url_accion, $config){
-		$txt = '';
-		$priv = $this->tienePrivilegioDe('', $url_accion, true);
-		if(is_object($priv)){
-			$conf = array(
-        'nombre'    => $priv->nombre,
-				'params'    => '',
-				'btn_type'  => '',
-				'icon_type' => 'icon-white',
-				'attrs'     => array(),
-				'text_link' => 'hidden-tablet',
-        		'html'      => '',
-				);
-			$conf = array_merge($conf, $config);
-
-			$attrs = '';
-			foreach ($conf['attrs'] as $key => $value) {
-				$attrs .= $key.'="'.$value.'" ';
-			}
-
-			$txt = '<a class="btn '.$conf['btn_type'].'" href="'.base_url('panel/'.$priv->url_accion.'?'.$conf['params']).'" '.$attrs.' title="'.$priv->nombre.'">
-							<i class="icon-'.$priv->url_icono.' '.$conf['icon_type'].'"></i> <span class="'.$conf['text_link'].'">'.$conf['nombre'].'</span>'.$conf['html'].'</a>';
+		if($tipo === 'nombre')
+		{
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).'/'.$data->nombre;
+			else
+				$nombre = $data->nombre;
+			return $nombre;
+		}else
+		{
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).$data->codigo;
+			else
+				$nombre = $data->codigo;
+			return $nombre;
 		}
-		return $txt;
-	}
-
-	/**
-	 * Verifica si el usuario tiene ese privilegio de alerta, si lo tiene genera el html de la alerta con sus datos
-	 * @param unknown_type $url_accion
-	 */
-	public function getAlertPriv($url_accion){
-		$txt = '';
-		$priv = $this->tienePrivilegioDe('', $url_accion, true);
-		if(is_object($priv)){
-			list($controler,$metodo) = explode("/",$url_accion);
-			$txt = $this->alertas_model->{$metodo}();
-		}
-		return $txt;
 	}
 
 
-	/**
-	 * Verifica si el usuario tiene un privilegio en espesifico
-	 * @param unknown_type $id_privilegio
-	 * @param unknown_type $url_accion
-	 * @param unknown_type $returninfo
-	 */
-	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false, $id_usuario = null){
-		$band = false;
-		$url_accion = str_replace('index/', '', $url_accion);
-
-		$excluir = array_search($url_accion, $this->excepcion_privilegio);
-
-    $id_usuario = $id_usuario?:$this->session->userdata('id_usuario');
-
-		$sql = $id_privilegio!=''? "p.id = '".$id_privilegio."'": "lower(url_accion) = lower('".$url_accion."')";
-		$res = $this->db
-			->select('p.id, p.nombre, p.url_accion, p.mostrar_menu, p.url_icono')
-			->from('privilegios AS p')
-				->join('usuarios_privilegios AS ep', 'p.id = ep.privilegio_id', 'inner')
-			->where("ep.usuario_id = '".$id_usuario."' AND ".$sql."")
-			->limit(1)
-		->get();
-		if($res->num_rows() > 0){
-			if($returninfo)
-				return $res->row();
-			$band = true;
-		}
-		if($excluir !== false)
-			return true;
-		return $band;
-	}
-
-	public function getFrmPrivilegios($id_submenu=0, $firs=true, $tipo=null, $showp=false){
+	public function getFrmAreas($id_submenu=0, $firs=true, $tipo=null, $showp=false){
 		$txt = "";
 		$bande = true;
+		$sql_subm = $id_submenu==0? 'id_padre IS NULL': "id_padre = '{$id_submenu}'";
 
 		$res = $this->db
-			->select("p.id, p.nombre, p.id_padre, p.url_accion, p.url_icono, p.target_blank,
-				(SELECT count(privilegio_id) FROM usuarios_privilegios WHERE usuario_id = '".$this->session->userdata('id_usuario')."'
-					AND privilegio_id = p.id) as tiene_p")
-			->from('privilegios AS p')
-			->where("p.id_padre = '".$id_submenu."'")
-			->order_by('p.nombre', 'asc')
+			->select("id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre")
+			->from('compras_areas')
+			->where("status = 't' AND {$sql_subm}")
+			->order_by('codigo_fin', 'asc')
 		->get();
+
 		$txt .= $firs? '<ul class="treeview">': '<ul>';
 		foreach($res->result() as $data){
 			$res1 = $this->db
-				->select('Count(p.id) AS num')
-				->from('privilegios AS p')
-				->where("p.id_padre = '".$data->id."'")
+				->select('Count(id_area) AS num')
+				->from('compras_areas')
+				->where("id_padre = '".$data->id_area."'")
 			->get();
 			$data1 = $res1->row();
 
 			if($tipo != null && !is_array($tipo)){
-				$set_nombre = 'dprivilegios';
-				$set_val = set_radio($set_nombre, $data->id, ($tipo==$data->id? true: false));
+				$set_nombre = 'dareas';
+				$set_val = set_radio($set_nombre, $data->id_area, ($tipo==$data->id_area? true: false));
 				$tipo_obj = 'radio';
 			}else{
-				$set_nombre = 'dprivilegios[]';
+				$set_nombre = 'dareas[]';
 				if(is_array($tipo))
-					$set_val = set_checkbox($set_nombre, $data->id,
-							(array_search($data->id, $tipo)!==false? true: false) );
+					$set_val = set_checkbox($set_nombre, $data->id_area,
+							(array_search($data->id_area, $tipo)!==false? true: false) );
 				else
-					$set_val = set_checkbox($set_nombre, $data->id);
+					$set_val = set_checkbox($set_nombre, $data->id_area);
 				$tipo_obj = 'checkbox';
 			}
 
 			if($bande==true && $firs==true && $showp==true){
 				$txt .= '<li><label style="font-size:11px;">
-				<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="0" '.$set_val.($data->id_padre==0?  ' checked': '').'> Padre</label>
+				<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" data-tipo="0" value="0" '.$set_val.($data->id_padre==0?  ' checked': '').'> Padre</label>
 				</li>';
 				$bande = false;
 			}
 
 			if($data1->num > 0){
 				$txt .= '<li><label style="font-size:11px;">
-					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="'.$data->id.'" '.$set_val.'> '.$data->nombre.'</label>
-					'.$this->getFrmPrivilegios($data->id, false, $tipo).'
+					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" data-tipo="'.$data->id_tipo.'" value="'.$data->id_area.'" '.$set_val.'> '.$data->codigo_fin.' - '.$data->nombre.'</label>
+					'.$this->getFrmAreas($data->id_area, false, $tipo).'
 				</li>';
 			}else{
 				$txt .= '<li><label style="font-size:11px;">
-					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" value="'.$data->id.'" '.$set_val.'> '.$data->nombre.'</label>
+					<input type="'.$tipo_obj.'" name="'.$set_nombre.'" data-uniform="false" data-tipo="'.$data->id_tipo.'" value="'.$data->id_area.'" '.$set_val.'> '.$data->codigo_fin.' - '.$data->nombre.'</label>
 				</li>';
 			}
 			$res1->free_result();
@@ -349,7 +291,8 @@ class compras_areas_model extends CI_Model{
 	{
 		$query = $this->db->query("SELECT *
 		                           FROM compras_areas_tipo
-		                           WHERE status = 't'");
+		                           WHERE status = 't'
+		                           ORDER BY id_tipo ASC");
 		return $query->result();
 	}
 

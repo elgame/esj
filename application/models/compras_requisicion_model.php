@@ -192,19 +192,19 @@ class compras_requisicion_model extends CI_Model {
     return array('passes' => true, 'msg' => 3);
   }
 
-  public function agregarData($data)
-  {
-    $this->db->insert('compras_ordenes', $data);
+  // public function agregarData($data)
+  // {
+  //   $this->db->insert('compras_ordenes', $data);
 
-    return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
-  }
+  //   return array('passes' => true, 'msg' => 3, 'id_orden' => $this->db->insert_id());
+  // }
 
-  public function agregarProductosData($data)
-  {
-    $this->db->insert_batch('compras_productos', $data);
+  // public function agregarProductosData($data)
+  // {
+  //   $this->db->insert_batch('compras_productos', $data);
 
-    return array('passes' => true, 'msg' => 3);
-  }
+  //   return array('passes' => true, 'msg' => 3);
+  // }
 
   /**
    * Actualiza los datos de una orden de compra junton con sus productos.
@@ -369,160 +369,272 @@ class compras_requisicion_model extends CI_Model {
 
 
       // Generar las ordenes compra
-      // //envia el email al momento de autorizar la orden
-      // if(isset($data['autorizado']))
-      //   if($data['autorizado'] == 't')
-      //     $this->sendEmail($idOrden, $_POST['proveedorId']);
+      if(isset($data['autorizado']))
+        if($data['autorizado'] == 't')
+          $this->crearOrdenes($idOrden);
+      
     }
+
 
     return array('passes' => true, 'msg' => 7, 'autorizado' => isset($data['autorizado']));
   }
 
-  /**
-   * Agrega una compra. Esto es cuando se agregan o ligan ordenes a una factura.
-   *
-   * @param  string $proveedorId
-   * @param  string $ordenesIds
-   * @return array
-   */
-  public function agregarCompra($proveedorId, $empresaId, $ordenesIds, $xml = null)
+
+  public function crearOrdenes($idOrden)
   {
-    // obtiene un array con los ids de las ordenes a ligar con la compra.
-    $ordenesIds = explode(',', $ordenesIds);
+    $this->load->model('compras_ordenes_model');
 
-    // datos de la compra.
-    $data = array(
-      'id_proveedor'   => $proveedorId,
-      'id_empresa'     => $empresaId,
-      'id_empleado'    => $this->session->userdata('id_usuario'),
-      'serie'          => $_POST['serie'],
-      'folio'          => $_POST['folio'],
-      'condicion_pago' => $_POST['condicionPago'],
-      'plazo_credito'  => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
-      // 'tipo_documento' => $_POST['algo'],
-      'fecha'          => str_replace('T', ' ', $_POST['fecha']),
-      'subtotal'       => $_POST['totalImporte'],
-      'importe_iva'    => $_POST['totalImpuestosTrasladados'],
-      'importe_ieps'   => $_POST['totalIeps'],
-      'total'          => $_POST['totalOrden'],
-      'concepto'       => 'Concepto',
-      'isgasto'        => 'f',
-      'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
-    );
-
-    // //si es contado, se verifica que la cuenta tenga saldo
-    // if ($data['condicion_pago'] == 'co')
-    // {
-    //   $this->load->model('banco_cuentas_model');
-    //   $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
-    //   if ($cuenta['cuentas'][0]->saldo < $data['total'])
-    //     return array('passes' => false, 'msg' => 30);
-    // }
-
-    // Realiza el upload del XML.
-    if ($xml && $xml['tmp_name'] !== '')
+    $data = $this->info($idOrden, true, false)['info'][0];
+    
+    // Se asignan los productos seleccionados x cada proveedor
+    foreach ($data->productos2 as $key => $value)
     {
-      $this->load->library("my_upload");
-      $this->load->model('proveedores_model');
-
-      $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
-      $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
-
-      $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
-
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => $xmlName,
-      );
-      $this->my_upload->initialize($config_upload);
-
-      $xmlData = $this->my_upload->do_upload('xml');
-
-      $xmlFile     = explode('application', $xmlData['full_path']);
-      $data['xml'] = 'application'.$xmlFile[1];
-    }
-
-    // inserta la compra
-    $this->db->insert('compras', $data);
-
-    // obtiene el id de la compra insertada.
-    $compraId = $this->db->insert_id();
-
-    // //si es contado, se registra el abono y el retiro del banco
-    // if ($data['condicion_pago'] == 'co')
-    // {
-    //   $this->load->model('cuentas_pagar_model');
-    //   $data_abono = array('fecha'             => $data['fecha'],
-    //                     'concepto'            => 'Pago de contado',
-    //                     'total'               => $data['total'],
-    //                     'id_cuenta'           => $this->input->post('dcuenta'),
-    //                     'ref_movimiento'      => $this->input->post('dreferencia'),
-    //                     'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
-    //   $_GET['tipo'] = 'f';
-    //   $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
-    // }
-
-    // Actualiza los productos.
-    $productos_compra = $productos_compra2 = array();
-    foreach ($_POST['concepto'] as $key => $producto)
-    {
-      if(isset($productos_compra[$_POST['ordenId'][$key]]))
-        $productos_compra[$_POST['ordenId'][$key]]++;
-      else{
-        $productos_compra[$_POST['ordenId'][$key]] = 1;
-        $productos_compra2[$_POST['ordenId'][$key]] = 0;
-      }
-
-      foreach ($_POST['productoCom'] as $keyp => $produc)
+      foreach ($data->proveedores as $keyp => $prov)
       {
-        $produc = explode('|', $produc);
-        if($_POST['ordenId'][$key] === $produc[0] && $_POST['row'][$key] === $produc[1]){
-          $productos_compra2[$_POST['ordenId'][$key]]++;
-          $prodData = array(
-            'precio_unitario'      => $_POST['valorUnitario'][$key],
-            'importe'              => $_POST['importe'][$key],
-            'iva'                  => $_POST['trasladoTotal'][$key],
-            'retencion_iva'        => $_POST['retTotal'][$key],
-            'total'                => $_POST['total'][$key],
-            'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-            'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
-            'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
-            'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
-            'id_compra'            => $compraId,
-          );
-
-          $this->db->update('compras_productos', $prodData, array(
-            'id_orden' => $_POST['ordenId'][$key],
-            'num_row'  => $_POST['row'][$key]
-          ));
+        if ($value->id_proveedor == $prov['id_proveedor'] && $value->prod_sel == 't')
+        {
+          $data->proveedores[$keyp]['productos'][] = $value;
         }
       }
-
     }
 
-    // construye el array de las ordenes a ligar con la compra.
-    $ordenes = array();
-    foreach ($ordenesIds as $ordenId)
+    // Se crean los ordenes de compra con productos por proveedor
+    foreach ($data->proveedores as $key => $value)
     {
-      $ordenes[] = array(
-        'id_compra' => $compraId,
-        'id_orden'  => $ordenId,
-      );
+      if(isset($value['productos']) && count($value['productos']) > 0)
+      {
+        $dataOrden = array(
+          'id_empresa'         => $data->id_empresa,
+          'id_proveedor'       => $value['id_proveedor'],
+          'id_departamento'    => $data->id_departamento,
+          'id_empleado'        => $data->id_empleado,
+          'folio'              => $this->compras_ordenes_model->folio($data->tipo_orden),
+          'status'             => 'p',
+          'autorizado'         => 't',
+          'fecha_autorizacion' => $data->fecha_autorizacion,
+          'fecha_aceptacion'   => $data->fecha_aceptacion,
+          'fecha_creacion'     => $data->fecha,
+          'tipo_pago'          => $data->tipo_pago,
+          'tipo_orden'         => $data->tipo_orden,
+          'solicito'           => $data->empleado_solicito,
+          'id_cliente'         => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
+          'descripcion'        => $data->descripcion,
+          'id_autorizo'        => $data->id_autorizo,
+        );
+        //si se registra a un vehiculo
+        if (is_numeric($data->id_vehiculo))
+        {
+          $dataOrden['tipo_vehiculo'] = $data->tipo_vehiculo;
+          $dataOrden['id_vehiculo']   = $data->id_vehiculo;
+        }
+        //si es flete
+        if ($data->tipo_orden == 'f')
+        {
+          $dataOrden['ids_facrem'] = $data->ids_facrem;
+        }
 
-      // Cambia a facturada hasta q todos los productos se ligan a las compras
-      if($productos_compra[$ordenId] == $productos_compra2[$ordenId])
-        $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $ordenId));
+        // si se registra a un vehiculo
+        $veiculoData = array();
+        if (is_numeric($data->id_vehiculo))
+        {
+          //si es de tipo gasolina o diesel se registra los litros
+          if($data->tipo_vehiculo !== 'ot')
+          {
+            $veiculoData = array(
+              'id_orden'   => null,
+              'kilometros' => $data->gasolina[0]->kilometros,
+              'litros'     => $data->gasolina[0]->litros,
+              'precio'     => $data->gasolina[0]->precio,
+            );
+          }
+        }
+
+        $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData);
+        $id_orden = $res['id_orden'];
+        
+        // Productos
+        $rows_compras = 0;
+        $productos = array();
+        foreach ($value['productos'] as $keypr => $prod)
+        {
+          $productos[] = array(
+            'id_orden'             => $id_orden,
+            'num_row'              => $rows_compras,
+            'id_producto'          => $prod->id_producto,
+            'id_presentacion'      => $prod->id_presentacion !== '' ? $prod->id_presentacion : null,
+            'descripcion'          => $prod->descripcion,
+            'cantidad'             => $prod->cantidad,
+            'precio_unitario'      => $prod->precio_unitario,
+            'importe'              => $prod->importe,
+            'iva'                  => $prod->iva,
+            'retencion_iva'        => $prod->retencion_iva,
+            'total'                => $prod->total,
+            'porcentaje_iva'       => $prod->porcentaje_iva,
+            'porcentaje_retencion' => $prod->porcentaje_retencion,
+            'faltantes'            => '0',
+            'observacion'          => $prod->observacion,
+            'ieps'                 => $prod->ieps,
+            'porcentaje_ieps'      => $prod->porcentaje_ieps,
+            'tipo_cambio'          => $prod->tipo_cambio,
+            'id_area'              => $prod->id_area,
+          );
+          $rows_compras++;
+        }
+
+        if(count($productos) > 0)
+          $this->compras_ordenes_model->agregarProductosData($productos);
+
+      }
     }
-    // inserta los ids de las ordenes.
-    $this->db->insert_batch('compras_facturas', $ordenes);
-
-    $respons['passes'] = true;
-
-    return $respons;
+    
   }
+
+
+  // /**
+  //  * Agrega una compra. Esto es cuando se agregan o ligan ordenes a una factura.
+  //  *
+  //  * @param  string $proveedorId
+  //  * @param  string $ordenesIds
+  //  * @return array
+  //  */
+  // public function agregarCompra($proveedorId, $empresaId, $ordenesIds, $xml = null)
+  // {
+  //   // obtiene un array con los ids de las ordenes a ligar con la compra.
+  //   $ordenesIds = explode(',', $ordenesIds);
+
+  //   // datos de la compra.
+  //   $data = array(
+  //     'id_proveedor'   => $proveedorId,
+  //     'id_empresa'     => $empresaId,
+  //     'id_empleado'    => $this->session->userdata('id_usuario'),
+  //     'serie'          => $_POST['serie'],
+  //     'folio'          => $_POST['folio'],
+  //     'condicion_pago' => $_POST['condicionPago'],
+  //     'plazo_credito'  => $_POST['plazoCredito'] !== '' ? $_POST['plazoCredito'] : 0,
+  //     // 'tipo_documento' => $_POST['algo'],
+  //     'fecha'          => str_replace('T', ' ', $_POST['fecha']),
+  //     'subtotal'       => $_POST['totalImporte'],
+  //     'importe_iva'    => $_POST['totalImpuestosTrasladados'],
+  //     'importe_ieps'   => $_POST['totalIeps'],
+  //     'total'          => $_POST['totalOrden'],
+  //     'concepto'       => 'Concepto',
+  //     'isgasto'        => 'f',
+  //     'status'         => $_POST['condicionPago'] ===  'co' ? 'pa' : 'p',
+  //   );
+
+  //   // //si es contado, se verifica que la cuenta tenga saldo
+  //   // if ($data['condicion_pago'] == 'co')
+  //   // {
+  //   //   $this->load->model('banco_cuentas_model');
+  //   //   $cuenta = $this->banco_cuentas_model->getCuentas(false, $_POST['dcuenta']);
+  //   //   if ($cuenta['cuentas'][0]->saldo < $data['total'])
+  //   //     return array('passes' => false, 'msg' => 30);
+  //   // }
+
+  //   // Realiza el upload del XML.
+  //   if ($xml && $xml['tmp_name'] !== '')
+  //   {
+  //     $this->load->library("my_upload");
+  //     $this->load->model('proveedores_model');
+
+  //     $proveedor = $this->proveedores_model->getProveedorInfo($proveedorId);
+  //     $path      = $this->creaDirectorioProveedorCfdi($proveedor['info']->nombre_fiscal);
+
+  //     $xmlName   = ($_POST['serie'] !== '' ? $_POST['serie'].'-' : '') . $_POST['folio'].'.xml';
+
+  //     $config_upload = array(
+  //       'upload_path'     => $path,
+  //       'allowed_types'   => '*',
+  //       'max_size'        => '2048',
+  //       'encrypt_name'    => FALSE,
+  //       'file_name'       => $xmlName,
+  //     );
+  //     $this->my_upload->initialize($config_upload);
+
+  //     $xmlData = $this->my_upload->do_upload('xml');
+
+  //     $xmlFile     = explode('application', $xmlData['full_path']);
+  //     $data['xml'] = 'application'.$xmlFile[1];
+  //   }
+
+  //   // inserta la compra
+  //   $this->db->insert('compras', $data);
+
+  //   // obtiene el id de la compra insertada.
+  //   $compraId = $this->db->insert_id();
+
+  //   // //si es contado, se registra el abono y el retiro del banco
+  //   // if ($data['condicion_pago'] == 'co')
+  //   // {
+  //   //   $this->load->model('cuentas_pagar_model');
+  //   //   $data_abono = array('fecha'             => $data['fecha'],
+  //   //                     'concepto'            => 'Pago de contado',
+  //   //                     'total'               => $data['total'],
+  //   //                     'id_cuenta'           => $this->input->post('dcuenta'),
+  //   //                     'ref_movimiento'      => $this->input->post('dreferencia'),
+  //   //                     'id_cuenta_proveedor' => $this->input->post('fcuentas_proveedor') );
+  //   //   $_GET['tipo'] = 'f';
+  //   //   $respons = $this->cuentas_pagar_model->addAbono($data_abono, $compraId);
+  //   // }
+
+  //   // Actualiza los productos.
+  //   $productos_compra = $productos_compra2 = array();
+  //   foreach ($_POST['concepto'] as $key => $producto)
+  //   {
+  //     if(isset($productos_compra[$_POST['ordenId'][$key]]))
+  //       $productos_compra[$_POST['ordenId'][$key]]++;
+  //     else{
+  //       $productos_compra[$_POST['ordenId'][$key]] = 1;
+  //       $productos_compra2[$_POST['ordenId'][$key]] = 0;
+  //     }
+
+  //     foreach ($_POST['productoCom'] as $keyp => $produc)
+  //     {
+  //       $produc = explode('|', $produc);
+  //       if($_POST['ordenId'][$key] === $produc[0] && $_POST['row'][$key] === $produc[1]){
+  //         $productos_compra2[$_POST['ordenId'][$key]]++;
+  //         $prodData = array(
+  //           'precio_unitario'      => $_POST['valorUnitario'][$key],
+  //           'importe'              => $_POST['importe'][$key],
+  //           'iva'                  => $_POST['trasladoTotal'][$key],
+  //           'retencion_iva'        => $_POST['retTotal'][$key],
+  //           'total'                => $_POST['total'][$key],
+  //           'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+  //           'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+  //           'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
+  //           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+  //           'id_compra'            => $compraId,
+  //         );
+
+  //         $this->db->update('compras_productos', $prodData, array(
+  //           'id_orden' => $_POST['ordenId'][$key],
+  //           'num_row'  => $_POST['row'][$key]
+  //         ));
+  //       }
+  //     }
+
+  //   }
+
+  //   // construye el array de las ordenes a ligar con la compra.
+  //   $ordenes = array();
+  //   foreach ($ordenesIds as $ordenId)
+  //   {
+  //     $ordenes[] = array(
+  //       'id_compra' => $compraId,
+  //       'id_orden'  => $ordenId,
+  //     );
+
+  //     // Cambia a facturada hasta q todos los productos se ligan a las compras
+  //     if($productos_compra[$ordenId] == $productos_compra2[$ordenId])
+  //       $this->db->update('compras_ordenes', array('status' => 'f'), array('id_orden' => $ordenId));
+  //   }
+  //   // inserta los ids de las ordenes.
+  //   $this->db->insert_batch('compras_facturas', $ordenes);
+
+  //   $respons['passes'] = true;
+
+  //   return $respons;
+  // }
 
   public function cancelar($idOrden)
   {
@@ -572,7 +684,7 @@ class compras_requisicion_model extends CI_Model {
       $query->free_result();
       if ($full)
       {
-        // $sql_produc = $prodAcep? " AND cp.status = 'a' AND cp.id_compra IS NULL": '';
+        $sql_produc = $prodAcep? " AND cp.prod_sel = 't'": '';
         // $sql_produc .= $idCompra!==NULL? " AND (cp.id_compra = {$idCompra} OR (cp.id_compra IS NULL AND Date(cp.fecha_aceptacion) <= '2014-05-26'))": '';
         $query = $this->db->query(
           "SELECT cp.id_requisicion, cp.num_row, p.id_proveedor, p.nombre_fiscal,
@@ -580,7 +692,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.observacion,
+                  cp.porcentaje_retencion, cp.observacion, cp.prod_sel, 
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
@@ -588,9 +700,10 @@ class compras_requisicion_model extends CI_Model {
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
            LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area 
-           WHERE cp.id_requisicion = {$data['info'][0]->id_requisicion}
+           WHERE cp.id_requisicion = {$data['info'][0]->id_requisicion} {$sql_produc}
            ORDER BY p.id_proveedor ASC, cp.id_producto ASC");
 
+        $data['info'][0]->productos2 = array();
         $data['info'][0]->productos = array();
         $data_proveedores = $data['info'][0]->proveedores = $data['info'][0]->data_desCodigos = array();
         if ($query->num_rows() > 0)
@@ -599,20 +712,30 @@ class compras_requisicion_model extends CI_Model {
           $provee = $productos[0]->id_proveedor;
           foreach ($productos as $key => $value)
           {
+            $data['info'][0]->productos2[] = clone $value;
+
             $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor, 
                                                           'nombre_fiscal' => $value->nombre_fiscal);
 
             if($provee == $value->id_proveedor)
             {
-              $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
+              if($value->id_area != '')
+                $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
 
-              $data['info'][0]->productos[$value->id_producto.$value->num_row] = $value;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'importe'.$value->id_proveedor}         = $value->importe;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'iva'.$value->id_proveedor}             = $value->iva;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
+              
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->iva                                      = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_iva                            = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->total                                    = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->ieps                                     = 0;
             }else
             {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
@@ -1115,6 +1238,7 @@ class compras_requisicion_model extends CI_Model {
       {
         $orden['info'][0]->proveedores[$keypp]['subtotal']  = 0;
         $orden['info'][0]->proveedores[$keypp]['iva']       = 0;
+        $orden['info'][0]->proveedores[$keypp]['ieps']      = 0;
         $orden['info'][0]->proveedores[$keypp]['total']     = 0;
         $orden['info'][0]->proveedores[$keypp]['retencion'] = 0;
       }
@@ -1176,6 +1300,7 @@ class compras_requisicion_model extends CI_Model {
         {
           $orden['info'][0]->proveedores[$keypp]['subtotal']  += floatval($prod->{'importe'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
           $orden['info'][0]->proveedores[$keypp]['iva']       += floatval($prod->{'iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
+          $orden['info'][0]->proveedores[$keypp]['ieps']      += floatval($prod->{'ieps'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
           $orden['info'][0]->proveedores[$keypp]['total']     += floatval($prod->{'total'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
           $orden['info'][0]->proveedores[$keypp]['retencion'] += floatval($prod->{'retencion_iva'.$orden['info'][0]->proveedores[$keypp]['id_proveedor']}/$tipoCambio);
         }
@@ -1193,6 +1318,13 @@ class compras_requisicion_model extends CI_Model {
       $pdf->Row(array('IVA', String::formatoNumero($orden['info'][0]->proveedores[0]['iva'], 2, '$', false),
                             String::formatoNumero($orden['info'][0]->proveedores[1]['iva'], 2, '$', false),
                             String::formatoNumero($orden['info'][0]->proveedores[2]['iva'], 2, '$', false)), false, true);
+      if ($orden['info'][0]->proveedores[0]['ieps'] > 0)
+      {
+        $pdf->SetX(79);
+        $pdf->Row(array('IEPS', String::formatoNumero($orden['info'][0]->proveedores[0]['ieps'], 2, '$', false),
+                                    String::formatoNumero($orden['info'][0]->proveedores[1]['ieps'], 2, '$', false),
+                                    String::formatoNumero($orden['info'][0]->proveedores[2]['ieps'], 2, '$', false)), false, true);
+      }
       if ($orden['info'][0]->proveedores[0]['retencion'] > 0)
       {
         $pdf->SetX(79);

@@ -978,6 +978,7 @@ class Ventas_model extends privilegios_model{
     $pdf->limiteY = 250;
 
     $pdf->setY($pdf->GetY() + 1);
+    $hay_prod_certificados = false;
     foreach($conceptos as $key => $item)
     {
       $band_head = false;
@@ -1001,14 +1002,28 @@ class Ventas_model extends privilegios_model{
       $pdf->SetX(0);
       $pdf->SetAligns($aligns2);
       $pdf->SetWidths($widths);
-      $pdf->Row(array(
-        $item->cantidad,
-        $item->unidad,
-        $item->descripcion,
-        $item->certificado === 't' ? 'Certificado' : '',
-        String::formatoNumero($item->precio_unitario, 2, '$', false),
-        String::formatoNumero($item->importe, 2, '$', false),
-      ), false, true, null, 2, 1);
+
+      $printRow = true;
+      if($factura['info']->sin_costo == 't')
+      {
+        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+            $item->id_clasificacion == '53')
+          $printRow = false;
+      }
+
+      if ($item->certificado === 't')
+        $hay_prod_certificados = true;
+      
+      if($printRow)
+        $pdf->Row(array(
+          $item->cantidad,
+          $item->unidad,
+          $item->descripcion,
+          $item->certificado === 't' ? 'Certificado' : '',
+          String::formatoNumero($item->precio_unitario, 2, '$', false),
+          String::formatoNumero($item->importe, 2, '$', false),
+        ), false, true, null, 2, 1);
     }
 
     /////////////
@@ -1126,6 +1141,18 @@ class Ventas_model extends privilegios_model{
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
         $pdf->Row(array($factura['info']->observaciones), true, 1);
+    }
+
+    if($hay_prod_certificados)
+    {
+      if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+          $pdf->AddPage();
+
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(10, $pdf->GetY());
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(196));
+      $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
     }
 
     ////////////////////
