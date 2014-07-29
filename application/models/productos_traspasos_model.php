@@ -133,7 +133,7 @@ class productos_traspasos_model extends CI_Model {
 
         $productosSalida = array();
 
-        foreach ($data['productos_id'] as $key => $productoId)
+        foreach ($data['productos_id_base'] as $key => $productoId)
         {
             $productosSalida[] = array(
                 'id_salida'       => $salida['id_salida'],

@@ -94,9 +94,10 @@ var productos = (function($) {
             $.getJSON(base_url + 'panel/productos_traspasos/ajax_verifica_producto/', getData, function(response, textStatus) {
                 if (response.existe) {
                     var cantidad = $tr.find('.prod-cantidad').val(),
-                        precio = $tr.find('.precio_producto').val();
+                        precio = $tr.find('.precio_producto').val(),
+                        id_prod_base = $tr.find('.idproducto').val();
 
-                    add(response.producto, cantidad, precio);
+                    add(response.producto, id_prod_base, cantidad, precio);
                 }
             });
         } else {
@@ -104,12 +105,13 @@ var productos = (function($) {
         }
     }
 
-    function add (producto, cantidad, precio) {
+    function add (producto, id_prod_base, cantidad, precio) {
         var $table = $('#table-productos-traspasar');
 
         var html = '<tr>' +
                         '<td>' + producto.nombre_producto +
                             ' <input type="hidden" name="producto_nombre[]" value="' + producto.nombre_producto + '" class="input traspaso-nombre">' +
+                            ' <input type="hidden" name="producto_id_base[]" value="' + id_prod_base + '" class="input traspaso-id-base">' +
                             ' <input type="hidden" name="producto_id[]" value="' + producto.id_producto + '" class="input traspaso-id">' +
                             ' <input type="hidden" name="producto_precio[]" value="' + (precio || 0) + '" class="input traspaso-precio">' +
                         '</td>' +
@@ -131,12 +133,14 @@ var productos = (function($) {
         loader.create();
 
         var productos_nombre = [],
+            productos_id_base = [],
             productos_id = [],
             productos_cantidad = [],
             productos_descripcion = [],
             productos_precio = [];
 
         productos_nombre = arrayCollection('.traspaso-nombre');
+        productos_id_base = arrayCollection('.traspaso-id-base');
         productos_id = arrayCollection('.traspaso-id');
         productos_cantidad = arrayCollection('.traspaso-cantidad');
         productos_descripcion = arrayCollection('.traspaso-desc');
@@ -151,6 +155,7 @@ var productos = (function($) {
                 empresa_id_para: $('#fid_empresa_to').val(),
                 descripcion: $('#descripcion').val(),
                 productos_nombre: productos_nombre,
+                productos_id_base: productos_id_base,
                 productos_id: productos_id,
                 productos_cantidad: productos_cantidad,
                 productos_descripcion: productos_descripcion,
