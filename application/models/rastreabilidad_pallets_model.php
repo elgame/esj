@@ -81,6 +81,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						LEFT JOIN calibres AS sz ON rpr.id_size = sz.id_calibre
 					WHERE id_pallet = {$id_pallet}");
 				$response['rendimientos'] = $result->result();
+        $response['info']->calibre_fijo_origen = ($response['info']->calibre_fijo==''? NULL: $response['info']->calibre_fijo);
         if($response['info']->calibre_fijo == '')
         {
           $nombre_calibres = array();

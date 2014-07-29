@@ -14,7 +14,7 @@ class productos_traspasos_model extends CI_Model {
         $this->load->library('pagination');
 
         $params = array(
-            'result_items_per_page' => '50',
+            'result_items_per_page' => '30',
             'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
         );
 

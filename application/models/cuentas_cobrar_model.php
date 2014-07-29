@@ -1876,8 +1876,9 @@ class cuentas_cobrar_model extends privilegios_model{
     $response = array();
     $response = $this->db->query(
         "SELECT
-            f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva, f.total, Date(fa.fecha) AS fecha_pago,
-            fa.total AS total_abono, ((fa.total*100/f.total)*f.importe_iva/100) AS importe_iva
+            f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva AS fimporte_iva, f.total, Date(fa.fecha) AS fecha_pago,
+            fa.total AS total_abono, ((fa.total*100/f.total)*f.importe_iva/100) AS importe_iva, 
+            (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= fa.id_abono AND id_factura = f.id_factura) AS num
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN clientes AS p ON p.id_cliente = f.id_cliente
@@ -1886,12 +1887,14 @@ class cuentas_cobrar_model extends privilegios_model{
             AND (Date(fa.fecha) >= '{$fecha1}' AND Date(fa.fecha) <= '{$fecha2}')
             {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
           ORDER BY {$order_by}")->result();
-      // foreach ($response as $key => $value)
-      // {
-      //   $value->fecha_pago = $value->fecha2;
-      //   if(strtotime($value->fecha) >= strtotime($value->fecha2))
-      //     $value->fecha_pago = $value->fecha;
-      // }
+    foreach ($response as $keyi => $facid)
+    {
+    	$facid->importe_iva = 0;
+      if($facid->num == 1){
+        $facid->importe_iva = $facid->fimporte_iva;
+        // $facid->importe_retencion += $infodac->retencion_iva;
+      }
+    }
 
     return $response;
   }

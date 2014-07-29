@@ -17,6 +17,7 @@ class inventario_model extends privilegios_model{
 	public function getCProveedorData()
   	{
 		$sql = '';
+	   $idsproveedores = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -30,15 +31,19 @@ class inventario_model extends privilegios_model{
 		$client_default = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
 		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+     	$idsproveedores .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    	$sel_proveedores = false;
+	    if(is_array($this->input->get('ids_proveedores')))
+	    {
+	    	$idsproveedores .= " AND id_proveedor IN(".implode(',', $this->input->get('ids_proveedores')).")";
+	    	$sel_proveedores = true;
 	    }
 
-	    $idsproveedores = '0';
-	    if(is_array($this->input->get('ids_proveedores')))
-	    	$idsproveedores = implode(',', $this->input->get('ids_proveedores'));
-
-	    $proveedores = $this->db->query("SELECT id_proveedor, nombre_fiscal FROM proveedores WHERE id_proveedor IN({$idsproveedores})");
+	    $proveedores = $this->db->query("SELECT id_proveedor, nombre_fiscal FROM proveedores WHERE 1 = 1 ".$idsproveedores);
 	    $response = array();
 	    foreach ($proveedores->result() as $key => $proveedor)
 	    {
@@ -55,8 +60,11 @@ class inventario_model extends privilegios_model{
 						) AS cp ON p.id_producto = cp.id_producto
 	    				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
 					ORDER BY p.nombre ASC");
-	    	$proveedor->productos = $productos->result();
-	    	$response[] = $proveedor;
+	    	if ($productos->num_rows() > 0 || $sel_proveedores)
+	    	{
+		    	$proveedor->productos = $productos->result();
+		    	$response[] = $proveedor;
+	    	}
 	    }
 
 		return $response;
@@ -77,7 +85,7 @@ class inventario_model extends privilegios_model{
 	    if ($empresa['info']->logo !== '')
 	      $pdf->logo = $empresa['info']->logo;
 
-	    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Proveedor';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 		$pdf->AliasNbPages();

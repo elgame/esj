@@ -82,13 +82,13 @@ $(function(){
   $(document).on('click', '.remove_proveedor', removeProveedor);
 
   $("#frmverform").submit(function(){
-    if ($(".ids_proveedores").length > 0) {
+    // if ($(".ids_proveedores").length > 0) {
 
       return true;
-    }else{
-      noty({"text":"Selecciona al menos un Proveedor", "layout":"topRight", "type":"error"});
-      return false;
-    }
+    // }else{
+    //   noty({"text":"Selecciona al menos un Proveedor", "layout":"topRight", "type":"error"});
+    //   return false;
+    // }
   });
 
   /****************

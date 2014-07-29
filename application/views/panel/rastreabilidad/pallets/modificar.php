@@ -71,8 +71,8 @@
                 <div class="span12">
                   <div class="span4">
                     <label class="span4" for="fcalibre_fijo">Calibre (Presentacion)</label>
-                    <input type="text" name="fcalibre_fijo" id="fcalibre_fijo" class="span8" value="<?php echo (isset($data->calibre_fijo)? $data->calibre_fijo: ''); ?>"
-                      maxlength="180" placeholder="Calibre" required data-next="fclasificacion">
+                    <input type="text" name="fcalibre_fijo" id="fcalibre_fijo" class="span8" value="<?php echo (isset($data->calibre_fijo_origen)? $data->calibre_fijo: ''); ?>"
+                      maxlength="180" placeholder="Calibre" data-next="fclasificacion">
                   </div>
                 </div>
                 <div class="clearfix"></div>
