@@ -114,6 +114,8 @@
                           $texto = 'Productos';
                         elseif($orden->tipo_orden == 'f')
                           $texto = 'Flete';
+                        elseif($orden->tipo_orden == 'oc')
+                          $texto = 'Orden';
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>

@@ -265,7 +265,7 @@
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: $('#tipoOrden').find('option:selected').val()
+              tipo: ($('#tipoOrden').find('option:selected').val()=='oc'? 'd': $('#tipoOrden').find('option:selected').val()),
             },
             success: function (data) {
               response(data);
@@ -342,7 +342,7 @@
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: $('#tipoOrden').find('option:selected').val()
+              tipo: ($('#tipoOrden').find('option:selected').val()=='oc'? 'd': $('#tipoOrden').find('option:selected').val()),
             },
             success: function (data) {
               response(data);

@@ -1683,30 +1683,38 @@ class nomina_fiscal_model extends CI_Model {
    * @param string $numSemana
    * @return array
    */
-  public function addIncapaciades($empleadoId, array $datos, $numSemana)
+  public function addIncapaciades($empleadoId, array $datos, $numSemana, $anio=null)
   {
-    if($datos['idias'] > 0)
+    $anio = $anio==null? date("Y"): $anio;
+    $this->load->model('usuarios_model');
+    $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
+    //Elimina los seleccionados
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana, $anio, $empled['info'][0]->dia_inicia_semana);
+    if(count($datos['eliminar_incapacidad']) > 0)
+      $this->db->delete('nomina_asistencia', "id_asistencia IN(".implode(',', $datos['eliminar_incapacidad']).") AND
+          id_usuario = {$empleadoId}");
+
+    foreach ($datos['idias'] as $key => $value)
     {
-      $sqlData = array(
-        'fecha_ini'           => $datos['ifecha'],
-        'fecha_fin'           => String::suma_fechas($datos['ifecha'], $datos['idias']-1),
-        'id_usuario'          => $empleadoId,
-        'tipo'                => 'in',
-        'id_clave'            => $datos['itipo_inciden'],
-        'dias_autorizados'    => $datos['idias'],
-        'ramo_seguro'         => $datos['iramo_seguro'],
-        'control_incapacidad' => $datos['icontrol_incapa'],
-        'folio'               => $datos['ifolio'],
-      );
-      if(isset($datos['iid_asistencia']{0}))
+      if($datos['idias'][$key] > 0)
       {
-        $this->db->update('nomina_asistencia', $sqlData, "id_asistencia = {$datos['iid_asistencia']}");
-      }else
-        $this->db->insert('nomina_asistencia', $sqlData);
-    }else
-    {
-      if(isset($datos['iid_asistencia']{0}))
-        $this->db->delete('nomina_asistencia', "id_asistencia = {$datos['iid_asistencia']}");
+        $sqlData = array(
+          'fecha_ini'           => $datos['ifecha'][$key],
+          'fecha_fin'           => String::suma_fechas($datos['ifecha'][$key], $datos['idias'][$key]-1),
+          'id_usuario'          => $empleadoId,
+          'tipo'                => 'in',
+          'id_clave'            => $datos['itipo_inciden'][$key],
+          'dias_autorizados'    => $datos['idias'][$key],
+          'ramo_seguro'         => $datos['iramo_seguro'][$key],
+          'control_incapacidad' => $datos['icontrol_incapa'][$key],
+          'folio'               => $datos['ifolio'][$key],
+        );
+        if(isset($datos['iid_asistencia'][$key]{0}))
+        {
+          $this->db->update('nomina_asistencia', $sqlData, "id_asistencia = {$datos['iid_asistencia'][$key]}");
+        }else
+          $this->db->insert('nomina_asistencia', $sqlData);
+      }
     }
 
     return array('passes' => true);
@@ -1778,13 +1786,12 @@ class nomina_fiscal_model extends CI_Model {
     $query = $this->db->query("SELECT id_asistencia, DATE(fecha_ini) AS fecha_ini, DATE(fecha_fin) AS fecha_fin, id_usuario, tipo,
                                 id_clave, dias_autorizados, ramo_seguro, control_incapacidad, folio
                                FROM nomina_asistencia
-                               WHERE tipo = 'in' AND id_usuario = {$empleadoId} AND DATE(fecha_ini) BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'
-                               LIMIT 1");
+                               WHERE tipo = 'in' AND id_usuario = {$empleadoId} AND DATE(fecha_ini) BETWEEN '{$semana['fecha_inicio']}' AND '{$semana['fecha_final']}'");
 
     $incapacidad = array();
     if ($query->num_rows() > 0)
     {
-      $incapacidad = $query->row();
+      $incapacidad = $query->result();
     }
 
     return $incapacidad;

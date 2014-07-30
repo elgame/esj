@@ -181,7 +181,7 @@ class compras_requisicion extends MY_Controller {
 
       $this->load->view('panel/header', $params);
       // $this->load->view('panel/general/menu', $params);
-      $this->load->view('panel/compras_ordenes/agregar', $params);
+      $this->load->view('panel/ordenes_requisicion/agregar', $params);
       $this->load->view('panel/footer');
     }
     else

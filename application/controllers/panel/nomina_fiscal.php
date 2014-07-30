@@ -507,7 +507,7 @@ class nomina_fiscal extends MY_Controller {
 
     //Incapacidades
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
-    $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem']);
+    $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     if(isset($_GET['msg']{0}))
     {

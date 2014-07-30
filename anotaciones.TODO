@@ -1,10 +1,10 @@
 
 
 -Archivo Dim Aun no pasa nada
--Incapacidades dobles en una misma semana, empleados nomina
--Orden de servicio agregar orden de compra
 -Modificar la app de visual para q tome todas las empresas y clasificaciones, quitar de movimientos de cuentas lo de pagos
--Traspaso de productos entre empresas, el reporte de seguimiento x producto las salidas
+-*Incapacidades dobles en una misma semana, empleados nomina
+-*Orden de servicio agregar orden de compra
+-*Traspaso de productos entre empresas, el reporte de seguimiento x producto las salidas
   tipo traspaso que no afecte el precio solo la existencia, imprimir una orden de donde salio
   y adonde entro, con una descripcion
 -*Pallets si es mixta no pone las 2 clasificaciones al editar el pallet

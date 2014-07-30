@@ -98,7 +98,7 @@ class compras_areas_model extends CI_Model{
 	}
 
 	/**
-	 * Agrega un privilegio a la bd
+	 * Agrega un area a la bd
 	 */
 	public function addArea(){
 		$data = array(
@@ -117,10 +117,10 @@ class compras_areas_model extends CI_Model{
 	}
 
 	/**
-	 * Elimina un privilegio de la bd
+	 * Elimina un area de la bd
 	 */
-	public function deletePrivilegio(){
-		$this->db->delete('privilegios', "id_privilegio = '".$_GET['id']."'");
+	public function deleteArea($idArea){
+		$this->db->update('compras_areas', array('status' => 'f'), "id_area = '{$idArea}'");
 		return array(true, '');
 	}
 
@@ -181,7 +181,7 @@ class compras_areas_model extends CI_Model{
 			->get();
 			$data1 = $res1->row();
 
-			if($tipo != null && !is_array($tipo)){
+			if($tipo !== null && !is_array($tipo)){
 				$set_nombre = 'dareas';
 				$set_val = set_radio($set_nombre, $data->id_area, ($tipo==$data->id_area? true: false));
 				$tipo_obj = 'radio';

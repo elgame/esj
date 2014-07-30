@@ -150,10 +150,12 @@ class compras_areas extends MY_Controller {
 	 */
 	public function eliminar(){
 		if(isset($_GET['id']{0})){
-			$respons = $this->usuarios_model->deletePrivilegio();
+
+			$this->load->model('compras_areas_model');
+			$respons = $this->compras_areas_model->deleteArea($_GET['id']);
 			
 			if($respons[0])
-				redirect(base_url('panel/privilegios/?msg=5'));
+				redirect(base_url('panel/compras_areas/?msg=5'));
 		}else
 			$params['frm_errors'] = $this->showMsgs(1);
 	}
@@ -192,8 +194,11 @@ class compras_areas extends MY_Controller {
 	public function val_codigo($codigo)
   {
   	$sql = isset($_GET['id']{0})? " AND id_area <> ".$_GET['id']: '';
+
+  	$id_padre = (intval($this->input->post('dareas'))>0? ' = '.$this->input->post('dareas'): ' IS NULL');
+
   	$datos = $this->db->query("SELECT Count(id_area) AS num from compras_areas 
-  		where id_padre = ".$_POST['dareas']." 
+  		where status = 't' AND id_padre {$id_padre} 
   			AND lower(codigo) = '".mb_strtolower($codigo, 'UTF-8')."'".$sql)->row();
     if ($datos->num > 0)
     {
@@ -223,15 +228,15 @@ class compras_areas extends MY_Controller {
 				$icono = 'error';
 			break;
 			case 3:
-				$txt = 'El privilegio se modifico correctamente.';
+				$txt = 'El area se modifico correctamente.';
 				$icono = 'success';
 			break;
 			case 4:
-				$txt = 'El privilegio se agrego correctamente.';
+				$txt = 'El area se agrego correctamente.';
 				$icono = 'success';
 			break;
 			case 5:
-				$txt = 'El privilegio se elimino correctamente.';
+				$txt = 'El area se elimino correctamente.';
 				$icono = 'success';
 			break;
 		}

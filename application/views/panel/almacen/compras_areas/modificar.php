@@ -62,7 +62,7 @@
 	                  <label class="control-label" style="width: 100px;">Catalogo </label>
 	                  <div class="controls" style="margin-left: 120px;">
 	                  	<div style="height: 300px; overflow-y: auto; border:1px #ddd solid;">
-	                  		<?php echo $this->compras_areas_model->getFrmAreas(0, true, $areas->id_padre, true); ?>
+	                  		<?php echo $this->compras_areas_model->getFrmAreas(0, true, ($areas->id_padre==''? '0': $areas->id_padre), true); ?>
 	                    </div>
 	                  </div>
 	                </div>

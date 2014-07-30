@@ -123,6 +123,7 @@
                   <select name="tipoOrden" class="span9" id="tipoOrden">
                     <option value="p" <?php echo set_select('tipoOrden', 'p'); ?>>Productos</option>
                     <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios</option>
+                    <option value="oc" <?php echo set_select('tipoOrden', 'oc'); ?>>Orden de compra</option>
                     <option value="f" <?php echo set_select('tipoOrden', 'f'); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes</option>
                   </select>
                 </div>

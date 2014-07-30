@@ -18,6 +18,9 @@
         e.preventDefault();
         $(this).tab('show');
       });
+
+    eventClickBtnAddIncapacidad();
+    eventClickBtnDelItemIncapacidad();
   });
 
   var eventClickBtnAddBono = function () {
@@ -204,6 +207,72 @@
       $parent.find('.vfecha1').val(f.toJSON().substr(0, 10));
       $parent.find('.vdias').val('0');
       // $parent.remove();
+    });
+  };
+
+
+  /*
+   |------------------------------------------------------------------------
+   | Incapacidades
+   |------------------------------------------------------------------------
+   */
+  var eventClickBtnAddIncapacidad = function () {
+    $('#btn-add-incapacidad').on('click', function(event) {
+       addItemIncapacidad();
+    });
+  };
+
+  var addItemIncapacidad = function () {
+    var htmlTr = '',
+        $tableIncapacidad = $('#table-incapacidades'),
+        $fecha = $('#fecha-prestamos'),
+        sat_incapacidades = $.parseJSON($("#sat_incapacidades").text());
+
+    htmlTr = '<tr>'+
+              '<td style="width: 60px;"><input type="text" name="ifolio[]" value="" class="span12" required> </td>'+
+              '<td style="width: 100px;">'+
+                '<input type="hidden" name="iid_asistencia[]" value="">'+
+                '<select name="itipo_inciden[]" class="span12">';
+                for (var i = 0; i < sat_incapacidades.length; i++) {
+                  htmlTr += '<option value="'+sat_incapacidades[i].id_clave+'">'+sat_incapacidades[i].nombre+'</option>';
+                }
+              htmlTr += '</select>'+
+              '</td>'+
+              '<td style="width: 80px;"><input type="date" name="ifecha[]" value="" class="span12 ifecha" required> </td>'+
+              '<td style="width: 100px;"><input type="number" name="idias[]" value="" class="span12" required> </td>'+
+              '<td style="width: 100px;">'+
+                '<select name="iramo_seguro[]" class="span12">'+
+                  '<option value="Riesgo de Trabajo">Riesgo de Trabajo</option>'+
+                  '<option value="Enfermedad General">Enfermedad General</option>'+
+                  '<option value="Maternitad Prenatal">Maternitad Prenatal</option>'+
+                  '<option value="Maternitad Postnatal">Maternitad Postnatal</option>'+
+                '</select>'+
+              '</td>'+
+              '<td style="width: 100px;">'+
+                '<select name="icontrol_incapa[]" class="span12">'+
+                  '<option value="Unica">Unica</option>'+
+                  '<option value="Inicial">Inicial</option>'+
+                  '<option value="Subsecuente">Subsecuente</option>'+
+                  '<option value="Alta Medica o ST-2">Alta Medica o ST-2</option>'+
+                  '<option value="Prenatal">Prenatal</option>'+
+                  '<option value="Postnatal">Postnatal</option>'+
+                  '<option value="Valuacion o ST-3">Valuacion o ST-3</option>'+
+                '</select>'+
+              '</td>'+
+              '<td style="width: 100px;">'+
+                '<button type="button" class="btn btn-danger btn-del-item-incapacidad"><i class="icon-trash"></i></button>'+
+              '</td>'+
+            '</tr>';
+
+    $(htmlTr).appendTo($tableIncapacidad.find('tbody'));
+
+    // $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
+
+  var eventClickBtnDelItemIncapacidad = function () {
+    $('#table-incapacidades').on('click', '.btn-del-item-incapacidad', function(event) {
+      var $parent = $(this).parents('tr');
+      $parent.remove();
     });
   };
 

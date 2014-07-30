@@ -25,7 +25,7 @@
         <div class="box-content">
           <div class="row-fluid">
             <div class="span12">
-              <iframe src="<?php echo base_url('panel/compras_ordenes/agregar?w=c&idf='.$factura['info']->id_factura.'&'.String::getVarsLink(array('msg'))) ?>" class="span12" style="height: 500px;"></iframe>
+              <iframe src="<?php echo base_url('panel/compras_requisicion/agregar?w=c&idf='.$factura['info']->id_factura.'&'.String::getVarsLink(array('msg'))) ?>" class="span12" style="height: 500px;"></iframe>
             </div>
           </div>
         </div>
