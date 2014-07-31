@@ -87,7 +87,7 @@
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
@@ -572,11 +572,11 @@
         <tbody>
           <?php foreach ($remisiones as $remision) { ?>
             <tr>
-              <td><input type="checkbox" class="chk-remision" data-id="<?php echo $remision->id_factura ?>" data-numremision="<?php echo $remision->folio ?>" data-total="<?php echo $remision->total ?>" data-foliofactura="<?php echo $remision->folio_factura ?>" data-concepto="<?php echo $remision->cliente ?>"></td>
+              <td><input type="checkbox" class="chk-remision" data-id="<?php echo $remision->id_factura ?>" data-numremision="<?php echo $remision->folio ?>" data-total="<?php echo $remision->saldo ?>" data-foliofactura="<?php echo $remision->folio_factura ?>" data-concepto="<?php echo $remision->cliente ?>"></td>
               <td style="width: 66px;"><?php echo $remision->fecha ?></td>
               <td><?php echo ($remision->serie ? $remision->serie.'-':'').$remision->folio ?></td>
               <td><?php echo $remision->cliente ?></td>
-              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($remision->total), 2, '$') ?></td>
+              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($remision->saldo), 2, '$') ?></td>
             </tr>
           <?php } ?>
         </tbody>

@@ -327,6 +327,8 @@ class caja_chica_model extends CI_Model {
 
   public function getRemisiones()
   {
+    $this->load->model('cuentas_cobrar_model');
+
     $remisiones = $this->db->query(
       "SELECT f.id_factura, DATE(f.fecha) as fecha, serie, folio, total, c.nombre_fiscal as cliente,
             COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), null) as folio_factura
@@ -334,11 +336,19 @@ class caja_chica_model extends CI_Model {
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        LEFT JOIN cajachica_remisiones cr ON cr.id_remision = f.id_factura
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
-       WHERE is_factura = 'f' AND COALESCE(cr.id_remision, 0) = 0
+       WHERE is_factura = 'f' AND f.status = 'p' 
        ORDER BY (f.fecha, f.serie, f.folio) DESC"
     );
+    // COALESCE(cr.id_remision, 0) = 0
 
-    return $remisiones->result();
+    $response = $remisiones->result();
+    foreach ($response as $key => $value)
+    {
+      $inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value->id_factura, 'f');
+      $value->saldo = $inf_factura['saldo'];
+    }
+
+    return $response;
   }
 
   public function getMovimientos()
