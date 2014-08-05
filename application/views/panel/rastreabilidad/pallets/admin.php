@@ -33,6 +33,15 @@
 								<label for="ffecha">Buscar</label>
 								<input type="date" name="ffecha" id="ffecha" value="<?php echo set_value_get('ffecha'); ?>"> |
 
+								<label for="parea">Area</label>
+								<select name="parea" id="parea">
+									<option value=""></option>
+                  <?php foreach ($areas['areas'] as $area){ ?>
+                    <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                      <?php echo set_select_get('parea', $area->id_area); ?>><?php echo $area->nombre ?></option>
+                  <?php } ?>
+                </select>
+
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">
 									<option value="todos" <?php echo set_select('fstatus', 'todos', false, $this->input->get('fstatus')); ?>>TODOS</option>

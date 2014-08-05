@@ -30,16 +30,29 @@
                   <table class="table">
                     <thead>
                       <tr class="center">
+                        <th style="background-color: #FFF; text-align: center;" class="center">Area</th>
+                        <th style="background-color: #FFF; text-align: center;">Certificado</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Fecha</th>
                         <th style="background-color: #FFF; text-align: center;" class="center">Semana</th>
                         <th style="background-color: #FFF; text-align: center;">Dia</th>
                         <th style="background-color: #FFF; text-align: center;">Lote</th>
                         <th style="background-color: #FFF; text-align: center;">Actualizar</th>
-                        <th style="background-color: #FFF; text-align: center;">Certificado</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
+                        <td>
+                          <select name="parea" id="parea" class="span12" style="margin: -7px auto 0 auto;">
+                            <?php foreach ($areas['areas'] as $area){ ?>
+                              <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                                <?php $set_select=($area->id_area == (isset($clasificaciones['info']->id_area) ? $clasificaciones['info']->id_area : ($area->predeterminado == 't' ? $area->id_area: '')));
+                                 echo ($set_select? 'selected': ''); ?>><?php echo $area->nombre ?></option>
+                            <?php } ?>
+                          </select>
+                        </td>
+                        <td style="text-align: center;">
+                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
+                        </td>
                         <td>
                           <input type="date" name="gfecha" value="<?php echo set_value_get('gfecha', $fecha); ?>" id="gfecha" class="span8"
                             style="margin: -7px auto 0 auto; text-align: center;" maxlength="10" autofocus>
@@ -63,10 +76,6 @@
                           </span>
                         </td>
 
-                        <td style="text-align: center;">
-                          <input type="checkbox" name="certificado" id="esta-certificado" <?php echo isset($clasificaciones['info']->certificado) && $clasificaciones['info']->certificado === 't' ? 'checked' : '' ?>>
-                        </td>
-
                       </tr>
                     </tbody>
                   </table>
@@ -75,12 +84,12 @@
                 <div class="span2 nomarg">
 
                   <?php if ($ant_lote >= 1) { ?>
-                    <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha); ?>">Anterior Lote</a>
+                    <a class="btn btn-success pull-right" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$ant_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Anterior Lote</a>
                   <?php } ?>
 
                 </div>
                 <div class="span2 nomarg">
-                  <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha); ?>">Siguiente Lote</a>
+                  <a class="btn btn-success pull-left" href="<?php echo base_url('panel/rastreabilidad/siguiente_lote?glote='.$sig_lote.'&gfecha='.$fecha.'&parea='.$area_default); ?>">Siguiente Lote</a>
                 </div>
                 <div class="span1 nomarg">
                   <?php if (count($clasificaciones['clasificaciones']) > 0) { ?>

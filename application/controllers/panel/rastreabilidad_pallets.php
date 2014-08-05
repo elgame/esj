@@ -9,6 +9,7 @@ class rastreabilidad_pallets extends MY_Controller {
   private $excepcion_privilegio = array(
     'rastreabilidad_pallets/ajax_get_rendimientos/',
     'rastreabilidad_pallets/dd/',
+    'rastreabilidad_pallets/ajax_get_folio/',
     );
 
   public function _remap($method){
@@ -39,8 +40,10 @@ class rastreabilidad_pallets extends MY_Controller {
     );
 
     $this->load->model('rastreabilidad_pallets_model');
+    $this->load->model('areas_model');
 
     $params['pallets'] = $this->rastreabilidad_pallets_model->getPallets(true);
+    $params['areas']   = $this->areas_model->getAreas();
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -76,6 +79,7 @@ class rastreabilidad_pallets extends MY_Controller {
 
     $this->load->model('rastreabilidad_pallets_model');
     $this->load->model('calibres_model');
+    $this->load->model('areas_model');
 
     $this->configAddModPallet();
     if ($this->form_validation->run() == FALSE)
@@ -89,9 +93,26 @@ class rastreabilidad_pallets extends MY_Controller {
       redirect(base_url('panel/rastreabilidad_pallets/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
     }
 
-    $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio();
+    $params['areas'] = $this->areas_model->getAreas();
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    if(isset($_POST['parea']{0}))
+      $params['area_default'] = $_POST['parea'];
+    else{
+      foreach ($params['areas']['areas'] as $key => $value)
+      {
+        if($value->predeterminado == 't')
+        {
+          $params['area_default'] = $value->id_area;
+          break;
+        }
+      }
+    }
+
+    $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($params['area_default']);
 
     // $params['calibres'] = $this->calibres_model->getCalibres();
+
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -130,6 +151,7 @@ class rastreabilidad_pallets extends MY_Controller {
 
       $this->load->model('rastreabilidad_pallets_model');
       $this->load->model('calibres_model');
+      $this->load->model('areas_model');
 
       $this->configAddModPallet();
       if ($this->form_validation->run() == FALSE)
@@ -146,6 +168,19 @@ class rastreabilidad_pallets extends MY_Controller {
       $params['info'] = $this->rastreabilidad_pallets_model->getInfoPallet($_GET['id']);
 
       // $params['calibres'] = $this->calibres_model->getCalibres();
+
+
+      $params['areas'] = $this->areas_model->getAreas();
+      // Obtenemos area predeterminada
+      $params['area_default'] = null;
+      foreach ($params['areas']['areas'] as $key => $value)
+      {
+        if($value->predeterminado == 't')
+        {
+          $params['area_default'] = $value->id_area;
+          break;
+        }
+      }
 
       if (isset($_GET['msg']))
         $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -189,6 +224,17 @@ class rastreabilidad_pallets extends MY_Controller {
     $params = $this->rastreabilidad_pallets_model->getRendimientoLibre(
                 $this->input->get('id'), $this->input->get('idunidad'),
                 $this->input->get('idcalibre'), $this->input->get('idetiqueta'));
+
+    echo json_encode($params);
+  }
+
+  public function ajax_get_folio(){
+    $params = array('folio' => null);
+    if(isset($_GET['darea']{0}))
+    {
+      $this->load->model('rastreabilidad_pallets_model');
+      $params['folio'] = $this->rastreabilidad_pallets_model->getNextFolio($_GET['darea']);
+    }
 
     echo json_encode($params);
   }
@@ -248,7 +294,7 @@ class rastreabilidad_pallets extends MY_Controller {
 
   public function chkfolio($folio){
     $result = $this->db->query("SELECT Count(id_pallet) AS num FROM rastria_pallets
-      WHERE folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
+      WHERE id_area = {$_POST['parea']} AND folio = {$folio}".(isset($_GET['id'])? " AND id_pallet <> '{$_GET['id']}'": '') )->row();
     if($result->num > 0){
       $this->form_validation->set_message('chkfolio', 'El folio ya existe, intenta con otro.');
       return false;

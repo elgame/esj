@@ -33,6 +33,22 @@ var addpallets = (function($){
     fidetiqueta       = $("#fidetiqueta");
 
     asignaAutocomplets();
+    changeAreas();
+  }
+
+
+
+  function changeAreas () {
+    $("#parea").on('change', function(event) {
+      $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_folio', 
+        {darea: $("#parea").val()}, 
+        function(json, textStatus) {
+          if(json.folio != null)
+            $("#ffolio").val(json.folio);
+          else
+            noty({"text": 'No se puede obtener el folio del area', "layout":"topRight", "type": 'error'});
+      });
+    });
   }
 
   function formPallet(){
@@ -60,7 +76,23 @@ var addpallets = (function($){
 
     // Autocomplete clasificaciones
     $("#fclasificacion").autocomplete({
-      source: base_url + 'panel/areas/ajax_get_clasificaciones/',
+      source: function (request, response) {
+        if ($('#did_empresa').val()!='') {
+          $.ajax({
+            url: base_url + 'panel/areas/ajax_get_clasificaciones/',
+            dataType: 'json',
+            data: {
+              term : request.term,
+              type : $('#parea').val()
+            },
+            success: function (data) {
+              response(data)
+            }
+          });
+        } else {
+          noty({"text": 'Seleccione una area para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+        }
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

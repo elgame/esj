@@ -955,6 +955,179 @@ class caja_chica_model extends CI_Model {
     return $res->result();
   }
 
+
+  /**
+   * Reporte existencias por unidad
+   *
+   * @return
+   */
+  public function getRptGastosData()
+  {
+    $sql = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    // $this->load->model('empresas_model');
+    // $client_default = $this->empresas_model->getDefaultEmpresa();
+    // $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    // $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('fnomenclatura') != '')
+      $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
+
+    $response = array();
+    $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria, 
+          cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
+          cn.id AS id_nomenclatura
+        FROM cajachica_gastos cg 
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+        WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql}
+        ORDER BY id_categoria ASC, fecha ASC");
+    $response = $gastos->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptGastosPdf(){
+    $res = $this->getRptGastosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Gastos';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'C', 'L', 'R');
+    $widths = array(20, 30, 20, 80, 35);
+    $header = array('Fecha', 'Nomenclatura', 'Folio', 'Concepto', 'Importe');
+
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $producto){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $aux_categoria != $producto->id_categoria){ //salta de pagina si exede el max
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        if($aux_categoria != $producto->id_categoria && $key > 0)
+        {
+          $this->getRptGastosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+        }elseif($key == 0)
+          $aux_categoria = $producto->id_categoria;
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFont('Arial','B',10);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(150));
+        $pdf->Row(array($producto->categoria), false, false);
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array($producto->fecha,
+        $producto->nomenclatura,
+        $producto->folio,
+        $producto->concepto,
+        String::formatoNumero($producto->monto, 2, '', false),
+        );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+      $this->getRptGastosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+    $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+
+  public function getRptGastosTotales(&$pdf, &$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
+  {
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('Arial','B',8);
+    $datos = array('Total General',
+      String::formatoNumero(($proveedor_total), 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(150, 35));
+    $pdf->Row($datos, false);
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(150));
+    $pdf->Row(array('DESGLOSE DE GASTOS'), false, false);
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('C', 'L', 'R'));
+    $pdf->SetWidths(array(25, 50, 50));
+    $pdf->Row(array('Nomenclatura', 'Concepto', 'Total por concepto'), false, false);
+    foreach ($total_nomenclatura as $keyn => $nomen)
+    {
+      if($pdf->GetY()+6 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+    }
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(75, 50));
+    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+
+    $aux_categoria      = $producto->id_categoria;
+    $proveedor_total    = 0;
+    $total_nomenclatura = array();
+
+    $pdf->SetXY(6, $pdf->GetY()+8);
+  }
+
 }
 
 /* End of file caja_chica_model.php */

@@ -21,6 +21,8 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/ajax_actualiza_lote/',
 
     'rastreabilidad/rpl_pdf/',
+    'rastreabilidad/rrs_pdf/',
+    'rastreabilidad/ajax_get_lotes/',
 
     'rastreabilidad/siguiente_lote/',
   );
@@ -86,6 +88,23 @@ class rastreabilidad extends MY_Controller {
     );
 
     $this->load->model('rastreabilidad_model');
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    if(isset($_GET['parea']{0}))
+      $params['area_default'] = $_GET['parea'];
+    else{
+      foreach ($params['areas']['areas'] as $key => $value)
+      {
+        if($value->predeterminado == 't')
+        {
+          $params['area_default'] = $value->id_area;
+          break;
+        }
+      }
+    }
 
     $params['fecha'] = isset($_GET['gfecha']) ? $_GET['gfecha'] : date('Y-m-d');
 
@@ -96,7 +115,7 @@ class rastreabilidad extends MY_Controller {
     $params['dia_semana'] = String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1;
 
     // Obtiene los lotes de la fecha indicada
-    $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'));
+    $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'), $params['area_default']);
 
     $params['clasificaciones'] = array('clasificaciones' => array());
 
@@ -122,16 +141,16 @@ class rastreabilidad extends MY_Controller {
       if (count($params['lotes']) > 0)
       {
         $params['clasificaciones'] = $this->rastreabilidad_model->getLoteInfo($params['lotes'][0]->id_rendimiento);
-        $params['id_lote_actual'] = intval($params['clasificaciones']['info']->id_rendimiento);
+        $params['id_lote_actual']  = intval($params['clasificaciones']['info']->id_rendimiento);
         $params['lote_actual_ext'] = intval($params['clasificaciones']['info']->lote_ext);
       }else
       {
         // Crea el primer lote para la fecha indicada
         // $this->rastreabilidad_model->createFirstLote($fecha->format('Y-m-d'));
-       $params['id_lote_actual'] = $this->rastreabilidad_model->createLote($fecha->format('Y-m-d'), 1, 1);
+       $params['id_lote_actual'] = $this->rastreabilidad_model->createLote($fecha->format('Y-m-d'), 1, 1, $params['area_default']);
 
         // Obtiene los lotes de la fecha.
-        $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'));
+        $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'), $params['area_default']);
 
         $params['lote_actual_ext'] = 1;
       }
@@ -160,26 +179,26 @@ class rastreabilidad extends MY_Controller {
    */
   public function siguiente_lote()
   {
-    if (isset($_GET['glote']{0}) && isset($_GET['gfecha']{0}))
+    if (isset($_GET['glote']{0}) && isset($_GET['gfecha']{0}) && isset($_GET['parea']{0}))
     {
       $this->load->model('rastreabilidad_model');
 
       // Obtiene los lotes de la fecha que llega en get
-      $lotes = $this->rastreabilidad_model->getLotesByFecha($_GET['gfecha']);
+      $lotes = $this->rastreabilidad_model->getLotesByFecha($_GET['gfecha'], $_GET['parea']);
 
       // Recorre los lotes existentes en esa fecha y verifica si el siguiente
       // lote a cargar ya existe. Si existe entonces redirecciona.
       foreach ($lotes as $key => $lote)
         if (intval($lote->lote) === intval($_GET['glote']))
-          redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$lote->id_rendimiento));
+          redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$lote->id_rendimiento.'&parea='.$_GET['parea']));
 
       // Si no existe entonces crea el lote.
-      $lote_ext = $this->rastreabilidad_model->getLoteExt($_GET['gfecha'], intval($_GET['glote'])-1 );
+      $lote_ext = $this->rastreabilidad_model->getLoteExt($_GET['gfecha'], intval($_GET['glote'])-1, $_GET['parea'] );
 
-      $id_rendimiento = $this->rastreabilidad_model->createLote($_GET['gfecha'], $_GET['glote'], $lote_ext);
+      $id_rendimiento = $this->rastreabilidad_model->createLote($_GET['gfecha'], $_GET['glote'], $lote_ext, $_GET['parea']);
 
       // Redirecciona con el nuevo lote.
-      redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$id_rendimiento));
+      redirect(base_url('panel/rastreabilidad/rendimiento_lote?gfecha='.$_GET['gfecha'].'&glote='.$id_rendimiento.'&parea='.$_GET['parea']));
     }
   }
 
@@ -348,6 +367,70 @@ class rastreabilidad extends MY_Controller {
   {
     $this->load->model('rastreabilidad_model');
     $this->rastreabilidad_model->ref_pdf();
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE RASTREABILIDAD Y SEGUIMIENTO"
+   *
+   * @return void
+   */
+  public function rrs()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/rastreabilidad/reportes/rrs.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Rastreabilidad y seguimiento Producto'
+    );
+    $this->load->model('areas_model');
+    $this->load->model('calidades_model');
+    $this->load->model('rastreabilidad_model');
+
+    $params['areas']     = $this->areas_model->getAreas(false);
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    foreach ($params['areas']['areas'] as $key => $value)
+    {
+      if($value->predeterminado == 't')
+      {
+        $params['area_default'] = $value->id_area;
+        break;
+      }
+    }
+    // Obtiene los lotes de la fecha indicada
+    $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha(date('Y-m-d'), $params['area_default']);
+
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/rastreabilidad/reportes/rrs', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rrs_pdf()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']) && isset($_GET['flotes']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrs_pdf();
+    }
+  }
+
+  public function ajax_get_lotes()
+  {
+    $this->load->model('rastreabilidad_model');
+    // Obtiene los lotes de la fecha indicada
+    $params = $this->rastreabilidad_model->getLotesByFecha($_GET['fecha'], $_GET['area']);
+    echo json_encode($params);
   }
 
 

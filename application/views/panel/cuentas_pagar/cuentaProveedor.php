@@ -141,7 +141,9 @@
                   <td>
                   <?php if($cuenta->estado == 'Pendiente'){ ?>
                     <input type="checkbox" class="change_spago" <?php echo ($cuenta->en_pago>0? 'checked': ''); ?>
-                        data-idcompra="<?php echo $cuenta->id_compra; ?>" data-idproveedor="<?php echo $this->input->get('id_proveedor'); ?>" data-monto="<?php echo $cuenta->saldo; ?>">
+                        data-idcompra="<?php echo $cuenta->id_compra; ?>" data-idproveedor="<?php echo $this->input->get('id_proveedor'); ?>" 
+                        data-monto="<?php echo $cuenta->saldo; ?>" data-status="<?php echo $cuenta->status ?>"
+                        data-folio="<?php echo $cuenta->serie.$cuenta->folio; ?>">
                   <?php } ?>
                   </td>
 									<td><?php echo $cuenta->fecha; ?></td>

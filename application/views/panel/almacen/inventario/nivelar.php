@@ -51,7 +51,7 @@
             <td><?php echo $producto->nombre_producto; ?>
               <input type="hidden" class="idproducto" name="idproducto[]" value="<?php echo $producto->id_producto; ?>">
               <input type="hidden" class="descripcion" name="descripcion[]" value="<?php echo $producto->nombre_producto; ?>">
-              <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo $producto->data[1]; ?>">
+              <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo $producto->ul_precio_unitario; ?>">
               <input type="hidden" class="esistema" name="esistema[]" value="<?php echo $producto->data[0]; ?>">
             </td>
             <td><?php echo String::formatoNumero($producto->data[0], 2, '').' '.$producto->abreviatura; ?></td>

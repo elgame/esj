@@ -127,18 +127,26 @@ var abonom = (function($){
    */
   function clickPagoBanco(event) {
     var $this = $(this);
-    if($this.is(':checked')){
-      $.post(base_url + 'panel/banco_pagos/set_compra/',
-        {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-        function(data, textStatus, xhr) {
-          // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
-      }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
-    }else{
-      $.post(base_url + 'panel/banco_pagos/set_compra/',
-        {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
-        function(data, textStatus, xhr) {
-          // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
-      }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+    
+    if($this.attr('data-status') == 'p')
+    {
+      if($this.is(':checked')){
+        $.post(base_url + 'panel/banco_pagos/set_compra/',
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
+      }else{
+        $.post(base_url + 'panel/banco_pagos/set_compra/',
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          function(data, textStatus, xhr) {
+            // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
+        }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
+      }
+    }else
+    {
+      noty({"text": 'La factura '+$this.attr('data-folio')+' ya esta pagada en otro periodo', "layout":"topRight", "type": 'error'});
+      return false;
     }
   }
 

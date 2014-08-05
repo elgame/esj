@@ -33,6 +33,9 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." rp.status = '".$this->input->get('fstatus')."'";
 
+		if($this->input->get('parea') != '')
+			$sql .= ($sql==''? 'WHERE': ' AND')." rp.id_area = '".$this->input->get('parea')."'";
+
 		$query = BDUtil::pagination("SELECT
 					rp.id_pallet, rp.folio, Date(rp.fecha) AS fecha, rp.no_cajas, Coalesce(Sum(rpr.cajas), 0) AS cajas,
 					c.nombre_fiscal
@@ -138,8 +141,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
 	 * Obtiene el siguiente folio para el pallet
 	 * @return [type] [description]
 	 */
- 	public function getNextFolio(){
- 		$result = $this->db->query("SELECT (folio+1) AS folio FROM rastria_pallets ORDER BY folio DESC LIMIT 1")->row();
+ 	public function getNextFolio($id_area){
+ 		$result = $this->db->query("SELECT (folio+1) AS folio FROM rastria_pallets WHERE id_area = {$id_area} ORDER BY folio DESC LIMIT 1")->row();
  		return (is_object($result)? $result->folio: '1');
  	}
 
@@ -187,6 +190,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						'no_cajas'     => $this->input->post('fcajas'),
 						'no_hojas'     => $this->input->post('fhojaspapel'),
 						'kilos_pallet' => $this->input->post('fkilos'),
+						'id_area'      => $this->input->post('parea'),
 						);
 			if($this->input->post('fid_cliente') > 0)
 				$data['id_cliente'] = $this->input->post('fid_cliente');
@@ -402,13 +406,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
       {
         $certificados['rendimientos'][] = $rendimiento;
         $certificados['info']->cajas += $rendimiento->cajas;
-        $certificados['info']->kilos_pallet += $rendimiento->kilos;
+        $certificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
       }
       else
       {
         $noCertificados['rendimientos'][] = $rendimiento;
         $noCertificados['info']->cajas += $rendimiento->cajas;
-        $noCertificados['info']->kilos_pallet += $rendimiento->kilos;
+        $noCertificados['info']->kilos_pallet += $rendimiento->kilos * $rendimiento->cajas;
       }
     }
 
@@ -602,12 +606,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
     $pdf->SetFont('helvetica','B', 14);
 
     $pdf->Rect(6, 148, 20, 111, '');
-    $pdf->RotatedText(16, 240, 'LISTA DE LOTIFICACION', 90);
+    $pdf->RotatedText(12, 240, 'LISTA DE LOTIFICACION', 90);
+    $pdf->RotatedText(18, 240, $data['info']->nombre_area, 90);
 
     if ($certificado)
     {
       $pdf->SetFont('helvetica','B', 15);
-      $pdf->RotatedText(22, 237, 'PROD. CERTIFICADO', 90);
+      $pdf->RotatedText(24, 240, 'PROD. CERTIFICADO', 90);
     }
 
     $pdf->SetFont('helvetica','B', 14);

@@ -30,6 +30,13 @@
 								<?php $data = $info['info']; ?>
 
 								<div class="span12">
+
+									<div class="span3">
+									  <label class="span3" for="parea">Area </label>
+									  <input type="text" value="<?php echo $data->nombre_area ?>" readonly>	
+									  <input type="hidden" name="parea" value="<?php echo $data->id_area ?>" id="parea">
+									</div>
+
 									<div class="span2">
 									  <label class="span4" for="ffolio">Folio </label>
 										<input type="text" name="ffolio" id="ffolio" class="span6" value="<?php echo (isset($data->folio)? $data->folio: ''); ?>"
@@ -55,7 +62,12 @@
 											maxlength="25" placeholder="Kilos" required data-next="fhojaspapel">
 									</div>
 
-									<div class="span3"><?php $no_hojas = (isset($data->no_hojas)? intval($data->no_hojas): 0); ?>
+								</div>
+								<div class="clearfix"></div>
+
+                <div class="span12">
+                	
+                	<div class="span3"><?php $no_hojas = (isset($data->no_hojas)? intval($data->no_hojas): 0); ?>
 									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
 									  <select name="fhojaspapel" id="fhojaspapel" class="span8" data-next="fcalibre_fijo">
 									  	<option value="0" <?php echo set_select('fhojaspapel', 0, false, $no_hojas); ?>>Sin papel</option>
@@ -65,10 +77,6 @@
 									  </select>
 									</div>
 
-								</div>
-								<div class="clearfix"></div>
-
-                <div class="span12">
                   <div class="span4">
                     <label class="span4" for="fcalibre_fijo">Calibre (Presentacion)</label>
                     <input type="text" name="fcalibre_fijo" id="fcalibre_fijo" class="span8" value="<?php echo (isset($data->calibre_fijo_origen)? $data->calibre_fijo: ''); ?>"

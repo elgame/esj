@@ -19,6 +19,8 @@
     autocompleteSize();
     autocompleteSizeLive();
 
+    onChangeArea();
+
     $('#box-content').keyJump();
 
     $("#btnActualizaLote").on('click', function(event) {
@@ -30,7 +32,8 @@
           {
             'id_rendimiento': $("#id_lote_actual").val(),
             'lote_ext': ($("#txtActualizaLote").val()!=''? $("#txtActualizaLote").val(): $("#txtActualizaLote").attr("data-lote")),
-            'es_certificado': $('#esta-certificado').is(':checked') ? 1 : 0
+            'es_certificado': ($('#esta-certificado').is(':checked') ? 1 : 0),
+            'id_area': $("#parea").val()
           },
           function(data) {
               window.location.reload(true);
@@ -120,6 +123,12 @@
 
   });
 
+  var onChangeArea = function() {
+    $("#parea").on('change', function(event) {
+      window.location = base_url + 'panel/rastreabilidad/rendimiento_lote/?gfecha='+$("#gfecha").val()+'&parea='+$("#parea").val();
+    });
+  };
+
   var initDate = function () {
     $('#gfecha').on('change', function(event) {
       var $form = $('#form'),
@@ -145,7 +154,23 @@
   // Autocomplete Clasificaciones
   var autocompleteClasif = function () {
     $("input#fclasificacion").autocomplete({
-      source: base_url + 'panel/rastreabilidad/ajax_get_clasificaciones/',
+      source: function (request, response) {
+        if ($('#did_empresa').val()!='') {
+          $.ajax({
+            url: base_url + 'panel/rastreabilidad/ajax_get_clasificaciones/',
+            dataType: 'json',
+            data: {
+              term : request.term,
+              type : $('#parea').val()
+            },
+            success: function (data) {
+              response(data)
+            }
+          });
+        } else {
+          noty({"text": 'Seleccione una area para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+        }
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -185,7 +210,23 @@
   var autocompleteClasifLive = function () {
     $("#tableClasif").on("focus", 'input#fclasificacion:not(.ui-autocomplete-input)', function (event) {
         $(this).autocomplete({
-          source: base_url + 'panel/rastreabilidad/ajax_get_clasificaciones/',
+          source: function (request, response) {
+            if ($('#did_empresa').val()!='') {
+              $.ajax({
+                url: base_url + 'panel/rastreabilidad/ajax_get_clasificaciones/',
+                dataType: 'json',
+                data: {
+                  term : request.term,
+                  type : $('#parea').val()
+                },
+                success: function (data) {
+                  response(data)
+                }
+              });
+            } else {
+              noty({"text": 'Seleccione una area para mostrar sus productos.', "layout":"topRight", "type": 'error'});
+            }
+          },
           minLength: 1,
           selectFirst: true,
           select: function( event, ui ) {

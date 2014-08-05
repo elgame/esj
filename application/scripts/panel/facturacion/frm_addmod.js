@@ -231,6 +231,11 @@ $(function(){
     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
       calculaTotalProducto($tr);
     }
+  }).on('change', '#prod_dcantidad, #prod_dpreciou', function(e) {
+    var $this = $(this),
+        $tr = $this.parent().parent();
+        
+    calculaTotalProducto($tr);
   });
 
   $('#table_prod').on('change', '#diva', function(event) {

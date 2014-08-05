@@ -28,6 +28,18 @@
 								<legend></legend>
 
 								<div class="span12">
+
+									<div class="span3">
+									  <label class="span3" for="parea">Area </label>
+										<select name="parea" id="parea" class="span9" autofocus data-next="fcajas">
+	                    <?php foreach ($areas['areas'] as $area){ ?>
+	                      <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+	                        <?php $set_select=($area->id_area == (isset($area_default) ? $area_default : ($area->predeterminado == 't' ? $area->id_area: '')));
+	                         echo ($set_select? 'selected': ''); ?>><?php echo $area->nombre ?></option>
+	                    <?php } ?>
+	                  </select>
+									</div>
+
 									<div class="span2">
 									  <label class="span4" for="ffolio">Folio </label>
 										<input type="text" name="ffolio" id="ffolio" class="span6" value="<?php echo set_value('ffolio', $folio); ?>" 
@@ -37,7 +49,7 @@
 									<div class="span2">
 									  <label class="span5" for="fcajas">Cajas del pallet </label>
 										<input type="text" name="fcajas" id="fcajas" class="span6 vpos-int" value="<?php echo set_value('fcajas'); ?>" 
-											maxlength="25" placeholder="Numero de cajas" required autofocus data-next="fcliente">
+											maxlength="25" placeholder="Numero de cajas" required data-next="fcliente">
 									</div>
 
 									<div class="span3">
@@ -53,7 +65,12 @@
 											maxlength="25" placeholder="Kilos" required data-next="fhojaspapel">
 									</div>
 
-									<div class="span3">
+								</div>
+								<div class="clearfix"></div>
+
+								<div class="span12">
+                  
+                  <div class="span3">
 									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
 									  <select name="fhojaspapel" id="fhojaspapel" class="span9" data-next="fclasificacion">
 									  	<option value="0" <?php echo set_select('fhojaspapel', 0); ?>>Sin papel</option>
@@ -63,8 +80,8 @@
 									  </select>
 									</div>
 
-								</div>
-								<div class="clearfix"></div>
+                </div>
+                <div class="clearfix"></div>
 
 								<div class="row-fluid">
 									<fieldset class="span6">

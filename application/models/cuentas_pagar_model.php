@@ -355,7 +355,7 @@ class cuentas_pagar_model extends privilegios_model{
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto,
-				'f'::text as tipo,
+				'f'::text as tipo, f.status, 
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
 			FROM
 				compras AS f
@@ -1073,6 +1073,8 @@ class cuentas_pagar_model extends privilegios_model{
       $widths = array(25, 25, 40);
       $header = array('FECHA', 'FOLIO', 'TOTAL');
 
+      $total = 0;
+
       $pdf->SetFont('Arial','B',8);
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFillColor(255,255,255);
@@ -1092,7 +1094,12 @@ class cuentas_pagar_model extends privilegios_model{
         );
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->Row($datos, false, false);
+
+        $total += $prod->total;
       }
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array('', 'TOTAL', String::formatoNumero($total, 2, '$', false) ), false, false);
 
       if ($path)
       {

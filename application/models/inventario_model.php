@@ -2030,7 +2030,8 @@ class inventario_model extends privilegios_model{
       $sql .= " AND p.id_producto = ".$id_producto;
 
 	    $query = BDUtil::pagination(
-	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
+	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
+	    		COALESCE((SELECT precio_unitario FROM compras_productos WHERE status = 'a' AND precio_unitario > 0 AND id_producto = p.id_producto ORDER BY fecha_aceptacion DESC LIMIT 1), 0) AS ul_precio_unitario
 			FROM productos AS p
 				INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 				INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad
