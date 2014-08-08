@@ -5,6 +5,12 @@
     autocompleteProductos();
 
     $('#form').on('submit', function(event) {
+      var linkDownXls = $("#linkDownXls"), 
+          url = "?ffecha1="+$("#ffecha1").val()+"&ffecha2="+$("#ffecha2").val()+"&dempresa="+$("#dempresa").val()+
+                "&did_empresa="+$("#did_empresa").val()+"&dproducto="+$("#dproducto").val()+"&did_producto="+$("#did_producto").val()+
+                "&dcliente="+$("#dcliente").val()+"&fid_cliente="+$("#fid_cliente").val();
+      linkDownXls.attr('href', linkDownXls.attr('data-url')+url);
+
       if ($('#did_producto').val() === '') {
         noty({"text": 'Seleccione un producto', "layout":"topRight", "type": 'error'});
         return false;

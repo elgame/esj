@@ -957,7 +957,7 @@ class caja_chica_model extends CI_Model {
 
 
   /**
-   * Reporte existencias por unidad
+   * Reporte gastos caja chica
    *
    * @return
    */
@@ -1127,6 +1127,267 @@ class caja_chica_model extends CI_Model {
 
     $pdf->SetXY(6, $pdf->GetY()+8);
   }
+
+  /**
+   * Reporte gastos caja chica
+   *
+   * @return
+   */
+  public function getRptIngresosData()
+  {
+    $sql = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+    }
+
+    // if ($this->input->get('fnomenclatura') != '')
+    //   $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
+
+    $response = array('movimientos' => array(), 'remisiones' => array());
+    
+    $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria, 
+          cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
+          cn.id AS id_nomenclatura
+        FROM cajachica_ingresos ci 
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+          INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+        WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql}
+        ORDER BY id_categoria ASC, fecha ASC");
+    $response['movimientos'] = $movimientos->result();
+
+    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria, 
+          f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
+        FROM cajachica_remisiones cr 
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+          INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+        WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql}
+        ORDER BY id_categoria ASC, fecha ASC");
+    $response['remisiones'] = $remisiones->result();
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por unidad pdf
+   */
+  public function getRptIngresosPdf(){
+    $res = $this->getRptIngresosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Ingresos';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R');
+    $widths = array(20, 22, 45, 80, 35);
+    $header = array('Fecha', 'Nomenclatura', 'Poliza', 'Concepto', 'Importe');
+
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $aux_proveedor_total = $proveedor_total = 0;
+    foreach($res['movimientos'] as $key => $producto){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $aux_categoria != $producto->id_categoria){ //salta de pagina si exede el max
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        if($aux_categoria != $producto->id_categoria && $key > 0)
+        {
+          $aux_proveedor_total = $proveedor_total;
+          $this->getRptMovimientosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+          $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+        }elseif($key == 0)
+          $aux_categoria = $producto->id_categoria;
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFont('Arial','B',12);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(150));
+        $pdf->Row(array($producto->categoria), false, false);
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array($producto->fecha,
+        $producto->nomenclatura,
+        $producto->poliza,
+        $producto->concepto,
+        String::formatoNumero($producto->monto, 2, '', false),
+        );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+    {
+      $aux_proveedor_total = $proveedor_total;
+      $this->getRptMovimientosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+      $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+    }
+
+    $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+
+  public function getRptMovimientosTotales(&$pdf, &$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
+  {
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('Arial','B',8);
+    $datos = array('Total Reposicion',
+      String::formatoNumero(($proveedor_total), 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(167, 35));
+    $pdf->Row($datos, false);
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(150));
+    $pdf->Row(array('DESGLOSE DE INGRESOS'), false, false);
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('C', 'L', 'R'));
+    $pdf->SetWidths(array(25, 50, 50));
+    $pdf->Row(array('Nomenclatura', 'Concepto', 'Total por concepto'), false, false);
+    foreach ($total_nomenclatura as $keyn => $nomen)
+    {
+      if($pdf->GetY()+6 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+    }
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(75, 50));
+    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+
+    $aux_categoria      = $producto->id_categoria;
+    $proveedor_total    = 0;
+    $total_nomenclatura = array();
+
+    $pdf->SetXY(6, $pdf->GetY()+8);
+  }
+
+  public function getRptRemisionesTotales(&$pdf, &$remisiones, $proveedor_total, $id_categoria)
+  {
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R');
+    $widths = array(20, 25, 96, 25, 35);
+    $header = array('Fecha', 'Remision', 'Nombre', 'Folio', 'Importe');
+
+    $entro = false;
+    $total_nomenclatura = array();
+    $remisiones_total = 0;
+    foreach($remisiones as $key => $producto){
+      if($producto->id_categoria == $id_categoria)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || !$entro){ //salta de pagina si exede el max
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+          $pdf->SetY($pdf->GetY()+2);
+          $entro = true;
+        }
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFont('Arial','',8);
+        $datos = array($producto->fecha,
+          $producto->serie.$producto->folio,
+          $producto->observacion,
+          $producto->folio_factura,
+          String::formatoNumero($producto->monto, 2, '', false),
+          );
+        $pdf->SetXY(6, $pdf->GetY()-2);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false, false);
+
+        $remisiones_total += $producto->monto;
+
+        unset($remisiones[$key]);
+      }
+    }
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('Arial','B',8);
+    $datos = array('Total Remisiones',
+      String::formatoNumero(($remisiones_total), 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(167, 35));
+    $pdf->Row($datos, false);
+
+    if($pdf->GetY()+6 >= $pdf->limiteY)
+      $pdf->AddPage();
+    $pdf->SetFont('Arial','B',8);
+    $datos = array('Total General',
+      String::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
+    );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetWidths(array(167, 35));
+    $pdf->Row($datos, false);
+
+    $pdf->SetXY(6, $pdf->GetY()+8);
+  }
+  
 
 }
 

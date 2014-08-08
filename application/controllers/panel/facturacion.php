@@ -13,6 +13,7 @@ class facturacion extends MY_Controller {
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
     'facturacion/prodfact_pdf/',
+    'facturacion/prodfact_xls/',
     'facturacion/rventasc_pdf/',
     'facturacion/rventasc_detalle_pdf/',
     'facturacion/remisiones_detalle_pdf/',
@@ -1324,6 +1325,11 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
     $this->facturacion_model->prodfact_pdf();
+  }
+  public function prodfact_xls()
+  {
+    $this->load->model('facturacion_model');
+    $this->facturacion_model->prodfact_xls();
   }
 
   public function rventasc()

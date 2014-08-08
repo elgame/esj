@@ -1056,6 +1056,7 @@ class inventario_model extends privilegios_model{
             'entrada' => array(0, 0, 0, 0),
             'salida' => array(0, 0, 0, 0),
             'saldo' => array(0, 0, 0, 0), );
+
     foreach ($res->result() as $key => $value)
     {
       $row = array('fecha' => $value->fecha, 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
@@ -1070,42 +1071,50 @@ class inventario_model extends privilegios_model{
         $row['saldo'][2] = $row['entrada'][2]+$result[count($result)-1]['saldo'][2];
         $row['saldo'][1] = $value->precio_unitario; //$row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
         $result[] = $row;
+        // echo count($result)."<br>";
       }elseif ($value->tipo == 's')
       {
         $aux_cantidad = $value->cantidad;
         $row = NULL;
         for ($ci = count($result)-1; $ci >= 0; --$ci)
         {
-          $row = array('fecha' => $value->fecha, 'misma_salida' => ($row==NULL? '' : '&&'), 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
-          if($aux_cantidad >= floatval($result[$ci]['entrada'][3]) && floatval($result[$ci]['entrada'][3]) > 0)
-          {
-            $row['salida'][0] = $result[$ci]['entrada'][3];
-            $row['salida'][1] = $result[$ci]['entrada'][1];
-            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
-            // resta las cantidades diponibles de las entradas y el total de salida
-            $result[$ci]['entrada'][3] = 0;
-            $aux_cantidad -= $row['salida'][0];
-          }elseif(floatval($result[$ci]['entrada'][3]) > 0)
-          {
-            $row['salida'][0] = $aux_cantidad;
-            $row['salida'][1] = $result[$ci]['entrada'][1];
-            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
-            // resta las cantidades diponibles de las entradas y el total de salida
-            $result[$ci]['entrada'][3] -= $aux_cantidad;
-            $aux_cantidad = 0;
-          }
-          //saldos cuando son salidas
-          $row['saldo'][0] = $result[count($result)-1]['saldo'][0]-$row['salida'][0];
-          $row['saldo'][1] = $row['salida'][1];
-          $row['saldo'][2] = $result[count($result)-1]['saldo'][2]-$row['salida'][2];
+        	if($result[$ci]['entrada'][0] > 0)
+        	{
+	          $row = array('fecha' => $value->fecha, 'misma_salida' => ($row==NULL? '' : '&&'), 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+	          if($aux_cantidad >= floatval($result[$ci]['entrada'][3]) && floatval($result[$ci]['entrada'][3]) > 0)
+	          {
+	            $row['salida'][0] = $result[$ci]['entrada'][3];
+	            $row['salida'][1] = $result[$ci]['entrada'][1];
+	            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
+	            // resta las cantidades diponibles de las entradas y el total de salida
+	            $result[$ci]['entrada'][3] = 0;
+	            $aux_cantidad -= $row['salida'][0];
+	          }elseif(floatval($result[$ci]['entrada'][3]) > 0)
+	          {
+	            $row['salida'][0] = $aux_cantidad;
+	            $row['salida'][1] = $result[$ci]['entrada'][1];
+	            $row['salida'][2] = $row['salida'][0]*$row['salida'][1];
+	            // resta las cantidades diponibles de las entradas y el total de salida
+	            $result[$ci]['entrada'][3] -= $aux_cantidad;
+	            $aux_cantidad = 0;
+	          }
+	          //saldos cuando son salidas
+	          $row['saldo'][0] = $result[count($result)-1]['saldo'][0]-$row['salida'][0];
+	          $row['saldo'][1] = $row['salida'][1];
+	          $row['saldo'][2] = $result[count($result)-1]['saldo'][2]-$row['salida'][2];
 
-          $result[] = $row;
-          if(floatval(String::formatoNumero($aux_cantidad, 2, '', true)) == 0)
-            break;
+	          $result[] = $row;
+	          if(floatval(String::formatoNumero($aux_cantidad, 2, '', true)) <= 0)
+	            break;
+        	}
         }
       }
-
+      unset($row);
+      gc_collect_cycles();
     }
+
+    $res->free_result();
+    unset($res);
 
     $valkey = $entro = 0;
     foreach ($result as $key => $value)
@@ -1122,6 +1131,7 @@ class inventario_model extends privilegios_model{
       $result[$valkey+1] = array('fecha' => 'S. Anterior', 'entrada' => array('', '', ''), 'salida' => array('', '', ''),
             'saldo' => $result[$valkey+1]['saldo'] );
     }
+    gc_collect_cycles();
 
     $keyconta = $entrada_cantidad = $entrada_importe = $salida_cantidad = $salida_importe = $entrada_cantidadt1 = $entrada_importet1 = 0;
     foreach ($result as $key => $value)
@@ -1203,8 +1213,10 @@ class inventario_model extends privilegios_model{
         $value->data       = array_pop($data);
         $value->data_saldo = array_shift($data);
         $response[$key]    = $value;
+        unset($data);
       }
     }
+    $res->free_result();
 
     return $response;
   }

@@ -13,7 +13,7 @@ $(function(){
         var lotes = '<option value=""></option>';
         if(res.length > 0){
           for (var i = 0; i < res.length; i++) {
-            lotes += '<option value="'+res[i].id_rendimiento+'-'+res[i].lote+'">'+res[i].lote+'</option>';
+            lotes += '<option value="'+res[i].id_rendimiento+'-'+res[i].lote+'">'+res[i].lote_ext+'</option>';
           };
         }
         $("#flotes").html(lotes);

@@ -1103,7 +1103,8 @@ class rastreabilidad_model extends CI_Model {
       // Creación del objeto de la clase heredada
       $pdf = new MYpdf('P', 'mm', 'Letter');
       $pdf->titulo2 = "REPORTE RASTREABILIDAD Y SEGUIMIENTO PRODUCTO";
-      $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} | LOTE: {$data['rendimientos'][0]->lote_ext} | AREA: {$data['rendimientos'][0]->area}\n";
+      if(isset($data['rendimientos'][0]))
+        $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} | LOTE: {$data['rendimientos'][0]->lote_ext} | AREA: {$data['rendimientos'][0]->area}\n";
       // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
       // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
 
@@ -1232,7 +1233,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(126);
       $pdf->Row(array(
-              String::formatoNumero($total_rendimiento, 2, '', false), '', String::formatoNumero($total_kilos_total, 2, '', false),
+              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false), '', 
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();

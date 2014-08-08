@@ -519,12 +519,13 @@ class empleados extends MY_Controller {
 
   public function valida_nombre_full()
   {
-    $query = $this->db->query("SELECT id
+    $query = $this->db->query("SELECT id 
                                FROM usuarios
-                               WHERE de_rancho = 'n' AND id_empresa = ".$this->input->post('did_empresa')." AND lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
+                               WHERE user_nomina = 't' AND de_rancho = 'n' AND 
+                                     id_empresa = ".$this->input->post('did_empresa')." AND 
+                                     lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
                                      lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
                                      lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");
-
     if ($query->num_rows() > 0)
     {
       $this->form_validation->set_message('valida_nombre_full', 'Ya existe un empleado con el nombre y apellidos especificado, si esta eliminado lo puede activar de nuevo.');

@@ -2139,6 +2139,78 @@ class facturacion_model extends privilegios_model{
       }
     }
 
+    public function prodfact_xls()
+    {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=productos_facturados.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      $facturas = $this->getRPF();
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = "Reporte Productos Facturados";
+      $titulo3 = "{$_GET['dproducto']} \n";
+      if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+          $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      elseif (!empty($_GET['ffecha1']))
+          $titulo3 .= "Del ".$_GET['ffecha1'];
+      elseif (!empty($_GET['ffecha2']))
+          $titulo3 .= "Del ".$_GET['ffecha2'];
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Serie/Folio</td>
+            <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+            <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
+            <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+          </tr>';
+      $total_importe = $total_cantidad = 0;
+      foreach ($facturas as $key => $value)
+      {
+        $html .= '<tr>
+            <td style="width:150px;border:1px solid #000;">'.$value->fecha.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$value->serie.$value->folio.'</td>
+            <td style="width:400px;border:1px solid #000;">'.$value->cliente.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$value->cantidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$value->precio_unitario.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$value->importe.'</td>
+          </tr>';
+          $total_importe += $value->importe;
+          $total_cantidad += $value->cantidad;
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="3">TOTALES</td>
+            <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+            <td style="border:1px solid #000;">'.($total_cantidad == 0 ? 0 : $total_importe/$total_cantidad).'</td>
+            <td style="border:1px solid #000;">'.$total_importe.'</td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
+    }
+
     /**
      * Reporte compras x cliente
      *

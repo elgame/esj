@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/caja_chica/rpt_gastos_pdf/'); ?>" method="GET" class="form-search" id="frmverformprod" target="frame_reporte">
+            <form action="<?php echo base_url('panel/caja_chica/rpt_ingresos_pdf/'); ?>" method="get" class="form-search" id="frmverformprod" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -57,7 +57,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/caja_chica/rpt_gastos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/caja_chica/rpt_ingresos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

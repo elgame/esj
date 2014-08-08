@@ -103,7 +103,7 @@ class privilegios_model extends CI_Model{
 	 * Elimina un privilegio de la bd
 	 */
 	public function deletePrivilegio(){
-		$this->db->delete('privilegios', "id_privilegio = '".$_GET['id']."'");
+		$this->db->delete('privilegios', "id = '".$_GET['id']."'");
 		return array(true, '');
 	}
 

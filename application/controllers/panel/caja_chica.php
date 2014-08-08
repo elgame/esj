@@ -12,6 +12,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/cerrar_caja/',
     'caja_chica/print_caja/',
     'caja_chica/rpt_gastos_pdf/',
+    'caja_chica/rpt_ingresos_pdf/',
   );
 
   public function _remap($method)
@@ -128,6 +129,34 @@ class caja_chica extends MY_Controller {
   public function rpt_gastos_pdf(){
     $this->load->model('caja_chica_model');
     $this->caja_chica_model->getRptGastosPdf();
+  }
+
+  public function rpt_ingresos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/rpt_gastos.js'),
+    ));
+
+    // $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de ingresos');
+
+    $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/rpt_ingresos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_ingresos_pdf(){
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->getRptIngresosPdf();
   }
 
 
