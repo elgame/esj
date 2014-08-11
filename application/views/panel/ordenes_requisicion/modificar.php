@@ -368,7 +368,7 @@
                               <input type="hidden" name="prodIdNumRow[]" value="<?php echo $concepto->num_row ?>" class="span12">
                             </td>
                             <td style="width: 65px;">
-                                <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="0">
+                                <input type="number" step="any" name="cantidad[]" value="<?php echo ($concepto->cantidad/($concepto->presen_cantidad>0?$concepto->presen_cantidad:1)) ?>" id="cantidad" class="span12 vpositive" min="0">
                             </td>
                             <td style="width: 70px;">
                               <select name="unidad[]" id="unidad" class="span12">
@@ -393,7 +393,9 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <input type="text" name="valorUnitario1[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']} * 
+                                                      ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
+                              <input type="text" name="valorUnitario1[]" value="<?php echo $precio_unitario; ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
                               <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}, 2, '$', false); ?></span>
@@ -409,7 +411,9 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <input type="text" name="valorUnitario2[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="valorUnitario2" class="span12 provvalorUnitario vpositive">
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']} * 
+                                                      ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
+                              <input type="text" name="valorUnitario2[]" value="<?php echo $precio_unitario ?>" id="valorUnitario2" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
                               <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}, 2, '$', false); ?></span>
@@ -425,7 +429,9 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <input type="text" name="valorUnitario3[]" value="<?php echo $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="valorUnitario3" class="span12 provvalorUnitario vpositive">
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']} * 
+                                                      ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
+                              <input type="text" name="valorUnitario3[]" value="<?php echo $precio_unitario; ?>" id="valorUnitario3" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
                               <span><?php echo String::formatoNumero($concepto->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}, 2, '$', false); ?></span>

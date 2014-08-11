@@ -1276,19 +1276,24 @@ class compras_requisicion_model extends CI_Model {
           $pdf->Row($header, false);
         }
 
+        
+        $precio_unitario1 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+        $precio_unitario2 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+        $precio_unitario3 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
+
         $pdf->SetFont('Arial','',7);
         $pdf->SetTextColor(0,0,0);
         $datos = array(
           $prod->codigo_fin,
           $prod->codigo,
-          $prod->cantidad,
+          ($prod->cantidad/($prod->presen_cantidad>0?$prod->presen_cantidad:1)),
           ($prod->presentacion==''? $prod->unidad: $prod->presentacion),
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
-          String::formatoNumero($prod->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          String::formatoNumero($precio_unitario1, 2, '$', false),
           String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          String::formatoNumero($prod->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          String::formatoNumero($precio_unitario2, 2, '$', false),
           String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio, 2, '$', false),
-          String::formatoNumero($prod->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
+          String::formatoNumero($precio_unitario3, 2, '$', false),
           String::formatoNumero($prod->{'importe'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio, 2, '$', false),
         );
 
