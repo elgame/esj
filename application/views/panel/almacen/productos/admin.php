@@ -1,4 +1,4 @@
-		<div id="content" class="span10">
+		<div id="content" class="span<?php echo isset($_GET['modal']) ? '12' : '10' ?>">
 			<!-- content starts -->
 
 

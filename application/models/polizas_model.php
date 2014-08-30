@@ -1276,7 +1276,7 @@ class polizas_model extends CI_Model {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
       $sql2 .= " AND bc.id_empresa = '".$_GET['fid_empresa']."'";
     }
-    $cuenta_cuadre = '00000';
+    $cuenta_cuadre = '';
     $query = $this->db->query(
       "SELECT *
       FROM (
@@ -1350,7 +1350,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
                               $this->setEspacios('0',10). //iddiario
-                              $this->setEspacios('Ingresos, '.String::fechaATexto($value->fecha),100). //concepto
+                              $this->setEspacios($value->concepto.' '.$value->nombre_fiscal, 100). //concepto  'Ingresos, '.String::fechaATexto($value->fecha)
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1927,6 +1927,18 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                               $this->setEspacios('1',1).  //tipo movimiento, Cuadra el IVa es un abono = 1
                               $this->setEspacios( $this->numero($impuestos2['iva_activo']['importe']), 20).  //importe movimiento
+                              $this->setEspacios('0',10).  //iddiario poner 0
+                              $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                              $this->setEspacios($value->nombre_fiscal,100). //concepto
+                              $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          }elseif($value->banco_cuenta_contpaq != '' && $value->banco_cuenta_contpaq == $value->cuenta_cpi_proveedor)
+          {
+            //Colocamos el Cargo al Proveedor que realizo el pago
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
+                              $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
+                              $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                              $this->setEspacios('0',1).  //tipo movimiento, Proveedor es un cargo = 0
+                              $this->setEspacios( $this->numero($value->total), 20).  //importe movimiento
                               $this->setEspacios('0',10).  //iddiario poner 0
                               $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                               $this->setEspacios($value->nombre_fiscal,100). //concepto

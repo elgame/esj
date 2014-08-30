@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/refacturar?idr='.$_GET['idr']); ?>" method="POST" id="form">
+        <form class="form-horizontal refacturaa" action="<?php echo base_url('panel/facturacion/refacturar?idr='.$_GET['idr']); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -116,20 +116,57 @@
                 </div>
               </div>
 
-              <div class="control-group" style="margin-top: 145px;">
-                <label class="control-label">Folio Pallet</label>
+              <div class="control-group">
+                <label class="control-label" for="es_carta_porte">Carta Porte</label>
                 <div class="controls">
-                  <div class="input-append">
-                    <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
-                    <button type="button" class="btn btn-info" id="show-pallets">Ver Pallets</button>
+                  <input type="checkbox" name="es_carta_porte" id="es-carta-porte" value="1" <?php echo set_checkbox('es_carta_porte', '1', (isset($factura) && isset($factura['carta_porte'])) ? true : false); ?>>
+                </div>
+              </div>
+
+              <?php
+                $displayCPorte = 'display: none;';
+                $displayPallets = 'display: ;';
+                if (isset($_POST['es_carta_porte']) || (isset($factura) && isset($factura['carta_porte']))) {
+                  $displayCPorte = 'display:;';
+                  $displayPallets = 'display: none;';
+                }
+              ?>
+                
+              <div id="campos-pallets" style="<?php echo $displayPallets ?>">
+                <div class="control-group" style="margin-top: 145px;">
+                  <label class="control-label">Folio Pallet</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <input type="text" id="folioPallet" class="span7 nokey vinteger"><button type="button" class="btn btn-info" id="loadPallet">Cargar</button>
+                      <button type="button" class="btn btn-info" id="show-pallets">Ver Pallets</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Sin Costo</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($factura) ? ($factura['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="control-group">
-                <label class="control-label">Sin Costo</label>
-                <div class="controls">
-                  <div class="input-append">
-                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
+
+              <div id="capos-carta-porte" style="<?php echo $displayCPorte ?>">
+                <div class="control-group" style="margin-top: 145px;">
+                  <label class="control-label">Remitente</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <a href="#modal-remitente" role="button" class="btn btn-info" data-toggle="modal">Informacion Remitente</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Destinatario</label>
+                  <div class="controls">
+                    <div class="input-append">
+                      <a href="#modal-destinatario" role="button" class="btn btn-info" data-toggle="modal">Informacion Destinatario</a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -143,10 +180,24 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group" style="display:none;">
                 <label class="control-label" for="dno_aprobacion">No. Aprobación</label>
                 <div class="controls">
                   <input type="text" name="dno_aprobacion" class="span9" id="dno_aprobacion" value="<?php echo set_value('dno_aprobacion'); ?>" size="25" readonly>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="moneda">Moneda</label>
+                <div class="controls">
+                  <?php $moneda_borrado = isset($factura) ? $factura['info']->moneda : (isset($_POST['moneda'])? $_POST['moneda']: 'M.N.');
+                  $moneda_borradover = (set_select('moneda', 'M.N.', false, $moneda_borrado)==' selected="selected"' || $moneda_borrado=='M.N.')? 'none': 'block';
+                  ?>
+                  <select name="moneda" class="span8 pull-left" id="moneda">
+                    <option value="M.N." <?php echo set_select('moneda', 'M.N.', false, $moneda_borrado); ?>>Peso mexicano (M.N.)</option>
+                    <option value="USD" <?php echo set_select('moneda', 'USD', false, $moneda_borrado); ?>>Dólar estadounidense (USD)</option>
+                  </select>
+                  <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="<?php echo set_value('tipoCambio', isset($factura) ? $factura['info']->tipo_cambio : ''); ?>"
+                    style="display:<?php echo $moneda_borradover; ?>" placeholder="Tipo de Cambio">
                 </div>
               </div>
 
@@ -251,6 +302,8 @@
                 <thead>
                   <tr>
                     <th>Descripción</th>
+                    <th class="cporte" style="<?php echo $displayCPorte; ?>">Clase</th>
+                    <th class="cporte" style="<?php echo $displayCPorte; ?>">Peso</th>
                     <th>Medida</th>
                     <th>Cant.</th>
                     <th>P Unitario</th>
@@ -258,6 +311,7 @@
                     <th>IVA</th>
                     <th>Retención</th>
                     <th>Importe</th>
+                    <th>Cert.</th>
                     <th>Accion</th>
                   </tr>
                 </thead>
@@ -267,20 +321,26 @@
                         {
                           foreach ($factura['productos'] as $key => $p) {
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
-                            $_POST['prod_importe'][$key]            = $p->importe;
+                            $_POST['prod_importe'][$key]            = $p->importe/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1);
                             $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
                             $_POST['prod_dmedida'][$key]            = $p->unidad;
                             $_POST['prod_dcantidad'][$key]          = $p->cantidad;
-                            $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
+                            $_POST['prod_dpreciou'][$key]           = $p->precio_unitario/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1);
                             $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva;
                             $_POST['prod_diva_total'][$key]         = $p->iva;
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
-                            $_POST['pallets_id'][$key]      = $p->ids_pallets;
-                            $_POST['prod_dkilos'][$key]     = $p->kilos;
-                            $_POST['prod_dcajas'][$key]     = $p->cajas;
-                            $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
-                            $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
+                            $_POST['pallets_id'][$key]              = $p->ids_pallets;
+                            $_POST['remisiones_id'][$key]           = $p->ids_remisiones;
+                            $_POST['prod_dkilos'][$key]             = $p->kilos;
+                            $_POST['prod_dcajas'][$key]             = $p->cajas;
+                            $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
+                            $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+                            $_POST['prod_dmedida_id'][$key]         = $p->id_unidad;
+                            
+                            $_POST['prod_dclase'][$key]             = $p->clase;
+                            $_POST['prod_dpeso'][$key]              = $p->peso;
+                            $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
                           }
                         } ?>
 
@@ -294,6 +354,14 @@
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
                                   <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
                                   <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
+                                  <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
+                                  <input type="hidden" name="id_size_rendimiento[]" value="<?php echo $_POST['id_size_rendimiento'][$k] ?>" id="id_size_rendimiento" class="span12">
+                                </td>
+                                <td class="cporte" style="<?php echo $displayCPorte; ?>">
+                                  <input type="text" name="prod_dclase[]" value="<?php echo $_POST['prod_dclase'][$k] ?>" id="prod_dclase" class="span12" style="width: 50px;">
+                                </td>
+                                <td class="cporte" style="<?php echo $displayCPorte; ?>">
+                                  <input type="text" name="prod_dpeso[]" value="<?php echo $_POST['prod_dpeso'][$k] ?>" id="prod_dpeso" class="span12 vpositive" style="width: 80px;">
                                 </td>
                                 <td>
                                   <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
@@ -339,6 +407,10 @@
                                   <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $_POST['prod_importe'][$k]?>" id="prod_importe">
                                 </td>
                                 <td>
+                                  <input type="checkbox" class="is-cert-check" <?php echo ($_POST['isCert'][$k] == '1' ? 'checked' : '') ?>>
+                                  <input type="hidden" name="isCert[]" value="<?php echo $_POST['isCert'][$k] ?>" class="certificado">
+                                </td>
+                                <td>
                                   <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
                                 </td>
                               </tr>
@@ -350,6 +422,14 @@
                       <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
                       <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
                       <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
+                      <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
+                      <input type="hidden" name="id_size_rendimiento[]" value="" id="id_size_rendimiento" class="span12">
+                    </td>
+                    <td class="cporte" style="<?php echo $displayCPorte ?>">
+                      <input type="text" name="prod_dclase[]" value="" id="prod_dclase" class="span12 sikey" style="width: 50px;" data-next="prod_dpeso">
+                    </td>
+                    <td class="cporte" style="<?php echo $displayCPorte ?>">
+                      <input type="text" name="prod_dpeso[]" value="" id="prod_dpeso" class="span12 vpositive sikey" style="width: 80px;" data-next="prod_dmedida">
                     </td>
                     <td>
                       <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
@@ -397,6 +477,7 @@
                     <td>
                       <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
                     </td>
+                    <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
                     <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
                   </tr>
                 </tbody>
@@ -463,6 +544,166 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+          
+          <!-- Modal Remitente-->
+          <div id="modal-remitente" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-remitente" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModalLabel">Informacion Remitente</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="remitente_nombre" style="width: auto;" style="width: auto;">Remitente</label>
+                <div class="controls" style="margin-left: 0" style="margin-left: 0">
+                  <input type="text" name="remitente_nombre" class="span12" id="remitente_nombre" value="<?php echo set_value('remitente_nombre', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->nombre : (isset($empresa_default->nombre_fiscal) ? $empresa_default->nombre_fiscal : '')); ?>" maxlenth="130">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_rfc" style="width: auto;">RFC</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_rfc" class="span12" id="remitente_rfc" value="<?php echo set_value('remitente_rfc', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->rfc : (isset($empresa_default->rfc) ? $empresa_default->rfc : '')); ?>" maxlenth="13">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_domicilio" style="width: auto;">Domicilio</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_domicilio" class="span12" id="remitente_domicilio" value="<?php echo set_value('remitente_domicilio', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->direccion : (isset($dire) ? $dire : '')); ?>" maxlenth="250">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_chofer" style="width: auto;">Chofer</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_chofer" class="span12" id="remitente_chofer" value="<?php echo set_value('remitente_chofer', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->chofer : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_marca" style="width: auto;">Marca</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_marca" class="span12" id="remitente_marca" value="<?php echo set_value('remitente_marca', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->marca : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_modelo" style="width: auto;">Modelo</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_modelo" class="span12" id="remitente_modelo" value="<?php echo set_value('remitente_modelo', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->modelo : ''); ?>" maxlenth="50">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="remitente_placas" style="width: auto;">Placas</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="remitente_placas" class="span12" id="remitente_placas" value="<?php echo set_value('remitente_placas', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['remitente'][0]->placas : ''); ?>" maxlenth="30">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Destinatario-->
+          <div id="modal-destinatario" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+              <h3 id="myModalLabel">Informacion Destinatario</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="destinatario_nombre" style="width: auto;">Remitente</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_nombre" class="span12" id="destinatario_nombre" value="<?php echo set_value('destinatario_nombre', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['destinatario'][0]->nombre : ''); ?>" maxlenth="130">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="destinatario_rfc" style="width: auto;">RFC</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_rfc" class="span12" id="destinatario_rfc" value="<?php echo set_value('destinatario_rfc', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['destinatario'][0]->rfc : ''); ?>" maxlenth="13">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="destinatario_domicilio" style="width: auto;">Domicilio</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="destinatario_domicilio" class="span12" id="destinatario_domicilio" value="<?php echo set_value('destinatario_domicilio', (isset($factura) && isset($factura['carta_porte'])) ? $factura['carta_porte']['destinatario'][0]->direccion : ''); ?>" maxlenth="250">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Seguro-->
+          <div id="modal-seguro" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Seguro</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_seguro" value="<?php echo set_value('pproveedor_seguro', isset($factura) && isset($factura['seguro']) ? $factura['seguro']->proveedor : '') ?>" id="pproveedor_seguro" class="span12 sikey field-check" placeholder="Proveedor" data-next="seg_poliza">
+                  <input type="hidden" name="seg_id_proveedor" value="<?php echo set_value('seg_id_proveedor', isset($factura) && isset($factura['seguro']) ? $factura['seguro']->id_proveedor : '') ?>" id="seg_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="seg_poliza" class="span12 sikey field-check" id="seg_poliza" value="<?php echo set_value('seg_poliza', isset($factura) && isset($factura['seguro']) ? $factura['seguro']->pol_seg : ''); ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['seguro']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Certificados -->
+          <div id="modal-certificado" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Certificado</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_certificado" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_certificado" value="<?php echo set_value('pproveedor_certificado', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->proveedor : '') ?>" id="pproveedor_certificado" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado">
+                  <input type="hidden" name="cert_id_proveedor" value="<?php echo set_value('cert_id_proveedor', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->id_proveedor : '') ?>" id="cert_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_certificado" style="width: auto;">CERTIFICADO</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_certificado" class="span12 sikey field-check" id="cert_certificado" value="<?php echo set_value('cert_certificado', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_bultos" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_bultos" class="span12 vpositive sikey field-check" id="cert_bultos" value="<?php echo set_value('cert_bultos', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['certificado']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Orden Flete -->
+          <div id="modal-orden-flete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Desea agregar una Orden de Flete?</h3>
+            </div>
+            <div class="modal-body center">
+              <input type="hidden" name="new_orden_flete" value="0" id="new_orden_flete" class="span12">
+              <button class="btn btn-large btn-success cboot-btn" id="btnOrdenFleteSi">SI</button>
+              <button class="btn btn-large btn-warning" id="btnOrdenFleteNo">NO</button>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
             </div>
           </div>
         </form>

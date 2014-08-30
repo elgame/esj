@@ -1,3 +1,12 @@
+-*Modificar el serie y folio de las compras
+-*Reporte productos facturados en piña de numero no los pone bien, varios productos a la ves
+-*Hacer administrable agregar cuentas de contpaq, depurar catalogo
+-Agregar pallets poner letrero de en area de piña
+-*Checar lo de chui en rendimiento, q no duplique las cantidades al editar un lote anterior o no permitir lotes consecutivos
+-*En ordenes de requisicion poner opcion para agregar los productos desde ahi sin salirce de la orden, y validar en todas
+las ordenes q seleccionen un producto
+
+
 -*En las nominas si se dio finiquito que salga en las pasadas y el puesto que no cambie por nomina
 -*Poner total en recibos de compra cuando pagan
 -Reporte de samuel sacar lo certificado y lo no certificado

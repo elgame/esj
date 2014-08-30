@@ -35,30 +35,48 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
-		// $gestor = @fopen("Catalogo de Cuentas.txt", "r");
-		// if ($gestor) {
-		// 	$idconta = 1;
-		// 	$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
-		//     while (($bufer = fgets($gestor, 4096)) !== false) {
-		//     	$nivel = trim(substr($bufer, 4, 3));
-		//     	if($nivel == '1'){
-		//     		$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}elseif ($nivel == '2') {
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}elseif ($nivel == '3') {
-		//     		$ids[$nivel+1] = $idconta;
-		//     	}else
-		//     		$nivel = 4;
+		// if($this->session->userdata('usuario') == 'admin')
+		// {
+		// 	$gestor = @fopen("CATALAGO SNJ.txt", "r");
+		// 	if ($gestor) {
+		// 		$idconta = 1;
+		// 		$ids = array(1 => null, 2 => null, 3 => null, 4 => null);
+		// 	    while (($bufer = fgets($gestor, 4096)) !== false) {
+		// 	    	$cuenta = trim(substr($bufer, 3, 8));
+		// 	    	$padre = trim(substr($bufer, 136, 8));
 
-		//     	$bufer = utf8_encode($bufer);
-		//     	echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
-		//     	$idconta++;
-		//     }
-		//     if (!feof($gestor)) {
-		//         echo "Error: fallo inesperado de fgets()\n";
-		//     }
-		//     fclose($gestor);
+		// 	    	$query = $this->db->query("SELECT Count(id_cuenta) as num,
+		// 	    														(SELECT id_cuenta FROM cuentas_contpaq 
+		// 	    															WHERE cuenta = '{$padre}' and id_empresa = 2) AS id_cuenta
+		// 	    	                           FROM cuentas_contpaq
+		// 	    	                           WHERE cuenta = '{$cuenta}' and id_empresa = 2")->row();
+		// 	    	if($query->num == 0){
+		// 	    		echo $cuenta.' - '.utf8_encode(trim(substr($bufer, 35, 102))).'<br>';
+		// 	    		// echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$query->id_cuenta.", '1', '".$cuenta."', '".utf8_encode(trim(substr($bufer, 35, 102)))."', '' );\n<br>";
+		// 	    		$idconta++;
+		// 	    	}
+
+
+		// 	    	// $nivel = trim(substr($bufer, 4, 3));
+		// 	    	// if($nivel == '1'){
+		// 	    	// 	$ids = array(1 => 'NULL', 2 => null, 3 => null, 4 => null);
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }elseif ($nivel == '2') {
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }elseif ($nivel == '3') {
+		// 	    	// 	$ids[$nivel+1] = $idconta;
+		// 	    	// }else
+		// 	    	// 	$nivel = 4;
+
+		// 	    	// $bufer = utf8_encode($bufer);
+		// 	    	// echo "INSERT INTO cuentas_contpaq (id_padre, nivel, cuenta, nombre, tipo) VALUES (".$ids[$nivel].", '".$nivel."', '".trim(str_replace("-", "", substr($bufer, 7, 10)))."', '".trim(substr($bufer, 23, 21))."', '".trim(substr($bufer, 46, 19))."' );\n";
+		// 	    }
+		// 	    echo $idconta;
+		// 	    if (!feof($gestor)) {
+		// 	        echo "Error: fallo inesperado de fgets()\n";
+		// 	    }
+		// 	    fclose($gestor);
+		// 	}
 		// }
 		// $departamento = array('ADMINISTRACION' => 1, 'EMPAQUE' => 2, 'MANTENIMIENTO INDUSTRIAL' => 3, 'RANCHOS' => 4);
 		// $puestos = array('AUXILIAR CONTABLE' => 5, 'RECEPCION DE FRUTA' => 6, 'GERENTE GENERAL' => 7, 'GERENTE ADMINISTRATIVO' => 8, 'RECEPCIONISTA' => 9, 'CONTADORA' => 10, 'AUXILIAR ADMINISTRATIVO' => 11, 'MENSAJERO' => 12, 'ASISTENTE INOCUIDAD' => 13, 'EMPACADOR' => 14, 'CAJONERA' => 15, 'ALMACENISTA' => 16, 'MONTACARGUISTA' => 17, 'CONTROL DE PRODUCCION' => 18, 'GERENTE DE PRODUCCION' => 19, 'SELECCIONADORA' => 20, 'SUPERVISOR DE PRODUCCION' => 21, 'JEFE DE PERSONAL' => 22, 'INTENDENTE' => 23, 'VIGILANTE' => 24, 'EMPAPELADORA' => 25, 'CAJONERO' => 26, 'SUPERVISOR DE MANTENIMIENTO' => 27, 'JEFE DE PROYECTOS' => 28, 'AUXILIAR MECANICO' => 29, 'SOLDADOR' => 30, 'REGADOR' => 31, 'MAYORDOMO' => 32, 'TRACTORISTA' => 33, 'JARDINERO' => 34);

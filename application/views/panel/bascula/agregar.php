@@ -43,6 +43,7 @@
           'k_tara'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
           'cajas_pres' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
           'pagar'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
+          'fecha_pago' => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
           'cajas'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
           );
         }
@@ -129,14 +130,14 @@
               <div class="row-fluid">
                 <div class="span7">
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="ptipo">Certificado</label>
                     <div class="controls">
                       <input type="checkbox" name="certificado" id="certificado" value="1" data-uniform="false"  <?php echo set_checkbox('certificado', "1", isset($certificado) && $certificado == '1' ? true : false) ?> autofocus>
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="ptipo">Tipo</label>
                     <div class="controls">
                       <select name="ptipo" class="input-xlarge" id="ptipo" <?php echo $disabled; ?>>
@@ -146,7 +147,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="parea">Area</label>
                     <div class="controls">
                       <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled; ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
@@ -160,7 +161,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="pempresa">Empresa</label>
                     <div class="controls">
                       <input type="text" name="pempresa"
@@ -184,7 +185,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group" id="groupProveedorRancho">
+                  <div class="control-group" id="groupProveedorRancho" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="prancho">Rancho</label>
                     <div class="controls">
                       <input type="text" name="prancho" value="<?php echo set_value('prancho', $this->input->post('prancho')) ?>"
@@ -204,7 +205,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="pcamion">Camión</label>
                     <div class="controls">
                       <input type="text" name="pcamion"
@@ -216,7 +217,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group">
+                  <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
@@ -257,6 +258,16 @@
                         id="pstatus" data-name="pstatus" data-value="1" <?php echo $disabled.$bmod['pagar']; ?>>Pagar</button>
                     </div>
                   </div>
+
+                  <?php if ($accion === 'p' && $bmod['fecha_pago']) { ?>
+                  <div class="control-group">
+                    <label class="control-label">Fecha de pago</label>
+                    <div class="controls">
+                      <input type="datetime-local" name="pfecha_pago" value="<?php echo set_value('pfecha_pago', $fecha_pago ); ?>" 
+                        id="pfecha_pago" class="span10" <?php echo $disabled; ?>>
+                    </div>
+                  </div>
+                  <?php } ?>
 
                   <div class="control-group">
                     <!-- <label class="control-label">Finalizado?</label> -->

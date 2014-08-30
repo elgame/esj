@@ -159,6 +159,23 @@ class Ventas_model extends privilegios_model{
 
       $response['pallets'] = $res->result();
 
+      $res = $this->db->query("SELECT fsc.*, p.nombre_fiscal as proveedor
+         FROM facturacion_seg_cert fsc
+         INNER JOIN proveedores p ON p.id_proveedor = fsc.id_proveedor
+         WHERE id_factura = {$id}");
+
+      foreach ($res->result() as $tipo)
+      {
+        if ($tipo->certificado === null)
+        {
+          $response['seguro'] = $tipo;
+        }
+        else
+        {
+          $response['certificado'] = $tipo;
+        }
+      }
+
 			return $response;
 		}else
 			return false;
@@ -274,6 +291,9 @@ class Ventas_model extends privilegios_model{
     );
     $this->db->insert('facturacion_cliente', $dataCliente);
 
+    $dataSeguroCerti = array();
+    $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
+
     // Productos
     $productosFactura   = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
@@ -300,9 +320,41 @@ class Ventas_model extends privilegios_model{
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
           'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
         );
+
+        if ($_POST['prod_did_prod'][$key] === '49')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['seg_id_proveedor'],
+            'pol_seg'          => $_POST['seg_poliza'],
+            'folio'            => $serieFolio,
+            'bultos'           => 0,
+            'certificado'      => null,
+          );
+        }
+
+        if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['cert_id_proveedor'],
+            'certificado'      => $_POST['cert_certificado'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['cert_bultos'],
+            'pol_seg'          => null,
+          );
+        }
       }
     }
     $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+    if (count($dataSeguroCerti) > 0)
+    {
+      $this->db->delete('facturacion_seg_cert', array('id_factura' => $id_venta));
+      $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
+    }
 
     if (isset($_POST['palletsIds']))
     {
@@ -400,11 +452,14 @@ class Ventas_model extends privilegios_model{
     );
     $this->db->update('facturacion_cliente', $dataCliente, "id_factura = {$id_venta}");
 
+    $dataSeguroCerti = array();
+    $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
+
     // Productos
     $productosFactura   = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
     {
-      if ($_POST['prod_importe'][$key] != 0)
+      if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $productosFactura[] = array(
           'id_factura'       => $id_venta,
@@ -426,10 +481,42 @@ class Ventas_model extends privilegios_model{
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
           'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
         );
+
+        if ($_POST['prod_did_prod'][$key] === '49')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['seg_id_proveedor'],
+            'pol_seg'          => $_POST['seg_poliza'],
+            'folio'            => $serieFolio,
+            'bultos'           => 0,
+            'certificado'      => null,
+          );
+        }
+
+        if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['cert_id_proveedor'],
+            'certificado'      => $_POST['cert_certificado'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['cert_bultos'],
+            'pol_seg'          => null,
+          );
+        }
       }
     }
     $this->db->delete('facturacion_productos', "id_factura = {$id_venta}");
     $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+    if (count($dataSeguroCerti) > 0)
+    {
+      $this->db->delete('facturacion_seg_cert', array('id_factura' => $id_venta));
+      $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
+    }
 
     if (isset($_POST['palletsIds']))
     {
@@ -975,6 +1062,9 @@ class Ventas_model extends privilegios_model{
     // if (! is_array($conceptos))
     //   $conceptos = array($conceptos);
 
+    $traslado11 = 0;
+    $traslado16 = 0;
+
     $pdf->limiteY = 250;
 
     $pdf->setY($pdf->GetY() + 1);
@@ -1016,6 +1106,12 @@ class Ventas_model extends privilegios_model{
         $hay_prod_certificados = true;
       
       if($printRow)
+      {
+        if ($item->porcentaje_iva == '11')
+          $traslado11 += $item->iva;
+        elseif ($item->porcentaje_iva == '16')
+          $traslado16 += $item->iva;
+
         $pdf->Row(array(
           $item->cantidad,
           $item->unidad,
@@ -1024,6 +1120,7 @@ class Ventas_model extends privilegios_model{
           String::formatoNumero($item->precio_unitario, 2, '$', false),
           String::formatoNumero($item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
+      }
     }
 
     /////////////
@@ -1041,15 +1138,15 @@ class Ventas_model extends privilegios_model{
     //   $ivas = array($ivas);
     // }
 
-    $traslado11 = 0;
-    $traslado16 = 0;
-    foreach ($conceptos as $key => $c)
-    {
-      if ($c->porcentaje_iva == '11')
-        $traslado11 += $c->iva;
-      elseif ($c->porcentaje_iva == '16')
-        $traslado16 += $c->iva;
-    }
+    // $traslado11 = 0;
+    // $traslado16 = 0;
+    // foreach ($conceptos as $key => $c)
+    // {
+    //   if ($c->porcentaje_iva == '11')
+    //     $traslado11 += $c->iva;
+    //   elseif ($c->porcentaje_iva == '16')
+    //     $traslado16 += $c->iva;
+    // }
 
     $pdf->SetFillColor(0, 171, 72);
     $pdf->SetXY(0, $pdf->GetY());

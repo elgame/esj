@@ -59,14 +59,14 @@
                     <div class="span4">
                       <div class="control-group">
                         <div class="controls span9">
-                          Serie <input type="text" name="serie" class="span12" id="serie" value="<?php echo set_value('serie', $compra['info']->serie); ?>" readonly>
+                          Serie <input type="text" name="serie" class="span12" id="serie" value="<?php echo set_value('serie', $compra['info']->serie); ?>">
                         </div>
                       </div>
                     </div>
                     <div class="span4">
                       <div class="control-group">
                         <div class="controls span9">
-                          Folio<input type="text" name="folio" class="span12" id="folio" value="<?php echo set_value('folio', $compra['info']->folio); ?>" readonly>
+                          Folio<input type="text" name="folio" class="span12" id="folio" value="<?php echo set_value('folio', $compra['info']->folio); ?>">
                         </div>
                       </div>
                     </div>

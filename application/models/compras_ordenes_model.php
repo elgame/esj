@@ -904,6 +904,10 @@ class compras_ordenes_model extends CI_Model {
       $_GET['did_empresa'] = $idEmpresa;
     }
 
+    $tipo_prod = '';
+    if($tipo != '')
+      $tipo_prod = "pf.tipo = '{$tipo}' AND ";
+
     $res = $this->db->query(
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia,
@@ -915,7 +919,7 @@ class compras_ordenes_model extends CI_Model {
         WHERE p.status = 'ac' AND
               {$term}
               {$sqlEmpresa}
-              pf.tipo = '{$tipo}' AND
+              {$tipo_prod}
               pf.status = 'ac'
         ORDER BY p.nombre ASC
         LIMIT 20");

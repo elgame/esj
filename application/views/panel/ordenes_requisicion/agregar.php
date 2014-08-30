@@ -246,8 +246,8 @@
                     </div><!--/span3s -->
                     <div class="span6">
                       <div class="input-append span12">
-                        <input type="text" class="span12" id="fconcepto" placeholder="Producto / Descripción">
-                        <!-- <a href="" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a> -->
+                        <input type="text" class="span10" id="fconcepto" placeholder="Producto / Descripción">
+                        <a href="<?php echo base_url('panel/productos').'?modal=true' ?>" rel="superbox-70x550" class="btn btn-info" type="button" data-rel="tooltip" data-title="Agregar Producto"><i class="icon-plus" ></i></a>
                       </div>
                       <input type="hidden" class="span1" id="fconceptoId">
                     </div><!--/span3s -->

@@ -211,6 +211,10 @@ class Bascula_model extends CI_Model {
           else
             $data2['accion'] = 'p';
         }
+
+        if(isset($_POST['pfecha_pago']) && $data2['accion'] === 'p')
+          $data2['fecha_pago'] = $_POST['pfecha_pago'];
+        
       }
 
       $cajas = null;
@@ -1588,6 +1592,7 @@ class Bascula_model extends CI_Model {
       'obcervaciones'   => 'Observaciones',
       'accion'          => 'Accion',
       'certificado'     => 'Certificado',
+      'fecha_pago'      => 'Fecha de pago',
     );
 
     // Campos que son ids, para facilitar la busqueda de sus valores.

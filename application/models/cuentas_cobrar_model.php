@@ -1461,7 +1461,7 @@ class cuentas_cobrar_model extends privilegios_model{
   								''::text AS serie,
   								id_abono AS folio,
   								Date(fecha) AS fecha,
-  								'Pago del cliente'::text AS concepto,
+  								('Pago del cliente (' || ref_movimiento || ')')::text AS concepto,
   								total AS abono
   							FROM
   								facturacion_abonos as fa
@@ -1489,6 +1489,7 @@ class cuentas_cobrar_model extends privilegios_model{
   				$cliente->facturas[$key]->abonos_total = 0;
   				foreach ($cliente->facturas[$key]->abonos as $keyab => $abono)
   				{
+  					$cliente->facturas[$key]->abonos[$keyab]->concepto = str_replace('()', '', $abono->concepto);
   					$cliente->facturas[$key]->abonos_total += $abono->abono;
   				}
   				$cliente->saldo -= $cliente->facturas[$key]->abonos_total;

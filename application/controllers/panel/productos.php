@@ -50,8 +50,14 @@ class productos extends MY_Controller {
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
+		if (isset($_GET['modal']))
+		{
+			$params['noHeader'] = true;
+		}
+
 		$this->load->view('panel/header', $params);
-		$this->load->view('panel/general/menu', $params);
+		if ( !isset($_GET['modal']) )
+			$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/almacen/productos/admin', $params);
 		$this->load->view('panel/footer');
 	}

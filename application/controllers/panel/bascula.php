@@ -169,7 +169,8 @@ class bascula extends MY_Controller {
     $params['idb']         = '';
     $params['param_folio'] = '';
     $params['fecha']       = str_replace(' ', 'T', date("Y-m-d H:i"));
-    $params['autorizar'] = false;
+    $params['autorizar']   = false;
+    $params['fecha_pago']  = '';
 
     $params['e'] = false;
 
@@ -254,6 +255,8 @@ class bascula extends MY_Controller {
           $params['fecha']      =  substr($info['info'][0]->fecha_bruto, 0, 10).'T'.date("H:i");
         else
           $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i"), 0, 16));
+
+        $params['fecha_pago']   = str_replace(' ', 'T', substr($info['info'][0]->fecha_pago, 0, 16) );
 
         $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;

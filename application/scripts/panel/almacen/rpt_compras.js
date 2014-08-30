@@ -25,7 +25,7 @@ $(function(){
           data: {
             term : request.term,
             ide: $('#did_empresa').val(),
-            tipo: 'p'
+            tipo: ''  //p
           },
           success: function (data) {
             response(data)
@@ -104,7 +104,7 @@ $(function(){
           data: {
             term : request.term,
             ide: $('#did_empresa').val(),
-            tipo: 'p'
+            tipo: '' //p
           },
           success: function (data) {
             response(data)

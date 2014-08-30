@@ -29,9 +29,19 @@
 
                 <div class="control-group">
                   <label class="control-label" for="dproducto">Producto</label>
-                  <div class="controls">
+                  <!-- <div class="controls">
                     <input type="text" name="dproducto" class="input-xlarge search-query" id="dproducto" value="<?php echo set_value_get('dproducto'); ?>" size="73">
                     <input type="hidden" name="did_producto" id="did_producto" value="<?php echo set_value_get('did_producto'); ?>">
+                  </div> -->
+                  <div class="input-append span12">
+                    <input type="text" name="dproducto" value="" id="dproducto" class="span9" placeholder="Buscar">
+                    <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
+                    <input type="hidden" name="did_producto" value="" id="did_producto">
+                  </div>
+                  <div class="clearfix"></div>
+                  <div style="height:110px;overflow-y: scroll;background-color:#eee;">
+                    <ul id="lista_proveedores" style="list-style: none;margin-left: 4px;">
+                    </ul>
                   </div>
                 </div>
 

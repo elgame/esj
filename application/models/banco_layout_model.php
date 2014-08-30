@@ -321,7 +321,17 @@ class banco_layout_model extends banco_cuentas_model {
         //   $nombre = $arreglo[$contz].' '.$nombre;
       }
     }
-    return array(trim($nombre), trim($apellidop), trim($apellidom));
+
+    $nombre2 = trim($nombre);
+    $nombre = explode(' ', $nombre2);
+    if(count($nombre) > 1)
+    {
+      $nombre2 = '';
+      for ($contz=count($nombre)-1; $contz>=0; $contz--)
+        $nombre2 .= $nombre[$contz].' ';
+    }
+
+    return array(trim($nombre2), trim($apellidop), trim($apellidom));
   }
 
   function buscarCadena($cadena, $palabra){

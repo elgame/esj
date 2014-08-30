@@ -323,12 +323,6 @@ class rastreabilidad_model extends CI_Model {
         {
           $clasifi2 = $sql2->row();
 
-          // $campos['existente']        = $_POST['existente'];
-          $campos['linea1']      = $clasifi->linea1+$clasifi2->linea1;
-          $campos['linea2']      = $clasifi->linea2+$clasifi2->linea2;
-          $campos['total']       += $clasifi2->linea1+$clasifi2->linea2;
-          $campos['rendimiento'] = $campos['linea1']+$campos['linea2'];
-
           if (
             $_POST['id_clasificacion'] != $_POST['id_clasificacion_old'] ||
             $_POST['id_unidad'] != $_POST['id_unidad_old'] ||
@@ -337,6 +331,12 @@ class rastreabilidad_model extends CI_Model {
             $_POST['id_size'] != $_POST['id_size_old'] ||
             $_POST['kilos'] != $_POST['kilos_old'] )
           {
+            // $campos['existente']        = $_POST['existente'];
+            $campos['linea1']      = $clasifi->linea1+$clasifi2->linea1;
+            $campos['linea2']      = $clasifi->linea2+$clasifi2->linea2;
+            $campos['total']       += $clasifi2->linea1+$clasifi2->linea2;
+            $campos['rendimiento'] = $campos['linea1']+$campos['linea2'];
+
             //Elimina el rendimiento viejo
             $this->db->delete('rastria_rendimiento_clasif', array(
                 'id_rendimiento'   => $clasifi2->id_rendimiento,
@@ -532,8 +532,10 @@ class rastreabilidad_model extends CI_Model {
     $sql = $this->db->select("id_rendimiento, lote, DATE(fecha) AS fecha, status, lote_ext")
       ->from("rastria_rendimiento")
       ->where("DATE(fecha)", $fecha)
-      ->where("lote", $lote)
+      // ->where("lote", $lote)
       ->where('id_area', $id_area)
+      ->order_by('lote_ext', 'DESC')
+      ->limit(1)
       ->get();
     if ($sql->num_rows() > 0)
     {

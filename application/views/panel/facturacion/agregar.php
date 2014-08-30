@@ -344,16 +344,16 @@
                             $_POST['prod_diva_total'][$key]         = $p->iva;
                             $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
                             $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
-                            $_POST['pallets_id'][$key]      = $p->ids_pallets;
-                            $_POST['remisiones_id'][$key]   = $p->ids_remisiones;
-                            $_POST['prod_dkilos'][$key]     = $p->kilos;
-                            $_POST['prod_dcajas'][$key]     = $p->cajas;
-                            $_POST['id_unidad_rendimiento'][$key] = $p->id_unidad_rendimiento;
-                            $_POST['id_size_rendimiento'][$key] = $p->id_size_rendimiento;
-
-                            $_POST['prod_dclase'][$key] = $p->clase;
-                            $_POST['prod_dpeso'][$key] = $p->peso;
-                            $_POST['isCert'][$key] = $p->certificado === 't' ? '1' : '0';
+                            $_POST['pallets_id'][$key]              = $p->ids_pallets;
+                            $_POST['remisiones_id'][$key]           = $p->ids_remisiones;
+                            $_POST['prod_dkilos'][$key]             = $p->kilos;
+                            $_POST['prod_dcajas'][$key]             = $p->cajas;
+                            $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
+                            $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+                            
+                            $_POST['prod_dclase'][$key]             = $p->clase;
+                            $_POST['prod_dpeso'][$key]              = $p->peso;
+                            $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
                           }
                         } ?>
 

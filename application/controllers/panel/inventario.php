@@ -131,7 +131,7 @@ class inventario extends MY_Controller {
   {
     $this->carabiner->js(array(
       array('general/msgbox.js'),
-      array('panel/almacen/rpt_inventarios.js'),
+      array('panel/almacen/rpt_segxproducto.js'),
     ));
 
     $this->load->library('pagination');

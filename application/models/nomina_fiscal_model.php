@@ -4239,8 +4239,9 @@ class nomina_fiscal_model extends CI_Model {
       $ver_trans += $_POST['ttotal_nomina'][$key];
     }
 
-    $columnas = array('n' => array(), 'w' => array(5, 64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(5, 64, 64, 20, 20, 20, 20, 20, 20), 'a' => array('L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'));
     $columnas['n'][] = 'No';
+    $columnas['n'][] = 'PUESTO';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'SUELDO';
     $columnas['n'][] = 'OTRAS';
@@ -4307,6 +4308,7 @@ class nomina_fiscal_model extends CI_Model {
 
           $dataarr = array();
           $dataarr[] = $numero_empleado;
+          $dataarr[] = $empleado->puesto;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
           $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
@@ -4358,6 +4360,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       $datatto = array();
+      $datatto[] = '';
       $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);

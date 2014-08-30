@@ -515,8 +515,8 @@ class inventario_model extends privilegios_model{
 	    $idsproveedores = $this->input->get('id_producto');
 
 	    $response = array();
-    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(cp.cantidad, 0) AS cantidad,
-				COALESCE(cp.importe, 0) AS importe, COALESCE(cp.impuestos, 0) AS impuestos, COALESCE(cp.total, 0) AS total,
+    	$productos = $this->db->query("SELECT p.id_producto, p.codigo, p.nombre, pu.abreviatura, COALESCE(Sum(cp.cantidad), 0) AS cantidad,
+				COALESCE(Sum(cp.importe), 0) AS importe, COALESCE(Sum(cp.impuestos), 0) AS impuestos, COALESCE(Sum(cp.total), 0) AS total,
 				cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
 			FROM
 				productos AS p LEFT JOIN (
@@ -531,7 +531,8 @@ class inventario_model extends privilegios_model{
 				) AS cp ON p.id_producto = cp.id_producto
 				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
 			WHERE p.id_producto = {$idsproveedores}
-				ORDER BY p.nombre ASC");
+			GROUP BY p.id_producto, pu.abreviatura, cp.fecha, cp.serie, cp.folio, cp.fechao, cp.folioo, cp.id_compra, cp.id_orden
+			ORDER BY p.nombre, folio ASC");
 
     	$response = $productos->result();
 

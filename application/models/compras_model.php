@@ -206,6 +206,8 @@ class compras_model extends privilegios_model{
       'retencion_iva' => String::float($this->input->post('totalRetencion')),
       'total'         => String::float($this->input->post('totalOrden')),
       'fecha'         => $this->input->post('fecha'),
+      'serie'         => $this->input->post('serie'),
+      'folio'         => $this->input->post('folio'),
     );
 
     // Realiza el upload del XML.
@@ -850,7 +852,7 @@ class compras_model extends privilegios_model{
           pr.nombre, cp.cantidad, cp.precio_unitario, cp.importe, pu.abreviatura AS unidad
         FROM compras c
           INNER JOIN compras_facturas cf ON c.id_compra = cf.id_compra
-          INNER JOIN compras_entradas_almacen cea ON cf.id_orden = cea.id_orden
+          LEFT JOIN compras_entradas_almacen cea ON cf.id_orden = cea.id_orden
           INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
           INNER JOIN compras_productos cp ON c.id_compra = cp.id_compra
           INNER JOIN productos pr ON pr.id_producto = cp.id_producto

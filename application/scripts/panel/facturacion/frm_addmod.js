@@ -4,6 +4,15 @@ $(function(){
   $('#modal-seguro').keyJump();
   $('#modal-certificado').keyJump();
 
+  $("#form").submit(function(){
+    var result = validaProductosEspecials();
+    if(result == false)
+    {
+      event.preventDefault();
+      return false;
+    }
+  });
+
   $("#dcliente").autocomplete({
     source: function(request, response) {
         $.ajax({
@@ -475,7 +484,10 @@ $(function(){
 
   $('#btnOrdenFleteSi').on('click', function(event) {
     $('#new_orden_flete').val('1');
-    $('#form').submit();
+
+    var result = validaProductosEspecials();
+    if(result == true)
+      $('#form').submit();
   });
 
   $('#table_prod').on('click', '.is-cert-check', function(event) {
@@ -488,6 +500,13 @@ $(function(){
       $td.find('.certificado').val('0');
     }
   });
+
+  if ($(".refacturaa").length > 0) {
+    $("#table_prod tbody tr").each(function(index, el) {
+      if($(this).find("#prod_did_prod").val() != '')
+        calculaTotalProducto($(this));
+    });
+  }
 });
 
 var EventOnChangeMoneda = function () {
@@ -1221,4 +1240,20 @@ var enabledCloseModal = function (idModal) {
       $modal.find('#btnClose').prop('disabled', 'disabled');
     }
   });
+};
+
+var validaProductosEspecials = function() {
+  var result = true;
+  $("#table_prod #prod_did_prod").each(function(index, el) {
+    if ($(this).val() === '49' && $('#seg_id_proveedor').val() == '') {
+      //Seguro
+      noty({"text": 'Seguro incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
+      result = false;
+    }else if (($(this).val() === '51' || $(this).val() === '52') && $('#cert_id_proveedor').val() == "") {
+      //certificados
+      noty({"text": 'Certificado incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
+      result = false;
+    }
+  });
+  return result;
 };
