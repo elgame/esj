@@ -20,6 +20,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/ajax_get_semana/',
     'nomina_fiscal/ajax_add_nomina_ptu_empleado/',
     'nomina_fiscal/ajax_add_nomina_aguinaldo_empleado/',
+    'nomina_fiscal/ajax_add_nomina_terminada/',
 
     'nomina_fiscal/nomina_fiscal_pdf/',
     'nomina_fiscal/nomina_fiscal_cfdis/',
@@ -313,7 +314,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $_GET['cid_empresa'] = $filtros['empresaId']; //para las cuentas del contpaq
     $configuraciones = $this->nomina_fiscal_model->configuraciones();
-    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, null);
+    $params['empleados'] = $this->nomina_fiscal_model->nomina($configuraciones, $filtros, null, null, null, null, null, null, null, 'ag');
     $params['empresas'] = $this->empresas_model->getEmpresasAjax();
     $params['puestos'] = $this->usuarios_model->puestos();
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno();
@@ -808,6 +809,14 @@ class nomina_fiscal extends MY_Controller {
     $empresaId = isset($_POST['empresa_id']) ? $_POST['empresa_id'] : $empresaDefault->id_empresa;
 
     $result = $this->nomina_fiscal_model->add_nominas($_POST, $empresaId, $_POST['empleado_id']);
+
+    echo json_encode($result);
+  }
+  public function ajax_add_nomina_terminada()
+  {
+    $this->load->model('nomina_fiscal_model');
+
+    $result = $this->nomina_fiscal_model->add_nomina_terminada($_POST);
 
     echo json_encode($result);
   }

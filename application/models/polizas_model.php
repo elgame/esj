@@ -615,7 +615,7 @@ class polizas_model extends CI_Model {
       $query = $this->db->query(
         "SELECT id_factura
          FROM facturacion AS f
-        WHERE status <> 'ca' AND status <> 'b'
+        WHERE status <> 'ca' AND status <> 'b' AND is_factura = 't'
             AND poliza_diario = 'f' AND id_nc IS NOT NULL
            {$sql} {$sql_fecha}
         ORDER BY id_factura ASC

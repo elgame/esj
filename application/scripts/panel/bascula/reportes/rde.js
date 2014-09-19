@@ -27,6 +27,20 @@ $(function(){
     setAutocomplet($(this).val());
   });
 
+  $("#farea").on('change', function() {
+    jQuery.getJSON(base_url+'panel/bascula/get_calidades', {id_area: $("#farea").val() },
+      function(json, textStatus) {
+        var html = '<option value=""></option>';
+        if (json.length > 0) {
+          for (var i = 0; i < json.length; i++) {
+            html += '<option value="'+json[i].id_calidad+'">'+json[i].nombre+'</option>';
+          }
+        }
+        $("#fcalidad").html(html);
+    });
+
+  });
+
   $("#linkXls").on('click', function(event) {
     var vthis = $(this), url="";
     $(".getjsval").each(function(){
@@ -41,6 +55,27 @@ $(function(){
     if ($("#fstatus").val() == '1' && $("#fefectivo:checked").length == 1)
       $("#linkXls").show();
   });
+
+
+  $('#form').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          farea: $("#farea").val(),
+          fcalidad: $("#fcalidad").val(),
+          ftipo: $("#ftipo").val(),
+          fproveedor: $("#fproveedor").val(),
+          fempresa: $("#fempresa").val(),
+          fstatus: $("#fstatus").val(),
+          fefectivo: $("#fefectivo").is(':checked')? 'si': '',
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
 });
 
 function setAutocomplet(tipo, first){

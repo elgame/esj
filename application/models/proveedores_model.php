@@ -6,6 +6,7 @@ class proveedores_model extends CI_Model {
 	function __construct()
 	{
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 	public function getProveedores($paginados = true)
@@ -136,6 +137,14 @@ class proveedores_model extends CI_Model {
 
 		$this->db->insert('proveedores', $data);
 		$id_proveedor = $this->db->insert_id('proveedores', 'id_proveedor');
+
+		// Bitacora
+    $this->bitacora_model->_insert('proveedores', $id_proveedor,
+                                    array(':accion'    => 'el proveedor', ':seccion' => 'proveedores',
+                                          ':folio'     => $data['nombre_fiscal'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'   => 'en '.$this->input->post('fempresa')));
+
 		$this->addCuentas($id_proveedor);
 
 		return array('error' => FALSE);
@@ -213,6 +222,25 @@ class proveedores_model extends CI_Model {
 						);
 			if($cer_caduca != '')
 				$data['cer_caduca'] = $cer_caduca;
+
+			// Bitacora
+	    $id_bitacora = $this->bitacora_model->_update('proveedores', $id_proveedor, $data,
+	                              array(':accion'       => 'el proveedor', ':seccion' => 'proveedores',
+	                                    ':folio'        => $data['nombre_fiscal'],
+	                                    ':id_empresa'   => $data['id_empresa'],
+	                                    ':empresa'      => 'en '.$this->input->post('fempresa'),
+	                                    ':id'           => 'id_proveedor',
+	                                    ':titulo'       => 'Proveedor'));
+		}else {
+			if(isset($data['status']) && $data['status'] === 'e') {
+				$proveerd = $this->getProveedorInfo($id_proveedor);
+				// Bitacora
+				$this->bitacora_model->_cancel('proveedores', $id_proveedor,
+				                                array(':accion'     => 'el proveedor', ':seccion' => 'proveedores',
+				                                      ':folio'      => $proveerd['info']->nombre_fiscal,
+				                                      ':id_empresa' => $proveerd['info']->id_empresa,
+				                                      ':empresa'    => 'de '.$proveerd['info']->empresa->nombre_fiscal));
+			}
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));

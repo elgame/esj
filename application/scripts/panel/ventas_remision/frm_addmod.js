@@ -2,22 +2,30 @@ $(function(){
 
   $('#form').keyJump();
   $('#modal-seguro').keyJump();
-  $('#modal-certificado').keyJump();
+  $('#modal-certificado51').keyJump();
+  $('#modal-certificado52').keyJump();
+
+  if ($("#did_empresa").val() == '2') {
+    $("#modal-produc-marcar").modal('show');
+  }
 
   $("#form").submit(function(){
-    $("#table_prod #prod_did_prod").each(function(index, el) {
-      if ($(this).val() === '49' && $('#seg_id_proveedor').val() == '') {
-        //Seguro
-        noty({"text": 'Seguro incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
-        event.preventDefault();
-        return false;
-      }else if (($(this).val() === '51' || $(this).val() === '52') && $('#cert_id_proveedor').val() == "") {
-        //certificados
-        noty({"text": 'Certificado incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
+    var result = validaProductosEspecials();
+    if(result == false)
+    {
+      event.preventDefault();
+      return false;
+    }else if($("#privAddDescripciones").length == 0)
+    {
+    // Valida agregar descripciones
+      result = validaPrivDescripciones();
+      if(result == false)
+      {
+        noty({"text": 'No tienes permiso para agregar Descripciones, Selecciona los productos que salen en el listado.', "layout":"topRight", "type": 'error'});
         event.preventDefault();
         return false;
       }
-    });
+    }
   });
 
   $("#dcliente").autocomplete({
@@ -207,7 +215,7 @@ $(function(){
   }).on('change', '#prod_dcantidad, #prod_dpreciou', function(e) {
     var $this = $(this),
         $tr = $this.parent().parent();
-        
+
     calculaTotalProducto($tr);
   });
 
@@ -325,7 +333,7 @@ $(function(){
     }
   });
 
-  $('#modal-seguro, #modal-certificado').modal({
+  $('#modal-seguro, #modal-certificado51, #modal-certificado52').modal({
     backdrop: 'static',
     keyboard: false,
     show: false
@@ -333,7 +341,8 @@ $(function(){
 
   autocompleteProveedores();
   enabledCloseModal('#modal-seguro');
-  enabledCloseModal('#modal-certificado');
+  enabledCloseModal('#modal-certificado51');
+  enabledCloseModal('#modal-certificado52');
 
   $('#table_prod').on('click', '.is-cert-check', function(event) {
     var $this = $(this),
@@ -950,14 +959,14 @@ var loadModalSegCert = function (idClasificacion) {
   // Si la clasificacion es el certificado de origin o fitosanitario.
   // muestra el modal para agregar sus datos.
   if (idClasificacion === '51' || idClasificacion === '52') {
-    $('#modal-certificado').modal('show');
-    $("#pproveedor_certificado").focus();
+    $('#modal-certificado'+idClasificacion).modal('show');
+    $("#pproveedor_certificado"+idClasificacion).focus();
   }
 };
 
 // Autocomplete Proveedor
 var autocompleteProveedores = function () {
-  $("#pproveedor_seguro, #pproveedor_certificado").autocomplete({
+  $("#pproveedor_seguro, #pproveedor_certificado51, #pproveedor_certificado52").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
       if(parseInt($("#did_empresa").val(), 10) > 0)
@@ -980,7 +989,7 @@ var autocompleteProveedores = function () {
       if ($this[0].id === 'pproveedor_seguro') {
         $("#seg_id_proveedor").val(ui.item.id).trigger('keyup');
       } else {
-        $('#cert_id_proveedor').val(ui.item.id).trigger('keyup');
+        $('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val(ui.item.id).trigger('keyup');
       }
     }
   }).keydown(function(e){
@@ -992,7 +1001,7 @@ var autocompleteProveedores = function () {
       if ($this[0].id === 'pproveedor_seguro') {
         $('#seg_id_proveedor').val('');
       } else {
-        $('#cert_id_proveedor').val('');
+        $('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val('');
       }
     }
   });
@@ -1019,4 +1028,60 @@ var enabledCloseModal = function (idModal) {
       $modal.find('#btnClose').prop('disabled', 'disabled');
     }
   });
+};
+
+var validaProductosEspecials = function() {
+  var result = true, prods_required = {};
+
+  $("#modal-produc-marcar .mpromarcsel:checked").each(function(){
+    prods_required['d'+$(this).val()] = false;
+  });
+
+  $("#table_prod #prod_did_prod").each(function(index, el) {
+    if ($(this).val() === '49' && $('#seg_id_proveedor').val() == '') {
+      //Seguro
+      noty({"text": 'Seguro incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
+      result = false;
+    }else if (($(this).val() === '51' && $('#cert_id_proveedor51').val() == "") || ($(this).val() === '52' && $('#cert_id_proveedor52').val() == "")) {
+      //certificados
+      noty({"text": 'Certificado incompleto, no se ha capturado los datos de proveedor, seleccione nuevamente el concepto.', "layout":"topRight", "type": 'error'});
+      result = false;
+    }
+
+    if (prods_required['d'+$(this).val()] != undefined) {
+      prods_required['d'+$(this).val()] = true;
+    }
+
+  });
+
+  for (var i in prods_required) {
+    if (prods_required[i] == false) {
+      noty({"text": getMsgDatos(i), "layout":"topRight", "type": 'error'});
+      result = false;
+    }
+  }
+
+  return result;
+};
+
+var getMsgDatos = function(id){
+  var msgs = {
+    'd49': 'El Seguro no esta agregado en los productos.',
+    'd50': 'El Flete no esta agregado en los productos.',
+    'd51': 'El Certificado fitosanitario no esta agregado en los productos.',
+    'd52': 'El Certificado de origen no esta agregado en los productos.',
+  };
+  return msgs[id];
+};
+
+var validaPrivDescripciones = function() {
+  var result = true;
+
+  $("#table_prod #prod_did_prod").each(function(index, el) {
+    var $td = $(this).parent();
+    if ($(this).val() === '' && $.trim($td.find('#prod_ddescripcion').val()) != '') {
+      result = false;
+    }
+  });
+  return result;
 };

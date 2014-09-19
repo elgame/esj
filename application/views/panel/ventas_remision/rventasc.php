@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
+            <form action="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" method="get" class="form-search" id="frmverform" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -48,7 +48,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dtipo_factura">Tipo</label>
                   <div class="controls">
-                    <select name="dtipo_factura">
+                    <select name="dtipo_factura" id="dtipo_factura">
                       <option value="f">Remision</option>
                       <option value="t">Facturas</option>
                     </select>
@@ -69,8 +69,9 @@
 
     <div id="content" class="span9">
       <!-- content starts -->
-
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/ventas/rventasr_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/ventas/rventasr_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

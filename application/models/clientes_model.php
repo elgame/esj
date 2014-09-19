@@ -6,6 +6,7 @@ class clientes_model extends CI_Model {
 	function __construct()
 	{
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 	public function getClientes($paginados = true)
@@ -107,6 +108,13 @@ class clientes_model extends CI_Model {
 		$id_cliente = $this->db->insert_id('clientes', 'id_cliente');
 		$this->addDocumentos($id_cliente);
 
+		// Bitacora
+    $this->bitacora_model->_insert('clientes', $id_cliente,
+                                    array(':accion'    => 'el cliente', ':seccion' => 'clientes',
+                                          ':folio'     => $data['nombre_fiscal'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'   => 'en '.$this->input->post('fempresa')));
+
 		return array('error' => FALSE);
 	}
 
@@ -143,6 +151,24 @@ class clientes_model extends CI_Model {
             'ultimos_digitos' => $this->input->post('fdigitos'),
             'id_empresa' => $this->input->post('did_empresa'),
 						);
+			// Bitacora
+	    $id_bitacora = $this->bitacora_model->_update('clientes', $id_cliente, $data,
+	                              array(':accion'       => 'el cliente', ':seccion' => 'clientes',
+	                                    ':folio'        => $data['nombre_fiscal'],
+	                                    ':id_empresa'   => $data['id_empresa'],
+	                                    ':empresa'      => 'en '.$this->input->post('fempresa'),
+	                                    ':id'           => 'id_cliente',
+	                                    ':titulo'       => 'Cliente'));
+		}else {
+			if (isset($data['status']) && $data['status'] === 'e') {
+				// Bitacora
+				$clientedata = $this->getClienteInfo($id_cliente);
+		    $this->bitacora_model->_cancel('clientes', $id_cliente,
+		                                    array(':accion'     => 'el cliente', ':seccion' => 'clientes',
+		                                          ':folio'      => $clientedata['info']->nombre_fiscal,
+		                                          ':id_empresa' => $clientedata['info']->id_empresa,
+		                                          ':empresa'    => 'de '.$clientedata['info']->empresa->nombre_fiscal));
+			}
 		}
 
 		$this->db->update('clientes', $data, array('id_cliente' => $id_cliente));
@@ -205,6 +231,11 @@ class clientes_model extends CI_Model {
 													->get();
 			$data['docus'] = $sql_res->result();
 			$sql_res->free_result();
+
+			// Carga la info de la empresa.
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa);
+      $data['info']->empresa = $empresa['info'];
 		}
 
 		return $data;

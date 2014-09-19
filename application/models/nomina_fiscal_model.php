@@ -42,25 +42,29 @@ class nomina_fiscal_model extends CI_Model {
     // Filtros
     $semana = $filtros['semana'] !== '' ? $this->fechasDeUnaSemana($filtros['semana'], $filtros['anio'], $filtros['dia_inicia_semana']) : $this->semanaActualDelMes();
 
-    $sql = '';
+    $sql = $sqlg = '';
     if ($filtros['empresaId'] !== '')
     {
       $sql .= " AND u.id_empresa = {$filtros['empresaId']}";
+      $sqlg .= " AND nf.id_empresa = {$filtros['empresaId']}";
     }
 
     if ($filtros['puestoId'] !== '')
     {
       $sql .= " AND u.id_puesto = {$filtros['puestoId']}";
+      $sqlg .= " AND nf.id_puesto = {$filtros['puestoId']}";
     }
 
     if ($empleadoId)
     {
       $sql .= " AND u.id = {$empleadoId}";
+      $sqlg .= " AND u.id = {$empleadoId}";
     }
 
     if(isset($filtros['asegurado']))
     {
       $sql .= " AND u.esta_asegurado = 't'";
+      $sqlg .= " AND nf.esta_asegurado = 't'";
     }
 
     $ordenar = " ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC ";
@@ -79,87 +83,170 @@ class nomina_fiscal_model extends CI_Model {
     $descuentoOtros = $descuentoOtros ?: 0;
     $utilidadEmpresa = $utilidadEmpresa ?: 0;
 
-    if ($tipo === null)
+    $nm_tipo = 'se';
+    if ($tipo === null || $tipo === 'ag')
     {
       $sql .= " AND (u.status = 't' OR (u.status = 'f' AND Date(u.fecha_salida) >= '{$diaUltimoDeLaSemana}')) ";
+      $nm_tipo = $tipo===null? 'se': 'ag';
     }
     else if($tipo === 'ptu')
     {
       $sql .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) > 0";
+      $sqlg .= " AND (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) > 0";
+      $nm_tipo = 'pt';
     }
 
+    // si la nomina esta guardada
+    $nm_guardada = $this->db->query("SELECT Count(*) AS num FROM nomina_fiscal_guardadas
+                               WHERE id_empresa = {$filtros['empresaId']} AND anio = {$anio} AND semana = {$semana['semana']} AND tipo = '{$nm_tipo}'")->row();
+
     // Query para obtener los empleados de la semana de la nomina.
-    $query = $this->db->query(
-      "SELECT u.id,
-              u.no_empleado,
-              (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
-              u.esta_asegurado,
-              u.curp,
-              DATE(u.fecha_entrada) as fecha_entrada,
-              u.id_puesto, u.id_departamente,
-              u.salario_diario,
-              u.salario_diario_real,
-              u.infonavit,
-              u.regimen_contratacion,
-              COALESCE(upp.nombre, up.nombre) as puesto,
-              6  as dias_trabajados,
-              (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
-              FROM nomina_asistencia
-              WHERE DATE(fecha_ini) >= '{$anio}-01-01' AND DATE(fecha_fin) <= '{$anio}-12-31' AND id_usuario = u.id) as dias_faltados_anio,
-              COALESCE(nf.horas_extras, {$horasExtrasDinero}) as horas_extras_dinero,
-              COALESCE(nf.descuento_playeras, {$descuentoPlayeras}) as descuento_playeras,
-              COALESCE(nf.descuento_otros, {$descuentoOtros}) as descuento_otros,
-              '{$diaPrimeroDeLaSemana}' as fecha_inicial_pago,
-              '{$diaUltimoDeLaSemana}' as fecha_final_pago,
-              COALESCE((SELECT SUM(bono) as bonos FROM nomina_percepciones_ext WHERE id_usuario = u.id AND bono <> 0  AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as bonos,
-              COALESCE((SELECT SUM(otro) as otros FROM nomina_percepciones_ext WHERE id_usuario = u.id AND otro <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as otros,
-              COALESCE((SELECT SUM(domingo) as domingo FROM nomina_percepciones_ext WHERE id_usuario = u.id AND domingo <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as domingo,
-              COALESCE(nf.prestamos, 0) as nomina_fiscal_prestamos,
-              COALESCE(nf.vacaciones, 0) as nomina_fiscal_vacaciones,
-              COALESCE(nf.aguinaldo, 0) as nomina_fiscal_aguinaldo,
-              COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
-              COALESCE(nf.isr, 0) as nomina_fiscal_isr,
-              -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
-              COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
-              COALESCE(nf.total_deduccion, 0) as nomina_fiscal_total_deducciones,
-              COALESCE(nf.total_neto, 0) as nomina_fiscal_total_neto,
-              COALESCE(nf.uuid, 'false') as esta_generada,
-              COALESCE(nf.utilidad_empresa, {$utilidadEmpresa}) as utilidad_empresa,
-              (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
-              (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
-              (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
-              (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
-              u.rfc,
-              u.cuenta_banco,
-              u.no_seguro,
-              (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
-              (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
+    if($nm_guardada->num > 0)
+    {
+      $query = $this->db->query(
+        "SELECT u.id,
+                u.no_empleado,
+                (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+                nf.esta_asegurado,
+                u.curp,
+                DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
+                nf.id_puesto, u.id_departamente,
+                u.salario_diario,
+                u.salario_diario_real,
+                nf.infonavit,
+                u.regimen_contratacion,
+                upp.nombre as puesto,
+                6  as dias_trabajados,
+                (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
+                FROM nomina_asistencia
+                WHERE DATE(fecha_ini) >= '{$anio}-01-01' AND DATE(fecha_fin) <= '{$anio}-12-31' AND id_usuario = u.id) as dias_faltados_anio,
+                COALESCE(nf.horas_extras, {$horasExtrasDinero}) as horas_extras_dinero,
+                COALESCE(nf.descuento_playeras, {$descuentoPlayeras}) as descuento_playeras,
+                COALESCE(nf.descuento_otros, {$descuentoOtros}) as descuento_otros,
+                '{$diaPrimeroDeLaSemana}' as fecha_inicial_pago,
+                '{$diaUltimoDeLaSemana}' as fecha_final_pago,
+                COALESCE((SELECT SUM(bono) as bonos FROM nomina_percepciones_ext WHERE id_usuario = u.id AND bono <> 0  AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as bonos,
+                COALESCE((SELECT SUM(otro) as otros FROM nomina_percepciones_ext WHERE id_usuario = u.id AND otro <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as otros,
+                COALESCE((SELECT SUM(domingo) as domingo FROM nomina_percepciones_ext WHERE id_usuario = u.id AND domingo <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as domingo,
+                COALESCE(nf.prestamos, 0) as nomina_fiscal_prestamos,
+                COALESCE(nf.vacaciones, 0) as nomina_fiscal_vacaciones,
+                COALESCE(nf.aguinaldo, 0) as nomina_fiscal_aguinaldo,
+                COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
+                COALESCE(nf.isr, 0) as nomina_fiscal_isr,
+                -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
+                COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
+                COALESCE(nf.total_deduccion, 0) as nomina_fiscal_total_deducciones,
+                COALESCE(nf.total_neto, 0) as nomina_fiscal_total_neto,
+                COALESCE(nf.uuid, 'false') as esta_generada,
+                COALESCE(nf.utilidad_empresa, {$utilidadEmpresa}) as utilidad_empresa,
+                (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
+                (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
+                u.rfc,
+                u.cuenta_banco,
+                u.no_seguro,
+                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
+                (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
 
-              COALESCE(nptu.uuid, 'false') AS ptu_generado,
-              COALESCE(nptu.ptu, 0) AS nomina_fiscal_ptu,
-              COALESCE(nptu.utilidad_empresa, {$utilidadEmpresa}) AS utilidad_empresa_ptu,
-              COALESCE(nptu.isr, 0) as nomina_fiscal_ptu_isr,
-              COALESCE(nptu.total_percepcion, 0) as nomina_fiscal_ptu_total_percepciones,
-              COALESCE(nptu.total_deduccion, 0) as nomina_fiscal_ptu_total_deducciones,
-              COALESCE(nptu.total_neto, 0) as nomina_fiscal_ptu_total_neto,
+                COALESCE(nptu.uuid, 'false') AS ptu_generado,
+                COALESCE(nptu.ptu, 0) AS nomina_fiscal_ptu,
+                COALESCE(nptu.utilidad_empresa, {$utilidadEmpresa}) AS utilidad_empresa_ptu,
+                COALESCE(nptu.isr, 0) as nomina_fiscal_ptu_isr,
+                COALESCE(nptu.total_percepcion, 0) as nomina_fiscal_ptu_total_percepciones,
+                COALESCE(nptu.total_deduccion, 0) as nomina_fiscal_ptu_total_deducciones,
+                COALESCE(nptu.total_neto, 0) as nomina_fiscal_ptu_total_neto,
 
-              COALESCE(nagui.uuid, 'false') AS aguinaldo_generado,
-              COALESCE(nagui.aguinaldo, 0) AS nomina_fiscal_aguinaldo,
-              COALESCE(nagui.isr, 0) as nomina_fiscal_aguinaldo_isr,
-              COALESCE(nagui.total_percepcion, 0) as nomina_fiscal_aguinaldo_total_percepciones,
-              COALESCE(nagui.total_deduccion, 0) as nomina_fiscal_aguinaldo_total_deducciones,
-              COALESCE(nagui.total_neto, 0) as nomina_fiscal_aguinaldo_total_neto,
+                COALESCE(nagui.uuid, 'false') AS aguinaldo_generado,
+                COALESCE(nagui.aguinaldo, 0) AS nomina_fiscal_aguinaldo,
+                COALESCE(nagui.isr, 0) as nomina_fiscal_aguinaldo_isr,
+                COALESCE(nagui.total_percepcion, 0) as nomina_fiscal_aguinaldo_total_percepciones,
+                COALESCE(nagui.total_deduccion, 0) as nomina_fiscal_aguinaldo_total_deducciones,
+                COALESCE(nagui.total_neto, 0) as nomina_fiscal_aguinaldo_total_neto,
 
-              (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
-       FROM usuarios u
-       LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
-       LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
-       LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
-       LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
-       LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
-       WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
-       {$ordenar}
-    ");
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
+         FROM usuarios u
+         INNER JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
+         LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
+         LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
+         INNER JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+         WHERE nf.anio = {$semana['anio']} AND nf.semana = {$semana['semana']} {$sqlg}
+         {$ordenar}
+      ");
+    } else
+    {
+      $query = $this->db->query(
+        "SELECT u.id,
+                u.no_empleado,
+                (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
+                u.esta_asegurado,
+                u.curp,
+                DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
+                u.id_puesto, u.id_departamente,
+                u.salario_diario,
+                u.salario_diario_real,
+                u.infonavit,
+                u.regimen_contratacion,
+                COALESCE(upp.nombre, up.nombre) as puesto,
+                6  as dias_trabajados,
+                (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
+                FROM nomina_asistencia
+                WHERE DATE(fecha_ini) >= '{$anio}-01-01' AND DATE(fecha_fin) <= '{$anio}-12-31' AND id_usuario = u.id) as dias_faltados_anio,
+                COALESCE(nf.horas_extras, {$horasExtrasDinero}) as horas_extras_dinero,
+                COALESCE(nf.descuento_playeras, {$descuentoPlayeras}) as descuento_playeras,
+                COALESCE(nf.descuento_otros, {$descuentoOtros}) as descuento_otros,
+                '{$diaPrimeroDeLaSemana}' as fecha_inicial_pago,
+                '{$diaUltimoDeLaSemana}' as fecha_final_pago,
+                COALESCE((SELECT SUM(bono) as bonos FROM nomina_percepciones_ext WHERE id_usuario = u.id AND bono <> 0  AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as bonos,
+                COALESCE((SELECT SUM(otro) as otros FROM nomina_percepciones_ext WHERE id_usuario = u.id AND otro <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as otros,
+                COALESCE((SELECT SUM(domingo) as domingo FROM nomina_percepciones_ext WHERE id_usuario = u.id AND domingo <> 0 AND DATE(fecha) >= '{$diaPrimeroDeLaSemana}' AND DATE(fecha) <= '{$diaUltimoDeLaSemana}'), 0) as domingo,
+                COALESCE(nf.prestamos, 0) as nomina_fiscal_prestamos,
+                COALESCE(nf.vacaciones, 0) as nomina_fiscal_vacaciones,
+                COALESCE(nf.aguinaldo, 0) as nomina_fiscal_aguinaldo,
+                COALESCE(nf.subsidio, 0) as nomina_fiscal_subsidio,
+                COALESCE(nf.isr, 0) as nomina_fiscal_isr,
+                -- COALESCE(nf.ptu, 0) as nomina_fiscal_ptu,
+                COALESCE(nf.total_percepcion, 0) as nomina_fiscal_total_percepciones,
+                COALESCE(nf.total_deduccion, 0) as nomina_fiscal_total_deducciones,
+                COALESCE(nf.total_neto, 0) as nomina_fiscal_total_neto,
+                COALESCE(nf.uuid, 'false') as esta_generada,
+                COALESCE(nf.utilidad_empresa, {$utilidadEmpresa}) as utilidad_empresa,
+                (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_percepciones_empleados,
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu}) as ptu_dias_trabajados_empleados,
+                (SELECT COALESCE(SUM(total_percepcion), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_percepciones_empleado,
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empleado = u.id) as ptu_dias_trabajados_empleado,
+                u.rfc,
+                u.cuenta_banco,
+                u.no_seguro,
+                (SELECT COALESCE(dias_vacaciones, 0) FROM nomina_fiscal_vacaciones WHERE anio = {$semana['anio']} AND semana = {$semana['semana']} AND id_empleado = u.id) as dias_vacaciones_fijo,
+                (SELECT Date(fecha_fin) FROM nomina_fiscal_vacaciones WHERE id_empleado = u.id AND Date(fecha) < '{$diaUltimoDeLaSemana}' ORDER BY fecha DESC LIMIT 1) AS en_vacaciones,
+
+                COALESCE(nptu.uuid, 'false') AS ptu_generado,
+                COALESCE(nptu.ptu, 0) AS nomina_fiscal_ptu,
+                COALESCE(nptu.utilidad_empresa, {$utilidadEmpresa}) AS utilidad_empresa_ptu,
+                COALESCE(nptu.isr, 0) as nomina_fiscal_ptu_isr,
+                COALESCE(nptu.total_percepcion, 0) as nomina_fiscal_ptu_total_percepciones,
+                COALESCE(nptu.total_deduccion, 0) as nomina_fiscal_ptu_total_deducciones,
+                COALESCE(nptu.total_neto, 0) as nomina_fiscal_ptu_total_neto,
+
+                COALESCE(nagui.uuid, 'false') AS aguinaldo_generado,
+                COALESCE(nagui.aguinaldo, 0) AS nomina_fiscal_aguinaldo,
+                COALESCE(nagui.isr, 0) as nomina_fiscal_aguinaldo_isr,
+                COALESCE(nagui.total_percepcion, 0) as nomina_fiscal_aguinaldo_total_percepciones,
+                COALESCE(nagui.total_deduccion, 0) as nomina_fiscal_aguinaldo_total_deducciones,
+                COALESCE(nagui.total_neto, 0) as nomina_fiscal_aguinaldo_total_neto,
+
+                (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anio} AND id_empleado = u.id) as ptu_dias_trabajados_anio
+         FROM usuarios u
+         LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
+         LEFT JOIN nomina_fiscal nf ON nf.id_empleado = u.id AND nf.id_empresa = {$filtros['empresaId']} AND nf.anio = {$anio} AND nf.semana = {$semana['semana']}
+         LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
+         LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
+         LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+         WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
+         {$ordenar}
+      ");
+    }
     $empleados = $query->num_rows() > 0 ? $query->result() : array();
 
     // echo "<pre>";
@@ -758,6 +845,17 @@ class nomina_fiscal_model extends CI_Model {
     return array('errorTimbrar' => $errorTimbrar, 'empleadoId' => $empleadoId, 'ultimoNoGenerado' => $datos['ultimo_no_generado']);
   }
 
+  public function add_nomina_terminada($datos)
+  {
+    $this->db->insert('nomina_fiscal_guardadas', array(
+      'id_empresa' => $datos['empresa_id'],
+      'anio'       => $datos['anio'],
+      'semana'     => $datos['semana'],
+      'tipo'       => $datos['tipo'],
+      ));
+    return true;
+  }
+
   public function add_prenominas($datos, $empresaId, $empleadoId)
   {
     $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_fiscal_presave WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$datos['anio']} AND semana = {$datos['numSemana']}")->row();
@@ -801,7 +899,7 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $fechaSalida->format('Y');
     $semana_salida = date("W", $fechaSalida->getTimestamp());
 
-    $fechaEntrada = $this->db->select('DATE(fecha_entrada) as fecha_entrada')
+    $fechaEntrada = $this->db->select('DATE(fecha_imss) as fecha_entrada')
                               ->from('usuarios as u')
                               ->where("u.esta_asegurado = 't' AND u.status = 't' {$sql}")
                               ->get()->row()->fecha_entrada;
@@ -828,7 +926,7 @@ class nomina_fiscal_model extends CI_Model {
               u.id_empresa,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.curp,
-              DATE(u.fecha_entrada) as fecha_entrada,
+              DATE(u.fecha_imss) as fecha_entrada,
               '{$fechaSalida->format('Y-m-d')}' as fecha_salida,
               '{$fechaSalida->format('Y-m-d')}' as fecha_final_pago,
               '{$fechaInicio}' as fecha_inicial_pago,
@@ -7624,7 +7722,8 @@ class nomina_fiscal_model extends CI_Model {
           null,
           null,
           null,
-          null
+          null,
+          'ag'
         );
 
         $valorUnitario = 0; // Total de las Percepciones.

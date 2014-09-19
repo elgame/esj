@@ -3,6 +3,7 @@ class Ventas_model extends privilegios_model{
 
 	function __construct(){
 		parent::__construct();
+    $this->load->model('bitacora_model');
 	}
 
   /*
@@ -166,13 +167,13 @@ class Ventas_model extends privilegios_model{
 
       foreach ($res->result() as $tipo)
       {
-        if ($tipo->certificado === null)
+        if ($tipo->id_clasificacion == 49)
         {
           $response['seguro'] = $tipo;
         }
         else
-        {
-          $response['certificado'] = $tipo;
+        { // Certificados 51 o 52
+          $response['certificado'.$tipo->id_clasificacion] = $tipo;
         }
       }
 
@@ -264,14 +265,23 @@ class Ventas_model extends privilegios_model{
       'is_factura'          => 'f'
     );
     //Si existe el parametro es una nota de credito de la factura
+    $bitacora_accion = 'la nota de remision';
     if(isset($_POST['id_nrc']{0}))
     {
       $datosFactura['id_nc'] = $_POST['id_nrc'];
       $datosFactura['status'] = 'pa';
+      $bitacora_accion = 'la nota de credito';
     }
 
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
+
+    // Bitacora
+    $this->bitacora_model->_insert('facturacion', $id_venta,
+                                    array(':accion'    => $bitacora_accion, ':seccion' => 'nota de remision',
+                                          ':folio'     => $datosFactura['serie'].$datosFactura['folio'],
+                                          ':id_empresa' => $datosFactura['id_empresa'],
+                                          ':empresa'   => 'en '.$this->input->post('dempresa')));
 
     // Obtiene los datos del cliente.
     $cliente = $this->clientes_model->getClienteInfo($this->input->post('did_cliente'), true);
@@ -339,16 +349,17 @@ class Ventas_model extends privilegios_model{
           $dataSeguroCerti[] = array(
             'id_factura'       => $id_venta,
             'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['cert_id_proveedor'],
-            'certificado'      => $_POST['cert_certificado'],
+            'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
+            'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
             'folio'            => $serieFolio,
-            'bultos'           => $_POST['cert_bultos'],
+            'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
             'pol_seg'          => null,
           );
         }
       }
     }
-    $this->db->insert_batch('facturacion_productos', $productosFactura);
+    if(count($productosFactura) > 0)
+      $this->db->insert_batch('facturacion_productos', $productosFactura);
 
     if (count($dataSeguroCerti) > 0)
     {
@@ -432,6 +443,14 @@ class Ventas_model extends privilegios_model{
       'is_factura'          => 'f'
     );
 
+    // Bitacora
+    $id_bitacora = $this->bitacora_model->_update('facturacion', $id_venta, $datosFactura,
+                              array(':accion'       => 'la nota de remision', ':seccion' => 'nota de remision',
+                                    ':folio'        => $datosFactura['serie'].$datosFactura['folio'],
+                                    ':id_empresa'   => $datosFactura['id_empresa'],
+                                    ':empresa'      => 'de '.$this->input->post('dempresa'),
+                                    ':id'           => 'id_factura',
+                                    ':titulo'       => 'Venta'));
     $this->db->update('facturacion', $datosFactura, "id_factura = {$id_venta}");
     // $id_venta = $this->db->insert_id();
 
@@ -509,8 +528,14 @@ class Ventas_model extends privilegios_model{
         }
       }
     }
+    // Bitacora
+    $this->bitacora_model->_updateExt($id_bitacora, 'facturacion_productos', $id_venta, $productosFactura,
+                              array(':id'     => 'id_factura',
+                                    ':titulo' => 'Productos',
+                                    ':updates_fields' => 'facturacion_productos_ventas'));
     $this->db->delete('facturacion_productos', "id_factura = {$id_venta}");
-    $this->db->insert_batch('facturacion_productos', $productosFactura);
+    if(count($productosFactura) > 0)
+      $this->db->insert_batch('facturacion_productos', $productosFactura);
 
     if (count($dataSeguroCerti) > 0)
     {
@@ -567,6 +592,16 @@ class Ventas_model extends privilegios_model{
     // Regenera el PDF de la factura.
     $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio);
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
+
+    // Bitacora
+    $bitacora_accion = 'la nota de remision';
+    if($remision['info']->id_nc > 0)
+      $bitacora_accion = 'la nota de credito';
+    $this->bitacora_model->_cancel('facturacion', $id_venta,
+                                    array(':accion'     => $bitacora_accion, ':seccion' => 'nota de remision',
+                                          ':folio'      => $remision['info']->serie.$remision['info']->folio,
+                                          ':id_empresa' => $remision['info']->id_empresa,
+                                          ':empresa'    => 'de '.$remision['info']->empresa->nombre_fiscal));
 
 		return array(true, '');
 	}
@@ -1104,7 +1139,7 @@ class Ventas_model extends privilegios_model{
 
       if ($item->certificado === 't')
         $hay_prod_certificados = true;
-      
+
       if($printRow)
       {
         if ($item->porcentaje_iva == '11')
@@ -1432,6 +1467,72 @@ class Ventas_model extends privilegios_model{
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');
+    }
+
+    public function getRVentasrXLS()
+    {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=ventas_facturas.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      $res = $this->getRVentascData();
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = $_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS';
+      $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Serie</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+            <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Razon Social</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Total</td>
+            <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pendiente</td>
+          </tr>';
+      $total_saldo = 0;
+      $total_total = 0;
+      foreach($res as $key => $factura)
+      {
+        $total_saldo += ($factura->status=='ca'?0:$factura->saldo);
+        $total_total += ($factura->status=='ca'?0:$factura->cargo);
+
+        $html .= '<tr>
+            <td style="width:100px;border:1px solid #000;">'.$factura->fecha.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$factura->serie.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$factura->folio.'</td>
+            <td style="width:300px;border:1px solid #000;">'.$factura->nombre_fiscal.($factura->status=='ca'?' (Cancelada)':'').'</td>
+            <td style="width:100px;border:1px solid #000;">'.($factura->status=='ca'? 0:$factura->cargo).'</td>
+            <td style="width:100px;border:1px solid #000;">'.($factura->status=='ca'?0:$factura->saldo).'</td>
+          </tr>';
+      }
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="4">TOTALES</td>
+            <td>'.$total_total.'</td>
+            <td>'.$total_saldo.'</td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
     }
 
     /**

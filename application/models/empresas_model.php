@@ -5,6 +5,7 @@ class empresas_model extends CI_Model{
 
 	function __construct(){
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 	/**
@@ -168,6 +169,13 @@ class empresas_model extends CI_Model{
 		if($cer_caduca != '')
 			$data['cer_caduca'] = $cer_caduca;
 		$this->db->insert('empresas', $data);
+		$id_empresas = $this->db->insert_id();
+
+		// Bitacora
+    $this->bitacora_model->_insert('empresas', $id_empresas,
+                                    array(':accion'    => 'la empresa', ':seccion' => 'empresas',
+                                          ':folio'     => $data['nombre_fiscal'],
+                                          ':empresa'   => ''));
 
 		return array(true, '', 3);
 	}
@@ -248,6 +256,14 @@ class empresas_model extends CI_Model{
 		);
 		if($cer_caduca != '')
 			$data['cer_caduca'] = $cer_caduca;
+
+		// Bitacora
+    $id_bitacora = $this->bitacora_model->_update('empresas', $_GET['id'], $data,
+                              array(':accion'       => 'la empresa', ':seccion' => 'empresas',
+                                    ':folio'        => $data['nombre_fiscal'],
+                                    ':empresa'      => '',
+                                    ':id'           => 'id_empresa',
+                                    ':titulo'       => 'Empresa'));
 		$this->db->update('empresas', $data, "id_empresa = '".$_GET['id']."'");
 
 		return array(true, '', 4);
@@ -258,6 +274,13 @@ class empresas_model extends CI_Model{
 	 */
 	public function eliminarEmpresa(){
 		$this->db->update('empresas', array('status' => 'f'), "id_empresa = '".$_GET['id']."'");
+
+		// Bitacora
+		$empresa = $this->getInfoEmpresa($_GET['id']);
+		$this->bitacora_model->_cancel('empresas', $_GET['id'],
+                                    array(':accion'     => 'la empresa', ':seccion' => 'empresas',
+                                          ':folio'      => $empresa['info']->nombre_fiscal,
+                                          ':empresa'    => ''));
 		return array(true, '');
 	}
 

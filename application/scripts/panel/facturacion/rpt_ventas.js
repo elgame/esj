@@ -1,4 +1,25 @@
 $(function(){
+
+  $('#frmverform').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          dempresa: $("#dempresa").val(),
+          did_empresa: $("#did_empresa").val(),
+          dtipo_factura: $("#dtipo_factura").val(),
+          ids_clientes: [],
+        };
+    $("#lista_clientes .ids_clientes").each(function(index, el) {
+      url.ids_clientes.push($(this).val());
+    });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
+
 	// Autocomplete Empresas
   $("#dempresa").autocomplete({
     source: base_url + 'panel/empresas/ajax_get_empresas/',

@@ -1,3 +1,20 @@
+-Mano de hobra
+-Maqinaria
+-Material
+
+
+-Supervisor de carga en los productos especiales de facturacion, q los datos en los certificados sean independientes
+-Prestamos de de productos a empleados y externos de productos, maquinaria,
+-Costos ueps
+
+
+-*Poner privilegio para q solo factures y ventas productos agregados y no descripciones
+-*Lo de la nomina de ranchos y asegurados si se eliminan ya no salen en ninguna nomina anterior, si cambian de empresa
+los trabajadores las nominas pasadas de la empresa a la q se cambio sale ese trabajador y sin guardar
+-*En facturacion al entrar poner modal q pregunte si quiere agregar certificados, seguro etc y q no lo deje facturar hasta que los agregue
+-*Nomina en los fiscal tomar la fecha del imss para hacer los calculos en finiquito y en semanal reportes etc.
+-*Reporte de nomina no lo pone bien las sumatorias
+
 -*Modificar el serie y folio de las compras
 -*Reporte productos facturados en piña de numero no los pone bien, varios productos a la ves
 -*Hacer administrable agregar cuentas de contpaq, depurar catalogo

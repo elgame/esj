@@ -49,7 +49,10 @@ class bascula extends MY_Controller {
     'bascula/bitacora_pdf/',
 
     'bascula/imprimir_recepcion/',
-    'bascula/get_boleta/'
+    'bascula/get_boleta/',
+
+    'bascula/get_calidades/',
+    'bascula/rdefull_xls/',
     );
 
   public function _remap($method){
@@ -622,6 +625,19 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rde_xls();
+  }
+
+  public function rdefull_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rdefull_xls();
+  }
+
+  public function get_calidades()
+  {
+    $this->load->model('calidades_model');
+    $response = $this->calidades_model->get_calidades($this->input->get('id_area'));
+    echo json_encode($response);
   }
 
   /**

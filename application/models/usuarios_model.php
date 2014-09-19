@@ -200,6 +200,7 @@ class Usuarios_model extends privilegios_model {
       $camposHistorial = array(
         array('evento' => 'Cambio de Salario Diario', 'campo' => 'salario_diario', 'valor_nuevo' => $data['salario_diario']),
         array('evento' => 'Cambio de Salario Diario Real', 'campo' => 'salario_diario_real', 'valor_nuevo' => $data['salario_diario_real']),
+        array('evento' => 'Cambio de Empresa', 'campo' => 'id_empresa', 'valor_nuevo' => $data['id_empresa']),
       );
 
       $this->usuario_historial_model->make($camposHistorial);

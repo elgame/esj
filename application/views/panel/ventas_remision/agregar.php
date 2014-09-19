@@ -21,6 +21,9 @@
         </div>
       </div>
       <div class="box-content">
+    <?php if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
+        <span id="privAddDescripciones"></span>
+    <?php } ?>
 
         <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
 
@@ -484,7 +487,7 @@
               </table>
             </div>
           </div>
-  
+
           <!-- Modal Seguro-->
           <div id="modal-seguro" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-header">
@@ -512,41 +515,100 @@
           </div>
 
           <!-- Modal Certificados -->
-          <div id="modal-certificado" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div id="modal-certificado51" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-header">
               <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
               <h3 id="myModalLabel">Informacion Certificado</h3>
             </div>
             <div class="modal-body">
               <div class="control-group">
-                <label class="control-label" for="pproveedor_certificado" style="width: auto;">PROVEEDOR</label>
+                <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="pproveedor_certificado" value="<?php echo set_value('pproveedor_certificado', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->proveedor : '') ?>" id="pproveedor_certificado" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado">
-                  <input type="hidden" name="cert_id_proveedor" value="<?php echo set_value('cert_id_proveedor', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->id_proveedor : '') ?>" id="cert_id_proveedor" class="field-check">
+                  <input type="text" name="pproveedor_certificado51" value="<?php echo set_value('pproveedor_certificado51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->proveedor : '') ?>" id="pproveedor_certificado51" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado51">
+                  <input type="hidden" name="cert_id_proveedor51" value="<?php echo set_value('cert_id_proveedor51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_proveedor : '') ?>" id="cert_id_proveedor51" class="field-check">
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="cert_certificado" style="width: auto;">CERTIFICADO</label>
+                <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="cert_certificado" class="span12 sikey field-check" id="cert_certificado" value="<?php echo set_value('cert_certificado', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                  <input type="text" name="cert_certificado51" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="cert_bultos" style="width: auto;">BULTOS</label>
+                <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="cert_bultos" class="span12 vpositive sikey field-check" id="cert_bultos" value="<?php echo set_value('cert_bultos', isset($borrador) && isset($borrador['certificado']) ? $borrador['certificado']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado">
+                  <input type="text" name="cert_bultos51" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo set_value('cert_bultos51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado51">
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado']) ? '' : 'disabled' ?>>Cerrar</button>
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado51']) ? '' : 'disabled' ?>>Cerrar</button>
             </div>
           </div>
+          <div id="modal-certificado52" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Certificado</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_certificado52" value="<?php echo set_value('pproveedor_certificado52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->proveedor : '') ?>" id="pproveedor_certificado52" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado52">
+                  <input type="hidden" name="cert_id_proveedor52" value="<?php echo set_value('cert_id_proveedor52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_proveedor : '') ?>" id="cert_id_proveedor52" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_certificado52" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_bultos52" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo set_value('cert_bultos52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado52">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado52']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
         </form>
 
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
+
+  <!-- Modal productos a marcar -->
+  <div id="modal-produc-marcar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
+    <div class="modal-header">
+      <h3 id="myModalLabelProd">Que productos tiene la factura?</h3>
+    </div>
+    <div class="modal-body center">
+      <div class="row-fluid">
+        <div class="span6">
+          <label class="control-label" for="mprosel_seguro">Seguro <input type="checkbox" id="mprosel_seguro" class="mpromarcsel" value="49"></label>
+        </div>
+        <div class="span6">
+          <label class="control-label" for="mprosel_flete">Flete <input type="checkbox" id="mprosel_flete" class="mpromarcsel" value="50"></label>
+        </div>
+      </div>
+      <div class="row-fluid">
+        <div class="span6">
+          <label class="control-label" for="mprosel_cerfit">Certificado fitosanitario <input type="checkbox" id="mprosel_cerfit" class="mpromarcsel" value="51"></label>
+        </div>
+        <div class="span6">
+          <label class="control-label" for="mprosel_cerorig">Certificado origen <input type="checkbox" id="mprosel_cerorig" class="mpromarcsel" value="52"></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    </div>
+  </div>
 
   <!-- Modal -->
   <div id="modal-pallets" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

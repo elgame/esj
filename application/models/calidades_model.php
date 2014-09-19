@@ -132,6 +132,16 @@ class calidades_model extends CI_Model {
 		return $data;
 	}
 
+	public function get_calidades($id_area)
+	{
+		$res = $this->db->query("
+				SELECT id_calidad, id_area, nombre, precio_compra, status, cuenta_cpi
+				FROM calidades
+				WHERE status = 't' AND id_area = {$id_area}
+				ORDER BY nombre ASC");
+		return $res->result();
+	}
+
 	/**
 	 * Obtiene el listado de proveedores para usar ajax
 	 * @param term. termino escrito en la caja de texto, busca en el nombre

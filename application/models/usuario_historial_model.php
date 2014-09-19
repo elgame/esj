@@ -6,6 +6,10 @@ class Usuario_historial_model extends CI_Model {
 
   private $valoresActualesDb = array();
 
+  private $campoEspecial = array(
+    'id_empresa' => "SELECT nombre_fiscal AS valor FROM empresas WHERE id_empresa = ?"
+    );
+
   public function make($eventos)
   {
     $campos = array();
@@ -50,7 +54,12 @@ class Usuario_historial_model extends CI_Model {
     {
       if ($evento['valor_nuevo'] != $this->valoresActualesDb->{$evento['campo']})
       {
-        $evento['valor_anterior'] = $this->valoresActualesDb->{$evento['campo']};
+        if(isset($this->campoEspecial[$evento['campo']]))
+        {
+          $evento['valor_anterior'] = $this->db->query( str_replace('?', $this->valoresActualesDb->{$evento['campo']}, $this->campoEspecial[$evento['campo']]) )->row()->valor;
+          $evento['valor_nuevo']    = $this->db->query( str_replace('?', $evento['valor_nuevo'], $this->campoEspecial[$evento['campo']]) )->row()->valor;
+        } else
+          $evento['valor_anterior'] = $this->valoresActualesDb->{$evento['campo']};
 
         $historial[] = $this->buildEvent($evento);
       }
@@ -105,7 +114,7 @@ class Usuario_historial_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
 
     $aligns = array('L', 'L', 'L', 'L', 'L');
-    $widths = array(20, 70, 30, 30, 50);
+    $widths = array(18, 65, 40, 40, 40);
     $header = array('FECHA', 'EVENTO', 'VALOR ANTERIOR', 'VALOR NUEVO', 'USUARIO AUTOR.');
 
     foreach($historial as $key => $log)

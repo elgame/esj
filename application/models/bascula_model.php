@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Bascula_model extends CI_Model {
+class bascula_model extends CI_Model {
 
   function __construct()
   {
@@ -214,7 +214,7 @@ class Bascula_model extends CI_Model {
 
         if(isset($_POST['pfecha_pago']) && $data2['accion'] === 'p')
           $data2['fecha_pago'] = $_POST['pfecha_pago'];
-        
+
       }
 
       $cajas = null;
@@ -857,6 +857,7 @@ class Bascula_model extends CI_Model {
       $sql = $sql2 = '';
 
       $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+      $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
       $fecha_compara = 'fecha_tara';
 
       $this->load->model('areas_model');
@@ -864,6 +865,11 @@ class Bascula_model extends CI_Model {
       if ($this->input->get('farea') != ''){
         $sql .= " AND b.id_area = " . $_GET['farea'];
         $sql2 .= " AND b.id_area = " . $_GET['farea'];
+      }
+
+      $calidad_val = null;
+      if(isset($_GET['fcalidad']{0})) {
+        $calidad_val = $_GET['fcalidad'];
       }
 
       if ($this->input->get('fid_proveedor') != ''){
@@ -894,8 +900,8 @@ class Bascula_model extends CI_Model {
           $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
       }
 
-      $sql .= " AND DATE(b.{$fecha_compara}) = '".$_GET['ffecha1']."' ";
-      $sql2 .= " AND DATE(b.{$fecha_compara}) = '".$_GET['ffecha1']."' ";
+      $sql .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sql2 .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."'  AND '".$_GET['ffecha2']."' ";
 
       //Filtros del tipo de pesadas
       if ($this->input->get('ftipo') != '')
@@ -919,7 +925,8 @@ class Bascula_model extends CI_Model {
           bc.importe,
           {$campos}
           b.folio,
-          b.accion AS pagado
+          b.accion AS pagado,
+          Date(b.{$fecha_compara}) AS fecha
         FROM bascula_compra AS bc
         INNER JOIN bascula AS b ON b.id_bascula = bc.id_bascula
         {$table_ms}
@@ -943,10 +950,12 @@ class Bascula_model extends CI_Model {
 
         foreach ($area['calidades'] as $key => $calidad)
         {
-          $rde[$key] = array('calidad' => $calidad->nombre, 'cajas' => array());
-          foreach ($query->result() as $key2 => $caja)
-            if ($caja->id_calidad == $calidad->id_calidad)
-              $rde[$key]['cajas'][] = $caja;
+          if ($calidad_val == $calidad->id_calidad || $calidad_val === null) {
+            $rde[$key] = array('calidad' => $calidad->nombre, 'cajas' => array());
+            foreach ($query->result() as $key2 => $caja)
+              if ($caja->id_calidad == $calidad->id_calidad)
+                $rde[$key]['cajas'][] = $caja;
+          }
         }
 
         foreach ($rde as $key => $calidad)
@@ -974,12 +983,12 @@ class Bascula_model extends CI_Model {
    public function rde_pdf()
    {
 
-    // Obtiene los datos del reporte.
-    $data = $this->rde_data();
+      // Obtiene los datos del reporte.
+      $data = $this->rde_data();
 
-    // echo "<pre>";
-    //   var_dump($data);
-    // echo "</pre>";exit;
+      // echo "<pre>";
+      //   var_dump($data);
+      // echo "</pre>";exit;
 
       $rde = $data['rde'];
 
@@ -989,6 +998,7 @@ class Bascula_model extends CI_Model {
       // echo "</pre>";exit;
 
       $fecha = new DateTime($_GET['ffecha1']);
+      $fecha2 = new DateTime($_GET['ffecha2']);
 
       $this->load->library('mypdf');
       // Creación del objeto de la clase heredada
@@ -1004,8 +1014,8 @@ class Bascula_model extends CI_Model {
         $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       }
 
-      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> DEL DIA " . $fecha->format('d/m/Y');
-      $pdf->titulo3 = $this->input->get('fproveedor').' | '.$data['tipo'].' | '.$this->input->get('fempresa');
+      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
+      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
 
       $pdf->AliasNbPages();
       //$pdf->AddPage();
@@ -1014,7 +1024,7 @@ class Bascula_model extends CI_Model {
       $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
       $aligns1 = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'R', 'R');
       $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
-      $header = array('',   'BOLETA', 'CUENTA','NOMBRE', 'PROM',
+      $header = array('',   'FECHA', 'BOLETA','NOMBRE', 'PROM',
                       'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
 
       $totalPagado    = 0;
@@ -1086,8 +1096,8 @@ class Bascula_model extends CI_Model {
             $totalNoPagado += $caja->importe;
 
           $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
+                         $caja->fecha,
                          $caja->folio,
-                         $caja->cuenta_cpi,
                          substr($caja->proveedor, 0, 28),
                          String::formatoNumero($caja->promedio, 2, '', false),
                          $caja->cajas,
@@ -1148,6 +1158,137 @@ class Bascula_model extends CI_Model {
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
+
+  public function rdefull_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_diario_entradas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    // Obtiene los datos del reporte.
+    $data = $this->rde_data();
+
+    $rde = $data['rde'];
+
+    $area = $data['area'];
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $titulo1 = '';
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:50px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+          <td style="width:80px;border:1px solid #000;background-color: #cccccc;">CUENTA</td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">PROM</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">CAJAS</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">PRECIO</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+    $totalPagado    = 0;
+    $totalNoPagado  = 0;
+    $totalCancelado = 0;
+    foreach($rde as $key => $calidad)
+    {
+      $promedio = 0;
+      $cajas    = 0;
+      $kilos    = 0;
+      $precio   = 0;
+      $importe  = 0;
+
+      $html .= '<tr>
+            <td colspan="9" style="font-size:14px;border:1px solid #000;">'.$calidad['calidad'].'</td>
+          </tr>';
+      foreach ($calidad['cajas'] as $caja)
+      {
+        $promedio += $caja->promedio;
+        $cajas    += $caja->cajas;
+        $kilos    += $caja->kilos;
+        $precio   += $caja->precio;
+        $importe  += $caja->importe;
+
+        if ($caja->pagado === 'p' || $caja->pagado === 'b')
+          $totalPagado += $caja->importe;
+        else
+          $totalNoPagado += $caja->importe;
+
+        $html .= '<tr>
+            <td style="width:30px;border:1px solid #000;">'.(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '').'</td>
+            <td style="width:50px;border:1px solid #000;">'.$caja->folio.'</td>
+            <td style="width:80px;border:1px solid #000;">'.$caja->cuenta_cpi.'</td>
+            <td style="width:300px;border:1px solid #000;">'.substr($caja->proveedor, 0, 28).'</td>
+            <td style="width:100px;border:1px solid #000;">'.$caja->promedio.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$caja->cajas.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$caja->kilos.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$caja->precio.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$caja->importe.'</td>
+          </tr>';
+      }
+
+      $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTALES</td>
+          <td style="border:1px solid #000;">'.($kilos/$cajas).'</td>
+          <td style="border:1px solid #000;">'.$cajas.'</td>
+          <td style="border:1px solid #000;">'.$kilos.'</td>
+          <td style="border:1px solid #000;">'.($importe/$kilos).'</td>
+          <td style="border:1px solid #000;">'.$importe.'</td>
+        </tr>
+        <tr>
+          <td colspan="9"></td>
+        </tr>
+        <tr>
+          <td colspan="9"></td>
+        </tr>';
+    }
+    $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3">PAGADO</td>
+          <td colspan="2">NO PAGADO</td>
+          <td colspan="2">CANCELADO</td>
+          <td colspan="2">TOTAL IMPORTE</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="3">'.$totalPagado.'</td>
+          <td colspan="2">'.$totalNoPagado.'</td>
+          <td colspan="2">'.$data['cancelados'].'</td>
+          <td colspan="2">'.$totalImporte.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 
   public function rde_xls()
   {

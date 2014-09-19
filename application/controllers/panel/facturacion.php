@@ -146,7 +146,6 @@ class facturacion extends MY_Controller {
         else
           $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
       }
-
     }
     else
     {
@@ -702,22 +701,43 @@ class facturacion extends MY_Controller {
     );
 
     $rules[] = array(
-      'field'   => 'pproveedor_certificado',
+      'field'   => 'pproveedor_certificado51',
       'label'   => '',
       'rules'   => ''
     );
     $rules[] = array(
-      'field'   => 'cert_id_proveedor',
+      'field'   => 'cert_id_proveedor51',
       'label'   => '',
       'rules'   => ''
     );
     $rules[] = array(
-      'field'   => 'cert_certificado',
+      'field'   => 'cert_certificado51',
       'label'   => '',
       'rules'   => ''
     );
     $rules[] = array(
-      'field'   => 'cert_bultos',
+      'field'   => 'cert_bultos51',
+      'label'   => '',
+      'rules'   => ''
+    );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_certificado52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_id_proveedor52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_certificado52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_bultos52',
       'label'   => '',
       'rules'   => ''
     );

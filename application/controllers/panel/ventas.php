@@ -8,6 +8,7 @@ class ventas extends MY_Controller {
   private $excepcion_privilegio = array(
     'ventas/get_folio/',
     'ventas/rventasr_pdf/',
+    'ventas/rventasr_xls/',
     'ventas/rpsaldo_vencido_pdf/',
     'ventas/rventas_nc_pdf/',
 
@@ -238,7 +239,12 @@ class ventas extends MY_Controller {
   public function rventasr_pdf(){
     $this->load->model('ventas_model');
     $this->ventas_model->getRVentasrPdf();
+  }
 
+  public function rventasr_xls()
+  {
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRVentasrXLS();
   }
 
   /**
@@ -481,6 +487,64 @@ class ventas extends MY_Controller {
         'rules'   => 'callback_check_existen_pallets'
       );
     }
+
+    $rules[] = array(
+      'field'   => 'pproveedor_seguro',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'seg_poliza',
+      'label'   => '',
+      'rules'   => ''
+    );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_certificado51',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_id_proveedor51',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_certificado51',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_bultos51',
+      'label'   => '',
+      'rules'   => ''
+    );
+
+    $rules[] = array(
+      'field'   => 'pproveedor_certificado52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_id_proveedor52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_certificado52',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'cert_bultos52',
+      'label'   => '',
+      'rules'   => ''
+    );
 
     $this->form_validation->set_rules($rules);
   }

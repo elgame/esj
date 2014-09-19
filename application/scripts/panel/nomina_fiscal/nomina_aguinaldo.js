@@ -507,8 +507,15 @@
       // Si el empleado que se timbro es el ultimo que se tenia que timbrar
       if (result.ultimoNoGenerado == result.empleadoId) {
         if (errorTimbrar === false) {
-          alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
-          location.reload();
+          $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
+            empresa_id: $('#empresaId').val(),
+            anio: $('#anio').val(),
+            semana: $('#semanas').find('option:selected').val(),
+            tipo: 'ag'
+          }, function(data, textStatus, xhr) {
+            alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
+            location.reload();
+          });
         } else {
           $('#ultimo-no-generado').val(idUltimoError);
           alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');

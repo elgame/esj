@@ -203,13 +203,13 @@ class facturacion_model extends privilegios_model{
 
       foreach ($res->result() as $tipo)
       {
-        if ($tipo->certificado === null)
+        if ($tipo->id_clasificacion == 49)
         {
           $response['seguro'] = $tipo;
         }
         else
-        {
-          $response['certificado'] = $tipo;
+        { // Certificados 51 o 52
+          $response['certificado'.$tipo->id_clasificacion] = $tipo;
         }
       }
 
@@ -563,10 +563,10 @@ class facturacion_model extends privilegios_model{
           $dataSeguroCerti[] = array(
             'id_factura'       => $idFactura,
             'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['cert_id_proveedor'],
-            'certificado'      => $_POST['cert_certificado'],
+            'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
+            'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
             'folio'            => $serieFolio,
-            'bultos'           => $_POST['cert_bultos'],
+            'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
             'pol_seg'          => null,
           );
         }
@@ -2199,7 +2199,7 @@ class facturacion_model extends privilegios_model{
       header("Content-Disposition: attachment; filename=productos_facturados.xls");
       header("Pragma: no-cache");
       header("Expires: 0");
-      
+
       $facturas = $this->getRPF();
 
       $this->load->model('empresas_model');
@@ -2921,8 +2921,8 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
       $pdf->SetAligns($aligns2);
       $pdf->SetWidths($widths);
-      
-      
+
+
       $printRow = true;
       if($factura['info']->sin_costo == 't')
       {
@@ -2934,7 +2934,7 @@ class facturacion_model extends privilegios_model{
 
       if ($item->certificado === 't')
         $hay_prod_certificados = true;
-      
+
       if($printRow)
         $pdf->Row(array(
           String::formatoNumero($item->cantidad, 2, ''),
@@ -3133,7 +3133,7 @@ class facturacion_model extends privilegios_model{
     }else
       $pdf->SetXY(10, $pdf->GetY() + 5);
 
-    
+
 
     ////////////////////
     // Timbrado Datos //

@@ -21,6 +21,9 @@
         </div>
       </div>
       <div class="box-content">
+    <?php if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
+        <span id="privAddDescripciones"></span>
+    <?php } ?>
 
         <form class="form-horizontal refacturaa" action="<?php echo base_url('panel/facturacion/refacturar?idr='.$_GET['idr']); ?>" method="POST" id="form">
 
@@ -131,7 +134,7 @@
                   $displayPallets = 'display: none;';
                 }
               ?>
-                
+
               <div id="campos-pallets" style="<?php echo $displayPallets ?>">
                 <div class="control-group" style="margin-top: 145px;">
                   <label class="control-label">Folio Pallet</label>
@@ -337,7 +340,7 @@
                             $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
                             $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
                             $_POST['prod_dmedida_id'][$key]         = $p->id_unidad;
-                            
+
                             $_POST['prod_dclase'][$key]             = $p->clase;
                             $_POST['prod_dpeso'][$key]              = $p->peso;
                             $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
@@ -546,7 +549,7 @@
               </table>
             </div>
           </div>
-          
+
           <!-- Modal Remitente-->
           <div id="modal-remitente" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-remitente" aria-hidden="true">
             <div class="modal-header">
@@ -711,6 +714,35 @@
       </div><!--/span-->
     </div><!--/row-->
   </div><!--/row-->
+
+
+  <!-- Modal productos a marcar -->
+  <div id="modal-produc-marcar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabelProd" aria-hidden="true">
+    <div class="modal-header">
+      <h3 id="myModalLabelProd">Que productos tiene la factura?</h3>
+    </div>
+    <div class="modal-body center">
+      <div class="row-fluid">
+        <div class="span6">
+          <label class="control-label" for="mprosel_seguro">Seguro <input type="checkbox" id="mprosel_seguro" class="mpromarcsel" value="49"></label>
+        </div>
+        <div class="span6">
+          <label class="control-label" for="mprosel_flete">Flete <input type="checkbox" id="mprosel_flete" class="mpromarcsel" value="50"></label>
+        </div>
+      </div>
+      <div class="row-fluid">
+        <div class="span6">
+          <label class="control-label" for="mprosel_cerfit">Certificado fitosanitario <input type="checkbox" id="mprosel_cerfit" class="mpromarcsel" value="51"></label>
+        </div>
+        <div class="span6">
+          <label class="control-label" for="mprosel_cerorig">Certificado origen <input type="checkbox" id="mprosel_cerorig" class="mpromarcsel" value="52"></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    </div>
+  </div>
 
   <!-- Modal -->
   <div id="modal-pallets" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
