@@ -206,8 +206,10 @@ class facturacion_model extends privilegios_model{
         if ($tipo->id_clasificacion == 49)
         {
           $response['seguro'] = $tipo;
-        }
-        else
+        } elseif ($tipo->id_clasificacion == 53)
+        {
+          $response['supcarga'] = $tipo;
+        }else
         { // Certificados 51 o 52
           $response['certificado'.$tipo->id_clasificacion] = $tipo;
         }
@@ -459,8 +461,11 @@ class facturacion_model extends privilegios_model{
       $datosFactura['tipo_cambio'] = '1';
 
     // Si el tipo de comprobante es "egreso" o una nota de credito.
-    if ($_POST['dtipo_comprobante'] === 'egreso')
+    $bitacora_accion = 'la factura';
+    if ($_POST['dtipo_comprobante'] === 'egreso') {
       $datosFactura['id_nc'] = $_GET['id'];
+      $bitacora_accion = 'la nota de credito';
+    }
 
     // Inserta los datos de la factura y obtiene el Id. Este en caso
     // de que se este timbrando una factura que no sea un borrador.
@@ -468,6 +473,13 @@ class facturacion_model extends privilegios_model{
     {
       $this->db->insert('facturacion', $datosFactura);
       $idFactura = $this->db->insert_id('facturacion', 'id_factura');
+
+      // Bitacora
+      $this->bitacora_model->_insert('facturacion', $idFactura,
+                                      array(':accion'    => $bitacora_accion, ':seccion' => 'facturas',
+                                            ':folio'     => $datosFactura['serie'].$datosFactura['folio'],
+                                            ':id_empresa' => $datosFactura['id_empresa'],
+                                            ':empresa'   => 'en '.$this->input->post('dempresa')));
     }
 
     // Si es un borrador que se esta timbrando entonces actualiza sus datos.
@@ -567,6 +579,19 @@ class facturacion_model extends privilegios_model{
             'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
             'folio'            => $serieFolio,
             'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
+            'pol_seg'          => null,
+          );
+        }
+
+        if ($_POST['prod_did_prod'][$key] === '53')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $idFactura,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['supcarga_id_proveedor'],
+            'certificado'      => $_POST['supcarga_numero'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['supcarga_bultos'],
             'pol_seg'          => null,
           );
         }
@@ -1025,6 +1050,16 @@ class facturacion_model extends privilegios_model{
         "id_factura = {$idFactura}"
       );
 
+      // Bitacora
+      $bitacora_accion = 'la factura';
+      if($factura['info']->id_nc > 0)
+        $bitacora_accion = 'la nota de credito';
+      $this->bitacora_model->_cancel('facturacion', $idFactura,
+                                      array(':accion'     => $bitacora_accion, ':seccion' => 'facturas',
+                                            ':folio'      => $factura['info']->serie.$factura['info']->folio,
+                                            ':id_empresa' => $factura['info']->id_empresa,
+                                            ':empresa'    => 'de '.$factura['info']->empresa->nombre_fiscal));
+
       // Regenera el PDF de la factura.
       $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
       $this->generaFacturaPdf($idFactura, $pathDocs);
@@ -1427,10 +1462,23 @@ class facturacion_model extends privilegios_model{
             $dataSeguroCerti[] = array(
               'id_factura'       => $idBorrador,
               'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'id_proveedor'     => $_POST['cert_id_proveedor'],
-              'certificado'      => $_POST['cert_certificado'],
+              'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
+              'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
               'folio'            => $serieFolio,
-              'bultos'           => $_POST['cert_bultos'],
+              'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
+              'pol_seg'          => null,
+            );
+          }
+
+          if ($_POST['prod_did_prod'][$key] === '53')
+          {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idBorrador,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'id_proveedor'     => $_POST['supcarga_id_proveedor'],
+              'certificado'      => $_POST['supcarga_numero'],
+              'folio'            => $serieFolio,
+              'bultos'           => $_POST['supcarga_bultos'],
               'pol_seg'          => null,
             );
           }

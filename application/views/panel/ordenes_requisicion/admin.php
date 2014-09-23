@@ -121,6 +121,9 @@
                   </td>
                   <td class="center">
                     <?php
+                      if ($orden->status === 'ca') {
+                        echo '<span class="label label-important">Cancelada</span>';
+                      }
 
                       if ($orden->status === 'p' && $orden->autorizado === 'f')
                       {
@@ -140,38 +143,38 @@
                         // );
                       }
 
-                      if ($orden->status === 'p' && $orden->autorizado === 't')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/entrada/', array(
-                          'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
-                          'btn_type' => 'btn-warning',
-                          'attrs' => array())
-                        );
+                      // if ($orden->status === 'p' && $orden->autorizado === 't')
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/entrada/', array(
+                      //     'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
+                      //     'btn_type' => 'btn-warning',
+                      //     'attrs' => array())
+                      //   );
 
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/email/', array(
-                          'params'   => 'id='.$orden->id_requisicion,
-                          'btn_type' => '',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar el email al proveedor?', 'Ordenes de Compras', this); return false;"))
-                        );
-                      }
+                      //   echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/email/', array(
+                      //     'params'   => 'id='.$orden->id_requisicion,
+                      //     'btn_type' => '',
+                      //     'attrs' => array('onclick' => "msb.confirm('Estas seguro de enviar el email al proveedor?', 'Ordenes de Compras', this); return false;"))
+                      //   );
+                      // }
 
-                      if ($orden->status === 'r')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar/', array(
-                          'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
-                          'btn_type' => 'btn-info',
-                          'attrs' => array())
-                        );
-                      }
+                      // if ($orden->status === 'r')
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/modificar/', array(
+                      //     'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
+                      //     'btn_type' => 'btn-info',
+                      //     'attrs' => array())
+                      //   );
+                      // }
 
-                      if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'ca')
-                      {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/ver/', array(
-                          'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
-                          'btn_type' => 'btn-success',
-                          'attrs' => array())
-                        );
-                      }
+                      // if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'ca')
+                      // {
+                      //   echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/ver/', array(
+                      //     'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
+                      //     'btn_type' => 'btn-success',
+                      //     'attrs' => array())
+                      //   );
+                      // }
 
                       if ($orden->status === 'a' || $orden->status === 'f' || $orden->status === 'p')
                       {
@@ -184,10 +187,10 @@
 
                       if ($orden->status !== 'r' && $orden->status !== 'f' && $orden->status !== 'ca')
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('compras_ordenes/cancelar/', array(
+                        echo $this->usuarios_model->getLinkPrivSm('compras_requisicion/cancelar/', array(
                           'params'   => 'id='.$orden->id_requisicion.'&w='.($requisicion ? 'r' : 'c'),
                           'btn_type' => 'btn-danger',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la orden de compra?', 'Ordenes de Compras', this); return false;"))
+                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la orden?', 'Ordenes de Compras', this); return false;"))
                         );
                       }
                     ?>

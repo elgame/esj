@@ -6,6 +6,7 @@ class banco_cuentas_model extends banco_model {
 	function __construct()
 	{
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 	public function getSaldosCuentasData()
@@ -686,6 +687,15 @@ class banco_cuentas_model extends banco_model {
 		$this->db->insert('banco_movimientos', $data);
 		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
 
+		// Bitacora
+		$data_cuenta = $this->getCuentaInfo($data['id_cuenta']);
+    $this->bitacora_model->_insert('banco_movimientos', $id_movimiento,
+                            array(':accion'    => 'un deposito a la cuenta',
+                            			':seccion' => 'banco',
+                                  ':folio'     => $data_cuenta['info']->alias.' por '.String::formatoNumero($data['monto']),
+                                  ':id_empresa' => $data_cuenta['info']->id_empresa,
+                                  ':empresa'   => 'de '.$data_cuenta['info']->nombre_fiscal));
+
 		return array('error' => FALSE, 'ver_cheque' => ($data['metodo_pago']=='cheque'? 'si': 'no'), 'id_movimiento' => $id_movimiento);
 	}
 
@@ -723,6 +733,15 @@ class banco_cuentas_model extends banco_model {
 
 		$this->db->insert('banco_movimientos', $data);
 		$id_movimiento = $this->db->insert_id('banco_movimientos', 'id_movimiento');
+
+		// Bitacora
+		$data_cuenta = $this->getCuentaInfo($data['id_cuenta']);
+    $this->bitacora_model->_insert('banco_movimientos', $id_movimiento,
+                            array(':accion'    => 'un retiro a la cuenta',
+                            			':seccion' => 'banco',
+                                  ':folio'     => $data_cuenta['info']->alias.' por '.String::formatoNumero($data['monto']),
+                                  ':id_empresa' => $data_cuenta['info']->id_empresa,
+                                  ':empresa'   => 'de '.$data_cuenta['info']->nombre_fiscal));
 
 		//registrar la comision
 		if($comision > 0)
@@ -875,6 +894,15 @@ class banco_cuentas_model extends banco_model {
 		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
 			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago
 			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+
+		// Bitacora
+		$inf_movi = $this->getMovimientoInfo($id_movimiento);
+		$data_cuenta = $this->getCuentaInfo($inf_movi['info']->id_cuenta);
+    $this->bitacora_model->_cancel('banco_movimientos', $id_movimiento,
+                            array(':accion'     => ($cancelar? 'cancelo': 'elimino').' un '.($inf_movi['info']->tipo=='t'? 'deposito': 'retiro').' de la cuenta ', ':seccion' => 'banco',
+                                  ':folio'      => $data_cuenta['info']->alias.' por '.String::formatoNumero($inf_movi['info']->monto),
+                                  ':id_empresa' => $data_cuenta['info']->id_empresa,
+                                  ':empresa'    => 'de '.$data_cuenta['info']->nombre_fiscal));
 
 		if($cancelar)//cancelar movimiento
 			$this->updateMovimiento($id_movimiento, array('status' => 'f') );

@@ -85,6 +85,13 @@ class gastos_model extends privilegios_model{
     // obtiene el id de la compra insertada.
     $compraId = $this->db->insert_id();
 
+    // Bitacora
+    $this->bitacora_model->_insert('compras', $compraId,
+                                    array(':accion'     => 'el gasto', ':seccion' => 'compras',
+                                          ':folio'      => $datos['serie'].$datos['folio'],
+                                          ':id_empresa' => $datos['id_empresa'],
+                                          ':empresa'    => 'en '.$this->input->post('empresa')));
+
     $respons = array();
     // //si es contado, se registra el abono y el retiro del banco
     // if ($datos['condicion_pago'] == 'co')
@@ -186,6 +193,18 @@ class gastos_model extends privilegios_model{
 
       $compra['xml'] = 'application'.$xmlFile[1];
     }
+
+    // Bitacora
+    $this->load->model('compras_model');
+    $datoscompra = $this->compras_model->getInfoCompra($compraId);
+    $id_bitacora = $this->bitacora_model->_update('compras', $compraId, $compra,
+                              array(':accion'       => 'la compra', ':seccion' => 'compras',
+                                    ':folio'        => $datoscompra['info']->serie.$datoscompra['info']->folio,
+                                    ':id_empresa'   => $datoscompra['info']->id_empresa,
+                                    ':empresa'      => 'en '.$datoscompra['info']->empresa->nombre_fiscal,
+                                    ':id'           => 'id_compra',
+                                    ':titulo'       => 'Compra'));
+
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
 

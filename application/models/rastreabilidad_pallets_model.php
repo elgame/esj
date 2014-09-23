@@ -6,6 +6,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 	function __construct()
 	{
 		parent::__construct();
+    $this->load->model('bitacora_model');
 	}
 
 	public function getPallets($paginados = true)
@@ -201,6 +202,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			$this->db->insert('rastria_pallets', $data);
 			$id_pallet = $this->db->insert_id('rastria_pallets', 'id_pallet');
 
+      // Bitacora
+      $this->bitacora_model->_insert('rastria_pallets', $id_pallet,
+                                      array(':accion'    => 'el pallet', ':seccion' => 'pallets',
+                                            ':folio'     => $data['folio'],
+                                            ':id_empresa' => '2',
+                                            ':empresa'   => 'en EMPAQUE SAN JORGE SA DE CV'));
+
 			$this->addPalletRendimientos($id_pallet);
 
 			$this->addPalletCalibres($id_pallet);
@@ -231,10 +239,19 @@ class rastreabilidad_pallets_model extends privilegios_model {
 				$data['id_cliente'] = $this->input->post('fid_cliente');
 		}
 
+    // Bitacora
+    $id_bitacora = $this->bitacora_model->_update('rastria_pallets', $id_pallet, $data,
+                              array(':accion'       => 'el pallet', ':seccion' => 'pallets',
+                                    ':folio'        => $data['folio'],
+                                    ':id_empresa'   => '2',
+                                    ':empresa'      => 'en EMPAQUE SAN JORGE SA DE CV',
+                                    ':id'           => 'id_pallet',
+                                    ':titulo'       => 'Pallet'));
+
 		$this->db->update('rastria_pallets', $data, "id_pallet = {$id_pallet}");
 
 		$this->db->delete('rastria_pallets_rendimiento', "id_pallet = {$id_pallet}");
-		$this->addPalletRendimientos($id_pallet);
+		$this->addPalletRendimientos($id_pallet, NULL, $id_bitacora);
 
 		$this->db->delete('rastria_pallets_calibres', "id_pallet = {$id_pallet}");
 		$this->addPalletCalibres($id_pallet);
@@ -242,7 +259,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return array('msg' => 5);
  	}
 
-	public function addPalletRendimientos($id_pallet, $data=NULL){
+	public function addPalletRendimientos($id_pallet, $data=NULL, $id_bitacora=0){
 		if ($data==NULL)
 		{
 			if(is_array($this->input->post('rendimientos')))
@@ -264,8 +281,16 @@ class rastreabilidad_pallets_model extends privilegios_model {
 			}
 		}
 
-		if(count($data) > 0)
+		if(count($data) > 0) {
+      if($id_bitacora > 0) {
+        // Bitacora
+        $this->bitacora_model->_updateExt($id_bitacora, 'rastria_pallets_rendimiento', $id_pallet, $data,
+                                  array(':id'             => 'id_pallet',
+                                        ':titulo'         => 'Clasificaciones',
+                                        ':updates_fields' => 'rastria_pallets_rendimiento'));
+      }
 			$this->db->insert_batch('rastria_pallets_rendimiento', $data);
+    }
 
 		return true;
 	}
@@ -320,6 +345,14 @@ class rastreabilidad_pallets_model extends privilegios_model {
           }
         }
       }
+
+      // Bitacora
+      $clientedata = $this->getClienteInfo($id_pallet);
+      $this->bitacora_model->_cancel('rastria_pallets', $id_pallet,
+                                      array(':accion'     => 'el pallet', ':seccion' => 'pallets',
+                                            ':folio'      => $clientedata['info']->folio,
+                                            ':id_empresa' => '2',
+                                            ':empresa'    => 'de EMPAQUE SAN JORGE SA DE CV'));
 
 			$this->db->delete('rastria_pallets', array('id_pallet' => $id_pallet));
 

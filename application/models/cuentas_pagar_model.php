@@ -355,7 +355,7 @@ class cuentas_pagar_model extends privilegios_model{
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
 				('Factura ' || f.serie || f.folio) AS concepto,
-				'f'::text as tipo, f.status, 
+				'f'::text as tipo, f.status,
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
 			FROM
 				compras AS f
@@ -921,6 +921,15 @@ class cuentas_pagar_model extends privilegios_model{
 		//se inserta el abono
 		$this->db->insert($camps[1], $data);
 		$data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
+
+		// Bitacora
+    $this->bitacora_model->_insert($camps[1], $data['id_abono'],
+                            array(':accion'    => 'un abono a la compra ',
+                            			':seccion' => 'cuentas por pagar',
+                                  ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($data['total']),
+                                  ':id_empresa' => $inf_factura['empresa']->id_empresa,
+                                  ':empresa'   => 'de '.$inf_factura['proveedor']->nombre_fiscal));
+
     $this->db->update('banco_pagos_compras', array('status' => 't'), array($camps[0] => $id));
 
 		//verifica si la factura se pago, se cambia el status
@@ -946,11 +955,21 @@ class cuentas_pagar_model extends privilegios_model{
 		$tipo = $tipo!=null? $tipo : $this->input->get('tipo');
 		$ida  = $ida!=null? $ida : $_GET['ida'];
 		$id   = $id!=null? $id : $_GET['id'];
-
 		$camps = array('id_abono', 'compras_abonos', 'compras', 'id_compra');
+
+		$info_abano = $this->db->query("SELECT * FROM compras_abonos WHERE {$camps[0]} = {$ida}")->row();
+
 		$this->db->delete($camps[1], "{$camps[0]} = {$ida}");
 		//Se cambia el estado de la factura
 		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$id}");
+
+		// Bitacora
+		$inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id);
+    $this->bitacora_model->_cancel('compras_abonos', $ida,
+                            array(':accion'     => 'un abono a la compra ', ':seccion' => 'cuentas por pagar',
+                                  ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($info_abano->total),
+                                  ':id_empresa' => $inf_factura['empresa']->id_empresa,
+                                  ':empresa'    => 'de '.$inf_factura['proveedor']->nombre_fiscal));
 
 		return true;
 	}

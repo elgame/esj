@@ -39,9 +39,11 @@ class bitacora_model extends bitacora_msg_model {
 
     	if ( isset($new[$key]) && $new[$key] != $old->{$key} && $special) {
     		if (array_key_exists($key, $campos['campos_ids'])) {
-    			$response[] = array('campo'   => $campo,
-															'antes'   => $this->db->query(str_replace('?', $old->{$key}, $campos['campos_ids'][$key]))->row()->dato,
-															'despues' => $this->db->query(str_replace('?', $new[$key], $campos['campos_ids'][$key]))->row()->dato);
+          $antes = $old->{$key}!=''? $this->db->query(str_replace('?', $old->{$key}, $campos['campos_ids'][$key]))->row()->dato: '';
+          $despues = $new[$key]!=''? $this->db->query(str_replace('?', $new[$key], $campos['campos_ids'][$key]))->row()->dato: '';
+          $response[] = array('campo'   => $campo,
+                              'antes'   => $antes,
+                              'despues' => $despues);
     		}else {
     			$response[] = array('campo' => $campo, 'antes' => $old->{$key}, 'despues' => $new[$key]);
     		}
@@ -80,7 +82,8 @@ class bitacora_model extends bitacora_msg_model {
 			$new[$key][':tipo'] = 'new';
 
 			foreach ($campos['campos_ids'] as $keycm => $sqlcm) {
-				$new[$key][$keycm] = $this->db->query(str_replace('?', $new[$key][$keycm], $sqlcm))->row()->dato;
+        $despues = $new[$key][$keycm]!=''? $this->db->query(str_replace('?', $new[$key][$keycm], $sqlcm))->row()->dato: '';
+				$new[$key][$keycm] = $despues;
 			}
     }
     foreach ($old as $key => $value) {
@@ -89,7 +92,8 @@ class bitacora_model extends bitacora_msg_model {
 			$old[$key][':tipo'] = 'old';
 
 			foreach ($campos['campos_ids'] as $keycm => $sqlcm) {
-				$old[$key][$keycm] = $this->db->query(str_replace('?', $old[$key][$keycm], $sqlcm))->row()->dato;
+        $antes = $old[$key][$keycm]!=''? $this->db->query(str_replace('?', $old[$key][$keycm], $sqlcm))->row()->dato: '';
+				$old[$key][$keycm] = $antes;
 			}
     }
 

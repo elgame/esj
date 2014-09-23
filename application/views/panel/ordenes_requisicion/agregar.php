@@ -226,7 +226,7 @@
           </div><!-- /row-fluid -->
 
 
-          
+
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
@@ -349,7 +349,7 @@
                         <?php if (isset($_POST['concepto'])) {
                               foreach ($_POST['concepto'] as $key => $concepto) { ?>
 
-                            
+
                           <tr class="rowprod">
                             <td style="width: 60px;">
                               <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoArea" readonly>
@@ -524,15 +524,15 @@
       <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
     </div>
     <div class="modal-body">
-        
+
       <div class="row-fluid">
-        
+
         <div>
-        
+
       <?php foreach ($areas as $key => $value)
       { ?>
           <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
-            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>" 
+            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
                 id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
               <thead>
                 <tr>
@@ -552,7 +552,7 @@
           </div>
       <?php
       } ?>
-        
+
         </div>
 
       </div>

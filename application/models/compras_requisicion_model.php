@@ -5,6 +5,7 @@ class compras_requisicion_model extends CI_Model {
   function __construct()
   {
     parent::__construct();
+    $this->load->model('bitacora_model');
   }
 
   /**
@@ -126,6 +127,13 @@ class compras_requisicion_model extends CI_Model {
     $this->db->insert('compras_requisicion', $data);
     $ordenId = $this->db->insert_id();
 
+    // Bitacora
+    $this->bitacora_model->_insert('compras_requisicion', $ordenId,
+                                    array(':accion'     => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
+                                          ':folio'      => $data['folio'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'    => 'en '.$this->input->post('empresa')));
+
     //si se registra a un vehiculo
     if (isset($_POST['es_vehiculo']))
     {
@@ -221,12 +229,12 @@ class compras_requisicion_model extends CI_Model {
     {
       if ($orden)
       {
-        $this->db->update('compras_ordenes', $orden, array('id_orden' => $idOrden));
+        $this->db->update('compras_requisicion', $orden, array('id_requisicion' => $idOrden));
       }
 
       if ($productos)
       {
-        $this->db->insert_batch('compras_productos', $productos);
+        $this->db->insert_batch('compras_requisicion_productos', $productos);
       }
 
       return array('passes' => true);
@@ -234,10 +242,10 @@ class compras_requisicion_model extends CI_Model {
 
     else
     {
-      // $status = $this->db->select("status")
-      //   ->from("compras_requisicion")
-      //   ->where("id_requisicion", $idOrden)
-      //   ->get()->row()->status;
+      $datos_ordenn = $this->db->select("folio")
+        ->from("compras_requisicion")
+        ->where("id_requisicion", $idOrden)
+        ->get()->row();
 
       $data = array(
         'id_empresa'      => $_POST['empresaId'],
@@ -288,6 +296,15 @@ class compras_requisicion_model extends CI_Model {
         $data['ids_facrem'] = $_POST['remfacs'];
       }
 
+      // Bitacora
+      $id_bitacora = $this->bitacora_model->_update('compras_requisicion', $idOrden, $data,
+                                array(':accion'       => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
+                                      ':folio'        => $datos_ordenn->folio,
+                                      ':id_empresa'   => $data['id_empresa'],
+                                      ':empresa'      => 'en '.$this->input->post('empresa'),
+                                      ':id'           => 'id_requisicion',
+                                      ':titulo'       => 'Orden de requisicion'));
+
       $this->db->update('compras_requisicion', $data, array('id_requisicion' => $idOrden));
 
       //si se registra a un vehiculo
@@ -330,7 +347,7 @@ class compras_requisicion_model extends CI_Model {
             }
 
             $prod_sel = 'f';
-            if (isset($_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0]) && 
+            if (isset($_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0]) &&
                 $_POST[ 'prodSelOrden'.$_POST['prodIdNumRow'][$key] ][0] == $id_proveedor &&
                 isset($data['autorizado']))
             {
@@ -364,6 +381,12 @@ class compras_requisicion_model extends CI_Model {
         }
       }
 
+      // Bitacora
+      $this->bitacora_model->_updateExt($id_bitacora, 'compras_requisicion_productos', $idOrden, $productos,
+                                array(':id'             => 'id_requisicion',
+                                      ':titulo'         => 'Productos',
+                                      ':updates_fields' => 'compras_requisicion_productos'));
+
       $this->db->delete('compras_requisicion_productos', array('id_requisicion' => $idOrden));
       $this->db->insert_batch('compras_requisicion_productos', $productos);
 
@@ -372,7 +395,7 @@ class compras_requisicion_model extends CI_Model {
       if(isset($data['autorizado']))
         if($data['autorizado'] == 't')
           $this->crearOrdenes($idOrden);
-      
+
     }
 
 
@@ -385,7 +408,7 @@ class compras_requisicion_model extends CI_Model {
     $this->load->model('compras_ordenes_model');
 
     $data = $this->info($idOrden, true, false)['info'][0];
-    
+
     // Se asignan los productos seleccionados x cada proveedor
     foreach ($data->productos2 as $key => $value)
     {
@@ -451,7 +474,7 @@ class compras_requisicion_model extends CI_Model {
 
         $res = $this->compras_ordenes_model->agregarData($dataOrden, $veiculoData);
         $id_orden = $res['id_orden'];
-        
+
         // Productos
         $rows_compras = 0;
         $productos = array();
@@ -486,7 +509,7 @@ class compras_requisicion_model extends CI_Model {
 
       }
     }
-    
+
   }
 
 
@@ -641,6 +664,14 @@ class compras_requisicion_model extends CI_Model {
     $data = array('status' => 'ca');
     $this->actualizar($idOrden, $data);
 
+    // Bitacora
+    $datosorden = $this->info($idOrden);
+    $this->bitacora_model->_cancel('compras_requisicion', $idOrden,
+                                    array(':accion'     => 'la orden de requisicion', ':seccion' => 'ordenes de compra',
+                                          ':folio'      => $datosorden['info'][0]->folio,
+                                          ':id_empresa' => $datosorden['info'][0]->id_empresa,
+                                          ':empresa'    => 'de '.$datosorden['info'][0]->empresa));
+
     return array('passes' => true);
   }
 
@@ -692,14 +723,14 @@ class compras_requisicion_model extends CI_Model {
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.observacion, cp.prod_sel, 
+                  cp.porcentaje_retencion, cp.observacion, cp.prod_sel,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area 
+           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area
            WHERE cp.id_requisicion = {$data['info'][0]->id_requisicion} {$sql_produc}
            ORDER BY p.id_proveedor ASC, cp.id_producto ASC");
 
@@ -714,7 +745,7 @@ class compras_requisicion_model extends CI_Model {
           {
             $data['info'][0]->productos2[] = clone $value;
 
-            $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor, 
+            $data_proveedores[$value->id_proveedor] = array('id_proveedor' => $value->id_proveedor,
                                                           'nombre_fiscal' => $value->nombre_fiscal);
 
             if($provee == $value->id_proveedor)
@@ -729,7 +760,7 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
-              
+
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->iva                                      = 0;
@@ -1210,7 +1241,7 @@ class compras_requisicion_model extends CI_Model {
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
       $tipo_orden = 'ORDEN DE REQUISICION';
-      
+
 
       $pdf->logo = $orden['info'][0]->logo!=''? (file_exists($orden['info'][0]->logo)? $orden['info'][0]->logo: '') : '';
 
@@ -1266,7 +1297,7 @@ class compras_requisicion_model extends CI_Model {
           $pdf->SetX(144);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths2);
-          $pdf->Row(array($orden['info'][0]->proveedores[0]['nombre_fiscal'], 
+          $pdf->Row(array($orden['info'][0]->proveedores[0]['nombre_fiscal'],
                           $orden['info'][0]->proveedores[1]['nombre_fiscal'],
                           $orden['info'][0]->proveedores[2]['nombre_fiscal']), false);
 
@@ -1276,7 +1307,7 @@ class compras_requisicion_model extends CI_Model {
           $pdf->Row($header, false);
         }
 
-        
+
         $precio_unitario1 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
         $precio_unitario2 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
         $precio_unitario3 = $prod->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']}/$tipoCambio*($prod->presen_cantidad>0?$prod->presen_cantidad:1);
@@ -1369,8 +1400,8 @@ class compras_requisicion_model extends CI_Model {
       $pdf->SetWidths(array(250));
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('DESCRIPCION DE CODIGOS: '.implode(', ', $orden['info'][0]->data_desCodigos)), false, false);
-      
-  
+
+
       if ($path)
       {
         $file = $path.'ORDEN_COMPRA_'.date('Y-m-d').'.pdf';

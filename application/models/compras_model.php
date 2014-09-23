@@ -191,8 +191,18 @@ class compras_model extends privilegios_model{
     }
 
     //si es una nota de credito la que se cancela, cambia de estado la compra a pendiente
-    if($compra['info']->id_nc != '')
+    if($compra['info']->id_nc != '') {
       $this->db->update('compras', array('status' => 'p'), array('id_compra' => $compra['info']->id_nc));
+      $tit_notac = 'nota de credito de la ';
+    }
+
+    // Bitacora
+    $datoscompra = $this->getInfoCompra($compraId);
+    $this->bitacora_model->_cancel('compras', $compraId,
+                                    array(':accion'     => 'la '.$tit_notac.'compra', ':seccion' => 'compras',
+                                          ':folio'      => $datoscompra['info']->folio,
+                                          ':id_empresa' => $datoscompra['info']->id_empresa,
+                                          ':empresa'    => 'de '.$datoscompra['info']->empresa->nombre_fiscal));
 
     return true;
   }
@@ -236,6 +246,17 @@ class compras_model extends privilegios_model{
 
       $compra['xml'] = 'application'.$xmlFile[1];
     }
+
+    // Bitacora
+    $datoscompra = $this->getInfoCompra($compraId);
+    $id_bitacora = $this->bitacora_model->_update('compras', $compraId, $compra,
+                              array(':accion'       => 'la compra', ':seccion' => 'compras',
+                                    ':folio'        => $compra['serie'].$compra['folio'],
+                                    ':id_empresa'   => $datoscompra['info']->id_empresa,
+                                    ':empresa'      => 'en '.$datoscompra['info']->empresa->nombre_fiscal,
+                                    ':id'           => 'id_compra',
+                                    ':titulo'       => 'Compra'));
+
     $this->db->update('compras', $compra, array('id_compra' => $compraId));
   }
 

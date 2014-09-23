@@ -742,6 +742,27 @@ class facturacion extends MY_Controller {
       'rules'   => ''
     );
 
+    $rules[] = array(
+      'field'   => 'pproveedor_supcarga',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'supcarga_id_proveedor',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'supcarga_numero',
+      'label'   => '',
+      'rules'   => ''
+    );
+    $rules[] = array(
+      'field'   => 'supcarga_bultos',
+      'label'   => '',
+      'rules'   => ''
+    );
+
     $this->form_validation->set_rules($rules);
   }
 

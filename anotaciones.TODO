@@ -1,13 +1,11 @@
 -Mano de hobra
 -Maqinaria
 -Material
-
-
--Supervisor de carga en los productos especiales de facturacion, q los datos en los certificados sean independientes
 -Prestamos de de productos a empleados y externos de productos, maquinaria,
 -Costos ueps
 
 
+-*Supervisor de carga en los productos especiales de facturacion, q los datos en los certificados sean independientes
 -*Poner privilegio para q solo factures y ventas productos agregados y no descripciones
 -*Lo de la nomina de ranchos y asegurados si se eliminan ya no salen en ninguna nomina anterior, si cambian de empresa
 los trabajadores las nominas pasadas de la empresa a la q se cambio sale ese trabajador y sin guardar

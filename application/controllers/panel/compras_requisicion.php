@@ -318,11 +318,11 @@ class compras_requisicion extends MY_Controller {
 
     if ($_GET['w'] === 'c')
     {
-      redirect(base_url('panel/compras_ordenes/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
     }
     else
     {
-      redirect(base_url('panel/compras_ordenes/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
     }
   }
 

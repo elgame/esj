@@ -5,6 +5,7 @@ class compras_ordenes_model extends CI_Model {
   function __construct()
   {
     parent::__construct();
+    $this->load->model('bitacora_model');
   }
 
   /**
@@ -196,7 +197,7 @@ class compras_ordenes_model extends CI_Model {
     {
       $dataVeiculo['id_orden'] = $id_orden;
       $this->db->insert('compras_vehiculos_gasolina', $dataVeiculo);
-    }      
+    }
 
     return array('passes' => true, 'msg' => 3, 'id_orden' => $id_orden);
   }
@@ -290,6 +291,15 @@ class compras_ordenes_model extends CI_Model {
         $data['ids_facrem'] = $_POST['remfacs'];
       }
 
+      // Bitacora
+      $id_bitacora = $this->bitacora_model->_update('compras_ordenes', $idOrden, $data,
+                                array(':accion'       => ($data['status']=='a'? 'acepto ': 'modifico ').'la orden de compra', ':seccion' => 'ordenes de compra',
+                                      ':folio'        => $this->input->post('folio'),
+                                      ':id_empresa'   => $this->input->post('empresaId'),
+                                      ':empresa'      => 'en '.$this->input->post('empresa'),
+                                      ':id'           => 'id_orden',
+                                      ':titulo'       => 'Orden de compra'));
+
       $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
 
       //si se registra a un vehiculo
@@ -358,6 +368,12 @@ class compras_ordenes_model extends CI_Model {
           'id_compra'        => $prod_id_compra,
         );
       }
+
+      // Bitacora
+      $this->bitacora_model->_updateExt($id_bitacora, 'compras_productos', $idOrden, $productos,
+                                array(':id'             => 'id_orden',
+                                      ':titulo'         => 'Productos',
+                                      ':updates_fields' => 'compras_ordenes_productos'));
 
       $this->db->delete('compras_productos', array('id_orden' => $idOrden));
       $this->db->insert_batch('compras_productos', $productos);
@@ -445,6 +461,15 @@ class compras_ordenes_model extends CI_Model {
     // obtiene el id de la compra insertada.
     $compraId = $this->db->insert_id();
 
+    // Bitacora
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($data['id_empresa']);
+    $this->bitacora_model->_insert('compras', $compraId,
+                                    array(':accion'     => 'la compra', ':seccion' => 'compras',
+                                          ':folio'      => $data['serie'].$data['folio'],
+                                          ':id_empresa' => $data['id_empresa'],
+                                          ':empresa'    => 'en '.$empresa['info']->nombre_fiscal));
+
     // //si es contado, se registra el abono y el retiro del banco
     // if ($data['condicion_pago'] == 'co')
     // {
@@ -523,6 +548,14 @@ class compras_ordenes_model extends CI_Model {
     $data = array('status' => 'ca');
     $this->actualizar($idOrden, $data);
 
+    // Bitacora
+    $datosorden = $this->info($idOrden);
+    $this->bitacora_model->_cancel('compras_ordenes', $idOrden,
+                                    array(':accion'     => 'la orden de compra', ':seccion' => 'ordenes de compra',
+                                          ':folio'      => $datosorden['info'][0]->folio,
+                                          ':id_empresa' => $datosorden['info'][0]->id_empresa,
+                                          ':empresa'    => 'de '.$datosorden['info'][0]->empresa));
+
     return array('passes' => true);
   }
 
@@ -580,7 +613,7 @@ class compras_ordenes_model extends CI_Model {
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
-           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area 
+           LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area
            WHERE id_orden = {$data['info'][0]->id_orden} {$sql_produc}");
 
         $data['info'][0]->productos = array();
@@ -774,7 +807,6 @@ class compras_ordenes_model extends CI_Model {
       if(count($producto_dd['info']) > 0 && !in_array($producto_dd['familia']->almacen, $almacen))
         $almacen[] = $producto_dd['familia']->almacen;
     }
-    $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     $data_almacen = null;
     // Si todos los productos fueron aceptados entonces la orden se marca
@@ -811,6 +843,22 @@ class compras_ordenes_model extends CI_Model {
 
       $msg = 6;
     }
+
+    // Bitacora
+    $id_bitacora = $this->bitacora_model->_update('compras_ordenes', $idOrden, $data,
+                              array(':accion'       => ($data['status']=='a'? 'acepto ': 'rechazo ').'la orden de compra', ':seccion' => 'ordenes de compra',
+                                    ':folio'        => $this->input->post('folio'),
+                                    ':id_empresa'   => $this->input->post('empresaId'),
+                                    ':empresa'      => 'en '.$this->input->post('empresa'),
+                                    ':id'           => 'id_orden',
+                                    ':titulo'       => 'Orden de compra'));
+    // Bitacora
+    $this->bitacora_model->_updateExt($id_bitacora, 'compras_productos', $idOrden, $productos,
+                              array(':id'             => 'id_orden',
+                                    ':titulo'         => 'Productos',
+                                    ':updates_fields' => 'compras_ordenes_productos'));
+
+    $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     $this->actualizar($idOrden, $data, $productos);
 

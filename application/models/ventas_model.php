@@ -170,8 +170,10 @@ class Ventas_model extends privilegios_model{
         if ($tipo->id_clasificacion == 49)
         {
           $response['seguro'] = $tipo;
-        }
-        else
+        } elseif ($tipo->id_clasificacion == 53)
+        {
+          $response['supcarga'] = $tipo;
+        }else
         { // Certificados 51 o 52
           $response['certificado'.$tipo->id_clasificacion] = $tipo;
         }
@@ -356,6 +358,20 @@ class Ventas_model extends privilegios_model{
             'pol_seg'          => null,
           );
         }
+
+        if ($_POST['prod_did_prod'][$key] === '53')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['supcarga_id_proveedor'],
+            'certificado'      => $_POST['supcarga_numero'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['supcarga_bultos'],
+            'pol_seg'          => null,
+          );
+        }
+
       }
     }
     if(count($productosFactura) > 0)
@@ -519,10 +535,23 @@ class Ventas_model extends privilegios_model{
           $dataSeguroCerti[] = array(
             'id_factura'       => $id_venta,
             'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['cert_id_proveedor'],
-            'certificado'      => $_POST['cert_certificado'],
+            'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
+            'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
             'folio'            => $serieFolio,
-            'bultos'           => $_POST['cert_bultos'],
+            'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
+            'pol_seg'          => null,
+          );
+        }
+
+        if ($_POST['prod_did_prod'][$key] === '53')
+        {
+          $dataSeguroCerti[] = array(
+            'id_factura'       => $id_venta,
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'id_proveedor'     => $_POST['supcarga_id_proveedor'],
+            'certificado'      => $_POST['supcarga_numero'],
+            'folio'            => $serieFolio,
+            'bultos'           => $_POST['supcarga_bultos'],
             'pol_seg'          => null,
           );
         }

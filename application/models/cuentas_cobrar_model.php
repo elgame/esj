@@ -3,6 +3,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 	function __construct(){
 		parent::__construct();
+		$this->load->model('bitacora_model');
 	}
 
 
@@ -968,6 +969,14 @@ class cuentas_cobrar_model extends privilegios_model{
 		$this->db->insert($camps[1], $data);
 		$data['id_abono'] = $this->db->insert_id($camps[1], 'id_abono');
 
+		// Bitacora
+    $this->bitacora_model->_insert($camps[1], $data['id_abono'],
+                            array(':accion'    => 'un abono a la venta ',
+                            			':seccion' => 'cuentas por cobrar',
+                                  ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($data['total']),
+                                  ':id_empresa' => $inf_factura['empresa']->id_empresa,
+                                  ':empresa'   => 'de '.$inf_factura['cliente']->nombre_fiscal));
+
 		//verifica si la factura se pago, se cambia el status
 		if($pagada){
 			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
@@ -1028,8 +1037,18 @@ class cuentas_cobrar_model extends privilegios_model{
 				// $camps = array('id_abono', 'facturacion_ventas_remision_abonos', 'facturacion_ventas_remision', 'id_venta');
 			}
 
+			$info_abano = $this->db->query("SELECT * FROM facturacion_abonos WHERE {$camps[0]} = {$ida}")->row();
+
 			$this->db->delete($camps[1], "{$camps[0]} = {$ida}");
 			$this->db->delete($camps[1].'_otros', "{$camps[0]} = {$ida}"); //elimina los pagos adicionales
+
+			// Bitacora
+			$inf_factura = $this->getDetalleVentaFacturaData($id);
+	    $this->bitacora_model->_cancel('facturacion_abonos', $ida,
+	                            array(':accion'     => 'un abono de la venta ', ':seccion' => 'cuentas por cobrar',
+	                                  ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($info_abano->total),
+	                                  ':id_empresa' => $inf_factura['empresa']->id_empresa,
+	                                  ':empresa'    => 'de '.$inf_factura['cliente']->nombre_fiscal));
 		}
 		//Se cambia el estado de la factura
 		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$id}");
@@ -1878,7 +1897,7 @@ class cuentas_cobrar_model extends privilegios_model{
     $response = $this->db->query(
         "SELECT
             f.id_factura, f.serie, f.folio, p.rfc, p.nombre_fiscal, f.subtotal, f.importe_iva AS fimporte_iva, f.total, Date(fa.fecha) AS fecha_pago,
-            fa.total AS total_abono, ((fa.total*100/f.total)*f.importe_iva/100) AS importe_iva, 
+            fa.total AS total_abono, ((fa.total*100/f.total)*f.importe_iva/100) AS importe_iva,
             (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= fa.id_abono AND id_factura = f.id_factura) AS num
           FROM facturacion AS f
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura

@@ -243,7 +243,7 @@ class nomina_fiscal_model extends CI_Model {
          LEFT JOIN nomina_ptu nptu ON nptu.id_empleado = u.id AND nptu.id_empresa = {$filtros['empresaId']} AND nptu.anio = {$anio} AND nptu.semana = {$semana['semana']}
          LEFT JOIN nomina_aguinaldo nagui ON nagui.id_empleado = u.id AND nagui.id_empresa = {$filtros['empresaId']} AND nagui.anio = {$anio} AND nagui.semana = {$semana['semana']}
          LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
-         WHERE u.user_nomina = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
+         WHERE u.user_nomina = 't' AND u.status = 't' AND u.de_rancho = 'n' AND DATE(u.fecha_entrada) <= '{$diaUltimoDeLaSemana}' {$sql}
          {$ordenar}
       ");
     }
@@ -902,7 +902,11 @@ class nomina_fiscal_model extends CI_Model {
     $fechaEntrada = $this->db->select('DATE(fecha_imss) as fecha_entrada')
                               ->from('usuarios as u')
                               ->where("u.esta_asegurado = 't' AND u.status = 't' {$sql}")
-                              ->get()->row()->fecha_entrada;
+                              ->get()->row();
+    if(isset($fechaEntrada->fecha_entrada))
+      $fechaEntrada = $fechaEntrada->fecha_entrada;
+    else
+      return false;
 
     // fecha en la que se inciaran a calcular los dias transcurrido del año
     // a la fecha de renuncia.

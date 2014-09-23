@@ -576,6 +576,38 @@
             </div>
           </div>
 
+          <!-- Modal Supervisor carga -->
+          <div id="modal-supcarga" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Supervisor de carga</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_supcarga" value="<?php echo set_value('pproveedor_supcarga', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->proveedor : '') ?>" id="pproveedor_supcarga" class="span12 sikey field-check" placeholder="Proveedor" data-next="supcarga_numero">
+                  <input type="hidden" name="supcarga_id_proveedor" value="<?php echo set_value('supcarga_id_proveedor', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->id_proveedor : '') ?>" id="supcarga_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="supcarga_numero" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo set_value('supcarga_numero', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->certificado : ''); ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="supcarga_bultos" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo set_value('supcarga_bultos', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_supcarga">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['supcarga']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
         </form>
 
       </div><!--/span-->
@@ -602,6 +634,13 @@
         </div>
         <div class="span6">
           <label class="control-label" for="mprosel_cerorig">Certificado origen <input type="checkbox" id="mprosel_cerorig" class="mpromarcsel" value="52"></label>
+        </div>
+      </div>
+      <div class="row-fluid">
+        <div class="span6">
+          <label class="control-label" for="mprosel_supcarga">Supervisor de carga <input type="checkbox" id="mprosel_supcarga" class="mpromarcsel" value="53"></label>
+        </div>
+        <div class="span6">
         </div>
       </div>
     </div>
