@@ -84,7 +84,7 @@
     $("#btnAutorizar").on('click', function(e) {
       var passes = true;
       $(".prodSelOrden:checked").each(function(index, el) {
-        if (($(this).val() != $('#proveedorId1').val() && 
+        if (($(this).val() != $('#proveedorId1').val() &&
             $(this).val() != $('#proveedorId2').val() &&
             $(this).val() != $('#proveedorId3').val()) || $(this).val() == '') {
           passes = false;
@@ -834,8 +834,9 @@
 
       $trHtml = $('<tr class="rowprod">' +
                   '<td style="width: 60px;">' +
-                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoArea" readonly>' +
+                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" >' +
                     '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" readonly>' +
+                    '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                   '</td>' +
                   '<td style="width: 60px;">' +
                     producto.codigo +
@@ -1046,7 +1047,7 @@
         totalIeps    = 0,
         totalRet     = 0,
         total        = 0;
-    
+
     for (var i = 0; i < $precio_uni.length; i++) {
 
       totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni[i].val() || 0)));
@@ -1064,10 +1065,10 @@
 
       $totalIva[i].val(totalIva);
       $iepsTotal[i].val(totalIeps);
-      $importe[i].parent().find('span').text(util.darFormatoNum(totalImporte)); 
+      $importe[i].parent().find('span').text(util.darFormatoNum(totalImporte));
       $importe[i].val(totalImporte);
       $total[i].val(total);
-      
+
       calculaTotal(i+1);
     }
 

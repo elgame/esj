@@ -32,7 +32,7 @@ class bitacora_model extends bitacora_msg_model {
     $response = array();
     foreach ($campos['campos'] as $key => $campo) {
     	$special = true;
-    	if (preg_match("/fecha/i", $key) === 1 ) {
+    	if (preg_match("/fecha/i", $key) === 1 && isset($new[$key])) {
 				if(strtotime($old->{$key}) === strtotime($new[$key]))
 					$special = false;
 			}

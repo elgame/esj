@@ -7,12 +7,42 @@
 
     showCodigoArea();
     btnModalAreasSel();
-    
+    autocompleteCodigos();
+
   });
+
+  var autocompleteCodigos = function autocompleteClasifiLive () {
+    $('#table-productos').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/compras_areas/ajax_get_areasauto/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+          setTimeout(function(){
+            $this.val(ui.item.item.codigo_fin);
+          },100)
+
+          $tr.find('#codigoAreaId').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#codigoAreaId').val('');
+        }
+      });
+    });
+  };
 
   var showCodigoArea = function() {
     $("#productos").on('click', '.showCodigoArea', function(event) {
-      objCodigoArea = $(this);
+      var $tr = $(this).parent().parent();
+      objCodigoArea = $tr.find('.showCodigoAreaAuto');
       $("div[id^=tblAreas]").hide();
       getAjaxAreas($(".tblAreasFirs").attr('data-id'), null);
       $("#modalAreas").modal('show');
@@ -46,8 +76,8 @@
   };
 
   var getAjaxAreas = function(area, padre) {
-    $.getJSON(base_url+'panel/compras_areas/ajax_get_areas', 
-      {id_area: area, id_padre: padre}, 
+    $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
+      {id_area: area, id_padre: padre},
       function(json, textStatus) {
         var html = '';
         for (var i = 0; i < json.length; i++) {

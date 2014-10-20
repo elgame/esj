@@ -600,7 +600,7 @@
 
   // Evento key up para los campos cantidad, valor unitario, descuento en la tabla.
   var eventKeyUpCantPrecio = function () {
-    $('#table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent', function(e) {
+    $('#table-productos').on('keyup', '#cantidad, #valorUnitario, #iepsPorcent, #faltantes', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent();
@@ -608,7 +608,7 @@
       if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
         calculaTotalProducto($tr);
       }
-    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent', function(event) {
+    }).on('change', '#cantidad, #valorUnitario, #iepsPorcent, #faltantes', function(event) {
       var $tr = $(this).parent().parent();
       calculaTotalProducto($tr);
     });
@@ -913,17 +913,18 @@
 
   // Realiza los calculos del producto: iva, importe total.
   function calculaTotalProducto ($tr) {
-    var $cantidad          = $tr.find('#cantidad'), // Input cantidad
-        $precio_uni        = $tr.find('#valorUnitario'), // Input precio u.
-        $iva               = $tr.find('#traslado'), // Select iva
-        $importe           = $tr.find('#importe'), // Input hidden importe
-        $totalIva          = $tr.find('#trasladoTotal'), // Input hidden iva total
-        $totalRet          = $tr.find('#retTotal'), // Input hidden iva total
-        $total             = $tr.find('#total'), // Input hidden iva total
-        $ieps             = $tr.find('#iepsPorcent'), // Input hidden iva total
-        $iepsTotal        = $tr.find('#iepsTotal'), // Input hidden iva total
+    var $cantidad     = $tr.find('#cantidad'), // Input cantidad
+        $precio_uni   = $tr.find('#valorUnitario'), // Input precio u.
+        $iva          = $tr.find('#traslado'), // Select iva
+        $importe      = $tr.find('#importe'), // Input hidden importe
+        $totalIva     = $tr.find('#trasladoTotal'), // Input hidden iva total
+        $totalRet     = $tr.find('#retTotal'), // Input hidden iva total
+        $total        = $tr.find('#total'), // Input hidden iva total
+        $ieps         = $tr.find('#iepsPorcent'), // Input hidden iva total
+        $iepsTotal    = $tr.find('#iepsTotal'), // Input hidden iva total
+        $faltantes    = $tr.find('#faltantes'),
 
-        totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni.val() || 0))),
+        totalImporte = util.trunc2Dec( ( parseFloat($cantidad.val() || 0) - parseFloat($faltantes.val() || 0) ) * parseFloat($precio_uni.val() || 0)),
         totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100),
         totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100),
         totalRet     = util.trunc2Dec(totalImporte * 0.04),

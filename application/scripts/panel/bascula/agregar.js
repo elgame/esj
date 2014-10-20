@@ -55,6 +55,21 @@ $(function(){
     }
   });
 
+  $('#newPesada').on('click', function(event) {
+    event.preventDefault();
+    var band = false;
+    if($("#pno_lote").length > 0) {
+      if ($("#pno_lote").val() != '')
+        band = true;
+    }else
+      band = true;
+
+    if(band) {
+      var href = $(this).attr('href');
+      window.location.href = href;
+    }else
+      noty({"text": 'Agrega el numero de lote a la boleta', "layout":"topRight", "type": 'error'});
+  });
 
   $('#form').keyJump({
     'next': 13,
@@ -69,8 +84,18 @@ $(function(){
       $('#icajas').focus();
     },
     '27': function () { // alt + n 78
-      var href = $('#newPesada').attr('href');
-      window.location.href = href;
+      var band = false;
+      if($("#pno_lote").length > 0) {
+        if ($("#pno_lote").val() != '')
+          band = true;
+      }else
+        band = true;
+
+      if(band) {
+        var href = $('#newPesada').attr('href');
+        window.location.href = href;
+      }else
+        noty({"text": 'Agrega el numero de lote a la boleta', "layout":"topRight", "type": 'error'});
     },
     'alt+71': function () { // alt + g
       $('#btnGuardar').trigger('click');
@@ -790,3 +815,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   $ptotal_cajas.val(totalCajas);
   $ptotal.val(total.toFixed(2));
 };
+
+function setLoteBoleta(){
+  $("#pno_lote").val("ok");
+}

@@ -1,8 +1,53 @@
+-*Pago en parcialidades para poder ligar los xml a las polizas por cada abono
+  -*Al momento de agregar el abono generar en automatico la factura de pago en parcialidades si es que no se
+  pago el total o si ya se habia agregado un abono
+  -*Poner esas facturas en un apartado aparte como notas de credito
+
+-*Poner 2 cajas chicas lo que capturen en una que no salga en la otra pero q los reportes sea lo mismo
+manejaria 2 saldos diferentes una x caja
+
+-*prestamos reporte no sale esa semana
+  *JUAN FARIAS CUELLAR - semana 40 de vianey
+
+-Salida de productos ponerles total, imprimir recibo de salida, quien lo solicita, a que codigo se va ir ese producto
+  -en conbustible agregar odometro, veiculo de codigos y generar reporte
+  -Reporte por codigo de las cantidades q se fueron
+-Nomina
+  -Parte para administrar las labores que agreguen las que esta en la hoja
+  -Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
+  -Reportes de eso
+
+-Pallets salidas de productos
+  productos q faltaron
+  -esquineros
+  -Bolsa perforada
+  -Malla
+  -Filverde
+  productos q puede agregar multiple
+  -etiquetas
+  -cajas
+  -arpilla
+
+
+
+-*Recibo de pago en cuentas x cobrar poner la referencia del deposito
+
+-*Reporte de rendimiento, poner un consentrado de los lotes (Lote, Cajas entraron, Kilos entraron, Cajas rendimiento, kilos rendimi, desecho indust), al final la suma y la tabla de las clasificaciones y sus totales
+-*Cambiar la salida de los productos al momento de registrar los pallets no al facturar, poner decimales en los productos
+-*Crear una orde de compra aceptada y todo los datos de la orden con los faltantes que le capturen y restar los faltantes a la orden que entro
+-*Ordenar las notas de credito de remisiones por fecha y folio poderlas modificar
+-Marcar a victor de las camaras y lector
+
+
 -Mano de hobra
 -Maqinaria
 -Material
 -Prestamos de de productos a empleados y externos de productos, maquinaria,
 -Costos ueps
+
+-*Lo de chui
+-**En las empresas distintas a sanjorge se tienen 2 veses el cliente sanjorge y con facturas unificarlos
+
 
 
 -*Supervisor de carga en los productos especiales de facturacion, q los datos en los certificados sean independientes

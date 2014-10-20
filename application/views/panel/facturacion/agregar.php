@@ -268,6 +268,7 @@
                     <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', $metodo === 'tarjeta' ? true : false); ?>>Tarjeta</option>
                     <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', $metodo === 'transferencia' ? true : false); ?>>Transferencia</option>
                     <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', $metodo === 'deposito' ? true : false); ?>>Deposito</option>
+                    <option value="trasferencia y/o cheque" <?php echo set_select('dmetodo_pago', 'trasferencia y/o cheque', $metodo === 'trasferencia y/o cheque' ? true : false); ?>>Trasferencia y/o cheque</option>
                   </select>
                 </div>
               </div>

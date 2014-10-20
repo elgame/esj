@@ -33,7 +33,7 @@
 
 									<div class="span3">
 									  <label class="span3" for="parea">Area </label>
-									  <input type="text" value="<?php echo $data->nombre_area ?>" readonly>	
+									  <input type="text" value="<?php echo $data->nombre_area ?>" readonly>
 									  <input type="hidden" name="parea" value="<?php echo $data->id_area ?>" id="parea">
 									</div>
 
@@ -66,22 +66,148 @@
 								<div class="clearfix"></div>
 
                 <div class="span12">
-                	
-                	<div class="span3"><?php $no_hojas = (isset($data->no_hojas)? intval($data->no_hojas): 0); ?>
-									  <label class="span3" for="fhojaspapel">Hojas de papel </label>
-									  <select name="fhojaspapel" id="fhojaspapel" class="span8" data-next="fcalibre_fijo">
-									  	<option value="0" <?php echo set_select('fhojaspapel', 0, false, $no_hojas); ?>>Sin papel</option>
-									  	<option value="2" <?php echo set_select('fhojaspapel', 2, false, $no_hojas); ?>>2 Hojas</option>
-									  	<option value="4" <?php echo set_select('fhojaspapel', 4, false, $no_hojas); ?>>4 Hojas</option>
-									  	<option value="7" <?php echo set_select('fhojaspapel', 7, false, $no_hojas); ?>>7 Hojas</option>
-									  </select>
-									</div>
 
                   <div class="span4">
                     <label class="span4" for="fcalibre_fijo">Calibre (Presentacion)</label>
                     <input type="text" name="fcalibre_fijo" id="fcalibre_fijo" class="span8" value="<?php echo (isset($data->calibre_fijo_origen)? $data->calibre_fijo: ''); ?>"
                       maxlength="180" placeholder="Calibre" data-next="fclasificacion">
                   </div>
+
+                  <div class="span3">
+									  <label class="span3" for="fhojaspapel">Salidas de productos </label>
+									  <a href="#modalProdutosSal" id="btnmodalproductosSa" role="button" class="btn btn-info" data-toggle="modal">Agregar productos</a>
+
+									  <!-- Modal productos salida -->
+										<div id="modalProdutosSal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalProductosSalLabel" aria-hidden="true">
+										  <div class="modal-header">
+										    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+										    <h3 id="modalProductosSalLabel">Salidas de Productos</h3>
+										  </div>
+										  <div class="modal-body">
+										  	<table class="table table-condensed table-striped">
+										  		<thead>
+										  			<tr>
+										  				<th></th>
+										  				<th>Producto</th>
+										  				<th>Cantidad</th>
+										  			</tr>
+										  		</thead>
+										  		<tbody>
+										  			<tr>
+										  				<td>Cajas</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->nombre: ''); ?>" data-xcajas="1" data-next="ps_papel">
+										  					<input type="hidden" name="ps_id[]" id="ps_caja_id" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="1">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Hojas de papel</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_papel" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->nombre: ''); ?>" data-next="fhojaspapel">
+										  					<input type="hidden" name="ps_id[]" id="ps_papel_id" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="2">
+										  				</td>
+										  				<td>
+										  					<select name="fhojaspapel" id="fhojaspapel" class="sikey span12" data-next="ps_fleje">
+															  	<option value="0" <?php echo set_select('ps_num[]', 0, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad: '')); ?>>Sin papel</option>
+															  	<option value="2" <?php echo set_select('ps_num[]', 2, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/2: '')); ?>>2 Hojas</option>
+															  	<option value="4" <?php echo set_select('ps_num[]', 4, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/4: '')); ?>>4 Hojas</option>
+															  	<option value="7" <?php echo set_select('ps_num[]', 7, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/7: '')); ?>>7 Hojas</option>
+															  </select>
+										  					<input type="text" name="ps_num[]" id="ps_papel_num" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad: ''); ?>" class="span12">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Fleje</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->nombre: ''); ?>" data-next="ps_fleje_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_fleje_id" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="3">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_grapa">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Grapa</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_grapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->nombre: ''); ?>" data-xcajas="20" data-next="ps_grapa_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_grapa_id" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="4">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_grapa_num" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_tapa">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Tapa</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_tapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->nombre: ''); ?>" data-next="ps_tapa_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_tapa_id" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="5">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_tapa_num" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_ficha">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Fichas</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_ficha" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->nombre: ''); ?>" data-next="ps_ficha_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_ficha_id" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="6">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_ficha_num" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_tarima">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Tarima</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_tarima" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][6])? $info['psalidas'][6]->nombre: ''); ?>" data-next="ps_etiqueta">
+										  					<input type="hidden" name="ps_id[]" id="ps_tarima_id" value="<?php echo (isset($info['psalidas'][6])? $info['psalidas'][6]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="7">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_tarima_num" value="1" class="sikey span12 noclear" readonly>
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Etiqueta</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->nombre: ''); ?>" data-xcajas="1" data-next="ps_arpilla">
+										  					<input type="hidden" name="ps_id[]" id="ps_etiqueta_id" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="8">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Arpilla</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->nombre: ''); ?>" data-xcajas="1" data-next="btn_ps_cerrar">
+										  					<input type="hidden" name="ps_id[]" id="ps_arpilla_id" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="9">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  				</td>
+										  			</tr>
+										  		</tbody>
+										  	</table>
+										  </div>
+										  <div class="modal-footer">
+										    <button id="btn_ps_cerrar" class="btn" data-dismiss="modal" aria-hidden="true">Ok</button>
+										  </div>
+										</div>
+
+									</div>
+
                 </div>
                 <div class="clearfix"></div>
 

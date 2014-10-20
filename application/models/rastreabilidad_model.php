@@ -470,7 +470,7 @@ class rastreabilidad_model extends CI_Model {
     $sql = $this->db->query(
       "SELECT id_rendimiento, lote, fecha, status, lote_ext, id_area, certificado
       FROM rastria_rendimiento
-      WHERE id_area = {$id_area} AND 
+      WHERE id_area = {$id_area} AND
         DATE(fecha) = '{$fecha}' AND
         status = true
       ORDER BY lote ASC
@@ -1015,7 +1015,7 @@ class rastreabilidad_model extends CI_Model {
         $sql .= " AND b.id_area = " . $_GET['farea'];
       }else
         $sql .= " AND b.id_area = 0";
-      
+
       $flotes = explode('-', $this->input->get('flotes'));
       if($flotes[1] != '')
         $sql .= " AND b.no_lote = ".$flotes[1];
@@ -1044,10 +1044,10 @@ class rastreabilidad_model extends CI_Model {
       $query = $this->db->query(
         "SELECT rr.id_rendimiento,
           rr.lote, rr.lote_ext, rr.certificado,
-          rrc.rendimiento, rrc.kilos, 
+          rrc.rendimiento, rrc.kilos,
           (rrc.rendimiento*rrc.kilos) AS kilos_total,
-          c.nombre AS clasificacion, u.nombre AS unidad, 
-          ca.nombre AS calibre, e.nombre AS etiqueta, 
+          c.nombre AS clasificacion, u.nombre AS unidad,
+          ca.nombre AS calibre, e.nombre AS etiqueta,
           cas.nombre AS size, a.nombre AS area
         FROM rastria_rendimiento AS rr
           INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
@@ -1057,7 +1057,7 @@ class rastreabilidad_model extends CI_Model {
           INNER JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
           INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
           INNER JOIN areas AS a ON a.id_area = rr.id_area
-        WHERE rr.status = 't' AND a.id_area = {$_GET['farea']} 
+        WHERE rr.status = 't' AND a.id_area = {$_GET['farea']}
           AND rr.id_rendimiento = {$flotes[0]}
         ORDER BY c.nombre ASC");
       if($query->num_rows() > 0)
@@ -1075,7 +1075,7 @@ class rastreabilidad_model extends CI_Model {
           LEFT JOIN clientes c ON c.id_cliente = rp.id_cliente
           LEFT JOIN facturacion_pallets fp ON rp.id_pallet = fp.id_pallet
           LEFT JOIN facturacion f ON (f.id_factura = fp.id_factura AND f.status IN('p', 'pa'))
-        WHERE rp.status = 't' AND rp.id_area = {$_GET['farea']} 
+        WHERE rp.status = 't' AND rp.id_area = {$_GET['farea']}
           AND rpr.id_rendimiento = {$flotes[0]}
         ORDER BY rp.folio ASC");
       if($query->num_rows() > 0)
@@ -1111,8 +1111,8 @@ class rastreabilidad_model extends CI_Model {
       // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
 
       $pdf->AliasNbPages();
-      
-      
+
+
       // Listado de boletas
       $pdf->SetFont('helvetica','', 8);
 
@@ -1235,7 +1235,7 @@ class rastreabilidad_model extends CI_Model {
         $pdf->AddPage();
       $pdf->SetX(126);
       $pdf->Row(array(
-              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false), '', 
+              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false), '',
             ), false);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
@@ -1301,6 +1301,266 @@ class rastreabilidad_model extends CI_Model {
           ), false);
       }
 
+
+      $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
+   }
+
+   /**
+   * REPORTE DE RENDIMIENTO
+   * @return [type] [description]
+   */
+  public function rrl_data()
+  {
+      $response = array('lotes' => array(), 'rendimientos' => array());
+      $sql1 = $sql2 = '';
+
+      if (empty($_GET['ffecha1'])){
+        $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+      }
+      if (!empty($_GET['ffecha1'])){
+        $response['titulo3'] = "Del ".$_GET['ffecha1'];
+        $sql1 .= " AND Date(b.fecha_tara) = '".$_GET['ffecha1']."'";
+        $sql2 .= " AND Date(rr.fecha) = '".$_GET['ffecha1']."'";
+      }
+      //Filtros de area
+      if ($this->input->get('farea') != ''){
+        $sql1 .= " AND b.id_area = " . $_GET['farea'];
+        $sql2 .= " AND a.id_area = " . $_GET['farea'];
+      }else {
+        $sql1 .= " AND b.id_area = 0";
+        $sql2 .= " AND a.id_area = 0";
+      }
+
+      // Obtenemos la lista de lotes con los totales
+      $query = $this->db->query(
+        "SELECT COALESCE(b.no_lote, r.no_lote) AS no_lote, COALESCE(b.btotal_cajas, 0) AS btotal_cajas, COALESCE(b.btotal_kilos, 0) AS btotal_kilos,
+          COALESCE(b.bcajas_inds, 0) AS bcajas_inds, COALESCE(b.bkilos_inds, 0) AS bkilos_inds,
+          COALESCE(r.rtotal_cajas, 0) AS rtotal_cajas, COALESCE(r.rtotal_kilos, 0) AS rtotal_kilos
+        FROM
+          (
+            SELECT b.no_lote, Sum(b.total_cajas) AS btotal_cajas, Sum(b.kilos_neto) AS btotal_kilos,
+              COALESCE(Sum(bc.cajas), 0) AS bcajas_inds, COALESCE(Sum(bc.kilos), 0) AS bkilos_inds
+            FROM bascula AS b
+              LEFT JOIN (
+                SELECT id_bascula, cajas, kilos FROM bascula_compra WHERE id_calidad = 3
+              ) bc ON b.id_bascula = bc.id_bascula
+            WHERE b.status = true AND b.tipo = 'en' AND b.accion IN('sa', 'p', 'b')
+              {$sql1}
+            GROUP BY b.no_lote
+            ORDER BY b.no_lote
+          ) b FULL JOIN
+          (
+            SELECT rr.lote_ext AS no_lote, Sum(rrc.rendimiento) AS rtotal_cajas,
+              (Sum(rrc.rendimiento*rrc.kilos)) AS rtotal_kilos
+            FROM rastria_rendimiento AS rr
+              INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
+              INNER JOIN areas AS a ON a.id_area = rr.id_area
+            WHERE rr.status = 't' {$sql2}
+            GROUP BY rr.id_rendimiento
+            ORDER BY rr.id_rendimiento
+          ) r ON b.no_lote = r.no_lote");
+      if($query->num_rows() > 0)
+        $response['lotes'] = $query->result();
+      $query->free_result();
+
+      // Obtenemos los rendimientos en los lotes de ese dia
+      $query = $this->db->query(
+        "SELECT c.id_clasificacion,
+          Sum(rrc.rendimiento) AS rendimiento,
+          Sum(rrc.rendimiento*rrc.kilos) AS kilos_total,
+          c.nombre AS clasificacion, u.nombre AS unidad,
+          ca.nombre AS calibre, e.nombre AS etiqueta,
+          cas.nombre AS size, a.nombre AS area
+        FROM rastria_rendimiento AS rr
+          INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
+          INNER JOIN clasificaciones AS c ON c.id_clasificacion = rrc.id_clasificacion
+          INNER JOIN unidades AS u ON u.id_unidad = rrc.id_unidad
+          INNER JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre
+          INNER JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
+          INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
+          INNER JOIN areas AS a ON a.id_area = rr.id_area
+        WHERE rr.status = 't' {$sql2}
+        GROUP BY c.id_clasificacion, u.nombre, ca.nombre, e.nombre, cas.nombre, a.nombre
+        ORDER BY c.nombre ASC");
+      if($query->num_rows() > 0)
+        $response['rendimientos'] = $query->result();
+      $query->free_result();
+
+
+      return $response;
+   }
+
+   /**
+    * Reporte de rendimientos de fruta
+    * @return void
+    */
+   public function rrl_pdf()
+   {
+      // Obtiene los datos del reporte.
+      $data = $this->rrl_data();
+      // echo "<pre>";
+      //   var_dump($data);
+      // echo "</pre>";exit;
+
+      $fecha = new DateTime($_GET['ffecha1']);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+      $pdf->titulo2 = "REPORTE RENDIMIENTO";
+      if(isset($data['rendimientos'][0]))
+        $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} | AREA: {$data['rendimientos'][0]->area}\n";
+      // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
+      // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
+
+      $pdf->AliasNbPages();
+
+
+      // Listado de boletas
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(20, 20, 30, 30, 25, 30, 30);
+      $header = array('LOTE', 'B CAJAS', 'B K NETOS', 'B K INDUSTRIAL', 'REND BULTOS', 'REND K NETOS', 'K INDUSTRIAL');
+
+      $totales = array(0,0,0,0,0,0);
+
+      foreach($data['lotes'] as $key => $lote)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(200,200,200);
+          // $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $lote->no_lote,
+            $lote->btotal_cajas,
+            String::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds, 2, '', false),
+            String::formatoNumero($lote->bkilos_inds, 2, '', false),
+            String::formatoNumero($lote->rtotal_cajas, 2, '', false),
+            String::formatoNumero($lote->rtotal_kilos, 2, '', false),
+            String::formatoNumero($lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos, 2, '', false),
+          ), false);
+
+        $totales[0] += $lote->btotal_cajas;
+        $totales[1] += $lote->btotal_kilos-$lote->bkilos_inds;
+        $totales[2] += $lote->bkilos_inds;
+        $totales[3] += $lote->rtotal_cajas;
+        $totales[4] += $lote->rtotal_kilos;
+        $totales[5] += $lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos;
+      }
+
+      //total general
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetTextColor(0 ,0 ,0 );
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(20, 30, 30, 25, 30, 30));
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(26);
+      $pdf->Row(array(
+              String::formatoNumero($totales[0], 2, '', false),
+              String::formatoNumero($totales[1], 2, '', false),
+              String::formatoNumero($totales[2], 2, '', false),
+              String::formatoNumero($totales[3], 2, '', false),
+              String::formatoNumero($totales[4], 2, '', false),
+              String::formatoNumero($totales[5], 2, '', false),
+            ), false);
+
+      // Listado de Rendimientos
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetY($pdf->GetY()+2);
+
+      $aligns = array('L', 'L', 'R', 'R', 'R', 'C');
+      $widths = array(60, 80, 20, 30);
+      $header = array('Clasificacion', 'Otros', 'Rendimiento', 'T Kilos');
+
+      $total_rendimiento = 0;
+      $total_kilos_total = 0;
+
+      foreach($data['rendimientos'] as $key => $boleta)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+        {
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(200,200,200);
+          // $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $boleta->clasificacion,
+            $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
+            String::formatoNumero($boleta->rendimiento, 2, '', false),
+            String::formatoNumero($boleta->kilos_total, 2, '', false),
+          ), false);
+
+        $total_rendimiento += $boleta->rendimiento;
+        $total_kilos_total += $boleta->kilos_total;
+      }
+
+      //total general
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetTextColor(0 ,0 ,0 );
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(20, 30));
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(146);
+      $pdf->Row(array(
+              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false)
+            ), false);
+
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+
+      $pdf->SetWidths(array(30, 30));
+      $pdf->SetX(6);
+      $pdf->Row(array(
+              'B K NETOS', String::formatoNumero($totales[1], 2, '', false),
+            ), false);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(6);
+      $pdf->Row(array(
+              'REND K NETOS', String::formatoNumero($totales[4], 2, '', false),
+            ), false);
+      if($pdf->GetY() >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(6);
+      $pdf->Row(array(
+              'K INDUSTRIAL', String::formatoNumero($totales[2]+$totales[5], 2, '', false),
+            ), false);
 
       $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
    }

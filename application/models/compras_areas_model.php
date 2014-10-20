@@ -27,7 +27,7 @@ class compras_areas_model extends CI_Model{
 			$params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
 		//Filtros para buscar
-		
+
 		if($this->input->get('status') != '')
 		{
 			$sql .= " ca.status = '".$this->input->get('status')."'";
@@ -41,7 +41,7 @@ class compras_areas_model extends CI_Model{
 		$query = BDUtil::pagination(
 			"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
 				cat.nombre AS tipo
-			FROM compras_areas ca 
+			FROM compras_areas ca
 				INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
 			WHERE {$sql}
 			ORDER BY ca.codigo_fin ASC
@@ -68,7 +68,7 @@ class compras_areas_model extends CI_Model{
 		$res = $this->db->query(
 				"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
 					cat.nombre AS tipo
-				FROM compras_areas ca 
+				FROM compras_areas ca
 					INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
 				WHERE ca.id_area = {$id}
 				ORDER BY ca.codigo_fin ASC");
@@ -129,18 +129,50 @@ class compras_areas_model extends CI_Model{
 	{
 		$sql = $padre? " AND id_padre = {$padre}": '';
 		$query = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
-		                           FROM compras_areas 
+		                           FROM compras_areas
 		                           WHERE status = 't' AND id_tipo = {$area} {$sql}
 		                           ORDER BY codigo ASC");
 
 		return $query->result();
 	}
 
+	/**
+	 * Obtiene el listado de clasificaciones para usar ajax
+	 * @param term. termino escrito en la caja de texto, busca en el nombre
+	 * @param type. clasificaciones de una area
+	 */
+	public function ajaxAreas(){
+		$sql = '';
+		if ($this->input->get('term') !== false)
+			$sql = " AND lower(codigo_fin) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+		// if($this->input->get('type') !== false)
+		// 	$sql .= " AND id_area = {$this->input->get('type')}";
+		$res = $this->db->query(" SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
+				FROM compras_areas
+				WHERE status = 't' {$sql}
+				ORDER BY nombre ASC
+				LIMIT 20");
+
+		$response = array();
+		if($res->num_rows() > 0){
+			foreach($res->result() as $itm){
+				$response[] = array(
+						'id'    => $itm->id_area,
+						'label' => $itm->codigo_fin.' - '.$itm->nombre,
+						'value' => $itm->codigo_fin.' - '.$itm->nombre,
+						'item'  => $itm,
+				);
+			}
+		}
+
+		return $response;
+	}
+
 
 	public function getDescripCodigo($id_area, $tipo='nombre')
 	{
 		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
-		                           FROM compras_areas 
+		                           FROM compras_areas
 		                           WHERE id_area = {$id_area}")->row();
 		if($tipo === 'nombre')
 		{

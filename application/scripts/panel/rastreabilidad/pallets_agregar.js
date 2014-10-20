@@ -34,14 +34,30 @@ var addpallets = (function($){
 
     asignaAutocomplets();
     changeAreas();
+
+    modalEvent();
+    changePapel();
   }
 
+  function modalEvent() {
+    $('#modalProdutosSal').on('shown', function () {
+      $("#ps_caja").focus();
+    });
+  }
 
+  function changePapel() {
+    $("#fhojaspapel").on('change', function(event) {
+      if(parseFloat($("#fcajas").val()) > 0)
+        $("#ps_papel_num").val(parseFloat($(this).val()) * parseFloat($("#fcajas").val()));
+      else
+        noty({"text": 'Asigne las cajas del Pallet', "layout":"topRight", "type": 'error'});
+    });
+  }
 
   function changeAreas () {
     $("#parea").on('change', function(event) {
-      $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_folio', 
-        {darea: $("#parea").val()}, 
+      $.getJSON(base_url+'panel/rastreabilidad_pallets/ajax_get_folio',
+        {darea: $("#parea").val()},
         function(json, textStatus) {
           if(json.folio != null)
             $("#ffolio").val(json.folio);
@@ -61,6 +77,55 @@ var addpallets = (function($){
   }
 
   function asignaAutocomplets(){
+    // Autocomplete de productos dar de baja
+    $(".prod_salida").autocomplete({
+      source: function (request, response) {
+        $.ajax({
+          url: base_url + 'panel/compras_ordenes/ajax_producto/',
+          dataType: 'json',
+          data: {
+            term : request.term,
+            ide: '2',
+            tipo: 'p'
+          },
+          success: function (data) {
+            response(data)
+          }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this), $fcajas = $("#fcajas");
+
+        $this.css("background-color", "#B6E7FF");
+        $("#"+$this.attr('id')+"_id").val(ui.item.id);
+
+        // Verifica si ese campo multimipla por una cantidad, lo coloca en la cantidad el resultado
+        if ($this.attr('data-xcajas') != undefined) {
+          if( $.isNumeric($fcajas.val()) ) {
+            $("#"+$this.attr('id')+"_num").val( parseFloat($this.attr('data-xcajas'))*parseFloat($fcajas.val()) );
+          }else {
+            noty({"text": 'Asigne las cajas del Pallet', "layout":"topRight", "type": 'error'});
+
+            $this.css("background-color", "#FDFC9A");
+            setTimeout(function(){
+              $this.val("");
+            }, 200);
+            $("#"+$this.attr('id')+"_id").val("");
+          }
+        }
+      }
+    }).on("keydown", function(event) {
+      var $this = $(this);
+      if(event.which == 8 || event.which == 46) {
+        $this.css("background-color", "#FDFC9A");
+        $("#"+$this.attr('id')+"_id").val("");
+        $("#"+$this.attr('id')+"_num:not(.noclear)").val( "" );
+
+      }
+    });
+
     $("input#fcalibre_fijo").autocomplete({
       source: base_url + 'panel/rastreabilidad/ajax_get_calibres/',
       minLength: 1,

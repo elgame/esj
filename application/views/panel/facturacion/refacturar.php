@@ -255,6 +255,7 @@
                     <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', $metodo === 'tarjeta' ? true : false); ?>>Tarjeta</option>
                     <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', $metodo === 'transferencia' ? true : false); ?>>Transferencia</option>
                     <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', $metodo === 'deposito' ? true : false); ?>>Deposito</option>
+                    <option value="trasferencia y/o cheque" <?php echo set_select('dmetodo_pago', 'trasferencia y/o cheque', $metodo === 'trasferencia y/o cheque' ? true : false); ?>>Trasferencia y/o cheque</option>
                   </select>
                 </div>
               </div>
@@ -663,34 +664,96 @@
           </div>
 
           <!-- Modal Certificados -->
-          <div id="modal-certificado" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div id="modal-certificado51" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-header">
               <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
               <h3 id="myModalLabel">Informacion Certificado</h3>
             </div>
             <div class="modal-body">
               <div class="control-group">
-                <label class="control-label" for="pproveedor_certificado" style="width: auto;">PROVEEDOR</label>
+                <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="pproveedor_certificado" value="<?php echo set_value('pproveedor_certificado', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->proveedor : '') ?>" id="pproveedor_certificado" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado">
-                  <input type="hidden" name="cert_id_proveedor" value="<?php echo set_value('cert_id_proveedor', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->id_proveedor : '') ?>" id="cert_id_proveedor" class="field-check">
+                  <input type="text" name="pproveedor_certificado51" value="<?php echo set_value('pproveedor_certificado51', isset($factura) && isset($factura['certificado51']) ? $factura['certificado51']->proveedor : '') ?>" id="pproveedor_certificado51" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado51">
+                  <input type="hidden" name="cert_id_proveedor51" value="<?php echo set_value('cert_id_proveedor51', isset($factura) && isset($factura['certificado51']) ? $factura['certificado51']->id_proveedor : '') ?>" id="cert_id_proveedor51" class="field-check">
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="cert_certificado" style="width: auto;">CERTIFICADO</label>
+                <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="cert_certificado" class="span12 sikey field-check" id="cert_certificado" value="<?php echo set_value('cert_certificado', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                  <input type="text" name="cert_certificado51" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51', isset($factura) && isset($factura['certificado51']) ? $factura['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="cert_bultos" style="width: auto;">BULTOS</label>
+                <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
                 <div class="controls" style="margin-left: 0">
-                  <input type="text" name="cert_bultos" class="span12 vpositive sikey field-check" id="cert_bultos" value="<?php echo set_value('cert_bultos', isset($factura) && isset($factura['certificado']) ? $factura['certificado']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado">
+                  <input type="text" name="cert_bultos51" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo set_value('cert_bultos51', isset($factura) && isset($factura['certificado51']) ? $factura['certificado51']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado51">
                 </div>
               </div>
             </div>
             <div class="modal-footer">
-              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['certificado']) ? '' : 'disabled' ?>>Cerrar</button>
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['certificado51']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+          <div id="modal-certificado52" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Certificado</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_certificado52" value="<?php echo set_value('pproveedor_certificado52', isset($factura) && isset($factura['certificado52']) ? $factura['certificado52']->proveedor : '') ?>" id="pproveedor_certificado52" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado52">
+                  <input type="hidden" name="cert_id_proveedor52" value="<?php echo set_value('cert_id_proveedor52', isset($factura) && isset($factura['certificado52']) ? $factura['certificado52']->id_proveedor : '') ?>" id="cert_id_proveedor52" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_certificado52" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52', isset($factura) && isset($factura['certificado52']) ? $factura['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="cert_bultos52" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo set_value('cert_bultos52', isset($factura) && isset($factura['certificado52']) ? $factura['certificado52']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado52">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['certificado52']) ? '' : 'disabled' ?>>Cerrar</button>
+            </div>
+          </div>
+
+          <!-- Modal Supervisor carga -->
+          <div id="modal-supcarga" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
+              <h3 id="myModalLabel">Informacion Supervisor de carga</h3>
+            </div>
+            <div class="modal-body">
+              <div class="control-group">
+                <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="pproveedor_supcarga" value="<?php echo set_value('pproveedor_supcarga', isset($factura) && isset($factura['supcarga']) ? $factura['supcarga']->proveedor : '') ?>" id="pproveedor_supcarga" class="span12 sikey field-check" placeholder="Proveedor" data-next="supcarga_numero">
+                  <input type="hidden" name="supcarga_id_proveedor" value="<?php echo set_value('supcarga_id_proveedor', isset($factura) && isset($factura['supcarga']) ? $factura['supcarga']->id_proveedor : '') ?>" id="supcarga_id_proveedor" class="field-check">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="supcarga_numero" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo set_value('supcarga_numero', isset($factura) && isset($factura['supcarga']) ? $factura['supcarga']->certificado : ''); ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
+                <div class="controls" style="margin-left: 0">
+                  <input type="text" name="supcarga_bultos" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo set_value('supcarga_bultos', isset($factura) && isset($factura['supcarga']) ? $factura['supcarga']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_supcarga">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($factura) && isset($factura['supcarga']) ? '' : 'disabled' ?>>Cerrar</button>
             </div>
           </div>
 

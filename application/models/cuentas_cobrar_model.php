@@ -80,7 +80,7 @@ class cuentas_cobrar_model extends privilegios_model{
 										Sum(fa.total) AS abonos
 									FROM
 										facturacion AS f INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-									WHERE f.status <> 'ca' AND f.status <> 'b'
+									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
 										AND Date(fa.fecha) <= '{$fecha}'{$sql}
 									GROUP BY f.id_cliente
 								)
@@ -91,14 +91,14 @@ class cuentas_cobrar_model extends privilegios_model{
 										Sum(f.total) AS abonos
 									FROM
 										facturacion AS f
-									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
 										AND Date(f.fecha) <= '{$fecha}'{$sql}
 									GROUP BY f.id_cliente
 								)
 							) AS ffaa
 							GROUP BY ffaa.id_cliente
 						) AS faa ON c.id_cliente = faa.id_cliente
-					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
+					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
 					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
 				)
 				UNION
@@ -345,7 +345,7 @@ class cuentas_cobrar_model extends privilegios_model{
                 FROM
                   facturacion AS f
                     INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-                WHERE f.status <> 'ca' AND f.status <> 'b'
+                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
                   AND f.id_cliente = '{$_GET['id_cliente']}'
                   AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_cliente, f.id_factura
@@ -358,7 +358,7 @@ class cuentas_cobrar_model extends privilegios_model{
                   Sum(f.total) AS abonos
                 FROM
                   facturacion AS f
-                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
                   AND f.id_cliente = '{$_GET['id_cliente']}'
                   AND Date(f.fecha) <= '{$fecha2}'{$sql}
                 GROUP BY f.id_cliente, f.id_factura
@@ -366,7 +366,7 @@ class cuentas_cobrar_model extends privilegios_model{
               GROUP BY d.id_cliente, d.id_factura
             ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
           WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-            AND Date(f.fecha) < '{$fecha1}'{$sql}
+             AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql}
           GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
 					UNION ALL
@@ -441,7 +441,7 @@ class cuentas_cobrar_model extends privilegios_model{
 								Sum(total) AS abono
 							FROM
 								facturacion
-							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+							WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
 								AND id_cliente = {$_GET['id_cliente']}
 								AND Date(fecha) <= '{$fecha2}'
 							GROUP BY id_nc
@@ -449,7 +449,7 @@ class cuentas_cobrar_model extends privilegios_model{
 					) AS ffs
 					GROUP BY id_factura
 				) AS ac ON f.id_factura = ac.id_factura {$sql}
-			WHERE f.id_cliente = {$_GET['id_cliente']}
+			WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
 				AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				{$sql}
@@ -737,7 +737,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		// {
 			$data['info'] = $this->db->query(
 											"SELECT id_factura AS id, DATE(fecha) as fecha, serie, folio, condicion_pago, status, total,
-												plazo_credito, id_cliente, id_empresa, 'f' AS tipo
+												plazo_credito, id_cliente, id_empresa, 'f' AS tipo, is_factura
 												FROM facturacion
 												WHERE id_factura={$_GET['id']}")->result();
 			$sql = array('tabla' => 'facturacion_abonos',
@@ -748,9 +748,9 @@ class cuentas_cobrar_model extends privilegios_model{
 							fecha,
 							total AS abono,
 							('Nota de credito ' || serie || folio) AS concepto,
-							'nc' AS tipo
+							'nc' AS tipo, 1 AS facturado
 						FROM facturacion
-						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+						WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL AND id_abono_factura IS NULL
 							AND id_nc = {$_GET['id']}
 							AND Date(fecha) <= '{$fecha2}' ";
 		// }
@@ -769,7 +769,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 			//Obtenemos los abonos de la factura o ticket
 			$res = $this->db->query(
-				"SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo
+				"SELECT id_abono, Date(fecha) AS fecha, abono, concepto, tipo, facturado
 				FROM
 				(
 						SELECT
@@ -777,7 +777,8 @@ class cuentas_cobrar_model extends privilegios_model{
 							fecha,
 							total AS abono,
 							concepto,
-							'ab' AS tipo
+							'ab' AS tipo,
+							(SELECT Count(id_factura) FROM facturacion WHERE id_abono_factura = {$sql['tabla']}.id_abono) AS facturado
 						FROM {$sql['tabla']}
 						WHERE {$sql['where_field']} = {$_GET['id']}
 							AND Date(fecha) <= '{$fecha2}'
@@ -982,6 +983,9 @@ class cuentas_cobrar_model extends privilegios_model{
 			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
 		}
 
+		// Verifica si es pago probicionado y crea la factura
+		$this->creaFacturaAbono($data['id_abono']);
+
 		//Si se hiso un pago mayor se registra a la factura
 		if ($pago_mayor > 0)
 		{
@@ -1141,6 +1145,152 @@ class cuentas_cobrar_model extends privilegios_model{
 		return $response;
 	}
 
+	/**
+	 * Funcion que registra una factura del abono a una factura
+	 * @param  [type] $id_abono [description]
+	 * @return [type]           [description]
+	 */
+	public function creaFacturaAbono($id_abono)
+	{
+		$this->load->model('facturacion_model');
+		$data_abono = $this->db->query("SELECT * FROM facturacion_abonos WHERE id_abono = {$id_abono}")->row();
+
+		$data_val = $this->db->query("SELECT f.status, f.is_factura, Count(fa.id_abono) AS num_abonos
+		                           FROM facturacion f LEFT JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+		                           WHERE f.id_factura = {$data_abono->id_factura} AND fa.id_abono <= {$id_abono}
+		                           GROUP BY f.id_factura")->row();
+		// Valida que se auna factura y que sea en parcialidades
+		if ($data_val->is_factura == 't' && ($data_val->status == 'p' || $data_val->num_abonos > 1)) {
+	    $this->load->library('cfdi');
+
+			$data_factura = $this->facturacion_model->getInfoFactura($data_abono->id_factura);
+
+			$data_folio = $this->facturacion_model->getFolioSerie('AB', $data_factura['info']->empresa->id_empresa, "es_nota_credito = 'f'");
+
+			// Obtiene el numero de certificado de la empresa predeterminada.
+	    $certificado = $this->cfdi->obtenNoCertificado($data_factura['info']->empresa->cer_org);
+
+			$dirCliente = $dirCliente2 = '';
+			$dirCliente .= $data_factura['info']->cliente->calle!=''? $data_factura['info']->cliente->calle: '';
+		  $dirCliente .= $data_factura['info']->cliente->no_exterior!=''? ' #'+$data_factura['info']->cliente->no_exterior: '';
+		  $dirCliente .= $data_factura['info']->cliente->no_interior!=''? '-'+$data_factura['info']->cliente->no_interior: '';
+		  $dirCliente .= $data_factura['info']->cliente->colonia!=''? ', '+$data_factura['info']->cliente->colonia: '';
+
+		  $dirCliente2 .= $data_factura['info']->cliente->municipio!=''? $data_factura['info']->cliente->municipio: '';
+		  $dirCliente2 .= $data_factura['info']->cliente->estado!=''? ', '+$data_factura['info']->cliente->estado: '';
+		  $dirCliente2 .= $data_factura['info']->cliente->cp!=''? ', CP: '+$data_factura['info']->cliente->cp: '';
+
+		  $dirEmpresa = [];
+	    if ($data_factura['info']->empresa->calle) array_push($dirEmpresa, $data_factura['info']->empresa->calle);
+	    if ($data_factura['info']->empresa->no_exterior) array_push($dirEmpresa, $data_factura['info']->empresa->no_exterior);
+	    if ($data_factura['info']->empresa->no_interior) array_push($dirEmpresa, $data_factura['info']->empresa->no_interior);
+	    if ($data_factura['info']->empresa->colonia) array_push($dirEmpresa, $data_factura['info']->empresa->colonia);
+	    if ($data_factura['info']->empresa->localidad) array_push($dirEmpresa, $data_factura['info']->empresa->localidad);
+	    if ($data_factura['info']->empresa->municipio) array_push($dirEmpresa, $data_factura['info']->empresa->municipio);
+	    if ($data_factura['info']->empresa->estado) array_push($dirEmpresa, $data_factura['info']->empresa->estado);
+	    if ($data_factura['info']->empresa->pais) array_push($dirEmpresa, $data_factura['info']->empresa->pais);
+	    if ($data_factura['info']->empresa->cp) array_push($dirEmpresa, $data_factura['info']->empresa->cp);
+	    $dirEmpresa = implode(' ', $dirEmpresa);
+
+	    $abonos = $this->db->query("SELECT Count(id_abono) AS num FROM facturacion_abonos WHERE id_factura = {$data_factura['info']->id_factura}")->row();
+	    $subtotal = $data_abono->total;
+			$iva      = 0;
+	    if($data_val->num_abonos == 1)
+	    {
+				$subtotal = $data_abono->total - $data_factura['info']->importe_iva;
+				$iva      = $data_factura['info']->importe_iva;
+	    }
+
+			$_POST['id_abono_factura']          = $id_abono;
+			$_POST['dempresa']                  = $data_factura['info']->empresa->nombre_fiscal;
+			$_POST['did_empresa']               = $data_factura['info']->empresa->id_empresa;
+			$_POST['dversion']                  = '3.2';
+			$_POST['dcer_caduca']               = $data_factura['info']->empresa->cer_caduca;
+			$_POST['dno_certificado']           = $certificado;
+			$_POST['dserie']                    = $data_folio[0]->serie;
+			$_POST['dfolio']                    = $data_folio[0]->folio;
+			$_POST['dano_aprobacion']           = $data_folio[0]->ano_aprobacion;
+			$_POST['dcliente']                  = $data_factura['info']->cliente->nombre_fiscal;
+			$_POST['did_cliente']               = $data_factura['info']->cliente->id_cliente;
+			$_POST['dcliente_rfc']              = $data_factura['info']->cliente->rfc;
+			$_POST['dcliente_domici']           = $dirCliente;
+			$_POST['dcliente_ciudad']           = $dirCliente2;
+			$_POST['dobservaciones']            = '';
+			$_POST['dfecha']                    = date("Y-m-d\TH:i");
+			$_POST['dno_aprobacion']            = $data_folio[0]->no_aprobacion;
+			$_POST['moneda']                    = $data_factura['info']->moneda;
+			$_POST['tipoCambio']                = $data_factura['info']->tipo_cambio;
+			$_POST['dtipo_comprobante']         = 'ingreso';
+			$_POST['dforma_pago']               = 'Pago en parcialidades';
+			$_POST['dforma_pago_parcialidad']   = 'Parcialidad '.$data_val->num_abonos.' de '.($data_val->num_abonos < $abonos->num? $abonos->num: ($data_val->status=='pa'? $data_val->num_abonos: $data_val->num_abonos+1));
+			$_POST['dmetodo_pago']              = $data_factura['info']->metodo_pago;
+			$_POST['dmetodo_pago_digitos']      = 'No identificado';
+			$_POST['dcondicion_pago']           = 'co';
+			$_POST['dplazo_credito']            = 0;
+
+			$_POST['prod_ddescripcion'][]       = 'Abono a factura '.$data_factura['info']->serie.$data_factura['info']->folio;
+			$_POST['prod_did_prod'][]           = '';
+			$_POST['pallets_id'][]              = '';
+			$_POST['remisiones_id'][]           = '';
+			$_POST['id_unidad_rendimiento'][]   = '';
+			$_POST['id_size_rendimiento'][]     = '';
+			$_POST['prod_dclase'][]             = '';
+			$_POST['prod_dpeso'][]              = '';
+			$_POST['prod_dmedida'][]            = 'NO APLICA';
+			$_POST['prod_dmedida_id'][]         = '17';
+			$_POST['prod_dcantidad'][]          = '1';
+			$_POST['prod_dcajas'][]             = '0';
+			$_POST['prod_dkilos'][]             = '0';
+			$_POST['prod_dpreciou'][]           = $subtotal;
+			$_POST['prod_diva_porcent'][]       = $iva>0? 16: 0;
+			$_POST['prod_diva_total'][]         = $iva;
+			$_POST['dreten_iva']                = 0;
+			$_POST['prod_dreten_iva_total'][]   = 0;
+			$_POST['prod_dreten_iva_porcent'][] = 0;
+			$_POST['prod_importe'][]            = $subtotal;
+			$_POST['isCert'][]                  = '0';
+			$_POST['dttotal_letra']             = strtoupper(String::num2letras($subtotal+$iva, $data_factura['info']->moneda));
+			$_POST['total_importe']             = $subtotal;
+			$_POST['total_descuento']           = 0;
+			$_POST['total_subtotal']            = $subtotal;
+			$_POST['total_iva']                 = $iva;
+			$_POST['total_retiva']              = 0;
+			$_POST['total_totfac']              = $subtotal+$iva;
+			$_POST['diva']                      = 0;
+
+			$_POST['remitente_nombre']          = $data_factura['info']->empresa->nombre_fiscal;
+			$_POST['remitente_rfc']             = $data_factura['info']->empresa->rfc;
+			$_POST['remitente_domicilio']       = $dirEmpresa;
+			$_POST['remitente_chofer']          = '';
+			$_POST['remitente_marca']           = '';
+			$_POST['remitente_modelo']          = '';
+			$_POST['remitente_placas']          = '';
+			$_POST['destinatario_nombre']       = $data_factura['info']->cliente->nombre_fiscal;
+			$_POST['destinatario_rfc']          = $data_factura['info']->cliente->rfc;
+			$_POST['destinatario_domicilio']    = $dirCliente.' '.$dirCliente2;
+			$_POST['pproveedor_seguro']         = '';
+			$_POST['seg_id_proveedor']          = '';
+			$_POST['seg_poliza']                = '';
+			$_POST['pproveedor_certificado51']  = '';
+			$_POST['cert_id_proveedor51']       = '';
+			$_POST['cert_certificado51']        = '';
+			$_POST['cert_bultos51']             = '';
+			$_POST['pproveedor_certificado52']  = '';
+			$_POST['cert_id_proveedor52']       = '';
+			$_POST['cert_certificado52']        = '';
+			$_POST['cert_bultos52']             = '';
+			$_POST['pproveedor_supcarga']       = '';
+			$_POST['supcarga_id_proveedor']     = '';
+			$_POST['supcarga_numero']           = '';
+			$_POST['supcarga_bultos']           = '';
+			$_POST['new_orden_flete']           = '0';
+
+			$result = $this->facturacion_model->addFactura();
+			return $result;
+		}
+
+	}
+
   /**
     * Visualiza/Descarga el PDF del abono.
     *
@@ -1186,6 +1336,8 @@ class cuentas_cobrar_model extends privilegios_model{
       			' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
       $pdf->SetX(10);
       $pdf->MultiCell(115,4, 'A orden de: '.$orden['abonos'][0]->empresa);
+      $pdf->SetX(10);
+      $pdf->MultiCell(115,4, 'Forma de pago: '.$orden['abonos'][0]->ref_movimiento);
 
       $pdf->Text(60, 53, 'Firma ____________________________________');
 

@@ -99,7 +99,7 @@
                   </div>
                 </div>
               </div>
-              
+
             <?php if ($autorizar_active){ ?>
               <div class="control-group">
                 <label class="control-label" for="autorizo">Autoriza</label>
@@ -172,7 +172,7 @@
                       <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
                 <?php if ($autorizar_active){ ?>
                       <br><br><button type="button" id="btnAutorizar" class="btn btn-info btn-large btn-block" style="width:100%;">Autorizar - Crear O. Compras</button>
-                      <input type="hidden" name="txtBtnAutorizar" id="txtBtnAutorizar" value="false"> 
+                      <input type="hidden" name="txtBtnAutorizar" id="txtBtnAutorizar" value="false">
                 <?php } ?>
                   </div>
                 </div>
@@ -234,7 +234,7 @@
                </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
-          
+
 
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
@@ -354,11 +354,12 @@
                         <?php if (isset($orden['info'][0]->productos)) {
                               foreach ($orden['info'][0]->productos as $key => $concepto) { ?>
 
-                            
+
                           <tr class="rowprod">
                             <td style="width: 60px;">
-                              <input type="text" name="codigoArea[]" value="<?php echo $concepto->codigo_fin ?>" id="codigoArea" class="span12 showCodigoArea" readonly>
+                              <input type="text" name="codigoArea[]" value="<?php echo $concepto->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
                               <input type="hidden" name="codigoAreaId[]" value="<?php echo $concepto->id_area ?>" id="codigoAreaId" class="span12">
+                              <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                             </td>
                             <td style="width: 60px;">
                               <?php echo $concepto->codigo ?>
@@ -393,7 +394,7 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']} * 
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[0]['id_proveedor']} *
                                                       ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
                               <input type="text" name="valorUnitario1[]" value="<?php echo $precio_unitario; ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
@@ -411,7 +412,7 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']} * 
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[1]['id_proveedor']} *
                                                       ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
                               <input type="text" name="valorUnitario2[]" value="<?php echo $precio_unitario ?>" id="valorUnitario2" class="span12 provvalorUnitario vpositive">
                             </td>
@@ -429,7 +430,7 @@
                             </td>
                           <?php } ?>
                             <td style="width: 90px;">
-                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']} * 
+                              <?php $precio_unitario = $concepto->{'precio_unitario'.$orden['info'][0]->proveedores[2]['id_proveedor']} *
                                                       ($concepto->presen_cantidad>0?$concepto->presen_cantidad:1);  ?>
                               <input type="text" name="valorUnitario3[]" value="<?php echo $precio_unitario; ?>" id="valorUnitario3" class="span12 provvalorUnitario vpositive">
                             </td>
@@ -532,7 +533,7 @@
                </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
-        
+
 
         </form>
 
@@ -550,15 +551,15 @@
       <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
     </div>
     <div class="modal-body">
-        
+
       <div class="row-fluid">
-        
+
         <div>
-        
+
       <?php foreach ($areas as $key => $value)
       { ?>
           <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
-            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>" 
+            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
                 id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
               <thead>
                 <tr>
@@ -578,7 +579,7 @@
           </div>
       <?php
       } ?>
-        
+
         </div>
 
       </div>

@@ -899,10 +899,13 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $fechaSalida->format('Y');
     $semana_salida = date("W", $fechaSalida->getTimestamp());
 
-    $fechaEntrada = $this->db->select('DATE(fecha_imss) as fecha_entrada')
-                              ->from('usuarios as u')
-                              ->where("u.esta_asegurado = 't' AND u.status = 't' {$sql}")
-                              ->get()->row();
+    $fechaEntrada = $this->db->query("SELECT DATE(COALESCE(fecha_imss, fecha_entrada)) as fecha_entrada
+                               FROM usuarios as u
+                               WHERE u.esta_asegurado = 't' AND u.status = 't' {$sql}")->row();
+    // $fechaEntrada = $this->db->select('DATE(COALESCE(fecha_imss, fecha_entrada)) as fecha_entrada')
+    //                           ->from('usuarios as u')
+    //                           ->where("u.esta_asegurado = 't' AND u.status = 't' {$sql}")
+    //                           ->get()->row();
     if(isset($fechaEntrada->fecha_entrada))
       $fechaEntrada = $fechaEntrada->fecha_entrada;
     else
@@ -930,7 +933,7 @@ class nomina_fiscal_model extends CI_Model {
               u.id_empresa,
               (COALESCE(u.apellido_paterno, '') || ' ' || COALESCE(u.apellido_materno, '') || ' ' || u.nombre) as nombre,
               u.curp,
-              DATE(u.fecha_imss) as fecha_entrada,
+              DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) as fecha_entrada,
               '{$fechaSalida->format('Y-m-d')}' as fecha_salida,
               '{$fechaSalida->format('Y-m-d')}' as fecha_final_pago,
               '{$fechaInicio}' as fecha_inicial_pago,
@@ -983,6 +986,11 @@ class nomina_fiscal_model extends CI_Model {
     {
       $anio_anterior = date($fechaEntrada);
     }
+    // Obtenemos si se le pagaron vacaciones
+    $res_vacaciones = $this->db->query("SELECT Date(fecha_fin) AS fecha FROM nomina_fiscal_vacaciones WHERE id_empleado = {$empleadoId} AND anio = ".date("Y"))->row();
+    if(isset($res_vacaciones->fecha) && strtotime($res_vacaciones->fecha) > strtotime($anio_anterior))
+      $anio_anterior = date($res_vacaciones->fecha);
+
     $empleado[0]->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, $fechaSalida->format('Y-m-d')));
 
     // Obtenemos los prestamos
@@ -6192,8 +6200,12 @@ class nomina_fiscal_model extends CI_Model {
 
       $fechaEntrada = new DateTime($filtros['ffecha1']);
       $fechaSalida = new DateTime($filtros['ffecha2']);
+      $fechaIniAnio = new DateTime($fechaSalida->format("Y").'-01-01');
       // $diasProporcionVacaciones = round((($fechaEntrada->diff($fechaSalida)->days + 1) / 365) * 6, 2);
-      $diasProporcionAguinaldo = round(( ((new DateTime($fechaSalida->format("Y").'-01-01'))->diff($fechaSalida)->days + 1) / 365) * 15, 2);
+      if ($fechaIniAnio < $fechaEntrada) {
+        $fechaIniAnio = $fechaEntrada;
+      }
+      $diasProporcionAguinaldo = round(( ($fechaIniAnio->diff($fechaSalida)->days) / 365) * 15, 2);
       // Saca la fecha del ultimo año que le tocan vacaciones
       $anios_dif = $fechaSalida->format("Y") - $fechaEntrada->format("Y");
       $fechaEntrada->modify("+{$anios_dif} years");

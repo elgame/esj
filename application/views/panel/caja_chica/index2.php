@@ -8,7 +8,7 @@
             <form action="<?php echo base_url('panel/caja_chica/cargar/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
               <label class="control-label" for="ffecha">Fecha</label>
               <input type="date" name="ffecha" class="input-medium search-query" id="ffecha" value="<?php echo set_value($this->input->post('ffecha'), date('Y-m-d')); ?>" data-next="ffecha2">
-              <input type="hidden" name="fno_caja" value="1">
+              <input type="hidden" name="fno_caja" value="2">
               <button type="submit" id="btn_submit" class="btn btn-primary">Enviar</button>
             </form> <!-- /form -->
           </div>
@@ -40,7 +40,7 @@
         <div class="box span12">
           <div class="box-content">
             <div class="row-fluid">
-              <iframe name="rdeReporte" id="iframe-reporte" class="span12" src="<?php echo base_url('panel/caja_chica/cargar/?fno_caja=1')?>" style="height:600px;"></iframe>
+              <iframe name="rdeReporte" id="iframe-reporte" class="span12" src="<?php echo base_url('panel/caja_chica/cargar/?fno_caja=2')?>" style="height:600px;"></iframe>
             </div>
           </div>
         </div><!--/span-->

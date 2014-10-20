@@ -8,10 +8,11 @@ class compras_areas extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'compras_areas/ajax_get_areas/',
+			'compras_areas/ajax_get_areasauto/',
 		);
-	
+
 	public function _remap($method){
-		
+
 		$this->load->model("usuarios_model");
 		if($this->usuarios_model->checkSession()){
 			$this->usuarios_model->excepcion_privilegio = $this->excepcion_privilegio;
@@ -24,7 +25,7 @@ class compras_areas extends MY_Controller {
 		}else
 			redirect(base_url('panel/home'));
 	}
-	
+
 	/**
 	 * Default. Mustra el listado de privilegios para administrarlos
 	 */
@@ -32,26 +33,26 @@ class compras_areas extends MY_Controller {
 		$this->carabiner->js(array(
 				array('general/msgbox.js')
 		));
-		
+
 		$this->load->model('compras_areas_model');
 		$this->load->library('pagination');
-		
+
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
 			'titulo' => 'Administrar Catalogo'
 		);
-		
+
 		$params['areas'] = $this->compras_areas_model->obtenAreas();
-		
+
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
-		
+
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/almacen/compras_areas/listado', $params);
 		$this->load->view('panel/footer');
 	}
-	
+
 	/**
 	 * Agrega un privilegio a la bd
 	 */
@@ -67,34 +68,34 @@ class compras_areas extends MY_Controller {
 		));
 
 		$this->load->model('compras_areas_model');
-		
+
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
 			'titulo' => 'Agregar area'
 		);
-		
+
 		$this->configAddModPriv();
-		
+
 		if($this->form_validation->run() == FALSE){
 			$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 		}else{
 			$respons = $this->compras_areas_model->addArea();
-			
+
 			if($respons[0])
 				redirect(base_url('panel/compras_areas/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		$params['t_areas'] = $this->compras_areas_model->getTipoAreas();
-		
+
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
-		
+
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/almacen/compras_areas/agregar', $params);
 		$this->load->view('panel/footer');
 	}
-	
+
 	/**
 	 * Modificar privilegios
 	 */
@@ -110,41 +111,41 @@ class compras_areas extends MY_Controller {
 		));
 
 		$this->load->model('compras_areas_model');
-		
+
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
 		$params['seo'] = array(
 			'titulo' => 'Modificar areas'
 		);
-		
+
 		if(isset($_GET['id']{0})){
 			$this->configAddModPriv();
-			
+
 			if($this->form_validation->run() == FALSE){
 				$params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
 			}else{
 				$respons = $this->compras_areas_model->updateArea($_GET['id']);
-				
+
 				if($respons[0])
 					redirect(base_url('panel/compras_areas/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
-			
+
 			$params['areas'] = $this->compras_areas_model->getInfo($_GET['id']);
 			$params['t_areas'] = $this->compras_areas_model->getTipoAreas();
 
 			if(!is_object($params['areas']))
 				unset($params['areas']);
-			
+
 			if(isset($_GET['msg']{0}))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 		}else
 			$params['frm_errors'] = $this->showMsgs(1);
-		
+
 		$this->load->view('panel/header', $params);
 		$this->load->view('panel/general/menu', $params);
 		$this->load->view('panel/almacen/compras_areas/modificar', $params);
 		$this->load->view('panel/footer');
 	}
-	
+
 	/**
 	 * Elimina un privilegio de la bd
 	 */
@@ -153,7 +154,7 @@ class compras_areas extends MY_Controller {
 
 			$this->load->model('compras_areas_model');
 			$respons = $this->compras_areas_model->deleteArea($_GET['id']);
-			
+
 			if($respons[0])
 				redirect(base_url('panel/compras_areas/?msg=5'));
 		}else
@@ -167,8 +168,15 @@ class compras_areas extends MY_Controller {
 		$response = $this->compras_areas_model->getAreasEspesifico($_GET['id_area'], $_GET['id_padre']);
 		echo json_encode($response);
 	}
-	
-	
+
+   public function ajax_get_areasauto()
+   {
+      $this->load->model('compras_areas_model');
+
+      echo json_encode($this->compras_areas_model->ajaxAreas());
+   }
+
+
 	/**
 	 * Configura los metodos de agregar y modificar
 	 */
@@ -197,8 +205,8 @@ class compras_areas extends MY_Controller {
 
   	$id_padre = (intval($this->input->post('dareas'))>0? ' = '.$this->input->post('dareas'): ' IS NULL');
 
-  	$datos = $this->db->query("SELECT Count(id_area) AS num from compras_areas 
-  		where status = 't' AND id_padre {$id_padre} 
+  	$datos = $this->db->query("SELECT Count(id_area) AS num from compras_areas
+  		where status = 't' AND id_padre {$id_padre}
   			AND lower(codigo) = '".mb_strtolower($codigo, 'UTF-8')."'".$sql)->row();
     if ($datos->num > 0)
     {
@@ -210,7 +218,7 @@ class compras_areas extends MY_Controller {
       return true;
     }
   }
-	
+
 	/**
 	 * Muestra mensajes cuando se realiza alguna accion
 	 * @param unknown_type $tipo
@@ -240,7 +248,7 @@ class compras_areas extends MY_Controller {
 				$icono = 'success';
 			break;
 		}
-		
+
 		return array(
 			'title' => $title,
 			'msg' => $txt,

@@ -454,6 +454,11 @@ class facturacion_model extends privilegios_model{
       'moneda'              => $_POST['moneda'],
     );
 
+    // indica q es una factura en parcialidades de un abono
+    if (isset($_POST['id_abono_factura'])) {
+      $datosFactura['id_abono_factura'] = $_POST['id_abono_factura'];
+    }
+
     // Tipo de cambio y moneda
     if ($datosFactura['moneda'] !== 'M.N.')
       $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
@@ -825,64 +830,93 @@ class facturacion_model extends privilegios_model{
       // if (isset($_GET['idb']))
       //   $this->db->delete('facturacion', array('id_factura' => $_GET['idb']));
 
-      // Procesa la salida
-      $this->load->model('unidades_model');
-      $this->load->model('productos_salidas_model');
-      $this->load->model('inventario_model');
+      // // ** Procesa la salida
+      // $this->load->model('unidades_model');
+      // $this->load->model('productos_salidas_model');
+      // $this->load->model('inventario_model');
 
-      $infoSalida      = array();
-      $productosSalida = array(); // contiene los productos que se daran salida.
+      // $infoSalida      = array();
+      // $productosSalida = array(); // contiene los productos que se daran salida.
+      // // Se obtienen los pallets ligados a la factura
+      // $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$idFactura}")->result();
+      // // Si hay pallets ligados
+      // if(count($listaPallets) > 0)
+      // {
+      //   $lipallets = array();
+      //   foreach ($listaPallets as $keylp => $lipallet) {
+      //     $lipallets[] = $lipallet->id_pallet;
+      //   }
+      //   $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
+      //                       FROM rastria_pallets_salidas WHERE id_pallet IN(".implode(',', $lipallets).") AND id_producto IS NOT NULL")->result();
+      //   if (count($productosPallets))
+      //   {
+      //     $infoSalida = array(
+      //       'id_empresa'      => $_POST['did_empresa'],
+      //       'id_empleado'     => $this->session->userdata('id_usuario'),
+      //       'folio'           => $this->productos_salidas_model->folio(),
+      //       'fecha_creacion'  => date('Y-m-d H:i:s'),
+      //       'fecha_registro'  => date('Y-m-d H:i:s'),
+      //       'status'          => 's',
+      //       'id_factura'      => $idFactura,
+      //     );
 
-      $infoSalida = array(
-        'id_empresa'      => $_POST['did_empresa'],
-        'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => $this->productos_salidas_model->folio(),
-        'fecha_creacion'  => date('Y-m-d H:i:s'),
-        'fecha_registro'  => date('Y-m-d H:i:s'),
-        'status'          => 's',
-      );
+      //     $ress = $this->productos_salidas_model->agregar($infoSalida);
 
-      $res = $this->productos_salidas_model->agregar($infoSalida);
+      //     $row = 0;
+      //     foreach ($productosPallets as $keypp => $prodspp) {
+      //       $inv   = $this->inventario_model->promedioData($prodspp->id_producto, date('Y-m-d'), date('Y-m-d'));
+      //       $saldo = array_shift($inv);
+      //       $productosSalida[] = array(
+      //             'id_salida'       => $ress['id_salida'],
+      //             'id_producto'     => $prodspp->id_producto,
+      //             'no_row'          => $row,
+      //             'cantidad'        => $prodspp->cantidad,
+      //             'precio_unitario' => $saldo['saldo'][1],
+      //           );
 
-      $row = 0;
-      foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
-      {
-        if ($_POST['prod_importe'][$key] != 0)
-        {
-          if (isset($_POST['prod_dmedida_id'][$key]) && $_POST['prod_dmedida_id'][$key] !== '')
-          {
-            $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
+      //       $row++;
+      //     }
+      //   }
+      //   // foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
+      //   // {
+      //   //   if ($_POST['prod_importe'][$key] != 0)
+      //   //   {
+      //   //     if (isset($_POST['prod_dmedida_id'][$key]) && $_POST['prod_dmedida_id'][$key] !== '')
+      //   //     {
+      //   //       $unidad = $this->unidades_model->info($_POST['prod_dmedida_id'][$key], true);
 
-            foreach ($unidad['info'][0]->productos as $uniProd)
-            {
-              $inv   = $this->inventario_model->promedioData($uniProd->id_producto, date('Y-m-d'), date('Y-m-d'));
-              $saldo = array_shift($inv);
+      //   //       foreach ($unidad['info'][0]->productos as $uniProd)
+      //   //       {
+      //   //         $inv   = $this->inventario_model->promedioData($uniProd->id_producto, date('Y-m-d'), date('Y-m-d'));
+      //   //         $saldo = array_shift($inv);
 
-              $productosSalida[] = array(
-                'id_salida'       => $res['id_salida'],
-                'id_producto'     => $uniProd->id_producto,
-                'no_row'          => $row,
-                'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
-                'precio_unitario' => $saldo['saldo'][1],
-              );
+      //   //         $productosSalida[] = array(
+      //   //           'id_salida'       => $res['id_salida'],
+      //   //           'id_producto'     => $uniProd->id_producto,
+      //   //           'no_row'          => $row,
+      //   //           'cantidad'        => floatval($_POST['prod_dcantidad'][$key]) * floatval($uniProd->cantidad),
+      //   //           'precio_unitario' => $saldo['saldo'][1],
+      //   //         );
 
-              $row++;
-            }
-          }
-        }
-      }
+      //   //         $row++;
+      //   //       }
+      //   //     }
+      //   //   }
+      //   // }
 
-      // Si hay al menos 1 producto para las salidas lo inserta.
-      if (count($productosSalida) > 0)
-      {
-        $this->productos_salidas_model->agregarProductos(null, $productosSalida);
-      }
+      //   // Si hay al menos 1 producto para las salidas lo inserta.
+      //   if (count($productosSalida) > 0)
+      //   {
+      //     $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+      //   }
 
-      // Si no hay productos para ninguna de las medidas elimina la salida.
-      else
-      {
-        $this->db->delete('compras_salidas', array('id_salida' => $res['id_salida']));
-      }
+      //   // Si no hay productos para ninguna de las medidas elimina la salida.
+      //   else
+      //   {
+      //     $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
+      //   }
+      // }
+
     }
     else
     {
@@ -1029,45 +1063,59 @@ class facturacion_model extends privilegios_model{
     // Obtenemos la info de la factura a cancelar.
     $factura = $this->getInfoFactura($idFactura);
 
-    // Carga los datos fiscales de la empresa dentro de la lib CFDI.
-    $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
-
-    // Parametros que necesita el webservice para la cancelacion.
-    $params = array(
-      'rfc'   => $factura['info']->empresa->rfc,
-      'uuids' => $factura['info']->uuid,
-      'cer'   => $this->cfdi->obtenCer(),
-      'key'   => $this->cfdi->obtenKey(),
-    );
-
-    // Lama el metodo cancelar para que realiza la peticion al webservice.
-    $result = $this->facturartebarato_api->cancelar($params);
-
-    if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+    if ($factura['info']->uuid != '')
     {
-      $this->db->update('facturacion',
-        array('status' => 'ca', 'status_timbrado' => 'ca'),
-        "id_factura = {$idFactura}"
+      // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+      $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
+
+      // Parametros que necesita el webservice para la cancelacion.
+      $params = array(
+        'rfc'   => $factura['info']->empresa->rfc,
+        'uuids' => $factura['info']->uuid,
+        'cer'   => $this->cfdi->obtenCer(),
+        'key'   => $this->cfdi->obtenKey(),
       );
 
-      // Bitacora
-      $bitacora_accion = 'la factura';
-      if($factura['info']->id_nc > 0)
-        $bitacora_accion = 'la nota de credito';
-      $this->bitacora_model->_cancel('facturacion', $idFactura,
-                                      array(':accion'     => $bitacora_accion, ':seccion' => 'facturas',
-                                            ':folio'      => $factura['info']->serie.$factura['info']->folio,
-                                            ':id_empresa' => $factura['info']->id_empresa,
-                                            ':empresa'    => 'de '.$factura['info']->empresa->nombre_fiscal));
+      // Lama el metodo cancelar para que realiza la peticion al webservice.
+      $result = $this->facturartebarato_api->cancelar($params);
 
-      // Regenera el PDF de la factura.
-      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
-      $this->generaFacturaPdf($idFactura, $pathDocs);
+      if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+      {
+        $status_uuid = $result->data->status_uuid;
+        $this->db->update('facturacion',
+          array('status' => 'ca', 'status_timbrado' => 'ca'),
+          "id_factura = {$idFactura}"
+        );
 
-      $this->enviarEmail($idFactura);
+        // Bitacora
+        $bitacora_accion = 'la factura';
+        if($factura['info']->id_nc > 0)
+          $bitacora_accion = 'la nota de credito';
+        $this->bitacora_model->_cancel('facturacion', $idFactura,
+                                        array(':accion'     => $bitacora_accion, ':seccion' => 'facturas',
+                                              ':folio'      => $factura['info']->serie.$factura['info']->folio,
+                                              ':id_empresa' => $factura['info']->id_empresa,
+                                              ':empresa'    => 'de '.$factura['info']->empresa->nombre_fiscal));
+
+        // Regenera el PDF de la factura.
+        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $this->generaFacturaPdf($idFactura, $pathDocs);
+
+        // Elimina la salida de productos q se dio si se ligaron pallets
+        $this->db->delete('compras_salidas', array('id_factura' => $idFactura));
+
+
+        $this->enviarEmail($idFactura);
+      }
+    }else{
+      $this->db->update('facturacion',
+          array('status' => 'ca', 'status_timbrado' => 'ca'),
+          "id_factura = {$idFactura}"
+        );
+      $status_uuid = '201';
     }
 
-    return array('msg' => $result->data->status_uuid);
+    return array('msg' => $status_uuid);
 	}
 
    /**

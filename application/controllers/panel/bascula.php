@@ -266,6 +266,8 @@ class bascula extends MY_Controller {
         $_POST['pcajas_prestadas'] = $info['info'][0]->cajas_prestadas;
         $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto;
 
+        $_POST['pno_lote']         = $info['info'][0]->no_lote;
+
         if ( ! isset($_POST['pcajas']) )
         {
           foreach ($info['cajas'] as $key => $c)

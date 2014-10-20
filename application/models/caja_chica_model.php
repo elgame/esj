@@ -2,7 +2,7 @@
 
 class caja_chica_model extends CI_Model {
 
-  public function get($fecha)
+  public function get($fecha, $noCaja)
   {
     $info = array(
       'saldo_inicial' => 0,
@@ -19,7 +19,7 @@ class caja_chica_model extends CI_Model {
     $ultimoSaldo = $this->db->query(
       "SELECT saldo
        FROM cajachica_efectivo
-       WHERE fecha < '$fecha'
+       WHERE fecha < '{$fecha}' AND no_caja = {$noCaja}
        ORDER BY fecha DESC
        LIMIT 1"
     );
@@ -34,8 +34,8 @@ class caja_chica_model extends CI_Model {
        FROM cajachica_ingresos ci
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
        INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
-       WHERE fecha = '$fecha' AND otro = 'f'
-       ORDER BY id_ingresos ASC"
+       WHERE ci.fecha = '{$fecha}' AND ci.otro = 'f' AND ci.no_caja = {$noCaja}
+       ORDER BY ci.id_ingresos ASC"
     );
 
     if ($ingresos->num_rows() > 0)
@@ -64,7 +64,7 @@ class caja_chica_model extends CI_Model {
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
-       WHERE cr.fecha = '$fecha'"
+       WHERE cr.fecha = '{$fecha}' AND cr.no_caja = {$noCaja}"
     );
 
     if ($remisiones->num_rows() > 0)
@@ -73,25 +73,28 @@ class caja_chica_model extends CI_Model {
     }
 
     // boletas
-    $boletas = $this->db->query(
-      "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor, b.importe, cb.folio as folio_caja_chica
-       FROM bascula b
-       INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-       LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
-       WHERE DATE(b.fecha_pago) = '$fecha' AND b.accion = 'p' AND b.status = 't'
-       ORDER BY (b.folio) ASC"
-    );
-
-    if ($boletas->num_rows() > 0)
+    if($noCaja == '1')
     {
-      $info['boletas'] = $boletas->result();
+      $boletas = $this->db->query(
+        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor, b.importe, cb.folio as folio_caja_chica
+         FROM bascula b
+         INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+         LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
+         WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'
+         ORDER BY (b.folio) ASC"
+      );
+
+      if ($boletas->num_rows() > 0)
+      {
+        $info['boletas'] = $boletas->result();
+      }
     }
 
     // denominaciones
     $denominaciones = $this->db->query(
       "SELECT *
        FROM cajachica_efectivo
-       WHERE fecha = '$fecha'"
+       WHERE fecha = '{$fecha}' AND no_caja = {$noCaja}"
     );
 
     if ($denominaciones->num_rows() === 0)
@@ -172,7 +175,7 @@ class caja_chica_model extends CI_Model {
        FROM cajachica_gastos cg
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
        INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
-       WHERE fecha = '$fecha'
+       WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
 
@@ -217,6 +220,7 @@ class caja_chica_model extends CI_Model {
         'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
         'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
         'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
+        'no_caja'         => $data['fno_caja'],
       );
     }
 
@@ -234,7 +238,7 @@ class caja_chica_model extends CI_Model {
     //   }
     // }
 
-    $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica']));
+    $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (count($ingresos) > 0)
     {
       $this->db->insert_batch('cajachica_ingresos', $ingresos);
@@ -243,13 +247,13 @@ class caja_chica_model extends CI_Model {
     // Remisiones
     //Elimina los movimientos de banco y cuentas por cobrar si ya se cerro el corte
     $this->load->model('banco_cuentas_model');
-    $corte_caja = $this->get($data['fecha_caja_chica']);
+    $corte_caja = $this->get($data['fecha_caja_chica'], $data['fno_caja']);
     foreach ($corte_caja['remisiones'] as $key => $value)
     {
       if($value->id_movimiento != '')
         $this->banco_cuentas_model->deleteMovimiento($value->id_movimiento);
     }
-    $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica']));
+    $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['remision_concepto']))
     {
       $remisiones = array();
@@ -257,13 +261,14 @@ class caja_chica_model extends CI_Model {
       foreach ($data['remision_concepto'] as $key => $concepto)
       {
         $remisiones[] = array(
-          'observacion' => $concepto,
-          'id_remision' => $_POST['remision_id'][$key],
-          'fecha'       => $data['fecha_caja_chica'],
-          'monto'       => $_POST['remision_importe'][$key],
-          'row'         => $key,
+          'observacion'   => $concepto,
+          'id_remision'   => $data['remision_id'][$key],
+          'fecha'         => $data['fecha_caja_chica'],
+          'monto'         => $data['remision_importe'][$key],
+          'row'           => $key,
           'id_categoria'  => $data['remision_empresa_id'][$key],
           'folio_factura' => empty($data['remision_folio'][$key]) ? null : $data['remision_folio'][$key],
+          'no_caja'       => $data['fno_caja'],
         );
       }
 
@@ -271,7 +276,7 @@ class caja_chica_model extends CI_Model {
     }
 
     // Boletas
-    $this->db->delete('cajachica_boletas', array('fecha' => $data['fecha_caja_chica']));
+    $this->db->delete('cajachica_boletas', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['boletas_id']))
     {
       $boletas = array();
@@ -279,10 +284,11 @@ class caja_chica_model extends CI_Model {
       foreach ($data['boletas_id'] as $key => $idBoleta)
       {
         $boletas[] = array(
-          'fecha'         => $data['fecha_caja_chica'],
-          'id_bascula'    => $idBoleta,
-          'row'           => $key,
-          'folio' => empty($data['boletas_folio'][$key]) ? null : $data['boletas_folio'][$key],
+          'fecha'      => $data['fecha_caja_chica'],
+          'id_bascula' => $idBoleta,
+          'row'        => $key,
+          'folio'      => empty($data['boletas_folio'][$key]) ? null : $data['boletas_folio'][$key],
+          'no_caja'    => $data['fno_caja'],
         );
       }
 
@@ -290,32 +296,34 @@ class caja_chica_model extends CI_Model {
     }
 
     // Denominaciones
-    $this->db->delete('cajachica_efectivo', array('fecha' => $data['fecha_caja_chica']));
+    $this->db->delete('cajachica_efectivo', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     $efectivo = array();
     foreach ($data['denom_abrev'] as $key => $denominacion)
     {
       $efectivo[$denominacion] = $data['denominacion_cantidad'][$key];
     }
 
-    $efectivo['fecha'] = $data['fecha_caja_chica'];
-    $efectivo['saldo'] = $data['saldo_corte'];
+    $efectivo['fecha']   = $data['fecha_caja_chica'];
+    $efectivo['saldo']   = $data['saldo_corte'];
+    $efectivo['no_caja'] = $data['fno_caja'];
 
     $this->db->insert('cajachica_efectivo', $efectivo);
 
     // Gastos del dia
-    $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica']));
+    $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_concepto']))
     {
       $gastos = array();
       foreach ($data['gasto_concepto'] as $key => $gasto)
       {
         $gastos[] = array(
-          'id_categoria'    => $_POST['gasto_empresa_id'][$key],
-          'id_nomenclatura' => $_POST['gasto_nomenclatura'][$key],
-          'folio'           => $_POST['gasto_folio'][$key],
+          'id_categoria'    => $data['gasto_empresa_id'][$key],
+          'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
+          'folio'           => $data['gasto_folio'][$key],
           'concepto'        => $gasto,
-          'monto'           => $_POST['gasto_importe'][$key],
+          'monto'           => $data['gasto_importe'][$key],
           'fecha'           => $data['fecha_caja_chica'],
+          'no_caja'         => $data['fno_caja'],
         );
       }
 
@@ -336,7 +344,7 @@ class caja_chica_model extends CI_Model {
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        LEFT JOIN cajachica_remisiones cr ON cr.id_remision = f.id_factura
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
-       WHERE is_factura = 'f' AND f.status = 'p' 
+       WHERE is_factura = 'f' AND f.status = 'p'
        ORDER BY (f.fecha, f.serie, f.folio) DESC"
     );
     // COALESCE(cr.id_remision, 0) = 0
@@ -574,14 +582,14 @@ class caja_chica_model extends CI_Model {
   }
 
 
-  public function cerrarCaja($idCaja)
+  public function cerrarCaja($idCaja, $noCajas)
   {
     $this->db->update('cajachica_efectivo', array('status' => 'f'), array('id_efectivo' => $idCaja));
     $caja = $this->db->query("SELECT fecha FROM cajachica_efectivo WHERE id_efectivo = {$idCaja}")->row();
 
     $this->load->model('cuentas_cobrar_model');
     $banco_cuenta = $this->db->query("SELECT id_cuenta FROM banco_cuentas WHERE UPPER(alias) LIKE '%PAGO REMISIONADO%'")->row();
-    $corte_caja = $this->get($caja->fecha);
+    $corte_caja = $this->get($caja->fecha, $noCajas);
     foreach ($corte_caja['remisiones'] as $key => $value)
     {
       $_POST['fmetodo_pago'] = 'efectivo';
@@ -618,9 +626,9 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array($n->nomenclatura.' '.$n->nombre), false, false, null, 1, 1);
     }
   }
-  public function printCaja($fecha)
+  public function printCaja($fecha, $noCajas)
   {
-    $caja = $this->get($fecha);
+    $caja = $this->get($fecha, $noCajas);
     $nomenclaturas = $this->nomenclaturas();
 
     // echo "<pre>";
@@ -983,10 +991,10 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
 
     $response = array();
-    $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria, 
+    $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
           cn.id AS id_nomenclatura
-        FROM cajachica_gastos cg 
+        FROM cajachica_gastos cg
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
         WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
@@ -1135,7 +1143,7 @@ class caja_chica_model extends CI_Model {
    */
   public function getRptIngresosData()
   {
-    $sql = '';
+    $sql = $sql2 = '';
       $idsproveedores = '';
 
     //Filtros para buscar
@@ -1147,25 +1155,25 @@ class caja_chica_model extends CI_Model {
       $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
-    // if ($this->input->get('fnomenclatura') != '')
-    //   $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
+    if ($this->input->get('fnomenclatura') != '')
+      $sql2 .= " AND cn.id = ".$this->input->get('fnomenclatura');
 
     $response = array('movimientos' => array(), 'remisiones' => array());
-    
-    $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria, 
+
+    $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
           cn.id AS id_nomenclatura
-        FROM cajachica_ingresos ci 
+        FROM cajachica_ingresos ci
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
         WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql}
+          {$sql} {$sql2}
         ORDER BY id_categoria ASC, fecha ASC");
     $response['movimientos'] = $movimientos->result();
 
-    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria, 
+    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria,
           f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
-        FROM cajachica_remisiones cr 
+        FROM cajachica_remisiones cr
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
           INNER JOIN facturacion f ON f.id_factura = cr.id_remision
         WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
@@ -1387,7 +1395,7 @@ class caja_chica_model extends CI_Model {
 
     $pdf->SetXY(6, $pdf->GetY()+8);
   }
-  
+
 
 }
 

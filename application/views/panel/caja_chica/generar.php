@@ -81,6 +81,7 @@
               </div>
               <div class="span4">
                 <div class="row-fluid">
+                  <input type="hidden" name="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
                   <?php if ($show){ ?>
                     <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>

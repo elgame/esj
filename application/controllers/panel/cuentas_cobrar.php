@@ -21,6 +21,8 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/estado_cuenta_xls/',
     'cuentas_cobrar/rpt_ventas_xls/',
     'cuentas_cobrar/rpt_ventas2_xls/',
+
+    'cuentas_cobrar/factura_abono_parci/',
   );
 
 
@@ -284,6 +286,21 @@ class cuentas_cobrar extends MY_Controller {
       redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
 
+  public function factura_abono_parci()
+  {
+    if (isset($_GET['ida']{0}) && isset($_GET['tipo']{0}))
+    {
+      $this->load->model('cuentas_cobrar_model');
+      $respons = $this->cuentas_cobrar_model->creaFacturaAbono($_GET['ida']);
+      if($respons['passes'])
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=11'));
+      else
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg='.$respons['codigo']));
+
+    }else
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+  }
+
   /**
    * RPTS
    */
@@ -368,6 +385,23 @@ class cuentas_cobrar extends MY_Controller {
       case 10:
         $txt = 'Los abonos se eliminaron correctamente.';
         $icono = 'success';
+        break;
+
+      case 11:
+        $txt = 'La Factura se timbro correctamente.';
+        $icono = 'success';
+        break;
+      case 500:
+        $txt = 'Error en el servidor del timbrado. Pongase en contacto con el equipo de desarrollo del sistema.';
+        $icono = 'error';
+        break;
+      case 'ERR_INTERNET_DISCONNECTED':
+        $txt = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
+        $icono = 'error';
+        break;
+      default:
+        $txt = 'Ocurrio un error al intentar timbrar la factura, verifique los datos fiscales de la empresa y/o cliente.';
+        $icono = 'error';
         break;
     }
 

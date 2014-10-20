@@ -23,6 +23,7 @@ class rastreabilidad extends MY_Controller {
     'rastreabilidad/rpl_pdf/',
     'rastreabilidad/rrs_pdf/',
     'rastreabilidad/ajax_get_lotes/',
+    'rastreabilidad/rrl_pdf/',
 
     'rastreabilidad/siguiente_lote/',
   );
@@ -433,6 +434,62 @@ class rastreabilidad extends MY_Controller {
     echo json_encode($params);
   }
 
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE DE RASTREABILIDAD Y SEGUIMIENTO"
+   *
+   * @return void
+   */
+  public function rrl()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/rastreabilidad/reportes/rrs.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Rendimiento de lotes'
+    );
+    $this->load->model('areas_model');
+    $this->load->model('calidades_model');
+    $this->load->model('rastreabilidad_model');
+
+    $params['areas']     = $this->areas_model->getAreas(false);
+    // Obtenemos area predeterminada
+    $params['area_default'] = null;
+    foreach ($params['areas']['areas'] as $key => $value)
+    {
+      if($value->predeterminado == 't')
+      {
+        $params['area_default'] = $value->id_area;
+        break;
+      }
+    }
+    // Obtiene los lotes de la fecha indicada
+    // $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha(date('Y-m-d'), $params['area_default']);
+
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/rastreabilidad/reportes/rrl', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rrl_pdf()
+  {
+    if(isset($_GET['ffecha1']) && isset($_GET['farea']))
+    {
+      $this->load->model('rastreabilidad_model');
+      $this->rastreabilidad_model->rrl_pdf();
+    }
+  }
 
 
   /*

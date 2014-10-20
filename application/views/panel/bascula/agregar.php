@@ -129,7 +129,9 @@
             <div class="box-content">
               <div class="row-fluid">
                 <div class="span7">
-
+                  <?php if(isset($_GET['p']) || isset($_GET['f'])){ ?>
+                  <input type="hidden" name="pno_lote" id="pno_lote" value="<?php echo $_POST['pno_lote']; ?>">
+                  <?php } ?>
                   <div class="control-group" style="margin:0px 0px 2px 0px;">
                     <label class="control-label" for="ptipo">Certificado</label>
                     <div class="controls">
@@ -263,7 +265,7 @@
                   <div class="control-group">
                     <label class="control-label">Fecha de pago</label>
                     <div class="controls">
-                      <input type="datetime-local" name="pfecha_pago" value="<?php echo set_value('pfecha_pago', $fecha_pago ); ?>" 
+                      <input type="datetime-local" name="pfecha_pago" value="<?php echo set_value('pfecha_pago', $fecha_pago ); ?>"
                         id="pfecha_pago" class="span10" <?php echo $disabled; ?>>
                     </div>
                   </div>

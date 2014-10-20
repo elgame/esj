@@ -36,7 +36,7 @@ class clientes_model extends CI_Model {
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
     if($this->input->get('did_empresa') != '')
-      $sql .= ' AND p.id_empresa = ' . $this->input->get('did_empresa');
+      $sql .= ($sql==''? 'WHERE': ' AND').' p.id_empresa = ' . $this->input->get('did_empresa');
 
 		// if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
 		// 	$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";

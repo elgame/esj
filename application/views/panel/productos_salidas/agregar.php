@@ -52,7 +52,7 @@
               <div class="control-group">
                 <label class="control-label" for="fecha">Fecha</label>
                 <div class="controls">
-                  <input type="datetime-local" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', $fecha); ?>" readonly>
+                  <input type="datetime-local" name="fecha" class="span9" id="fecha" value="<?php echo set_value('fecha', $fecha); ?>">
                 </div>
               </div>
 

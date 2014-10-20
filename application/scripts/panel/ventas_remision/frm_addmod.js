@@ -16,7 +16,7 @@ $(function(){
     {
       event.preventDefault();
       return false;
-    }else if($("#privAddDescripciones").length == 0)
+    }else if($("#privAddDescripciones").length == 0 && $("#isNotaCredito").length == 0)
     {
     // Valida agregar descripciones
       result = validaPrivDescripciones();

@@ -160,6 +160,7 @@
                       <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', false, $factura['info']->metodo_pago); ?>>Tarjeta</option>
                       <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', false, $factura['info']->metodo_pago); ?>>Transferencia</option>
                       <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', false, $factura['info']->metodo_pago); ?>>Deposito</option>
+                      <option value="trasferencia y/o cheque" <?php echo set_select('dmetodo_pago', 'trasferencia y/o cheque', false, $factura['info']->metodo_pago); ?>>Trasferencia y/o cheque</option>
                     </select>
                   </div>
                 </div>

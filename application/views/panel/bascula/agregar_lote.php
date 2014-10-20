@@ -53,6 +53,9 @@
 ?>
 <script type="text/javascript" charset="UTF-8">
   $(document).ready(function(){
+    <?php if($frm_errors['ico'] == 'success'){ ?>
+      parent.setLoteBoleta();
+    <?php } ?>
     noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
   });
 </script>

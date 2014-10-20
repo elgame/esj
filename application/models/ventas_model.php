@@ -58,7 +58,7 @@ class Ventas_model extends privilegios_model{
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
         WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
-        ORDER BY  f.folio DESC, f.fecha DESC, f.serie DESC
+        ORDER BY f.fecha DESC, f.folio DESC, f.serie DESC
         ", $params, true);
     $res = $this->db->query($query['query']);
 
@@ -416,6 +416,9 @@ class Ventas_model extends privilegios_model{
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
+    // Registra la salida de productos si tiene pallets
+    $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
+
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
 
@@ -606,7 +609,77 @@ class Ventas_model extends privilegios_model{
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
+    // Registra la salida de productos si tiene pallets
+    $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
+
     return array('passes' => true, 'id_venta' => $id_venta);
+  }
+
+  public function addSalidaProductosPallets($id_venta, $id_empresa)
+  {
+    // Elimina la salida si tiene
+    $this->db->delete('compras_salidas', array('id_factura' => $id_venta));
+
+    // Procesa la salida
+    $this->load->model('unidades_model');
+    $this->load->model('productos_salidas_model');
+    $this->load->model('inventario_model');
+
+    $infoSalida      = array();
+    $productosSalida = array(); // contiene los productos que se daran salida.
+    // Se obtienen los pallets ligados a la factura
+    $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$id_venta}")->result();
+    // Si hay pallets ligados
+    if(count($listaPallets) > 0)
+    {
+      $lipallets = array();
+      foreach ($listaPallets as $keylp => $lipallet) {
+        $lipallets[] = $lipallet->id_pallet;
+      }
+      $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
+                          FROM rastria_pallets_salidas WHERE id_pallet IN(".implode(',', $lipallets).") AND id_producto IS NOT NULL")->result();
+      if (count($productosPallets))
+      {
+        $infoSalida = array(
+          'id_empresa'      => $id_empresa,
+          'id_empleado'     => $this->session->userdata('id_usuario'),
+          'folio'           => $this->productos_salidas_model->folio(),
+          'fecha_creacion'  => date('Y-m-d H:i:s'),
+          'fecha_registro'  => date('Y-m-d H:i:s'),
+          'status'          => 's',
+          'id_factura'      => $id_venta,
+        );
+
+        $ress = $this->productos_salidas_model->agregar($infoSalida);
+
+        $row = 0;
+        foreach ($productosPallets as $keypp => $prodspp) {
+          $inv   = $this->inventario_model->promedioData($prodspp->id_producto, date('Y-m-d'), date('Y-m-d'));
+          $saldo = array_shift($inv);
+          $productosSalida[] = array(
+                'id_salida'       => $ress['id_salida'],
+                'id_producto'     => $prodspp->id_producto,
+                'no_row'          => $row,
+                'cantidad'        => $prodspp->cantidad,
+                'precio_unitario' => $saldo['saldo'][1],
+              );
+
+          $row++;
+        }
+      }
+
+      // Si hay al menos 1 producto para las salidas lo inserta.
+      if (count($productosSalida) > 0)
+      {
+        $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+      }
+
+      // Si no hay productos para ninguna de las medidas elimina la salida.
+      else
+      {
+        $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
+      }
+    }
   }
 
 	/**
@@ -621,6 +694,9 @@ class Ventas_model extends privilegios_model{
     // Regenera el PDF de la factura.
     $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio);
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
+
+    // Elimina la salida de productos q se dio si se ligaron pallets
+    $this->db->delete('compras_salidas', array('id_factura' => $id_venta));
 
     // Bitacora
     $bitacora_accion = 'la nota de remision';

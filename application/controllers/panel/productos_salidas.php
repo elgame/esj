@@ -42,7 +42,7 @@ class productos_salidas extends MY_Controller {
 
     $params['salidas'] = $this->productos_salidas_model->getSalidas();
 
-    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['fecha']  = str_replace(' ', 'T', date("Y-m-d"));
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

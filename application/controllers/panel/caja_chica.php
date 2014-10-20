@@ -51,6 +51,23 @@ class caja_chica extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
+  public function caja2()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Caja chica 2');
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
   public function cargar()
   {
     $this->carabiner->js(array(
@@ -83,7 +100,7 @@ class caja_chica extends MY_Controller {
     $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
     $_GET['ffecha'] = $fecha;
 
-    $params['caja'] = $this->caja_chica_model->get($fecha);
+    $params['caja'] = $this->caja_chica_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1') );
 
     $params['remisiones'] = $this->caja_chica_model->getRemisiones();
     $params['movimientos'] = $this->caja_chica_model->getMovimientos();
@@ -100,7 +117,7 @@ class caja_chica extends MY_Controller {
   }
 
   /**
-   * REPORTES 
+   * REPORTES
    * @return [type] [description]
    */
   public function rpt_gastos()
@@ -169,6 +186,9 @@ class caja_chica extends MY_Controller {
             'rules' => 'required'),
       array('field' => 'saldo_inicial',
             'label' => 'Saldo Inicial',
+            'rules' => 'required|numeric'),
+      array('field' => 'fno_caja',
+            'label' => 'No Caja',
             'rules' => 'required|numeric'),
     );
 
@@ -570,7 +590,7 @@ class caja_chica extends MY_Controller {
   public function cerrar_caja()
   {
     $this->load->model('caja_chica_model');
-    $this->caja_chica_model->cerrarCaja($_GET['id']);
+    $this->caja_chica_model->cerrarCaja($_GET['id'], $_GET['fno_caja']);
 
     redirect(base_url('panel/caja_chica/cargar/?'.String::getVarsLink(array('id', 'msg')).'&msg=7'));
   }
@@ -578,7 +598,7 @@ class caja_chica extends MY_Controller {
   public function print_caja()
   {
     $this->load->model('caja_chica_model');
-    $this->caja_chica_model->printCaja($_GET['ffecha']);
+    $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')

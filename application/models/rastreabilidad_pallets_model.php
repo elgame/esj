@@ -111,6 +111,15 @@ class rastreabilidad_pallets_model extends privilegios_model {
 				if($data_calibres->num_rows() > 0)
 					$response['calibres'] = $data_calibres->result();
 
+        //Salidas de productos
+        $response['psalidas'] = array();
+        $data_calibres = $this->db->query("SELECT p.id_producto, p.nombre, rps.cantidad, rps.nom_row
+                          FROM rastria_pallets_salidas AS rps
+                            LEFT JOIN productos AS p ON p.id_producto = rps.id_producto
+                          WHERE rps.id_pallet = {$id_pallet} ORDER BY rps.nom_row ASC");
+        if($data_calibres->num_rows() > 0)
+          $response['psalidas'] = $data_calibres->result();
+
 				//Info cliente
         $response['cliente'] = array();
         if ($response['info']->id_cliente !== null)
@@ -189,7 +198,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
 						'folio'        => $this->input->post('ffolio'),
 						'no_cajas'     => $this->input->post('fcajas'),
-						'no_hojas'     => $this->input->post('fhojaspapel'),
+						'no_hojas'     => 0,
 						'kilos_pallet' => $this->input->post('fkilos'),
 						'id_area'      => $this->input->post('parea'),
 						);
@@ -213,9 +222,13 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 			$this->addPalletCalibres($id_pallet);
 
+      $this->addPalletProductosSalida($id_pallet);
+
 			// $this->addPalletRendimiento($data['id_clasificacion']);
 
-			return array('msg' => 3, $id_pallet);
+			$this->registraSalida($id_pallet);
+
+      return array('msg' => 3, $id_pallet);
 		// }
 		// return array('msg' => 4, 0);
  	}
@@ -231,7 +244,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 						// 'id_clasificacion' => $this->input->post('fid_clasificacion'),
 						'folio'        => $this->input->post('ffolio'),
 						'no_cajas'     => $this->input->post('fcajas'),
-						'no_hojas'     => $this->input->post('fhojaspapel'),
+						'no_hojas'     => 0,
 						'kilos_pallet' => $this->input->post('fkilos'),
             'calibre_fijo' => $this->input->post('fcalibre_fijo'),
 						);
@@ -255,6 +268,12 @@ class rastreabilidad_pallets_model extends privilegios_model {
 
 		$this->db->delete('rastria_pallets_calibres', "id_pallet = {$id_pallet}");
 		$this->addPalletCalibres($id_pallet);
+
+    $this->db->delete('rastria_pallets_salidas', "id_pallet = {$id_pallet}");
+    $this->addPalletProductosSalida($id_pallet);
+
+    $this->db->delete('compras_salidas', "id_pallet = {$id_pallet}");
+    $this->registraSalida($id_pallet);
 
 		return array('msg' => 5);
  	}
@@ -321,6 +340,98 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		return true;
 	}
 
+  public function addPalletProductosSalida($id_pallet, $data=NULL, $id_bitacora=0){
+    if ($data==NULL)
+    {
+      if(is_array($this->input->post('ps_id')))
+      {
+        foreach ($this->input->post('ps_id') as $key => $prod)
+        {
+          $data[] = array(
+            'id_pallet'   => $id_pallet,
+            'id_producto' => $prod>0? $prod: NULL,
+            'cantidad'    => floatval($_POST['ps_num'][$key]),
+            'nom_row'     => $_POST['ps_row'][$key]
+            );
+        }
+      }
+    }
+
+    if(count($data) > 0) {
+      $this->db->insert_batch('rastria_pallets_salidas', $data);
+    }
+
+    return true;
+  }
+
+  public function registraSalida($id_pallet)
+  {
+    $dato_info = $this->getInfoPallet($id_pallet, true);
+
+    if($dato_info['info']->no_cajas == $dato_info['info']->cajas)
+    {
+      // Procesa la salida
+      $this->load->model('productos_salidas_model');
+      $this->load->model('inventario_model');
+
+      $infoSalida      = array();
+      $productosSalida = array(); // contiene los productos que se daran salida.
+      // // Se obtienen los pallets ligados a la factura
+      // $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$idFactura}")->result();
+      // // Si hay pallets ligados
+      // if(count($listaPallets) > 0)
+      // {
+        // $lipallets = array();
+        // foreach ($listaPallets as $keylp => $lipallet) {
+        //   $lipallets[] = $lipallet->id_pallet;
+        // }
+        $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
+                            FROM rastria_pallets_salidas WHERE id_pallet = {$id_pallet} AND id_producto IS NOT NULL")->result();
+        if (count($productosPallets))
+        {
+          $infoSalida = array(
+            'id_empresa'      => 2, // sanjorge
+            'id_empleado'     => $this->session->userdata('id_usuario'),
+            'folio'           => $this->productos_salidas_model->folio(),
+            'fecha_creacion'  => $dato_info['info']->fecha,
+            'fecha_registro'  => $dato_info['info']->fecha,
+            'status'          => 's',
+            // 'concepto'        => 'Salida automatica de productos al armar pallet',
+            'id_pallet'       => $id_pallet,
+          );
+
+          $ress = $this->productos_salidas_model->agregar($infoSalida);
+
+          $row = 0;
+          foreach ($productosPallets as $keypp => $prodspp) {
+            $inv   = $this->inventario_model->promedioData($prodspp->id_producto, substr($dato_info['info']->fecha, 0, 10), substr($dato_info['info']->fecha, 0, 10));
+            $saldo = array_shift($inv);
+            $productosSalida[] = array(
+                  'id_salida'       => $ress['id_salida'],
+                  'id_producto'     => $prodspp->id_producto,
+                  'no_row'          => $row,
+                  'cantidad'        => $prodspp->cantidad,
+                  'precio_unitario' => $saldo['saldo'][1],
+                );
+
+            $row++;
+          }
+        }
+
+        // Si hay al menos 1 producto para las salidas lo inserta.
+        if (count($productosSalida) > 0)
+        {
+          $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+        }
+        // Si no hay productos para ninguna de las medidas elimina la salida.
+        else
+        {
+          $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
+        }
+      // }
+    }
+  }
+
 	public function deletePallet($id_pallet, $delRendimientos = false)
 	{
 		$data = $this->db->query("SELECT Count(f.id_factura) AS num
@@ -347,7 +458,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
       }
 
       // Bitacora
-      $clientedata = $this->getClienteInfo($id_pallet);
+      $clientedata = $this->getInfoPallet($id_pallet);
       $this->bitacora_model->_cancel('rastria_pallets', $id_pallet,
                                       array(':accion'     => 'el pallet', ':seccion' => 'pallets',
                                             ':folio'      => $clientedata['info']->folio,

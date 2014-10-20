@@ -435,6 +435,18 @@ class productos_model extends CI_Model {
 		return $response;
 	}
 
+	public function infoProducto($text)
+	{
+		$id_producto = (isset($_GET['id']))? $_GET['id']: $id_producto;
+    $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
+
+		$result = $this->db->query("SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre,
+      	stock_min, ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps
+      FROM productos WHERE id_empresa = 2 AND lower(nombre) = '".mb_strtolower($text, 'UTF-8')."'")->row();
+
+		return $result;
+	}
+
 
 
 

@@ -366,6 +366,7 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'        => $prod_id_compra,
+          'id_area'          => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
         );
       }
 
@@ -739,16 +740,27 @@ class compras_ordenes_model extends CI_Model {
   public function entrada($idOrden)
   {
     $ordenRechazada = false;
+    // Verifica si la orden se va rechazar
+    foreach ($_POST['concepto'] as $key => $concepto)
+    {
+      if ($_POST['isProdOk'][$key] === '0')
+      {
+        $ordenRechazada = true;
+      }
+    }
 
     $this->load->model('productos_model');
 
     $almacen = array();
     $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
               WHERE id_orden = {$idOrden}")->result();
-    $productos = array();
+    $productos = $productosFaltantes = array();
     $faltantes = false;
     foreach ($_POST['concepto'] as $key => $concepto)
     {
+      $faltantesProd = $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key];
+      if( ! $ordenRechazada)
+        $_POST['cantidad'][$key] -= $faltantesProd;
 
       if ($_POST['presentacionCant'][$key] !== '')
       {
@@ -760,8 +772,6 @@ class compras_ordenes_model extends CI_Model {
         $cantidad = $_POST['cantidad'][$key];
         $pu       = $_POST['valorUnitario'][$key];
       }
-
-      $faltantesProd = $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key];
 
       $prod_id_compra = NULL;
       foreach ($res_prodc_orden as $keyor => $ord)
@@ -791,17 +801,47 @@ class compras_ordenes_model extends CI_Model {
         'porcentaje_ieps'  => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
         'tipo_cambio'      => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
         'id_compra'        => $prod_id_compra,
+        'id_area'          => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
       );
 
-      if ($faltantesProd !== '0')
+      if ($faltantesProd != '0')
       {
+        if ($_POST['presentacionCant'][$key] !== '')
+          $faltantesProd = $faltantesProd * floatval($_POST['presentacionCant'][$key]);
+
+        // productos faltantes para registrar en una nueva orden
+        $productosFaltantes[] = array(
+          'id_producto'          => $_POST['productoId'][$key] !== '' ? $_POST['productoId'][$key] : null,
+          'id_presentacion'      => $_POST['presentacion'][$key] !== '' ? $_POST['presentacion'][$key] : null,
+          'descripcion'          => $concepto,
+          'cantidad'             => $faltantesProd,
+          'precio_unitario'      => $pu,
+          'importe'              => $faltantesProd * $pu,
+          'iva'                  => ($faltantesProd * $pu * $_POST['trasladoPorcent'][$key]/100),
+          'retencion_iva'        => 0,
+          'total'                => $_POST['total'][$key],
+          'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
+          'porcentaje_retencion' => $_POST['retTotal'][$key] == '0' ? '0' : '4',
+          'status'               => 'p',
+          'fecha_aceptacion'     => date('Y-m-d H:i:s'),
+          'faltantes'            => 0,
+          'observacion'          => $_POST['observacion'][$key],
+          'ieps'                 => ($faltantesProd * $pu * floatval($_POST['iepsPorcent'][$key])/100),
+          'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
+          'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
+          'id_compra'            => NULL,
+          'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+        );
+        $productosFaltantes[count($productosFaltantes)-1]['total'] = $productosFaltantes[count($productosFaltantes)-1]['importe'] +
+                                                                      $productosFaltantes[count($productosFaltantes)-1]['iva'] +
+                                                                      $productosFaltantes[count($productosFaltantes)-1]['ieps'];
         $faltantes = true;
       }
 
-      if ($_POST['isProdOk'][$key] === '0')
-      {
-        $ordenRechazada = true;
-      }
+      // if ($_POST['isProdOk'][$key] === '0')
+      // {
+      //   $ordenRechazada = true;
+      // }
 
       $producto_dd = $this->productos_model->getProductoInfo(false, false, $_POST['productoId'][$key]);
       if(count($producto_dd['info']) > 0 && !in_array($producto_dd['familia']->almacen, $almacen))
@@ -831,6 +871,11 @@ class compras_ordenes_model extends CI_Model {
         'almacen'    => implode('|', $almacen),
         );
       $this->db->insert('compras_entradas_almacen', $data_almacen);
+
+      // Crea la orden de los faltantes
+      if (count($productosFaltantes) > 0) {
+        $this->creaOrdenFaltantes($idOrden, $productosFaltantes);
+      }
     }
 
     // Si al menos un producto no fue aceptado entonces la orden es
@@ -903,6 +948,50 @@ class compras_ordenes_model extends CI_Model {
     // }
 
     return array('status' => true, 'msg' => $msg, 'faltantes' => $faltantes, 'entrada' => $data_almacen);
+  }
+
+  public function creaOrdenFaltantes($idOrden, $productos)
+  {
+    $data = $this->info($idOrden);
+    $data['info'] = $data['info'][0];
+    $dataOrden = array(
+      'id_empresa'         => $data['info']->id_empresa,
+      'id_proveedor'       => $data['info']->id_proveedor,
+      'id_departamento'    => $data['info']->id_departamento,
+      'id_empleado'        => $data['info']->id_empleado,
+      'folio'              => $this->folio($data['info']->tipo_orden),
+      'status'             => 'p',
+      'autorizado'         => 't',
+      'fecha_autorizacion' => $data['info']->fecha_autorizacion,
+      'fecha_aceptacion'   => $data['info']->fecha_aceptacion,
+      'fecha_creacion'     => $data['info']->fecha,
+      'tipo_pago'          => $data['info']->tipo_pago,
+      'tipo_orden'         => $data['info']->tipo_orden,
+      'solicito'           => $data['info']->empleado_solicito,
+      'id_cliente'         => (is_numeric($data['info']->id_cliente)? $data['info']->id_cliente: NULL),
+      'descripcion'        => $data['info']->descripcion,
+      'id_autorizo'        => $data['info']->id_autorizo,
+    );
+    //si es flete
+    if ($data['info']->tipo_orden == 'f')
+    {
+      $dataOrden['ids_facrem'] = $data['info']->ids_facrem;
+    }
+
+    $res = $this->agregarData($dataOrden);
+    $id_orden = $res['id_orden'];
+
+    // Productos
+    $rows_compras = 0;
+    foreach ($productos as $keypr => $prod)
+    {
+      $productos[$keypr]['id_orden'] = $id_orden;
+      $productos[$keypr]['num_row']  = $rows_compras;
+      $rows_compras++;
+    }
+
+    if(count($productos) > 0)
+      $this->compras_ordenes_model->agregarProductosData($productos);
   }
 
   /*
@@ -1257,9 +1346,15 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY()-3);
         $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
       }
+
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array('PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO.'), false, false);
+
       $y_compras = $pdf->GetY();
 
       //Totales
+      $pdf->SetFont('Arial','',8);
       $pdf->SetXY(160, $yy);
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(25, 25));
