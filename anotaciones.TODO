@@ -1,3 +1,22 @@
+-*Poliza de ventas Quitar las que no salgan los pagos en parcialidades
+-*Poliza de gastos en la cuenta q selecciona que ponga el subtotal
+-*Esquineros 4 chui, en los fleje poder poner varios en pallet
+-*En Estado de cuenta poner pago en parcialidades y poner el folio de la factura, que no salgan como ventas las parcialidades
+-*Limon suelo meterlo en insdustrial en reporte de rendimientos
+-*Al dar de alta un proveedor poner pordefault de credito 15 dias
+-*Ordenes de compra lo de los codigos q no se dupliquen
+-de jorge gomez y vianey gudiño pasar los proveedores y productos a gomez gudiño
+-*salidas poner opcion para copiar codigo q no sea uno x uno
+
+-*Salida de productos ponerles total, imprimir recibo de salida, quien lo solicita, a que codigo se va ir ese producto
+  -*en conbustible agregar odometro, veiculo de codigos y generar reporte
+  -*Reporte por codigo de las cantidades q se fueron
+-Nomina
+  -Parte para administrar las labores que agreguen las que esta en la hoja
+  -Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
+  -Reportes de eso
+
+
 -*Pago en parcialidades para poder ligar los xml a las polizas por cada abono
   -*Al momento de agregar el abono generar en automatico la factura de pago en parcialidades si es que no se
   pago el total o si ya se habia agregado un abono
@@ -9,24 +28,16 @@ manejaria 2 saldos diferentes una x caja
 -*prestamos reporte no sale esa semana
   *JUAN FARIAS CUELLAR - semana 40 de vianey
 
--Salida de productos ponerles total, imprimir recibo de salida, quien lo solicita, a que codigo se va ir ese producto
-  -en conbustible agregar odometro, veiculo de codigos y generar reporte
-  -Reporte por codigo de las cantidades q se fueron
--Nomina
-  -Parte para administrar las labores que agreguen las que esta en la hoja
-  -Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
-  -Reportes de eso
-
 -Pallets salidas de productos
-  productos q faltaron
-  -esquineros
-  -Bolsa perforada
-  -Malla
-  -Filverde
+  *productos q faltaron
+  -*esquineros
+  -*Bolsa perforada
+  -*Malla
+  -*Filverde
   productos q puede agregar multiple
-  -etiquetas
-  -cajas
-  -arpilla
+  -*etiquetas
+  -*cajas
+  -*arpilla
 
 
 

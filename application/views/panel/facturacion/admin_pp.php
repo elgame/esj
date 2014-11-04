@@ -140,7 +140,7 @@
                         {
 
                           echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
-                            'params'   => 'id='.$fact->id_factura,
+                            'params'   => 'id='.$fact->id_factura.'&sec=pp',
                             'btn_type' => 'btn-danger',
                             'attrs' => array('onclick' => "msb.confirm('Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>', 'Facturas', this); return false;"))
                           );

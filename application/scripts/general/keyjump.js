@@ -67,13 +67,14 @@
     hiddens.forEach(function ($h, i) {
       $h.on('keypress', function(event) {
         if (event.which == settings.next) {
+          var $next = $(hiddens[i+1]);
 
           if (settings.next == 13) event.preventDefault();
 
           if ($h.attr('data-next')) {
             $('#'+$h.attr('data-next')).focus();
           }
-          else {
+          else if ($h.attr('data-replace')) {
             fields.forEach(function ($e, i) {
               if ($h.attr('data-replace') === $($e).attr('id')) {
                 $(fields[i+1]).focus();
@@ -81,6 +82,7 @@
               }
             });
           }
+          else if ($next.is(':visible')) $next.focus();
         }
       });
     });
@@ -131,6 +133,35 @@
 
       }
 
+    });
+  };
+
+  $.fn.keyJump.off  = function () {
+    var $wrapper = $(this),
+        hiddens = [],
+        fields = $wrapper
+                 .find('input, textarea, select')
+                 // .filter(':visible')
+                 .filter(function (i) {
+                    var $this = $(this);
+                    if ($this.is(':hidden.sikey')) {
+                      hiddens.push($this)
+                    }
+                    return $this.is(':visible');
+                 })
+                 .filter(':enabled')
+                 .filter(function (i) {
+                    return $(this).prop('readonly') !== true;
+                 })
+                 .not('.nokey')
+                 .toArray();
+
+    fields.forEach(function ($e, i) {
+      $($e).off('keypress');
+    });
+
+    hiddens.forEach(function ($h, i) {
+      $h.off('keypress');
     });
   };
 

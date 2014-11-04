@@ -302,7 +302,7 @@
             echo "window.open(base_url+'panel/banco/cheque?id='+{$id_movimiento}, 'Print cheque');";
       ?>
 
-      window.parent.location.reload();
+      window.location = base_url+"panel/gastos/agregar";
     },1500)
   <?php } ?>
 

@@ -211,8 +211,8 @@
 										<label class="control-label" for="condicionPago">Condición de Pago:</label>
 										<div class="controls">
 											<select name="condicionPago" class="span9" id="condicionPago">
-												<option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
 												<option value="cr" <?php echo set_select('condicionPago', 'cr'); ?>>Credito</option>
+												<option value="co" <?php echo set_select('condicionPago', 'co'); ?>>Contado</option>
 											</select>
 										</div>
 									</div>
@@ -220,7 +220,7 @@
 									<div class="control-group">
 										<label class="control-label" for="plazoCredito">Plazo de Crédito:</label>
 										<div class="controls">
-											<input type="text" name="plazoCredito" class="span9 vpos-int" id="plazoCredito" value="<?php echo set_value('plazoCredito', '0'); ?>">
+											<input type="text" name="plazoCredito" class="span9 vpos-int" id="plazoCredito" value="<?php echo set_value('plazoCredito', '15'); ?>">
 										</div>
 									</div>
 

@@ -7,6 +7,8 @@ class productos_salidas extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'productos_salidas/rpt_gastos_pdf/',
+    'productos_salidas/rpt_gastos_xls/',
   );
 
   public function _remap($method){
@@ -72,9 +74,11 @@ class productos_salidas extends MY_Controller {
       array('general/util.js'),
       array('general/keyjump.js'),
       array('panel/productos_salidas/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
     $this->load->model('productos_salidas_model');
+    $this->load->model('compras_areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -93,12 +97,17 @@ class productos_salidas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_salidas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/productos_salidas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
       }
     }
 
     $params['next_folio']    = $this->productos_salidas_model->folio();
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
+
+    //imprimir
+    $params['prints'] = isset($_GET['print'])? $_GET['print']: '';
 
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -175,6 +184,60 @@ class productos_salidas extends MY_Controller {
     redirect(base_url('panel/productos_salidas/?' . String::getVarsLink(array('id')).'&msg=4'));
   }
 
+  public function imprimir()
+  {
+    $this->load->model('productos_salidas_model');
+
+    if (isset($_GET['id']))
+    {
+      $this->productos_salidas_model->print_orden_compra($_GET['id']);
+    }
+  }
+
+
+  /**
+   * REPORTES
+   * ***********************************
+   * @return [type] [description]
+   */
+  public function rpt_gastos()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.treeview.css', 'screen')
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.treeview.js'),
+      array('panel/productos_salidas/rpt_gastos.js'),
+    ));
+
+    $this->load->model('compras_areas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte gastos');
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
+    $params['vehiculos'] = $this->compras_areas_model->getFrmAreas();
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/productos_salidas/rpt_gastos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_gastos_pdf()
+  {
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->rpt_gastos_pdf();
+  }
+  public function rpt_gastos_xls()
+  {
+    $this->load->model('productos_salidas_model');
+    $this->productos_salidas_model->rpt_gastos_xls();
+  }
+
+
+
   /*
    |------------------------------------------------------------------------
    | Metodos con validaciones de formulario.
@@ -204,6 +267,18 @@ class productos_salidas extends MY_Controller {
             'label' => 'Folio',
             'rules' => 'required'),
 
+      array('field' => 'codigoArea[]',
+            'label' => 'Codigo Area',
+            'rules' => 'required'),
+      array('field' => 'codigoAreaId[]',
+            'label' => 'Codigo Area',
+            'rules' => 'required'),
+      array('field' => 'tipoProducto[]',
+            'label' => '',
+            'rules' => 'required'),
+      array('field' => 'precioUnit[]',
+            'label' => '',
+            'rules' => ''),
       array('field' => 'codigo[]',
             'label' => '',
             'rules' => ''),

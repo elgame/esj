@@ -1047,7 +1047,7 @@ class compras_ordenes_model extends CI_Model {
 
     $res = $this->db->query(
        "SELECT p.*,
-              pf.nombre as familia, pf.codigo as codigo_familia,
+              pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
               (SELECT precio_unitario FROM compras_productos WHERE id_producto = p.id_producto ORDER BY id_orden DESC LIMIT 1) AS precio_unitario
         FROM productos AS p
@@ -1114,7 +1114,7 @@ class compras_ordenes_model extends CI_Model {
 
     $res = $this->db->query(
        "SELECT p.*,
-              pf.nombre as familia, pf.codigo as codigo_familia,
+              pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura
         FROM productos as p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
@@ -1266,8 +1266,8 @@ class compras_ordenes_model extends CI_Model {
         $retencion += floatval($prod->retencion_iva/$tipoCambio);
         $ieps      += floatval($prod->ieps/$tipoCambio);
 
-        if($prod->id_area != '')
-          $codigoAreas[] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+        if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
+          $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
       }
 
       $yy = $pdf->GetY();
@@ -1636,6 +1636,277 @@ class compras_ordenes_model extends CI_Model {
 
     return $path;
   }
+
+  /**
+   * Reporte de gastos
+   * @return [type] [description]
+   */
+  public function getDataGastos()
+  {
+    $this->load->model('compras_areas_model');
+    $sql = $sql2 = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
+      $sql .= " AND Date(csc.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    elseif($this->input->get('ffecha1') != '')
+      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
+    elseif($this->input->get('ffecha2') != '')
+      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
+
+    $sql2 = $sql;
+
+    // vehiculos
+
+    $response = array();
+
+
+    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
+    {
+      foreach ($_GET['dareas'] as $key => $value) {
+        $ids_hijos = $value.$this->compras_areas_model->getHijos($value);
+        $result = $this->db->query("SELECT ca.nombre, COALESCE(
+                                      (SELECT Sum(csp.importe) AS importe
+                                      FROM compras_productos csp
+                                      WHERE csp.status = 'a' AND csp.id_area In({$ids_hijos}))
+                                    , 0) AS importe
+                                    FROM compras_areas ca
+                                    WHERE ca.id_area = {$value}");
+        $response[] = $result->row();
+        $result->free_result();
+
+        if (isset($_GET['dmovimientos']{0}) && $_GET['dmovimientos'] == '1' && $response[count($response)-1]->importe == 0)
+          array_pop($response);
+        else {
+          // Si es desglosado carga independientes
+          if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
+            $response[count($response)-1]->detalle = $this->db->query(
+                "SELECT ca.id_area, ca.nombre, Date(cs.fecha_aceptacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
+                FROM compras_ordenes cs
+                  INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
+                  INNER JOIN compras_areas ca ON ca.id_area = csp.id_area
+                  INNER JOIN productos p ON p.id_producto = csp.id_producto
+                WHERE csp.status = 'a' AND ca.id_area In({$ids_hijos})
+                ORDER BY nombre")->result();
+          }
+        }
+
+      }
+    }
+
+    return $response;
+  }
+  public function rpt_gastos_pdf()
+  {
+    $combustible = $this->getDataGastos();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Gastos";
+
+    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R');
+    $widths = array(170, 35);
+    $header = array('Nombre', 'Importe');
+    $aligns2 = array('L', 'L', 'L', 'L', 'R', 'R');
+    $widths2 = array(18, 22, 65, 65, 35);
+    $header2 = array('Fecha', 'Folio', 'C Costo', 'Producto', 'Importe');
+
+    $lts_combustible = 0;
+    $horas_totales = 0;
+
+    $entro = false;
+    foreach($combustible as $key => $vehiculo)
+    {
+      $cantidad = 0;
+      $importe = 0;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        if (isset($vehiculo->detalle)) {
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row($header2, true);
+        }
+      }
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $vehiculo->nombre,
+        String::formatoNumero($vehiculo->importe, 2, '', false),
+      ), false, false);
+
+      $lts_combustible += floatval($vehiculo->importe);
+
+      if (isset($vehiculo->detalle)) {
+        foreach ($vehiculo->detalle as $key2 => $item)
+        {
+          $band_head = false;
+          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+          {
+            $pdf->AddPage();
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns2);
+            $pdf->SetWidths($widths2);
+            $pdf->Row($header2, true);
+          }
+
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetTextColor(0,0,0);
+
+          $datos = array(
+            $item->fecha,
+            $item->folio,
+            $item->nombre,
+            $item->producto,
+            String::formatoNumero($item->importe, 2, '', false),
+          );
+
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row($datos, false, false);
+        }
+      }
+
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES',
+        String::formatoNumero($lts_combustible, 2, '', false) ),
+    true, false);
+
+    $pdf->Output('reporte_gasto_codigo.pdf', 'I');
+  }
+
+  public function rpt_gastos_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_gasto_codigo.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $combustible = $this->getDataGastos();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Reporte de Gastos";
+    $titulo3 = "";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+    if (isset($combustible[0]->detalle)) {
+      $html .= '<tr style="font-weight:bold">
+        <td></td>
+        <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+      </tr>';
+    }
+    $lts_combustible = $horas_totales = 0;
+    foreach ($combustible as $key => $vehiculo)
+    {
+      $lts_combustible += floatval($vehiculo->importe);
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->nombre.'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->importe.'</td>
+        </tr>';
+      if (isset($vehiculo->detalle)) {
+        foreach ($vehiculo->detalle as $key2 => $item)
+        {
+          $html .= '<tr>
+              <td></td>
+              <td style="width:100px;border:1px solid #000;background-color: #cccccc;">'.$item->fecha.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->folio.'</td>
+              <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
+              <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
+            </tr>';
+        }
+      }
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTALES</td>
+          <td colspan="2" style="border:1px solid #000;">'.$lts_combustible.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 
   /**
    * Regresa el MES que corresponde en texto.

@@ -91,25 +91,25 @@
 										  		</thead>
 										  		<tbody>
 										  			<tr>
-										  				<td>Cajas</td>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Cajas</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-next="ps_papel">
+										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_caja_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_caja_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="1">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_papel">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Hojas de papel</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_papel" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-next="fhojaspapel">
+										  					<input type="text" name="ps[]" id="ps_papel" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="fhojaspapel">
 										  					<input type="hidden" name="ps_id[]" id="ps_papel_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="2">
 										  				</td>
 										  				<td>
-										  					<select name="fhojaspapel" id="fhojaspapel" class="sikey span12" data-next="ps_fleje">
+										  					<select name="fhojaspapel" id="fhojaspapel" class="sikey span12" data-nextttt="ps_fleje">
 															  	<option value="0" <?php echo set_select('fhojaspapel', 0); ?>>Sin papel</option>
 															  	<option value="2" <?php echo set_select('fhojaspapel', 2); ?>>2 Hojas</option>
 															  	<option value="4" <?php echo set_select('fhojaspapel', 4); ?>>4 Hojas</option>
@@ -119,53 +119,53 @@
 										  				</td>
 										  			</tr>
 										  			<tr>
-										  				<td>Fleje</td>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Fleje</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-next="ps_fleje_num">
+										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="ps_fleje_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_fleje_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="3">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-next="ps_grapa">
+										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_grapa">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Grapa</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_grapa" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="20" data-next="ps_grapa_num">
+										  					<input type="text" name="ps[]" id="ps_grapa" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="20" data-nextttt="ps_grapa_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_grapa_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="4">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_grapa_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-next="ps_tapa">
+										  					<input type="text" name="ps_num[]" id="ps_grapa_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_tapa">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Tapa</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_tapa" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-next="ps_tapa_num">
+										  					<input type="text" name="ps[]" id="ps_tapa" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="ps_tapa_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_tapa_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="5">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_tapa_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-next="ps_ficha">
+										  					<input type="text" name="ps_num[]" id="ps_tapa_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_ficha">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Fichas</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_ficha" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-next="ps_ficha_num">
+										  					<input type="text" name="ps[]" id="ps_ficha" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="ps_ficha_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_ficha_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="6">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_ficha_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-next="ps_tarima">
+										  					<input type="text" name="ps_num[]" id="ps_ficha_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_tarima">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Tarima</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_tarima" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-next="ps_etiqueta">
+										  					<input type="text" name="ps[]" id="ps_tarima" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="ps_etiqueta">
 										  					<input type="hidden" name="ps_id[]" id="ps_tarima_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="7">
 										  				</td>
@@ -174,25 +174,70 @@
 										  				</td>
 										  			</tr>
 										  			<tr>
-										  				<td>Etiqueta</td>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Etiqueta</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-next="ps_arpilla">
+										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_etiqueta_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_etiqueta_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="8">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_arpilla">
 										  				</td>
 										  			</tr>
 										  			<tr>
-										  				<td>Arpilla</td>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Arpilla</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-next="btn_ps_cerrar">
+										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_arpilla_num">
 										  					<input type="hidden" name="ps_id[]" id="ps_arpilla_id" value="<?php echo set_value('ps_id[]'); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="9">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_esquinero">
+										  				</td>
+										  			</tr>
+
+										  			<tr>
+										  				<td>Esquineros</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_esquinero" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-nextttt="ps_esquinero_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_esquinero_id" value="<?php echo set_value('ps_id[]'); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="10">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_esquinero_num" value="<?php echo set_value('ps_num[]', '4'); ?>" class="sikey span12 vpositive" data-nextttt="ps_bolsaperf">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Bolsa perforada</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_bolsaperf" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_bolsaperf_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_bolsaperf_id" value="<?php echo set_value('ps_id[]'); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="11">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_bolsaperf_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_malla">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Malla</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_malla" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_malla_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_malla_id" value="<?php echo set_value('ps_id[]'); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="12">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_malla_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="ps_filverde">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Filverde</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_filverde" class="sikey span12 prod_salida" value="<?php echo set_value('ps[]'); ?>" data-xcajas="1" data-nextttt="ps_filverde_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_filverde_id" value="<?php echo set_value('ps_id[]'); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="13">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_filverde_num" value="<?php echo set_value('ps_num[]'); ?>" class="sikey span12 vpositive" data-nextttt="btn_ps_cerrar">
 										  				</td>
 										  			</tr>
 										  		</tbody>

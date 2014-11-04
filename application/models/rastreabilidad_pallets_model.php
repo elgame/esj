@@ -117,8 +117,22 @@ class rastreabilidad_pallets_model extends privilegios_model {
                           FROM rastria_pallets_salidas AS rps
                             LEFT JOIN productos AS p ON p.id_producto = rps.id_producto
                           WHERE rps.id_pallet = {$id_pallet} ORDER BY rps.nom_row ASC");
-        if($data_calibres->num_rows() > 0)
+        $aux_num_row = 1;
+        if($data_calibres->num_rows() > 0) {
           $response['psalidas'] = $data_calibres->result();
+          foreach ($response['psalidas'] as $key => $ps) {
+            if($aux_num_row != $ps->nom_row) {
+              $response['psalidas2'][] = count($psalidas)>1? $psalidas: $psalidas[0];
+              $psalidas = array();
+              $aux_num_row = $ps->nom_row;
+            }
+            $psalidas[] = $ps;
+          }
+
+          if(count($psalidas) > 0) {
+            $response['psalidas2'][] = count($psalidas)>1? $psalidas: $psalidas[0];
+          }
+        }
 
 				//Info cliente
         $response['cliente'] = array();
@@ -351,7 +365,8 @@ class rastreabilidad_pallets_model extends privilegios_model {
             'id_pallet'   => $id_pallet,
             'id_producto' => $prod>0? $prod: NULL,
             'cantidad'    => floatval($_POST['ps_num'][$key]),
-            'nom_row'     => $_POST['ps_row'][$key]
+            'nom_row'     => $_POST['ps_row'][$key],
+            'row'         => $key,
             );
         }
       }

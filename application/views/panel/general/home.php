@@ -13,30 +13,30 @@
 			</div>
 <!--
 			<div class="sortable row-fluid">
-        <a data-rel="tooltip" title="<?php echo $venta_dia; ?>" class="well span3 top-block">
+        <a data-rel="tooltip" title="<?php //echo $venta_dia; ?>" class="well span3 top-block">
           <span class="icon32 icon-red icon-shopping-cart"></span>
           <div>Ventas del dia</div>
-          <div><?php echo String::formatoNumero($venta_dia); ?></div>
+          <div><?php //echo String::formatoNumero($venta_dia); ?></div>
         </a>
 
-				<a data-rel="tooltip" title="<?php echo $venta_semana; ?>" class="well span3 top-block">
+				<a data-rel="tooltip" title="<?php //echo $venta_semana; ?>" class="well span3 top-block">
 					<span class="icon32 icon-red icon-shopping-cart"></span>
 					<div>Ventas semanal</div>
-					<div><?php echo String::formatoNumero($venta_semana); ?></div>
+					<div><?php //echo String::formatoNumero($venta_semana); ?></div>
 				</a>
 
-				<a data-rel="tooltip" title="<?php echo $venta_mes; ?>" class="well span3 top-block">
+				<a data-rel="tooltip" title="<?php //echo $venta_mes; ?>" class="well span3 top-block">
 					<span class="icon32 icon-color icon-shopping-cart"></span>
 					<div>Ventas del mes</div>
-					<div><?php echo String::formatoNumero($venta_mes); ?></div>
+					<div><?php //echo String::formatoNumero($venta_mes); ?></div>
 				</a>
       <?php
       $tienep = $this->usuarios_model->tienePrivilegioDe('', 'reportes/bajos_inventario/');
       ?>
-        <a <?php echo ($tienep? 'href="'.base_url('panel/reportes/bajos_inventario').'" target="_blank"': ''); ?> data-rel="tooltip" title="<?php echo $bajos_inventario; ?>" class="well span3 top-block">
+        <a <?php echo ($tienep? 'href="'.base_url('panel/reportes/bajos_inventario').'" target="_blank"': ''); ?> data-rel="tooltip" title="<?php //echo $bajos_inventario; ?>" class="well span3 top-block">
           <span class="icon32 icon-color icon-th-list"></span>
           <div>Productos bajos inventario</div>
-          <div><?php echo $bajos_inventario; ?></div>
+          <div><?php //echo $bajos_inventario; ?></div>
         </a>
 			</div> -->
       <?php echo $cuentas; ?>

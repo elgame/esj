@@ -129,7 +129,8 @@
             <div class="box-content">
               <div class="row-fluid">
                 <div class="span7">
-                  <?php if(isset($_GET['p']) || isset($_GET['f'])){ ?>
+                  <?php if( ( $accion === 'sa' || $accion === 'f' || $accion === 'p' || $accion === 'b') &&
+                            ($this->input->post('ptipo') === 'en') ){ ?>
                   <input type="hidden" name="pno_lote" id="pno_lote" value="<?php echo $_POST['pno_lote']; ?>">
                   <?php } ?>
                   <div class="control-group" style="margin:0px 0px 2px 0px;">

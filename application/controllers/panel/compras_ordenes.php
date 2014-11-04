@@ -16,6 +16,9 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/imprimir_entrada/',
+
+    'compras_ordenes/rpt_gastos_pdf/',
+    'compras_ordenes/rpt_gastos_xls/',
     );
 
   public function _remap($method){
@@ -439,6 +442,46 @@ class compras_ordenes extends MY_Controller {
     {
       $this->load->view('panel/compras_ordenes/print_orden_compra');
     }
+  }
+
+  /**
+   * Reportes
+   * @return [type] [description]
+   */
+  public function rpt_gastos()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.treeview.css', 'screen')
+    ));
+    $this->carabiner->js(array(
+      array('libs/jquery.treeview.js'),
+      array('panel/productos_salidas/rpt_gastos.js'),
+    ));
+
+    $this->load->model('compras_areas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte gastos');
+
+    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $this->compras_areas_model->class_treeAreas = 'treeviewcustom';
+    $params['vehiculos'] = $this->compras_areas_model->getFrmAreas();
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/compras_ordenes/rpt_gastos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rpt_gastos_pdf()
+  {
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->rpt_gastos_pdf();
+  }
+  public function rpt_gastos_xls()
+  {
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->rpt_gastos_xls();
   }
 
   /*

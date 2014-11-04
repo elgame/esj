@@ -671,7 +671,8 @@ class String{
     $dias = array();
     for ($i = 0; $i < $xdias; $i++)
     {
-      $dias[] = date("Y-m-d", strtotime($fecha) + 86400 * $i);
+      $dias[] = date("Y-m-d", strtotime($fecha.' +'.$i.' day'));
+      // $dias[] = date("Y-m-d", strtotime($fecha) + 86400 * $i);
     }
 
     return $dias;

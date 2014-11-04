@@ -12,6 +12,8 @@
     eventBtnAddProducto();
     eventBtnDelProducto();
     eventCantKeypress();
+
+    copyCodigoAll();
   });
 
   /*
@@ -52,7 +54,7 @@
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: 'p'
+              tipo: ''
             },
             success: function (data) {
               response(data)
@@ -66,13 +68,17 @@
       selectFirst: true,
       select: function( event, ui ) {
         var $fconcepto    = $(this),
-            $fcodigo     = $('#fcodigo'),
-            $fconceptoId   = $('#fconceptoId'),
-            $fcantidad     = $('#fcantidad');
+            $fcodigo          = $('#fcodigo'),
+            $fconceptoId      = $('#fconceptoId'),
+            $fcantidad        = $('#fcantidad'),
+            $ftipoproducto    = $("#ftipoproducto"),
+            $fprecio_unitario = $("#fprecio_unitario");
 
         $fconcepto.css("background-color", "#B6E7FF");
         $fcodigo.val(ui.item.item.codigo);
         $fconceptoId.val(ui.item.id);
+        $ftipoproducto.val(ui.item.item.tipo_familia);
+        $fprecio_unitario.val(ui.item.item.precio_unitario);
         $fcantidad.val('1');
       }
     }).on("keydown", function(event) {
@@ -81,6 +87,8 @@
         $("#fcodigo").val("");
         $('#fconceptoId').val('');
         $('#fcantidad').val('');
+        $("#ftipoproducto").val('');
+        $("#fprecio_unitario").val('');
       }
     });
   };
@@ -103,6 +111,7 @@
                 'concepto': data[0].nombre,
                 'id': data[0].id_producto,
                 'cantidad': '1',
+                'tipo_prod': data[0].tipo_familia,
               };
 
               addProducto(producto);
@@ -125,6 +134,8 @@
           $fconcepto   = $('#fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId = $('#fconceptoId'),
           $fcantidad   = $('#fcantidad').css({'background-color': '#FFF'}),
+          $ftipoproducto = $("#ftipoproducto"),
+          $fprecio_unitario = $("#fprecio_unitario"),
 
           campos = [$fcantidad],
           producto,
@@ -143,7 +154,7 @@
 
       // Si el tipo de orden es producto entonces verifica si se selecciono
       // un producto, si no no deja agregar descripciones.
-      if ($fconceptoId.val() == '') {
+      if ($fconceptoId.val() == '' || $ftipoproducto.val() == '') {
         $fconcepto.css({'background-color': '#FDFC9A'});
         error = true;
       }
@@ -163,6 +174,8 @@
           'concepto': $fconcepto.val(),
           'id': $fconceptoId.val(),
           'cantidad': $fcantidad.val(),
+          'tipo_prod': $ftipoproducto.val(),
+          'precio_unitario': $fprecio_unitario.val(),
         };
 
         addProducto(producto);
@@ -247,6 +260,13 @@
       // htmlPresen += '</select>';
 
       $trHtml = $('<tr>' +
+                  '<td style="width: 60px;">'+
+                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
+                    '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                    '<input type="hidden" name="tipoProducto[]" value="'+producto.tipo_prod+'">'+
+                    '<input type="hidden" name="precioUnit[]" value="'+(producto.precio_unitario||'0')+'">'+
+                    '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
+                  '</td>'+
                   '<td style="width: 70px;">' +
                     producto.codigo +
                     '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
@@ -276,6 +296,19 @@
       // $('.jump'+indexJump).focus();
     }
   }
+
+  var copyCodigoAll = function() {
+    $("#chkcopydatos").on('click', function(event) {
+      var obj = $("#table-productos tbody tr:first"),
+      codigo = obj.find('#codigoArea'),
+      codigoid = obj.find('#codigoAreaId');
+      $("#table-productos tbody tr").each(function(index, el) {
+        $(this).find('#codigoArea').val(codigo.val()).css('background-color', codigo.css('background-color'));
+        $(this).find('#codigoAreaId').val(codigoid.val()).css('background-color', codigo.css('background-color'));
+      });
+    });
+  }
+
   /*
    |------------------------------------------------------------------------
    | Helpers

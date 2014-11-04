@@ -93,109 +93,243 @@
 										  			</tr>
 										  		</thead>
 										  		<tbody>
+										  		<?php if (isset($info['psalidas2'][0]) && is_array($info['psalidas2'][0])) {
+										  			foreach ($info['psalidas2'][0] as $key => $value) {
+										  		?>
 										  			<tr>
-										  				<td>Cajas</td>
+										  			<?php if($key == 0) { ?>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Cajas</td>
+										  			<?php }else{ ?>
+										  				<td><button type="button" class="btn btn-danger btnRemoveM"><i class="icon-remove"></i></button></td>
+										  			<?php } ?>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->nombre: ''); ?>" data-xcajas="1" data-next="ps_papel">
-										  					<input type="hidden" name="ps_id[]" id="ps_caja_id" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo (isset($value)? $value->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_papel">
+										  					<input type="hidden" name="ps_id[]" id="ps_caja_id" value="<?php echo (isset($value)? $value->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="1">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo (isset($info['psalidas'][0])? $info['psalidas'][0]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo (isset($value)? $value->cantidad: ''); ?>" class="sikey span12 vpositive">
 										  				</td>
 										  			</tr>
+										  		<?php
+										  			}
+										  		} else { ?>
+										  			<tr>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Cajas</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_caja" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][0])? $info['psalidas2'][0]->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_papel">
+										  					<input type="hidden" name="ps_id[]" id="ps_caja_id" value="<?php echo (isset($info['psalidas2'][0])? $info['psalidas2'][0]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="1">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_caja_num" value="<?php echo (isset($info['psalidas2'][0])? $info['psalidas2'][0]->cantidad: ''); ?>" class="sikey span12 vpositive">
+										  				</td>
+										  			</tr>
+										  		<?php } ?>
 										  			<tr>
 										  				<td>Hojas de papel</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_papel" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->nombre: ''); ?>" data-next="fhojaspapel">
-										  					<input type="hidden" name="ps_id[]" id="ps_papel_id" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_papel" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][1])? $info['psalidas2'][1]->nombre: ''); ?>" data-nextttt="fhojaspapel">
+										  					<input type="hidden" name="ps_id[]" id="ps_papel_id" value="<?php echo (isset($info['psalidas2'][1])? $info['psalidas2'][1]->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="2">
 										  				</td>
 										  				<td>
-										  					<select name="fhojaspapel" id="fhojaspapel" class="sikey span12" data-next="ps_fleje">
-															  	<option value="0" <?php echo set_select('ps_num[]', 0, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad: '')); ?>>Sin papel</option>
-															  	<option value="2" <?php echo set_select('ps_num[]', 2, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/2: '')); ?>>2 Hojas</option>
-															  	<option value="4" <?php echo set_select('ps_num[]', 4, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/4: '')); ?>>4 Hojas</option>
-															  	<option value="7" <?php echo set_select('ps_num[]', 7, FALSE, (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad/7: '')); ?>>7 Hojas</option>
+										  					<select name="fhojaspapel" id="fhojaspapel" class="sikey span12" data-nextttt="ps_fleje">
+															  	<option value="0" <?php echo set_select('ps_num[]', 0, FALSE, (isset($info['psalidas2'][1])? $info['psalidas2'][1]->cantidad: '')); ?>>Sin papel</option>
+															  	<option value="2" <?php echo set_select('ps_num[]', 2, FALSE, (isset($info['psalidas2'][1])? $info['psalidas2'][1]->cantidad/2: '')); ?>>2 Hojas</option>
+															  	<option value="4" <?php echo set_select('ps_num[]', 4, FALSE, (isset($info['psalidas2'][1])? $info['psalidas2'][1]->cantidad/4: '')); ?>>4 Hojas</option>
+															  	<option value="7" <?php echo set_select('ps_num[]', 7, FALSE, (isset($info['psalidas2'][1])? $info['psalidas2'][1]->cantidad/7: '')); ?>>7 Hojas</option>
 															  </select>
-										  					<input type="text" name="ps_num[]" id="ps_papel_num" value="<?php echo (isset($info['psalidas'][1])? $info['psalidas'][1]->cantidad: ''); ?>" class="span12">
+										  					<input type="text" name="ps_num[]" id="ps_papel_num" value="<?php echo (isset($info['psalidas2'][1])? $info['psalidas2'][1]->cantidad: ''); ?>" class="span12">
 										  				</td>
 										  			</tr>
+										  		<?php if (isset($info['psalidas2'][2]) && is_array($info['psalidas2'][2])) {
+										  			foreach ($info['psalidas2'][2] as $key => $value) {
+										  		?>
 										  			<tr>
-										  				<td>Fleje</td>
+										  			<?php if($key == 0) { ?>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Fleje</td>
+										  			<?php }else{ ?>
+										  				<td><button type="button" class="btn btn-danger btnRemoveM"><i class="icon-remove"></i></button></td>
+										  			<?php } ?>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->nombre: ''); ?>" data-next="ps_fleje_num">
-										  					<input type="hidden" name="ps_id[]" id="ps_fleje_id" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo (isset($value)? $value->nombre: ''); ?>" data-nextttt="ps_fleje_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_fleje_id" value="<?php echo (isset($value)? $value->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="3">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo (isset($info['psalidas'][2])? $info['psalidas'][2]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_grapa">
+										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo (isset($value)? $value->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_grapa">
 										  				</td>
 										  			</tr>
+										  		<?php
+										  			}
+										  		} else { ?>
+										  			<tr>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Fleje</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_fleje" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][2])? $info['psalidas2'][2]->nombre: ''); ?>" data-nextttt="ps_fleje_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_fleje_id" value="<?php echo (isset($info['psalidas2'][2])? $info['psalidas2'][2]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="3">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_fleje_num" value="<?php echo (isset($info['psalidas2'][2])? $info['psalidas2'][2]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_grapa">
+										  				</td>
+										  			</tr>
+										  		<?php } ?>
 										  			<tr>
 										  				<td>Grapa</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_grapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->nombre: ''); ?>" data-xcajas="20" data-next="ps_grapa_num">
-										  					<input type="hidden" name="ps_id[]" id="ps_grapa_id" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_grapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][3])? $info['psalidas2'][3]->nombre: ''); ?>" data-xcajas="20" data-nextttt="ps_grapa_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_grapa_id" value="<?php echo (isset($info['psalidas2'][3])? $info['psalidas2'][3]->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="4">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_grapa_num" value="<?php echo (isset($info['psalidas'][3])? $info['psalidas'][3]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_tapa">
+										  					<input type="text" name="ps_num[]" id="ps_grapa_num" value="<?php echo (isset($info['psalidas2'][3])? $info['psalidas2'][3]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_tapa">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Tapa</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_tapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->nombre: ''); ?>" data-next="ps_tapa_num">
-										  					<input type="hidden" name="ps_id[]" id="ps_tapa_id" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_tapa" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][4])? $info['psalidas2'][4]->nombre: ''); ?>" data-nextttt="ps_tapa_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_tapa_id" value="<?php echo (isset($info['psalidas2'][4])? $info['psalidas2'][4]->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="5">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_tapa_num" value="<?php echo (isset($info['psalidas'][4])? $info['psalidas'][4]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_ficha">
+										  					<input type="text" name="ps_num[]" id="ps_tapa_num" value="<?php echo (isset($info['psalidas2'][4])? $info['psalidas2'][4]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_ficha">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Fichas</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_ficha" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->nombre: ''); ?>" data-next="ps_ficha_num">
-										  					<input type="hidden" name="ps_id[]" id="ps_ficha_id" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_ficha" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][5])? $info['psalidas2'][5]->nombre: ''); ?>" data-nextttt="ps_ficha_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_ficha_id" value="<?php echo (isset($info['psalidas2'][5])? $info['psalidas2'][5]->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="6">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_ficha_num" value="<?php echo (isset($info['psalidas'][5])? $info['psalidas'][5]->cantidad: ''); ?>" class="sikey span12 vpos-int" data-next="ps_tarima">
+										  					<input type="text" name="ps_num[]" id="ps_ficha_num" value="<?php echo (isset($info['psalidas2'][5])? $info['psalidas2'][5]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_tarima">
 										  				</td>
 										  			</tr>
 										  			<tr>
 										  				<td>Tarima</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_tarima" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][6])? $info['psalidas'][6]->nombre: ''); ?>" data-next="ps_etiqueta">
-										  					<input type="hidden" name="ps_id[]" id="ps_tarima_id" value="<?php echo (isset($info['psalidas'][6])? $info['psalidas'][6]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_tarima" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][6])? $info['psalidas2'][6]->nombre: ''); ?>" data-nextttt="ps_etiqueta">
+										  					<input type="hidden" name="ps_id[]" id="ps_tarima_id" value="<?php echo (isset($info['psalidas2'][6])? $info['psalidas2'][6]->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="7">
 										  				</td>
 										  				<td>
 										  					<input type="text" name="ps_num[]" id="ps_tarima_num" value="1" class="sikey span12 noclear" readonly>
 										  				</td>
 										  			</tr>
+										  		<?php if (isset($info['psalidas2'][7]) && is_array($info['psalidas2'][7])) {
+										  			foreach ($info['psalidas2'][7] as $key => $value) {
+										  		?>
 										  			<tr>
-										  				<td>Etiqueta</td>
+										  			<?php if($key == 0) { ?>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Etiqueta</td>
+										  			<?php }else{ ?>
+										  				<td><button type="button" class="btn btn-danger btnRemoveM"><i class="icon-remove"></i></button></td>
+										  			<?php } ?>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->nombre: ''); ?>" data-xcajas="1" data-next="ps_arpilla">
-										  					<input type="hidden" name="ps_id[]" id="ps_etiqueta_id" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo (isset($value)? $value->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_arpilla">
+										  					<input type="hidden" name="ps_id[]" id="ps_etiqueta_id" value="<?php echo (isset($value)? $value->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="8">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo (isset($info['psalidas'][7])? $info['psalidas'][7]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo (isset($value)? $value->cantidad: ''); ?>" class="sikey span12 vpositive">
 										  				</td>
 										  			</tr>
+										  		<?php
+										  			}
+										  		} else { ?>
 										  			<tr>
-										  				<td>Arpilla</td>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Etiqueta</td>
 										  				<td>
-										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->nombre: ''); ?>" data-xcajas="1" data-next="btn_ps_cerrar">
-										  					<input type="hidden" name="ps_id[]" id="ps_arpilla_id" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->id_producto: ''); ?>">
+										  					<input type="text" name="ps[]" id="ps_etiqueta" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][7])? $info['psalidas2'][7]->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_arpilla">
+										  					<input type="hidden" name="ps_id[]" id="ps_etiqueta_id" value="<?php echo (isset($info['psalidas2'][7])? $info['psalidas2'][7]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="8">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_etiqueta_num" value="<?php echo (isset($info['psalidas2'][7])? $info['psalidas2'][7]->cantidad: ''); ?>" class="sikey span12 vpositive">
+										  				</td>
+										  			</tr>
+										  		<?php } ?>
+
+										  		<?php if (isset($info['psalidas2'][8]) && is_array($info['psalidas2'][8])) {
+										  			foreach ($info['psalidas2'][8] as $key => $value) {
+										  		?>
+										  			<tr>
+										  			<?php if($key == 0) { ?>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Arpilla</td>
+										  			<?php }else{ ?>
+										  				<td><button type="button" class="btn btn-danger btnRemoveM"><i class="icon-remove"></i></button></td>
+										  			<?php } ?>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo (isset($value)? $value->nombre: ''); ?>" data-xcajas="1" data-nextttt="btn_ps_cerrar">
+										  					<input type="hidden" name="ps_id[]" id="ps_arpilla_id" value="<?php echo (isset($value)? $value->id_producto: ''); ?>">
 										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="9">
 										  				</td>
 										  				<td>
-										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo (isset($info['psalidas'][8])? $info['psalidas'][8]->cantidad: ''); ?>" class="sikey span12" readonly>
+										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo (isset($value)? $value->cantidad: ''); ?>" class="sikey span12 vpositive">
+										  				</td>
+										  			</tr>
+										  		<?php
+										  			}
+										  		} else { ?>
+										  			<tr>
+										  				<td><button type="button" class="btn btn-info btnAddM"><i class="icon-plus"></i></button> Arpilla</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_arpilla" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][8])? $info['psalidas2'][8]->nombre: ''); ?>" data-xcajas="1" data-nextttt="btn_ps_cerrar">
+										  					<input type="hidden" name="ps_id[]" id="ps_arpilla_id" value="<?php echo (isset($info['psalidas2'][8])? $info['psalidas2'][8]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="9">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_arpilla_num" value="<?php echo (isset($info['psalidas2'][8])? $info['psalidas2'][8]->cantidad: ''); ?>" class="sikey span12 vpositive">
+										  				</td>
+										  			</tr>
+										  		<?php } ?>
+
+										  			<tr>
+										  				<td>Esquineros</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_esquinero" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][9])? $info['psalidas2'][9]->nombre: ''); ?>" data-nextttt="ps_esquinero_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_esquinero_id" value="<?php echo (isset($info['psalidas2'][9])? $info['psalidas2'][9]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="10">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_esquinero_num" value="<?php echo (isset($info['psalidas2'][9])? $info['psalidas2'][9]->cantidad: '4'); ?>" class="sikey span12 vpositive" data-nextttt="ps_bolsaperf">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Bolsa perforada</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_bolsaperf" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][10])? $info['psalidas2'][10]->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_bolsaperf_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_bolsaperf_id" value="<?php echo (isset($info['psalidas2'][10])? $info['psalidas2'][10]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="11">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_bolsaperf_num" value="<?php echo (isset($info['psalidas2'][10])? $info['psalidas2'][10]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_malla">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Malla</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_malla" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][11])? $info['psalidas2'][11]->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_malla_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_malla_id" value="<?php echo (isset($info['psalidas2'][11])? $info['psalidas2'][11]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="12">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_malla_num" value="<?php echo (isset($info['psalidas2'][11])? $info['psalidas2'][11]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="ps_filverde">
+										  				</td>
+										  			</tr>
+										  			<tr>
+										  				<td>Filverde</td>
+										  				<td>
+										  					<input type="text" name="ps[]" id="ps_filverde" class="sikey span12 prod_salida" value="<?php echo (isset($info['psalidas2'][12])? $info['psalidas2'][12]->nombre: ''); ?>" data-xcajas="1" data-nextttt="ps_filverde_num">
+										  					<input type="hidden" name="ps_id[]" id="ps_filverde_id" value="<?php echo (isset($info['psalidas2'][12])? $info['psalidas2'][12]->id_producto: ''); ?>">
+										  					<input type="hidden" name="ps_row[]" id="ps_caja_row" value="13">
+										  				</td>
+										  				<td>
+										  					<input type="text" name="ps_num[]" id="ps_filverde_num" value="<?php echo (isset($info['psalidas2'][12])? $info['psalidas2'][12]->cantidad: ''); ?>" class="sikey span12 vpositive" data-nextttt="btn_ps_cerrar">
 										  				</td>
 										  			</tr>
 										  		</tbody>

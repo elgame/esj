@@ -876,11 +876,12 @@ class cuentas_cobrar_model extends privilegios_model{
 					'a_nombre_de' => $inf_factura['cliente']->nombre_fiscal,
 					));
 
+		$fecha_pago = $this->input->post('dfecha');
 		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
 		{
 			$_GET['id']   = $value;
 			$_GET['tipo'] = $_POST['tipos'][$key];
-			$data = array('fecha'        => $this->input->post('dfecha'),
+			$data = array('fecha'        => $fecha_pago,
 						'concepto'       => $this->input->post('dconcepto'),
 						'total'          => $_POST['montofv'][$key], //$total,
 						'id_cuenta'      => $this->input->post('dcuenta'),
@@ -899,6 +900,7 @@ class cuentas_cobrar_model extends privilegios_model{
 					// $this->db->insert('banco_movimientos_ventas_remision', array('id_movimiento' => $resp['id_movimiento'], 'id_abono_venta_remision' => $resa['id_abono']));
 			}
 		}
+		$_POST['dfecha'] = $fecha_pago;
 
 		return $resp;
 	}
@@ -983,9 +985,6 @@ class cuentas_cobrar_model extends privilegios_model{
 			$this->db->update($camps[2], array('status' => 'pa'), "{$camps[0]} = {$id}");
 		}
 
-		// Verifica si es pago probicionado y crea la factura
-		$this->creaFacturaAbono($data['id_abono']);
-
 		//Si se hiso un pago mayor se registra a la factura
 		if ($pago_mayor > 0)
 		{
@@ -1005,6 +1004,9 @@ class cuentas_cobrar_model extends privilegios_model{
 			unset($data_mayor['id_cuenta'], $data_mayor['ref_movimiento']);
 			$this->db->insert($camps[1].'_otros', $data_mayor);
 		}
+
+		// Verifica si es pago probicionado y crea la factura
+		$this->creaFacturaAbono($data['id_abono']);
 
 		//Registra el rastro de la factura o remision que se abono en bancos (si no es masivo)
 		if(isset($resp['id_movimiento']))
@@ -1159,10 +1161,10 @@ class cuentas_cobrar_model extends privilegios_model{
 		                           FROM facturacion f LEFT JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
 		                           WHERE f.id_factura = {$data_abono->id_factura} AND fa.id_abono <= {$id_abono}
 		                           GROUP BY f.id_factura")->row();
+
 		// Valida que se auna factura y que sea en parcialidades
 		if ($data_val->is_factura == 't' && ($data_val->status == 'p' || $data_val->num_abonos > 1)) {
 	    $this->load->library('cfdi');
-
 			$data_factura = $this->facturacion_model->getInfoFactura($data_abono->id_factura);
 
 			$data_folio = $this->facturacion_model->getFolioSerie('AB', $data_factura['info']->empresa->id_empresa, "es_nota_credito = 'f'");
@@ -1228,6 +1230,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$_POST['dcondicion_pago']           = 'co';
 			$_POST['dplazo_credito']            = 0;
 
+			$this->clearPostFactura();
 			$_POST['prod_ddescripcion'][]       = 'Abono a factura '.$data_factura['info']->serie.$data_factura['info']->folio;
 			$_POST['prod_did_prod'][]           = '';
 			$_POST['pallets_id'][]              = '';
@@ -1289,6 +1292,31 @@ class cuentas_cobrar_model extends privilegios_model{
 			return $result;
 		}
 
+	}
+
+	public function clearPostFactura()
+	{
+		unset($_POST['prod_ddescripcion']);
+		unset($_POST['prod_did_prod']);
+		unset($_POST['pallets_id']);
+		unset($_POST['remisiones_id']);
+		unset($_POST['id_unidad_rendimiento']);
+		unset($_POST['id_size_rendimiento']);
+		unset($_POST['prod_dclase']);
+		unset($_POST['prod_dpeso']);
+		unset($_POST['prod_dmedida']);
+		unset($_POST['prod_dmedida_id']);
+		unset($_POST['prod_dcantidad']);
+		unset($_POST['prod_dcajas']);
+		unset($_POST['prod_dkilos']);
+		unset($_POST['prod_dpreciou']);
+		unset($_POST['prod_diva_porcent']);
+		unset($_POST['prod_diva_total']);
+		unset($_POST['dreten_iva']);
+		unset($_POST['prod_dreten_iva_total']);
+		unset($_POST['prod_dreten_iva_porcent']);
+		unset($_POST['prod_importe']);
+		unset($_POST['isCert']);
 	}
 
   /**
@@ -1471,7 +1499,7 @@ class cuentas_cobrar_model extends privilegios_model{
                     FROM
                       facturacion AS f
                         INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-                    WHERE f.status <> 'ca' AND f.status <> 'b'
+                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
@@ -1485,6 +1513,7 @@ class cuentas_cobrar_model extends privilegios_model{
                     FROM
                       facturacion AS f
                     WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                    	AND f.id_abono_factura IS NULL
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(f.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
@@ -1492,7 +1521,7 @@ class cuentas_cobrar_model extends privilegios_model{
                   GROUP BY d.id_cliente, d.id_factura
                 ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-                AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
+                AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
               UNION ALL
@@ -1565,7 +1594,7 @@ class cuentas_cobrar_model extends privilegios_model{
                     FROM
                       facturacion AS f
                         INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-                    WHERE f.status <> 'ca' AND f.status <> 'b'
+                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(fa.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
@@ -1579,6 +1608,7 @@ class cuentas_cobrar_model extends privilegios_model{
                     FROM
                       facturacion AS f
                     WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                      AND f.id_abono_factura IS NULL
                       AND f.id_cliente = '{$cliente->id_cliente}'
                       AND Date(f.fecha) <= '{$fecha2}'{$sql}
                     GROUP BY f.id_cliente, f.id_factura
@@ -1586,6 +1616,7 @@ class cuentas_cobrar_model extends privilegios_model{
                   GROUP BY d.id_cliente, d.id_factura
                 ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
+              	AND f.id_abono_factura IS NULL
                 AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]} AND
                 Date(f.fecha + (f.plazo_credito || ' days')::interval) < '{$fecha2}'
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
@@ -1611,7 +1642,7 @@ class cuentas_cobrar_model extends privilegios_model{
   					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
   				FROM facturacion as f
   				WHERE id_cliente = {$cliente->id_cliente}
-  					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL
+  					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL AND f.id_abono_factura IS NULL
   					AND (Date(fecha) >= '{$fecha1}' AND Date(fecha) <= '{$fecha2}')
   					{$sql} {$sqlext[1]}
   				ORDER BY fecha ASC, folio ASC");
@@ -1628,15 +1659,23 @@ class cuentas_cobrar_model extends privilegios_model{
   					FROM (
   						(
   							SELECT
-  								id_abono,
-  								''::text AS serie,
-  								id_abono AS folio,
-  								Date(fecha) AS fecha,
-  								('Pago del cliente (' || ref_movimiento || ')')::text AS concepto,
-  								total AS abono
-  							FROM
-  								facturacion_abonos as fa
-  							WHERE id_factura = {$factura->id_factura} AND Date(fecha) <= '{$fecha2}'
+									fa.id_abono,
+									(CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
+									(CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
+									Date(fa.fecha) AS fecha,
+									(CASE WHEN abs.num=1 THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
+									fa.total AS abono
+								FROM
+									facturacion_abonos as fa
+									LEFT JOIN (
+										SELECT id_factura, Count(id_abono) AS num
+										FROM facturacion_abonos
+										WHERE id_factura = {$factura->id_factura}
+											AND Date(fecha) <= '{$fecha2}'
+										GROUP BY id_factura
+									) abs ON abs.id_factura = fa.id_factura
+									LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
+								WHERE fa.id_factura = {$factura->id_factura} AND Date(fa.fecha) <= '{$fecha2}'
   						)
   						UNION
   						(
@@ -1650,7 +1689,7 @@ class cuentas_cobrar_model extends privilegios_model{
   							FROM
   								facturacion
   							WHERE status <> 'ca' AND status <> 'b' AND id_nc = {$factura->id_factura}
-  								AND Date(fecha) <= '{$fecha2}'
+  								AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
   						)
   					) AS ffs
   					ORDER BY id_abono");
@@ -2055,7 +2094,7 @@ class cuentas_cobrar_model extends privilegios_model{
             INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
             INNER JOIN clientes AS p ON p.id_cliente = f.id_cliente
             INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-          WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
+          WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f' AND f.id_abono_factura IS NULL
             AND (Date(fa.fecha) >= '{$fecha1}' AND Date(fa.fecha) <= '{$fecha2}')
             {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
           ORDER BY {$order_by}")->result();

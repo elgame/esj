@@ -14,9 +14,11 @@ var addpallets = (function($){
   fid_clasificacion, fclasificacion,
   funidad, fidunidad,
   fcalibre, fidcalibre,
-  fetiqueta, fidetiqueta;
+  fetiqueta, fidetiqueta, contadorInputs;
 
   function init(){
+    contadorInputs = 0;
+
     formPallet();
 
     tbody             = $("#tblrendimientos");
@@ -37,6 +39,39 @@ var addpallets = (function($){
 
     modalEvent();
     changePapel();
+
+    addNewProductsSalida();
+  }
+
+  function addNewProductsSalida () {
+    $(".btnAddM").on('click', function(event) {
+      var $this = $(this), $tr = $this.parents('tr'),
+      $trnew = $tr.clone(), $trInput = $trnew.find(".prod_salida");
+      $trnew.find('.btnAddM').parents('td').html('<button type="button" class="btn btn-danger btnRemoveM"><i class="icon-remove"></i></button> ');
+      // $trnew.find('.vpositive').numeric({ negative: false });
+      $trnew.find('[id^='+$trInput.attr('id')+']').not('input[name="ps_row[]"]').each(function(index, el) {
+        $(this).val('');
+      });
+      $tr.after($trnew);
+      $trInput.focus();
+
+      $.fn.removeNumeric();
+      $('#form-search').keyJump.off();
+      $('#form-search').keyJump({
+        'next': 13,
+      });
+      $.fn.setNumericDefault();
+      ++contadorInputs;
+    });
+
+    // Eliminar
+    $('#modalProdutosSal').on('click', '.btnRemoveM', function(event) {
+      $('#form-search').keyJump.off();
+      $(this).parents('tr').remove();
+      $('#form-search').keyJump({
+        'next': 13,
+      });
+    });
   }
 
   function modalEvent() {
@@ -78,52 +113,56 @@ var addpallets = (function($){
 
   function asignaAutocomplets(){
     // Autocomplete de productos dar de baja
-    $(".prod_salida").autocomplete({
-      source: function (request, response) {
-        $.ajax({
-          url: base_url + 'panel/compras_ordenes/ajax_producto/',
-          dataType: 'json',
-          data: {
-            term : request.term,
-            ide: '2',
-            tipo: 'p'
-          },
-          success: function (data) {
-            response(data)
-          }
-        });
-      },
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        var $this = $(this), $fcajas = $("#fcajas");
+    $("#modalProdutosSal").on('keyup.autocomplete', '.prod_salida', function(event) {
+      event.preventDefault();
+      /* Act on the event */
+      $(".prod_salida").autocomplete({
+        source: function (request, response) {
+          $.ajax({
+            url: base_url + 'panel/compras_ordenes/ajax_producto/',
+            dataType: 'json',
+            data: {
+              term : request.term,
+              ide: '2',
+              tipo: 'p'
+            },
+            success: function (data) {
+              response(data)
+            }
+          });
+        },
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this), $fcajas = $("#fcajas"), $tr = $this.parents('tr');
 
-        $this.css("background-color", "#B6E7FF");
-        $("#"+$this.attr('id')+"_id").val(ui.item.id);
+          $this.css("background-color", "#B6E7FF");
+          $("#"+$this.attr('id')+"_id", $tr).val(ui.item.id);
 
-        // Verifica si ese campo multimipla por una cantidad, lo coloca en la cantidad el resultado
-        if ($this.attr('data-xcajas') != undefined) {
-          if( $.isNumeric($fcajas.val()) ) {
-            $("#"+$this.attr('id')+"_num").val( parseFloat($this.attr('data-xcajas'))*parseFloat($fcajas.val()) );
-          }else {
-            noty({"text": 'Asigne las cajas del Pallet', "layout":"topRight", "type": 'error'});
+          // Verifica si ese campo multimipla por una cantidad, lo coloca en la cantidad el resultado
+          if ($this.attr('data-xcajas') != undefined) {
+            if( $.isNumeric($fcajas.val()) ) {
+              $("#"+$this.attr('id')+"_num", $tr).val( parseFloat($this.attr('data-xcajas'))*parseFloat($fcajas.val()) );
+            }else {
+              noty({"text": 'Asigne las cajas del Pallet', "layout":"topRight", "type": 'error'});
 
-            $this.css("background-color", "#FDFC9A");
-            setTimeout(function(){
-              $this.val("");
-            }, 200);
-            $("#"+$this.attr('id')+"_id").val("");
+              $this.css("background-color", "#FDFC9A");
+              setTimeout(function(){
+                $this.val("");
+              }, 200);
+              $("#"+$this.attr('id')+"_id", $tr).val("");
+            }
           }
         }
-      }
-    }).on("keydown", function(event) {
-      var $this = $(this);
-      if(event.which == 8 || event.which == 46) {
-        $this.css("background-color", "#FDFC9A");
-        $("#"+$this.attr('id')+"_id").val("");
-        $("#"+$this.attr('id')+"_num:not(.noclear)").val( "" );
+      }).on("keydown", function(event) {
+        var $this = $(this), $tr = $this.parents('tr');
+        if(event.which == 8 || event.which == 46) {
+          $this.css("background-color", "#FDFC9A");
+          $("#"+$this.attr('id')+"_id", $tr).val("");
+          $("#"+$this.attr('id')+"_num:not(.noclear)", $tr).val( "" );
 
-      }
+        }
+      });
     });
 
     $("input#fcalibre_fijo").autocomplete({

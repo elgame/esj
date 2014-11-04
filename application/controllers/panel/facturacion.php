@@ -362,7 +362,10 @@ class facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $response = $this->facturacion_model->cancelaFactura($_GET['id']);
 
-      redirect(base_url("panel/facturacion/?&msg={$response['msg']}"));
+      if(isset($_GET['sec']) && $_GET['sec'] == 'pp')
+        redirect(base_url("panel/facturacion/pago_parcialidad/?&msg={$response['msg']}"));
+      else
+        redirect(base_url("panel/facturacion/?&msg={$response['msg']}"));
     }
   }
 

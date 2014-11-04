@@ -30,20 +30,19 @@ class compras_areas_model extends CI_Model{
 
 		if($this->input->get('status') != '')
 		{
-			$sql .= " ca.status = '".$this->input->get('status')."'";
+			$sql .= " AND ca.status = '".$this->input->get('status')."'";
 		}else
-			$sql .= " ca.status = 't'";
+			$sql .= " AND ca.status = 't'";
 
 		if($this->input->get('fnombre') != '')
-			$sql = " AND ( lower(ca.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
-				lower(ca.codigo_fin) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+			$sql = " AND ( lower(ca.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
 		$query = BDUtil::pagination(
 			"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
 				cat.nombre AS tipo
 			FROM compras_areas ca
 				INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
-			WHERE {$sql}
+			WHERE 1 = 1 {$sql}
 			ORDER BY ca.codigo_fin ASC
 		", $params, true);
 		$res = $this->db->query($query['query']);
@@ -150,7 +149,7 @@ class compras_areas_model extends CI_Model{
 		$res = $this->db->query(" SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
 				FROM compras_areas
 				WHERE status = 't' {$sql}
-				ORDER BY nombre ASC
+				ORDER BY (id_area, codigo) ASC
 				LIMIT 20");
 
 		$response = array();
@@ -181,6 +180,12 @@ class compras_areas_model extends CI_Model{
 			else
 				$nombre = $data->nombre;
 			return $nombre;
+		}elseif($tipo === 'id') {
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).','.$data->id_area;
+			else
+				$nombre = $data->id_area;
+			return $nombre;
 		}else
 		{
 			if($data->id_padre != '')
@@ -191,6 +196,25 @@ class compras_areas_model extends CI_Model{
 		}
 	}
 
+	public function getHijos($id_area)
+	{
+		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre,
+																(SELECT Count(id_area) FROM compras_areas WHERE id_padre = ca.id_area) AS tiene_hijos
+		                           FROM compras_areas AS ca
+		                           WHERE id_padre = {$id_area}");
+		$nombre = '';
+		foreach ($data->result() as $key => $value) {
+			if ($value->tiene_hijos > 0) {
+				$nombre .= $this->getHijos($value->id_area).','.$value->id_area;
+			} else {
+				$nombre .= ','.$value->id_area;
+			}
+		}
+		return $nombre;
+	}
+
+
+	public $class_treeAreas = 'treeview';
 
 	public function getFrmAreas($id_submenu=0, $firs=true, $tipo=null, $showp=false){
 		$txt = "";
@@ -204,7 +228,7 @@ class compras_areas_model extends CI_Model{
 			->order_by('codigo_fin', 'asc')
 		->get();
 
-		$txt .= $firs? '<ul class="treeview">': '<ul>';
+		$txt .= $firs? '<ul class="'.$this->class_treeAreas.'">': '<ul>';
 		foreach($res->result() as $data){
 			$res1 = $this->db
 				->select('Count(id_area) AS num')

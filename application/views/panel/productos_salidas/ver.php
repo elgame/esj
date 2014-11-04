@@ -62,15 +62,21 @@
                 </div>
               </div>
 
-              <?php if ($modificar){ ?>
                 <div class="control-group">
                   <div class="controls">
                     <div class="well span9">
+              <?php if ($modificar){ ?>
                         <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;">Guardar</button>
+              <?php }
+                    echo $this->usuarios_model->getLinkPrivSm('productos_salidas/imprimir/', array(
+                      'params'   => 'id='.$salida['info'][0]->id_salida,
+                      'btn_type' => 'btn-info btn-large btn-block',
+                      'attrs' => array('target' => '_BLANK'))
+                    );
+              ?>
                     </div>
                   </div>
                 </div>
-              <?php } ?>
             </div>
           </div>
 
@@ -92,11 +98,17 @@
                           <th>PRODUCTO</th>
                           <th>CANT.</th>
                           <th>P.U.</th>
+                          <th>Importe</th>
                         </tr>
                       </thead>
                       <tbody>
 
-                        <?php foreach ($salida['info'][0]->productos as $key => $concepto) { ?>
+                        <?php
+                        $total = $importe = 0;
+                        foreach ($salida['info'][0]->productos as $key => $concepto) {
+                          $importe = floatval($concepto->precio_unitario*$concepto->cantidad);
+                          $total   += $importe;
+                          ?>
                           <tr>
                             <td style="width: 70px;">
                               <?php echo $concepto->codigo ?>
@@ -111,9 +123,18 @@
                             <td style="width: 90px;">
                               <input type="text" name="valorUnitario[]" value="<?php echo $concepto->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" readonly>
                             </td>
+                            <td style="width: 150px;">
+                              <input type="text" name="importe[]" value="<?php echo $importe ?>" id="valorUnitario" class="span12 vpositive" readonly>
+                            </td>
                           </tr>
                          <?php } ?>
                       </tbody>
+                      <tfoot>
+                        <tr>
+                          <th colspan="4"></th>
+                          <th><?php echo String::formatoNumero($total, 2, '$', false); ?></th>
+                        </tr>
+                      </tfoot>
                     </table>
                   </div>
                 </div>

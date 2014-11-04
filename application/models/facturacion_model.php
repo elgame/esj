@@ -2686,7 +2686,7 @@ class facturacion_model extends privilegios_model{
 
   public function generaFacturaPdf($idFactura, $path = null)
   {
-    include(APPPATH.'libraries/phpqrcode/qrlib.php');
+    include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
     $factura = $this->getInfoFactura($idFactura);
 

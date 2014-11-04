@@ -11,7 +11,7 @@
 
   });
 
-  var autocompleteCodigos = function autocompleteClasifiLive () {
+  var autocompleteCodigos = function () {
     $('#table-productos').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
         source: base_url+'panel/compras_areas/ajax_get_areasauto/',

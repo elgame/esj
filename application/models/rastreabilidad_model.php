@@ -1342,7 +1342,7 @@ class rastreabilidad_model extends CI_Model {
               COALESCE(Sum(bc.cajas), 0) AS bcajas_inds, COALESCE(Sum(bc.kilos), 0) AS bkilos_inds
             FROM bascula AS b
               LEFT JOIN (
-                SELECT id_bascula, cajas, kilos FROM bascula_compra WHERE id_calidad = 3
+                SELECT id_bascula, cajas, kilos FROM bascula_compra WHERE id_calidad In(3, 4)
               ) bc ON b.id_bascula = bc.id_bascula
             WHERE b.status = true AND b.tipo = 'en' AND b.accion IN('sa', 'p', 'b')
               {$sql1}
@@ -1368,8 +1368,7 @@ class rastreabilidad_model extends CI_Model {
         "SELECT c.id_clasificacion,
           Sum(rrc.rendimiento) AS rendimiento,
           Sum(rrc.rendimiento*rrc.kilos) AS kilos_total,
-          c.nombre AS clasificacion, u.nombre AS unidad,
-          ca.nombre AS calibre, e.nombre AS etiqueta,
+          c.nombre AS clasificacion,
           cas.nombre AS size, a.nombre AS area
         FROM rastria_rendimiento AS rr
           INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
@@ -1380,10 +1379,28 @@ class rastreabilidad_model extends CI_Model {
           INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
           INNER JOIN areas AS a ON a.id_area = rr.id_area
         WHERE rr.status = 't' {$sql2}
-        GROUP BY c.id_clasificacion, u.nombre, ca.nombre, e.nombre, cas.nombre, a.nombre
+        GROUP BY c.id_clasificacion, cas.nombre, a.nombre
         ORDER BY c.nombre ASC");
-      if($query->num_rows() > 0)
+      // "SELECT c.id_clasificacion,
+      //     Sum(rrc.rendimiento) AS rendimiento,
+      //     Sum(rrc.rendimiento*rrc.kilos) AS kilos_total,
+      //     c.nombre AS clasificacion, u.nombre AS unidad,
+      //     ca.nombre AS calibre, e.nombre AS etiqueta,
+      //     cas.nombre AS size, a.nombre AS area
+      //   FROM rastria_rendimiento AS rr
+      //     INNER JOIN rastria_rendimiento_clasif AS rrc ON rr.id_rendimiento = rrc.id_rendimiento
+      //     INNER JOIN clasificaciones AS c ON c.id_clasificacion = rrc.id_clasificacion
+      //     INNER JOIN unidades AS u ON u.id_unidad = rrc.id_unidad
+      //     INNER JOIN calibres AS ca ON ca.id_calibre = rrc.id_calibre
+      //     INNER JOIN etiquetas AS e ON e.id_etiqueta = rrc.id_etiqueta
+      //     INNER JOIN calibres AS cas ON cas.id_calibre = rrc.id_size
+      //     INNER JOIN areas AS a ON a.id_area = rr.id_area
+      //   WHERE rr.status = 't' {$sql2}
+      //   GROUP BY c.id_clasificacion, u.nombre, ca.nombre, e.nombre, cas.nombre, a.nombre
+      //   ORDER BY c.nombre ASC"
+      if($query->num_rows() > 0){
         $response['rendimientos'] = $query->result();
+      }
       $query->free_result();
 
 
@@ -1520,7 +1537,8 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetWidths($widths);
         $pdf->Row(array(
             $boleta->clasificacion,
-            $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
+            // $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
+            $boleta->size,
             String::formatoNumero($boleta->rendimiento, 2, '', false),
             String::formatoNumero($boleta->kilos_total, 2, '', false),
           ), false);

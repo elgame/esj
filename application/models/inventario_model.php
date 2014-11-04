@@ -811,7 +811,7 @@ class inventario_model extends privilegios_model{
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p' AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 				GROUP BY sp.id_producto
 			) AS sa ON sa.id_producto = p.id_producto
 			LEFT JOIN
@@ -827,7 +827,7 @@ class inventario_model extends privilegios_model{
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sa.status <> 'ca' AND Date(sa.fecha_registro) < '{$fecha}'
+				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p' AND Date(sa.fecha_registro) < '{$fecha}'
 				GROUP BY sp.id_producto
 			) AS sal_sa ON sal_sa.id_producto = p.id_producto
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
@@ -1047,7 +1047,7 @@ class inventario_model extends privilegios_model{
         SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
         FROM compras_salidas AS sa
         INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-        WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
+        WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
         )
       ) AS t
     ORDER BY fecha ASC");
@@ -1702,7 +1702,7 @@ class inventario_model extends privilegios_model{
                 SELECT cp.id_producto, 0 AS entrada, cp.cantidad AS salida
                 FROM compras_salidas cs
                   INNER JOIN compras_salidas_productos cp ON cs.id_salida = cp.id_salida
-                WHERE cs.status = 'n' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}
+                WHERE cs.status = 'n' AND cp.tipo_orden = 'p' AND Date(cs.fecha_creacion) = '{$value->fecha}' AND cs.id_empresa = {$_GET['did_empresa']}
               ) es
               GROUP BY id_producto
             ) AS es
@@ -1859,7 +1859,7 @@ class inventario_model extends privilegios_model{
 				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sp.id_producto = {$id_producto} AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
+				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
 				)
 			) AS t
 		ORDER BY fecha ASC");

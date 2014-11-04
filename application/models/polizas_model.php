@@ -475,7 +475,7 @@ class polizas_model extends CI_Model {
         "SELECT id_factura
          FROM facturacion AS f
         WHERE status <> 'b' AND is_factura = 't'
-            AND poliza_diario = 'f' AND id_nc IS NULL
+            AND poliza_diario = 'f' AND id_nc IS NULL AND f.id_abono_factura IS NULL
            {$sql} {$sql_fecha}
         ORDER BY id_factura ASC
         ");
@@ -1295,6 +1295,7 @@ class polizas_model extends CI_Model {
             INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
           WHERE f.status <> 'ca' AND f.status <> 'b' AND fa.poliza_ingreso = 'f'
              {$sql} AND ((f.fecha < '2014-01-01' AND f.is_factura = 'f') OR (f.is_factura = 't') )
+             AND f.id_abono_factura IS NULL
           GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
             bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha)
           ORDER BY bmf.id_movimiento ASC

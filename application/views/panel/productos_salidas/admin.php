@@ -89,6 +89,11 @@
                         'btn_type' => 'btn-success',
                         'attrs' => array())
                       );
+                      echo $this->usuarios_model->getLinkPrivSm('productos_salidas/imprimir/', array(
+                        'params'   => 'id='.$salida->id_salida,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => '_BLANK'))
+                      );
 
                       if ($salida->status !== 'ca')
                       {
