@@ -19,6 +19,8 @@ class compras_ordenes extends MY_Controller {
 
     'compras_ordenes/rpt_gastos_pdf/',
     'compras_ordenes/rpt_gastos_xls/',
+    'compras_ordenes/rpt_ordenes_pdf/',
+    'compras_ordenes/rpt_ordenes_xls/',
     );
 
   public function _remap($method){
@@ -482,6 +484,47 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $this->compras_ordenes_model->rpt_gastos_xls();
+  }
+
+
+  public function rpt_ordenes()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/banco/rpt_rie.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'REPORTE DE ORDEN DE COMPRA ACUMULADO POR EMPRESA'
+    );
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/compras_ordenes/rpt_ordenes', $params);
+    $this->load->view('panel/footer');
+  }
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rpt_ordenes_pdf()
+  {
+    if(isset($_GET['ffecha1']))
+    {
+      $this->load->model('compras_ordenes_model');
+      $this->compras_ordenes_model->rpt_ordenes_pdf();
+    }
+  }
+  public function rpt_ordenes_xls()
+  {
+    if(isset($_GET['ffecha1']))
+    {
+      $this->load->model('compras_ordenes_model');
+      $this->compras_ordenes_model->rpt_ordenes_xls();
+    }
   }
 
   /*

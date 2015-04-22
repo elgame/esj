@@ -180,6 +180,7 @@ class nomina
     $this->empleado->dias_vacaciones       = $this->empleado->dias_vacaciones_fijo>0? $this->empleado->dias_vacaciones_fijo: $this->diasDeVacaciones();
     $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
     $this->empleado->factor_integracion    = $this->factorIntegracion();
+    $this->empleado->dias_aguinaldo        = 0;
 
     $this->empleado->nomina = new stdclass;
     $this->empleado->nomina->aguinaldo = $this->aguinaldo();
@@ -224,10 +225,13 @@ class nomina
    */
   public function aguinaldo()
   {
-    $diasTrabajadosAnio = 365 - $this->empleado->dias_faltados_anio;
-    $diasAguinaldo = round(($diasTrabajadosAnio * $this->empresaConfig->aguinaldo) / 365, 2);
+    if ($this->empleado->dias_aguinaldo_full > 365) {
+      $this->empleado->dias_aguinaldo_full = 365;
+    }
+    // $diasTrabajadosAnio = 365 - $this->empleado->dias_faltados_anio;
+    $this->empleado->dias_aguinaldo = round(($this->empleado->dias_aguinaldo_full * $this->empresaConfig->aguinaldo) / 365, 2);
 
-    return $diasAguinaldo * $this->empleado->salario_diario;
+    return $this->empleado->dias_aguinaldo * $this->empleado->salario_diario;
   }
 
   /**
@@ -609,7 +613,10 @@ class nomina
   public function dInfonavit()
   {
     // $infonavit = round(($this->empleado->infonavit / 30.4) * ($this->salariosZonasConfig->zona_a * $this->empleado->dias_trabajados), 2);
-    $infonavit = round(($this->empleado->infonavit * $this->empleado->dias_trabajados) / 7, 2);
+    if($this->empleado->nomina_guardada == 'f')
+      $infonavit = round(($this->empleado->infonavit * $this->empleado->dias_trabajados) / 7, 2);
+    else
+      $infonavit = $this->empleado->infonavit;
 
     return array(
       'TipoDeduccion' => '010',
@@ -780,6 +787,12 @@ class nomina
     {
       $otros += floatval($prestamo['pago_semana_descontar']);
     }
+
+    // Fondo de ahorro
+    if($this->empleado->nomina_guardada == 'f')
+      $otros += $this->empleado->fondo_ahorro; //round(($this->empleado->fondo_ahorro * $this->empleado->dias_trabajados) / 7, 2);
+    else
+      $otros += $this->empleado->fondo_ahorro;
 
     return array(
       'TipoDeduccion' => '004',

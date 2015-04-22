@@ -35,6 +35,32 @@ class home extends MY_Controller {
 			'titulo' => 'Panel de Administración'
 		);
 
+		// $result = $this->db->query("SELECT *
+		//                            FROM proveedores
+		//                            WHERE id_empresa = 4");
+		// foreach ($result->result() as $key => $value) {
+		// 	$dda = $this->db->query("SELECT Count(*) AS num
+		// 	                           FROM proveedores
+		// 	                           WHERE id_empresa = 3 AND rfc <> '' AND UPPER(rfc) = '".strtoupper($value->rfc)."'")->row();
+		// 	if($dda->num == 0) {
+		// 		echo "INSERT INTO proveedores(
+  //           nombre_fiscal, calle, no_exterior, no_interior,
+  //           colonia, localidad, municipio, estado, cp, telefono, celular,
+  //           email, pag_web, status, cuenta_cpi, tipo_proveedor, rfc, curp,
+  //           cer_org, cer, key_path, pass, cfdi_version, cer_caduca, regimen_fiscal,
+  //           pais, id_empresa, condicion_pago, dias_credito)
+		// 	    VALUES (
+		// 	    	'{$value->nombre_fiscal}', '{$value->calle}', '{$value->no_exterior}', '{$value->no_interior}',
+		// 	    	'{$value->colonia}', '{$value->localidad}', '{$value->municipio}', '{$value->estado}',
+		// 	    	'{$value->cp}', '{$value->telefono}', '{$value->celular}', '{$value->email}', '{$value->pag_web}',
+		// 	    	'{$value->status}', '{$value->cuenta_cpi}', '{$value->tipo_proveedor}', '{$value->rfc}',
+		// 	    	'{$value->curp}', '{$value->cer_org}', '{$value->cer}', '{$value->key_path}', '{$value->pass}',
+		// 	    	'{$value->cfdi_version}', '{$value->cer_caduca}', '{$value->regimen_fiscal}', '{$value->pais}',
+		// 	    	'3', '{$value->condicion_pago}', '{$value->dias_credito}'
+		// 	    	);<br>";
+		// 	}
+		// }
+
 		// if($this->session->userdata('usuario') == 'admin')
 		// {
 		// 	$gestor = @fopen("CATALAGO SNJ.txt", "r");
@@ -46,7 +72,7 @@ class home extends MY_Controller {
 		// 	    	$padre = trim(substr($bufer, 136, 8));
 
 		// 	    	$query = $this->db->query("SELECT Count(id_cuenta) as num,
-		// 	    														(SELECT id_cuenta FROM cuentas_contpaq 
+		// 	    														(SELECT id_cuenta FROM cuentas_contpaq
 		// 	    															WHERE cuenta = '{$padre}' and id_empresa = 2) AS id_cuenta
 		// 	    	                           FROM cuentas_contpaq
 		// 	    	                           WHERE cuenta = '{$cuenta}' and id_empresa = 2")->row();

@@ -20,6 +20,7 @@
                   <div class="controls">
                     <select name="farea" id="farea" class="span12 getjsval" required>
                       <option value=""></option>
+                      <option value="all">Todas</option>
                       <?php foreach ($areas['areas'] as $area) { ?>
                         <?php echo '<option value="'.$area->id_area.'">'.$area->nombre.'</option>' ?>
                       <?php } ?>

@@ -561,7 +561,7 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->SetFont('Arial','', 8);
       $aux_clasif = 0;
       $total_producto = $totla_general = 0;
-      foreach ($fac_ligados as $key => $value)
+      foreach ($fac_ligados['ligadas'] as $key => $value)
       {
         if($value->id_clasificacion != $aux_clasif)
         {
@@ -577,6 +577,28 @@ class cuentas_pagar_model extends privilegios_model{
           $aux_clasif = $value->id_clasificacion;
           $total_producto = 0;
         }
+        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+        $pdf->SetWidths(array(23, 23, 120, 30));
+        $pdf->Row(array(
+          $value->fecha,
+          $value->serie.$value->folio,
+          $value->cliente,
+          String::formatoNumero($value->importe, 2, '$', false),
+          ), false);
+        $total_producto += $value->importe;
+        $totla_general += $value->importe;
+      }
+      $pdf->SetAligns(array('R', 'R'));
+      $pdf->SetWidths(array(166, 30));
+      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+
+      $total_producto = 0;
+      foreach ($fac_ligados['canceladas'] as $key => $value)
+      {
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(205));
+        $pdf->Row(array('CANCELADAS'), false, false);
+
         $pdf->SetAligns(array('L', 'L', 'L', 'R'));
         $pdf->SetWidths(array(23, 23, 120, 30));
         $pdf->Row(array(
@@ -1736,7 +1758,8 @@ class cuentas_pagar_model extends privilegios_model{
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
-    $sql .= " AND f.status = 'pa'";
+    $sql .= " AND Date(fa.fecha) BETWEEN '".$fecha1."' AND '".$fecha2."'";
+    // $sql .= " AND f.status = 'pa'";
 
     $response = array();
     $response = $this->db->query(

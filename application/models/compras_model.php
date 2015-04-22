@@ -742,8 +742,8 @@ class compras_model extends privilegios_model{
 
   public function getRptComprasData()
   {
-    $sql = '';
-      $idsproveedores = '';
+    $having = $sql = '';
+    $idsproveedores = '';
 
     //Filtros para buscar
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -760,16 +760,23 @@ class compras_model extends privilegios_model{
       $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
+    if($this->input->get('tipoOrden') != ''){
+      $having = "HAVING replace(substring(array_to_string(array_agg(co.tipo_orden), ',') from '^.{0,2}'), ',', '') = '".$this->input->get('tipoOrden')."'";
+    }
+
       $response = array();
       $productos = $this->db->query("SELECT
-          c.id_compra, c.serie, c.folio, Date(c.fecha) AS fecha, p.nombre_fiscal, c.total, c.status, array_to_string(array_agg(cea.folio), ',') AS folio_almacen
+          c.id_compra, c.serie, c.folio, Date(c.fecha) AS fecha, p.nombre_fiscal, c.total, c.status, array_to_string(array_agg(cea.folio), ',') AS folio_almacen,
+          replace(substring(array_to_string(array_agg(co.tipo_orden), ',') from '^.{0,2}'), ',', '') AS tipo_orden
         FROM compras c
           INNER JOIN compras_facturas cf ON c.id_compra = cf.id_compra
           INNER JOIN compras_entradas_almacen cea ON cf.id_orden = cea.id_orden
           INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+          INNER JOIN compras_ordenes co ON co.id_orden = cf.id_orden
         WHERE c.status <> 'ca' {$sql}
         GROUP BY c.id_compra, c.serie, c.folio, Date(c.fecha), p.nombre_fiscal, c.total, c.status
-        ORDER BY fecha ASC, folio ASC");
+        {$having}
+        ORDER BY tipo_orden ASC, fecha ASC, folio ASC");
       $response = $productos->result();
 
     return $response;
@@ -779,6 +786,7 @@ class compras_model extends privilegios_model{
    */
   public function getRptComprasPdf(){
     $res = $this->getRptComprasData();
+    $tipos_orden = array('p' => 'Productos', 'd' => 'Servicios', 'oc' => 'Orden de compra', 'f' => 'Fletes');
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -801,11 +809,35 @@ class compras_model extends privilegios_model{
     $widths = array(20, 25, 80, 30, 20, 30);
     $header = array('Fecha', 'Factura', 'Proveedor', 'Importe', 'Estado', 'Folio Almacen');
 
-    $familia = '';
-    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    $tipoaux = '';
+    $proveedor_tipo = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
     foreach($res as $key => $factura){
-      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-        $pdf->AddPage();
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $tipoaux !== $factura->tipo_orden){ //salta de pagina si exede el max
+
+        if($pdf->GetY() >= $pdf->limiteY || $key==0)
+          $pdf->AddPage();
+
+        if ($tipoaux !== $factura->tipo_orden) {
+          if ($key > 0) {
+            $datos = array('Total',
+              '', '',
+              String::formatoNumero($proveedor_tipo, 2, '', false),
+              '', '',
+              );
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($datos, false);
+          }
+          $pdf->SetFont('Arial','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths(array(180));
+          $pdf->Row(array($tipos_orden[$factura->tipo_orden]), false, false);
+          $tipoaux        = $factura->tipo_orden;
+          $proveedor_tipo = 0;
+        }
 
         $pdf->SetFont('Arial','B',8);
         $pdf->SetTextColor(255,255,255);
@@ -819,6 +851,7 @@ class compras_model extends privilegios_model{
 
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
+
       $datos = array(String::fechaATexto($factura->fecha, '/c'),
         $factura->serie.$factura->folio,
         $factura->nombre_fiscal,
@@ -832,8 +865,19 @@ class compras_model extends privilegios_model{
       $pdf->Row($datos, false, false);
 
       $proveedor_importe   += $factura->total;
+      $proveedor_tipo   += $factura->total;
 
     }
+    $datos = array('Total',
+      '', '',
+      String::formatoNumero($proveedor_tipo, 2, '', false),
+      '', '',
+      );
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+    $pdf->Row($datos, false);
+
     $datos = array('Total General',
       '', '',
       String::formatoNumero($proveedor_importe, 2, '', false),

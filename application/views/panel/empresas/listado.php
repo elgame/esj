@@ -26,8 +26,8 @@
 						<form action="<?php echo base_url('panel/empresas'); ?>" method="get" class="form-search">
 							<div class="form-actions form-filters">
 								<label for="fnombre">Nombre</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
-									class="input-large search-query" placeholder="Empaque sanjorge, Av carlos" autofocus> | 
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
+									class="input-large search-query" placeholder="Empaque sanjorge, Av carlos" autofocus> |
 
 								<label for="fstatus">Estado</label>
 								<select name="fstatus">
@@ -40,7 +40,7 @@
 							</div>
 						</form>
 
-						<?php 
+						<?php
 						echo $this->usuarios_model->getLinkPrivSm('empresas/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
@@ -76,7 +76,7 @@
 										<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 									</td>
 									<td class="center">
-											<?php 
+											<?php
 											echo $this->usuarios_model->getLinkPrivSm('empresas/modificar/', array(
 													'params'   => 'id='.$empresa->id_empresa,
 													'btn_type' => 'btn-success')
@@ -94,7 +94,7 @@
 														'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar la empresa?', 'empresas', this); return false;"))
 												);
 											}
-											
+
 											?>
 									</td>
 								</tr>

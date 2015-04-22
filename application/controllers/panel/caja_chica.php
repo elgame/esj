@@ -12,7 +12,9 @@ class caja_chica extends MY_Controller {
     'caja_chica/cerrar_caja/',
     'caja_chica/print_caja/',
     'caja_chica/rpt_gastos_pdf/',
+    'caja_chica/rpt_gastos_xls/',
     'caja_chica/rpt_ingresos_pdf/',
+    'caja_chica/rpt_ingresos_xls/',
   );
 
   public function _remap($method)
@@ -76,10 +78,12 @@ class caja_chica extends MY_Controller {
       array('general/msgbox.js'),
       array('general/util.js'),
       array('panel/caja_chica/cargar.js'),
+      array('panel/caja_chica/areas_requisicion.js'),
     ));
 
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
+    $this->load->model('compras_areas_model');
 
     $this->configGuardaCajaChica();
     if ($this->form_validation->run() == FALSE)
@@ -101,6 +105,8 @@ class caja_chica extends MY_Controller {
     $_GET['ffecha'] = $fecha;
 
     $params['caja'] = $this->caja_chica_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1') );
+
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
     $params['remisiones'] = $this->caja_chica_model->getRemisiones();
     $params['movimientos'] = $this->caja_chica_model->getMovimientos();
@@ -147,6 +153,10 @@ class caja_chica extends MY_Controller {
     $this->load->model('caja_chica_model');
     $this->caja_chica_model->getRptGastosPdf();
   }
+  public function rpt_gastos_xls(){
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->getRptGastosXls();
+  }
 
   public function rpt_ingresos()
   {
@@ -174,6 +184,10 @@ class caja_chica extends MY_Controller {
   public function rpt_ingresos_pdf(){
     $this->load->model('caja_chica_model');
     $this->caja_chica_model->getRptIngresosPdf();
+  }
+  public function rpt_ingresos_xls(){
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->getRptIngresosXls();
   }
 
 

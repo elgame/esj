@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/rastreabilidad/rrl_pdf/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
+            <form action="<?php echo base_url('panel/rastreabilidad/rrl_pdf/'); ?>" method="GET" id="frmverform" class="form-search" target="rdeReporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group">
@@ -42,8 +42,10 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
+            <a href="<?php echo base_url('panel/rastreabilidad/rrl_xls/'); ?>" id="linkDownXls" data-url="<?php echo base_url('panel/rastreabilidad/rrl_xls/'); ?>" class="linksm" target="_blank">
+              <i class="icon-table"></i> Excel</a>
             <div class="row-fluid">
-              <iframe name="rdeReporte" id="iframe-reporte" class="span12"
+              <iframe name="rdeReporte" id="rdeReporte" class="span12"
                 src="<?php echo base_url('panel/rastreabilidad/rrl_pdf/?farea='.$area_default)?>" style="height:520px;"></iframe>
             </div>
           </div>

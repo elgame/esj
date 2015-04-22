@@ -8,6 +8,7 @@ class nomina_ranchos extends MY_Controller {
   private $excepcion_privilegio = array(
     'nomina_ranchos/ajax_add_nomina_empleado/',
     'nomina_ranchos/lista_asistencia/',
+    'nomina_ranchos/quitar_prestamos/',
   );
 
   public function _remap($method)
@@ -32,6 +33,7 @@ class nomina_ranchos extends MY_Controller {
 
     $this->carabiner->js(array(
       array('general/supermodal.js'),
+      array('general/msgbox.js'),
       array('libs/jquery.numeric.js'),
       array('general/util.js'),
       array('panel/nomina_fiscal/nomina.js'),
@@ -80,6 +82,11 @@ class nomina_ranchos extends MY_Controller {
     $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
+    $fffecha1 = (new DateTime($semana['fecha_inicio']));
+    $fffecha2 = (new DateTime());
+    $interval = $fffecha1->diff($fffecha2);
+    $params['show_prestamos'] = $interval->days<=10? true: false;
+
     $params['nominas_finalizadas'] = false;
     // foreach ($params['empleados'] as $key => $value)
     // {
@@ -103,6 +110,21 @@ class nomina_ranchos extends MY_Controller {
   {
     $this->load->model('nomina_ranchos_model');
     $result = $this->nomina_ranchos_model->listadoAsistenciaPdf($_GET);
+  }
+
+  public function quitar_prestamos()
+  {
+    if(isset($_GET['empresaId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0})) {
+      $query = $this->db->query("UPDATE nomina_prestamos SET status = 't'
+        FROM (SELECT id_prestamo FROM nomina_fiscal_prestamos WHERE id_empresa = {$_GET['empresaId']} AND anio = {$_GET['anio']} AND semana = {$_GET['semana']}) AS sbq
+        WHERE nomina_prestamos.id_prestamo = sbq.id_prestamo");
+
+      $query = $this->db->query("DELETE FROM nomina_fiscal_prestamos WHERE id_empresa = {$_GET['empresaId']} AND anio = {$_GET['anio']} AND semana = {$_GET['semana']}");
+
+      $query = $this->db->query("UPDATE nomina_ranchos SET prestamo = 0 WHERE id_empresa = {$_GET['empresaId']} AND anio = {$_GET['anio']} AND semana = {$_GET['semana']}");
+    }
+
+    redirect(base_url('panel/nomina_ranchos/?'.String::getVarsLink(array('msg'))));
   }
 
   /*

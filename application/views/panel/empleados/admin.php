@@ -94,7 +94,13 @@
                         'params'   => 'id='.$usuario->id_usuario,
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => '_BLANK')
-                      ))
+                      ));
+
+                      echo $this->usuarios_model->getLinkPrivSm('empleados/prestamos/', array(
+                        'params'   => 'id='.$usuario->id_usuario,
+                        'btn_type' => 'btn-info',
+                        'attrs' => array('target' => '_BLANK')
+                      ));
 
 										?>
 								</td>

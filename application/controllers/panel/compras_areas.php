@@ -9,6 +9,7 @@ class compras_areas extends MY_Controller {
 	private $excepcion_privilegio = array(
 			'compras_areas/ajax_get_areas/',
 			'compras_areas/ajax_get_areasauto/',
+			'compras_areas/imprimir_catalogo/',
 		);
 
 	public function _remap($method){
@@ -175,6 +176,12 @@ class compras_areas extends MY_Controller {
 
       echo json_encode($this->compras_areas_model->ajaxAreas());
    }
+
+  public function imprimir_catalogo()
+	{
+		$this->load->model('compras_areas_model');
+		$this->compras_areas_model->listaAreas();
+	}
 
 
 	/**

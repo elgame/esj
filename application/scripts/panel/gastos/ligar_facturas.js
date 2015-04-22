@@ -17,7 +17,54 @@
         event.preventDefault();
       }
     });
+
+    autocompleteEmpresas();
+
+    addProdsCancelados();
   });
+
+  var addProdsCancelados = function () {
+    $("#addProdsCancelados").on('click', function(event) {
+      if( $("#costo").val() != '' && $("#fid_clasificacion").val() != '' && $("#fid_cliente").val() != '' && $("#fecha").val() != '') {
+        var html = '<tr id="row_sel">'+
+                  '  <td style="width:70px;">'+$("#fecha").val()+
+                  '    <input type="hidden" name="idclasif[]" class="idclasif" value="'+$("#fid_clasificacion").val()+'">'+
+                  '    <input type="hidden" name="idfactura[]" class="idfactura" value="">'+
+                  '    <input type="hidden" name="fecha[]" class="fecha" value="'+$("#fecha").val()+'">'+
+                  '    <input type="hidden" name="costo[]" class="costo" value="'+$("#costo").val()+'">'+
+                  '  </td>'+
+                  '  <td></td>'+
+                  '  <td>'+$("#fcliente").val()+
+                  '    <input type="hidden" name="id_cliente[]" class="id_cliente" value="'+$("#fid_cliente").val()+'">'+
+                  '  </td>'+
+                  '  <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>'+
+                  '</tr>';
+      $("#tblcanceladas .tblfacturasligadas").append(html);
+      } else
+        noty({"text": 'El cliente, la clasificacion y el costo son requeridos.', "layout":"topRight", "type": 'error'});
+    });
+  };
+
+  // Autocomplete para las empresas.
+  var autocompleteEmpresas = function () {
+    $("#empresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $empresa =  $(this);
+
+        $empresa.val(ui.item.id);
+        $("#id_empresa").val(ui.item.id);
+        $empresa.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#empresa").css("background-color", "#FFD071");
+        $("#id_empresa").val('');
+      }
+    });
+  };
 
 
   var getFacturasLibres = function(){
@@ -95,9 +142,13 @@
                   '  <td style="width:70px;">'+data_factura.find('.fecha').text()+
                   '    <input type="hidden" name="idclasif[]" class="idclasif" value="'+idClasif+'">'+
                   '    <input type="hidden" name="idfactura[]" class="idfactura" value="'+$factura.attr('data-idFactura')+'">'+
+                  '    <input type="hidden" name="fecha[]" class="fecha" value="">'+
+                  '    <input type="hidden" name="costo[]" class="costo" value="">'+
                   '  </td>'+
                   '  <td>'+data_factura.find('.folio').text()+'</td>'+
-                  '  <td>'+data_factura.find('.cliente').text()+'</td>'+
+                  '  <td>'+data_factura.find('.cliente').text()
+                  '    <input type="hidden" name="id_cliente[]" class="id_cliente" value="">'+
+                  '  </td>'+
                   '  <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>'+
                   '</tr>';
       tbl.append(html);

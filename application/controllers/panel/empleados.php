@@ -203,6 +203,13 @@ class empleados extends MY_Controller {
     $this->usuario_historial_model->printHistorialDeEmpleado($_GET['id']);
   }
 
+  public function prestamos()
+  {
+    $this->load->model('usuario_historial_model');
+
+    $this->usuario_historial_model->printPrestamosDeEmpleado($_GET['id']);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Ajax
@@ -427,6 +434,10 @@ class empleados extends MY_Controller {
 							array('field' => 'finfonavit',
 										'label' => 'Infonavit',
 										'rules' => 'numeric'),
+              array('field' => 'ffondo_ahorro',
+                    'label' => 'Fondo de Ahorro',
+                    'rules' => 'numeric'),
+
 							array('field' => 'festa_asegurado',
 										'label' => 'Asegurado',
 										'rules' => ''),
@@ -519,10 +530,10 @@ class empleados extends MY_Controller {
 
   public function valida_nombre_full()
   {
-    $query = $this->db->query("SELECT id 
+    $query = $this->db->query("SELECT id
                                FROM usuarios
-                               WHERE user_nomina = 't' AND de_rancho = 'n' AND 
-                                     id_empresa = ".$this->input->post('did_empresa')." AND 
+                               WHERE user_nomina = 't' AND de_rancho = 'n' AND
+                                     id_empresa = ".$this->input->post('did_empresa')." AND
                                      lower(nombre) = '".mb_strtolower(trim($_POST['fnombre']))."' AND
                                      lower(apellido_paterno) = '".mb_strtolower(trim($_POST['fapellido_paterno']))."' AND
                                      lower(apellido_materno) = '".mb_strtolower(trim($_POST['fapellido_materno']))."'");

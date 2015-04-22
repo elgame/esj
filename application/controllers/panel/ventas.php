@@ -11,6 +11,7 @@ class ventas extends MY_Controller {
     'ventas/rventasr_xls/',
     'ventas/rpsaldo_vencido_pdf/',
     'ventas/rventas_nc_pdf/',
+    'ventas/rventas_nc_xls/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -164,6 +165,7 @@ class ventas extends MY_Controller {
       ->order_by('nombre')
       ->get()->result();
 
+    $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
       $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
@@ -180,6 +182,14 @@ class ventas extends MY_Controller {
         $params['borrador']['info']->total         = '';
         $params['seo']['titulo'] = 'Agregar Nota de credito';
       }
+    } elseif (isset($_GET['id_vd']))
+    {
+      // Si es una venta del dia la que se quiere facturar carga sus datos.
+      $this->load->model('ventas_dia_model');
+      $params['borrador'] = $this->ventas_dia_model->getInfoFactura($_GET['id_vd']);
+      $params['borrador']['info']->serie = '';
+      $params['borrador']['info']->folio = '';
+      $params['getId'] = '?id_vd='.$_GET['id_vd'];
     }
 
     if(isset($_GET['msg']{0}))
@@ -276,7 +286,10 @@ class ventas extends MY_Controller {
   public function rventas_nc_pdf(){
     $this->load->model('ventas_model');
     $this->ventas_model->getRFacturasNCPdf();
-
+  }
+  public function rventas_nc_xls(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRFacturasNCXls();
   }
 
   /**

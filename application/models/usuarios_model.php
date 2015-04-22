@@ -104,6 +104,8 @@ class Usuarios_model extends privilegios_model {
 						'id_puesto'            => $this->input->post('fpuesto'),
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
 						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
+            'fondo_ahorro'         => is_numeric($this->input->post('ffondo_ahorro'))? $this->input->post('ffondo_ahorro'): 0,
+            'fondo_ahorro_cpi'     => $this->input->post('ffondo_ahorro_cpi'),
 						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
 						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
@@ -119,6 +121,9 @@ class Usuarios_model extends privilegios_model {
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
+
+      if($this->input->post('fbanco') != '')
+        $data['banco'] = $this->input->post('fbanco');
 
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
@@ -174,7 +179,9 @@ class Usuarios_model extends privilegios_model {
 						'id_empresa'           => $this->input->post('did_empresa'),
 						'id_puesto'            => $this->input->post('fpuesto'),
 						'salario_diario'       => is_numeric($this->input->post('fsalario_diario'))? $this->input->post('fsalario_diario'): 0,
-						'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
+            'infonavit'            => is_numeric($this->input->post('finfonavit'))? $this->input->post('finfonavit'): 0,
+						'fondo_ahorro'         => is_numeric($this->input->post('ffondo_ahorro'))? $this->input->post('ffondo_ahorro'): 0,
+            'fondo_ahorro_cpi'     => $this->input->post('ffondo_ahorro_cpi'),
 						'salario_diario_real'  => is_numeric($this->input->post('fsalario_diario_real'))? $this->input->post('fsalario_diario_real'): 0,
 						'esta_asegurado'       => $this->input->post('festa_asegurado')=='t'?'t':'f',
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
@@ -186,6 +193,9 @@ class Usuarios_model extends privilegios_model {
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 					);
+      if($this->input->post('fbanco') != '')
+        $data['banco'] = $this->input->post('fbanco');
+      
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
@@ -232,8 +242,8 @@ class Usuarios_model extends privilegios_model {
 						u.apellido_paterno, u.apellido_materno, u.calle, u.numero, u.colonia, u.municipio, u.estado, u.cp,
 						Date(u.fecha_nacimiento) AS fecha_nacimiento, Date(u.fecha_entrada) AS fecha_entrada,
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
-						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.salario_diario_real,
-						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.user_nomina, u.no_seguro,
+						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
+						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
 						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
@@ -451,6 +461,8 @@ class Usuarios_model extends privilegios_model {
       $sql .= " AND user_nomina = 't'";
     if($this->input->get('did_empresa')!='')
       $sql .= " AND id_empresa = ".$this->input->get('did_empresa');
+    if($this->input->get('only_usuario')!='')
+      $sql .= " AND usuario IS NOT NULL";
 
     $res = $this->db->query(
         "SELECT id, nombre, usuario, apellido_paterno, apellido_materno, salario_diario_real, salario_diario,

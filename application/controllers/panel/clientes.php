@@ -6,7 +6,9 @@ class clientes extends MY_Controller {
 	 * Evita la validacion (enfocado cuando se usa ajax). Ver mas en privilegios_model
 	 * @var unknown_type
 	 */
-	private $excepcion_privilegio = array('clientes/ajax_get_proveedores/', 'clientes/merges/');
+	private $excepcion_privilegio = array('clientes/ajax_get_proveedores/',
+		'clientes/merges/',
+		'clientes/catalogo_xls/');
 
 	public function _remap($method){
 
@@ -154,7 +156,9 @@ public function fecha($fecha)
 
 		$this->load->model('clientes_model');
 		$params['clientes'] = $this->clientes_model->getClientes();
-    	$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    if(!isset($_GET['did_empresa']))
+    	$_GET['did_empresa'] = $params['empresa']->id_empresa;
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -311,6 +315,12 @@ public function fecha($fecha)
 		$params = $this->clientes_model->getClientesAjax();
 
 		echo json_encode($params);
+	}
+
+	public function catalogo_xls()
+	{
+		$this->load->model('clientes_model');
+		$this->clientes_model->catalogo_xls();
 	}
 
 

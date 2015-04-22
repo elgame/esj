@@ -57,9 +57,9 @@ class banco_pagos_model extends CI_Model {
         $this->db->update('banco_pagos_compras', array(
           'id_cuenta'        => ($cuenta[0]{0}? $cuenta[0]: NULL),
           'referencia'       => $datos['ref_numerica'][$keyp][0],
-          'ref_alfanumerica' => $datos['ref_alfanumerica'][$keyp][0],
+          'ref_alfanumerica' => substr($datos['ref_alfanumerica'][$keyp][0], 0, 40),
           'monto'            => $datos['monto'][$keyp][$key],
-          'descripcion'      => $datos['descripcion'][$keyp][0],
+          'descripcion'      => substr($datos['descripcion'][$keyp][0], 0, 40),
           'es_moral'         => ($datos['es_moral'][$keyp][0]=='si'? 't': 'f'),
           'modificado_banco' => 't',
           ), "id_pago = {$id_pago}");

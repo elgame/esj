@@ -63,7 +63,7 @@
           <?php } ?>
         </select>
 
-        <form class="form-horizontal" action="<?php echo $action ?>" method="POST">
+        <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica">
           <?php $totalIngresos = 0; $totalSaldoIngresos = $caja['saldo_inicial']; ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
@@ -349,10 +349,11 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="4">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="5">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
                                 <tr>
+                                  <th>COD AREA</th>
                                   <th>EMPRESA</th>
                                   <th>NOM</th>
                                   <th>FOLIO</th>
@@ -367,7 +368,12 @@
                                   if (isset($_POST['gasto_concepto'])) {
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
-                                        <tr>a
+                                        <tr>
+                                          <td style="width: 60px;">
+                                            <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
+                                            <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                          </td>
                                           <td style="width: 100px;">
                                             <input type="text" name="gasto_empresa[]" value="<?php echo $_POST['gasto_empresa'][$key] ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
                                             <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $_POST['gasto_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
@@ -391,6 +397,11 @@
                                     $totalGastos += floatval($gasto->monto);
                                   ?>
                                   <tr>
+                                    <td style="width: 60px;">
+                                      <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
+                                      <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                    </td>
                                     <td style="width: 100px;">
                                       <input type="text" name="gasto_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
                                       <input type="hidden" name="gasto_empresa_id[]" value="<?php echo $gasto->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
@@ -411,7 +422,7 @@
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="4" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>
@@ -625,6 +636,53 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="carga-movimientos">Cargar</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalAreas" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalAreasLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+
+        <div>
+
+      <?php foreach ($areas as $key => $value)
+      { ?>
+          <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
+            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
+                id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
+              <thead>
+                <tr>
+                  <th style="width:10px;"></th>
+                  <th>Codigo</th>
+                  <th><?php echo $value->nombre ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr class="areaClick" data-id="" data-sig="">
+                  <td><input type="radio" name="modalRadioSel" value="" data-uniform="false"></td>
+                  <td>9</td>
+                  <td>EMPAQUE</td>
+                </tr> -->
+              </tbody>
+            </table>
+          </div>
+      <?php
+      } ?>
+
+        </div>
+
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalAreasSel">Seleccionar</button>
     </div>
   </div>
 

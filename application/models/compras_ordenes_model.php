@@ -1290,7 +1290,7 @@ class compras_ordenes_model extends CI_Model {
           {
             $facturaa = explode(':', $value);
             $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
-            $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio;
+            $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.substr($facturaa['info']->fecha, 0, 10);
             $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
 
             if($info_bascula === false)
@@ -1903,6 +1903,234 @@ class compras_ordenes_model extends CI_Model {
         </tr>
       </tbody>
     </table>';
+
+    echo $html;
+  }
+
+
+  public function rpt_ordenes_data()
+  {
+    $response = array();
+    $sql = '';
+
+    $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date("Y-m-1");
+    $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date("Y-m-d");
+    $sql .= " AND Date(co.fecha_autorizacion) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+
+    // //Filtros de area
+    // $sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+
+
+    // Obtenemos los rendimientos en los lotes de ese dia
+    $query = $this->db->query(
+      "SELECT co.id_orden, co.folio, p.nombre_fiscal AS proveedor, e.id_empresa, e.nombre_fiscal AS empresa,
+        Sum(cp.total) AS total, string_agg(cp.descripcion, ', ') AS descripcion,
+        Date(co.fecha_autorizacion) AS fecha, co.status
+      FROM compras_ordenes co
+        INNER JOIN proveedores p ON p.id_proveedor = co.id_proveedor
+        INNER JOIN empresas e ON e.id_empresa = co.id_empresa
+        INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+      WHERE co.status <> 'ca' AND co.status <> 'n' {$sql}
+      GROUP BY co.id_orden, p.nombre_fiscal, e.id_empresa
+      ORDER BY empresa ASC, folio ASC");
+    if($query->num_rows() > 0) {
+      $aux = 0;
+      foreach ($query->result() as $key => $value) {
+        $response[$value->id_empresa][] = $value;
+      }
+    }
+    $query->free_result();
+
+
+    return $response;
+ }
+
+ /**
+  * Reporte de rendimientos de fruta
+  * @return void
+  */
+ public function rpt_ordenes_pdf()
+ {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_ordenes_data();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->titulo2 = "REPORTE DE ORDEN DE COMPRA ACUMULADO POR EMPRESA";
+    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
+    // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
+    // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+
+    // Listado de Rendimientos
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'L', 'L', 'R', 'L', 'L');
+    $widths = array(18, 18, 55, 22, 20, 73);
+    $header = array('Fecha', 'Folio', 'Proveedor', 'Importe', 'Estado', 'Descripcion');
+
+    $total_importes = 0;
+    $total_importes_total = 0;
+
+    foreach($data as $key => $movimiento)
+    {
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(205));
+      $pdf->Row(array(
+        $movimiento[0]->empresa
+      ), false, false);
+
+      $total_importes = 0;
+      foreach ($movimiento as $keym => $mov) {
+        if($pdf->GetY() >= $pdf->limiteY || $keym==0) //salta de pagina si exede el max
+        {
+          if($pdf->GetY() >= $pdf->limiteY)
+            $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B',8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(200,200,200);
+          // $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+            $mov->fecha,
+            $mov->folio,
+            $mov->proveedor,
+            String::formatoNumero($mov->total, 2, '$', true),
+            ($mov->status=='f'? 'FACTURADA': 'PENDIENTE'),
+            $mov->descripcion,
+          ), false);
+
+        $total_importes       += $mov->total;
+        $total_importes_total += $mov->total;
+      }
+
+      //total
+      $pdf->SetX(82);
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(37));
+      $pdf->Row(array(
+        String::formatoNumero($total_importes, 2, '$', true)
+      ), false);
+    }
+
+    //total general
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetTextColor(0 ,0 ,0 );
+    $pdf->SetX(82);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(37));
+    $pdf->Row(array(
+      String::formatoNumero($total_importes_total, 2, '$', true)
+    ), false);
+
+
+    $pdf->Output('reporte_compra_acomulados.pdf', 'I');
+ }
+
+ public function rpt_ordenes_xls() {
+    $data = $this->rpt_ordenes_data();
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_compra_acomulados.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE DE ORDEN DE COMPRA ACUMULADO POR EMPRESA";
+    $titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    $total_importes_total = 0;
+    foreach($data as $key => $movimiento)
+    {
+      $html .= '<tr>
+          <td style="font-weight:bold;" colspan="6">'.$movimiento[0]->empresa.'</td>
+        </tr>';
+      $total_importes = 0;
+      foreach ($movimiento as $keym => $mov) {
+        if($keym==0) //salta de pagina si exede el max
+        {
+          $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Folio</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Proveedor</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Estado</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Descripcion</td>
+          </tr>';
+        }
+        $html .= '<tr>
+          <td style="border:1px solid #000;">'.$mov->fecha.'</td>
+          <td style="border:1px solid #000;">'.$mov->folio.'</td>
+          <td style="border:1px solid #000;">'.$mov->proveedor.'</td>
+          <td style="border:1px solid #000;">'.$mov->total.'</td>
+          <td style="border:1px solid #000;">'.($mov->status=='f'? 'FACTURADA': 'PENDIENTE').'</td>
+          <td style="border:1px solid #000;">'.$mov->descripcion.'</td>
+        </tr>';
+
+        $total_importes       += $mov->total;
+        $total_importes_total += $mov->total;
+      }
+
+      //total
+      $html .= '<tr>
+        <td style="" colspan="2"></td>
+        <td style="border:1px solid #000;" colspan="2">'.$total_importes.'</td>
+        <td style="" colspan="2"></td>
+      </tr>';
+
+    }
+
+    $html .= '<tr>
+        <td style="" colspan="2"></td>
+        <td style="border:1px solid #000;" colspan="2">'.$total_importes_total.'</td>
+        <td style="" colspan="2"></td>
+      </tr>';
 
     echo $html;
   }

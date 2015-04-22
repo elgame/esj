@@ -166,7 +166,7 @@ class mypdf_ticket extends FPDF {
       $this->Row(array('EXPEDIDO EL:' ), false, false);
       $this->SetY($this->GetY() - 3);
       $this->SetFounts(array($this->fount_num, $this->fount_txt), array(1, 0));
-      $this->Row(array(substr($data->fecha_tara, 0, 19), $txt_impresion), false, false);
+      $this->Row(array(substr(date("Y-m-d H:i:s"), 0, 19), $txt_impresion), false, false);
 
       $this->SetFont($this->fount_txt, '', $this->font_size);
       $this->SetY($this->GetY() + 5);

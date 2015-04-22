@@ -109,7 +109,7 @@
                       <th colspan="6"></th>
                       <th colspan="2" style="text-align: center;background-color: #BEEEBC;">PERCEPCIONES</th>
                       <th colspan="2" style="text-align: center;background-color: #EEBCBC;">DEDUCCIONES</th>
-                      <th style="background-color: #BCD4EE;"></th>
+                      <th colspan="5" style="background-color: #BCD4EE;"></th>
                       <!-- <th colspan="6" style="background-color: #EEEEBC;"></th> -->
                     </tr>
                     <tr>
@@ -146,8 +146,11 @@
                       <th style="background-color: #EEEEBC;">OTRAS</th>
                       <th style="background-color: #EEEEBC;">DOMINGO</th>
                       <th style="background-color: #EEBCBC;">DESC. PLAY</th>
-                      <th style="background-color: #EEBCBC;">DESC. OTRO</th>
-                      <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th> -->
+                      <th style="background-color: #EEBCBC;">DESC. OTRO</th> -->
+                      <th style="background-color: #EEEEBC;">DIAS</th>
+                      <th style="background-color: #EEEEBC;">S. REAL</th>
+                      <th style="background-color: #EEEEBC;">A. REAL</th>
+                      <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,6 +183,7 @@
                       $totalComplementos = 0;
                       $utilidadEmpresa = 0;
                       $ultimoNoGenerado = '';
+                      $totalComplementosReal = 0;
 
                       foreach($empleados as $key => $e)
                       {
@@ -200,7 +204,8 @@
                           //                     $e->nomina->deducciones['rcv']['total']; //+
                                               //$e->descuento_playeras;
 
-                          $totalComplementoEmpleado = (($e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                          // $totalComplementoEmpleado = (($e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                          $totalComplementoEmpleado = $e->dias_aguinaldo * $e->salario_diario_real;
 
                           $bgColor = '';
                           $htmlLabel = '';
@@ -303,7 +308,7 @@
                           <?php echo $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado ?>
                         </td>
                         <td style="display:; <?php echo $bgColor ?>">
-                          <?php echo $e->esta_asegurado=='f'?(365 - $e->dias_faltados_anio)-1:(365 - $e->dias_faltados_anio) ?>
+                          <?php echo $e->esta_asegurado=='f'? $e->dias_aguinaldo_full: $e->dias_aguinaldo_full ?>
                           <input type="hidden" name="dias_trabajados[]" value="<?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>" class="span12 dias-trabajados">
                         </td>
 
@@ -407,20 +412,33 @@
                         <td style="display: none;width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="display: none;width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <!-- total por fuera -->
+                        <td style="<?php echo $bgColor ?>">
+                          <span class="total-complemento-span"><?php echo String::formatoNumero($e->dias_aguinaldo, 2, '') ?></span>
+                          <input type="hidden" name="dias_aguinaldo[]" class="span12 total-complemento" value="<?php echo $e->dias_aguinaldo ?>">
+                        </td>
+                        <td style="<?php echo $bgColor ?>">
+                          <span class="total-complemento-span"><?php echo String::formatoNumero($e->salario_diario_real) ?></span>
+                          <!-- <input type="hidden" name="salario_diario_real[]" class="span12 total-complemento" value="<?php echo $e->salario_diario_real ?>"> -->
+                        </td>
+                        <td style="<?php echo $bgColor ?>">
+                          <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>
+                          <input type="hidden" name="total_complementoe[]" class="span12 total-complemento" value="<?php echo $totalComplementoEmpleado ?>">
+                        </td>
                         <?php
 
+                            $totalComplementoReal = $totalComplementoEmpleado;
                             $totalComplementoEmpleado = $totalComplementoEmpleado +
-                                                  $ttotal_nomina_cheques +
-                                                  $e->bonos +
-                                                  $e->otros +
-                                                  $e->domingo -
-                                                  ( $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) ) -
-                                                  ($e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total']) -
-                                                  $totalPrestamosEmpleado -
-                                                  $e->descuento_playeras -
-                                                  $e->descuento_otros;
+                                                  ($e->esta_asegurado=='f'? 0: $ttotal_nomina_cheques)
+                                                  // $e->bonos +
+                                                  // $e->otros +
+                                                  // $e->domingo -
+                                                  - ( $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) );
+                                                  // ($e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total']) -
+                                                  // $totalPrestamosEmpleado -
+                                                  // $e->descuento_playeras -
+                                                  // $e->descuento_otros;
                         ?>
-                        <td style="display: none; <?php echo $bgColor ?>">
+                        <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>
                           <input type="hidden" name="total_no_fiscal[]" class="span12 total-complemento" value="<?php echo $totalComplementoEmpleado ?>">
                         </td>
@@ -444,11 +462,12 @@
                       $totalDescuentoOtros     += $e->descuento_otros;
                       $totalIsrs               += $e->esta_asegurado=='f'?0:$isrEmpleado;
                       $totalDeducciones        += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
-                      $totalTransferencias     += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
+                      $totalTransferencias     += $e->esta_asegurado=='f'?0:$ttotal_nomina;
                       $totalBonos              += $e->bonos;
                       $totalOtras              += $e->otros;
                       $totalDomingos           += $e->domingo;
                       $totalComplementos       += $totalComplementoEmpleado;
+                      $totalComplementosReal   += $totalComplementoReal;
                     } ?>
                     <tr>
                       <td colspan="3" style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
@@ -474,7 +493,10 @@
                       <td id="totales-domingo" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDomingos) ?></td>
                       <td id="totales-descuento-playeras" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDescuentoPlayeras) ?></td>
                       <td id="totales-descuento-otros" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDescuentoOtros) ?></td>
-                      <td id="totales-complementos" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalComplementos) ?></td>
+                      <td id="totales-complementos" style="background-color: #BCD4EE;"></td>
+                      <td id="totales-complementos" style="background-color: #BCD4EE;"></td>
+                      <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalComplementosReal) ?></td>
+                      <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>
               </table>

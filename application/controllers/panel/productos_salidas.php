@@ -9,6 +9,7 @@ class productos_salidas extends MY_Controller {
   private $excepcion_privilegio = array(
     'productos_salidas/rpt_gastos_pdf/',
     'productos_salidas/rpt_gastos_xls/',
+    'productos_salidas/imprimirticket/',
   );
 
   public function _remap($method){
@@ -193,6 +194,15 @@ class productos_salidas extends MY_Controller {
       $this->productos_salidas_model->print_orden_compra($_GET['id']);
     }
   }
+  public function imprimirticket()
+  {
+    $this->load->model('productos_salidas_model');
+
+    if (isset($_GET['id']))
+    {
+      $this->productos_salidas_model->imprimir_salidaticket($_GET['id']);
+    }
+  }
 
 
   /**
@@ -254,6 +264,19 @@ class productos_salidas extends MY_Controller {
             'rules' => 'required'),
       array('field' => 'empresa',
             'label' => '',
+            'rules' => ''),
+
+      array('field' => 'solicito',
+            'label' => 'Solicito',
+            'rules' => 'required|max_length[130]'),
+      array('field' => 'recibio',
+            'label' => 'Recibio',
+            'rules' => 'required|max_length[130]'),
+      array('field' => 'ftrabajador',
+            'label' => 'Trabajador',
+            'rules' => ''),
+      array('field' => 'fid_trabajador',
+            'label' => 'Trabajador',
             'rules' => ''),
 
       array('field' => 'conceptoSalida',

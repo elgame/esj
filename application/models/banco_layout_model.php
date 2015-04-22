@@ -77,7 +77,7 @@ class banco_layout_model extends banco_cuentas_model {
           $tipo_cuenta = '03';
         }else
           $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
-        $ref_alfanumerica = $value['ref_numerica'];
+        $ref_alfanumerica = substr($value['ref_numerica'], 0, 10);
         $instrucciones = $value['ref_alfanumerica'];
         $descripcion = $value['descripcion'];
         $ref_numerica = '';

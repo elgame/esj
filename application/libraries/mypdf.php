@@ -5,7 +5,13 @@ class MYpdf extends FPDF {
 	var $titulo1 = "EMPAQUE SAN JORGE S.A. DE C.V.";
 	var $titulo2 = '';
 	var $titulo3 = '';
+    var $reg_fed = 'REG. ESJ97052763A0620061646';
     var $logo = '/images/logo.png';
+
+    var $fount_txt = 'helvetica';
+    var $fount_num = 'SciFly-Sans'; // SciFly-Sans
+    var $font_size = 8;
+    var $pag_size = array();
 
 	var $hheader = '';
 
@@ -20,6 +26,8 @@ class MYpdf extends FPDF {
 	 */
 	function __construct($orientation='P', $unit='mm', $size='Letter'){
 		parent::__construct($orientation, $unit, $size);
+
+        $this->pag_size = $size;
 
         if(!is_array($size))
 		  $this->hheader = 'header'.$size.$orientation;
@@ -198,6 +206,8 @@ class MYpdf extends FPDF {
     var $widths;
     var $aligns;
     var $links;
+    var $font;
+    var $fontz;
 
     function SetWidths($w){
     	$this->widths=$w;
@@ -209,6 +219,11 @@ class MYpdf extends FPDF {
 
     function SetMyLinks($a){
     	$this->links=$a;
+    }
+
+    function SetFounts($a, $z=array()){
+        $this->font=$a;
+        $this->fontz=$z;
     }
 
     function Row($data, $header=false, $bordes=true, $colortxt=null, $height=3, $positionY=2){
@@ -249,6 +264,45 @@ class MYpdf extends FPDF {
     			$this->SetXY($x+$w,$y);
     		}
     		$this->Ln($h);
+    }
+
+
+    function Row2($data, $header=false, $bordes=true, $h=NULL){
+        $nb=0;
+        for($i=0;$i<count($data);$i++)
+            $nb=max($nb,$this->NbLines($this->widths[$i],$data[$i]));
+            $h= $h==NULL? $this->FontSize*$nb+3: $h;
+            if($header)
+                $h += 2;
+            $this->CheckPageBreak($h);
+            for($i=0;$i<count($data);$i++){
+                $w=$this->widths[$i];
+                $a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+                $x=$this->GetX();
+                $y=$this->GetY();
+
+                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), '', ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
+
+                if($header && $bordes)
+                    $this->Rect($x,$y,$w,$h,'DF');
+                elseif($bordes)
+                    $this->Rect($x,$y,$w,$h);
+
+                if($header)
+                    $this->SetXY($x,$y+3);
+                else
+                    $this->SetXY($x,$y+2);
+
+                if(isset($this->links[$i]{0}) && $header==false){
+                    $this->SetTextColor(35, 95, 185);
+                    $this->Cell($w, $this->FontSize, $data[$i], 0, strlen($data[$i]), $a, false, $this->links[$i]);
+                    $this->SetTextColor(0,0,0);
+                }else
+                    $this->MultiCell($w,$this->FontSize, $data[$i],0,$a);
+
+                $this->SetXY($x+$w,$y);
+            }
+            $this->Ln($h);
     }
 
     function CheckPageBreak($h, $limit=0){

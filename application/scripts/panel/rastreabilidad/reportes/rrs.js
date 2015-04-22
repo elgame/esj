@@ -1,14 +1,42 @@
 $(function(){
 
+  // Autocomplete Empresas
+  $("#dempresa").autocomplete({
+    source: base_url + 'panel/empresas/ajax_get_empresas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#did_empresa").val(ui.item.id);
+      $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#did_empresa').val('');
+    }
+  });
+
+  $('#frmverform').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          farea: $("#farea").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   $('#form-search').keyJump({
     'next': 13,
   });
 
   $("#ffecha1, #farea").on('change', function(){
-    $.getJSON(base_url+'panel/rastreabilidad/ajax_get_lotes', 
+    $.getJSON(base_url+'panel/rastreabilidad/ajax_get_lotes',
       {'area': $("#farea").val(),
       'fecha': $("#ffecha1").val()
-      }, 
+      },
       function(res){
         var lotes = '<option value=""></option>';
         if(res.length > 0){

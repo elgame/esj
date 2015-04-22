@@ -34,6 +34,7 @@ class bascula extends MY_Controller {
     'bascula/rde_xls/',
     'bascula/r_acumulados_pdf/',
 	  'bascula/rmc_pdf/',
+    'bascula/rbp_pdf/',
 
     'bascula/imprimir_pagadas/',
 
@@ -336,7 +337,7 @@ class bascula extends MY_Controller {
     if (isset($_GET['id']))
     {
       $this->load->model('bascula_model');
-      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'));
+      $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
       if($res_mdl)
         redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=8'));
     }
@@ -640,6 +641,46 @@ class bascula extends MY_Controller {
     $this->load->model('calidades_model');
     $response = $this->calidades_model->get_calidades($this->input->get('id_area'));
     echo json_encode($response);
+  }
+
+  /**
+   * Muestra la vista para el Reporte "REPORTE BOLETAS PAGADAS"
+   *
+   * @return void
+   */
+  public function rbp()
+  {
+    $this->carabiner->js(array(
+      // array('general/msgbox.js'),
+      array('panel/bascula/admin.js'),
+      array('panel/bascula/reportes/rde.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Reporte Boletas Pagadas'
+    );
+    $this->load->model('areas_model');
+
+    $params['areas'] = $this->areas_model->getAreas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/reportes/rbp', $params);
+    $this->load->view('panel/footer');
+  }
+
+ /**
+   * Procesa los datos para mostrar el reporte rcr en pdf
+   * @return void
+   */
+  public function rbp_pdf()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rbp_pdf();
   }
 
   /**
@@ -1826,6 +1867,7 @@ class bascula extends MY_Controller {
     if ($fechaPago !== null)
     {
       $this->bascula_model->logBitacora(
+        true,
         $_GET['idb'],
         array('accion' => 'p'),
         $this->session->userdata['id_usuario'],

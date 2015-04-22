@@ -29,6 +29,7 @@
 
           <div class="row-fluid">
             <div class="span6">
+              <input type="hidden" name="id_nr" id="id_nr" value="<?php echo set_value('id_nr', (isset($id_nr)? $id_nr: '')); ?>">
 
               <div class="control-group">
                 <label class="control-label" for="dempresa">Empresa</label>
@@ -363,7 +364,7 @@
 
                         <?php if (isset($_POST['prod_did_prod'])) {
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
-                            if ($_POST['prod_importe'][$k] != 0) {
+                            if ($_POST['prod_importe'][$k] >= 0) {
                             ?>
                               <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>" data-remisiones="<?php echo $_POST['remisiones_id'][$k] ?>">
                                 <td>

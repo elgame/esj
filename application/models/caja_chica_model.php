@@ -171,10 +171,12 @@ class caja_chica_model extends CI_Model {
 
     // gastos
     $gastos = $this->db->query(
-      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa, cg.folio, cg.id_nomenclatura, cn.nomenclatura
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin
        FROM cajachica_gastos cg
-       INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-       INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
        WHERE cg.fecha = '{$fecha}' AND cg.no_caja = {$noCaja}
        ORDER BY cg.id_gasto ASC"
     );
@@ -324,6 +326,7 @@ class caja_chica_model extends CI_Model {
           'monto'           => $data['gasto_importe'][$key],
           'fecha'           => $data['fecha_caja_chica'],
           'no_caja'         => $data['fno_caja'],
+          'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
         );
       }
 
@@ -598,7 +601,7 @@ class caja_chica_model extends CI_Model {
             'concepto'       => 'Pago en caja chica',
             'total'          => $value->monto, //$total,
             'id_cuenta'      => $banco_cuenta->id_cuenta,
-            'ref_movimiento' => '',
+            'ref_movimiento' => 'Caja '.$noCajas,
             'saldar'         => 'no' );
       $resp = $this->cuentas_cobrar_model->addAbono($data, $value->id_remision);
       $this->db->update('cajachica_remisiones', array('id_movimiento' => $resp['id_movimiento']),
@@ -628,6 +631,8 @@ class caja_chica_model extends CI_Model {
   }
   public function printCaja($fecha, $noCajas)
   {
+    $this->load->model('compras_areas_model');
+
     $caja = $this->get($fecha, $noCajas);
     $nomenclaturas = $this->nomenclaturas();
 
@@ -839,19 +844,20 @@ class caja_chica_model extends CI_Model {
     $pdf->SetFillColor(230, 230, 230);
     $pdf->SetXY(111, 32);
     $pdf->SetAligns(array('L', 'C'));
-    $pdf->SetWidths(array(80, 20));
+    $pdf->SetWidths(array(83, 17));
     $pdf->Row(array('GASTOS DEL DIA', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetX(111);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 10, 15, 40, 20));
-    $pdf->Row(array('EMPRESA', 'NOM', 'FOLIO', 'CONCEPTO', 'CARGO'), true, true);
+    $pdf->SetWidths(array(25, 15, 7, 36, 17));
+    $pdf->Row(array('COD', 'EMPRESA', 'NOM', 'CONCEPTO', 'CARGO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-    $pdf->SetWidths(array(15, 10, 15, 40, 20));
+    $pdf->SetWidths(array(25, 15, 7, 36, 17));
 
+    $codigoAreas = array();
     $totalGastos = 0;
     foreach ($caja['gastos'] as $key => $gasto)
     {
@@ -862,21 +868,25 @@ class caja_chica_model extends CI_Model {
         $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(111, $pdf->GetY());
-        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-        $pdf->SetWidths(array(15, 10, 15, 40, 20));
-        $pdf->Row(array('EMPRESA', 'NOM', 'FOLIO', 'CONCEPTO', 'CARGO'), true, true);
+        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+        $pdf->SetWidths(array(25, 15, 7, 36, 17));
+        $pdf->Row(array('COD', 'EMPRESA', 'NOM', 'CONCEPTO', 'CARGO'), true, true);
       }
 
       $totalGastos += floatval($gasto->monto);
 
-      $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
+      $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R'));
       $pdf->SetX(111);
       $pdf->Row(array(
+        $gasto->codigo_fin.' '.$this->compras_areas_model->getDescripCodigo($gasto->id_area),
         $gasto->empresa,
         $gasto->nomenclatura,
-        $gasto->folio,
+        // $gasto->folio,
         $gasto->concepto,
         String::float(String::formatoNumero($gasto->monto, 2, '', false))), false, true);
+
+      // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+      //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
     }
 
     $pdf->SetFont('Arial', 'B', 7);
@@ -950,6 +960,14 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
 
+    if(count($codigoAreas) > 0){
+      $pdf->SetFont('Arial', '', 6);
+      $pdf->SetXY(6, $pdf->GetY()+7);
+      $pdf->SetWidths(array(205));
+      $pdf->SetAligns('L');
+      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }
 
@@ -993,10 +1011,11 @@ class caja_chica_model extends CI_Model {
     $response = array();
     $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
-          cn.id AS id_nomenclatura
+          cn.id AS id_nomenclatura, ca.codigo_fin, ca.id_area
         FROM cajachica_gastos cg
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+          LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
         WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql}
         ORDER BY id_categoria ASC, fecha ASC");
@@ -1009,6 +1028,8 @@ class caja_chica_model extends CI_Model {
    */
   public function getRptGastosPdf(){
     $res = $this->getRptGastosData();
+
+    $this->load->model('compras_areas_model');
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa(2);
@@ -1027,10 +1048,11 @@ class caja_chica_model extends CI_Model {
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'C', 'L', 'R');
-    $widths = array(20, 30, 20, 80, 35);
-    $header = array('Fecha', 'Nomenclatura', 'Folio', 'Concepto', 'Importe');
+    $aligns = array('L', 'L', 'L', 'C', 'L', 'R');
+    $widths = array(20, 24, 22, 20, 80, 35);
+    $header = array('Fecha', 'Codigo', 'Nomenclatura', 'Folio', 'Concepto', 'Importe');
 
+    $codigoAreas = array();
     $aux_categoria = '';
     $total_nomenclatura = array();
     $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
@@ -1065,6 +1087,7 @@ class caja_chica_model extends CI_Model {
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
       $datos = array($producto->fecha,
+        $producto->codigo_fin,
         $producto->nomenclatura,
         $producto->folio,
         $producto->concepto,
@@ -1080,13 +1103,96 @@ class caja_chica_model extends CI_Model {
       else
         $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
 
+      if($producto->id_area != '' && !array_key_exists($producto->id_area, $codigoAreas))
+          $codigoAreas[$producto->id_area] = $this->compras_areas_model->getDescripCodigo($producto->id_area);
+
       $proveedor_total += $producto->monto;
     }
 
     if(isset($producto))
       $this->getRptGastosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
 
+    if(count($codigoAreas) > 0){
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(200));
+      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
     $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+  public function getRptGastosXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_ventas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptGastosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Gastos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Folio</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $producto) {
+
+      if($aux_categoria != $producto->id_categoria && $key > 0)
+      {
+        $html .= $this->getRptGastosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+      }elseif($key == 0)
+        $aux_categoria = $producto->id_categoria;
+
+      $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$producto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$producto->folio.'</td>
+          <td style="border:1px solid #000;">'.$producto->concepto.'</td>
+          <td style="border:1px solid #000;">'.$producto->monto.'</td>
+        </tr>';
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+      $html .= $this->getRptGastosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
   public function getRptGastosTotales(&$pdf, &$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
@@ -1099,7 +1205,7 @@ class caja_chica_model extends CI_Model {
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetWidths(array(150, 35));
+    $pdf->SetWidths(array(166, 35));
     $pdf->Row($datos, false);
 
     if($pdf->GetY()+6 >= $pdf->limiteY)
@@ -1134,6 +1240,43 @@ class caja_chica_model extends CI_Model {
     $total_nomenclatura = array();
 
     $pdf->SetXY(6, $pdf->GetY()+8);
+  }
+
+  public function getRptGastosTotalesXls(&$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
+  {
+    $html = '
+    <tr style="font-weight:bold">
+      <td colspan="4">Total General</td>
+      <td style="border:1px solid #000;">'.($proveedor_total).'</td>
+    </tr>
+    <tr style="font-weight:bold">
+      <td colspan="5">DESGLOSE DE GASTOS</td>
+    </tr>
+    <tr style="font-weight:bold">
+      <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Total por concepto</td>
+    </tr>
+    ';
+
+    foreach ($total_nomenclatura as $keyn => $nomen)
+    {
+      $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;">'.$nomen[2].'</td>
+        <td style="border:1px solid #000;">'.$nomen[1].'</td>
+        <td style="border:1px solid #000;">'.$nomen[0].'</td>
+      </tr>';
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Total</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$proveedor_total.'</td>
+      </tr>';
+
+    $aux_categoria      = $producto->id_categoria;
+    $proveedor_total    = 0;
+    $total_nomenclatura = array();
+    return $html;
   }
 
   /**
@@ -1273,7 +1416,97 @@ class caja_chica_model extends CI_Model {
       $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
     }
 
-    $pdf->Output('compras_proveedor.pdf', 'I');
+    $pdf->Output('ingresos_caja.pdf', 'I');
+  }
+
+  public function getRptIngresosXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=ingresos_caja.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptIngresosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Ingresos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $aux_proveedor_total = $proveedor_total = 0;
+    foreach($res['movimientos'] as $key => $producto){
+
+      if($key==0 || $aux_categoria != $producto->id_categoria) {
+        if($aux_categoria != $producto->id_categoria && $key > 0)
+        {
+          $aux_proveedor_total = $proveedor_total;
+          $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+          $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+        }elseif($key == 0)
+          $aux_categoria = $producto->id_categoria;
+
+        $html .= '<tr style="font-weight:bold">
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="6" style="background-color: #cccccc;">'.$producto->categoria.'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Poliza</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$producto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$producto->poliza.'</td>
+          <td style="border:1px solid #000;">'.$producto->concepto.'</td>
+          <td style="border:1px solid #000;">'.$producto->monto.'</td>
+        </tr>';
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+    {
+      $aux_proveedor_total = $proveedor_total;
+      $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+      $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
   public function getRptMovimientosTotales(&$pdf, &$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
@@ -1394,6 +1627,87 @@ class caja_chica_model extends CI_Model {
     $pdf->Row($datos, false);
 
     $pdf->SetXY(6, $pdf->GetY()+8);
+  }
+
+  public function getRptMovimientosTotalesXls(&$proveedor_total, &$total_nomenclatura, &$aux_categoria, &$producto)
+  {
+    $html = '
+    <tr style="font-weight:bold">
+      <td colspan="4">Total Reposicion</td>
+      <td style="border:1px solid #000;">'.($proveedor_total).'</td>
+    </tr>
+    <tr style="font-weight:bold">
+      <td colspan="5">DESGLOSE DE INGRESOS</td>
+    </tr>
+    <tr style="font-weight:bold">
+      <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Total por concepto</td>
+    </tr>
+    ';
+
+    foreach ($total_nomenclatura as $keyn => $nomen)
+    {
+      $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;">'.$nomen[2].'</td>
+        <td style="border:1px solid #000;">'.$nomen[1].'</td>
+        <td style="border:1px solid #000;">'.$nomen[0].'</td>
+      </tr>';
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Total</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$proveedor_total.'</td>
+      </tr>';
+
+    $aux_categoria      = $producto->id_categoria;
+    $proveedor_total    = 0;
+    $total_nomenclatura = array();
+    return $html;
+  }
+
+  public function getRptRemisionesTotalesXls(&$remisiones, $proveedor_total, $id_categoria)
+  {
+    $html = '
+    <tr style="font-weight:bold">
+      <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Remision</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Folio</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+    </tr>
+    ';
+
+    $entro = false;
+    $total_nomenclatura = array();
+    $remisiones_total = 0;
+    foreach($remisiones as $key => $producto)
+    {
+      $html .= '<tr style="font-weight:bold">
+        <td style="border:1px solid #000;">'.$producto->fecha.'</td>
+        <td style="border:1px solid #000;">'.$producto->serie.$producto->folio.'</td>
+        <td style="border:1px solid #000;">'.$producto->observacion.'</td>
+        <td style="border:1px solid #000;">'.$producto->folio_factura.'</td>
+        <td style="border:1px solid #000;">'.$producto->monto.'</td>
+      </tr>';
+
+      $remisiones_total += $producto->monto;
+      unset($remisiones[$key]);
+    }
+
+    $html .= '<tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Total Remisiones</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.$remisiones_total.'</td>
+      </tr>
+      <tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Total General</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">'.($remisiones_total+$proveedor_total).'</td>
+      </tr>';
+
+    // $aux_categoria      = $producto->id_categoria;
+    // $proveedor_total    = 0;
+    // $total_nomenclatura = array();
+    return $html;
   }
 
 

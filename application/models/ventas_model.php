@@ -53,10 +53,14 @@ class Ventas_model extends privilegios_model{
     $query = BDUtil::pagination("
         SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada
+                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada,
+                COALESCE(fh.id_remision, 0) AS facturada
         FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
+        LEFT JOIN (SELECT id_remision, id_factura, status
+                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
         WHERE 1 = 1 AND f.is_factura = 'f' AND f.status != 'b' ".$sql.$sql2."
         ORDER BY f.fecha DESC, f.folio DESC, f.serie DESC
         ", $params, true);
@@ -278,6 +282,12 @@ class Ventas_model extends privilegios_model{
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
 
+    // si probiene de una venta se asigna
+    if (isset($_GET['id_vd'])) {
+      $this->load->model('ventas_dia_model');
+      $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $id_venta, 'id_venta' => $_GET['id_vd']));
+    }
+
     // Bitacora
     $this->bitacora_model->_insert('facturacion', $id_venta,
                                     array(':accion'    => $bitacora_accion, ':seccion' => 'nota de remision',
@@ -416,8 +426,8 @@ class Ventas_model extends privilegios_model{
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
-    // Registra la salida de productos si tiene pallets
-    $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
+    // // Registra la salida de productos si tiene pallets
+    // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
 
 		return array('passes' => true, 'id_venta' => $id_venta);
 	}
@@ -609,78 +619,78 @@ class Ventas_model extends privilegios_model{
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
-    // Registra la salida de productos si tiene pallets
-    $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
+    // // Registra la salida de productos si tiene pallets
+    // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
 
     return array('passes' => true, 'id_venta' => $id_venta);
   }
 
-  public function addSalidaProductosPallets($id_venta, $id_empresa)
-  {
-    // Elimina la salida si tiene
-    $this->db->delete('compras_salidas', array('id_factura' => $id_venta));
+  // public function addSalidaProductosPallets($id_venta, $id_empresa)
+  // {
+  //   // Elimina la salida si tiene
+  //   $this->db->delete('compras_salidas', array('id_factura' => $id_venta));
 
-    // Procesa la salida
-    $this->load->model('unidades_model');
-    $this->load->model('productos_salidas_model');
-    $this->load->model('inventario_model');
+  //   // Procesa la salida
+  //   $this->load->model('unidades_model');
+  //   $this->load->model('productos_salidas_model');
+  //   $this->load->model('inventario_model');
 
-    $infoSalida      = array();
-    $productosSalida = array(); // contiene los productos que se daran salida.
-    // Se obtienen los pallets ligados a la factura
-    $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$id_venta}")->result();
-    // Si hay pallets ligados
-    if(count($listaPallets) > 0)
-    {
-      $lipallets = array();
-      foreach ($listaPallets as $keylp => $lipallet) {
-        $lipallets[] = $lipallet->id_pallet;
-      }
-      $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
-                          FROM rastria_pallets_salidas WHERE id_pallet IN(".implode(',', $lipallets).") AND id_producto IS NOT NULL")->result();
-      if (count($productosPallets))
-      {
-        $infoSalida = array(
-          'id_empresa'      => $id_empresa,
-          'id_empleado'     => $this->session->userdata('id_usuario'),
-          'folio'           => $this->productos_salidas_model->folio(),
-          'fecha_creacion'  => date('Y-m-d H:i:s'),
-          'fecha_registro'  => date('Y-m-d H:i:s'),
-          'status'          => 's',
-          'id_factura'      => $id_venta,
-        );
+  //   $infoSalida      = array();
+  //   $productosSalida = array(); // contiene los productos que se daran salida.
+  //   // Se obtienen los pallets ligados a la factura
+  //   $listaPallets = $this->db->query("SELECT id_pallet FROM facturacion_pallets WHERE id_factura = {$id_venta}")->result();
+  //   // Si hay pallets ligados
+  //   if(count($listaPallets) > 0)
+  //   {
+  //     $lipallets = array();
+  //     foreach ($listaPallets as $keylp => $lipallet) {
+  //       $lipallets[] = $lipallet->id_pallet;
+  //     }
+  //     $productosPallets = $this->db->query("SELECT id_pallet, id_producto, cantidad, nom_row
+  //                         FROM rastria_pallets_salidas WHERE id_pallet IN(".implode(',', $lipallets).") AND id_producto IS NOT NULL")->result();
+  //     if (count($productosPallets))
+  //     {
+  //       $infoSalida = array(
+  //         'id_empresa'      => $id_empresa,
+  //         'id_empleado'     => $this->session->userdata('id_usuario'),
+  //         'folio'           => $this->productos_salidas_model->folio(),
+  //         'fecha_creacion'  => date('Y-m-d H:i:s'),
+  //         'fecha_registro'  => date('Y-m-d H:i:s'),
+  //         'status'          => 's',
+  //         'id_factura'      => $id_venta,
+  //       );
 
-        $ress = $this->productos_salidas_model->agregar($infoSalida);
+  //       $ress = $this->productos_salidas_model->agregar($infoSalida);
 
-        $row = 0;
-        foreach ($productosPallets as $keypp => $prodspp) {
-          $inv   = $this->inventario_model->promedioData($prodspp->id_producto, date('Y-m-d'), date('Y-m-d'));
-          $saldo = array_shift($inv);
-          $productosSalida[] = array(
-                'id_salida'       => $ress['id_salida'],
-                'id_producto'     => $prodspp->id_producto,
-                'no_row'          => $row,
-                'cantidad'        => $prodspp->cantidad,
-                'precio_unitario' => $saldo['saldo'][1],
-              );
+  //       $row = 0;
+  //       foreach ($productosPallets as $keypp => $prodspp) {
+  //         $inv   = $this->inventario_model->promedioData($prodspp->id_producto, date('Y-m-d'), date('Y-m-d'));
+  //         $saldo = array_shift($inv);
+  //         $productosSalida[] = array(
+  //               'id_salida'       => $ress['id_salida'],
+  //               'id_producto'     => $prodspp->id_producto,
+  //               'no_row'          => $row,
+  //               'cantidad'        => $prodspp->cantidad,
+  //               'precio_unitario' => $saldo['saldo'][1],
+  //             );
 
-          $row++;
-        }
-      }
+  //         $row++;
+  //       }
+  //     }
 
-      // Si hay al menos 1 producto para las salidas lo inserta.
-      if (count($productosSalida) > 0)
-      {
-        $this->productos_salidas_model->agregarProductos(null, $productosSalida);
-      }
+  //     // Si hay al menos 1 producto para las salidas lo inserta.
+  //     if (count($productosSalida) > 0)
+  //     {
+  //       $this->productos_salidas_model->agregarProductos(null, $productosSalida);
+  //     }
 
-      // Si no hay productos para ninguna de las medidas elimina la salida.
-      else
-      {
-        $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
-      }
-    }
-  }
+  //     // Si no hay productos para ninguna de las medidas elimina la salida.
+  //     else
+  //     {
+  //       $this->db->delete('compras_salidas', array('id_salida' => $ress['id_salida']));
+  //     }
+  //   }
+  // }
 
 	/**
 	 * Cancela una nota, la elimina
@@ -690,6 +700,10 @@ class Ventas_model extends privilegios_model{
 
     $this->db->update('facturacion', array('status' => 'ca'), "id_factura = '{$id_venta}'");
     $remision = $this->getInfoVenta($id_venta);
+
+    // Quita la asignacion de la factura a la venta del dia
+    $this->load->model('ventas_dia_model');
+    $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $id_venta), true);
 
     // Regenera el PDF de la factura.
     $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio);
@@ -969,11 +983,33 @@ class Ventas_model extends privilegios_model{
  //      $pdf->Output('Factura', 'I');
 	// }
 
+  public function getHistRemision($idVenta)
+  {
+    $this->load->model('cuentas_cobrar_model');
+    $response['facturas'] = $this->db->query("SELECT id_factura, status, serie, folio, Date(fecha) AS fecha
+                               FROM remisiones_historial
+                               WHERE id_remision = {$idVenta}
+                               ORDER BY (serie, folio) ASC")->result();
+    $response['abonos_remision'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($idVenta, 'r', true, true);
+    $response['abonos_factura'] = false;
+    foreach ($response['facturas'] as $key => $value) {
+      if ($value->status != 'ca' && $value->status != 'b') {
+        $response['abonos_factura'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value->id_factura, 'r', true, true);
+      }
+    }
+    return $response;
+  }
+
   public function generaNotaRemisionPdf($idVenta, $path = null)
   {
     // include(APPPATH.'libraries/phpqrcode/qrlib.php');
 
     $factura = $this->getInfoVenta($idVenta);
+    $hist    = $this->getHistRemision($idVenta);
+
+    // echo "<pre>";
+    //   var_dump($hist);
+    // echo "</pre>";exit;
 
     // echo "<pre>";
     //   var_dump($factura, $factura['info']->cliente->rfc);
@@ -1209,6 +1245,8 @@ class Ventas_model extends privilegios_model{
 
     $pdf->setY($pdf->GetY() + 1);
     $hay_prod_certificados = false;
+    $gastos = array();
+    $bultoss = 0;
     foreach($conceptos as $key => $item)
     {
       $band_head = false;
@@ -1238,8 +1276,10 @@ class Ventas_model extends privilegios_model{
       {
         if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
             $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53')
+            $item->id_clasificacion == '53'){
           $printRow = false;
+          $gastos[] = $item;
+        }
       }
 
       if ($item->certificado === 't')
@@ -1252,15 +1292,93 @@ class Ventas_model extends privilegios_model{
         elseif ($item->porcentaje_iva == '16')
           $traslado16 += $item->iva;
 
+        $descripcion_ext = '';
+        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+            $item->id_clasificacion == '53'){
+          if($item->id_clasificacion == '49' && isset($factura['seguro']))
+            $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+          elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
+            $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+          elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
+            $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+        }else
+          $bultoss += $item->cantidad;
+
         $pdf->Row(array(
           $item->cantidad,
           $item->unidad,
-          $item->descripcion,
+          $item->descripcion.$descripcion_ext,
           $item->certificado === 't' ? 'Certificado' : '',
           String::formatoNumero($item->precio_unitario, 2, '$', false),
           String::formatoNumero($item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
       }
+    }
+
+    $pdf->SetFont('Arial', 'B', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetX(0);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths(array(30));
+    $pdf->Row(array($bultoss), true, true, null, 2, 1);
+    $pdf->SetY($pdf->GetY()+2);
+
+    foreach($gastos as $key => $item)
+    {
+      if($factura['info']->sin_costo == 'f')
+      {
+        if ($item->porcentaje_iva == '11')
+          $traslado11 += $item->iva;
+        elseif ($item->porcentaje_iva == '16')
+          $traslado16 += $item->iva;
+      }
+      $band_head = false;
+
+      if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+      {
+        if($key > 0) $pdf->AddPage();
+
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetX(0);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths(array(216));
+        $pdf->Row(array('Gastos'), true, true, null, 2, 1);
+      }
+
+      $pdf->SetFont('Arial', '', 8);
+      $pdf->SetTextColor(0,0,0);
+
+      $pdf->SetX(0);
+      $pdf->SetAligns($aligns2);
+      $pdf->SetWidths($widths);
+
+      if ($item->certificado === 't')
+        $hay_prod_certificados = true;
+
+      $descripcion_ext = '';
+      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+          $item->id_clasificacion == '53'){
+        if($item->id_clasificacion == '49' && isset($factura['seguro']))
+          $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+        elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
+          $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+        elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
+          $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+      }
+
+      $pdf->Row(array(
+        $item->cantidad,
+        $item->unidad,
+        $item->descripcion.$descripcion_ext,
+        $item->certificado === 't' ? 'Certificado' : '',
+        String::formatoNumero($item->precio_unitario, 2, '$', false),
+        String::formatoNumero($item->importe, 2, '$', false),
+      ), false, true, null, 2, 1);
     }
 
     /////////////
@@ -1393,11 +1511,68 @@ class Ventas_model extends privilegios_model{
     }
 
     ////////////////////
-    // Timbrado Datos //
+    // historial      //
     ////////////////////
 
-    if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+    if($pdf->GetY() + 15 >= $pdf->limiteY) //salta de pagina si exede el max
         $pdf->AddPage();
+
+    $yaux = $pdf->GetY()+5;
+    if (count($hist['facturas']) > 0) {
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(5, $pdf->GetY()+5);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(19, 20, 30));
+      $pdf->Row(array('Fecha', 'Folio', 'Status'), false, true);
+      $pdf->SetFont('helvetica', '', 7.5);
+      $pdf->SetXY(5, $pdf->GetY()-1);
+      foreach ($hist['facturas'] as $key => $value) {
+        $status = 'Pendiente';
+        if ($value->status == 'pa')
+          $status = 'Pagada';
+        elseif($value->status == 'ca')
+          $status = 'Cancelada';
+        elseif($value->status == 'b')
+          $status = 'Borrador';
+        $pdf->Row(array($value->fecha, $value->serie.$value->folio, $status), false, false);
+        $pdf->SetXY(5, $pdf->GetY()-2);
+      }
+    }
+
+    if (count($hist['abonos_remision']['abonos']) > 0 || count($hist['abonos_factura']['abonos']) > 0) {
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetXY(75, $yaux);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(19, 20, 70, 25));
+      $pdf->Row(array('Fecha', 'Folio', 'Concepto', 'Abono'), false, true);
+      $pdf->SetFont('helvetica', '', 7.5);
+      $pdf->SetXY(75, $pdf->GetY()-1);
+      $total_abanos = 0;
+      if (count($hist['abonos_remision']['abonos']) > 0)
+        foreach($hist['abonos_remision']['abonos'] as $key => $value) {
+          $pdf->Row(array(
+              $value->fecha,
+              $hist['abonos_remision']['cobro'][0]->serie.$hist['abonos_remision']['cobro'][0]->folio,
+              $value->concepto,
+              String::formatoNumero($value->abono, 2, '$', false)), false, false);
+          $total_abanos += $value->abono;
+          $pdf->SetXY(75, $pdf->GetY()-2);
+        }
+      if (count($hist['abonos_factura']['abonos']) > 0)
+        foreach ($hist['abonos_factura']['abonos'] as $key => $value) {
+          $pdf->Row(array(
+              $value->fecha,
+              $hist['abonos_factura']['cobro'][0]->serie.$hist['abonos_factura']['cobro'][0]->folio,
+              $value->concepto,
+              String::formatoNumero($value->abono, 2, '$', false)), false, false);
+          $total_abanos += $value->abono;
+          $pdf->SetXY(75, $pdf->GetY()-2);
+        }
+      $pdf->SetFont('helvetica', 'B', 8);
+      $pdf->SetX(184);
+      $pdf->SetWidths(array(19, 20, 70, 25));
+      $pdf->Row(array(String::formatoNumero($total_abanos, 2, '$', false)), false, false);
+    }
 
     //------------ IMAGEN CANDELADO --------------------
 
@@ -1640,6 +1815,212 @@ class Ventas_model extends privilegios_model{
       echo $html;
     }
 
+    public function getRNotasCredData()
+    {
+      $sql = '';
+
+      //Filtros para buscar
+      $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+      $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+      $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+      $sql = " AND Date(f.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+      $this->load->model('empresas_model');
+      $client_default   = $this->empresas_model->getDefaultEmpresa();
+      $did_empresa      = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : array($client_default->id_empresa));
+      $_GET['dempresa'] = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      if(is_array($did_empresa))
+        $sql .= " AND e.id_empresa IN(".implode(',', $did_empresa).")";
+
+      if(is_array($this->input->get('ids_clientes')))
+        $sql .= " AND c.id_cliente IN(".implode(',', $this->input->get('ids_clientes')).")";
+
+      $result = $this->db->query("SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, f.total, c.id_cliente,
+          c.nombre_fiscal AS cliente, c.cuenta_cpi, (fa.serie||fa.folio) AS factura, fa.is_factura,
+          e.id_empresa, e.nombre_fiscal AS empresa, fp.cantidad, fp.descripcion
+        FROM facturacion f
+          INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+          INNER JOIN empresas e ON e.id_empresa = f.id_empresa
+          INNER JOIN facturacion fa ON fa.id_factura = f.id_nc
+          INNER JOIN (SELECT id_factura, Sum(cantidad) AS cantidad, string_agg(descripcion, ',') AS descripcion
+            FROM facturacion_productos GROUP BY id_factura
+          ) fp ON f.id_factura = fp.id_factura
+        WHERE f.id_nc IS NOT NULL {$sql}
+        ORDER BY empresa ASC, cliente ASC, fecha ASC");
+
+      $empresa = '';
+      $cliente = '';
+      $response = array();
+      foreach ($result->result() as $key => $value) {
+        if ($empresa !== $value->id_empresa) {
+          $empresa = $value->id_empresa;
+          $cliente = $value->id_cliente;
+          $response[$empresa] = array('empresa' => $value->empresa, 'clientes' => array());
+          $response[$empresa]['clientes'][$cliente] = array('cliente' => $value->cliente, 'cuenta_cpi' => $value->cuenta_cpi, 'facturas' => array());
+          $response[$empresa]['clientes'][$cliente]['facturas'][] = $value;
+        }elseif ($cliente !== $value->id_cliente) {
+          $cliente = $value->id_cliente;
+          $response[$empresa]['clientes'][$cliente] = array('cliente' => $value->cliente, 'cuenta_cpi' => $value->cuenta_cpi, 'facturas' => array());
+          $response[$empresa]['clientes'][$cliente]['facturas'][] = $value;
+        }else{
+          $response[$empresa]['clientes'][$cliente]['facturas'][] = $value;
+        }
+      }
+
+      return $response;
+    }
+    /**
+    * Reporte compras x cliente pdf
+    */
+    public function getRNotasCredPdf() {
+      $res = $this->getRNotasCredData();
+
+      $con_mov = $this->input->get('dcon_mov')=='si'? false: true;
+
+      $this->load->model('empresas_model');
+      // $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      // if ($empresa['info']->logo !== '')
+      //   $pdf->logo = $empresa['info']->logo;
+
+      // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      $pdf->titulo2 = 'Notas de credito';
+      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+      $pdf->SetFont('Arial','',8);
+
+      $aligns = array('L', 'L', 'R', 'L', 'R', 'R', 'R');
+      $widths = array(25, 11, 15, 70, 23, 23, 23);
+      $header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cantidad', 'Total', 'Factura');
+
+      $total_subtotal_g2 = 0;
+      $total_impuesto_g2 = 0;
+      $total_total_g2 = 0;
+      $total_cantidad_g2 = 0;
+      $total_saldo_g2 = 0;
+      $total_saldo_cliente_g2 = 0;
+      $auxEmpresa = '';
+      $auxcliente = '';
+      foreach ($res as $keye => $dempresa) {
+        $total_subtotal_g = 0;
+        $total_impuesto_g = 0;
+        $total_total_g = 0;
+        $total_cantidad_g = 0;
+        $total_saldo_g = 0;
+        $total_saldo_cliente_g = 0;
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(180));
+        $pdf->Row(array($dempresa['empresa']), false, false);
+
+        foreach($dempresa['clientes'] as $key => $item) {
+          if (count($item['facturas']) > 0 || $con_mov)
+          {
+            $total_total = 0;
+            $total_cantidad = 0;
+
+            if($pdf->GetY()+10 >= $pdf->limiteY || $total_total==0){ //salta de pagina si exede el max
+              if($total_total > 0)
+                $pdf->AddPage();
+
+              $pdf->SetFont('Arial','B',8);
+              $pdf->SetTextColor(255,255,255);
+              $pdf->SetFillColor(160,160,160);
+              $pdf->SetX(6);
+              $pdf->SetAligns($aligns);
+              $pdf->SetWidths($widths);
+              $pdf->Row($header, true);
+            }
+
+            $pdf->SetFont('Arial','',8);
+            $pdf->SetTextColor(0,0,0);
+
+            $pdf->SetXY(6, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L'));
+            $pdf->SetWidths(array(20, 170));
+            $pdf->Row(array('CLIENTE:', $item['cuenta_cpi']), false, false);
+            $pdf->SetXY(6, $pdf->GetY()-2);
+            $pdf->Row(array('NOMBRE:', $item['cliente']), false, false);
+
+            $pdf->SetXY(6, $pdf->GetY()+3);
+
+            foreach ($item['facturas'] as $keyf => $factura)
+            {
+              $total_cantidad += $factura->cantidad;
+              $total_total += $factura->total;
+
+              $total_cantidad_g += $factura->cantidad;
+              $total_total_g += $factura->total;
+
+              $total_cantidad_g2 += $factura->cantidad;
+              $total_total_g2 += $factura->total;
+
+              $datos = array(String::fechaATexto($factura->fecha, '/c'),
+                      $factura->serie,
+                      $factura->folio,
+                      $factura->descripcion,
+                      String::formatoNumero($factura->cantidad, 2, '', false),
+                      String::formatoNumero($factura->total, 2, '', false),
+                      $factura->factura,
+                    );
+
+              if($pdf->GetY()+10 >= $pdf->limiteY)
+                $pdf->AddPage();
+              $pdf->SetXY(6, $pdf->GetY()-1);
+              $pdf->SetAligns($aligns);
+              $pdf->SetWidths($widths);
+              $pdf->Row($datos, false, false);
+            }
+
+            if($pdf->GetY()+10 >= $pdf->limiteY)
+              $pdf->AddPage();
+            $pdf->SetX(127);
+            $pdf->SetFont('Arial','B',8);
+            // $pdf->SetTextColor(255,255,255);
+            $pdf->SetAligns(array('R', 'R'));
+            $pdf->SetWidths(array(23, 23));
+            $pdf->Row(array(
+                String::formatoNumero($total_cantidad, 2, '', false),
+                String::formatoNumero($total_total, 2, '', false)), false);
+
+            // $total_saldo_cliente += $saldo_cliente;
+          }
+        }
+        if($pdf->GetY()+10 >= $pdf->limiteY)
+          $pdf->AddPage();
+        $pdf->SetX(97);
+        $pdf->SetAligns(array('R', 'R', 'R'));
+        $pdf->SetWidths(array(30, 23, 23));
+        $pdf->Row(array('TOTAL EMPRESA',
+            String::formatoNumero($total_cantidad_g, 2, '', false),
+            String::formatoNumero($total_total_g, 2, '', false)), false);
+      }
+
+      if($pdf->GetY()+10 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(97);
+      $pdf->SetAligns(array('R', 'R', 'R'));
+      $pdf->SetWidths(array(30, 23, 23));
+      $pdf->Row(array('TOTAL GRAL',
+          String::formatoNumero($total_cantidad_g2, 2, '', false),
+          String::formatoNumero($total_total_g2, 2, '', false)), false);
+
+
+      // $pdf->SetXY(66, $pdf->GetY()+4);
+      // $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+
+
+      $pdf->Output('reporte_ventas.pdf', 'I');
+    }
+
     /**
      * Reporte de facturas y notas de credito
      * @return
@@ -1671,7 +2052,8 @@ class Ventas_model extends privilegios_model{
           Date(f.fecha) AS fecha,
           COALESCE(f.total, 0) AS cargo,
           COALESCE(f.importe_iva, 0) AS iva,
-          f.id_nc
+          f.id_nc,
+          f.id_abono_factura
         FROM
           facturacion AS f
           INNER JOIN facturacion_cliente AS fc ON fc.id_factura = f.id_factura
@@ -1714,6 +2096,7 @@ class Ventas_model extends privilegios_model{
       $header = array('RFC', 'Serie', 'Folio', 'Fecha', 'Operacion', 'IVA', 'Estado');
 
       $total_nc_cancel = $total_nc = $total_factura_cancel = $total_iva_cancel = $total_factura = $total_iva = 0;
+      $total_pp_cancel = $total_pp = 0;
       foreach($res as $key => $factura){
         if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
           $pdf->AddPage();
@@ -1730,6 +2113,9 @@ class Ventas_model extends privilegios_model{
         if(is_numeric($factura->id_nc))
         {
           $factura->status=='ca'? $total_nc_cancel += $factura->cargo : $total_nc += $factura->cargo ;
+        }elseif(is_numeric($factura->id_abono_factura))
+        {
+          $factura->status=='ca'? $total_pp_cancel += $factura->cargo : $total_pp += $factura->cargo ;
         }else
         {
           if ($factura->status=='ca')
@@ -1763,43 +2149,171 @@ class Ventas_model extends privilegios_model{
       $pdf->SetFont('Arial','B',8);
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(60, 40));
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('FACTURAS ADMIN', String::formatoNumero( $total_factura+$total_factura_cancel , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA ADMIN', String::formatoNumero( $total_iva+$total_iva_cancel , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('FACT  CANCELADAS', String::formatoNumero( $total_factura_cancel , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA CANCELADO', String::formatoNumero( $total_iva_cancel , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('FACT. CONTAB', String::formatoNumero( $total_factura-$total_iva , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('IVA TRASLADADO CONTAB', String::formatoNumero( $total_iva , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('NOTAS DE CREDITO', String::formatoNumero( $total_nc , 2, '', false) ), false);
-      if($pdf->GetY()+8 >= $pdf->limiteY)
+      if($pdf->GetY()+7 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetX(80);
       $pdf->Row(array('NC CANCELADAS', String::formatoNumero( $total_nc_cancel , 2, '', false) ), false);
+      if($pdf->GetY()+7 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(80);
+      $pdf->Row(array('PAGO PARCIALIDADES', String::formatoNumero( $total_pp , 2, '', false) ), false);
+      if($pdf->GetY()+7 >= $pdf->limiteY)
+        $pdf->AddPage();
+      $pdf->SetX(80);
+      $pdf->Row(array('PAGO PARCIA CANCELADAS', String::formatoNumero( $total_pp_cancel , 2, '', false) ), false);
 
 
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
+    public function getRFacturasNCXls(){
+      $res = $this->getRFacturasNCData();
 
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=reporte_ventas.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = String::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
+      $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">RFC</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Serie</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Folio</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Operacion</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">IVA</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Estado</td>
+          </tr>';
+      $total_nc_cancel = $total_nc = $total_factura_cancel = $total_iva_cancel = $total_factura = $total_iva = 0;
+      $total_pp_cancel = $total_pp = 0;
+      foreach($res as $key => $factura)
+      {
+        if(is_numeric($factura->id_nc))
+        {
+          $factura->status=='ca'? $total_nc_cancel += $factura->cargo : $total_nc += $factura->cargo ;
+        }elseif(is_numeric($factura->id_abono_factura))
+        {
+          $factura->status=='ca'? $total_pp_cancel += $factura->cargo : $total_pp += $factura->cargo ;
+        }else
+        {
+          if ($factura->status=='ca')
+          {
+            $total_factura_cancel += $factura->cargo;
+            $total_iva_cancel += $factura->iva;
+          }else
+          {
+            $total_factura += $factura->cargo;
+            $total_iva += $factura->iva;
+          }
+        }
+
+        $html .= '<tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->rfc.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->serie.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->folio.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->fecha.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->cargo.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$factura->iva.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.($factura->status=='ca'? '0': '1').'</td>
+          </tr>';
+      }
+
+      $html .= '
+          <tr>
+            <td colspan="7"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">FACTURAS ADMIN</td>
+            <td colspan="3" style="border:1px solid #000;">'.($total_factura+$total_factura_cancel).'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">IVA ADMIN</td>
+            <td colspan="3" style="border:1px solid #000;">'.($total_iva+$total_iva_cancel).'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">FACT  CANCELADAS</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_factura_cancel.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">IVA CANCELADO</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_iva_cancel.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">FACT. CONTAB</td>
+            <td colspan="3" style="border:1px solid #000;">'.($total_factura-$total_iva).'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">IVA TRASLADADO CONTAB</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_iva.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">NOTAS DE CREDITO</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_nc.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">NC CANCELADAS</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_nc_cancel.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">PAGO PARCIALIDADES</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_pp.'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="4">PAGO PARCIA CANCELADAS</td>
+            <td colspan="3" style="border:1px solid #000;">'.$total_pp_cancel.'</td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
+    }
 
 
   public function getRVP()

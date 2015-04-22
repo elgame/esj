@@ -189,6 +189,7 @@ class gastos extends MY_Controller {
     );
 
     $this->load->model('gastos_model');
+    $this->load->model('empresas_model');
 
     $this->configLigarFacturas();
     if ($this->form_validation->run() == FALSE)
@@ -203,6 +204,7 @@ class gastos extends MY_Controller {
     }
 
     $params['facturas'] = $this->gastos_model->getFacturasLigadas($_GET);
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($this->input->get('ide'));
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);
@@ -558,7 +560,7 @@ class gastos extends MY_Controller {
             'rules' => 'required|numeric'),
       array('field' => 'idfactura[]',
             'label' => 'Factura',
-            'rules' => 'required|numeric'),
+            'rules' => ''),
     );
 
     $this->form_validation->set_rules($rules);

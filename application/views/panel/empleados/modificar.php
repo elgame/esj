@@ -289,12 +289,37 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="ffondo_ahorro">Fondo de Ahorro </label>
+                    <div class="controls">
+                      <input type="text" name="ffondo_ahorro" id="ffondo_ahorro" class="span12 vpositive"
+                        value="<?php echo isset($data['info'][0]->fondo_ahorro)?$data['info'][0]->fondo_ahorro:''; ?>" maxlength="12" placeholder="Fondo de Ahorro">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="ffondo_ahorro_cpi">Cuenta Fondo de Ahorro </label>
+                    <div class="controls">
+                      <input type="text" name="ffondo_ahorro_cpi" id="ffondo_ahorro_cpi" class="span12 vpositive"
+                        value="<?php echo isset($data['info'][0]->fondo_ahorro_cpi)?$data['info'][0]->fondo_ahorro_cpi:''; ?>" maxlength="12" placeholder="Cuenta contpaq Fondo de Ahorro">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
                     <div class="controls">
                     <select name="fregimen_contratacion" id="fregimen_contratacion">
                       <option value="2" <?php echo set_select('fregimen_contratacion', '2', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Sueldos y salarios</option>
                       <option value="3" <?php echo set_select('fregimen_contratacion', '3', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Jubilados</option>
                       <option value="4" <?php echo set_select('fregimen_contratacion', '4', false, (isset($data['info'][0]->regimen_contratacion)?$data['info'][0]->regimen_contratacion:'')); ?>>Pensionados</option>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fbanco">Banco </label>
+                    <div class="controls">
+                    <select name="fbanco" id="fbanco">
+                      <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>BBVA Bancomer</option>
+                      <option value="santr" <?php echo set_select('fbanco', 'santr', false, (isset($data['info'][0]->banco)?$data['info'][0]->banco:'')); ?>>Santander</option>
                     </select>
                     </div>
                   </div>

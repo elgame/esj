@@ -89,6 +89,13 @@
                   <option value="" <?php echo set_select_get('tmetodo_pago', ''); ?>>Todas</option>
                   <option value="transferencia" <?php echo set_select_get('tmetodo_pago', 'transferencia'); ?>>Transferencia</option>
                   <option value="cheque" <?php echo set_select_get('tmetodo_pago', 'cheque'); ?>>Cheque</option>
+                </select> |
+
+                <label for="tipomovimiento">Tipo movimiento:</label>
+                <select name="tipomovimiento" id="tipomovimiento" class="input-large search-query">
+                  <option value="" <?php echo set_select_get('tipomovimiento', ''); ?>>Todas</option>
+                  <option value="t" <?php echo set_select_get('tipomovimiento', 't'); ?>>Deposito</option>
+                  <option value="f" <?php echo set_select_get('tipomovimiento', 'f'); ?>>Retiro</option>
                 </select>
 
                 <button type="submit" class="btn">Enviar</button>

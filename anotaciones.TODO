@@ -1,3 +1,66 @@
+-*Estados de cuenta bancos poner filtros de ingresos y gastos
+-*Reporte diario de entrada poner que salgan todas las areas
+-*ordenes de flete poner la fecha de la factura ligada
+
+
+
+
+-*Poner dos bancos para dispersar la nomina
+-*Remisiones separar los productos como las ventas del dia, en los gastos poner el folio (seguro, certificado)
+-*Remisiones poner historial de movimientos (a que factura se ligo, si se cancelo que factura la sustituyo, notas de credito, y abonos ya sea a la remision o a la factura ligada), es un pequeño resumen de movimientos
+-*Falta validar que no puedan facturar si la remision ya lo esta
+-*Modificar las unidades y clasificaciones para que tengan los codigos de la hoja, eliminar todas las demas clasificaciones de limon, poner codigo 2 de contpaq para empresa oroverde
+  En las unidades agregar los codigos para q en las remisiones salgan esos codigos como unidades, al facturar el codigo es la unidad del codigo
+-*Poner lo de prorratear el costo de seguro, certificados, etc. en remisiones y facturacion
+-poner filtro en almacen para q tome apartir del 01/01/2015
+-*Menu crear un apartado para reportes y ahi meter todos separados por area
+-*Reporte de compra poner filtro de tipo de orden y separar las compras por tipo
+-*Crear reporte de Notas de credito, Estilo como el reporte de ventas por cliente, nc de facturas y nc de remisiones (poner a que factura afecto)
+-*Reporte de productos facturados, agregar los de las remisiones (ver si se estan cargando las remisiones) y ponerle columna de No poliza que se captura al facturar, ver la forma de poder seleccionar varios productos a la ves con checkboxs
+-*Reporte de ventas poder seleccionar varias empresas y que ponga un total general de las empresas
+-*Bascula poner boton de reimprimir la boleta de entrada
+-*Poliza de nomina va confirmar tryana como quedaran las cuentas de ingreso
+
+
+
+
+compras_facturacion_prodc Quitar pkey, agregar los campos news-*Compras, en ligar productos de certificados agregarle para poner productos cancelados, fecha, cliente, costo
+-Terminar de acomodar lo de maquinaria, bodega y labores para crear el reporte de costos
+
+
+
+
+-*compras al ligar las facturas que seleccionen la empresa para que agreguen los certificados, en el reporte de cuentas por pagar checar el reporte para que cargue los certificados de diferente empresa
+-*En todos los codigos de gastos (caja chica, ordenes, salidas almacen) que busque por codigo y por nombre en la caja de texto
+-*Reportes de caja chika
+-*Rastreabilidad agregar pallet que salga los clientes de oroverde para q se lo asignen
+-*Imprimir el listado de codigos de compras
+
+
+Sueldos, salarios, rayas y jornales (Gravado) - sueldo completo
+Gratificación anual (Exento) - es el aguinaldo
+
+sueldo y vacaciones y finiquito - gravado
+
+Impuesto retenido durante el ejercicio - isr
+
+
+
+
+
+-Agregar a la nomina deducciones "fondo de ahorro" como lo de infonavit lo que pone norma se descuenta
+-*Reporte metodo de pago (separar en no pagadas, efectivo, trasnferencia, cheque) poner las boletas de cada una en una fecha o rango de fechas
+-Costos de almacen en upes
+-Los reportes q mando
+-*Los codigos ponerlos en las caja chicas para asignar el gasto
+
+
+-*Exportar clientes a exel y productos
+-*Exportar a exel *reportes de caja chica, rastriabilidad y *Ventas/Facturas y NC (separar en otro total los pagos en parcialidades)
+-*Costos de salida checar
+-*Salidaalidas agregar quien recicio el material y poner asignar a un trabajador, generar un reporte de herramienta prestada al trabajador pornerlo en empleados
+-Entrada y salida en vigilancia, para los productores y de mas q comento la señora
+
 -*Poliza de ventas Quitar las que no salgan los pagos en parcialidades
 -*Poliza de gastos en la cuenta q selecciona que ponga el subtotal
 -*Esquineros 4 chui, en los fleje poder poner varios en pallet
@@ -5,15 +68,15 @@
 -*Limon suelo meterlo en insdustrial en reporte de rendimientos
 -*Al dar de alta un proveedor poner pordefault de credito 15 dias
 -*Ordenes de compra lo de los codigos q no se dupliquen
--de jorge gomez y vianey gudiño pasar los proveedores y productos a gomez gudiño
+-*de jorge gomez y vianey gudiño pasar los proveedores y productos a gomez gudiño
 -*salidas poner opcion para copiar codigo q no sea uno x uno
 
 -*Salida de productos ponerles total, imprimir recibo de salida, quien lo solicita, a que codigo se va ir ese producto
   -*en conbustible agregar odometro, veiculo de codigos y generar reporte
   -*Reporte por codigo de las cantidades q se fueron
 -Nomina
-  -Parte para administrar las labores que agreguen las que esta en la hoja
-  -Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
+  -*Parte para administrar las labores que agreguen las que esta en la hoja
+  -*Seccion para capturar lo que trabajo (lavor) cada trabajador como esta en las hojas
   -Reportes de eso
 
 

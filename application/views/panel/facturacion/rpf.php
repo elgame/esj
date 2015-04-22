@@ -34,8 +34,9 @@
                     <input type="hidden" name="did_producto" id="did_producto" value="<?php echo set_value_get('did_producto'); ?>">
                   </div> -->
                   <div class="input-append span12">
-                    <input type="text" name="dproducto" value="" id="dproducto" class="span9" placeholder="Buscar">
-                    <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
+                    <a href="#modal-productos" role="button" class="btn" data-toggle="modal">Productos</a>
+                    <!-- <input type="text" name="dproducto" value="" id="dproducto" class="span9" placeholder="Buscar"> -->
+                    <!-- <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button> -->
                     <input type="hidden" name="did_producto" value="" id="did_producto">
                   </div>
                   <div class="clearfix"></div>
@@ -62,6 +63,34 @@
 
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
+                </div>
+
+                <!-- Modal -->
+                <div id="modal-productos" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-productos" aria-hidden="true">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="myModalLabel">Productos</h3>
+                  </div>
+                  <div class="modal-body">
+                    <form id="frmproductos" class="form-inline" onsubmit="return false;">
+                      <input id="txtbuscar" type="text" class="input-small" placeholder="Buscar">
+                    </form>
+                    <table id="tblProductos" class="table table-condensed">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Producto</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" id="addProductos">Agregar</button>
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+                  </div>
                 </div>
 
               </div>

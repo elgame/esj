@@ -171,6 +171,88 @@ class Usuario_historial_model extends CI_Model {
     )->result();
   }
 
+  public function printPrestamosDeEmpleado($usuarioId)
+  {
+    $historial = $this->getPrestamos($usuarioId);
+
+    $this->load->library('mypdf');
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    $usuario = $this->usuarios_model->get_usuario_info($usuarioId, true);
+    $empresa = $this->empresas_model->getInfoEmpresa($usuario['info'][0]->id_empresa);
+
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+    {
+      $pdf->logo = $empresa['info']->logo;
+    }
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "PRODUCTOS PRESTADOS A {$usuario['info'][0]->nombre} {$usuario['info'][0]->apellido_paterno} {$usuario['info'][0]->apellido_materno}";
+    // $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'R');
+    $widths = array(20, 18, 85, 20, 30, 30);
+    $header = array('FOLIO', 'FECHA', 'PRODUCTO', 'CANTIDAD', 'PRECIO', 'IMPORTE');
+
+    foreach($historial as $key => $log)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('helvetica', 'B', 8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(240,240,240);
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, 1, 1);
+      }
+
+      $pdf->SetFont('helvetica', '', 8);
+
+      // se colocaria la info de la bascula
+      $pdf->SetY($pdf->GetY());
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $log->folio,
+        $log->fecha,
+        $log->nombre,
+        $log->cantidad,
+        String::formatoNumero($log->precio_unitario, 2, '', false),
+        String::formatoNumero($log->cantidad*$log->precio_unitario, 2, '', false),
+      ), false, false);
+    }
+
+    $pdf->Output('prestamos.pdf', 'I');
+  }
+
+  private function getPrestamos($empleadoId)
+  {
+    return $this->db->query(
+      "SELECT cs.id_salida, cs.folio, Date(cs.fecha_creacion) AS fecha, (u.nombre || ' ' || u.apellido_paterno) AS empleado,
+        csp.cantidad, csp.precio_unitario, p.nombre
+       FROM compras_salidas cs
+       INNER JOIN usuarios u ON u.id = cs.id_usuario
+       INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
+       INNER JOIN productos p ON p.id_producto = csp.id_producto
+       WHERE u.id = {$empleadoId} AND Date(cs.fecha_creacion) BETWEEN Date(u.fecha_entrada) AND Date(now())
+        AND cs.status <> 'ca'
+       ORDER BY id ASC"
+    )->result();
+  }
+
 }
 
 /* End of file usuario_historial_model.php */

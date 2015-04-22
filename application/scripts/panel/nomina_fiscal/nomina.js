@@ -3,6 +3,9 @@
 })(function ($, window) {
 
   $(function () {
+    $(".box-header h2 .icon-list-alt").on('click', function(event) {
+      guardaNominaEmpleado($("#empleado250"));
+    });
     autocompleteEmpresas();
 
     eventOnChangeHorasExtras();

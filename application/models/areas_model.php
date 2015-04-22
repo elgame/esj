@@ -8,7 +8,7 @@ class areas_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getAreas($paginados = true)
+	public function getAreas($paginados = true, $sql2='')
 	{
 		$sql = '';
 		//paginacion
@@ -36,7 +36,7 @@ class areas_model extends CI_Model {
 		$str_query = "
 				SELECT id_area, nombre, tipo, status, predeterminado
 				FROM areas
-				".$sql."
+				".$sql.$sql2."
 				ORDER BY nombre ASC
 				";
 		if($paginados){

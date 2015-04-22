@@ -39,6 +39,14 @@
               </div>
 
               <div class="control-group">
+                <label class="control-label" for="fcodigo">Codigo </label>
+                <div class="controls">
+                  <input type="text" name="fcodigo" id="fcodigo" class="span6" maxlength="15"
+                  value="<?php echo (isset($data['info']->codigo)? $data['info']->codigo: ''); ?>" placeholder="AL2, EXT, 500">
+                </div>
+              </div>
+
+              <div class="control-group">
                 <label class="control-label" for="fnombre">IVA </label>
                 <div class="controls">
                   <select name="diva" id="diva" class="span3">
@@ -87,6 +95,14 @@
                 <div class="controls">
                   <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11"
                   value="<?php echo (isset($data['info']->cuenta_cpi)? $data['info']->cuenta_cpi: ''); ?>" required placeholder="123212, 332123">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fcuenta_cpi2">Cuenta contpaq 2 (Orov)</label>
+                <div class="controls">
+                  <input type="text" name="fcuenta_cpi2" id="fcuenta_cpi2" class="span6 vpositive" maxlength="11"
+                  value="<?php echo (isset($data['info']->cuenta_cpi2)? $data['info']->cuenta_cpi2: ''); ?>" placeholder="123212, 332123">
                 </div>
               </div>
 

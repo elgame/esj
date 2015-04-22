@@ -30,6 +30,23 @@
                 <legend>Disponibles</legend>
                 <div class="row-fluid">
                   <div class="span5">
+                    <input type="date" name="fecha" class="span12" id="fecha" value="<?php echo date("Y-m-d") ?>">
+                  </div>
+                </div>
+                <div class="row-fluid">
+                  <div class="span8">
+                    <input type="text" name="dempresa" class="span12" id="empresa" value="<?php echo (isset($empresa['info'])? $empresa['info']->nombre_fiscal: '') ?>">
+                    <input type="hidden" name="id_empresa" id="id_empresa" value="<?php echo (isset($empresa['info'])? $empresa['info']->id_empresa: '') ?>">
+                  </div>
+                  <div class="span2">
+                    <input type="text" name="costo" id="costo" class="span12" placeholder="Costo">
+                  </div>
+                  <div class="span2">
+                    <buttom id="addProdsCancelados" class="btn"><i class="icon-angle-right"></i></buttom>
+                  </div>
+                </div>
+                <div class="row-fluid">
+                  <div class="span5">
                     <input type="text" name="fclasificacion" id="fclasificacion" class="span12" value="<?php echo set_value('fclasificacion'); ?>"
                       maxlength="100" placeholder="Clasificación" data-next="fcliente">
                     <input type="hidden" name="fid_clasificacion" id="fid_clasificacion" value="<?php echo set_value('fid_clasificacion'); ?>">
@@ -65,12 +82,18 @@
                 <div id="tblsligadas">
               <?php
               $aux_clasif = 0;
-              foreach ($facturas as $key => $value)
+              foreach ($facturas['ligadas'] as $key => $value)
               {
                 $idrow = $value->id_clasificacion.'_'.$value->id_compra.'_'.$value->id_factura;
                 if($aux_clasif != $value->id_clasificacion)
                 {
               ?>
+                <?php if($aux_clasif != 0)
+                { ?>
+                    </tbody>
+                  </table>
+                <?php }
+                $aux_clasif = $value->id_clasificacion; ?>
                   <table id="tbl<?php echo $value->id_clasificacion ?>" class="table table-striped table-bordered bootstrap-datatable">
                     <caption><?php echo $value->nombre ?> - <buttom class="btn deleteTblSel"><i class="icon-remove"></i></buttom></caption>
                     <thead>
@@ -87,19 +110,51 @@
                         <td style="width:70px;"><?php echo $value->fecha ?>
                           <input type="hidden" name="idclasif[]" class="idclasif" value="<?php echo $value->id_clasificacion ?>">
                           <input type="hidden" name="idfactura[]" class="idfactura" value="<?php echo $value->id_factura ?>">
+                          <input type="hidden" name="fecha[]" class="fecha" value="">
+                          <input type="hidden" name="costo[]" class="costo" value="">
                         </td>
                         <td><?php echo $value->serie.$value->folio ?></td>
-                        <td><?php echo $value->cliente ?></td>
+                        <td><?php echo $value->cliente ?>
+                          <input type="hidden" name="id_cliente[]" class="id_cliente" value="">
+                        </td>
                         <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>
                       </tr>
-          <?php if($aux_clasif != $value->id_clasificacion)
-                { ?>
+          <?php
+              } ?>
                     </tbody>
                   </table>
-              <?php
-                  $aux_clasif = $value->id_clasificacion;
-                }
-              } ?>
+
+                  <table id="tblcanceladas" class="table table-striped table-bordered bootstrap-datatable">
+                    <caption>Canceladas</caption>
+                    <thead>
+                      <tr>
+                        <th style="width:70px;">Fecha</th>
+                        <th>Folio</th>
+                        <th>Cliente</th>
+                       <th>Opciones</th>
+                      </tr>
+                    </thead>
+                    <tbody class="tblfacturasligadas">
+                  <?php
+                  foreach ($facturas['canceladas'] as $key => $value)
+                  { ?>
+                      <tr id="row_sel">
+                        <td style="width:70px;"><?php echo $value->fecha ?>
+                          <input type="hidden" name="idclasif[]" class="idclasif" value="<?php echo $value->id_clasificacion ?>">
+                          <input type="hidden" name="idfactura[]" class="idfactura" value="">
+                          <input type="hidden" name="fecha[]" class="fecha" value="<?php echo $value->fecha ?>">
+                          <input type="hidden" name="costo[]" class="costo" value="<?php echo $value->importe ?>">
+                        </td>
+                        <td><?php echo $value->serie.$value->folio ?></td>
+                        <td><?php echo $value->cliente ?>
+                          <input type="hidden" name="id_cliente[]" class="id_cliente" value="<?php echo $value->id_cliente ?>">
+                        </td>
+                        <td><buttom class="btn deleteFacturaSel"><i class="icon-remove"></i></buttom></td>
+                      </tr>
+                  <?php } ?>
+                    </tbody>
+                  </table>
+
                 </div>
               </fieldset>
 

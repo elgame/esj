@@ -49,7 +49,8 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
     'nomina_fiscal/asistencia_pdf/',
-    'nomina_fiscal/cancelar/'
+    'nomina_fiscal/cancelar/',
+    'nomina_fiscal/rpt_dim/',
   );
 
   public function _remap($method)
@@ -65,6 +66,12 @@ class nomina_fiscal extends MY_Controller {
         redirect(base_url('panel/home?msg=1'));
     }else
       redirect(base_url('panel/home'));
+  }
+
+  public function rpt_dim()
+  {
+    $this->load->model('nomina_fiscal_otros_model');
+    $this->nomina_fiscal_otros_model->rpt_dim();
   }
 
   public function index()
@@ -345,7 +352,7 @@ class nomina_fiscal extends MY_Controller {
     $params['nominas_generadas'] = false;
     foreach ($params['empleados'] as $empleado)
     {
-      if ($empleado->aguinaldo_generado !== 'false')
+      if ($empleado->aguinaldo_generado !== 'false' || $empleado->esta_asegurado == 'f')
       {
         $totalGeneradas++;
         $params['nominas_generadas'] = true;

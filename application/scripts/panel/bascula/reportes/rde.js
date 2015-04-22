@@ -138,4 +138,32 @@ function setAutocomplet(tipo, first){
       }
     });
   }
+
+  $("#fusuario").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#fid_empresa").val()) > 0)
+        params.did_empresa = $("#fid_empresa").val();
+      params.only_usuario = 'true';
+      $.ajax({
+          url: base_url + 'panel/usuarios/ajax_get_usuarios/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#fid_usuario").val(ui.item.id);
+      $("#fusuario").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#fid_usuario').val('');
+    }
+  });
 }

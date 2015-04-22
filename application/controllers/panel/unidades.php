@@ -173,7 +173,13 @@ class unidades extends MY_Controller {
     $rules = array(
       array('field' => 'nombre',
             'label' => 'Nombre',
-            'rules' => 'required|max_length[20]'),
+            'rules' => 'required|max_length[40]'),
+      array('field' => 'codigo',
+            'label' => 'Codigo',
+            'rules' => 'max_length[20]'),
+      array('field' => 'cantidad',
+            'label' => 'Cantidad',
+            'rules' => 'numeric'),
 
       array('field' => 'concepto[]',
             'label' => 'Productos',

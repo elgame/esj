@@ -57,6 +57,8 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
+      <a href="<?php echo base_url('panel/caja_chica/rpt_gastos_xls/'); ?>" id="linkDownXls" data-url="<?php echo base_url('panel/caja_chica/rpt_gastos_xls/'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
       <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/caja_chica/rpt_gastos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->

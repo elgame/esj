@@ -108,9 +108,11 @@ $(function(){
 
       // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
       if ($('#autorizar').length === 0) {
+        alert("no");
         $form.attr('action', $form.attr('action') + '&p=t');
         $form.submit();
       } else {
+        alert("si");
         var win=window.open($('#btnPrint').attr('href'), '_blank');
         win.focus();
       }

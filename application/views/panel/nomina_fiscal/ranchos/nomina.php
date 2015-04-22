@@ -57,6 +57,12 @@
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
 
+                <?php
+                if ($show_prestamos) {
+                ?>
+                <a href="<?php echo base_url('panel/nomina_ranchos/quitar_prestamos?').String::getVarsLink(); ?>" class="btn btn-info pull-right"
+                  onclick="msb.confirm('Estas seguro de quitar los prestamos para que se carguen de nuevo?', 'Nomina', this); return false;">Quitar prestamos</a>
+                <?php } ?>
                 <a href="<?php echo base_url('panel/nomina_ranchos/lista_asistencia?').String::getVarsLink(); ?>" class="btn btn-info pull-right" target="_blank">Imprimir Lista</a>
               </div>
             </form>

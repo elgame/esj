@@ -36,6 +36,25 @@
                   </div>
                 </div>
               </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="codigo">Codigo </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="codigo" class="span11" id="codigo" value="<?php echo set_value('codigo', $unidad['info'][0]->codigo) ?>" maxlength="20">
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="cantidad">Cantidad </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="number" name="cantidad" class="span11" id="cantidad" value="<?php echo set_value('cantidad', $unidad['info'][0]->cantidad) ?>" step="any" min="0">
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">

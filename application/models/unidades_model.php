@@ -54,7 +54,11 @@ class unidades_model extends CI_Model {
 
   public function agregar()
   {
-    $this->db->insert('unidades', array('nombre' => $_POST['nombre']));
+    $this->db->insert('unidades', array(
+      'nombre'   => $_POST['nombre'],
+      'codigo'   => $_POST['codigo'],
+      'cantidad' => $_POST['cantidad'],
+    ));
     $idUnidad = $this->db->insert_id();
 
     $productos = array();
@@ -77,21 +81,27 @@ class unidades_model extends CI_Model {
 
   public function modificar($idUnidad)
   {
-    $this->db->update('unidades', array('nombre' => $_POST['nombre']), array('id_unidad' => $idUnidad));
+    $this->db->update('unidades', array(
+      'nombre' => $_POST['nombre'],
+      'codigo' => $_POST['codigo'],
+      'cantidad' => $_POST['cantidad'],
+    ), array('id_unidad' => $idUnidad));
 
     $this->db->delete('unidades_productos', array('id_unidad' => $idUnidad));
 
     $productos = array();
-    foreach ($_POST['productoId'] as $key => $idProd)
-    {
-      $productos[] = array(
-        'id_unidad'   => $idUnidad,
-        'id_producto' => $idProd,
-        'cantidad'    => $_POST['cantidad'][$key],
-      );
+    if (isset($_POST['productoId']) && count($_POST['productoId']) > 0) {
+      foreach ($_POST['productoId'] as $key => $idProd)
+      {
+        $productos[] = array(
+          'id_unidad'   => $idUnidad,
+          'id_producto' => $idProd,
+          'cantidad'    => $_POST['cantidad'][$key],
+        );
+      }
+      $this->db->insert_batch('unidades_productos', $productos);
     }
 
-    $this->db->insert_batch('unidades_productos', $productos);
 
     return array('passes' => true, 'msg' => 4);
   }

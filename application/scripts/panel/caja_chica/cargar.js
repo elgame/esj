@@ -279,6 +279,11 @@
   var agregarGasto = function () {
     var $table = $('#table-gastos').find('tbody .row-total'),
         tr =  '<tr>' +
+                '<td style="width: 60px;">'+
+                  '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
+                  '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                  '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
+                '</td>'+
                 '<td style="width: 100px;">' +
                   '<input type="text" name="gasto_empresa[]" value="" class="span12 gasto-cargo">' +
                   '<input type="hidden" name="gasto_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +

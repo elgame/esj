@@ -28,7 +28,7 @@
 
 								<label for="fnombre">Buscar</label>
 								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
-									class="input-large search-query" placeholder="GAS MENGUC SA DE CV, 5 DE MAYO" autofocus> | 
+									class="input-large search-query" placeholder="GAS MENGUC SA DE CV, 5 DE MAYO" autofocus> |
 
 				                <label class="control-label" for="fempresa">Empresa </label>
 				                <input type="text" name="fempresa" id="fempresa" class="input-xlarge search-query" value="<?php echo set_value_get('fempresa', $empresa->nombre_fiscal); ?>" placeholder="Nombre">
@@ -52,6 +52,10 @@
 							</fieldset>
 						</form>
 
+
+						<a href="<?php echo base_url('panel/clientes/catalogo_xls/?'.String::getVarsLink(array('fnombre')) ); ?>"
+                class="pull-left">
+              <i class="icon-table"></i> Catalogo</a>
 						<?php
 						echo $this->usuarios_model->getLinkPrivSm('clientes/agregar/', array(
 										'params'   => '',

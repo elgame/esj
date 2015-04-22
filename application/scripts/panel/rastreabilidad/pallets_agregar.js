@@ -281,7 +281,8 @@ var addpallets = (function($){
             dataType: "json",
             data: {
               term : request.term,
-              did_empresa : '2'
+              did_empresa : '2,7',
+              empresa: 'si'
             },
             success: function(data) {
                 response(data);

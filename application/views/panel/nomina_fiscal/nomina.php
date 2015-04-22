@@ -56,6 +56,10 @@
                 </select> -->
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
+                <?php if ( $_GET['anio'] < date("Y")){ ?>
+                  <a class="btn btn-success pull-right" href="<?php echo base_url('panel/nomina_fiscal/rpt_dim/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="DIM">
+                    DIM</a>
+                <?php } ?>
               </div>
             </form>
 
@@ -107,7 +111,7 @@
                     <tr>
                       <th colspan="6"></th>
                       <th colspan="4" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
-                      <th colspan="5" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
+                      <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                       <th colspan="6" style="background-color: #EEEEBC;"></th>
                     </tr>
@@ -133,6 +137,7 @@
                       <th style="background-color: #EEBCBC;">INFO.</th>
                       <th style="background-color: #EEBCBC;">IMSS</th>
                       <th style="background-color: #EEBCBC;">PRESTAMOS</th>
+                      <th style="background-color: #EEBCBC;">FA</th>
                       <th style="background-color: #EEBCBC;">ISR</th>
                       <th style="background-color: #EEBCBC;">TOTAL</th>
 
@@ -165,6 +170,7 @@
                       $totalPtu = 0;
                       $totalPercepciones = 0; // total de todas las percepciones.
                       $totalInfonavit = 0;
+                      $totalFondoAhorro = 0;
                       $totalImss = 0;
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
@@ -192,10 +198,11 @@
 
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
                                             $e->nomina->deducciones['imss']['total'] +
-                                            $e->nomina->deducciones['rcv']['total']; //+
+                                            $e->nomina->deducciones['rcv']['total'] +
+                                            $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = (($e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                        $totalComplementoEmpleado = (($e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';
@@ -304,8 +311,8 @@
                           <?php echo $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado ?>
                         </td>
                         <td style="<?php echo $bgColor ?>">
-                          <?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>
-                          <input type="hidden" name="dias_trabajados[]" value="<?php echo $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>" class="span12 dias-trabajados">
+                          <?php echo $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>
+                          <input type="hidden" name="dias_trabajados[]" value="<?php echo $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados ?>" class="span12 dias-trabajados">
                         </td>
 
                         <!-- Percepciones -->
@@ -369,6 +376,10 @@
                           <input type="hidden" name="total_prestamos[]" value="<?php echo $totalPrestamosEmpleado ?>" class="span12 prestamos">
                         </td>
                         <td style="width: 60px; <?php echo $bgColor ?>">
+                          <span class="fondo_ahorro-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$e->fondo_ahorro) ?></span>
+                          <input type="hidden" name="fondo_ahorro[]" value="<?php echo $e->esta_asegurado=='f'?0:$e->fondo_ahorro ?>" class="span12 fondo_ahorro">
+                        </td>
+                        <td style="width: 60px; <?php echo $bgColor ?>">
                           <span class="isr-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$isrEmpleado) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $e->esta_asegurado=='f'?0:$isrEmpleado ?>" class="span12 isr">
                         </td>
@@ -416,6 +427,7 @@
                                                   $e->domingo -
                                                   ( $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) ) -
                                                   ($e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total']) -
+                                                  ($e->esta_asegurado=='f'?0:$e->fondo_ahorro) -
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros;
@@ -428,7 +440,7 @@
                     <?php
                       $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
                       $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
-                      $totalDiasTrabajados     += $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
+                      $totalDiasTrabajados     += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
                       $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
                       $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
                       $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
@@ -438,6 +450,7 @@
                       $totalPtu                += $e->esta_asegurado=='f'?0:$ptuEmpleado;
                       $totalPercepciones       += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
                       $totalInfonavit          += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
+                      $totalFondoAhorro        += $e->esta_asegurado=='f'?0:$e->fondo_ahorro;
                       $totalImss               += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
                       $totalPrestamos          += $totalPrestamosEmpleado;
                       $totalDescuentoPlayeras  += $e->descuento_playeras;
@@ -466,6 +479,7 @@
                       <td id="totales-infonavit" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalInfonavit) ?></td>
                       <td id="totales-imss" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalImss) ?></td>
                       <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPrestamos) ?></td>
+                      <td id="totales-prestamos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalFondoAhorro) ?></td>
                       <td id="totales-isrs" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalIsrs) ?></td>
                       <td id="totales-deducciones" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalDeducciones) ?></td>
                       <td id="totales-transferencias" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalTransferencias) ?></td>

@@ -67,7 +67,7 @@
 	</style>
 </head>
 <body>
-	<?php 
+	<?php
 		$rmc       = $data['movimientos'];
 		$area      = $data['area'];
 		$proveedor = $data['proveedor'];
@@ -90,7 +90,7 @@
 	<h4><?php echo $titulo3; ?></h4>
 	<table class="tblinfo">
 		<tbody>
-			
+
 			<tr>
 				<td>
 					<table class="font8">
@@ -108,6 +108,7 @@
 							<td class="txt_right">TOTAL</td>
 							<td>TIPO PAGO</td>
 							<td>CONCEPTO</td>
+							<td>RANCHO</td>
 							<!-- <td>BONIF</td> -->
 						</tr>
 				<?php
@@ -131,6 +132,7 @@
 							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
+							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->rancho: ''; ?></td>
 							<!-- <td><?php echo ($caja->id_bascula != $lastFolio ? (is_numeric($caja->id_bonificacion)? 'Si': ''): ''); ?></td> -->
 						</tr>
         <?php
@@ -152,6 +154,7 @@
 							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
 							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
 							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
+							<td></td>
 							<td></td>
 							<td></td>
 							<!-- <td></td> -->

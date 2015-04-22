@@ -48,3 +48,13 @@
           <!-- content ends -->
     </div><!--/#content.span10-->
   </div>
+
+  <script type="text/javascript">
+    $(function() {
+      $("#form-search").submit(function(event) {
+        alert("Antes de modificar la caja, comprueba que la fecha sea la correcta");
+      });
+      alert("Antes de modificar la caja, comprueba que la fecha sea la correcta");
+    });
+
+  </script>

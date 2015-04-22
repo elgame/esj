@@ -86,9 +86,13 @@
             Guardar
             <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span>
           </button>
-        <?php } ?>
+        <?php }
 
+        if (isset($idb)) {
+        ?>
+          <a href="<?php echo base_url('panel/bascula/imprimir_recepcion/?id='.$idb) ?>" class="btn btn-primary" title="Recepción" target="_blank">Recepción</a>
         <?php
+        }
         if ($accion !== 'n')
           echo $this->usuarios_model->getLinkPrivSm('bascula/imprimir/', array(
               'params'   => 'id='.$idb,
@@ -606,8 +610,8 @@
 
 <?php if (isset($_GET['br']{0})) { ?>
   <script>
-    // var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_recepcion/?id=' . $_GET['br']."'") ?>, '_blank');
-    // win.focus();
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_recepcion/?id=' . $_GET['br']."'") ?>, '_blank');
+    win.focus();
   </script>
 <?php } ?>
 

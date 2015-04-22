@@ -41,20 +41,25 @@ class clientes_model extends CI_Model {
 		// if($this->input->get('ftipo_proveedor') != '' && $this->input->get('ftipo_proveedor') != 'todos')
 		// 	$sql .= ($sql==''? 'WHERE': ' AND')." p.tipo_proveedor='".$this->input->get('ftipo_proveedor')."'";
 
-		$query = BDUtil::pagination("
-				SELECT p.id_cliente, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia, p.localidad, p.municipio,
-							p.telefono, p.estado, p.status
-				FROM clientes p
-				".$sql."
-				ORDER BY p.nombre_fiscal ASC
-				", $params, true);
+    $query['query'] =
+    			"SELECT p.id_cliente, p.nombre_fiscal, p.calle, p.no_exterior, p.no_interior, p.colonia,
+    						p.localidad, p.municipio, p.telefono, p.estado, p.status,
+								p.nombre_fiscal, p.pais, p.cp, p.celular, p.email, p.pag_web,
+								p.cuenta_cpi, p.rfc, p.curp, p.dias_credito, p.metodo_pago
+					FROM clientes p
+					{$sql}
+					ORDER BY p.nombre_fiscal ASC
+					";
+    if($paginados) {
+			$query = BDUtil::pagination($query['query'], $params, true);
+    }
 		$res = $this->db->query($query['query']);
 
 		$response = array(
 				'clientes'    => array(),
-				'total_rows'     => $query['total_rows'],
-				'items_per_page' => $params['result_items_per_page'],
-				'result_page'    => $params['result_page']
+				'total_rows'     => isset($query['total_rows'])? $query['total_rows']: 0,
+				'items_per_page' => isset($params['result_items_per_page'])? $params['result_items_per_page']: 0,
+				'result_page'    => isset($params['result_page'])? $params['result_page']: 0
 		);
 		if($res->num_rows() > 0){
 			$response['clientes'] = $res->result();
@@ -249,20 +254,21 @@ class clientes_model extends CI_Model {
 	public function getClientesAjax($sqlX = null){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND lower(c.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 
 		if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
-			$sql .= " AND id_empresa = ".$this->input->get('did_empresa');
+			$sql .= " AND e.id_empresa in(".$this->input->get('did_empresa').")";
 
 	    if ( ! is_null($sqlX))
 	      $sql .= $sqlX;
 
 		$res = $this->db->query(
-      	"SELECT id_cliente, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono, dias_credito, metodo_pago, ultimos_digitos, id_empresa
-  			FROM clientes
-  			WHERE status = 'ac'
+      	"SELECT c.id_cliente, c.nombre_fiscal, c.rfc, c.calle, c.no_exterior, c.no_interior, c.colonia, c.municipio, c.estado, c.cp,
+          c.telefono, c.dias_credito, c.metodo_pago, c.ultimos_digitos, c.id_empresa, e.nombre_fiscal AS empresa
+  			FROM clientes c INNER JOIN empresas e ON e.id_empresa = c.id_empresa
+  			WHERE c.status = 'ac'
         	{$sql}
-  			ORDER BY nombre_fiscal ASC
+  			ORDER BY c.nombre_fiscal ASC
   			LIMIT 20"
     );
 
@@ -270,6 +276,7 @@ class clientes_model extends CI_Model {
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
         $dato_ext = $itm->municipio==''? ($itm->estado==''? '': ' - '.$itm->estado): ' - '.$itm->municipio;
+        $dato_ext .= $this->input->get('empresa')=='si'? ' - '.substr($itm->empresa, 0, 5): '';
 				$response[] = array(
 						'id'    => $itm->id_cliente,
 						'label' => $itm->nombre_fiscal.$dato_ext,
@@ -281,6 +288,92 @@ class clientes_model extends CI_Model {
 
 		return $response;
 	}
+
+	public function catalogo_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=clientes.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    // $this->load->model('areas_model');
+    // $area = $this->areas_model->getAreaInfo($id_area, true);
+    $clasificaciones = $this->getClientes(false);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Catalogo de clientes";
+    $titulo3 = '';
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre Fiscal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calle</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No exterior</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">No interior</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Colonia</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Localidad</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Municipio</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pais</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CP</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Telefono</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Celular</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Email</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Pag Web</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cta Contpaq</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CURP</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Dias de Credito</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Metodo de Pago</td>
+        </tr>';
+
+    foreach ($clasificaciones['clientes'] as $key => $clasif)
+    {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$clasif->nombre_fiscal.'</td>
+					<td style="width:400px;border:1px solid #000;">'.$clasif->calle.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->no_exterior.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->no_interior.'</td>
+					<td style="width:150px;border:1px solid #000;">'.$clasif->colonia.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->localidad.'</td>
+					<td style="width:400px;border:1px solid #000;">'.$clasif->municipio.'</td>
+					<td style="width:150px;border:1px solid #000;">'.$clasif->estado.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->pais.'</td>
+					<td style="width:400px;border:1px solid #000;">'.$clasif->cp.'</td>
+					<td style="width:150px;border:1px solid #000;">'.$clasif->telefono.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->celular.'</td>
+					<td style="width:400px;border:1px solid #000;">'.$clasif->email.'</td>
+					<td style="width:150px;border:1px solid #000;">'.$clasif->pag_web.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->cuenta_cpi.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->rfc.'</td>
+					<td style="width:150px;border:1px solid #000;">'.$clasif->curp.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->dias_credito.'</td>
+					<td style="width:100px;border:1px solid #000;">'.$clasif->metodo_pago.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
 
 }
 /* End of file usuarios_model.php */

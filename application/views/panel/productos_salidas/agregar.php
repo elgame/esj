@@ -47,6 +47,25 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="recibio">Recibio</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="recibio" class="span11" id="recibio" value="<?php echo set_value('recibio') ?>" placeholder="" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="ftrabajador">Trabajador</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="ftrabajador" class="span11" id="ftrabajador" value="<?php echo set_value('ftrabajador') ?>" placeholder="Asignar material y/o herramienta">
+                    <input type="hidden" name="fid_trabajador" class="span12" id="fid_trabajador" value="" required="">
+                  </div>
+                </div>
+              </div>
+
               <!-- <div class="control-group">
                 <label class="control-label" for="empresa">Concepto </label>
                 <div class="controls">

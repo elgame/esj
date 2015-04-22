@@ -351,6 +351,8 @@ class proveedores_model extends CI_Model {
 	 */
 	private function addCuentas($id_proveedor)
 	{
+		$cuentas = $this->getCuentas($id_proveedor);
+
 		if ( is_array($this->input->post('cuentas_alias')) )
 		{
 			foreach ($this->input->post('cuentas_alias') as $key => $value)
@@ -365,8 +367,14 @@ class proveedores_model extends CI_Model {
 							);
 				if (is_numeric($_POST['cuentas_id'][$key]))  //update
 				{
-					if($_POST['cuentas_delte'][$key] == 'true')
-						$data['status'] = 'f';
+					foreach ($cuentas as $keyc => $cuent) {
+						if ($cuent->id_cuenta == $_POST['cuentas_id'][$key]) {
+							unset($cuentas[$keyc]);
+						}
+					}
+
+					// if($_POST['cuentas_delte'][$key] == 'true')
+					// 	$data['status'] = 'f';
 					$this->db->update('proveedores_cuentas', $data, "id_cuenta = {$_POST['cuentas_id'][$key]}");
 				}else  //insert
 				{
@@ -375,6 +383,12 @@ class proveedores_model extends CI_Model {
 				}
 			}
 		}
+
+		// Elimina las cuentas
+		if (count($cuentas) > 0)
+			foreach ($cuentas as $keyc => $cuent) {
+				$this->db->update('proveedores_cuentas', array('status' => 'f'), "id_cuenta = {$cuent->id_cuenta}");
+			}
 	}
 
 	/**

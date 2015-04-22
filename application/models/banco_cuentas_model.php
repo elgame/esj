@@ -190,7 +190,7 @@ class banco_cuentas_model extends banco_model {
 		}
 
 		$_GET['vertodos'] = $this->input->get('vertodos')!=''? $this->input->get('vertodos'): 'all';
-		$sql = $sql_todos = $sqloperacion = '';
+		$sql = $sql_todos = $sqloperacion = $sqlsaldo = '';
 		if($_GET['vertodos'] == 'tran')
 			$sql_todos = " AND entransito = 't'";
 		elseif($_GET['vertodos'] == 'notran')
@@ -208,6 +208,11 @@ class banco_cuentas_model extends banco_model {
       $sqloperacion .= " AND m.metodo_pago = '{$_GET['tmetodo_pago']}'";
     }
 
+    if(isset($_GET['tipomovimiento']{0})){
+			$sqloperacion .= " AND m.tipo = '".$_GET['tipomovimiento']."'";
+			$sqlsaldo .= " AND tipo = '".$_GET['tipomovimiento']."'";
+		}
+
 		/*if(isset($_GET['fid_banco']{0}))
 			$sql .= " AND bb.id_banco = {$this->input->get('fid_banco')}";
 
@@ -223,9 +228,9 @@ class banco_cuentas_model extends banco_model {
 				"SELECT deposito, retiro, (deposito - retiro) AS saldo
 				FROM (
 					SELECT
-						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}') AS deposito,
+						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sqlsaldo}) AS deposito,
 
-						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sql_todos}) AS retiro
+						(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sql_todos} {$sqlsaldo}) AS retiro
 					) AS m")->row();
 		$data_anterior->id_movimiento  = '';
 		$data_anterior->fecha          = '';
@@ -1157,6 +1162,247 @@ class banco_cuentas_model extends banco_model {
     }
 
     return 32;
+  }
+
+
+
+  /*
+   |-------------------------------------------------------------------------
+   |  REPORTES
+   |-------------------------------------------------------------------------
+   */
+
+    /**
+   * REPORTE DE RENDIMIENTO
+   * @return [type] [description]
+   */
+  public function rie_data()
+  {
+    $response = array();
+    $sql = '';
+
+    $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date("Y-m-1");
+    $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date("Y-m-d");
+    $sql .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+
+    //Filtros de area
+    $sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+
+
+    // Obtenemos los rendimientos en los lotes de ese dia
+    $query = $this->db->query(
+      "SELECT bm.id_movimiento, Date(bm.fecha) AS fecha, bm.numero_ref, initcap(bm.metodo_pago) AS tipo,
+      	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta
+      FROM banco_movimientos bm
+        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
+        INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
+      WHERE bm.status = 't' {$sql}
+      ORDER BY e.id_empresa ASC, bc.alias ASC");
+    if($query->num_rows() > 0) {
+    	$aux = '';
+      foreach ($query->result() as $key => $value) {
+      	if ($aux != $value->cuenta) {
+      		$aux = $value->cuenta;
+      	} else {
+      		$value->cuenta = '';
+      	}
+      	$response[$value->id_empresa][] = $value;
+      }
+    }
+    $query->free_result();
+
+
+    return $response;
+ }
+
+ /**
+  * Reporte de rendimientos de fruta
+  * @return void
+  */
+ public function rie_pdf()
+ {
+    // Obtiene los datos del reporte.
+    $data = $this->rie_data();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->titulo2 = "REPORTE BANCOS ACUMULADO POR EMPRESA";
+    $pdf->titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')." DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
+    // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
+    // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
+
+    $pdf->AliasNbPages();
+	  $pdf->AddPage();
+
+
+    // Listado de Rendimientos
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'L', 'L', 'R', 'L', 'L');
+    $widths = array(18, 40, 15, 22, 60, 50);
+    $header = array('Fecha', 'Cuenta', 'Tipo', 'Importe', 'Beneficiario', 'Descripcion');
+
+    $total_importes = 0;
+    $total_importes_total = 0;
+
+    foreach($data as $key => $movimiento)
+    {
+	    $pdf->SetFont('helvetica','B',8);
+    	$pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(205));
+      $pdf->Row(array(
+        $movimiento[0]->nombre_fiscal
+      ), false, false);
+
+      $total_importes = 0;
+      foreach ($movimiento as $keym => $mov) {
+	      if($pdf->GetY() >= $pdf->limiteY || $keym==0) //salta de pagina si exede el max
+	      {
+	        if($pdf->GetY() >= $pdf->limiteY)
+	          $pdf->AddPage();
+
+	        $pdf->SetFont('helvetica','B',8);
+	        $pdf->SetTextColor(0,0,0);
+	        $pdf->SetFillColor(200,200,200);
+	        // $pdf->SetY($pdf->GetY()-2);
+	        $pdf->SetX(6);
+	        $pdf->SetAligns($aligns);
+	        $pdf->SetWidths($widths);
+	        $pdf->Row($header, true);
+	      }
+
+	      $pdf->SetFont('helvetica','', 8);
+	      $pdf->SetTextColor(0,0,0);
+
+	      // $pdf->SetY($pdf->GetY()-2);
+	      $pdf->SetX(6);
+	      $pdf->SetAligns($aligns);
+	      $pdf->SetWidths($widths);
+	      $pdf->Row(array(
+	          $mov->fecha,
+	          $mov->cuenta,
+	          substr($mov->tipo, 0, 5),
+	          String::formatoNumero($mov->monto, 2, '$', true),
+	          substr($mov->a_nombre_de, 0, 33),
+	          $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
+	        ), false);
+
+				$total_importes       += $mov->monto;
+				$total_importes_total += $mov->monto;
+      }
+
+      //total
+		  $pdf->SetX(64);
+      $pdf->SetAligns(array('R'));
+      $pdf->SetWidths(array(37));
+      $pdf->Row(array(
+        String::formatoNumero($total_importes, 2, '$', true)
+      ), false);
+    }
+
+    //total general
+    $pdf->SetFont('helvetica','B',8);
+    $pdf->SetTextColor(0 ,0 ,0 );
+    $pdf->SetX(64);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(37));
+    $pdf->Row(array(
+      String::formatoNumero($total_importes_total, 2, '$', true)
+    ), false);
+
+
+    $pdf->Output('reporte_banco.pdf', 'I');
+ }
+
+ public function rie_xls(){
+    $data = $this->rie_data();
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_banco.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "REPORTE BANCOS ACUMULADO POR EMPRESA";
+    $titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')." DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    $total_importes_total = 0;
+    foreach($data as $key => $movimiento)
+    {
+      $html .= '<tr>
+          <td style="font-weight:bold;" colspan="6">'.$movimiento[0]->nombre_fiscal.'</td>
+        </tr>';
+      $total_importes = 0;
+    	foreach ($movimiento as $keym => $mov) {
+    		if($keym==0) //salta de pagina si exede el max
+	      {
+	        $html .= '<tr style="font-weight:bold">
+	          <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+	          <td style="border:1px solid #000;background-color: #cccccc;">Cuenta</td>
+	          <td style="border:1px solid #000;background-color: #cccccc;">Tipo</td>
+	          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+	          <td style="border:1px solid #000;background-color: #cccccc;">Beneficiario</td>
+	          <td style="border:1px solid #000;background-color: #cccccc;">Descripcion</td>
+	        </tr>';
+	      }
+	      $html .= '<tr>
+          <td style="border:1px solid #000;">'.$mov->fecha.'</td>
+          <td style="border:1px solid #000;">'.$mov->cuenta.'</td>
+          <td style="border:1px solid #000;">'.substr($mov->tipo, 0, 5).'</td>
+          <td style="border:1px solid #000;">'.$mov->monto.'</td>
+          <td style="border:1px solid #000;">'.substr($mov->a_nombre_de, 0, 33).'</td>
+          <td style="border:1px solid #000;">'.$mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto.'</td>
+        </tr>';
+
+				$total_importes       += $mov->monto;
+				$total_importes_total += $mov->monto;
+    	}
+
+    	//total
+      $html .= '<tr>
+        <td style="" colspan="2"></td>
+        <td style="border:1px solid #000;" colspan="2">'.$total_importes.'</td>
+        <td style="" colspan="2"></td>
+      </tr>';
+
+    }
+
+    $html .= '<tr>
+        <td style="" colspan="2"></td>
+        <td style="border:1px solid #000;" colspan="2">'.$total_importes_total.'</td>
+        <td style="" colspan="2"></td>
+      </tr>';
+
+    echo $html;
   }
 
 }

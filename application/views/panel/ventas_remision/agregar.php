@@ -28,7 +28,7 @@
         <span id="privAddDescripciones"></span>
     <?php } ?>
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.$getId.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -280,7 +280,7 @@
                 </thead>
                 <tbody>
                   <?php
-                        if (isset($borrador) && ! isset($_POST['prod_did_prod']) && isset($_GET['id_nr']))
+                        if (isset($borrador) && ! isset($_POST['prod_did_prod']) && (isset($_GET['id_nr']) ||  isset($_GET['id_vd'])) )
                         {
                           foreach ($borrador['productos'] as $key => $p) {
                             $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
@@ -425,6 +425,30 @@
                     <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
                     <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="row-fluid">
+            <div class="span12">
+              <strong>Gastos</strong>
+              <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod2">
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Medida</th>
+                    <th>Cant.</th>
+                    <th>P Unitario</th>
+                    <th>IVA%</th>
+                    <th>IVA</th>
+                    <th>Retención</th>
+                    <th>Importe</th>
+                    <th>Cert.</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
                 </tbody>
               </table>
             </div>

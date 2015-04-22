@@ -216,8 +216,11 @@ class gastos_model extends privilegios_model{
     {
       $data[] = array(
         'id_compra'        => $datos['id_compra'],
-        'id_factura'       => $datos['idfactura'][$key],
+        'id_factura'       => ($datos['idfactura'][$key]>0? $datos['idfactura'][$key]: NULL),
         'id_clasificacion' => $value,
+        'fecha'            => (isset($datos['fecha'][$key]{0})? $datos['fecha'][$key]: NULL),
+        'id_cliente'       => (isset($datos['id_cliente'][$key]{0})? $datos['id_cliente'][$key]: NULL),
+        'costo'            => (isset($datos['costo'][$key]{0})? $datos['costo'][$key]: NULL),
         );
     }
     if(count($data) > 0){
@@ -230,7 +233,7 @@ class gastos_model extends privilegios_model{
   {
     $sql = $multiple? "cf.id_compra IN(".implode(',', $params['idc']).")": "cf.id_compra = {$params['idc']}";
     $result = $this->db->query("SELECT cf.id_compra, f.id_empresa, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
-            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva
+            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva, c.id_cliente
           FROM compras_facturacion_prodc AS cf
             INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
             INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
@@ -238,9 +241,21 @@ class gastos_model extends privilegios_model{
             INNER JOIN facturacion_productos AS ffp ON f.id_factura = ffp.id_factura AND fp.id_clasificacion = ffp.id_clasificacion
           WHERE {$sql}
           ORDER BY fp.id_clasificacion ASC");
-    $response = array();
+    $response = array('ligadas' => array(), 'canceladas' => array());
     if($result->num_rows() > 0)
-      $response = $result->result();
+      $response['ligadas'] = $result->result();
+
+    $result->free_result();
+
+    $result = $this->db->query("SELECT cf.id_compra, '' AS id_empresa, cf.id_factura, '' AS serie, '' AS folio, Date(cf.fecha) AS fecha,
+            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, cf.costo AS importe, 0 AS iva, c.id_cliente
+          FROM compras_facturacion_prodc AS cf
+            INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
+            INNER JOIN clientes AS c ON cf.id_cliente = c.id_cliente
+          WHERE {$sql}
+          ORDER BY fp.id_clasificacion ASC");
+    if($result->num_rows() > 0)
+      $response['canceladas'] = $result->result();
 
     $result->free_result();
 

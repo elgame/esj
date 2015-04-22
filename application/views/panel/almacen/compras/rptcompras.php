@@ -29,6 +29,19 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="tipoOrden">Tipo de Orden</label>
+                  <div class="controls">
+                    <select name="tipoOrden" class="span9" id="tipoOrden">
+                      <option value="">Todos</option>
+                      <option value="p">Productos</option>
+                      <option value="d">Servicios</option>
+                      <option value="oc">Orden de compra</option>
+                      <option value="f">Fletes</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>
@@ -44,7 +57,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/compras/rpt_compras_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe name="frame_reporte" id="frame_reporte" src="<?php echo base_url('panel/compras/rpt_compras_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

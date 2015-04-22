@@ -17,6 +17,7 @@ class facturacion extends MY_Controller {
     'facturacion/rventasc_pdf/',
     'facturacion/rventasc_detalle_pdf/',
     'facturacion/remisiones_detalle_pdf/',
+    'facturacion/rnotas_cred_pdf/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -228,11 +229,20 @@ class facturacion extends MY_Controller {
     }
 
     // Si es una nota de remision la que se quiere facturar carga sus datos.
-    if (isset($_GET['id_nr']))
+    if (isset($_GET['id_nr']) || isset($_POST['id_nr']))
     {
-      $params['borrador'] = $this->facturacion_model->getInfoFactura($_GET['id_nr']);
+      $params['id_nr'] = isset($_GET['id_nr'])? $_GET['id_nr']: $_POST['id_nr'];
+      $params['borrador'] = $this->facturacion_model->getInfoFactura($params['id_nr']);
       $params['borrador']['info']->serie = '';
       $params['borrador']['info']->folio = '';
+    } elseif (isset($_GET['id_vd']))
+    {
+      // Si es una venta del dia la que se quiere facturar carga sus datos.
+      $this->load->model('ventas_dia_model');
+      $params['borrador'] = $this->ventas_dia_model->getInfoFactura($_GET['id_vd']);
+      $params['borrador']['info']->serie = '';
+      $params['borrador']['info']->folio = '';
+      $params['getId'] = 'id_vd='.$_GET['id_vd'];
     }
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
@@ -534,6 +544,10 @@ class facturacion extends MY_Controller {
               'label'   => 'SubTotal',
               'rules'   => $required.'|numeric'),
 
+        array('field'   => 'id_nr',
+              'label'   => 'Nota venta',
+              'rules'   => 'numeric|callback_notaventa_check'),
+
         array('field'   => 'total_descuento',
               'label'   => 'Descuento',
               'rules'   => $required.'|numeric'),
@@ -829,6 +843,21 @@ class facturacion extends MY_Controller {
     return true;
   }
 
+  public function notaventa_check($str)
+  {
+    if (floatval($str) == 0)
+      return true;
+    $res = $this->db->select('id_factura')
+        ->from('remisiones_historial')
+        ->where("id_remision = ".$str." AND status <> 'ca' AND status <> 'b'")
+        ->get();
+    if ($res->num_rows() > 0) {
+      $this->form_validation->set_message('notaventa_check', 'La remision ya esta facturada.');
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Verifica que la serie y folio enviados del form no esten asignados a una
    * factura y tambien que esten vigentes.
@@ -1093,7 +1122,8 @@ class facturacion extends MY_Controller {
       $tipo = isset($_GET['tipof'])? $_GET['tipof']: 'f';
       $this->load->model('facturacion_model');
       $res = $this->facturacion_model->getSeriesEmpresa($_GET['ide']);
-      $quit = array('f' => array('NCR' => 0, 'R' => 0), 'r' => array('D' => 0));
+      $quit = array('f' => array('NCR' => 0, 'R' => 0, 'AB' => 0, 'VD' => 0), 'r' => array('D' => 0, 'AB' => 0, 'VD' => 0),
+                    'vd' => array('F' => 0, 'NCR' => 0, 'R' => 0, 'AB' => 0, 'D' => 0, 'RE' => 0));
       foreach ($res[0] as $key => $value)
       {
         if(isset($quit[$tipo][$value->serie]) && $value->serie == $quit[$tipo][$value->serie])
@@ -1233,7 +1263,7 @@ class facturacion extends MY_Controller {
     */
   public function ajax_get_clientes(){
     $this->load->model('clientes_model');
-    $params = $this->clientes_model->getClientesAjax(" AND rfc != ''");
+    $params = $this->clientes_model->getClientesAjax(" AND c.rfc <> ''");
 
     echo json_encode($params);
   }
@@ -1419,7 +1449,8 @@ class facturacion extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Ventas por Cliente');
 
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa']  = $this->empresas_model->getDefaultEmpresa();
+    $params['empresas'] = $this->empresas_model->getEmpresas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -1436,6 +1467,34 @@ class facturacion extends MY_Controller {
   public function rventasc_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->cuentasPagarExcel();
+  }
+
+  public function rnotas_cred()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Ventas por Cliente');
+
+    $params['empresa']  = $this->empresas_model->getDefaultEmpresa();
+    $params['empresas'] = $this->empresas_model->getEmpresas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/facturacion/rnotas_cred',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function rnotas_cred_pdf(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRNotasCredPdf();
   }
 
   public function rventasc_detalle_pdf()

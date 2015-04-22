@@ -23,9 +23,14 @@
                 <div class="control-group">
                   <label class="control-label" for="dempresa">Empresa</label>
                   <div class="controls">
-                    <input type="text" name="dempresa"
+                    <select id="did_empresa" name="did_empresa[]" class="span12" multiple>
+                    <?php foreach ($empresas['empresas'] as $key => $value) { ?>
+                      <option value="<?php echo $value->id_empresa ?>"><?php echo $value->nombre_fiscal ?></option>
+                    <?php } ?>
+                    </select>
+                    <!-- <input type="text" name="dempresa"
                       value="<?php echo (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: ''); ?>" id="dempresa" class="span12" placeholder="Nombre">
-                    <input type="hidden" name="did_empresa" value="<?php echo (isset($empresa->id_empresa)? $empresa->id_empresa: ''); ?>" id="did_empresa">
+                    <input type="hidden" name="did_empresa" value="<?php echo (isset($empresa->id_empresa)? $empresa->id_empresa: ''); ?>" id="did_empresa"> -->
                   </div>
                 </div>
 
@@ -78,7 +83,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe name="frame_reporte" id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

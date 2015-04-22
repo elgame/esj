@@ -99,8 +99,12 @@
                               $label = 'success';
                             }
                             if($fact->id_nc != '')
-                              $texto .= ' - Nota de Credito'
-                            ?>
+                              $texto .= ' - Nota de Credito';
+
+                            if ($fact->facturada > 0) {
+                              echo '<span class="label label-info">Facturada</span>';
+                            }
+                      ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
                   <td><?php echo $fact->observaciones; ?></td>
@@ -137,7 +141,7 @@
                         }
                       }
 
-                      if ($fact->status === 'ca' && $fact->id_nc == '')
+                      if ($fact->facturada == 0 && $fact->id_nc == '') //&& $fact->status != 'ca'
                       {
                         echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
                           'params'   => 'id_nr='.$fact->id_factura,

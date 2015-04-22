@@ -32,10 +32,29 @@
                 <label class="control-label" for="nombre">Nombre </label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <input type="text" name="nombre" class="span11" id="nombre" value="<?php echo set_value('nombre') ?>" maxlength="20" autofocus>
+                    <input type="text" name="nombre" class="span11" id="nombre" value="<?php echo set_value('nombre') ?>" maxlength="40" autofocus>
                   </div>
                 </div>
               </div><!--/control-group -->
+
+              <div class="control-group">
+                <label class="control-label" for="codigo">Codigo </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="codigo" class="span11" id="codigo" value="<?php echo set_value('codigo') ?>" maxlength="20">
+                  </div>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="cantidad">Cantidad </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="number" name="cantidad" class="span11" id="cantidad" value="<?php echo set_value('cantidad') ?>" step="any" min="0">
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">

@@ -94,6 +94,10 @@
                         'btn_type' => 'btn-info',
                         'attrs' => array('target' => '_BLANK'))
                       );
+                      if($this->usuarios_model->tienePrivilegioDe('', 'productos_salidas/imprimir/')){
+                        echo '<a class="btn btn-info" href="'.base_url('panel/productos_salidas/imprimirticket/?id='.$salida->id_salida).'" target="_BLANK" title="Imprimir">
+                                <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+                      }
 
                       if ($salida->status !== 'ca')
                       {

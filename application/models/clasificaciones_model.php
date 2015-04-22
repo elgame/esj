@@ -74,6 +74,8 @@ class clasificaciones_model extends CI_Model {
 						'id_unidad'    => $this->input->post('dunidad'),
 						// 'precio_venta' => $this->input->post('fprecio_venta'),
             'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
+            'cuenta_cpi2'   => $this->input->post('fcuenta_cpi2'),
+            'codigo'   => $this->input->post('fcodigo'),
 						);
 		}
 
@@ -113,6 +115,8 @@ class clasificaciones_model extends CI_Model {
 						'id_area'      => $this->input->post('farea'),
             'iva'          => $this->input->post('diva'),
             'id_unidad'    => $this->input->post('dunidad'),
+            'cuenta_cpi2'   => $this->input->post('fcuenta_cpi2'),
+            'codigo'   => $this->input->post('fcodigo'),
 						);
 
       // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
@@ -145,7 +149,8 @@ class clasificaciones_model extends CI_Model {
 	{
 		$id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
 
-		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad" )
+		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad,
+                                  cuenta_cpi2, codigo" )
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
@@ -207,6 +212,60 @@ class clasificaciones_model extends CI_Model {
 
 		return $response;
 	}
+
+  public function clasificaciones_xls($id_area)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('areas_model');
+    $area = $this->areas_model->getAreaInfo($id_area, true);
+    $clasificaciones = $this->getClasificaciones($id_area, false);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Catalogo de productos";
+    $titulo3 = $area['info']->nombre;
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cta Contpaq</td>
+        </tr>';
+
+    foreach ($clasificaciones['clasificaciones'] as $key => $clasif)
+    {
+      $html .= '<tr>
+          <td style="width:100px;border:1px solid #000;">'.$clasif->nombre.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$clasif->precio_venta.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$clasif->cuenta_cpi.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
 
 }
 /* End of file usuarios_model.php */

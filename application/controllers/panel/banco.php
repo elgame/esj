@@ -21,6 +21,9 @@ class banco extends MY_Controller {
 		'banco/saldos_xls/',
     'banco/get_cuentas_contpaq/',
     'banco/mover_movimiento/',
+
+    'banco/rie_pdf/',
+		'banco/rie_xls/',
 		);
 
 	public function _remap($method){
@@ -733,6 +736,61 @@ class banco extends MY_Controller {
 				'msg' => $txt,
 				'ico' => $icono);
 	}
+
+
+	/*
+   |-------------------------------------------------------------------------
+   |  REPORTES
+   |-------------------------------------------------------------------------
+   */
+  /**
+   * Muestra la vista para el Reporte REPORTE BANCOS ACUMULADO POR EMPRESA
+   * Ingresos y egresos
+   *
+   * @return void
+   */
+  public function rie()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/banco/rpt_rie.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'REPORTE BANCOS ACUMULADO POR EMPRESA'
+    );
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/banco/rie', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rie_pdf()
+  {
+    if(isset($_GET['ftipo']))
+    {
+      $this->load->model('banco_cuentas_model');
+      $this->banco_cuentas_model->rie_pdf();
+    }
+  }
+
+  public function rie_xls()
+  {
+    if(isset($_GET['ftipo']))
+    {
+      $this->load->model('banco_cuentas_model');
+      $this->banco_cuentas_model->rie_xls();
+    }
+  }
+
 }
 
 

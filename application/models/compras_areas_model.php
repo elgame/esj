@@ -35,7 +35,7 @@ class compras_areas_model extends CI_Model{
 			$sql .= " AND ca.status = 't'";
 
 		if($this->input->get('fnombre') != '')
-			$sql = " AND ( lower(ca.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
+			$sql .= " AND ( lower(ca.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
 		$query = BDUtil::pagination(
 			"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
@@ -143,7 +143,8 @@ class compras_areas_model extends CI_Model{
 	public function ajaxAreas(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(codigo_fin) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND (lower(codigo_fin) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+				lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')";
 		// if($this->input->get('type') !== false)
 		// 	$sql .= " AND id_area = {$this->input->get('type')}";
 		$res = $this->db->query(" SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
@@ -337,6 +338,108 @@ class compras_areas_model extends CI_Model{
 		return $txt;
 	}
 
+
+	public function listaAreas(){
+    // $res = $this->getRptComprasData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('L', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Catalogo de maquinaria, equipos e instalaciones';
+    // $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L');
+    $widths = array(15, 50);
+    $header = array('CODIGO', 'NOMBRE');
+
+    $response = $this->getAreasEspesifico(1, '');
+
+    $newpag = false;
+    $y2aux = $pdf->GetY();
+    foreach ($response as $key => $value) {
+    	if($y2aux > $pdf->GetY() && !$newpag)
+				$pdf->SetY($y2aux);
+
+    	if($pdf->GetY()+4 >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY());
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array($value->codigo, $value->nombre);
+      $pdf->SetXY(6, $pdf->GetY());
+      $y = $pdf->GetY();
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, true);
+      $y2aux = $pdf->GetY();
+
+      $datos2 = $this->getAreasEspesifico(2, $value->id_area);
+      if(count($datos2) > 0)
+      	$newpag = $this->listaAreasRec($pdf, $datos2, 2, $y);
+    }
+
+
+    $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+
+  public function listaAreasRec(&$pdf, $datos, $tipo, $y)
+  {
+  	$aligns = array('L', 'L');
+    $widths = array(15, 50);
+    $header = array('CODIGO', 'NOMBRE');
+
+    $newpag = false;
+    $y2aux = $y;
+    $pdf->SetY($y);
+
+		foreach ($datos as $key => $value) {
+			if($y2aux > $pdf->GetY() && !$newpag)
+				$pdf->SetY($y2aux);
+
+			if($pdf->GetY()+4 >= $pdf->limiteY){
+        $pdf->AddPage();
+        $newpag = true;
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array($value->codigo, $value->nombre);
+      $pdf->SetX(6+(($tipo-1)*65));
+      $y2 = $pdf->GetY();
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, true);
+      $y2aux = $pdf->GetY();
+
+  		$datos2 = $this->getAreasEspesifico($tipo+1, $value->id_area);
+	  	if(count($datos2) > 0) {
+	  		$newpag = $this->listaAreasRec($pdf, $datos2, $tipo+1, $y2);
+	  	}
+		}
+
+		return $newpag;
+  }
 
 
 

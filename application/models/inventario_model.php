@@ -1868,10 +1868,10 @@ class inventario_model extends privilegios_model{
 		$result[] = array('fecha' => 'S. Anterior',
 						'entrada' => array(0, 0, 0),
 						'salida' => array(0, 0, 0),
-						'saldo' => array(0, 0, 0), );
+						'saldo' => array(0, 0, 0, 0), );
 		foreach ($res->result() as $key => $value)
 		{
-			$row = array('fecha' => $value->fecha, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+			$row = array('fecha' => $value->fecha, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0));
 			if ($value->tipo == 'c')
 			{
 				$row['entrada'][0] = $value->cantidad;
@@ -1880,7 +1880,8 @@ class inventario_model extends privilegios_model{
 
 				$row['saldo'][0] = $value->cantidad+$result[$key]['saldo'][0];
 				$row['saldo'][2] = $row['entrada'][2]+$result[$key]['saldo'][2];
-				$row['saldo'][1] = $row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
+        $row['saldo'][1] = abs($row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]));
+				// $row['saldo'][3] = $row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
 			}else
 			{
 				$row['salida'][0] = $value->cantidad;
@@ -1889,6 +1890,7 @@ class inventario_model extends privilegios_model{
 
 				$row['saldo'][0] = $result[$key]['saldo'][0]-$value->cantidad;
 				$row['saldo'][1] = $result[$key]['saldo'][1];
+        // $row['saldo'][3] = $result[$key]['saldo'][3];
 				$row['saldo'][2] = $row['saldo'][0]*$row['saldo'][1];
 			}
 

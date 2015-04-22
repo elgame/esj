@@ -40,17 +40,21 @@ $(function(){
   // Autocomplete cliente
   $("#dcliente").autocomplete({
     source: function(request, response) {
-        $.ajax({
-            url: base_url + 'panel/clientes/ajax_get_proveedores/',
-            dataType: "json",
-            data: {
-                term : request.term,
-                did_empresa : $("#did_empresa").val()
-            },
-            success: function(data) {
-                response(data);
-            }
-        });
+        var vales = $("#did_empresa").val();
+        if (vales.length == 1) {
+          $.ajax({
+              url: base_url + 'panel/clientes/ajax_get_proveedores/',
+              dataType: "json",
+              data: {
+                  term : request.term,
+                  did_empresa : vales[0]
+              },
+              success: function(data) {
+                  response(data);
+              }
+          });
+        } else
+          response([]);
     },
     minLength: 1,
     selectFirst: true,

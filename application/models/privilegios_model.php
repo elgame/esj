@@ -284,7 +284,7 @@ class privilegios_model extends CI_Model{
 			if($data1->num > 0){
 				$txt .= '
 				<li'.($firs==false? ' class="submenu parent"': ' class="parent"').'>
-					<a class="ajax-link" '.($firs? 'onclick="panel.menu('.$data->id.');"': '').' href="'.base_url('panel/'.$data->url_accion).'"'.$link_tar.'>
+					<a class="ajax-link" '.($firs? 'onclick="panel.menu('.$data->id.');"': '').' href="'.($data->url_accion=='#'? 'javascript:void(0);':base_url('panel/'.$data->url_accion)).'"'.$link_tar.'>
 						<i class="icon-'.$data->url_icono.'"></i><span class="hidden-tablet"> '.$data->nombre.'</span>
 					</a>
 					<div class="menu-flotante">
@@ -304,7 +304,7 @@ class privilegios_model extends CI_Model{
 			}else{
 				$txt .= '
 				<li'.($firs==false? ' class="submenu"': '').'>
-					<a class="ajax-link" href="'.base_url('panel/'.$data->url_accion).'"'.$link_tar.'>
+					<a class="ajax-link" href="'.($data->url_accion=='#'? 'javascript:void(0);':base_url('panel/'.$data->url_accion)).'"'.$link_tar.'>
 						<i class="icon-'.$data->url_icono.'"></i><span class="hidden-tablet"> '.$data->nombre.'</span>
 					</a>
 				</li>';

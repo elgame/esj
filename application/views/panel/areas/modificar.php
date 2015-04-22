@@ -14,7 +14,7 @@
         </ul>
       </div>
 
-      
+
       <div class="row-fluid">
 
         <div class="box span12">
@@ -30,7 +30,7 @@
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
-                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="140" 
+                  <input type="text" name="fnombre" id="fnombre" class="span6" maxlength="140"
                   value="<?php echo (isset($data['info']->nombre)? $data['info']->nombre: ''); ?>" required autofocus placeholder="Limon, Piña, Insumo">
                 </div>
               </div>
@@ -79,7 +79,7 @@
                 <div class="row-fluid">
                   <p class="span5">
                     <label for="calidades_fnombre">Buscar</label>
-                    <input type="text" name="fnombre" id="calidades_fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+                    <input type="text" name="fnombre" id="calidades_fnombre" value="<?php echo set_value_get('fnombre'); ?>"
                       class="input-large search-query" placeholder="Limon, limon verde" autofocus>
                   </p>
                   <p class="span4">
@@ -103,13 +103,17 @@
               <legend>Clasificaciones <?php echo $this->usuarios_model->getLinkPrivSm('areas/agregar_clasificacion/', array(
                                           'params'   => 'id='.$this->input->get('id'),
                                           'btn_type' => 'btn-success pull-right')
-                                      ); ?></legend>
+                                      ); ?>
+                <a href="<?php echo base_url('panel/areas/clasificaciones_xls/?id='.$this->input->get('id')); ?>"
+                    class="pull-right" style="font-size:12px;margin-right:3px;">
+                  <i class="icon-table"></i> Catalogo</a>
+              </legend>
 
               <form id="frm_clasificaciones" action="<?php echo base_url('panel/areas/'); ?>" method="get" class="form-search">
                 <div class="row-fluid">
                   <p class="span5">
                     <label for="fnombre">Buscar</label>
-                    <input type="text" name="fnombre" id="clasificaciones_fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+                    <input type="text" name="fnombre" id="clasificaciones_fnombre" value="<?php echo set_value_get('fnombre'); ?>"
                       class="input-large search-query" placeholder="Limon, limon verde" autofocus>
                   </p>
                   <p class="span4">

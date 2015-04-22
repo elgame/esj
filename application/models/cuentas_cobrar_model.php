@@ -98,7 +98,11 @@ class cuentas_cobrar_model extends privilegios_model{
 							) AS ffaa
 							GROUP BY ffaa.id_cliente
 						) AS faa ON c.id_cliente = faa.id_cliente
-					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND Date(f.fecha) <= '{$fecha}'{$sql}
+						LEFT JOIN (SELECT id_remision, id_factura, status
+		                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+		        ) fh ON f.id_factura = fh.id_remision
+					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND Date(f.fecha) <= '{$fecha}'
+						AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
 				)
 				UNION
@@ -365,8 +369,12 @@ class cuentas_cobrar_model extends privilegios_model{
               ) AS d
               GROUP BY d.id_cliente, d.id_factura
             ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+						LEFT JOIN (SELECT id_remision, id_factura, status
+		                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+		        ) fh ON f.id_factura = fh.id_remision
           WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-             AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql}
+             AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'
+             AND COALESCE(fh.id_remision, 0) = 0 {$sql}
           GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
 					UNION ALL
@@ -449,10 +457,13 @@ class cuentas_cobrar_model extends privilegios_model{
 					) AS ffs
 					GROUP BY id_factura
 				) AS ac ON f.id_factura = ac.id_factura {$sql}
+				LEFT JOIN (SELECT id_remision, id_factura, status
+                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
 			WHERE f.id_cliente = {$_GET['id_cliente']} AND f.id_abono_factura IS NULL
 				AND f.status <> 'ca' AND f.status <> 'b' AND id_nc IS NULL
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
-				{$sql}
+				AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
 			UNION ALL
 
@@ -707,7 +718,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	 * Obtiene los abonos de una factura o nota de venta
 	 * @return [type] [description]
 	 */
-	public function getDetalleVentaFacturaData($id_factura=null, $tipo=null)
+	public function getDetalleVentaFacturaData($id_factura=null, $tipo=null, $sin_fecha=false, $only_abono=false)
 	{
 		$_GET['id'] = $id_factura==null? $_GET['id']: $id_factura;
 		$_GET['tipo'] = $tipo==null? $_GET['tipo']: $tipo;
@@ -715,15 +726,15 @@ class cuentas_cobrar_model extends privilegios_model{
 		$sql = '';
 
 		//Filtros para buscar
-		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
-		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+		$ffecha1 = $this->input->get('ffecha1')==''||$sin_fecha? date("Y-m-").'01': $this->input->get('ffecha1');
+		$ffecha2 = $this->input->get('ffecha2')==''||$sin_fecha? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha1 = $fecha2 = '';
-		if($_GET['ffecha1'] > $_GET['ffecha2']){
-			$fecha2 = $_GET['ffecha1'];
-			$fecha1 = $_GET['ffecha2'];
+		if($ffecha1 > $ffecha2){
+			$fecha2 = $ffecha1;
+			$fecha1 = $ffecha2;
 		}else{
-			$fecha2 = $_GET['ffecha2'];
-			$fecha1 = $_GET['ffecha1'];
+			$fecha2 = $ffecha2;
+			$fecha1 = $ffecha1;
 		}
 
 		$sql = $sql2 = '';
@@ -789,7 +800,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		//obtenemos la info del cliente
 		$prov['info'] = '';
-		if (isset($data['info'][0]->id_cliente))
+		if (isset($data['info'][0]->id_cliente) && !$only_abono)
 		{
 			$this->load->model('clientes_model');
 			$prov = $this->clientes_model->getClienteInfo($data['info'][0]->id_cliente, true);
@@ -797,7 +808,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		//obtenemos la info de la empresa
 		$empresa['info'] = '';
-		if (isset($data['info'][0]->id_empresa))
+		if (isset($data['info'][0]->id_empresa) && !$only_abono)
 		{
 			$this->load->model('empresas_model');
 			$empresa = $this->empresas_model->getInfoEmpresa($data['info'][0]->id_empresa, true);
@@ -854,7 +865,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		$data_cuenta  = $data_cuenta['info'];
 		$_GET['id']   = $ids[0];
 		$_GET['tipo'] = $tipos[0];
-		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo']);
+		$inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo'], true);
 		//Registra deposito
 		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
 		{
@@ -928,7 +939,7 @@ class cuentas_cobrar_model extends privilegios_model{
 		$pagada = false;
 		$pago_mayor = 0;//valor cuando pagan de mas en una factura se carga a pagos adicionales
 		$pago_saldar = 0;//valor cuando pagan de menos y aun asi saldan la cuenta
-		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($id, $this->input->get('tipo'));
+		$inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($id, $this->input->get('tipo'), true);
 		if ($inf_factura['saldo'] <= $data['total']){ //se ajusta
 			$pago_mayor = $data['total']-$inf_factura['saldo'];
 			$data['total'] -= $pago_mayor;
@@ -1202,6 +1213,8 @@ class cuentas_cobrar_model extends privilegios_model{
 				$subtotal = $data_abono->total - $data_factura['info']->importe_iva;
 				$iva      = $data_factura['info']->importe_iva;
 	    }
+			$subtotal = number_format($subtotal, 3, '.', '');
+			$iva      = number_format($iva, 3, '.', '');
 
 			$_POST['id_abono_factura']          = $id_abono;
 			$_POST['dempresa']                  = $data_factura['info']->empresa->nombre_fiscal;
@@ -1225,7 +1238,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			$_POST['dtipo_comprobante']         = 'ingreso';
 			$_POST['dforma_pago']               = 'Pago en parcialidades';
 			$_POST['dforma_pago_parcialidad']   = 'Parcialidad '.$data_val->num_abonos.' de '.($data_val->num_abonos < $abonos->num? $abonos->num: ($data_val->status=='pa'? $data_val->num_abonos: $data_val->num_abonos+1));
-			$_POST['dmetodo_pago']              = $data_factura['info']->metodo_pago;
+			$_POST['dmetodo_pago']              = 'No aplica'; //$data_factura['info']->metodo_pago;
 			$_POST['dmetodo_pago_digitos']      = 'No identificado';
 			$_POST['dcondicion_pago']           = 'co';
 			$_POST['dplazo_credito']            = 0;
@@ -1446,6 +1459,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	    if($this->input->get('did_empresa') != ''){
 	      $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
 	      $sqlt .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
+	      $sql_clientes .= " AND id_empresa = ".$this->input->get('did_empresa');
 	    }
 
       if($this->input->get('fid_cliente') != ''){
@@ -1520,8 +1534,11 @@ class cuentas_cobrar_model extends privilegios_model{
                   ) AS d
                   GROUP BY d.id_cliente, d.id_factura
                 ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+								LEFT JOIN (SELECT id_remision, id_factura, status
+				                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+				        ) fh ON f.id_factura = fh.id_remision
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-                AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
+                AND COALESCE(fh.id_remision, 0) = 0 AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
               UNION ALL
@@ -1615,8 +1632,11 @@ class cuentas_cobrar_model extends privilegios_model{
                   ) AS d
                   GROUP BY d.id_cliente, d.id_factura
                 ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+								LEFT JOIN (SELECT id_remision, id_factura, status
+				                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+				        ) fh ON f.id_factura = fh.id_remision
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
-              	AND f.id_abono_factura IS NULL
+              	AND f.id_abono_factura IS NULL AND COALESCE(fh.id_remision, 0) = 0
                 AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]} AND
                 Date(f.fecha + (f.plazo_credito || ' days')::interval) < '{$fecha2}'
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
@@ -1637,13 +1657,17 @@ class cuentas_cobrar_model extends privilegios_model{
   			$sql_field_cantidad = '';
   			if($all_clientes && $all_facturas)
   				$sql_field_cantidad = ", (SELECT Sum(cantidad) FROM facturacion_productos WHERE id_factura = f.id_factura) AS cantidad_productos";
-  			$facturas = $this->db->query("SELECT id_factura, Date(fecha) AS fecha, serie, folio,
-  					(CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, subtotal, importe_iva, total,
-  					Date(fecha + (plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
+  			$facturas = $this->db->query("SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
+  					(CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
+  					Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
   				FROM facturacion as f
-  				WHERE id_cliente = {$cliente->id_cliente}
-  					AND status <> 'ca' AND status <> 'b' AND id_nc IS NULL AND f.id_abono_factura IS NULL
-  					AND (Date(fecha) >= '{$fecha1}' AND Date(fecha) <= '{$fecha2}')
+  				LEFT JOIN (SELECT id_remision, id_factura, status
+	                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+	        ) fh ON f.id_factura = fh.id_remision
+  				WHERE f.id_cliente = {$cliente->id_cliente}
+  					AND f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL
+  					AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+  					AND COALESCE(fh.id_remision, 0) = 0
   					{$sql} {$sqlext[1]}
   				ORDER BY fecha ASC, folio ASC");
         $cliente->saldo_facturas = 0;
@@ -1663,16 +1687,16 @@ class cuentas_cobrar_model extends privilegios_model{
 									(CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
 									(CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
 									Date(fa.fecha) AS fecha,
-									(CASE WHEN abs.num=1 THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
+									(CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
 									fa.total AS abono
 								FROM
 									facturacion_abonos as fa
 									LEFT JOIN (
-										SELECT id_factura, Count(id_abono) AS num
-										FROM facturacion_abonos
-										WHERE id_factura = {$factura->id_factura}
-											AND Date(fecha) <= '{$fecha2}'
-										GROUP BY id_factura
+										SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
+										FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+										WHERE f.id_factura = {$factura->id_factura}
+											AND Date(fa.fecha) <= '{$fecha2}'
+										GROUP BY f.id_factura
 									) abs ON abs.id_factura = fa.id_factura
 									LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
 								WHERE fa.id_factura = {$factura->id_factura} AND Date(fa.fecha) <= '{$fecha2}'
@@ -2061,7 +2085,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	}
 
 
-  public function getRptventasData($order_by='fa.fecha ASC')
+  public function getRptventasData($order_by='fa.fecha ASC, f.folio ASC')
   {
     $sql = '';
 
@@ -2082,7 +2106,7 @@ class cuentas_cobrar_model extends privilegios_model{
       $sql .= " AND f.id_empresa = '".$this->input->get('did_empresa')."'";
     }
 
-    $sql .= " AND f.status = 'pa'";
+    // $sql .= " AND f.status = 'pa'";
 
     $response = array();
     $response = $this->db->query(
@@ -2156,9 +2180,9 @@ class cuentas_cobrar_model extends privilegios_model{
           <td style="width:150px;border:1px solid #000;">'.$value->fecha_pago.'</td>
           <td style="width:150px;border:1px solid #000;">'.$value->rfc.'</td>
           <td style="width:400px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
-          <td style="width:100px;border:1px solid #000;">'.$value->total_abono.'</td>
+          <td style="width:100px;border:1px solid #000;">'.($value->total_abono-$value->importe_iva).'</td>
           <td style="width:100px;border:1px solid #000;">'.$value->importe_iva.'</td>
-          <td style="width:150px;border:1px solid #000;">'.($value->total_abono+$value->importe_iva).'</td>
+          <td style="width:150px;border:1px solid #000;">'.($value->total_abono).'</td>
         </tr>';
         $total_importe += $value->total_abono;
         $total_iva += $value->importe_iva;
@@ -2167,9 +2191,9 @@ class cuentas_cobrar_model extends privilegios_model{
     $html .= '
         <tr style="font-weight:bold">
           <td colspan="5">TOTALES</td>
-          <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.($total_importe-$total_iva).'</td>
           <td style="border:1px solid #000;">'.$total_iva.'</td>
-          <td style="border:1px solid #000;">'.($total_importe+$total_iva).'</td>
+          <td style="border:1px solid #000;">'.($total_importe).'</td>
         </tr>
       </tbody>
     </table>';
@@ -2230,11 +2254,18 @@ class cuentas_cobrar_model extends privilegios_model{
           <td style="width:500px;border:1px solid #000;">'.$value->nombre_fiscal.'</td>
           <td style="width:150px;border:1px solid #000;">'.($value->total_abono+$value->importe_iva).'</td>
         </tr>';
-        $total_importe += $value->total_abono;
+        $total_importe += $value->total_abono-$value->importe_iva;
         $total_iva += $value->importe_iva;
-        $total_proveedor += $value->total_abono+$value->importe_iva;
+        $total_proveedor += $value->total_abono;
     }
 
+    if($total_proveedor > 0){
+      $html .= '<tr style="font-weight:bold;">
+        <td style="width:150px;border:1px solid #000;"></td>
+        <td style="width:500px;border:1px solid #000;">Total '.$grupo_cliente.'</td>
+        <td style="width:150px;border:1px solid #000;">'.$total_proveedor.'</td>
+      </tr>';
+    }
     $html .= '
         <tr style="font-weight:bold">
           <td colspan="1">TOTALES</td>

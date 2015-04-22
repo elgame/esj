@@ -89,14 +89,20 @@ class productos_salidas_model extends CI_Model {
     if ( ! $data)
     {
       $data = array(
-        'id_empresa'      => $_POST['empresaId'],
-        'id_empleado'     => $this->session->userdata('id_usuario'),
-        'folio'           => $_POST['folio'],
-        'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
-        'fecha_registro'  => str_replace('T', ' ', $_POST['fecha']),
-        // 'concepto'        => '', //$_POST['conceptoSalida']
-        'status'          => 's',
+        'id_empresa'     => $_POST['empresaId'],
+        'id_empleado'    => $this->session->userdata('id_usuario'),
+        'folio'          => $_POST['folio'],
+        'fecha_creacion' => str_replace('T', ' ', $_POST['fecha']),
+        'fecha_registro' => str_replace('T', ' ', $_POST['fecha']),
+        // 'concepto'    => '', //$_POST['conceptoSalida']
+        'status'         => 's',
+        'solicito'       => $_POST['solicito'],
+        'recibio'       => $_POST['recibio'],
       );
+
+      if (isset($_POST['fid_trabajador']{0})) {
+        $data['id_usuario'] = $_POST['fid_trabajador'];
+      }
     }
 
     $this->db->insert('compras_salidas', $data);
@@ -175,10 +181,12 @@ class productos_salidas_model extends CI_Model {
               cs.id_empresa, e.nombre_fiscal AS empresa, e.logo,
               cs.id_empleado, (u.nombre || ' ' || u.apellido_paterno) AS empleado,
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
-              cs.status, cs.concepto, cs.solicito
+              cs.status, cs.concepto, cs.solicito, cs.recibio,
+              cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+        LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
         WHERE cs.id_salida = {$idSalida}");
 
     $data = array();
@@ -263,12 +271,12 @@ class productos_salidas_model extends CI_Model {
       $tipo_orden,
       'No '.String::formatoNumero($orden['info'][0]->folio, 2, ''),
     ), false, false);
-    $pdf->SetFont('helvetica','', 8);
-    $pdf->SetX(6);
-    $pdf->Row(array(
-      'PROVEEDOR: ' . $orden['info'][0]->empleado,
-      String::fechaATexto($orden['info'][0]->fecha, '/c'),
-    ), false, false);
+    // $pdf->SetFont('helvetica','', 8);
+    // $pdf->SetX(6);
+    // $pdf->Row(array(
+    //   'PROVEEDOR: ' . $orden['info'][0]->empleado,
+    //   String::fechaATexto($orden['info'][0]->fecha, '/c'),
+    // ), false, false);
 
     $aligns = array('C', 'C', 'L', 'R', 'R');
     $widths = array(35, 25, 94, 25, 25);
@@ -332,8 +340,10 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(154));
     $pdf->SetXY(6, $pdf->GetY()-2);
     $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(6, $pdf->GetY()-2);
+    $pdf->Row(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
 
-    $pdf->SetXY(6, $pdf->GetY()+6);
+    $pdf->SetXY(6, $pdf->GetY()+4);
     $pdf->Row(array('________________________________________________________________________________________________'), false, false);
     $yy2 = $pdf->GetY();
     if(count($codigoAreas) > 0){
@@ -345,6 +355,13 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetWidths(array(155));
       $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
     }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->SetWidths(array(155));
+      $pdf->Row(array('Se asigno a: ' . $orden['info'][0]->trabajador), false, false);
+    }
+
     // ($tipoCambio ? "TIPO DE CAMBIO: " . $tipoCambio : ''),
 
     // $pdf->SetXY(6, $pdf->GetY());
@@ -379,6 +396,95 @@ class productos_salidas_model extends CI_Model {
     }
   }
 
+  public function imprimir_salidaticket($salidaID, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+
+    $orden = $this->info($salidaID, true);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+    $pdf->AddPage();
+    $pdf->AddFont($pdf->fount_num, '');
+
+    // Título
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetXY(0, 3);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->SetFont($pdf->fount_txt, '', 7);
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS', 0, 'C');
+
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
+    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size);
+
+    $pdf->SetWidths(array(12, 27, 13, 14));
+    $pdf->SetAligns(array('L','L','R','R'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-1));
+    $pdf->SetX(0);
+    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'PRECIO', 'IMPORTE'), false, true, 5);
+
+    $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                   array(.5,-1,-1,-1));
+    $subtotal = $iva = $total = $retencion = $ieps = 0;
+    $tipoCambio = 0;
+    $codigoAreas = array();
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array(
+        $prod->cantidad.' '.$prod->abreviatura,
+        $prod->producto,
+        String::formatoNumero($prod->precio_unitario, 2, '', true),
+        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+
+      $total += floatval($prod->precio_unitario*$prod->cantidad);
+
+      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
+        $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+    }
+
+    // $pdf->SetX(29);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(13, 20));
+    // $pdf->SetX(29);
+    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetX(30);
+    $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(66, 0));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+
+    $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->Row2(array('_____________________________________________'), false, false);
+    $yy2 = $pdf->GetY();
+    if(count($codigoAreas) > 0){
+      $yy2 = $pdf->GetY();
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+    }
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
 
   /**
    * Reportes
@@ -410,7 +516,7 @@ class productos_salidas_model extends CI_Model {
       foreach ($_GET['dareas'] as $key => $value) {
         $ids_hijos = $value.$this->compras_areas_model->getHijos($value);
         $result = $this->db->query("SELECT ca.nombre, COALESCE(
-                                      (SELECT (Sum(csp.cantidad) * Sum(csp.precio_unitario)) AS importe
+                                      (SELECT (Sum(csp.cantidad * csp.precio_unitario)) AS importe
                                       FROM compras_salidas_productos csp
                                       WHERE csp.id_area In({$ids_hijos}))
                                     , 0) AS importe
@@ -419,11 +525,24 @@ class productos_salidas_model extends CI_Model {
         $response[] = $result->row();
         $result->free_result();
 
+        // Se obtienen los costos de nomina
+        $result = $this->db->query("SELECT Sum(importe) AS importe
+                                    FROM nomina_trabajos_dia
+                                    WHERE id_area In({$ids_hijos})")->row();
+        $response[count($response)-1]->importe += $result->importe;
+
+        // Se obtienen los costos de los gastos de caja chica
+        $result = $this->db->query("SELECT Sum(monto) AS importe
+                                    FROM cajachica_gastos
+                                    WHERE id_area In({$ids_hijos})")->row();
+        $response[count($response)-1]->importe += $result->importe;
+
+
         if (isset($_GET['dmovimientos']{0}) && $_GET['dmovimientos'] == '1' && $response[count($response)-1]->importe == 0)
           array_pop($response);
         else {
-          // Si es desglosado carga independientes
           if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
+            // Si es desglosado carga independientes de compras salidas
             $response[count($response)-1]->detalle = $this->db->query(
                 "SELECT ca.id_area, ca.nombre, Date(cs.fecha_creacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
                 FROM compras_salidas cs
@@ -432,6 +551,34 @@ class productos_salidas_model extends CI_Model {
                   INNER JOIN productos p ON p.id_producto = csp.id_producto
                 WHERE ca.id_area In({$ids_hijos})
                 ORDER BY nombre")->result();
+
+            // Si es desglosado carga los gastos de las nominas
+            $response[count($response)-1]->detalle = array_merge(
+              $response[count($response)-1]->detalle,
+              $this->db->query(
+                "SELECT ca.id_area, ca.nombre, Date(cs.fecha) AS fecha, 'NOM' AS folio,
+                  (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre || ' - ' ||
+                    (SELECT string_agg(css.nombre, ',') FROM nomina_trabajos_dia_labores nt
+                      INNER JOIN compras_salidas_labores css ON css.id_labor = nt.id_labor
+                      WHERE nt.id_area = ca.id_area AND nt.fecha = cs.fecha AND nt.id_usuario = u.id)) AS producto, cs.importe
+                FROM nomina_trabajos_dia cs
+                  INNER JOIN usuarios u ON cs.id_usuario = u.id
+                  INNER JOIN compras_areas ca ON ca.id_area = cs.id_area
+                WHERE ca.id_area In({$ids_hijos})
+                ORDER BY nombre")->result()
+            );
+
+            // Si es desglosado carga los gastos de las nominas
+            $response[count($response)-1]->detalle = array_merge(
+              $response[count($response)-1]->detalle,
+              $this->db->query(
+                "SELECT ca.id_area, ca.nombre, Date(cg.fecha) AS fecha, cg.folio AS folio,
+                  ('Caja #' || cg.no_caja || ' ' || cg.concepto) AS producto, cg.monto AS importe
+                FROM cajachica_gastos cg
+                  INNER JOIN compras_areas ca ON ca.id_area = cg.id_area
+                WHERE ca.id_area In({$ids_hijos})
+                ORDER BY nombre")->result()
+            );
           }
         }
 

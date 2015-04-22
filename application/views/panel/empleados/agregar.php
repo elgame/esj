@@ -267,6 +267,21 @@
 									</div>
 
 									<div class="control-group">
+                    <label class="control-label" for="ffondo_ahorro">Fondo de Ahorro </label>
+                    <div class="controls">
+                      <input type="text" name="ffondo_ahorro" id="ffondo_ahorro" class="span12 vpositive"
+                        value="<?php echo set_value('ffondo_ahorro'); ?>" maxlength="12" placeholder="Fondo de Ahorro">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label" for="ffondo_ahorro_cpi">Cuenta Fondo de Ahorro </label>
+                    <div class="controls">
+                      <input type="text" name="ffondo_ahorro_cpi" id="ffondo_ahorro_cpi" class="span12 vpositive"
+                        value="<?php echo set_value('ffondo_ahorro_cpi'); ?>" maxlength="12" placeholder="Cuenta contpaq Fondo de Ahorro">
+                    </div>
+                  </div>
+
+									<div class="control-group">
 									  <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
 									  <div class="controls">
 										<select name="fregimen_contratacion" id="fregimen_contratacion">
@@ -276,6 +291,16 @@
 										</select>
 									  </div>
 									</div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fbanco">Banco </label>
+                    <div class="controls">
+                    <select name="fbanco" id="fbanco">
+                      <option value="bancr" <?php echo set_select('fbanco', 'bancr', false, $this->input->post('fbanco')); ?>>BBVA Bancomer</option>
+                      <option value="santr" <?php echo set_select('fbanco', 'santr', false, $this->input->post('fbanco')); ?>>Santander</option>
+                    </select>
+                    </div>
+                  </div>
 
 									<div class="control-group">
 									  <label class="control-label" for="dcuenta_banco">Cuenta Banco </label>

@@ -1583,6 +1583,132 @@ class rastreabilidad_model extends CI_Model {
       $pdf->Output('reporte_rastreabilidad_'.$fecha->format('d/m/Y').'.pdf', 'I');
    }
 
+   public function rrl_xls(){
+      $data = $this->rrl_data();
+
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=reporte_rastreabilidad.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      $fecha = new DateTime($_GET['ffecha1']);
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = "REPORTE RENDIMIENTO";
+      $titulo3 = "DEL {$fecha->format('d/m/Y')} | AREA: {$data['rendimientos'][0]->area}\n";
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">LOTE</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">B CAJAS</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">B K NETOS</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">B K INDUSTRIAL</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">REND BULTOS</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">REND K NETOS</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">K INDUSTRIAL</td>
+          </tr>';
+      $totales = array(0,0,0,0,0,0);
+      foreach($data['lotes'] as $key => $lote)
+      {
+
+        $html .= '<tr>
+            <td style="border:1px solid #000;">'.$lote->no_lote.'</td>
+            <td style="border:1px solid #000;">'.$lote->btotal_cajas.'</td>
+            <td style="border:1px solid #000;">'.($lote->btotal_kilos-$lote->bkilos_inds).'</td>
+            <td style="border:1px solid #000;">'.$lote->bkilos_inds.'</td>
+            <td style="border:1px solid #000;">'.$lote->rtotal_cajas.'</td>
+            <td style="border:1px solid #000;">'.$lote->rtotal_kilos.'</td>
+            <td style="border:1px solid #000;">'.($lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos).'</td>
+          </tr>';
+
+        $totales[0] += $lote->btotal_cajas;
+        $totales[1] += $lote->btotal_kilos-$lote->bkilos_inds;
+        $totales[2] += $lote->bkilos_inds;
+        $totales[3] += $lote->rtotal_cajas;
+        $totales[4] += $lote->rtotal_kilos;
+        $totales[5] += $lote->btotal_kilos-$lote->bkilos_inds-$lote->rtotal_kilos;
+      }
+      $html .= '<tr style="font-weight:bold">
+            <td>Totales</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[0].'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[1].'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[2].'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[3].'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[4].'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$totales[5].'</td>
+          </tr>
+          <tr>
+            <td colspan="7"></td>
+          </tr>';
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td style="border:1px solid #000;background-color: #cccccc;">Clasificacion</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Otros</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">Rendimiento</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">T Kilos</td>
+          </tr>';
+      $total_rendimiento = 0;
+      $total_kilos_total = 0;
+      foreach($data['rendimientos'] as $key => $boleta)
+      {
+
+        $html .= '<tr>
+            <td style="border:1px solid #000;">'.$boleta->clasificacion.'</td>
+            <td style="border:1px solid #000;">'.$boleta->size.'</td>
+            <td style="border:1px solid #000;">'.$boleta->rendimiento.'</td>
+            <td style="border:1px solid #000;">'.$boleta->kilos_total.'</td>
+          </tr>';
+
+        $total_rendimiento += $boleta->rendimiento;
+        $total_kilos_total += $boleta->kilos_total;
+      }
+      $html .= '<tr style="font-weight:bold">
+            <td></td>
+            <td></td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$total_rendimiento.'</td>
+            <td style="border:1px solid #000;background-color: #cccccc;">'.$total_kilos_total.'</td>
+          </tr>
+          <tr>
+            <td colspan="7"></td>
+          </tr>';
+
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td>B K NETOS</td>
+            <td style="border:1px solid #000;">'.$totales[1].'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td>REND K NETOS</td>
+            <td style="border:1px solid #000;">'.$totales[4].'</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td>K INDUSTRIAL</td>
+            <td style="border:1px solid #000;">'.($totales[2]+$totales[5]).'</td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
+    }
+
 
    /**
     * Obtiene los lotes que pintara en el reporte rpl.

@@ -13,7 +13,9 @@ $(function(){
       if($tr.find('.ref_descripcion').val() === '')
         $tr.find('.ref_descripcion').val($this.find('option:selected').attr('data-descrip').substr(0, 24));
       if($tr.find('.ref_alfa').val() === '')
-        $tr.find('.ref_alfa').val($this.find('option:selected').attr('data-ref'));
+        $tr.find('.ref_alfa').val(
+          ($this.find('option:selected').attr('data-ref')!='1'? $this.find('option:selected').attr('data-ref'): $this.find('option:selected').attr('data-descrip'))
+        );
     }else if(datos[1] == 'f') // es interbancario
     {
       $tr.find('.ref_alfa').attr('maxlength', '40').attr('required', 'required');

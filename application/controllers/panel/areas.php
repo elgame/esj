@@ -11,6 +11,8 @@ class areas extends MY_Controller {
       'areas/ajax_get_clasificaciones/',
       'areas/ajax_get_calibres/',
 			'areas/ajax_add_new_calibre/',
+
+			'areas/clasificaciones_xls/',
 		);
 
 	public function _remap($method){
@@ -562,6 +564,15 @@ class areas extends MY_Controller {
 		echo json_encode($params);
 	}
 
+	public function clasificaciones_xls()
+	{
+		if (isset($_GET['id']))
+		{
+			$this->load->model('clasificaciones_model');
+			$this->clasificaciones_model->clasificaciones_xls( $this->input->get('id'));
+		}
+	}
+
 
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo
@@ -626,6 +637,13 @@ class areas extends MY_Controller {
 			array('field' => 'fnombre',
 						'label' => 'Nombre',
 						'rules' => 'required|max_length[40]'),
+			array('field' => 'fcodigo',
+						'label' => 'Codigo',
+						'rules' => 'max_length[15]'),
+			array('field' => 'fcuenta_cpi2',
+						'label' => 'Cuenta contpaq 2 (Orov)',
+						'rules' => 'numeric|max_length[40]'),
+
 			// array('field' => 'fprecio_venta',
 			// 			'label' => 'Precio venta',
 			// 			'rules' => 'numeric|max_length[11]'),

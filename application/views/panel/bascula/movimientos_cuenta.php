@@ -51,14 +51,13 @@
                   </div>
                 </div>
 
-                <!-- <div class="control-group">
-                  <label class="control-label" for="fempresa">Empresa</label>
+                <div class="control-group">
+                  <label class="control-label" for="prancho">Rancho</label>
                   <div class="controls">
-                    <input type="text" name="fempresa"
-                      value="<?php //echo set_value('fempresa') ?>" id="fempresa" class="span12" placeholder="Empresa">
-                    <input type="hidden" name="fid_empresa" value="<?php //echo set_value('fid_empresa') ?>" id="fid_empresa">
+                    <input type="text" name="prancho"
+                      value="<?php echo set_value_get('prancho') ?>" id="prancho" class="span12" placeholder="Rancho">
                   </div>
-                </div> -->
+                </div>
 
                 <div class="control-group">
                   <label class="control-label" for="fstatusp">Status</label>

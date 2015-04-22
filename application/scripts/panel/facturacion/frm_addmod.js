@@ -6,7 +6,9 @@ $(function(){
   $('#modal-certificado52').keyJump();
   $('#modal-supcarga').keyJump();
 
-  if ($("#did_empresa").val() == '2') {
+  pasaGastosTabla();
+
+  if ($("#did_empresa").val() == '2' || $("#did_empresa").val() == '7') {
     $("#modal-produc-marcar").modal('show');
   }
 
@@ -93,9 +95,14 @@ $(function(){
 
 
       $("#modal-produc-marcar .mpromarcsel").removeAttr('checked');
-      if (ui.item.id == '2') {
+      if (ui.item.id == '2' || ui.item.id == '7') {
         $("#modal-produc-marcar").modal('show');
       }
+
+      // Borra cliente
+      var e = jQuery.Event("keydown");
+      e.which = 8; // # Some key code value
+      $("#dcliente").trigger(e).val("");
     }
   }).on("keydown", function(event){
     if(event.which == 8 || event == 46){
@@ -556,6 +563,7 @@ var EventOnClickSinCosto = function () {
   $('#dsincosto').on('click', function(event) {
     var $this = $(this);
 
+    recalculaCosto();
     calculaTotal();
   });
 };
@@ -634,7 +642,7 @@ var EventOnChangeMedida = function () {
     // carga el valor del input oculto de los kilos, si es cualquier otra
     // medida entonces carga las cajas.
     if ($medidaId.val() == '19') {
-      $cantidad.val($kilosInput.val());
+      $cantidad.val( parseFloat($kilosInput.val()) * parseFloat($cajasInput.val()) );
     } else {
       $cantidad.val($cajasInput.val());
     }
@@ -644,7 +652,8 @@ var EventOnChangeMedida = function () {
   });
 };
 
-function calculaTotalProducto ($tr) {
+function calculaTotalProducto ($tr, $calculaT) {
+  $calculaT = $calculaT!=undefined? $calculaT: true;
   var $cantidad   = $tr.find('#prod_dcantidad'),
       $precio_uni = $tr.find('#prod_dpreciou'),
       $iva        = $tr.find('#diva'),
@@ -663,10 +672,21 @@ function calculaTotalProducto ($tr) {
   $totalRetencion.val(totalRetencion);
   $importe.val(totalImporte);
 
-  calculaTotal();
+  if ($calculaT)
+    calculaTotal();
   // var importe   = trunc2Dec(parseFloat($('#dcantidad').val() * parseFloat($('#dpreciou').val()))),
   //     iva       = trunc2Dec(((importe - descuento) * parseFloat($('#diva option:selected').val())) / 100),
   //     retencion = trunc2Dec(iva * parseFloat($('#dreten_iva option:selected').val()));
+}
+
+function pasaGastosTabla () {
+  // Pasa los gastos a la otra tabla
+  $("#table_prod #prod_did_prod").each(function(index, el) {
+    var $this = $(this), $tr = $this.parent().parent();
+    if ($this.val() == '49' || $this.val() == '50' || $this.val() == '51' || $this.val() == '52' || $this.val() == '53') {
+      $tr.appendTo('#table_prod2 thead');
+    }
+  });
 }
 
 var jumpIndex = 0;
@@ -683,6 +703,9 @@ function addProducto(unidades, prod) {
 
   var prod_nombre = '', prod_id = '', pallet = '', remision = '', prod_cajas = 0,
       ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false;
+
+  // Pasa los gastos a la otra tabla
+  pasaGastosTabla();
 
   if (prod) {
     // console.log(prod);
@@ -880,7 +903,40 @@ function addProducto(unidades, prod) {
   }
 }
 
-function calculaTotal () {
+function recalculaCosto () {
+  var isCheckedSinCosto = $('#dsincosto').is(':checked'),
+  num_cantidad       = 0,
+  total_repartir     = 0,
+  repartir_costo     = 0;
+
+  $('input#prod_did_prod').each(function(i, e) {
+    var $this = $(this), $parent = $this.parent().parent(), idProd;
+    idProd = $this.val();
+    if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+      num_cantidad += parseFloat($parent.find('#prod_dcantidad').val());
+    } else {
+      total_repartir += parseFloat($parent.find('#prod_importe').val()) +
+                        parseFloat($parent.find('#prod_diva_total').val());
+    }
+  });
+  // if(isCheckedSinCosto)
+    repartir_costo = total_repartir / (num_cantidad>0? num_cantidad: 1);
+
+  $('#table_prod input#prod_dpreciou').each(function(i, e) {
+    var $this = $(this), $parent = $this.parent().parent(), idProd;
+    if (parseFloat($this.val()) > 0) {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+        $this.val( (parseFloat($this.val()) + (parseFloat(repartir_costo)*(isCheckedSinCosto? 1: -1))).toFixed(4) );
+        calculaTotalProducto($parent, false);
+      }
+    }
+  });
+}
+
+function calculaTotal ($calculaT) {
+  $calculaT = $calculaT? $calculaT: true;
+
   var total_importes    = 0,
       total_descuentos  = 0,
       total_ivas        = 0,

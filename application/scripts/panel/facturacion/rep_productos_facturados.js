@@ -5,7 +5,7 @@
     autocompleteProductos();
 
     $('#form').on('submit', function(event) {
-      var linkDownXls = $("#linkDownXls"), 
+      var linkDownXls = $("#linkDownXls"),
           url = {
             ffecha1: $("#ffecha1").val(),
             ffecha2: $("#ffecha2").val(),
@@ -39,6 +39,9 @@
 
     $("#btnAddProducto").on('click', addProducto);
     $(document).on('click', '.remove_producto', removeProducto);
+
+    $("#txtbuscar").on('keyup', buscarProductos);
+    submitProducto();
   });
 
   function autocompleteProductos () {
@@ -100,5 +103,47 @@
   function removeProducto(event){
     $(this).parent('li').remove();
   }
-  
+
+  function buscarProductos (event) {
+    var vthis = $(this);
+    $.ajax({
+      url: base_url + 'panel/facturacion/ajax_get_clasificaciones/',
+      method: "GET",
+      dataType: "json",
+      data: { term: vthis.val() }
+    }).done(function( data ) {
+      var html = '';
+      for (var i in data) {
+        html += '<tr>'+
+                  '<td><input type="checkbox" value="'+data[i].id+'" data-name="'+data[i].item.nombre+'"></td>'+
+                  '<td>'+data[i].item.nombre+'</td>'+
+                '</tr>';
+      }
+      $("#tblProductos tbody").html(html);
+    });
+  }
+
+  function submitProducto () {
+    $("#addProductos").on('click', function(event) {
+      var productos = $("#tblProductos tbody input[type=checkbox]:checked");
+      if (productos.length > 0) {
+        productos.each(function(index, el) {
+          var id = $(this).val(), nombre = $(this).attr('data-name');
+            if ( $('#liprovee'+id).length == 0) {
+              $("#lista_proveedores").append('<li id="liprovee'+id+'"><a class="btn btn-link remove_producto" style="padding: 2px 5px;"><i class="icon-minus-sign"></i></a>'+
+                      '<input type="hidden" name="ids_productos[]" class="ids_productos" value="'+id+'"> '+nombre+'</li>');
+            }else
+              noty({"text":"El Producto ya esta seleccionado", "layout":"topRight", "type":"error"});
+        });
+      }else
+        noty({"text":"Selecciona un Producto", "layout":"topRight", "type":"error"});
+
+      return false;
+    });
+
+    $('#modal-productos').on('show', function () {
+      $("#tblProductos tbody").html("");
+    });
+  }
+
 });
