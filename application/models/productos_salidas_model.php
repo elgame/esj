@@ -494,15 +494,23 @@ class productos_salidas_model extends CI_Model {
   public function getDataGastos()
   {
     $this->load->model('compras_areas_model');
-    $sql = $sql2 = '';
+    $sql_compras = $sql_caja = $sql = $sql2 = '';
 
     //Filtro de fecha.
-    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql .= " AND Date(csc.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-    elseif($this->input->get('ffecha1') != '')
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $sql_caja .= " AND Date(cg.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    }
+    elseif($this->input->get('ffecha1') != '') {
+      $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha1')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
-    elseif($this->input->get('ffecha2') != '')
+    }
+    elseif($this->input->get('ffecha2') != ''){
+      $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
+    }
 
     $sql2 = $sql;
 
@@ -515,70 +523,111 @@ class productos_salidas_model extends CI_Model {
     {
       foreach ($_GET['dareas'] as $key => $value) {
         $ids_hijos = $value.$this->compras_areas_model->getHijos($value);
-        $result = $this->db->query("SELECT ca.nombre, COALESCE(
-                                      (SELECT (Sum(csp.cantidad * csp.precio_unitario)) AS importe
-                                      FROM compras_salidas_productos csp
-                                      WHERE csp.id_area In({$ids_hijos}))
-                                    , 0) AS importe
-                                    FROM compras_areas ca
-                                    WHERE ca.id_area = {$value}");
+        $result = $this->db->query("SELECT ca.nombre, (
+            SELECT Sum(importe) importe
+            FROM (
+              SELECT Sum(cp.total) importe
+              FROM compras_productos cp INNER JOIN compras_ordenes co ON co.id_orden = cp.id_orden
+              WHERE cp.id_area In({$ids_hijos}) {$sql_compras} AND cp.status = 'a' AND co.status <> 'ca'
+              UNION
+              SELECT Sum(cg.monto) importe
+              FROM cajachica_gastos cg
+              WHERE cg.id_area In({$ids_hijos}) {$sql_caja}
+            ) t
+          ) importe
+          FROM compras_areas ca
+          WHERE ca.id_area = {$value}");
         $response[] = $result->row();
         $result->free_result();
 
-        // Se obtienen los costos de nomina
-        $result = $this->db->query("SELECT Sum(importe) AS importe
-                                    FROM nomina_trabajos_dia
-                                    WHERE id_area In({$ids_hijos})")->row();
-        $response[count($response)-1]->importe += $result->importe;
+        // $result = $this->db->query("SELECT ca.nombre, COALESCE(
+        //                               (SELECT (Sum(csp.cantidad * csp.precio_unitario)) AS importe
+        //                               FROM compras_salidas_productos csp
+        //                               WHERE csp.id_area In({$ids_hijos}))
+        //                             , 0) AS importe
+        //                             FROM compras_areas ca
+        //                             WHERE ca.id_area = {$value}");
+        // $response[] = $result->row();
+        // $result->free_result();
 
-        // Se obtienen los costos de los gastos de caja chica
-        $result = $this->db->query("SELECT Sum(monto) AS importe
-                                    FROM cajachica_gastos
-                                    WHERE id_area In({$ids_hijos})")->row();
-        $response[count($response)-1]->importe += $result->importe;
+        // // Se obtienen los costos de nomina
+        // $result = $this->db->query("SELECT Sum(importe) AS importe
+        //                             FROM nomina_trabajos_dia
+        //                             WHERE id_area In({$ids_hijos})")->row();
+        // $response[count($response)-1]->importe += $result->importe;
+
+        // // Se obtienen los costos de los gastos de caja chica
+        // $result = $this->db->query("SELECT Sum(cg.monto) AS importe
+        //                             FROM cajachica_gastos cg
+        //                             WHERE cg.id_area In({$ids_hijos}) {$sql_caja}")->row();
+        // $response[count($response)-1]->importe += $result->importe;
 
 
         if (isset($_GET['dmovimientos']{0}) && $_GET['dmovimientos'] == '1' && $response[count($response)-1]->importe == 0)
           array_pop($response);
         else {
           if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
-            // Si es desglosado carga independientes de compras salidas
             $response[count($response)-1]->detalle = $this->db->query(
-                "SELECT ca.id_area, ca.nombre, Date(cs.fecha_creacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
-                FROM compras_salidas cs
-                  INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
-                  INNER JOIN compras_areas ca ON ca.id_area = csp.id_area
-                  INNER JOIN productos p ON p.id_producto = csp.id_producto
-                WHERE ca.id_area In({$ids_hijos})
-                ORDER BY nombre")->result();
-
-            // Si es desglosado carga los gastos de las nominas
-            $response[count($response)-1]->detalle = array_merge(
-              $response[count($response)-1]->detalle,
-              $this->db->query(
-                "SELECT ca.id_area, ca.nombre, Date(cs.fecha) AS fecha, 'NOM' AS folio,
-                  (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre || ' - ' ||
-                    (SELECT string_agg(css.nombre, ',') FROM nomina_trabajos_dia_labores nt
-                      INNER JOIN compras_salidas_labores css ON css.id_labor = nt.id_labor
-                      WHERE nt.id_area = ca.id_area AND nt.fecha = cs.fecha AND nt.id_usuario = u.id)) AS producto, cs.importe
-                FROM nomina_trabajos_dia cs
-                  INNER JOIN usuarios u ON cs.id_usuario = u.id
-                  INNER JOIN compras_areas ca ON ca.id_area = cs.id_area
-                WHERE ca.id_area In({$ids_hijos})
-                ORDER BY nombre")->result()
-            );
-
-            // Si es desglosado carga los gastos de las nominas
-            $response[count($response)-1]->detalle = array_merge(
-              $response[count($response)-1]->detalle,
-              $this->db->query(
-                "SELECT ca.id_area, ca.nombre, Date(cg.fecha) AS fecha, cg.folio AS folio,
-                  ('Caja #' || cg.no_caja || ' ' || cg.concepto) AS producto, cg.monto AS importe
+            "SELECT *
+              FROM (
+                SELECT
+                  ca.id_area, ca.nombre, Date(cp.fecha_aceptacion) fecha_orden, co.folio::text folio_orden,
+                  Date(c.fecha) fecha_compra, (c.serie || c.folio) folio_compra, cp.descripcion producto,
+                  cp.total importe
+                FROM compras_ordenes co
+                  INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                  INNER JOIN compras_areas ca ON ca.id_area = cp.id_area
+                  LEFT JOIN compras c ON c.id_compra = cp.id_compra
+                WHERE ca.id_area In({$ids_hijos}) {$sql_compras}
+                  AND cp.status = 'a' AND co.status <> 'ca'
+                UNION
+                SELECT ca.id_area, ca.nombre, Date(cg.fecha) fecha_orden, cg.folio::text folio_orden,
+                  NULL fecha_compra, NULL folio_compra,
+                  ('Caja #' || cg.no_caja || ' ' || cg.concepto) producto,
+                  cg.monto AS importe
                 FROM cajachica_gastos cg
                   INNER JOIN compras_areas ca ON ca.id_area = cg.id_area
-                WHERE ca.id_area In({$ids_hijos})
-                ORDER BY nombre")->result()
-            );
+                WHERE ca.id_area In({$ids_hijos}) {$sql_caja}
+              ) t
+              ORDER BY fecha_orden ASC")->result();
+
+            // // Si es desglosado carga independientes de compras salidas
+            // $response[count($response)-1]->detalle = $this->db->query(
+            //     "SELECT ca.id_area, ca.nombre, Date(cs.fecha_creacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
+            //     FROM compras_salidas cs
+            //       INNER JOIN compras_salidas_productos csp ON cs.id_salida = csp.id_salida
+            //       INNER JOIN compras_areas ca ON ca.id_area = csp.id_area
+            //       INNER JOIN productos p ON p.id_producto = csp.id_producto
+            //     WHERE ca.id_area In({$ids_hijos})
+            //     ORDER BY nombre")->result();
+
+            // // Si es desglosado carga los gastos de las nominas
+            // $response[count($response)-1]->detalle = array_merge(
+            //   $response[count($response)-1]->detalle,
+            //   $this->db->query(
+            //     "SELECT ca.id_area, ca.nombre, Date(cs.fecha) AS fecha, 'NOM' AS folio,
+            //       (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre || ' - ' ||
+            //         (SELECT string_agg(css.nombre, ',') FROM nomina_trabajos_dia_labores nt
+            //           INNER JOIN compras_salidas_labores css ON css.id_labor = nt.id_labor
+            //           WHERE nt.id_area = ca.id_area AND nt.fecha = cs.fecha AND nt.id_usuario = u.id)) AS producto, cs.importe
+            //     FROM nomina_trabajos_dia cs
+            //       INNER JOIN usuarios u ON cs.id_usuario = u.id
+            //       INNER JOIN compras_areas ca ON ca.id_area = cs.id_area
+            //     WHERE ca.id_area In({$ids_hijos})
+            //     ORDER BY nombre")->result()
+            // );
+
+            // // Si es desglosado carga los gastos de caja chica
+            // $response[count($response)-1]->detalle = array_merge(
+            //   $response[count($response)-1]->detalle,
+            //   $this->db->query(
+            //     "SELECT ca.id_area, ca.nombre, Date(cg.fecha) AS fecha, cg.folio AS folio,
+            //       ('Caja #' || cg.no_caja || ' ' || cg.concepto) AS producto, cg.monto AS importe
+            //     FROM cajachica_gastos cg
+            //       INNER JOIN compras_areas ca ON ca.id_area = cg.id_area
+            //     WHERE ca.id_area In({$ids_hijos}) {$sql_caja}
+            //     ORDER BY nombre")->result()
+            // );
           }
         }
 
@@ -619,9 +668,9 @@ class productos_salidas_model extends CI_Model {
     $aligns = array('L', 'R');
     $widths = array(170, 35);
     $header = array('Nombre', 'Importe');
-    $aligns2 = array('L', 'L', 'L', 'L', 'R', 'R');
-    $widths2 = array(18, 22, 65, 65, 35);
-    $header2 = array('Fecha', 'Folio', 'C Costo', 'Producto', 'Importe');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'L', 'R', 'R');
+    $widths2 = array(18, 18, 18, 18, 60, 45, 29);
+    $header2 = array('Fecha O', 'Folio O', 'Fecha C', 'Folio C', 'C Costo', 'Producto', 'Importe');
 
     $lts_combustible = 0;
     $horas_totales = 0;
@@ -683,8 +732,10 @@ class productos_salidas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            $item->fecha,
-            $item->folio,
+            $item->fecha_orden,
+            $item->folio_orden,
+            $item->fecha_compra,
+            $item->folio_compra,
             $item->nombre,
             $item->producto,
             String::formatoNumero($item->importe, 2, '', false),
@@ -737,26 +788,28 @@ class productos_salidas_model extends CI_Model {
     $html = '<table>
       <tbody>
         <tr>
-          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          <td colspan="8" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          <td colspan="8" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
         </tr>
         <tr>
-          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+          <td colspan="8" style="text-align:center;">'.$titulo3.'</td>
         </tr>
         <tr>
-          <td colspan="6"></td>
+          <td colspan="8"></td>
         </tr>
         <tr style="font-weight:bold">
-          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Importe</td>
         </tr>';
     if (isset($combustible[0]->detalle)) {
       $html .= '<tr style="font-weight:bold">
         <td></td>
-        <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
-        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+        <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha O</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio O</td>
+        <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha C</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio C</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
         <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
         <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
@@ -768,7 +821,7 @@ class productos_salidas_model extends CI_Model {
       $lts_combustible += floatval($vehiculo->importe);
 
       $html .= '<tr style="font-weight:bold">
-          <td colspan="4" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->nombre.'</td>
+          <td colspan="6" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->nombre.'</td>
           <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->importe.'</td>
         </tr>';
       if (isset($vehiculo->detalle)) {
@@ -776,8 +829,10 @@ class productos_salidas_model extends CI_Model {
         {
           $html .= '<tr>
               <td></td>
-              <td style="width:100px;border:1px solid #000;background-color: #cccccc;">'.$item->fecha.'</td>
-              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->folio.'</td>
+              <td style="width:100px;border:1px solid #000;background-color: #cccccc;">'.$item->fecha_orden.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->folio_orden.'</td>
+              <td style="width:100px;border:1px solid #000;background-color: #cccccc;">'.$item->fecha_compra.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->folio_compra.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
               <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
               <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
@@ -789,7 +844,7 @@ class productos_salidas_model extends CI_Model {
 
     $html .= '
         <tr style="font-weight:bold">
-          <td colspan="4">TOTALES</td>
+          <td colspan="6">TOTALES</td>
           <td colspan="2" style="border:1px solid #000;">'.$lts_combustible.'</td>
         </tr>
       </tbody>

@@ -84,15 +84,20 @@ class compras_areas_model extends CI_Model{
 		$data = array(
 			'nombre'     => $this->input->post('dnombre'),
 			'id_padre'   => (intval($this->input->post('dareas'))>0? $this->input->post('dareas'): NULL),
-			'id_tipo'    => $this->input->post('did_tipo'),
+			// 'id_tipo'    => $this->input->post('did_tipo'),
 			'codigo'     => $this->input->post('dcodigo'),
 			'codigo_fin' => $this->input->post('dcodigo'),
+			// 'nivel'      => 1,
 		);
 
-		if ($data['id_padre'] !== NULL)
+		if ($data['id_padre'] !== NULL){
 			$data['codigo_fin'] = $this->getDescripCodigo($data['id_padre'], 'codigo').$data['codigo'];
-
+		}
 		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");
+
+		$data = array('nivel' => $this->getDescripCodigo($id_area, 'nivel'));
+		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");
+
 		return array(true, '');
 	}
 
@@ -103,15 +108,21 @@ class compras_areas_model extends CI_Model{
 		$data = array(
 			'nombre'     => $this->input->post('dnombre'),
 			'id_padre'   => (intval($this->input->post('dareas'))>0? $this->input->post('dareas'): NULL),
-			'id_tipo'    => $this->input->post('did_tipo'),
+			// 'id_tipo' => $this->input->post('did_tipo'),
 			'codigo'     => $this->input->post('dcodigo'),
 			'codigo_fin' => $this->input->post('dcodigo'),
+			// 'nivel'      => 1,
 		);
 
-		if ($data['id_padre'] !== NULL)
+		if ($data['id_padre'] !== NULL){
 			$data['codigo_fin'] = $this->getDescripCodigo($data['id_padre'], 'codigo').$data['codigo'];
+		}
 
 		$this->db->insert('compras_areas', $data);
+		$id_area = $this->db->insert_id();
+
+		$data = array('nivel' => $this->getDescripCodigo($id_area, 'nivel'));
+		$this->db->update('compras_areas', $data, "id_area = '".$id_area."'");
 		return array(true, '');
 	}
 
@@ -169,7 +180,7 @@ class compras_areas_model extends CI_Model{
 	}
 
 
-	public function getDescripCodigo($id_area, $tipo='nombre')
+	public function getDescripCodigo($id_area, $tipo='nombre', $nivel=0)
 	{
 		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
 		                           FROM compras_areas
@@ -187,6 +198,13 @@ class compras_areas_model extends CI_Model{
 			else
 				$nombre = $data->id_area;
 			return $nombre;
+		}elseif($tipo === 'nivel') {
+			if($data->id_padre != '') {
+				$nivel++;
+				$nivel = $this->getDescripCodigo($data->id_padre, $tipo, $nivel);
+			} else
+				$nivel++;
+			return $nivel;
 		}else
 		{
 			if($data->id_padre != '')

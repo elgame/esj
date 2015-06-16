@@ -341,6 +341,7 @@ class Ventas_model extends privilegios_model{
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
           'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+          'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')
@@ -528,6 +529,7 @@ class Ventas_model extends privilegios_model{
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
           'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+          'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')

@@ -16,6 +16,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/imprimir_entrada/',
+    'compras_ordenes/ajax_imprimir_recibo/',
 
     'compras_ordenes/rpt_gastos_pdf/',
     'compras_ordenes/rpt_gastos_xls/',
@@ -279,6 +280,8 @@ class compras_ordenes extends MY_Controller {
 
     $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
 
+    $params['impresoras'] = $this->compras_ordenes_model->impresoras();
+
     if (isset($_GET['msg']))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -421,6 +424,11 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
     $this->compras_ordenes_model->imprimir_entrada($_GET['folio'], $_GET['ide']);
+  }
+  public function ajax_imprimir_recibo()
+  {
+    $this->load->model('compras_ordenes_model');
+    $this->compras_ordenes_model->imprimir_entradatxt($_GET['folio'], $_GET['ide'], $_GET['ruta']);
   }
 
   public function email()

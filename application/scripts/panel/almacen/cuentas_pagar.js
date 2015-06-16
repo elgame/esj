@@ -99,7 +99,7 @@ var abonom = (function($){
       total += parseFloat( util.quitarFormatoNum(vttis.text()) );
     });
     url = btn_abonos_masivo.attr("href").split("?");
-    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total.toFixed(2);
+    url = url[0]+"?id="+ids+"&tipo="+tipos+"&total="+total.toFixed(2)+"&tcambio="+$("#tipo_cambio").val();
     btn_abonos_masivo.attr("href", url);
     if($(".sel_abonom.active").length > 0){
       btn_abonos_masivo.show();
@@ -127,18 +127,20 @@ var abonom = (function($){
    */
   function clickPagoBanco(event) {
     var $this = $(this);
-    
+
     if($this.attr('data-status') == 'p')
     {
       if($this.is(':checked')){
         $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
+          monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val() },
           function(data, textStatus, xhr) {
             // noty({"text": 'Se agrego correctamente a la lista', "layout":"topRight", "type": 'success'});
         }).fail(function(){ noty({"text": 'No se agrego a la lista', "layout":"topRight", "type": 'error'}); });
       }else{
         $.post(base_url + 'panel/banco_pagos/set_compra/',
-          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"), monto: $this.attr("data-monto")},
+          {id_compra: $this.attr("data-idcompra"), id_proveedor: $this.attr("data-idproveedor"),
+          monto: $this.attr("data-monto"), tcambio: $("#tipo_cambio").val() },
           function(data, textStatus, xhr) {
             // noty({"text": 'Se quito correctamente de la lista', "layout":"topRight", "type": 'success'});
         }).fail(function(){ noty({"text": 'No se quito de la lista', "layout":"topRight", "type": 'error'}); });
@@ -172,7 +174,16 @@ var modalAbonos = (function($){
   {
     var monto = 0;
     $("#abonomasivo .monto_factura").each(function(index, val) {
-      monto += parseFloat($(this).val());
+      var parent = $(this).parent().parent(),
+      cant = parseFloat($(this).val()),
+      cant2 = cant;
+      monto += cant;
+
+      //cant >= parseFloat($(this).attr('data-val')) ||
+      if ( cant == 0  ) {
+        cant2 = parent.find('.new_total').attr('data-val');
+      }
+      parent.find('.new_total').val( cant2 );
     });
     $("#dmonto").val(monto);
     $("#suma_monto").text(util.darFormatoNum(monto));

@@ -1,6 +1,26 @@
+-En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no hay ventas) y que tenga saldo
+  el proveedor de los anticipos y de ahi pueda pagar facturas o ventas echas sin que se refleje en el banco
+-en ordenes de compra y de requi poner impuestos de retencion de iva e isr y ponerlo en las polizas
+  en compras tambien
+
+
+-*Nitrofoska especial -> checar
+-*En nomina sanjorge poner premio de asistencia (10% proporcional a los dias trabajados) que todo sea gravado en persepciones
+  y en imms que sea exento
+-*Tambien poner en la nomina el bono de despensa (40% del salario minimo zona A proporcionales a los dias trabajados) 40%xdias es gravado en percepciones
+  y en imms que sea exento
+
+
+
 -*Estados de cuenta bancos poner filtros de ingresos y gastos
 -*Reporte diario de entrada poner que salgan todas las areas
 -*ordenes de flete poner la fecha de la factura ligada
+-*cuentas x pagar poner el tipo de cambio y las ordenes con dolares registrar el nuevo costo
+-COMPRAS LIMON TECOMAN: las bonificaciones si es sumada, los kilos y bultos no se suman ni resten
+  Egresos de apatzingan: poder agregar diversis gastos
+  Costo de venta: limon facturado+existencia del dia - existenia anterior - compra empacada; restar las clasificaciones q son iguales
+-*Gomez gudiño: en polizas tomar las cuentas de los productos de oroverde ahora en gomez
+
 
 
 
@@ -12,7 +32,7 @@
 -*Modificar las unidades y clasificaciones para que tengan los codigos de la hoja, eliminar todas las demas clasificaciones de limon, poner codigo 2 de contpaq para empresa oroverde
   En las unidades agregar los codigos para q en las remisiones salgan esos codigos como unidades, al facturar el codigo es la unidad del codigo
 -*Poner lo de prorratear el costo de seguro, certificados, etc. en remisiones y facturacion
--poner filtro en almacen para q tome apartir del 01/01/2015
+-*poner filtro en almacen para q tome apartir del 01/01/2015
 -*Menu crear un apartado para reportes y ahi meter todos separados por area
 -*Reporte de compra poner filtro de tipo de orden y separar las compras por tipo
 -*Crear reporte de Notas de credito, Estilo como el reporte de ventas por cliente, nc de facturas y nc de remisiones (poner a que factura afecto)

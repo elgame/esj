@@ -404,6 +404,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
                             FROM rastria_pallets_salidas WHERE id_pallet = {$id_pallet} AND id_producto IS NOT NULL")->result();
         if (count($productosPallets))
         {
+
           $infoSalida = array(
             'id_empresa'      => 2, // sanjorge
             'id_empleado'     => $this->session->userdata('id_usuario'),

@@ -192,7 +192,7 @@ class nomina
     $this->empleado->nomina->percepciones = array();
     $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
     // $this->empleado->nomina->percepciones['premio_puntualidad'] = $this->pPremioPuntualidad();
-    // $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
+    $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
     // $this->empleado->nomina->percepciones['despensa'] = $this->pDespensa();
     $this->empleado->nomina->percepciones['horas_extras'] = $this->pHorasExtras();
     $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
@@ -303,7 +303,7 @@ class nomina
 
     return array(
       'TipoPercepcion' => '001',
-      'Clave'          => $this->clavesPatron['sueldo'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'sueldo1': 'sueldo2')],
       'Concepto'       => 'Sueldos, Salarios Rayas y Jornales',
       'ImporteGravado' => (float)$this->empleado->nomina->sueldo,
       'ImporteExcento' => 0,
@@ -341,7 +341,7 @@ class nomina
 
     return array(
       'TipoPercepcion' => '010',
-      'Clave'          => $this->clavesPatron['premio_asistencia'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'premio_asistencia1': 'premio_asistencia2')],
       'Concepto'       => 'Premios por asistencia',
       'ImporteGravado' => (float)$premioAsistencia,
       'ImporteExcento' => 0,
@@ -395,7 +395,7 @@ class nomina
 
     return array(
       'TipoPercepcion' => '019',
-      'Clave'          => $this->clavesPatron['horas_extras'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'horas_extras1': 'horas_extras2')],
       'Concepto'       => 'Horas extra',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
@@ -426,7 +426,7 @@ class nomina
 
     return array(
       'TipoPercepcion' => '002',
-      'Clave'          => $this->clavesPatron['aguinaldo'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'aguinaldo1': 'aguinaldo2')],
       'Concepto'       => 'Aguinaldo',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
@@ -443,7 +443,7 @@ class nomina
   {
     return array(
       'TipoPercepcion' => '016',
-      'Clave'          => $this->clavesPatron['vacaciones'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'vacaciones1': 'vacaciones2')],
       'Concepto'       => 'Vacaciones',
       'ImporteGravado' => (float)$this->empleado->nomina->vacaciones,
       'ImporteExcento' => 0,
@@ -474,7 +474,7 @@ class nomina
 
     return array(
       'TipoPercepcion' => '021',
-      'Clave'          => $this->clavesPatron['prima_vacacional'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'prima_vacacional1': 'prima_vacacional2')],
       'Concepto'       => 'Prima Vacacional',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
@@ -493,15 +493,20 @@ class nomina
     $excento = 0;
 
     // echo "<pre>";
-    //   var_dump($this->empleado->utilidad_empresa);
-    // echo "</pre>";exit;
+    //   var_dump($this->empleado->utilidad_empresa_ptu);
+    // echo "</pre>";
 
     if ($this->empleado->utilidad_empresa_ptu > 0 && $this->empleado->ptu_percepciones_empleados > 0 && $this->empleado->ptu_dias_trabajados_empleados > 0)
     {
       $ptu = $this->empleado->utilidad_empresa_ptu / 2;
 
-      $percepciones = round((floatval($this->empleado->ptu_percepciones_empleado) * $ptu) / floatval($this->empleado->ptu_percepciones_empleados), 2);
-      $dias = round((floatval($this->empleado->ptu_dias_trabajados_empleado) * $ptu) / floatval($this->empleado->ptu_dias_trabajados_empleados), 2);
+      $percepciones = round((floatval($this->empleado->ptu_percepciones_empleado) * $ptu) / floatval($this->empleado->ptu_percepciones_empleados), 3);
+      $dias = round((floatval($this->empleado->ptu_dias_trabajados_empleado) * $ptu) / floatval($this->empleado->ptu_dias_trabajados_empleados), 3);
+
+      $this->empleado->ptu_empleado_percepciones = $percepciones;
+      $this->empleado->ptu_empleado_dias         = $dias;
+      $this->empleado->ptu_empleado_percepciones_fact = round($ptu/floatval($this->empleado->ptu_percepciones_empleados), 4);
+      $this->empleado->ptu_empleado_dias_fact         = round($ptu/floatval($this->empleado->ptu_dias_trabajados_empleados), 4);
 
       $ptuTrabajador = $percepciones + $dias;
 
@@ -671,6 +676,15 @@ class nomina
       // Agrega a la suma de de los importes gravados el sueldo.
       $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['sueldo']['ImporteGravado']);
 
+      // Si el importe gravado del premio de asistencia es mayor a 0.
+      $premioAsistenciaGravadoDiario = 0;
+      if ($this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado'] > 0)
+      {
+        $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado']);
+
+        $premioAsistenciaGravadoDiario = round(floatval($this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado']) / 365, 4);
+      }
+
       // Si se tomara en cuenta la percepcion horas extras la suma.
       $horasExtrasGravadoDiario = 0;
       if (isset($_POST['horas_extras']) && $_POST['horas_extras'] != 0)
@@ -736,10 +750,10 @@ class nomina
       );
 
       // Suma todos los gravados diarios con aguinaldo, prima vacacional y ptu.
-      $sumaImporteGravadosDiariosConOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $aguinaldoGravadoDiario + $ptuGravadoDiario;
+      $sumaImporteGravadosDiariosConOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $premioAsistenciaGravadoDiario + $aguinaldoGravadoDiario + $ptuGravadoDiario;
 
       // Suma todos los gravados diarios sin aguinaldo, prima vacacional y ptu.
-      $sumaImporteGravadosDiariosSinOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario;
+      $sumaImporteGravadosDiariosSinOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $premioAsistenciaGravadoDiario;
 
       // Recorre los rangos de la tabla diaria de ISR para determinar en que
       // limites se encuentra la suma de los importes gravados diarios con

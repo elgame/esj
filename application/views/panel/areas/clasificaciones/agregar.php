@@ -80,7 +80,7 @@
                 <label class="control-label" for="fcuenta_cpi">Cuenta contpaq </label>
                 <div class="controls">
                   <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span6 vpositive" maxlength="11"
-                  value="<?php echo set_value('fcuenta_cpi'); ?>" required placeholder="123212, 332123">
+                  value="<?php echo set_value('fcuenta_cpi'); ?>" placeholder="123212, 332123">
                 </div>
               </div>
 

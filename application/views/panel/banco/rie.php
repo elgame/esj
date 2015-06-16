@@ -21,9 +21,19 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="dempresa"
+                      value="EMPAQUE SAN JORGE SA DE CV" id="dempresa" class="span12" placeholder="Nombre">
+                    <input type="hidden" name="did_empresa" value="2" id="did_empresa">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="ftipo">Tipo</label>
                   <div class="controls">
                     <select name="ftipo" id="ftipo" class="span12" required data-next="btn_submit">
+                      <option value="a">Ingreso/Egreso</option>
                       <option value="e">Egreso</option>
                       <option value="i">Ingreso</option>
                     </select>

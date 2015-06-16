@@ -8,7 +8,7 @@ class usuarios_departamentos_model extends CI_Model {
 		parent::__construct();
 	}
 
-	public function getPuestos($paginados = true)
+	public function getPuestos($paginados = true, $status=null)
 	{
 		$sql = '';
 		$params = array('result_items_per_page' => '60', 'result_page' => 0);
@@ -28,15 +28,15 @@ class usuarios_departamentos_model extends CI_Model {
 			$sql = "WHERE ( lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' OR
 							lower(e.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('fnombre'), 'UTF-8')."%' )";
 
-		$_GET['fstatus'] = ($this->input->get('fstatus') !== false? $this->input->get('fstatus'): 't');
+		$_GET['fstatus'] = ($this->input->get('fstatus') !== false? $this->input->get('fstatus'): ($status? $status:'t') );
 		if($this->input->get('fstatus') != '' && $this->input->get('fstatus') != 'todos')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.status='".$this->input->get('fstatus')."'";
 
 		if($this->input->get('did_empresa') != '')
 			$sql .= ($sql==''? 'WHERE': ' AND')." p.id_empresa='".$this->input->get('did_empresa')."'";
-		
+
 		$query['query'] = "SELECT p.id_departamento, p.nombre, p.status, e.id_empresa, e.nombre_fiscal
-					FROM usuarios_departamento p 
+					FROM usuarios_departamento p
 						INNER JOIN empresas AS e ON e.id_empresa = p.id_empresa
 					".$sql."
 					ORDER BY p.nombre ASC";

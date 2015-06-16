@@ -189,13 +189,13 @@ class vehiculos_model extends CI_Model {
 
 		//Gasolina
 		$res = $this->db->query(
-			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total, c.id_empresa
+			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 			WHERE c.status<>'ca' AND c.tipo_vehiculo='g' {$sql} {$sqlf1}
-			ORDER BY c.fecha_aceptacion ASC
+			ORDER BY c.fecha_creacion ASC
 			");
 		$response = array('gasolina' => array(), 'disel' => array(), 'gastos' => array());
 		if($res->num_rows() > 0)
@@ -206,13 +206,13 @@ class vehiculos_model extends CI_Model {
 
 		//Disel
 		$res = $this->db->query(
-			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_aceptacion) AS fecha,
-				(cvg.litros * cvg.precio) AS total, c.id_empresa
+			"SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+				(cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio
 			FROM compras_ordenes AS c
 				INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
 				INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
 			WHERE c.status<>'ca' AND c.tipo_vehiculo='d' {$sql} {$sqlf1}
-			ORDER BY c.fecha_aceptacion ASC
+			ORDER BY c.fecha_creacion ASC
 			");
 		if($res->num_rows() > 0)
 		{
@@ -276,9 +276,9 @@ class vehiculos_model extends CI_Model {
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('C', 'R', 'R', 'R', 'R', 'R', 'R');
-		$widths = array(18, 36, 25, 20, 37, 30, 37);
-		$header = array('Fecha', 'Kilometros', 'Km/Recorridos', 'Litros', 'Km/L', 'L/100Km', 'Importe');
+		$aligns = array('C', 'L', 'R', 'R', 'R', 'R', 'R', 'R');
+		$widths = array(18, 20, 36, 25, 20, 25, 25, 33);
+		$header = array('Fecha', 'Folio Ordn', 'Kilometros', 'Km/Recorridos', 'Litros', 'Km/L', 'L/100Km', 'Importe');
 
 		$total_gasolina = $total_kilometros = $total_litros = $totalRecorridos = 0;
 		if(count($res['gasolina']) > 0)
@@ -310,6 +310,7 @@ class vehiculos_model extends CI_Model {
 				$pdf->SetTextColor(0,0,0);
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
 				$datos = array($item->fecha,
+					$item->folio,
 					String::formatoNumero($item->kilometros, 2, ''),
           '',
 					String::formatoNumero($item->litros, 2, ''),
@@ -320,10 +321,10 @@ class vehiculos_model extends CI_Model {
 				if ($key > 0)
 				{
 					$rendimiento = ($item->kilometros - $res['gasolina'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
-          $datos[2] = String::formatoNumero($item->kilometros - $res['gasolina'][$key-1]->kilometros, 2, '');
+          $datos[3] = String::formatoNumero($item->kilometros - $res['gasolina'][$key-1]->kilometros, 2, '');
 
-					$datos[4] = String::formatoNumero( $rendimiento , 2, '');
-					$datos[5] = String::formatoNumero( (100/($rendimiento == 0 ? 1 : $rendimiento)) , 2, '');
+					$datos[5] = String::formatoNumero( $rendimiento , 2, '');
+					$datos[6] = String::formatoNumero( (100/($rendimiento == 0 ? 1 : $rendimiento)) , 2, '');
 
 					$total_kilometros += $item->kilometros - $res['gasolina'][$key-1]->kilometros;
 					$total_litros     += $item->litros;
@@ -343,7 +344,7 @@ class vehiculos_model extends CI_Model {
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
-			$pdf->Row(array('',
+			$pdf->Row(array('', '',
 						String::formatoNumero( $total_kilometros , 2, ''),
             String::formatoNumero( $totalRecorridos, 2, ''),
 						String::formatoNumero( $total_litros , 2, ''),
@@ -384,6 +385,7 @@ class vehiculos_model extends CI_Model {
 				$pdf->SetTextColor(0,0,0);
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
 				$datos = array($item->fecha,
+					$item->folio,
 					String::formatoNumero($item->kilometros, 2, ''),
           '',
 					String::formatoNumero($item->litros, 2, ''),
@@ -417,7 +419,7 @@ class vehiculos_model extends CI_Model {
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$total_rendimiento = ($total_kilometros/($total_litros>0? $total_litros: 1));
-			$pdf->Row(array('',
+			$pdf->Row(array('', '',
 						String::formatoNumero( $total_kilometros , 2, ''),
             String::formatoNumero( $totalRecorridos, 2, ''),
 						String::formatoNumero( $total_litros , 2, ''),

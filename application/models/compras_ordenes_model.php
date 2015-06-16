@@ -302,25 +302,8 @@ class compras_ordenes_model extends CI_Model {
 
       $this->db->update('compras_ordenes', $data, array('id_orden' => $idOrden));
 
-      //si se registra a un vehiculo
-      if (isset($_POST['es_vehiculo']))
-      {
-        //si es de tipo gasolina o diesel se registra los litros
-        if($_POST['tipo_vehiculo'] !== 'ot')
-        {
-          $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
-          $this->db->insert('compras_vehiculos_gasolina', array(
-            'id_orden'   => $idOrden,
-            'kilometros' => $_POST['dkilometros'],
-            'litros'     => $_POST['dlitros'],
-            'precio'     => $_POST['dprecio'],
-            ));
-        }
-      }
-      else
-      {
-        $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
-      }
+      // Actualiza los datos del vehiculo
+      $this->actualizaVehiculo($idOrden);
 
       $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
               WHERE id_orden = {$idOrden}")->result();
@@ -386,6 +369,29 @@ class compras_ordenes_model extends CI_Model {
     }
 
     return array('passes' => true, 'msg' => 7);
+  }
+
+  public function actualizaVehiculo($idOrden)
+  {
+    //si se registra a un vehiculo
+    if (isset($_POST['es_vehiculo']))
+    {
+      //si es de tipo gasolina o diesel se registra los litros
+      if($_POST['tipo_vehiculo'] !== 'ot')
+      {
+        $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
+        $this->db->insert('compras_vehiculos_gasolina', array(
+          'id_orden'   => $idOrden,
+          'kilometros' => $_POST['dkilometros'],
+          'litros'     => $_POST['dlitros'],
+          'precio'     => $_POST['dprecio'],
+          ));
+      }
+    }
+    else
+    {
+      $this->db->delete('compras_vehiculos_gasolina', array('id_orden' => $idOrden));
+    }
   }
 
   /**
@@ -903,9 +909,24 @@ class compras_ordenes_model extends CI_Model {
                                     ':titulo'         => 'Productos',
                                     ':updates_fields' => 'compras_ordenes_productos'));
 
+    //si se registra a un vehiculo
+    if (isset($_POST['es_vehiculo']))
+    {
+      $data['tipo_vehiculo'] = $_POST['tipo_vehiculo'];
+      $data['id_vehiculo'] = $_POST['vehiculoId'];
+    }
+    else
+    {
+      $data['tipo_vehiculo'] = 'ot';
+      $data['id_vehiculo'] = null;
+    }
+
     $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     $this->actualizar($idOrden, $data, $productos);
+
+    // Actualiza los datos del vehiculo
+    $this->actualizaVehiculo($idOrden);
 
     // // Si la orden no esta rechazada verifica si el proveedor tiene el email
     // // asignado para enviarle la orden de compra.
@@ -992,6 +1013,12 @@ class compras_ordenes_model extends CI_Model {
 
     if(count($productos) > 0)
       $this->compras_ordenes_model->agregarProductosData($productos);
+  }
+
+  public function impresoras()
+  {
+    $impresoras = $this->db->query("SELECT id_impresora, impresora, ruta FROM impresoras");
+    return $impresoras->result();
   }
 
   /*
@@ -1491,6 +1518,26 @@ class compras_ordenes_model extends CI_Model {
     $pdf->Output();
   }
 
+  public function imprimir_entradatxt($folio, $empresa, $ruta)
+  {
+    $data = $this->getInfoEntrada($folio, $empresa);
+
+    $file = fopen(APPPATH."media/imprimir/entradatxt.txt", "w");
+    fwrite($file, "----------------------------------------\r\n");
+    fwrite($file, '     INGRESO ALMACEN '.$data->almacen . "\r\n");
+    fwrite($file, $data->empresa . "\r\n");
+    fwrite($file, 'FECHA: '.String::fechaATexto($data->fecha, '/c').'  REG. No '.$data->folio_almacen . "\r\n");
+    fwrite($file, $data->proveeor . "\r\n");
+    fwrite($file, 'FOLIO: '.String::formatoNumero($data->folio, 2, '').'  IMPORTE: '.String::formatoNumero($data->total) . "\r\n");
+    fwrite($file, 'RECIBI: '.$data->recibio . "\r\n");
+    fwrite($file, "----------------------------------------\r\n");
+    fclose($file);
+
+    shell_exec("c:\\xampp\\htdocs\\sanjorge\\application\\media\\imprimir\\printApp.exe c:\\xampp\\htdocs\\sanjorge\\application\\media\\imprimir\\entradatxt.txt ".base64_decode($ruta));
+    echo base64_decode($ruta);
+    // exec('C:\Users\gama\Documents\sanjorge\application\printApp\printApp\bin\Debug\printApp.exe entradatxt.txt '.base64_decode($ruta));
+  }
+
    /**
     * Visualiza/Descarga el PDF de la orden de compra.
     *
@@ -1648,11 +1695,11 @@ class compras_ordenes_model extends CI_Model {
 
     //Filtro de fecha.
     if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
-      $sql .= " AND Date(csc.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql .= " AND Date(cs.fecha_creacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
     elseif($this->input->get('ffecha1') != '')
-      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
+      $sql .= " AND Date(cs.fecha_creacion) = '".$this->input->get('ffecha1')."'";
     elseif($this->input->get('ffecha2') != '')
-      $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
+      $sql .= " AND Date(cs.fecha_creacion) = '".$this->input->get('ffecha2')."'";
 
     $sql2 = $sql;
 
@@ -1667,8 +1714,9 @@ class compras_ordenes_model extends CI_Model {
         $ids_hijos = $value.$this->compras_areas_model->getHijos($value);
         $result = $this->db->query("SELECT ca.nombre, COALESCE(
                                       (SELECT Sum(csp.importe) AS importe
-                                      FROM compras_productos csp
-                                      WHERE csp.status = 'a' AND csp.id_area In({$ids_hijos}))
+                                      FROM compras_ordenes cs
+                                        INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
+                                      WHERE csp.status = 'a' AND csp.id_area In({$ids_hijos}) {$sql})
                                     , 0) AS importe
                                     FROM compras_areas ca
                                     WHERE ca.id_area = {$value}");
@@ -1681,12 +1729,12 @@ class compras_ordenes_model extends CI_Model {
           // Si es desglosado carga independientes
           if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
             $response[count($response)-1]->detalle = $this->db->query(
-                "SELECT ca.id_area, ca.nombre, Date(cs.fecha_aceptacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
+                "SELECT ca.id_area, ca.nombre, Date(cs.fecha_creacion) AS fecha, cs.folio, p.nombre AS producto, (csp.cantidad * csp.precio_unitario) AS importe
                 FROM compras_ordenes cs
                   INNER JOIN compras_productos csp ON cs.id_orden = csp.id_orden
                   INNER JOIN compras_areas ca ON ca.id_area = csp.id_area
                   INNER JOIN productos p ON p.id_producto = csp.id_producto
-                WHERE csp.status = 'a' AND ca.id_area In({$ids_hijos})
+                WHERE csp.status = 'a' AND ca.id_area In({$ids_hijos}) {$sql}
                 ORDER BY nombre")->result();
           }
         }

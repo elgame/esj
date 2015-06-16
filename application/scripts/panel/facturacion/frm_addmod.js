@@ -985,6 +985,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
+  total_ivas = trunc2Dec(total_ivas);
 
   $('input#prod_dreten_iva_total').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -997,6 +998,7 @@ function calculaTotal ($calculaT) {
       }
     }
   });
+  total_retenciones = trunc2Dec(total_retenciones);
 
   total_factura = trunc2Dec(parseFloat(total_subtotal) + (parseFloat(total_ivas) - parseFloat(total_retenciones)));
 

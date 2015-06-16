@@ -197,7 +197,8 @@ class cuentas_pagar extends MY_Controller {
         $tipos = explode(',', substr($tipos_aux, 1));
         foreach ($ids as $key => $value)
         {
-          $params['data']['facturas'][] = $this->cuentas_pagar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
+          $params['data']['facturas'][] = $this->cuentas_pagar_model
+            ->getDetalleVentaFacturaData($value, $tipos[$key], (isset($_GET['tcambio'])?$_GET['tcambio']:0) );
         }
         $proveedor = $params['data']['facturas'][0]['proveedor'];
         $_GET['id'] = $ids_aux;

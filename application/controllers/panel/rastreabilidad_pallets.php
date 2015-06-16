@@ -253,7 +253,7 @@ class rastreabilidad_pallets extends MY_Controller {
     $rules = array(
       array('field' => 'ffolio',
             'label' => 'Folio',
-            'rules' => 'required|is_natural_no_zero|callback_chkfolio'),
+            'rules' => 'required|is_natural_no_zero|callback_chkfolio|callback_productos_existencia'),
       array('field' => 'fid_clasificacion',
             'label' => 'Clasificacion',
             'rules' => ''),
@@ -309,6 +309,28 @@ class rastreabilidad_pallets extends MY_Controller {
       return false;
     }else
       return true;
+  }
+
+  public function productos_existencia($str)
+  {
+    $this->load->model('inventario_model');
+    $productos = array();
+    if (is_array($_POST['ps_id']) && count($_POST['ps_id']) > 0) {
+      foreach ($_POST['ps_id'] as $key => $value) {
+        if (floatval($value) > 0) {
+          $item = $this->inventario_model->getEPUData($value);
+          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( String::float($existencia-$_POST['ps_num'][$key]) < 0) {
+            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['ps_num'][$key]).')';
+          }
+        }
+      }
+    }
+    if (count($productos)>0) {
+      $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
+      return FALSE;
+    }
+    return true;
   }
 
 

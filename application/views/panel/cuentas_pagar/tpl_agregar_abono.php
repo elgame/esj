@@ -12,6 +12,7 @@
 
         <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_pagar/agregar_abono?'.String::getVarsLink(array())); ?>" method="post" id="form">
 
+          <input type="hidden" name="tcambio" value="<?php echo $this->input->get('tcambio') ?>">
           <div class="row-fluid">
             <div class="span12">
 
@@ -111,9 +112,12 @@
                     <input type="hidden" name="factura_desc[]" value="<?php echo $value['cobro'][0]->serie.$value['cobro'][0]->folio; ?>">
                     <input type="hidden" name="ids[]" value="<?php echo $value['cobro'][0]->id; ?>">
                     <input type="hidden" name="tipos[]" value="<?php echo $value['cobro'][0]->tipo; ?>">
+                    <input type="hidden" name="new_total[]" value="<?php echo $value['new_total']; ?>"
+                      data-val="<?php echo $value['new_total']; ?>" class="new_total">
                   </td>
                   <td><?php echo $value['saldo']; ?></td>
-                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>" min="0.001"></td>
+                  <td><input type="number" step="any" name="montofv[]" class="monto_factura" value="<?php echo $value['saldo'] ?>"
+                    data-val="<?php echo $value['saldo'] ?>" min="0.001"></td>
                 </tr>
               <?php
               }

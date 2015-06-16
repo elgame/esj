@@ -111,7 +111,7 @@
                   <td class="center">
                     <?php
 
-                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/modificar/') && $fact->id_nc == '')
+                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/modificar/') && $fact->id_nc == '' && $fact->facturada == 0)
                         echo '<a class="btn btn-success" href="'.base_url().'panel/ventas/agregar/?id_nr='.$fact->id_factura.'" title="Modificar">
                               <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Modificar</span></a>';
 
@@ -135,7 +135,7 @@
                                 'btn_type' => 'btn-success',
                                 'attrs'    => array())
                             );
-                          if($this->usuarios_model->tienePrivilegioDe('', 'ventas/nota_credito/'))
+                          if($this->usuarios_model->tienePrivilegioDe('', 'ventas/nota_credito/') && $fact->facturada == 0)
                             echo '<a class="btn btn-warning" href="'.base_url().'panel/ventas/agregar/?id_nrc='.$fact->id_factura.'" title="Agregar Nota credito">
                                   <i class="icon-edit icon-white"></i> <span class="hidden-tablet">Nota Credito</span></a>';
                         }

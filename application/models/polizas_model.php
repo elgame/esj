@@ -13,7 +13,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
@@ -26,7 +26,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
@@ -277,6 +277,25 @@ class polizas_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     return $basic? $data->cuenta: $data;
   }
+  private function getPAsistenciaContpaq($basic=true, $departamento=1)
+  {
+    $sql = '';
+    if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1296'"; //sanjorge
+    elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%ASISTENCIA%'"; //sanjorge
+    elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
+    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    else{
+      $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    }
+    $query = $this->db->query(
+      "SELECT *
+       FROM cuentas_contpaq
+       WHERE id_empresa = {$this->empresaId} {$sql}")->result();
+
+    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
+  }
   public function getCuentaNominaPagar($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //sanjorge
@@ -512,8 +531,10 @@ class polizas_model extends CI_Model {
 
           if($inf_factura['info']->status == 'ca')
           {
+            $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
+            $cuenta_cpi = $cuenta_cpi==''? '41040000': $cuenta_cpi;
             $response['data'] .= $this->setEspacios('M',2).
-                              $this->setEspacios('41040000',30).
+                              $this->setEspacios($cuenta_cpi,30).
                               $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
                               $this->setEspacios('1',1).  //clientes es un abono = 1
                               $this->setEspacios( $this->numero(0) , 20).
@@ -543,7 +564,7 @@ class polizas_model extends CI_Model {
                   $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
                   $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
               {
-                $value->cuenta_cpi = $inf_factura['info']->id_empresa==7? $value->cuenta_cpi2: $value->cuenta_cpi;
+                $value->cuenta_cpi = $inf_factura['info']->id_empresa==3? $value->cuenta_cpi2: $value->cuenta_cpi;
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;
@@ -1074,7 +1095,7 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
           f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
-          u.id_departamente
+          u.id_departamente, f.pasistencia
        FROM nomina_fiscal AS f INNER JOIN usuarios AS u ON u.id = f.id_empleado
       WHERE f.esta_asegurado = 't'
          {$sql}
@@ -1092,12 +1113,14 @@ class polizas_model extends CI_Model {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
         } else {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional2 += $value->prima_vacacional;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
         }
 
         $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
@@ -1115,24 +1138,28 @@ class polizas_model extends CI_Model {
           $value->prima_vacacional1 = $value->prima_vacacional;
           $value->aguinaldo1        = $value->aguinaldo;
           $value->horas_extras1     = $value->horas_extras;
+          $value->pasistencia1      = $value->pasistencia;
 
           $value->sueldo_semanal2   = 0;
           $value->vacaciones2       = 0;
           $value->prima_vacacional2 = 0;
           $value->aguinaldo2        = 0;
           $value->horas_extras2     = 0;
+          $value->pasistencia2      = 0;
         } else {
           $value->sueldo_semanal1   = 0;
           $value->vacaciones1       = 0;
           $value->prima_vacacional1 = 0;
           $value->aguinaldo1        = 0;
           $value->horas_extras1     = 0;
+          $value->pasistencia1      = 0;
 
           $value->sueldo_semanal2   = $value->sueldo_semanal;
           $value->vacaciones2       = $value->vacaciones;
           $value->prima_vacacional2 = $value->prima_vacacional;
           $value->aguinaldo2        = $value->aguinaldo;
           $value->horas_extras2     = $value->horas_extras;
+          $value->pasistencia2      = $value->pasistencia;
         }
         $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
       }
@@ -1227,6 +1254,16 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios("HRS EXTRAS Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'pasistencia'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getPAsistenciaContpaq(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'pasistencia'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                             $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }
 
@@ -1714,7 +1751,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, p.nombre_fiscal, p.cuenta_cpi AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq
+            'limon'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio
           FROM bascula_pagos AS fa
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
             INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
@@ -1746,7 +1783,7 @@ class polizas_model extends CI_Model {
             bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
             Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, Sum(((fa.total*100/f.total)*f.importe_ieps/100)) AS importe_ieps, c.nombre_fiscal,
             c.cuenta_cpi AS cuenta_cpi_proveedor, bm.metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
-            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq
+            'facturas'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, bm.tcambio
           FROM compras AS f
             INNER JOIN compras_abonos AS fa ON fa.id_compra = f.id_compra
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
@@ -1756,7 +1793,7 @@ class polizas_model extends CI_Model {
           WHERE f.status <> 'ca' AND fa.poliza_egreso = 'f'
              {$sql}
           GROUP BY bmc.id_movimiento, fa.ref_movimiento, fa.concepto,
-            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha)
+            bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, bm.metodo_pago, Date(fa.fecha), bm.tcambio
           ORDER BY bmc.id_movimiento ASC
         )
         UNION
@@ -1767,7 +1804,7 @@ class polizas_model extends CI_Model {
             COALESCE(c.nombre_fiscal, cc.nombre, 'CUENTA CUADRE') AS nombre_fiscal,
             COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
             Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco'::character varying AS tipoo,
-            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio
           FROM banco_movimientos AS bm
             INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
             LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
@@ -1863,7 +1900,35 @@ class polizas_model extends CI_Model {
           $impuestos['ieps_acreditar']['importe']  = $value->importe_ieps; //$factor*($value->importe_iva)/100;
           $impuestos['ieps_acreditado']['importe'] = $impuestos['ieps_acreditar']['importe'];
 
-          $subtotal = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
+          $subtotal = $subtotal2 = $value->total_abono;//-$impuestos['iva_retener']['importe']-$impuestos['iva_acreditar']['importe'];
+
+          if ($value->tcambio > 0) {
+            // obtiene el nuevo total de la compra de acuerdo al tipo de cambio actual
+            $productoss = $this->db->query("SELECT
+                  cp.cantidad, cp.precio_unitario, cp.porcentaje_iva, cp.porcentaje_retencion,
+                  cp.porcentaje_ieps, cp.tipo_cambio, bm.monto
+                FROM compras_abonos AS fa
+                  INNER JOIN banco_movimientos_compras AS bmc ON bmc.id_compra_abono = fa.id_abono
+                  INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = bmc.id_movimiento
+                  INNER JOIN compras_productos cp ON cp.id_compra = fa.id_compra
+                WHERE bm.id_movimiento = {$value->id_movimiento}
+                ORDER BY bmc.id_movimiento ASC")->result();
+            $new_iva = $new_total = 0;
+            if (count($productoss) > 0) {
+              foreach ($productoss as $ppkey => $ppvalue) {
+                $pu = $ppvalue->precio_unitario;
+                if($ppvalue->tipo_cambio > 0 && $value->tcambio > 0) {
+                  $pu = ($ppvalue->precio_unitario/$ppvalue->tipo_cambio)*$value->tcambio;
+                }
+                $subtotall  = $ppvalue->cantidad*$pu;
+                $new_iva   += ($subtotall*$ppvalue->porcentaje_iva/100);
+                $new_total += floor( ($subtotall+($subtotall*$ppvalue->porcentaje_iva/100)+($subtotall*$ppvalue->porcentaje_ieps/100)) * 100)/100;
+              }
+
+              $impuestos['iva_acreditar']['importe']  = ($value->total_abono*100/$new_total)*$new_iva/100;
+              $subtotal2 = $productoss[0]->monto;
+            }
+          }
 
           //Colocamos el Cargo al Proveedor que realizo el pago
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
@@ -1880,7 +1945,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
                             $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
                             $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
-                            $this->setEspacios( $this->numero($subtotal) , 20).  //importe movimiento
+                            $this->setEspacios( $this->numero($subtotal2) , 20).  //importe movimiento
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios($value->nombre_fiscal,100). //concepto

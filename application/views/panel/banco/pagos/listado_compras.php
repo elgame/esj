@@ -79,7 +79,7 @@
               <?php
               $total_pagar = 0;
               foreach($pagos as $keyp => $pago){
-                $total_pagar_proveedor = 0;
+                $total_pagar_proveedor = $total_pagar_proveedor_new = 0;
                 $html = '';
                 $facturas_desc = array();
 
@@ -87,6 +87,7 @@
                 {
                   $total_pagar += $value->monto;
                   $total_pagar_proveedor += $value->monto;
+                  $total_pagar_proveedor_new += $value->new_total;
                   $facturas_desc[] = $value->serie.$value->folio;
                   $html .= '<tr>
                             <td>'.$value->fecha.'</td>
@@ -104,7 +105,8 @@
                 }
                 echo '<tr>
                     <td style="font-weight:bold" colspan="2">'.$pago->nombre_fiscal.'</td>
-                    <td style="font-weight:bold">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).'</td>
+                    <td style="font-weight:bold">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).' <br>
+                    '.String::formatoNumero($total_pagar_proveedor_new, 2, '$', false).'</td>
                     <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta span12">
                                 <option value=""></option>';
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)

@@ -106,7 +106,7 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
-                      <th colspan="5"></th>
+                      <th colspan="9"></th>
                       <th colspan="2" style="text-align: center;background-color: #BEEEBC;">PERCEPCIONES</th>
                       <th colspan="2" style="text-align: center;background-color: #EEBCBC;">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
@@ -117,8 +117,14 @@
                       <th></th>
                       <th>NOMBRE</th>
                       <th>PUESTO</th>
-                      <th>SALARIO</th>
-                      <th>SDI</th>
+                      <th>Días Lab.</th>
+                      <th>Fact. X Dia</th>
+                      <th>PTU por dias</th>
+                      <th>Sueldo anual</th>
+                      <th>Fact. De Sal</th>
+                      <th>PTU por sal</th>
+                      <!-- <th>SALARIO</th> -->
+                      <!-- <th>SDI</th> -->
                       <!-- <th>DIAS TRAB.</th> -->
 
                       <!-- Percepciones -->
@@ -272,7 +278,14 @@
                     ?>
                       <tr class="tr-empleado" id="empleado<?php echo $e->id ?>">
                         <td style="<?php echo $bgColor ?>">
-                          <?php if($nominas_finalizadas){ ?>
+                          <?php if($nominas_finalizadas){
+                            if ($e->ptu_generado !== 'false') {
+                          ?>
+                          <a href="<?php echo base_url('panel/nomina_fiscal/cancelar_ptu/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
+                              onclick="if(confirm('Seguro de cancelar el comprobante?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
+                          <?php
+                              }
+                          ?>
                           <a href="<?php echo base_url('panel/nomina_fiscal/recibo_nomina_ptu_pdf/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>" target="_blank" title="Ver PDF"><img src="<?php echo base_url('application/images/otros/doc_pdf.png') ?>" width="20" height="20"></a>
                           <?php } ?>
                         </td>
@@ -296,12 +309,32 @@
                           <input type="hidden" name="dcuenta_banco[]" value="<?php echo $e->cuenta_banco ?>" class="span12 empleado-cuenta_banco">
                         </td>
                         <td style="<?php echo $bgColor ?>"><?php echo strtoupper($e->puesto) ?></td>
-                        <td style="<?php echo $bgColor ?>">
+                        <td style="<?php echo $bgColor ?>"><?php echo (isset($e->ptu_dias_trabajados_empleado)? $e->ptu_dias_trabajados_empleado: 0) ?>
+                          <input type="hidden" name="ptu_dias_trabajados_empleado[]" value="<?php echo (isset($e->ptu_dias_trabajados_empleado)? $e->ptu_dias_trabajados_empleado: 0) ?>">
+                        </td>
+                        <td style="<?php echo $bgColor ?>"><?php echo (isset($e->ptu_empleado_dias_fact)? $e->ptu_empleado_dias_fact: 0) ?>
+                          <input type="hidden" name="ptu_empleado_dias_fact[]" value="<?php echo (isset($e->ptu_empleado_dias_fact)? $e->ptu_empleado_dias_fact: 0) ?>">
+                        </td>
+                        <td style="<?php echo $bgColor ?>"><?php echo String::formatoNumero((isset($e->ptu_empleado_dias)? $e->ptu_empleado_dias: 0)) ?>
+                          <input type="hidden" name="ptu_empleado_dias[]" value="<?php echo (isset($e->ptu_empleado_dias)? $e->ptu_empleado_dias: 0) ?>">
+                        </td>
+
+                        <td style="<?php echo $bgColor ?>"><?php echo String::formatoNumero((isset($e->ptu_percepciones_empleado)? $e->ptu_percepciones_empleado: 0)) ?>
+                          <input type="hidden" name="ptu_percepciones_empleado[]" value="<?php echo (isset($e->ptu_percepciones_empleado)? $e->ptu_percepciones_empleado: 0) ?>">
+                        </td>
+                        <td style="<?php echo $bgColor ?>"><?php echo (isset($e->ptu_empleado_percepciones_fact)? $e->ptu_empleado_percepciones_fact: 0) ?>
+                          <input type="hidden" name="ptu_empleado_percepciones_fact[]" value="<?php echo (isset($e->ptu_empleado_percepciones_fact)? $e->ptu_empleado_percepciones_fact: 0) ?>">
+                        </td>
+                        <td style="<?php echo $bgColor ?>"><?php echo String::formatoNumero((isset($e->ptu_empleado_percepciones)? $e->ptu_empleado_percepciones: 0)) ?>
+                          <input type="hidden" name="ptu_empleado_percepciones[]" value="<?php echo (isset($e->ptu_empleado_percepciones)? $e->ptu_empleado_percepciones: 0) ?>">
+                        </td>
+
+                        <td style="display: none;<?php echo $bgColor ?>">
                           <?php echo String::formatoNumero($e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario) ?>
                           <input type="hidden" name="salario_diario[]" value="<?php echo $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario ?>" class="span12 salario-diario">
                           <input type="hidden" name="salario_diario_real[]" value="<?php echo $e->salario_diario_real ?>" class="span12 salario-diario-real">
                         </td>
-                        <td style="<?php echo $bgColor ?>">
+                        <td style="display: none;<?php echo $bgColor ?>">
                           <?php echo $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado ?>
                         </td>
                         <td style="display: none; <?php echo $bgColor ?>">
@@ -364,7 +397,7 @@
                                   }
                                 }
 
-                                $totalDeduccionesEmpleado += floatval($totalPrestamosEmpleado);
+                                // $totalDeduccionesEmpleado += floatval($totalPrestamosEmpleado);
                           ?>
                           <?php echo String::formatoNumero($totalPrestamosEmpleado) ?>
                           <input type="hidden" name="total_prestamos[]" value="<?php echo $totalPrestamosEmpleado ?>" class="span12 prestamos">
@@ -452,9 +485,9 @@
                       $totalComplementos       += $totalComplementoEmpleado;
                     }} ?>
                     <tr>
-                      <td colspan="3" style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
-                      <td id="totales-salarios" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSalarios) ?></td>
-                      <td id="totales-sdi" style="background-color: #BCD4EE;"><?php echo $totalSdi ?></td>
+                      <td colspan="9" style="background-color: #BCD4EE; text-align: right; font-weight: bold;">TOTALES</td>
+                      <td id="totales-salarios" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSalarios) ?></td>
+                      <td id="totales-sdi" style="display: none;background-color: #BCD4EE;"><?php echo $totalSdi ?></td>
                       <td id="totales-dias-trabajados" style="display: none;background-color: #BCD4EE;"><?php echo $totalDiasTrabajados ?></td>
                       <td id="totales-sueldos" style="display: none;background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSueldos) ?></td>
                       <td id="totales-vacaciones" style="display: none;background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalVacaciones) ?></td>

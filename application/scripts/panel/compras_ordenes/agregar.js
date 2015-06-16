@@ -67,6 +67,15 @@
       else
         $("#group_gasolina").hide();
     });
+
+    $("#BtnImprimir").on('click', function(event) {
+      var datos = '?folio='+$(this).attr('data-folio')+'&ide='+$(this).attr('data-ide')+'&ruta='+$("#lista_impresoras").val();
+      $.get(base_url+'panel/compras_ordenes/ajax_imprimir_recibo/'+datos,
+      function() {
+        console.log("dd");
+      });
+    });
+
   });
 
   /*

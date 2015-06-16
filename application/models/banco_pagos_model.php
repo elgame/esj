@@ -10,6 +10,7 @@ class banco_pagos_model extends CI_Model {
 
 	public function getPagos($datos=array())
 	{
+    $this->load->model('cuentas_pagar_model');
     $this->load->model('proveedores_model');
 		$sql = '';
 		// //Filtros para buscar
@@ -31,15 +32,45 @@ class banco_pagos_model extends CI_Model {
     {
       $value->pagos = $this->db->query("SELECT bpc.id_pago, c.serie, c.folio, bpc.referencia, bpc.ref_alfanumerica, bpc.monto, Date(c.fecha) AS fecha,
                                   COALESCE(pc.id_cuenta, 0) AS id_cuenta, COALESCE(pc.is_banamex, 'f') AS is_banamex, COALESCE(pc.cuenta, '') AS cuenta,
-                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion, bpc.modificado_banco
+                                  COALESCE(pc.sucursal, 0) AS sucursal, b.codigo AS codigo_banco, c.id_compra, bpc.descripcion, bpc.modificado_banco,
+                                  bpc.tcambio
                                FROM banco_pagos_compras AS bpc
                                  INNER JOIN compras AS c ON c.id_compra = bpc.id_compra
                                  LEFT JOIN proveedores_cuentas AS pc ON pc.id_cuenta = bpc.id_cuenta
                                  LEFT JOIN banco_bancos AS b ON b.id_banco = pc.id_banco
                                WHERE bpc.status = 'f' AND bpc.id_proveedor = {$value->id_proveedor} {$sql}
                                ORDER BY c.folio ASC")->result();
-      if(count($value->pagos) > 0)
+      if(count($value->pagos) > 0){
+        foreach ($value->pagos as $kp => $pago) {
+          // obtiene el nuevo total de la compra de acuerdo al tipo de cambio actual
+          $data_fact = $this->cuentas_pagar_model->getDetalleVentaFacturaData($pago->id_compra, 'f', $pago->tcambio);
+          $pago->new_total = $data_fact['new_total'];
+
+          // $productos = $this->db->query(
+          //                   "SELECT cantidad, precio_unitario, porcentaje_iva, porcentaje_retencion, porcentaje_ieps, tipo_cambio, total
+          //                     FROM compras_productos
+          //                     WHERE id_compra={$pago->id_compra}")->result();
+          // $new_total = 0;
+          // if (count($productos) > 0) {
+          //   foreach ($productos as $kpp => $pproducto) {
+          //     $pu = $pproducto->precio_unitario;
+          //     if($pproducto->tipo_cambio > 0 && $pago->tcambio > 0) {
+          //       $pu = ($pproducto->precio_unitario/$pproducto->tipo_cambio)*$pago->tcambio;
+          //       $subtotal = $pproducto->cantidad*$pu;
+          //       $new_total += floor( ($subtotal+($subtotal*$pproducto->porcentaje_iva/100)+
+          //                     ($subtotal*$pproducto->porcentaje_ieps/100)-
+          //                     ($subtotal*$pproducto->porcentaje_retencion/100)) * 100)/100;
+          //     } else {
+          //       $new_total += $pproducto->total;
+          //     }
+          //   }
+          // }
+          // $pago->new_total = $new_total==0? $pago->monto : $new_total;
+
+        }
+
         $value->cuentas_proveedor = $this->proveedores_model->getCuentas($value->id_proveedor);
+      }
       else
         unset($response[$key]);
     }
@@ -71,6 +102,7 @@ class banco_pagos_model extends CI_Model {
   {
     $this->load->model('banco_cuentas_model');
     $this->load->model('banco_layout_model');
+    $tipo = $_GET['tipo'];
     $pagos = $this->getPagos(array(
         'did_empresa' => $_GET['did_empresa'],
         'tipo_cuenta' => ($_GET['tipo']=='ba'? 't': 'f'),
@@ -84,8 +116,8 @@ class banco_pagos_model extends CI_Model {
       $total_proveedor = 0;
       foreach ($pago->pagos as $keyp => $value)
       {
-        $total_pagar += $value->monto;
-        $total_proveedor += $value->monto;
+        $total_pagar += $value->new_total; // monto
+        $total_proveedor += $value->new_total; //monto
       }
       if ($total_proveedor > 0)
       {
@@ -111,7 +143,7 @@ class banco_pagos_model extends CI_Model {
       'fecha_pago'     => date("Y-m-d"),
       'nombre_empresa' => $cuenta_retiro->nombre_fiscal,
       'description'    => 'Pago a proveedores',
-      'toperacion'     => $_GET['tipo'],
+      'toperacion'     => $tipo,
       //Reg Global
       'total_retiro' => $total_pagar,
       'sucursal'     => $cuenta_retiro->sucursal,
@@ -138,17 +170,19 @@ class banco_pagos_model extends CI_Model {
     foreach ($pagos as $key => $pago)
     {
       $total_pagar = $num_cargos = 0;
-      $_POST['dfecha'] = date("Y-m-d");
-      $_POST['dcuenta'] = $_GET['cuentaretiro'];
-      $_POST['dreferencia'] = '';
-      $_POST['dconcepto'] = $pago->nombre_fiscal;
-      $_POST['fmetodo_pago'] = 'transferencia';
+      $_POST['dfecha']             = date("Y-m-d");
+      $_POST['dcuenta']            = $_GET['cuentaretiro'];
+      $_POST['dreferencia']        = '';
+      $_POST['dconcepto']          = $pago->nombre_fiscal;
+      $_POST['fmetodo_pago']       = 'transferencia';
       $_POST['fcuentas_proveedor'] = '';
+      $_POST['tcambio']            = (isset($pago->pagos[0]->tcambio)? $pago->pagos[0]->tcambio: 0);
 
       $_POST['factura_desc'] = array();
       $_POST['ids']          = array();
       $_POST['tipos']        = array();
       $_POST['montofv']      = array();
+      $_POST['new_total']    = array();
       foreach ($pago->pagos as $keyp => $value)
       {
         $total_pagar += $value->monto;
@@ -157,6 +191,7 @@ class banco_pagos_model extends CI_Model {
         $_POST['ids'][]          = $value->id_compra;
         $_POST['tipos'][]        = 'f';
         $_POST['montofv'][]      = $value->monto;
+        $_POST['new_total'][]    = $value->new_total;
         $this->db->update('banco_pagos_compras', array('status' => 't'), array('id_compra' => $value->id_compra));
       }
       $_POST['dmonto'] = $total_pagar;
@@ -216,7 +251,8 @@ class banco_pagos_model extends CI_Model {
       $this->db->insert('banco_pagos_compras', array(
         'id_compra'    =>  $datos['id_compra'],
         'id_proveedor' =>  $datos['id_proveedor'],
-        'monto'        => $datos['monto']));
+        'monto'        => $datos['monto'],
+        'tcambio'      => floatval($datos['tcambio']) ));
     }
     return array('status' => 'ok');
   }

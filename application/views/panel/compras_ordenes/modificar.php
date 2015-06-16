@@ -241,8 +241,9 @@
                       <div class="well span9">
                           <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;"><?php echo $txtButton ?></button><br><br>
                           <?php if($orden['info'][0]->status == 'a' && isset($orden['info'][0]->entrada_almacen->folio_almacen)){ ?>
-                            <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$orden['info'][0]->entrada_almacen->folio_almacen.'&ide='.$orden['info'][0]->id_empresa); ?>"
-                              onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir (entrada almacen)</a>
+                            <a href="#modal-imprimir" role="button" class="btn btn-primary" data-toggle="modal">Imprimir (entrada almacen)</a>
+                            <!-- <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$orden['info'][0]->entrada_almacen->folio_almacen.'&ide='.$orden['info'][0]->id_empresa); ?>"
+                              onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir (entrada almacen)</a> -->
                           <?php } ?>
                           <?php if ($this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/") && isset($_GET['mod'])) { ?>
                             <label style="font-weight: bold;"><input type="checkbox" name="autorizar" value="1"> AUTORIZAR ENTRADA</label>
@@ -705,6 +706,28 @@
       <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
+
+  <!-- Modal -->
+  <div id="modal-imprimir" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Imprimir (entrada almacen)</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <select name="lista_impresoras" id="lista_impresoras">
+        <?php foreach ($impresoras as $key => $value) { ?>
+          <option value="<?php echo base64_encode($value->ruta) ?>"><?php echo $value->impresora ?></option>
+        <?php } ?>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnImprimir" data-folio="<?php echo $orden['info'][0]->entrada_almacen->folio_almacen ?>"
+        data-ide="<?php echo $orden['info'][0]->id_empresa ?>">Imprimir</button>
+    </div>
+  </div><!--/modal impresoras -->
 
 
 <?php if (isset($print)) {

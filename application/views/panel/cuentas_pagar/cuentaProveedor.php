@@ -87,6 +87,7 @@
 
             <div id="sumaRowsSel" style="display:none;position:fixed;top:200px;right: 0px;width: 100px;background-color:#FFFF00;padding:3px 0px 3px 3px;font-size:14px;font-weight:bold;"></div>
 
+            Tipo de cambio: <input type="number" step="any" id="tipo_cambio" value="" min="0.001">
             <table class="table table-striped table-bordered bootstrap-datatable">
               <thead>
                 <tr>
@@ -141,7 +142,7 @@
                   <td>
                   <?php if($cuenta->estado == 'Pendiente'){ ?>
                     <input type="checkbox" class="change_spago" <?php echo ($cuenta->en_pago>0? 'checked': ''); ?>
-                        data-idcompra="<?php echo $cuenta->id_compra; ?>" data-idproveedor="<?php echo $this->input->get('id_proveedor'); ?>" 
+                        data-idcompra="<?php echo $cuenta->id_compra; ?>" data-idproveedor="<?php echo $this->input->get('id_proveedor'); ?>"
                         data-monto="<?php echo $cuenta->saldo; ?>" data-status="<?php echo $cuenta->status ?>"
                         data-folio="<?php echo $cuenta->serie.$cuenta->folio; ?>">
                   <?php } ?>

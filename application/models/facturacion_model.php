@@ -560,6 +560,7 @@ class facturacion_model extends privilegios_model{
           'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : '',
           'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : 0,
           'certificado' => (isset($_POST['isCert'][$key])? ($_POST['isCert'][$key]=== '1' ? 't' : 'f'): 'f'),
+          'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')
@@ -741,7 +742,7 @@ class facturacion_model extends privilegios_model{
       $impuestosTraslados[] = array(
         'Impuesto' => 'IVA',
         'tasa'     => '16',
-        'importe'  => $traslado16,
+        'importe'  => round($traslado16, 2),
       );
     }
 
@@ -1505,6 +1506,7 @@ class facturacion_model extends privilegios_model{
             'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : null,
             'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : null,
             'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+            'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
           );
 
           if ($_POST['prod_did_prod'][$key] === '49')

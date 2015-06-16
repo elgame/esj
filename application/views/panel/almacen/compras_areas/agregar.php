@@ -42,7 +42,7 @@
 	                  </div>
 	                </div>
 
-	                <div class="control-group">
+	                <!-- <div class="control-group">
 	                  <label class="control-label" for="did_tipo">Tipo </label>
 	                  <div class="controls">
 	                    <select name="did_tipo" id="did_tipo" required>
@@ -53,7 +53,7 @@
 	                   } ?>
 	                    </select>
 	                  </div>
-	                </div>
+	                </div> -->
 
 								</div> <!--/span -->
 

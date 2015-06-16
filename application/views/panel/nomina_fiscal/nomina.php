@@ -110,7 +110,7 @@
                   <thead>
                     <tr>
                       <th colspan="6"></th>
-                      <th colspan="4" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
+                      <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                       <th colspan="6" style="background-color: #EEEEBC;"></th>
@@ -125,6 +125,8 @@
 
                       <!-- Percepciones -->
                       <th style="background-color: #BEEEBC;">SUELDO</th>
+                      <th style="background-color: #BEEEBC;">P ASISTENCIA</th>
+                      <!-- <th style="background-color: #BEEEBC;">DESPENSA</th> -->
                       <th id="head-vacaciones" style="display: none;background-color: #BEEEBC;">VACACIONES</th>
                       <th id="head-prima-vacacional" style="display: none;background-color: #BEEEBC;">P. VACACIONAL</th>
                       <th style="background-color: #BEEEBC;">HRS. EXT.</th>
@@ -159,6 +161,8 @@
                       $totalDeduccionesEmpleado = 0;
 
                       $totalSalarios = 0;
+                      $totalPasistencia = 0;
+                      // $totalDespensa = 0;
                       $totalSdi = 0;
                       $totalDiasTrabajados = 0;
                       $totalSueldos = 0;
@@ -194,7 +198,9 @@
                         $e->descuento_otros     = $prenomina['desc_otros'];
 
                         $totalPercepcionesEmpleado = $e->nomina->percepciones['sueldo']['total'] +
-                                             $e->nomina->percepciones['horas_extras']['total'];
+                                             $e->nomina->percepciones['horas_extras']['total'] +
+                                             $e->nomina->percepciones['premio_asistencia']['total'];
+                                             // $e->nomina->percepciones['despensa']['total'];
 
                         $totalDeduccionesEmpleado = $e->nomina->deducciones['infonavit']['total'] +
                                             $e->nomina->deducciones['imss']['total'] +
@@ -321,6 +327,14 @@
                           <input type="hidden" name="sueldo_semanal[]" value="<?php echo $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'] ?>" class="span12 sueldo">
                           <input type="hidden" name="sueldo_semanal_real[]" value="<?php echo $totalComplementoEmpleado ?>" class="span12 sueldo-real">
                         </td>
+                        <td id="td-premio_asistencia" style="<?php echo $bgColor ?>">
+                          <span class="premio_asistencia-span"><?php echo String::formatoNumero($e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total']) ?></span>
+                          <input type="hidden" name="premio_asistencia[]" value="<?php echo $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'] ?>" class="span12 premio_asistencia">
+                        </td>
+                        <!-- <td id="td-despensa" style="<?php //echo $bgColor ?>">
+                          <span class="despensa-span"><?php //echo String::formatoNumero($e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total']) ?></span>
+                          <input type="hidden" name="despensa[]" value="<?php //echo $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'] ?>" class="span12 despensa">
+                        </td> -->
                         <td id="td-vacaciones" style="display: none; <?php echo $bgColor ?>">
                           <span class="vacaciones-span">0</span>
                           <input type="hidden" value="<?php echo $e->nomina->vacaciones ?>" class="span12 vacaciones">
@@ -439,6 +453,8 @@
                       </tr>
                     <?php
                       $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
+                      $totalPasistencia        += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['premio_asistencia']['total'];
+                      // $totalDespensa           += $e->esta_asegurado=='f'?0:$e->nomina->percepciones['despensa']['total'];
                       $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
                       $totalDiasTrabajados     += $e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
                       $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
@@ -469,6 +485,8 @@
                       <td id="totales-sdi" style="background-color: #BCD4EE;"><?php echo $totalSdi ?></td>
                       <td id="totales-dias-trabajados" style="background-color: #BCD4EE;"><?php echo $totalDiasTrabajados ?></td>
                       <td id="totales-sueldos" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSueldos) ?></td>
+                      <td id="totales-pasistencia" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalPasistencia) ?></td>
+                      <!-- <td id="totales-despensa" style="background-color: #BCD4EE;"><?php //echo String::formatoNumero($totalDespensa) ?></td> -->
                       <td id="totales-vacaciones" style="background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalVacaciones) ?></td>
                       <td id="totales-prima-vacacional" style="background-color: #BCD4EE; display: none;"><?php echo String::formatoNumero($totalPrimasVacacionales) ?></td>
                       <td id="totales-horas-extras" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalHorasExtras) ?></td>

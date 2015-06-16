@@ -263,10 +263,10 @@ class proveedores extends MY_Controller {
 
 			array('field' => 'fempresa',
 						'label' => 'Empresa',
-						'rules' => ''),
+						'rules' => 'required'),
 			array('field' => 'did_empresa',
 						'label' => 'Empresa',
-						'rules' => ''),
+						'rules' => 'required'),
 
 			array('field' => 'frfc',
 						'label' => 'RFC',

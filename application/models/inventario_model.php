@@ -211,7 +211,7 @@ class inventario_model extends privilegios_model{
 						FROM compras AS c
 							INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 							INNER JOIN compras_productos AS cp ON cf.id_orden = cp.id_orden
-						WHERE cp.id_producto IS NOT NULL {$sql} AND
+						WHERE c.status <> 'ca' AND cp.id_producto IS NOT NULL {$sql} AND
 							Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 						GROUP BY cp.id_producto
 					) AS cp ON p.id_producto = cp.id_producto
@@ -308,7 +308,7 @@ class inventario_model extends privilegios_model{
    */
   public function getCUnProductosData()
   {
-    $sql = '';
+    $sql_com = $sql = '';
     $idsproveedores = $idsproveedores2 = '' ;
 
     //Filtros para buscar
@@ -320,10 +320,15 @@ class inventario_model extends privilegios_model{
     $client_default = $this->empresas_model->getDefaultEmpresa();
     $_GET['did_empresa'] = (isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : $client_default->id_empresa);
     $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-      if($this->input->get('did_empresa') != ''){
-        $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
-        $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND c.id_empresa = '".$this->input->get('did_empresa')."'";
+      $idsproveedores = " WHERE p.id_empresa = '".$this->input->get('did_empresa')."'";
+
+      if ($this->input->get('did_empresa') == 3) { // gomez gudiño
+        $sql_com = " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+        // $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
       }
+    }
 
       // if($this->input->get('fid_producto') != '')
       // {
@@ -526,7 +531,7 @@ class inventario_model extends privilegios_model{
 						INNER JOIN compras_facturas AS cf ON c.id_compra = cf.id_compra
 						INNER JOIN compras_ordenes AS co ON cf.id_orden = co.id_orden
 						INNER JOIN compras_productos AS cp ON co.id_orden = cp.id_orden
-					WHERE cp.id_producto = {$idsproveedores} {$sql} AND
+					WHERE c.status <> 'ca' AND cp.id_producto = {$idsproveedores} {$sql} AND
 						Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
 				) AS cp ON p.id_producto = cp.id_producto
 				INNER JOIN productos_unidades AS pu ON p.id_unidad = pu.id_unidad
@@ -769,9 +774,9 @@ class inventario_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getEPUData()
+	public function getEPUData($id_producto=null)
   {
-		$sql = '';
+		$sql_com = $sql_sal = $sql = '';
 
 		//Filtros para buscar
 		$_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
@@ -781,19 +786,30 @@ class inventario_model extends privilegios_model{
 		if(is_array($this->input->get('ffamilias'))){
 			$sql .= " AND pf.id_familia IN (".implode(',', $this->input->get('ffamilias')).")";
 		}
-		if($this->input->get('fid_producto') != ''){
-			$sql .= " AND p.id_producto = ".$this->input->get('fid_producto');
-		}
-		$this->load->model('empresas_model');
-		$client_default = $this->empresas_model->getDefaultEmpresa();
-		$_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
-		$_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
-	    if($this->input->get('did_empresa') != ''){
-	      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
-	    }
+
+    if($this->input->get('fid_producto') != '' || $id_producto > 0){
+      $id_producto = $id_producto>0? $id_producto: $this->input->get('fid_producto');
+      $sql .= " AND p.id_producto = ".$id_producto;
+      $res_prod = $this->db->query("SELECT id_empresa FROM productos WHERE id_producto = {$id_producto}")->row();
+      $_GET['did_empresa'] = $res_prod->id_empresa;
+    }
+
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('did_empresa') == 3) { // gomez gudiño
+      $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+      $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
 
 		$res = $this->db->query(
-			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura, COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
+			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
+        COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
 				(COALESCE(sal_co.cantidad, 0) - COALESCE(sal_sa.cantidad, 0)) AS saldo_anterior, p.stock_min
 			FROM productos AS p
 			INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
@@ -803,7 +819,9 @@ class inventario_model extends privilegios_model{
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql_com}
 				GROUP BY cp.id_producto
 			) AS co ON co.id_producto = p.id_producto
 			LEFT JOIN
@@ -811,7 +829,9 @@ class inventario_model extends privilegios_model{
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p' AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql_sal}
 				GROUP BY sp.id_producto
 			) AS sa ON sa.id_producto = p.id_producto
 			LEFT JOIN
@@ -819,7 +839,9 @@ class inventario_model extends privilegios_model{
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a' AND Date(cp.fecha_aceptacion) < '{$fecha}'
+				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) < '{$fecha}'
+          {$sql_com}
 				GROUP BY cp.id_producto
 			) AS sal_co ON sal_co.id_producto = p.id_producto
 			LEFT JOIN
@@ -827,7 +849,9 @@ class inventario_model extends privilegios_model{
 				SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p' AND Date(sa.fecha_registro) < '{$fecha}'
+				WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) < '{$fecha}'
+          {$sql_sal}
 				GROUP BY sp.id_producto
 			) AS sal_sa ON sal_sa.id_producto = p.id_producto
 			WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
@@ -1843,6 +1867,13 @@ class inventario_model extends privilegios_model{
 	 */
 	public function promedioData($id_producto, $fecha1, $fecha2)
 	{
+    $sql_com = $sql_sal = '';
+    $prod = $this->db->query("SELECT id_empresa FROM productos WHERE id_producto = {$id_producto}")->row();
+    if (isset($prod->id_empresa) && $prod->id_empresa == 3) { // gomez gudiño
+      $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+      $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
+
 		$res = $this->db->query(
 		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
 		FROM
@@ -1853,16 +1884,19 @@ class inventario_model extends privilegios_model{
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
 					AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
+          {$sql_com}
 				)
 				UNION ALL
 				(
 				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
+				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
+          AND Date(sa.fecha_registro) <= '{$fecha2}'
+          {$sql_sal}
 				)
 			) AS t
-		ORDER BY fecha ASC");
+		ORDER BY fecha ASC, tipo ASC");
 
 		$result   = array();
 		$result[] = array('fecha' => 'S. Anterior',

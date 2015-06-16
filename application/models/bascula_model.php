@@ -449,7 +449,7 @@ class bascula_model extends CI_Model {
     $pdf->show_head = false;
 
     $pdf->AddPage();
-    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetFont('helvetica','', 8);
     $pdf->SetXY(0, 1);
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(43, 20));
@@ -472,19 +472,19 @@ class bascula_model extends CI_Model {
     $pdf->SetAligns(array('L', 'C', 'C'));
     $pdf->SetWidths(array(14, 22, 22));
     $pdf->Row(array('', 'CAJAS', 'PRECIO'), false, false);
-    $pdf->SetAligns(array('L', 'L', 'L'));
+    $pdf->SetAligns(array('L', 'C', 'C'));
     $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('IND', '', ''), false, true);
+    $pdf->Row(array('IND', '________', '________'), false, false);
     $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('ALIM', '', ''), false, true);
+    $pdf->Row(array('ALIM', '________', '________'), false, false);
     $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('FRUTA', '', ''), false, true);
+    $pdf->Row(array('FRUTA', '________', '________'), false, false);
     $pdf->SetXY(2, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(14, 44));
-    $pdf->Row(array('LOTE', ''), false, true);
+    $pdf->Row(array('LOTE', '________________'), false, false);
     $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('OBSERV', ''), false, true);
+    $pdf->Row(array('OBSERV', '________________'), false, false);
     $pdf->SetXY(0, $pdf->GetY()+4);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
@@ -494,7 +494,7 @@ class bascula_model extends CI_Model {
     $pdf->SetAligns(array('C'));
     $pdf->Row(array('REG. ESJ97052763A0620061646'), false, false);
 
-    $pdf->Rect(0.5, 0.5, 62, $pdf->GetY());
+    // $pdf->Rect(0.5, 0.5, 62, $pdf->GetY());
 
     $pdf->AutoPrint(true);
     $pdf->Output();
@@ -1610,8 +1610,8 @@ class bascula_model extends CI_Model {
         FROM bascula AS b
         {$table_ms}
         LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
-        LEFT JOIN bascula_pagos bp ON bp.id_pago = bpb.id_pago AND bp.status = 't'
-        WHERE b.status = true
+        LEFT JOIN bascula_pagos bp ON bp.id_pago = bpb.id_pago
+        WHERE b.status = true AND (bp.status = 't' OR bp.status IS NULL)
               {$sql}
         ORDER BY b.folio ASC
         "

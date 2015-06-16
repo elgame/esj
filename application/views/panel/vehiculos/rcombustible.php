@@ -53,7 +53,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/vehiculos/combustible_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/vehiculos/combustible_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

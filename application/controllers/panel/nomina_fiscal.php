@@ -50,6 +50,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/rpt_pdf/',
     'nomina_fiscal/asistencia_pdf/',
     'nomina_fiscal/cancelar/',
+    'nomina_fiscal/cancelar_ptu/',
     'nomina_fiscal/rpt_dim/',
   );
 
@@ -197,6 +198,7 @@ class nomina_fiscal extends MY_Controller {
       'anio'    => isset($_GET['anio']) ? $_GET['anio'] : date("Y"),
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
+      'asegurado'  => true,
     );
     if ($filtros['empresaId'] !== '')
     {
@@ -962,6 +964,17 @@ class nomina_fiscal extends MY_Controller {
       $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
 
       redirect(base_url("panel/nomina_fiscal/?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
+    }
+  }
+
+  public function cancelar_ptu()
+  {
+    if (isset($_GET['empleadoId']{0}) && isset($_GET['anio']{0}) && isset($_GET['semana']{0}) && isset($_GET['empresaId']{0}))
+    {
+      $this->load->model('nomina_fiscal_model');
+      $response = $this->nomina_fiscal_model->cancelaPtu($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
+
+      redirect(base_url("panel/nomina_fiscal/ptu?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
     }
   }
 

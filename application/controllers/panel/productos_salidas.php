@@ -261,7 +261,7 @@ class productos_salidas extends MY_Controller {
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
-            'rules' => 'required'),
+            'rules' => 'required|callback_productos_existencia'),
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
@@ -317,6 +317,24 @@ class productos_salidas extends MY_Controller {
     );
 
     $this->form_validation->set_rules($rules);
+  }
+
+  public function productos_existencia($str)
+  {
+    $this->load->model('inventario_model');
+    $productos = array();
+    foreach ($_POST['productoId'] as $key => $value) {
+      $item = $this->inventario_model->getEPUData($value);
+      $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+      if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+        $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
+      }
+    }
+    if (count($productos)>0) {
+      $this->form_validation->set_message('productos_existencia', 'No hay existencia suficiente en: '.implode(', ', $productos));
+      return FALSE;
+    }
+    return true;
   }
 
   public function configModSalida()

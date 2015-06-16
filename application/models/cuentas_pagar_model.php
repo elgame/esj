@@ -694,7 +694,7 @@ class cuentas_pagar_model extends privilegios_model{
 	 * Obtiene los abonos de una factura o nota de venta
 	 * @return [type] [description]
 	 */
-	public function getDetalleVentaFacturaData($id_factura=null, $tipo=null)
+	public function getDetalleVentaFacturaData($id_factura=null, $tipo=null, $tipo_cambio=0)
 	{
 		$_GET['id'] = $id_factura==null? $_GET['id']: $id_factura;
 		$_GET['tipo'] = $tipo==null? $_GET['tipo']: $tipo;
@@ -772,6 +772,31 @@ class cuentas_pagar_model extends privilegios_model{
 					ORDER BY fecha ASC
 			");
 
+		// obtiene el nuevo total de la compra de acuerdo al tipo de cambio actual
+		$productos = $this->db->query(
+											"SELECT cantidad, precio_unitario, porcentaje_iva, porcentaje_retencion, porcentaje_ieps, tipo_cambio, total
+												FROM compras_productos
+												WHERE id_compra={$_GET['id']}")->result();
+		$new_total = 0;
+		$entro1 = false;
+		if (count($productos) > 0) {
+			foreach ($productos as $key => $value) {
+				$pu = $value->precio_unitario;
+				if($value->tipo_cambio > 0 && $tipo_cambio > 0) {
+					$pu = ($value->precio_unitario/$value->tipo_cambio)*$tipo_cambio;
+					$subtotal = $value->cantidad*$pu;
+					$new_total += floor( ($subtotal+($subtotal*$value->porcentaje_iva/100)+
+											($subtotal*$value->porcentaje_ieps/100)-
+											($subtotal*$value->porcentaje_retencion/100) ) * 100)/100;
+					$entro1 = true;
+				} else {
+          $new_total += $value->total;
+        }
+			}
+		}
+
+		$new_total = $new_total==0||!$entro1? $data['info'][0]->total : $new_total;
+
 		//obtenemos la info del proveedor
 		$prov['info'] = '';
 		if (isset($data['info'][0]->id_proveedor))
@@ -791,11 +816,13 @@ class cuentas_pagar_model extends privilegios_model{
 		$response = array(
 				'abonos'    => array(),
 				'saldo'     => '',
+				'new_total' => $new_total,
 				'cobro'     => $data['info'],
 				'proveedor' => $prov['info'],
-				'empresa' => $empresa['info'],
+				'empresa'   => $empresa['info'],
 				'fecha1'    => $fecha1
 		);
+
 		$abonos = 0;
 		if($res->num_rows() > 0){
 			$response['abonos'] = $res->result();
@@ -804,7 +831,8 @@ class cuentas_pagar_model extends privilegios_model{
 				$abonos += $value->abono;
 			}
 		}
-		$response['saldo'] = $response['cobro'][0]->total - $abonos;
+		$response['saldo']     = $response['cobro'][0]->total - $abonos;
+		$response['new_total'] -= $abonos;
 
 		return $response;
 	}
@@ -831,24 +859,25 @@ class cuentas_pagar_model extends privilegios_model{
 		//Registra deposito
 		foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
 		{
-			$total += $_POST['montofv'][$key];
-			$desc .= ' | '.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
+			$total += $_POST['new_total'][$key]; //$_POST['montofv'][$key]
+			$desc .= ' | '.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['new_total'][$key], 2, '', false);
 		}
 		$desc = ' ('.substr($desc, 1).')';
 		$resp = $this->banco_cuentas_model->addRetiro(array(
-					'id_cuenta'    => $this->input->post('dcuenta'),
-					'id_banco'     => $data_cuenta->id_banco,
-					'fecha'        => $this->input->post('dfecha'),
-					'numero_ref'   => $this->input->post('dreferencia'),
-					'concepto'     => $this->input->post('dconcepto').$desc,
-					'monto'        => $total,
-					'tipo'         => 'f',
-					'entransito'   => 'f',
-					'metodo_pago'  => $this->input->post('fmetodo_pago'),
-					'id_proveedor' => $inf_factura['proveedor']->id_proveedor,
-					'a_nombre_de'  => $inf_factura['proveedor']->nombre_fiscal,
+					'id_cuenta'           => $this->input->post('dcuenta'),
+					'id_banco'            => $data_cuenta->id_banco,
+					'fecha'               => $this->input->post('dfecha'),
+					'numero_ref'          => $this->input->post('dreferencia'),
+					'concepto'            => $this->input->post('dconcepto').$desc,
+					'monto'               => $total,
+					'tipo'                => 'f',
+					'entransito'          => 'f',
+					'metodo_pago'         => $this->input->post('fmetodo_pago'),
+					'id_proveedor'        => $inf_factura['proveedor']->id_proveedor,
+					'a_nombre_de'         => $inf_factura['proveedor']->nombre_fiscal,
 					'id_cuenta_proveedor' => ($this->input->post('fcuentas_proveedor')!=''? $this->input->post('fcuentas_proveedor'): NULL),
 					'clasificacion'       => ($this->input->post('fmetodo_pago')=='cheque'? 'echeque': 'egasto'),
+					'tcambio'             => floatval($this->input->post('tcambio')),
 					));
 
 		if ($resp['error'] == false)

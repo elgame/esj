@@ -1186,13 +1186,18 @@ class banco_cuentas_model extends banco_model {
     $sql .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
 
     //Filtros de area
-    $sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+    if ($this->input->get('ftipo') != 'a') {
+    	$sql .= " AND bm.tipo = '".($this->input->get('ftipo')==='i'? 't': 'f')."'";
+    }
+    if ($this->input->get('did_empresa') > 0) {
+    	$sql .= " AND e.id_empresa = ".$this->input->get('did_empresa');
+    }
 
 
     // Obtenemos los rendimientos en los lotes de ese dia
     $query = $this->db->query(
       "SELECT bm.id_movimiento, Date(bm.fecha) AS fecha, bm.numero_ref, initcap(bm.metodo_pago) AS tipo,
-      	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta
+      	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta, bm.tipo tipomov
       FROM banco_movimientos bm
         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
         INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
@@ -1246,12 +1251,11 @@ class banco_cuentas_model extends banco_model {
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetY($pdf->GetY()+2);
 
-    $aligns = array('L', 'L', 'L', 'R', 'L', 'L');
-    $widths = array(18, 40, 15, 22, 60, 50);
-    $header = array('Fecha', 'Cuenta', 'Tipo', 'Importe', 'Beneficiario', 'Descripcion');
+    $aligns = array('L', 'L', 'L', 'R', 'R', 'L', 'L');
+    $widths = array(18, 40, 15, 22, 22, 48, 40);
+    $header = array('Fecha', 'Cuenta', 'Tipo', 'Ingreso', 'Retiro', 'Beneficiario', 'Descripcion');
 
-    $total_importes = 0;
-    $total_importes_total = 0;
+    $total_importes_ingre = $total_importes_total_ingre = $total_importes_egre = $total_importes_total_egre = 0;
 
     foreach($data as $key => $movimiento)
     {
@@ -1263,7 +1267,7 @@ class banco_cuentas_model extends banco_model {
         $movimiento[0]->nombre_fiscal
       ), false, false);
 
-      $total_importes = 0;
+      $total_importes_ingre = $total_importes_egre = 0;
       foreach ($movimiento as $keym => $mov) {
 	      if($pdf->GetY() >= $pdf->limiteY || $keym==0) //salta de pagina si exede el max
 	      {
@@ -1291,32 +1295,40 @@ class banco_cuentas_model extends banco_model {
 	          $mov->fecha,
 	          $mov->cuenta,
 	          substr($mov->tipo, 0, 5),
-	          String::formatoNumero($mov->monto, 2, '$', true),
+	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', true): '',
+	          $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', true): '',
 	          substr($mov->a_nombre_de, 0, 33),
 	          $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
 	        ), false);
 
-				$total_importes       += $mov->monto;
-				$total_importes_total += $mov->monto;
+	      if ($mov->tipomov=='t') {
+					$total_importes_ingre       += $mov->monto;
+					$total_importes_total_ingre += $mov->monto;
+	      } else {
+	      	$total_importes_egre       += $mov->monto;
+					$total_importes_total_egre += $mov->monto;
+	      }
       }
 
       //total
-		  $pdf->SetX(64);
-      $pdf->SetAligns(array('R'));
-      $pdf->SetWidths(array(37));
+		  $pdf->SetX(71);
+      $pdf->SetAligns(array('R','R'));
+      $pdf->SetWidths(array(30, 30));
       $pdf->Row(array(
-        String::formatoNumero($total_importes, 2, '$', true)
+        String::formatoNumero($total_importes_ingre, 2, '$', true),
+        String::formatoNumero($total_importes_egre, 2, '$', true)
       ), false);
     }
 
     //total general
     $pdf->SetFont('helvetica','B',8);
     $pdf->SetTextColor(0 ,0 ,0 );
-    $pdf->SetX(64);
-    $pdf->SetAligns(array('R'));
-    $pdf->SetWidths(array(37));
+    $pdf->SetX(71);
+    $pdf->SetAligns(array('R','R'));
+    $pdf->SetWidths(array(30, 30));
     $pdf->Row(array(
-      String::formatoNumero($total_importes_total, 2, '$', true)
+      String::formatoNumero($total_importes_total_ingre, 2, '$', true),
+      String::formatoNumero($total_importes_total_egre, 2, '$', true)
     ), false);
 
 

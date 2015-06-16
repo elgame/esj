@@ -229,7 +229,7 @@ class facturacion extends MY_Controller {
     }
 
     // Si es una nota de remision la que se quiere facturar carga sus datos.
-    if (isset($_GET['id_nr']) || isset($_POST['id_nr']))
+    if ((isset($_GET['id_nr']) && $_GET['id_nr'] > 0) || (isset($_POST['id_nr']) && $_POST['id_nr'] > 0))
     {
       $params['id_nr'] = isset($_GET['id_nr'])? $_GET['id_nr']: $_POST['id_nr'];
       $params['borrador'] = $this->facturacion_model->getInfoFactura($params['id_nr']);
