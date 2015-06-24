@@ -270,7 +270,7 @@
                   </div><!--/span12 -->
                   <br><br>
                   <div class="span12 mquit">
-                    <div class="span3">
+                    <div class="span2">
                       <label for="fpresentacion" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">PRESENTACION</label>
                       <select class="span12" id="fpresentacion">
                       </select>
@@ -292,6 +292,19 @@
                       </select>
                     </div><!--/span1 -->
                     <div class="span1">
+                      <label for="fretencionIva" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Ret IVA</label>
+                      <select class="span12" id="fretencionIva" data-next="fretencionIsr">
+                        <option value="0">No retener</option>
+                        <option value="4">4%</option>
+                        <option value="10.6667">2 Terceras</option>
+                        <option value="16">100 %</option>
+                      </select>
+                    </div><!--/span1 -->
+                    <div class="span1">
+                      <label for="fIsrPercent" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">Ret. ISR</label>
+                      <input type="text" class="span12 vpositive" id="fIsrPercent" placeholder="%">
+                    </div><!--/span1 -->
+                    <div class="span1">
                       <label for="fieps" class="span12" style="min-height:20px;font-size: 12px;font-weight: bolder;">IEPS (%)</label>
                       <input type="text" class="span12 vpositive" id="fieps" placeholder="%">
                     </div><!--/span1 -->
@@ -303,7 +316,7 @@
                       </select>
                       <input type="text" class="span5 vpositive" id="ftipo_cambio" placeholder="12.45">
                     </div><!--/span2 -->
-                    <div class="span2 offset1">
+                    <div class="span2">
                       <button type="button" class="btn btn-success span12" id="btnAddProd">Agregar</button>
                     </div><!--/span2 -->
                   </div><!--/span12 -->
@@ -405,6 +418,7 @@
                               <input type="hidden" name="trasladoTotal1[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="trasladoTotal1" class="span12">
                               <input type="hidden" name="iepsTotal1[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="iepsTotal1" class="span12">
                               <input type="hidden" name="retTotal1[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retTotal1" class="span12" readonly>
+                              <input type="hidden" name="retIsrTotal1[]" value="<?php echo $concepto->{'retencion_isr'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retIsrTotal1" class="span12" readonly>
                             </td>
                           <?php if ($autorizar_active){ ?>
                             <td style="width: 10px;">
@@ -423,6 +437,7 @@
                               <input type="hidden" name="trasladoTotal2[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="trasladoTotal2" class="span12">
                               <input type="hidden" name="iepsTotal2[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="iepsTotal2" class="span12">
                               <input type="hidden" name="retTotal2[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[1]['id_proveedor']} ?>" id="retTotal2" class="span12" readonly>
+                              <input type="hidden" name="retIsrTotal2[]" value="<?php echo $concepto->{'retencion_isr'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retIsrTotal2" class="span12" readonly>
                             </td>
                           <?php if ($autorizar_active){ ?>
                             <td style="width: 10px;">
@@ -441,6 +456,7 @@
                               <input type="hidden" name="trasladoTotal3[]" value="<?php echo $concepto->{'iva'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="trasladoTotal3" class="span12">
                               <input type="hidden" name="iepsTotal3[]" value="<?php echo $concepto->{'ieps'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="iepsTotal3" class="span12">
                               <input type="hidden" name="retTotal3[]" value="<?php echo $concepto->{'retencion_iva'.$orden['info'][0]->proveedores[2]['id_proveedor']} ?>" id="retTotal3" class="span12" readonly>
+                              <input type="hidden" name="retIsrTotal3[]" value="<?php echo $concepto->{'retencion_isr'.$orden['info'][0]->proveedores[0]['id_proveedor']} ?>" id="retIsrTotal3" class="span12" readonly>
                             </td>
                             <td style="width: 35px;">
                               <div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>
@@ -450,6 +466,8 @@
                                     <table>
                                       <tr>
                                         <td style="width: 66px;">IVA</td>
+                                        <td style="width: 66px;">Ret IVA</td>
+                                        <td style="width: 66px;">Ret ISR</td>
                                         <td style="width: 66px;">IEPS</td>
                                         <td>DESCRIP</td>
                                       </tr>
@@ -461,6 +479,17 @@
                                               <option value="16" <?php echo $concepto->porcentaje_iva === '16' ? 'selected' : ''?>>16%</option>
                                             </select>
                                             <input type="hidden" name="trasladoPorcent[]" value="<?php echo $concepto->porcentaje_iva ?>" id="trasladoPorcent" class="span12">
+                                        </td>
+                                        <td style="width: 66px;">
+                                            <select name="ret_iva[]" id="ret_iva" class="span12">
+                                              <option value="0" <?php echo $concepto->porcentaje_retencion === '0' ? "selected" : '' ?>>No retener</option>
+                                              <option value="4" <?php echo $concepto->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
+                                              <option value="10.6667" <?php echo $concepto->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
+                                              <option value="16" <?php echo $concepto->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                            </select>
+                                        </td>
+                                        <td style="width: 66px;">
+                                            <input type="text" name="ret_isrPorcent[]" value="<?php echo $concepto->porcentaje_isr ?>" id="ret_isrPorcent" class="span12">
                                         </td>
                                         <td style="width: 66px;">
                                             <input type="text" name="iepsPorcent[]" value="<?php echo $concepto->porcentaje_ieps ?>" id="iepsPorcent" class="span12">
@@ -514,6 +543,15 @@
                                 <input type="hidden" name="totalRetencion2" id="totalRetencion2" value="<?php echo set_value('totalRetencion2', 0); ?>">
                               <td id="retencion-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion3', 0))?></td>
                                 <input type="hidden" name="totalRetencion3" id="totalRetencion3" value="<?php echo set_value('totalRetencion3', 0); ?>">
+                            </tr>
+                            <tr>
+                              <td colspan="5" style="text-align: right;">RET ISR</td>
+                              <td id="retencionisr-format1" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr1', 0))?></td>
+                                <input type="hidden" name="totalRetencionIsr1" id="totalRetencionIsr1" value="<?php echo set_value('totalRetencionIsr1', 0); ?>">
+                              <td id="retencionisr-format2" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr2', 0))?></td>
+                                <input type="hidden" name="totalRetencionIsr2" id="totalRetencionIsr2" value="<?php echo set_value('totalRetencionIsr2', 0); ?>">
+                              <td id="retencionisr-format3" colspan="<?php echo $autorizar_active?'3':'2'; ?>" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr3', 0))?></td>
+                                <input type="hidden" name="totalRetencionIsr3" id="totalRetencionIsr3" value="<?php echo set_value('totalRetencionIsr3', 0); ?>">
                             </tr>
                             <tr style="font-weight:bold;font-size:1.2em;">
                               <td colspan="5" style="text-align: right;">TOTAL</td>

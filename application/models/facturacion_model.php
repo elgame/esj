@@ -454,6 +454,11 @@ class facturacion_model extends privilegios_model{
       'moneda'              => $_POST['moneda'],
     );
 
+    // Si la factura es = 0 se pone pagada
+    if ($datosFactura['total'] == 0) {
+      $datosFactura['status'] = 'pa';
+    }
+
     // indica q es una factura en parcialidades de un abono
     if (isset($_POST['id_abono_factura'])) {
       $datosFactura['id_abono_factura'] = $_POST['id_abono_factura'];

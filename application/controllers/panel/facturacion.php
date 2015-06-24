@@ -931,8 +931,8 @@ class facturacion extends MY_Controller {
 
   public function val_total($str)
   {
-    if($str <= 0){
-      $this->form_validation->set_message('val_total', 'El Total no puede ser 0, verifica los datos ingresados.');
+    if($str < 0){
+      $this->form_validation->set_message('val_total', 'El Total no puede ser menor que 0, verifica los datos ingresados.');
       return false;
     }
     return true;

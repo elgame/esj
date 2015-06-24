@@ -193,18 +193,20 @@
                                 <th>P.U.</th>
                                 <th>IVA</th>
                                 <th>IEPS (%)</th>
-                                <th>RET 4%</th>
+                                <th>RET %</th>
+                                <th>RET ISR%</th>
                                 <th>IMPORTE</th>
                               </tr>
                             </thead>
                             <tbody>
                                   <?php
-                                        $subtotal = $iva = $ieps = $total = $retencion = 0;
+                                        $retencion_isr = $subtotal = $iva = $ieps = $total = $retencion = 0;
                                        foreach ($productos as $key => $prod) {
                                           $subtotal += $prod->importe;
                                           $iva      += $prod->iva;
                                           $ieps     += $prod->ieps;
-                                          $retencion+= $prod->retencion_iva;
+                                          $retencion     += $prod->retencion_iva;
+                                          $retencion_isr += $prod->retencion_isr;
                                           $total    += $prod->total;
 
                                           $cantidad = $prod->cantidad;
@@ -241,7 +243,18 @@
                                            <input type="hidden" name="iepsTotal[]" value="<?php echo isset($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : $prod->ieps ?>" id="iepsTotal" class="span12">
                                          </td>
                                          <td style="width: 66px;">
-                                             <input type="text" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
+                                            <select name="ret_iva[]" id="ret_iva" class="span12">
+                                              <option value="0" <?php echo $prod->porcentaje_retencion === '0' ? "selected" : '' ?>>No retener</option>
+                                              <option value="4" <?php echo $prod->porcentaje_retencion === '4' ? "selected" : '' ?>>4%</option>
+                                              <option value="10.6667" <?php echo $prod->porcentaje_retencion === '10.6667' ? "selected" : '' ?>>2 Terceras</option>
+                                              <option value="16" <?php echo $prod->porcentaje_retencion === '16' ? "selected" : '' ?>>100 %</option>
+                                            </select>
+                                             <input type="hidden" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
+                                         </td>
+                                         <td style="width: 66px;">
+                                             <!-- <input type="text" name="retIsrTotal[]" value="<?php echo isset($_POST['retIsrTotal'][$key]) ? $_POST['retIsrTotal'][$key]: $prod->retencion_isr ?>" id="retIsrTotal" class="span12" readonly> -->
+                                             <input type="text" name="ret_isrPorcent[]" value="<?php echo isset($_POST['ret_isrPorcent'][$key]) ? $_POST['ret_isrPorcent'][$key]: $prod->porcentaje_isr ?>" id="ret_isrPorcent" class="span12 vpositive">
+                                             <input type="hidden" name="ret_isrTotal[]" value="<?php echo isset($_POST['ret_isrTotal'][$key]) ? $_POST['ret_isrTotal'][$key]: $prod->retencion_isr ?>" id="ret_isrTotal" class="span12">
                                          </td>
                                          <td style="">
                                              <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe) ?></span>
@@ -294,6 +307,11 @@
                           <td>RET.</td>
                           <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', $retencion))?></td>
                           <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', $retencion); ?>">
+                        </tr>
+                        <tr>
+                          <td>RET ISR</td>
+                          <td id="retencionisr-format"><?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencion_isr))?></td>
+                          <input type="hidden" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo set_value('totalRetencionIsr', $retencion_isr); ?>">
                         </tr>
                         <tr style="font-weight:bold;font-size:1.2em;">
                           <td>TOTAL</td>

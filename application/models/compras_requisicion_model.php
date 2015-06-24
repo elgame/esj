@@ -182,13 +182,15 @@ class compras_requisicion_model extends CI_Model {
             'retencion_iva'        => $_POST['retTotal'.$value][$key],
             'total'                => $_POST['total'.$value][$key],
             'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-            'porcentaje_retencion' => $_POST['retTotal'.$value][$key] == '0' ? '0' : '4',
+            'porcentaje_retencion' => $_POST['ret_iva'][$key],
             // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
             'observacion'          => $_POST['observacion'][$key],
             'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
             'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
             'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
             'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+            'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
           );
         }
       }
@@ -368,7 +370,7 @@ class compras_requisicion_model extends CI_Model {
               'retencion_iva'        => $_POST['retTotal'.$value][$key],
               'total'                => $_POST['total'.$value][$key],
               'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
-              'porcentaje_retencion' => $_POST['retTotal'.$value][$key] == '0' ? '0' : '4',
+              'porcentaje_retencion' => $_POST['ret_iva'][$key],
               // 'faltantes'         => $_POST['faltantes'.$value][$key] === '' ? '0' : $_POST['faltantes'.$value][$key],
               'observacion'          => $_POST['observacion'][$key],
               'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
@@ -376,6 +378,8 @@ class compras_requisicion_model extends CI_Model {
               'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
               'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
               'prod_sel'             => $prod_sel,
+              'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
+              'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
             );
           }
         }
@@ -500,6 +504,8 @@ class compras_requisicion_model extends CI_Model {
             'porcentaje_ieps'      => $prod->porcentaje_ieps,
             'tipo_cambio'          => $prod->tipo_cambio,
             'id_area'              => $prod->id_area,
+            'retencion_isr'        => $prod->retencion_isr,
+            'porcentaje_isr'       => $prod->porcentaje_isr,
           );
           $rows_compras++;
         }
@@ -722,8 +728,8 @@ class compras_requisicion_model extends CI_Model {
                   cp.id_producto, pr.nombre AS producto, pr.codigo, pr.id_unidad, pu.abreviatura, pu.nombre as unidad,
                   cp.id_presentacion, pp.nombre AS presentacion, pp.cantidad as presen_cantidad,
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
-                  cp.iva, cp.retencion_iva, cp.total, cp.porcentaje_iva,
-                  cp.porcentaje_retencion, cp.observacion, cp.prod_sel,
+                  cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
+                  cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
@@ -760,6 +766,7 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
 
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->precio_unitario                          = 0;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->importe                                  = 0;
@@ -767,6 +774,7 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_iva                            = 0;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->total                                    = 0;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->ieps                                     = 0;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->retencion_isr                            = 0;
             }else
             {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;
@@ -775,6 +783,7 @@ class compras_requisicion_model extends CI_Model {
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_iva'.$value->id_proveedor}   = $value->retencion_iva;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'total'.$value->id_proveedor}           = $value->total;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'ieps'.$value->id_proveedor}            = $value->ieps;
+              $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'retencion_isr'.$value->id_proveedor}   = $value->retencion_isr;
             }
           }
 

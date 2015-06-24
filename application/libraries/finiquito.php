@@ -282,7 +282,7 @@ class finiquito
 
     return array(
       'TipoPercepcion' => '001',
-      'Clave'          => $this->clavesPatron['sueldo'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'sueldo1': 'sueldo2')],
       'Concepto'       => 'Sueldos, Salarios Rayas y Jornales',
       'ImporteGravado' => (float)$this->empleado->nomina->sueldo,
       'ImporteExcento' => 0,
@@ -320,7 +320,7 @@ class finiquito
 
     return array(
       'TipoPercepcion' => '010',
-      'Clave'          => $this->clavesPatron['premio_asistencia'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'premio_asistencia1': 'premio_asistencia2')],
       'Concepto'       => 'Premios por asistencia',
       'ImporteGravado' => (float)$premioAsistencia,
       'ImporteExcento' => 0,
@@ -374,7 +374,7 @@ class finiquito
 
     return array(
       'TipoPercepcion' => '019',
-      'Clave'          => $this->clavesPatron['horas_extras'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'horas_extras1': 'horas_extras2')],
       'Concepto'       => 'Horas extra',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
@@ -405,7 +405,7 @@ class finiquito
 
     return array(
       'TipoPercepcion' => '002',
-      'Clave'          => $this->clavesPatron['aguinaldo'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'aguinaldo1': 'aguinaldo2')],
       'Concepto'       => 'Aguinaldo',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
@@ -422,7 +422,7 @@ class finiquito
   {
     return array(
       'TipoPercepcion' => '016',
-      'Clave'          => $this->clavesPatron['vacaciones'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'vacaciones1': 'vacaciones2')],
       'Concepto'       => 'Vacaciones',
       'ImporteGravado' => (float)$this->empleado->nomina->vacaciones,
       'ImporteExcento' => 0,
@@ -453,7 +453,7 @@ class finiquito
 
     return array(
       'TipoPercepcion' => '021',
-      'Clave'          => $this->clavesPatron['prima_vacacional'],
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'prima_vacacional1': 'prima_vacacional2')],
       'Concepto'       => 'Prima Vacacional',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,

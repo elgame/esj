@@ -517,6 +517,21 @@ class cuentas_cobrar_model extends privilegios_model{
 			//verifica q no sea negativo o exponencial el saldo
 			foreach ($response['cuentas'] as $key => $cuenta) {
 				$cuenta->saldo = floatval(String::float($cuenta->saldo));
+				// anticipos a fruta
+				if ((strtolower($cuenta->serie) == 'a' || strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
+					$cuenta->cargo = 0;
+				} elseif ( strtolower($cuenta->serie) != 'a' && strtolower($cuenta->serie) != 'an') { // $cuenta->cargo == 0 &&
+					$resp = $this->db
+		        ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')
+		        ->from('facturacion_productos as fp')
+		        ->where("fp.id_factura = ".$cuenta->id_factura)
+		        ->where("fp.descripcion = 'ANTICIPO A FRUTA'")->get()->row();
+		        if (isset($resp->id_factura) && $resp->importe < 0) {
+		        	$cuenta->cargo += abs($resp->importe);
+		        }
+				}
+
+				$cuenta->saldo = floatval(String::float($cuenta->saldo));
 				if($cuenta->saldo == 0){
 					$cuenta->estado = 'Pagada';
 					$cuenta->fecha_vencimiento = $cuenta->dias_transc = '';
@@ -1673,6 +1688,7 @@ class cuentas_cobrar_model extends privilegios_model{
         $cliente->saldo_facturas = 0;
   			$cliente->facturas = $facturas->result();
   			$facturas->free_result();
+  			$tiene_abonos = false;
   			foreach ($cliente->facturas as $key => $factura)
   			{
   				$cliente->saldo += $factura->total;
@@ -1728,6 +1744,23 @@ class cuentas_cobrar_model extends privilegios_model{
   				}
   				$cliente->saldo -= $cliente->facturas[$key]->abonos_total;
   				$cliente->facturas[$key]->saldo -= $cliente->facturas[$key]->abonos_total;
+
+					// anticipos a fruta
+					if ((strtolower($cliente->facturas[$key]->serie) == 'a' || strtolower($cliente->facturas[$key]->serie) == 'an')) {
+						if ($cliente->facturas[$key]->saldo == 0)
+							$cliente->facturas[$key]->total = 0;
+						$tiene_abonos = true;
+						$cliente->facturas[$key]->concepto = 'ANTICIPO '.$cliente->facturas[$key]->concepto;
+					} elseif ( strtolower($cliente->facturas[$key]->serie) != 'a' && strtolower($cliente->facturas[$key]->serie) != 'an' && $tiene_abonos) { // $cliente->facturas[$key]->cargo == 0 &&
+						$resp = $this->db
+			        ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')
+			        ->from('facturacion_productos as fp')
+			        ->where("fp.id_factura = ".$cliente->facturas[$key]->id_factura)
+			        ->where("fp.descripcion = 'ANTICIPO A FRUTA'")->get()->row();
+			        if (isset($resp->id_factura) && $resp->importe < 0) {
+			        	$cliente->facturas[$key]->total += abs($resp->importe);
+			        }
+					}
 
   				if($cliente->facturas[$key]->saldo <= 0 && $all_facturas == false)
   					unset($cliente->facturas[$key]);

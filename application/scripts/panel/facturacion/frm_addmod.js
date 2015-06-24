@@ -861,7 +861,7 @@ function addProducto(unidades, prod) {
                     '<input type="hidden" name="prod_dcajas[]" value="'+prod_cajas+'" id="prod_dcajas" class="span12 vpositive">' +
                 '</td>' +
                 '<td>' +
-                  '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                 '</td>' +
                 '<td>' +
                     '<select name="diva" id="diva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -900,6 +900,7 @@ function addProducto(unidades, prod) {
     $('.jump'+indexJump).focus();
 
     $(".vpositive").numeric({ negative: false });
+    $(".vnumeric").numeric();
   }
 }
 

@@ -214,6 +214,7 @@ class compras_model extends privilegios_model{
       'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
       'importe_ieps'  => String::float($this->input->post('totalIeps')),
       'retencion_iva' => String::float($this->input->post('totalRetencion')),
+      'retencion_isr' => String::float($this->input->post('totalRetencionIsr')),
       'total'         => String::float($this->input->post('totalOrden')),
       'fecha'         => $this->input->post('fecha'),
       'serie'         => $this->input->post('serie'),

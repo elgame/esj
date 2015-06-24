@@ -447,7 +447,7 @@ class productos extends MY_Controller {
 
 		$res = $this->db->select('Count(id_producto) AS num')
 			->from('productos')
-			->where("id_familia = ".$this->input->get('fid_familia')." AND codigo = '".$str."'".$sql)->get()->row();
+			->where("status <> 'e' AND id_familia = ".$this->input->get('fid_familia')." AND codigo = '".$str."'".$sql)->get()->row();
 		if($res->num == '0')
 			return true;
 

@@ -34,9 +34,13 @@
 
     if($("#form-modif").length > 0)
     {
-      calculaTotal(1);
-      calculaTotal(2);
-      calculaTotal(3);
+      $('#productos #table-productos .bodyproducs tr.rowprod').each(function() {
+        calculaTotalProducto($(this));
+      });
+
+      // calculaTotal(1);
+      // calculaTotal(2);
+      // calculaTotal(3);
     }
 
     // Autocomplete para los Vehiculos.
@@ -170,6 +174,9 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+        $('#productos #table-productos tbody.bodyproducs tr').remove();
+        $("#proveedor1, #proveedor2, #proveedor3").val("");
+        $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -548,7 +555,7 @@
   var eventBtnAddProducto = function () {
     $('#productos #btnAddProd').on('click', function(event) {
       var idval = $(this).parents("div[id^=productos]").attr('id').replace("productos", ""),
-          $fcodigo     = $('#productos #fcodigo').css({'background-color': '#FFF'}),
+          $fcodigo       = $('#productos #fcodigo').css({'background-color': '#FFF'}),
           $fconcepto     = $('#productos #fconcepto').css({'background-color': '#FFF'}),
           $fconceptoId   = $('#productos #fconceptoId'),
           $fcantidad     = $('#productos #fcantidad').css({'background-color': '#FFF'}),
@@ -559,6 +566,8 @@
           $ftipo_moneda  = $('#productos #ftipo_moneda'),
           $ftipo_cambio  = $('#productos #ftipo_cambio'),
           $ftraslado     = $('#productos #ftraslado'),
+          $fretencionIva = $('#productos #fretencionIva'),
+          $fIsrPercent   = $('#productos #fIsrPercent'),
 
           campos = [$fcantidad, $fprecio],
           producto = {},
@@ -635,6 +644,8 @@
           'traslado': $ftraslado.find('option:selected').val(),
           'tipo_moneda': $ftipo_moneda.val(),
           'tipo_cambio': $ftipo_cambio.val(),
+          'ret_iva': $fretencionIva.find('option:selected').val(),
+          'ret_isr': $fIsrPercent.val(),
         };
 
         addProducto(producto, idval);
@@ -651,6 +662,8 @@
         $fpresentacion.html('');
         $fcodigo.val('');
         $ftipo_cambio.val('');
+        $fretencionIva.val('0');
+        $fIsrPercent.val('')
         $("#productos #show_info_prod").show().find('span').text('');
       } else {
         noty({"text": 'Los campos marcados son obligatorios.', "layout":"topRight", "type": 'error'});
@@ -692,11 +705,11 @@
 
   // Evento onchange del select iva en la tabla.
   var eventOnChangeTraslado = function () {
-    $('#productos #table-productos').on('change', '#traslado', function(event) {
+    $('#productos #table-productos').on('change', '#traslado, #ret_iva, #ret_isrPorcent', function(event) {
       var $this = $(this),
           $tr   = $this.parents("tr.rowprod");
-
-      $tr.find('#trasladoPorcent').val($this.find('option:selected').val());
+      if ($this.attr('id') == 'traslado')
+        $tr.find('#trasladoPorcent').val($this.find('option:selected').val());
       calculaTotalProducto($tr);
     });
   };
@@ -873,6 +886,7 @@
                     '<input type="hidden" name="trasladoTotal1[]" value="" id="trasladoTotal1" class="span12">' +
                     '<input type="hidden" name="iepsTotal1[]" value="0" id="iepsTotal1" class="span12">' +
                     '<input type="hidden" name="retTotal1[]" value="0" id="retTotal1" class="span12" readonly>' +
+                    '<input type="hidden" name="retIsrTotal1[]" value="0" id="retIsrTotal1" class="span12" readonly>' +
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
                   '<td style="width: 90px;">' +
@@ -885,6 +899,7 @@
                     '<input type="hidden" name="trasladoTotal2[]" value="" id="trasladoTotal2" class="span12">' +
                     '<input type="hidden" name="iepsTotal2[]" value="0" id="iepsTotal2" class="span12">' +
                     '<input type="hidden" name="retTotal2[]" value="0" id="retTotal2" class="span12" readonly>' +
+                    '<input type="hidden" name="retIsrTotal2[]" value="0" id="retIsrTotal2" class="span12" readonly>' +
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
                   '<td style="width: 90px;">' +
@@ -897,15 +912,18 @@
                     '<input type="hidden" name="trasladoTotal3[]" value="" id="trasladoTotal3" class="span12">' +
                     '<input type="hidden" name="iepsTotal3[]" value="0" id="iepsTotal3" class="span12">' +
                     '<input type="hidden" name="retTotal3[]" value="0" id="retTotal3" class="span12" readonly>' +
+                    '<input type="hidden" name="retIsrTotal3[]" value="0" id="retIsrTotal3" class="span12" readonly>' +
                   '</td>' +
                   '<td style="width: 35px;">'+
                     '<div style="position:relative;"><button type="button" class="btn btn-info" id="btnListOtros"><i class="icon-list"></i></button>'+
-                      '<div class="popover fade left in" style="top:-55.5px;left:-411px;">'+
+                      '<div class="popover fade left in" style="top:-55.5px;left:-566px;">'+
                         '<div class="arrow"></div><h3 class="popover-title">Otros</h3>'+
                         '<div class="popover-content">'+
                           '<table>'+
                             '<tr>'+
                               '<td style="width: 66px;">IVA</td>' +
+                              '<td style="width: 66px;">Ret IVA</td>' +
+                              '<td style="width: 66px;">Ret ISR</td>' +
                               '<td style="width: 66px;">IEPS</td>' +
                               '<td>DESCRIP</td>' +
                             '</tr>'+
@@ -917,6 +935,17 @@
                                     '<option value="16" '+(producto.traslado === '16' ? "selected" : "")+'>16%</option>' +
                                   '</select>' +
                                   '<input type="hidden" name="trasladoPorcent[]" value="'+producto.traslado+'" id="trasladoPorcent" class="span12">' +
+                              '</td>' +
+                              '<td style="width: 66px;">' +
+                                  '<select name="ret_iva[]" id="ret_iva" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                                    '<option value="0" '+(producto.ret_iva === '0' ? "selected" : "")+'>No retener</option>'+
+                                    '<option value="4" '+(producto.ret_iva === '4' ? "selected" : "")+'>4%</option>'+
+                                    '<option value="10.6667" '+(producto.ret_iva === '10.6667' ? "selected" : "")+'>2 Terceras</option>'+
+                                    '<option value="16" '+(producto.ret_iva === '16' ? "selected" : "")+'>100 %</option>'+
+                                  '</select>' +
+                              '</td>' +
+                              '<td style="width: 66px;">' +
+                                  '<input type="text" name="ret_isrPorcent[]" value="'+(producto.ret_isr || 0)+'" id="ret_isrPorcent" class="span12">' +
                               '</td>' +
                               '<td style="width: 66px;">' +
                                   '<input type="text" name="iepsPorcent[]" value="'+(producto.ieps || 0)+'" id="iepsPorcent" class="span12">' +
@@ -961,6 +990,7 @@
         total_ivas     = 0,
         total_ieps     = 0,
         total_ret      = 0,
+        total_retisr   = 0,
         total_orden    = 0,
         chkproducto    = $('.chkproducto');
 
@@ -1007,10 +1037,22 @@
           }
         }else
           total_ret += parseFloat($(this).val());
+        console.log(total_ret);
      });
      total_ret = util.trunc2Dec(total_ret);
 
-     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_ret);
+     $('#productos input#retIsrTotal'+idval).each(function(i, e) {
+        var $tr = $(this).parents("tr");
+        if(chkproducto.length > 0){
+          if($tr.find('.chkproducto').is(':checked')){
+            total_retisr += parseFloat($(this).val());
+          }
+        }else
+          total_retisr += parseFloat($(this).val());
+     });
+     total_retisr = util.trunc2Dec(total_retisr);
+
+     total_orden = parseFloat(total_subtotal) + parseFloat(total_ivas) + parseFloat(total_ieps) - parseFloat(total_ret) - parseFloat(total_retisr);
 
     $('#productos #importe-format'+idval).html(util.darFormatoNum(total_subtotal));
     $('#productos #totalImporte'+idval).val(total_subtotal);
@@ -1023,6 +1065,9 @@
 
     $('#productos #retencion-format'+idval).html(util.darFormatoNum(total_ret));
     $('#productos #totalRetencion'+idval).val(total_ret);
+
+    $('#productos #retencionisr-format'+idval).html(util.darFormatoNum(total_retisr));
+    $('#productos #totalRetencionIsr'+idval).val(total_retisr);
 
     $('#productos #total-format'+idval).html(util.darFormatoNum(total_orden));
     $('#productos #totalOrden'+idval).val(total_orden);
@@ -1040,12 +1085,16 @@
         $totalIva    = [$tr.find('#trasladoTotal1'), $tr.find('#trasladoTotal2'), $tr.find('#trasladoTotal3')], // Input hidden iva total
         $totalRet    = [$tr.find('#retTotal1'), $tr.find('#retTotal2'), $tr.find('#retTotal3')], // Input hidden ret iva total
         $iepsTotal   = [$tr.find('#iepsTotal1'), $tr.find('#iepsTotal2'), $tr.find('#iepsTotal3')], // Input hidden ieps total
+        $retIsrTotal = [$tr.find('#retIsrTotal1'), $tr.find('#retIsrTotal2'), $tr.find('#retIsrTotal3')], // Input hidden ieps total
         $iva         = $tr.find('#traslado'), // Select iva
         $ieps        = $tr.find('#iepsPorcent'), // Input hidden iva total
+        $ret_iva     = $tr.find('#ret_iva'), // Select ret_iva
+        $ret_isrPorcent = $tr.find('#ret_isrPorcent'), // ret_isrPorcent
         totalImporte = 0,
         totalIva     = 0,
         totalIeps    = 0,
         totalRet     = 0,
+        totalRetIsr  = 0,
         total        = 0;
 
     for (var i = 0; i < $precio_uni.length; i++) {
@@ -1053,14 +1102,18 @@
       totalImporte = util.trunc2Dec(parseFloat(($cantidad.val() || 0) * parseFloat($precio_uni[i].val() || 0)));
       totalIva     = util.trunc2Dec(((totalImporte) * parseFloat($iva.find('option:selected').val())) / 100);
       totalIeps    = util.trunc2Dec(((totalImporte) * parseFloat($ieps.val() || 0)) / 100);
-      totalRet     = util.trunc2Dec(totalImporte * 0.04);
+      totalRet     = util.trunc2Dec(totalImporte * (parseFloat($ret_iva.find('option:selected').val()) / 100) );
+      totalRetIsr  = util.trunc2Dec(totalImporte * (parseFloat($ret_isrPorcent.val()) / 100) );
       total        = util.trunc2Dec(totalImporte + totalIva + totalIeps);
-      console.log(totalImporte);
-      console.log(totalIva);
 
-      if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f') {
+      if ($('#tipoOrden').find('option:selected').val() === 'f' || $tr.find('#prodTipoOrden').val() === 'f' || totalRet >= 0) {
         total -= parseFloat(totalRet);
         $totalRet[i].val(totalRet);
+      }
+
+      if (totalRetIsr >= 0) {
+        total -= parseFloat(totalRetIsr);
+        $retIsrTotal[i].val(totalRetIsr);
       }
 
       $totalIva[i].val(totalIva);

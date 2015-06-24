@@ -396,7 +396,7 @@
                                     <input type="hidden" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span12 vpositive">
                                 </td>
                                 <td>
-                                  <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
+                                  <input type="text" name="prod_dpreciou[]" class="span12 vnumeric" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
                                 </td>
                                 <td>
                                     <select name="diva" id="diva" class="span12">
@@ -466,7 +466,7 @@
                               <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive">
                           </td>
                           <td>
-                            <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vpositive">
+                            <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric">
                           </td>
                           <td>
                               <select name="diva" id="diva" class="span12">

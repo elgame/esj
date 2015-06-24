@@ -78,7 +78,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA ACREDITABLE POR DIFERIR%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE POR DIFERIR%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
@@ -91,7 +91,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%IVA ACREDITABLE PAGADO%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE PAGADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //tests carga las de sanjorge
@@ -205,7 +205,15 @@ class polizas_model extends CI_Model {
   }
   public function getCuentaCuadreGasto()
   {
-    return '50000100';
+    if ($this->empresaId==2) $cuenta = '50000100'; //sanjorge
+    elseif($this->empresaId==6) $cuenta = ''; //francis -
+    elseif($this->empresaId==4) $cuenta=""; //Raul jorge
+    elseif($this->empresaId==3) $cuenta = '50007000'; //Gomez gudiño
+    elseif($this->empresaId==5) $cuenta=""; //vianey rocio
+    else{
+      $cuenta = '50000100';
+    }
+    return $cuenta;
   }
   public function getCuentaNSueldo($basic=true, $departamento=null){
     $sql = '';
@@ -849,6 +857,7 @@ class polizas_model extends CI_Model {
             //                 $this->setEspacios($inf_compra['info']->proveedor->nombre_fiscal,100).
             //                 $this->setEspacios('',4)."\r\n";
           }
+
           foreach ($productos_grups as $key => $value)
           {
             if($value->importe > 0)

@@ -158,7 +158,7 @@
 									<td colspan="4" class="a-r">Totales:</td>
 									<td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, '$', false); ?></td>
 									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo String::formatoNumero($total_cargo-$total_abono, 2, '$', false); ?></td>
 									<td colspan="3"></td>
 								</tr>
               </tbody>

@@ -127,17 +127,19 @@
                                   <th>P.U.</th>
                                   <th>IVA</th>
                                   <th>IEPS (%)</th>
-                                  <th>RET 4%</th>
+                                  <th>RET</th>
+                                  <th>RET ISR</th>
                                   <th>IMPORTE</th>
                                 </tr>
                               </thead>
                               <tbody>
                                     <?php
-                                          $subtotal = $iva = $ieps = $total = $retencion = 0;
+                                          $retencionisr = $subtotal = $iva = $ieps = $total = $retencion = 0;
                                           $subtotal  += $compra['info']->subtotal;
                                           $iva       += $compra['info']->importe_iva;
                                           $ieps      += $compra['info']->importe_ieps;
                                           $retencion += $compra['info']->retencion_iva;
+                                          $retencionisr += $compra['info']->retencion_isr;
                                           $total     += $compra['info']->total;
                                          foreach ($productos as $key => $prod) {
 
@@ -175,6 +177,9 @@
                                            </td>
                                            <td style="width: 66px;">
                                                <input type="text" name="retTotal[]" value="<?php echo isset($_POST['retTotal'][$key]) ? $_POST['retTotal'][$key]: $prod->retencion_iva ?>" id="retTotal" class="span12" readonly>
+                                           </td>
+                                           <td style="width: 66px;">
+                                               <input type="text" name="ret_isrTotal[]" value="<?php echo isset($_POST['ret_isrTotal'][$key]) ? $_POST['ret_isrTotal'][$key]: $prod->retencion_isr ?>" id="ret_isrTotal" class="span12" readonly>
                                            </td>
                                            <td style="">
                                                <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe, 2, '$', false) ?></span>
@@ -230,6 +235,12 @@
                             <td>RET.</td>
                             <td id="retencion-format">
                               <input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo String::formatoNumero(set_value('totalRetencion', $retencion), 2, '$', false)?>">
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>RET ISR</td>
+                            <td id="retencionisr-format">
+                              <input type="text" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencionisr), 2, '$', false)?>">
                             </td>
                           </tr>
                           <tr style="font-weight:bold;font-size:1.2em;">
