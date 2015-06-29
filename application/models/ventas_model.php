@@ -268,7 +268,8 @@ class Ventas_model extends privilegios_model{
       'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'status_timbrado'     => 'p',
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
-      'is_factura'          => 'f'
+      'is_factura'          => 'f',
+      'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
     );
     //Si existe el parametro es una nota de credito de la factura
     $bitacora_accion = 'la nota de remision';
@@ -470,7 +471,8 @@ class Ventas_model extends privilegios_model{
       'status'              => 'p', //$_POST['dcondicion_pago'] === 'co' ? 'pa' : 'p',
       'status_timbrado'     => 'p',
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
-      'is_factura'          => 'f'
+      'is_factura'          => 'f',
+      'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
     );
 
     // Bitacora
@@ -1274,13 +1276,15 @@ class Ventas_model extends privilegios_model{
       $pdf->SetWidths($widths);
 
       $printRow = true;
-      if($factura['info']->sin_costo == 't')
-      {
-        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
-            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
-            $item->id_clasificacion == '53'){
+      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+          $item->id_clasificacion == '53'){
+        if($factura['info']->sin_costo_nover == 'f')
+        {
           $printRow = false;
           $gastos[] = $item;
+        } else {
+          $printRow = false;
         }
       }
 

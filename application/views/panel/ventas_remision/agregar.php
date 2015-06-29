@@ -138,10 +138,13 @@
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label">Sin Costo</label>
                 <div class="controls">
-                  <div class="input-append">
-                    <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : '') ?>>
+                  <div class="input-append pull-left"> <?php $chk_sincosto = isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto']) ? 'checked' : ''); ?>
+                    <label class="control-label">Sin Costo <input type="checkbox" name="dsincosto" id="dsincosto" class="nokey" <?php echo $chk_sincosto; ?>></label>
+                  </div>
+
+                  <div class="input-append <?php echo $chk_sincosto=='checked'? '': 'hide'; ?>  pull-left" id="dsincosto_novergrup">
+                    <label class="control-label">No ver <input type="checkbox" name="dsincosto_nover" id="dsincosto_nover" class="nokey" <?php echo isset($borrador) ? ($borrador['info']->sin_costo == 't' ? 'checked' : '' ) : (isset($_POST['dsincosto_nover']) ? 'checked' : '') ?>></label>
                   </div>
                 </div>
               </div>

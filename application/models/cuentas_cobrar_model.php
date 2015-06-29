@@ -518,9 +518,9 @@ class cuentas_cobrar_model extends privilegios_model{
 			foreach ($response['cuentas'] as $key => $cuenta) {
 				$cuenta->saldo = floatval(String::float($cuenta->saldo));
 				// anticipos a fruta
-				if ((strtolower($cuenta->serie) == 'a' || strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
+				if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
 					$cuenta->cargo = 0;
-				} elseif ( strtolower($cuenta->serie) != 'a' && strtolower($cuenta->serie) != 'an') { // $cuenta->cargo == 0 &&
+				} elseif ( strtolower($cuenta->serie) != 'an') { // $cuenta->cargo == 0 &&
 					$resp = $this->db
 		        ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')
 		        ->from('facturacion_productos as fp')
@@ -1746,12 +1746,12 @@ class cuentas_cobrar_model extends privilegios_model{
   				$cliente->facturas[$key]->saldo -= $cliente->facturas[$key]->abonos_total;
 
 					// anticipos a fruta
-					if ((strtolower($cliente->facturas[$key]->serie) == 'a' || strtolower($cliente->facturas[$key]->serie) == 'an')) {
+					if ((strtolower($cliente->facturas[$key]->serie) == 'an')) {
 						if ($cliente->facturas[$key]->saldo == 0)
 							$cliente->facturas[$key]->total = 0;
 						$tiene_abonos = true;
 						$cliente->facturas[$key]->concepto = 'ANTICIPO '.$cliente->facturas[$key]->concepto;
-					} elseif ( strtolower($cliente->facturas[$key]->serie) != 'a' && strtolower($cliente->facturas[$key]->serie) != 'an' && $tiene_abonos) { // $cliente->facturas[$key]->cargo == 0 &&
+					} elseif ( strtolower($cliente->facturas[$key]->serie) != 'an' && $tiene_abonos) { // $cliente->facturas[$key]->cargo == 0 &&
 						$resp = $this->db
 			        ->select('fp.id_factura, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario, fp.importe, fp.iva')
 			        ->from('facturacion_productos as fp')

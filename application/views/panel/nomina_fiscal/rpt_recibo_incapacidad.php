@@ -42,6 +42,13 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="fporcentaje">Incapacidad pagada por el Seguro</label>
+                  <div class="controls">
+                    <input type="number" step="any" name="fporcentaje" class="span12 vpositive" id="fporcentaje" value="100" data-next="">
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

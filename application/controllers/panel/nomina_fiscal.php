@@ -600,12 +600,13 @@ class nomina_fiscal extends MY_Controller {
     // Datos para la vista.
     if (isset($_GET['empleadoId']) && $_GET['empleadoId'] !== '' && isset($_GET['fechaSalida']) && $_GET['fechaSalida'] !== '')
     {
-      $params['empleado'] = $this->nomina_fiscal_model->finiquito($_GET['empleadoId'], $_GET['fechaSalida']);
+      $params['empleado'] = $this->nomina_fiscal_model->finiquito($_GET['empleadoId'], $_GET['fechaSalida'], ($this->input->get('despido')=='true'? true: false));
     }
     else if (isset($_GET['empleadoId']) && $_GET['empleadoId'] == '' || isset($_GET['fechaSalida']) && $_GET['fechaSalida'] == '')
     {
       $params['frm_errors'] = $this->showMsgs(6);
     }
+    $params['indemni'] = $this->input->get('despido')=='true'? true: false;
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -619,7 +620,7 @@ class nomina_fiscal extends MY_Controller {
   public function add_finiquito()
   {
     $this->load->model('nomina_fiscal_model');
-    $result = $this->nomina_fiscal_model->add_finiquito($_GET['empleadoId'], $_GET['fechaSalida']);
+    $result = $this->nomina_fiscal_model->add_finiquito($_GET['empleadoId'], $_GET['fechaSalida'], ($this->input->get('despido')=='true'? true: false));
 
     if ( ! $result['errorTimbrar'])
     {
@@ -763,6 +764,7 @@ class nomina_fiscal extends MY_Controller {
       'fsalario_real' => isset($_GET['fsalario_real']) ?: '',
       'ffecha1' => isset($_GET['ffecha1']) ?: '',
       'ffecha2' => isset($_GET['ffecha2']) ?: '',
+      'despido' => isset($_GET['despido']) ? true: false,
     ), $_GET);
 
     $this->nomina_fiscal_model->printReciboFiniquito($_GET);
@@ -794,11 +796,12 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
 
     $_GET = array_merge(array(
-      'fid_trabajador' => isset($_GET['fid_trabajador']) ?: '',
-      'fsalario_real' => isset($_GET['fsalario_real']) ?: '',
-      'ffecha_inicio' => isset($_GET['ffecha_inicio']) ?: '',
-      'fdias_incapacidad' => isset($_GET['fdias_incapacidad']) ?: '',
+      'fid_trabajador'      => isset($_GET['fid_trabajador']) ?: '',
+      'fsalario_real'       => isset($_GET['fsalario_real']) ?: '',
+      'ffecha_inicio'       => isset($_GET['ffecha_inicio']) ?: '',
+      'fdias_incapacidad'   => isset($_GET['fdias_incapacidad']) ?: '',
       'fincapacidad_seguro' => isset($_GET['fincapacidad_seguro']) ?: '',
+      'fporcentaje'         => isset($_GET['fporcentaje']) ?: '100',
     ), $_GET);
 
     $this->nomina_fiscal_model->printReciboIncapacidad($_GET);

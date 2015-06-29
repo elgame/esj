@@ -921,6 +921,10 @@ class bascula_model extends CI_Model {
         $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
         $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
         $tipo_rpt = "Salida";
+      } elseif ($this->input->get('fid_chofer') > 0) {
+        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
+        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
       }
 
       $this->load->model('areas_model');
@@ -1596,6 +1600,10 @@ class bascula_model extends CI_Model {
         $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
         $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
         $tipo_rpt = "Salida";
+      } elseif ($this->input->get('fid_chofer') > 0) {
+        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
+        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
       }
 
       $query = $this->db->query(

@@ -383,6 +383,12 @@ var EventKeyPressFolioPallet = function () {
 var EventOnClickSinCosto = function () {
   $('#dsincosto').on('click', function(event) {
     var $this = $(this);
+    if ($this.is(':checked')) {
+      $("#dsincosto_novergrup").show();
+    } else {
+      $("#dsincosto_novergrup").hide();
+      $("#dsincosto_nover").prop('checked', false);
+    }
 
     recalculaCosto();
     calculaTotal();

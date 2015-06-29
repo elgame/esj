@@ -35,6 +35,14 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="despido">Despido</label>
+                  <div class="controls">
+                    <input type="checkbox" name="despido" id="despido" value="true" <?php echo $this->input->get('despido')=='true'? 'checked': '';  ?>>
+                  </div>
+                </div>
+
+
                 <div class="form-actions">
                   <button type="submit" id="btn_submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

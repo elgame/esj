@@ -46,6 +46,8 @@ class finiquito
    */
   public $tablasIsr = array();
 
+  private $despido = false;
+
   /*
    |------------------------------------------------------------------------
    | Setters
@@ -158,19 +160,24 @@ class finiquito
    *
    * @return [type] [description]
    */
-  public function procesar()
+  public function procesar($despido=false)
   {
+    $this->despido = $despido;
+
     $this->empleado->anios_trabajados      = $this->aniosTrabajadosEmpleado();
     $this->empleado->dias_trabajados      = $this->diasTrabajadosEmpleado();
     $this->empleado->dias_vacaciones       = $this->diasDeVacaciones();
     $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
-    // $this->empleado->factor_integracion    = $this->factorIntegracion();
+    $this->empleado->factor_integracion    = $this->factorIntegracion();
+    $this->empleado->dias_aguinaldo        = 0;
 
     $this->empleado->nomina = new stdclass;
     $this->empleado->nomina->aguinaldo = $this->aguinaldo();
     $this->empleado->nomina->vacaciones = $this->vacaciones();
     $this->empleado->nomina->prima_vacacional = $this->primaVacacional();
-    // $this->empleado->finiquito->salario_diario_integrado = $this->sdi();
+    $this->empleado->salario_diario_integrado = $this->sdi();
+    if ($this->despido)
+      $this->empleado->nomina->indemnizaciones  = $this->indemnizaciones();
 
     // Percepciones
     $this->empleado->nomina->percepciones = array();
@@ -182,6 +189,8 @@ class finiquito
     $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
     $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
     $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
+    if ($this->despido)
+      $this->empleado->nomina->percepciones['indemnizaciones'] = $this->pIndemnizaciones();
     // $this->empleado->nomina->percepciones['ptu'] = $this->pPtu();
 
     // Deducciones
@@ -264,6 +273,27 @@ class finiquito
     return round($this->empleado->factor_integracion * $this->empleado->salario_diario);
   }
 
+  /**
+   *  Cálculo de las indemnizaciones
+   * Cuando es una liquidacion (lo corren) de trabajador calcula las indemnizaciones
+   *
+   * @return [type] [description]
+   */
+  public function indemnizaciones()
+  {
+    // 3 meses de sueldo
+    $despido_injustificado = $this->empleado->salario_diario_integrado*90;
+
+    // 20 días de sueldo por cada año de servicios prestados
+    $indemnisacion_negativa = 20*$this->empleado->anios_trabajados*$this->empleado->salario_diario_integrado;
+    $indemnisacion_negativa += ($this->empleado->dias_anio_vacaciones*20/365)*$this->empleado->salario_diario_integrado;
+
+    // Prima de antigüedad 12 días de salario por cada año de servicio
+    $prima_antiguedad = 12*$this->empleado->anios_trabajados*$this->empleado->salario_diario_integrado;
+    $prima_antiguedad += ($this->empleado->dias_anio_vacaciones*12/365)*$this->empleado->salario_diario_integrado;
+
+    return round($despido_injustificado+$indemnisacion_negativa+$prima_antiguedad, 4);
+  }
 
   /*
    |------------------------------------------------------------------------
@@ -455,6 +485,38 @@ class finiquito
       'TipoPercepcion' => '021',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'prima_vacacional1': 'prima_vacacional2')],
       'Concepto'       => 'Prima Vacacional',
+      'ImporteGravado' => $gravado,
+      'ImporteExcento' => (float)$excento,
+      'total'          => floatval($gravado) + floatval($excento),
+    );
+  }
+
+  /**
+   * Percepcion Indemnizaciones - 025
+   *
+   * @return array
+   */
+  public function pIndemnizaciones()
+  {
+    $anios_trabajados = $this->empleado->anios_trabajados+($this->empleado->dias_anio_vacaciones>0? 1: 0);
+    $topeExcento = 90 * floatval($this->salariosZonasConfig->zona_a)*$anios_trabajados;
+
+    // Si los que se le dara de indemnizacion al empleado excede el tope excento.
+    if ($this->empleado->nomina->indemnizaciones > $topeExcento)
+    {
+      $gravado = $this->empleado->nomina->indemnizaciones - $topeExcento;
+      $excento = $topeExcento;
+    }
+    else
+    {
+      $gravado = 0;
+      $excento = $this->empleado->nomina->indemnizaciones;
+    }
+
+    return array(
+      'TipoPercepcion' => '025',
+      'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'indemnizaciones1': 'indemnizaciones2')],
+      'Concepto'       => 'Indemnizaciones',
       'ImporteGravado' => $gravado,
       'ImporteExcento' => (float)$excento,
       'total'          => floatval($gravado) + floatval($excento),
@@ -690,6 +752,13 @@ class finiquito
     // echo "<pre>";
     //   var_dump($isrSemana, $isrSemanaSubsidio, $isrAnual, $isr);
     // echo "</pre>";exit;
+
+    if ($this->despido) {
+      // ISR para el calculo de las indemnizaciones
+      $sueldoMensual = round(7 * $this->empleado->salario_diario * 30, 2);
+      $taza_isr = $this->empleado->isr_ultima_semana/$sueldoMensual;
+      $isr += $this->empleado->nomina->percepciones['indemnizaciones']['ImporteGravado']*$taza_isr;
+    }
 
     // $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
     // $isr = round(($isrAuxConOtros - $isrUltimaSemana) * $this->empleado->dias_trabajados, 2);

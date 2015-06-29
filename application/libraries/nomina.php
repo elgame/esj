@@ -169,6 +169,17 @@ class nomina
     return $this;
   }
 
+  public function calculoBasico($empleado)
+  {
+    $this->empleado = $empleado;
+    $this->empleado->anios_trabajados      = $this->aniosTrabajadosEmpleado();
+    $this->empleado->dias_vacaciones       = $this->diasDeVacaciones();
+    $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
+    $this->empleado->factor_integracion    = $this->factorIntegracion();
+    $this->empleado->salario_diario_integrado = $this->sdi();
+    return $this->empleado;
+  }
+
   /**
    * Procesa la nomina.
    *

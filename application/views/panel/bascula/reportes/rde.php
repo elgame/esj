@@ -49,11 +49,20 @@
 
                 <div class="control-group">
                   <label class="control-label autocomplet_en" for="fproveedor">Proveedor</label>
-                  <label class="control-label autocomplet_sa" for="fproveedor">Cliente</label>
+                  <label class="control-label autocomplet_sa hide" for="fproveedor">Cliente</label>
                   <div class="controls">
                     <input type="text" name="fproveedor"
                       value="<?php echo set_value('fproveedor', $this->input->post('fproveedor')) ?>" id="fproveedor" class="span12 getjsval" placeholder="Buscar">
                     <input type="hidden" name="fid_proveedor" value="<?php echo set_value('fid_proveedor', $this->input->post('fid_proveedor')) ?>" id="fid_proveedor" class="getjsval">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fchofer">Chofer</label>
+                  <div class="controls">
+                    <input type="text" name="fchofer" class="span12 getjsval" id="fchofer"
+                      value="<?php echo set_value('fchofer', $this->input->post('fchofer')) ?>" placeholder="Proveedor que es Chofer">
+                    <input type="hidden" name="fid_chofer" value="<?php echo set_value('fid_chofer', $this->input->post('fid_chofer')) ?>" id="fid_chofer">
                   </div>
                 </div>
 

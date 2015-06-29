@@ -21,6 +21,7 @@ class bascula extends MY_Controller {
 
     'bascula/ajax_pagar_boleta/',
     'bascula/auth_modify/',
+    'bascula/puede_modificar/',
 
     'bascula/show_view_agregar_empresa/',
     'bascula/show_view_agregar_proveedor/',
@@ -360,6 +361,16 @@ class bascula extends MY_Controller {
     }
     else
       redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+  }
+
+  public function puede_modificar()
+  {
+    if (isset($_GET['folio'])) {
+      $this->load->model('bascula_model');
+      $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
+      echo json_encode(array('puede_modificar' => $info['info'][0]->no_impresiones > 0 ? false : true));
+    } else
+      echo json_encode(array('puede_modificar' => false));
   }
 
   /**

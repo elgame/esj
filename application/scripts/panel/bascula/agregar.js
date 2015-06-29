@@ -561,16 +561,20 @@ $(function(){
     }
   });
 
-  // $('button#btnGuardar').on('click' , function(event) {
-  //   if ($('input#pstatus').is(':checked')) {
-  //     var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-  //     {
-  //       $('#form').submit();
-  //     });
-  //   } else {
-  //     $('#form').submit();
-  //   }
-  // });
+  $('button#btnGuardar').on('click' , function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/puede_modificar/',
+      type: 'get',
+      dataType: 'json',
+      data: {folio: $('#pfolio').val()},
+    })
+    .done(function(response) {
+      if (response.puede_modificar == false)
+        location.reload();
+      else
+        $('#form').submit();
+    });
+  });
 
   // $('#form').submit(function ($t) {
 
@@ -578,15 +582,15 @@ $(function(){
 
   //   return false;
 
-    // if ($('input#pstatus').is(':checked')) {
-    //   var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
-    //   {
-    //     $this.submit();
-    //   });
-    //   return false;
-    // } else {
-    //   return true;
-    // }
+  //   if ($('input#pstatus').is(':checked')) {
+  //     var res = msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
+  //     {
+  //       $this.submit();
+  //     });
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
   // });
 
   $('#pstatus').on('click', function(event) {

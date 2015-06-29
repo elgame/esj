@@ -30,6 +30,10 @@
 
                 <label for="empleado">Fecha de Salida</label>
                 <input type="date" name="fechaSalida" value="<?php echo set_value_get('fechaSalida', date('Y-m-d'))  ?>">
+
+                <label for="empleado">Despido</label>
+                <input type="checkbox" name="despido" value="true" <?php echo $this->input->get('despido')=='true'? 'checked': '';  ?>>
+
                 <input type="submit" name="enviar" value="Cargar" class="btn">
               </div>
             </form>
@@ -53,7 +57,7 @@
                   <thead>
                     <tr>
                       <th colspan="7"></th>
-                      <th colspan="6" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
+                      <th colspan="<?php echo 6+($indemni? 1: 0); ?>" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="3" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
                     </tr>
@@ -71,6 +75,9 @@
                       <th id="head-vacaciones" style="background-color: #BEEEBC;">VACACIONES</th>
                       <th id="head-prima-vacacional" style="background-color: #BEEEBC;">P. VACACIONAL</th>
                       <th id="head-aguinaldo" style="background-color: #BEEEBC;">AGUINALDO</th>
+                      <?php if ($indemni) { ?>
+                      <th id="head-indemnizaciones" style="background-color: #BEEEBC;">INDEMNIZACIONES</th>
+                      <?php } ?>
                       <th style="background-color: #BEEEBC;">SUBSIDIO</th>
                       <th style="background-color: #BEEEBC;">TOTAL</th>
 
@@ -91,6 +98,9 @@
                                              $empleado[0]->nomina->prima_vacacional +
                                              $empleado[0]->nomina->subsidio +
                                              $empleado[0]->nomina->aguinaldo;
+                        if ($indemni)
+                          $totalPercepciones += $empleado[0]->nomina->indemnizaciones;
+
                         $totalDeducciones = $empleado[0]->nomina->deducciones['isr']['total'] +
                                             $empleado[0]->nomina->deducciones['otros']['total'];
                       ?>
@@ -132,6 +142,12 @@
                           <span class="aguinaldo-span"><?php echo String::formatoNumero($empleado[0]->nomina->aguinaldo) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->aguinaldo ?>" class="span12 aguinaldo">
                         </td>
+                        <?php if ($indemni) { ?>
+                        <td id="td-indemnizaciones">
+                          <span class="indemnizaciones-span"><?php echo String::formatoNumero($empleado[0]->nomina->indemnizaciones) ?></span>
+                          <input type="hidden" value="<?php echo $empleado[0]->nomina->indemnizaciones ?>" class="span12 indemnizaciones">
+                        </td>
+                        <?php } ?>
                         <td id="td-subsidio">
                           <span class="subsidio-span"><?php echo String::formatoNumero($empleado[0]->nomina->subsidio) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->subsidio ?>" class="span12 subsidio">
