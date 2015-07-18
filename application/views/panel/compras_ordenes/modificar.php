@@ -312,7 +312,7 @@
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
 
-          <div class="row-fluid">  <!-- Box Productos -->
+          <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
                 <h2><i class="icon-barcode"></i> Productos <span id="show_info_prod" style="display:none;"><i class="icon-hand-right"></i> <span>Existencia: 443 | Stok: 43</span></span></h2>
@@ -546,11 +546,14 @@
                                    <?php echo $prod->codigo?>
                                    <input type="hidden" name="codigo[]" value="<?php echo $prod->codigo || '' ?>" class="span12">
                                    <input type="hidden" name="tipo_cambio[]" value="<?php echo $prod->tipo_cambio ?>" class="span12">
-                                   <input type="hidden" name="prodIdOrden[]" value="<?php echo $prod->id_orden ?>" class="span12">
-                                   <input type="hidden" name="prodIdNumRow[]" value="<?php echo $prod->num_row ?>" class="span12">
+                                   <input type="hidden" name="prodIdOrden[]" value="<?php echo $prod->id_orden ?>" class="span12" id="prodIdOrden">
+                                   <input type="hidden" name="prodIdNumRow[]" value="<?php echo $prod->num_row ?>" class="span12" id="prodIdNumRow">
 
-                                   <input type="hidden" name="codigoArea[]" value="<?php echo $prod->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
-                                   <input type="hidden" name="codigoAreaId[]" value="<?php echo $prod->id_area ?>" id="codigoAreaId" class="span12">
+                                    <input type="text" name="codigoArea[]" value="<?php echo $prod->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto" data-call="ComprasOrdenes">
+                                    <input type="hidden" name="codigoAreaId[]" value="<?php echo $prod->id_area ?>" id="codigoAreaId" class="span12">
+                                    <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                   <!-- <input type="hidden" name="codigoArea[]" value="<?php echo $prod->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
+                                   <input type="hidden" name="codigoAreaId[]" value="<?php echo $prod->id_area ?>" id="codigoAreaId" class="span12"> -->
                                  </td>
                                  <td style="<?php echo $redBg ?>">
                                      <?php echo $prod->descripcion ?>
@@ -695,6 +698,52 @@
 
 </div>
 
+   <!-- Modal -->
+  <div id="modalAreas" class="modal modal-w70 hide fade" tabindex="-1" role="dialog" aria-labelledby="modalAreasLavel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="modalAreasLavel">Catalogo de maquinaria, equipos e instalaciones</h3>
+    </div>
+    <div class="modal-body">
+
+      <div class="row-fluid">
+
+        <div>
+
+      <?php foreach ($areas as $key => $value)
+      { ?>
+          <div class="span3" id="tblAreasDiv<?php echo $value->id_tipo ?>" style="display: none;">
+            <table class="table table-hover table-condensed <?php echo ($key==0? 'tblAreasFirs': ''); ?>"
+                id="tblAreas<?php echo $value->id_tipo ?>" data-id="<?php echo $value->id_tipo ?>">
+              <thead>
+                <tr>
+                  <th style="width:10px;"></th>
+                  <th>Codigo</th>
+                  <th><?php echo $value->nombre ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- <tr class="areaClick" data-id="" data-sig="">
+                  <td><input type="radio" name="modalRadioSel" value="" data-uniform="false"></td>
+                  <td>9</td>
+                  <td>EMPAQUE</td>
+                </tr> -->
+              </tbody>
+            </table>
+          </div>
+      <?php
+      } ?>
+
+        </div>
+
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+      <button class="btn btn-primary" id="btnModalAreasSel">Seleccionar</button>
+    </div>
+  </div>
 
   <!-- Modal -->
   <div id="modal-facturas" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

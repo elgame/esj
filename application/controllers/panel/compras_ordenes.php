@@ -17,6 +17,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/imprimir_entrada/',
     'compras_ordenes/ajax_imprimir_recibo/',
+    'compras_ordenes/ajax_cambia_area/',
 
     'compras_ordenes/rpt_gastos_pdf/',
     'compras_ordenes/rpt_gastos_xls/',
@@ -215,9 +216,11 @@ class compras_ordenes extends MY_Controller {
       // array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
       array('panel/compras_ordenes/agregar.js'),
+      array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
     $this->load->model('compras_ordenes_model');
+    $this->load->model('compras_areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -278,6 +281,7 @@ class compras_ordenes extends MY_Controller {
       }
     }
 
+    $params['areas'] = $this->compras_areas_model->getTipoAreas();
     $params['orden'] = $this->compras_ordenes_model->info($_GET['id'], true);
 
     $params['impresoras'] = $this->compras_ordenes_model->impresoras();
@@ -324,6 +328,14 @@ class compras_ordenes extends MY_Controller {
     else
     {
       redirect(base_url('panel/compras_ordenes/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+    }
+  }
+
+  public function ajax_cambia_area()
+  {
+    if (isset($_GET['id_orden']{0}) && isset($_GET['id_area']{0}) && isset($_GET['num_row']{0})) {
+      $this->load->model('compras_ordenes_model');
+      $this->compras_ordenes_model->actualizaArea($_GET);
     }
   }
 

@@ -396,6 +396,11 @@ class compras_ordenes_model extends CI_Model {
     }
   }
 
+  public function actualizaArea($params)
+  {
+    $this->db->update('compras_productos', array('id_area' => $params['id_area']), "id_orden = {$params['id_orden']} AND num_row = {$params['num_row']}");
+  }
+
   /**
    * Agrega una compra. Esto es cuando se agregan o ligan ordenes a una factura.
    *
@@ -1326,7 +1331,7 @@ class compras_ordenes_model extends CI_Model {
           {
             $facturaa = explode(':', $value);
             $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
-            $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.substr($facturaa['info']->fecha, 0, 10);
+            $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
             $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
 
             if($info_bascula === false)

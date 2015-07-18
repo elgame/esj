@@ -155,7 +155,7 @@
 									  <label class="control-label" for="femail">Email </label>
 									  <div class="controls">
 											<input type="text" name="femail" id="femail" class="span12" value="<?php echo set_value('femail'); ?>"
-												maxlength="250" placeholder="correo@gmail.com">
+												maxlength="600" placeholder="correo@gmail.com">
 									  </div>
 									</div>
 

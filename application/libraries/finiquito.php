@@ -691,6 +691,8 @@ class finiquito
     $primaVacacionalGravadoDiario = round(floatval($this->empleado->nomina->percepciones['prima_vacacional']['ImporteGravado']) / 52, 2);
     $vacacionesGravadoDiario = round(floatval($this->empleado->nomina->percepciones['vacaciones']['ImporteGravado']) / 52 , 2);
     $salarioDiario = (float)$this->empleado->salario_diario;
+    if ($this->despido)
+      $indemnizacionGravadoDiario = round(floatval($this->empleado->nomina->percepciones['indemnizaciones']['ImporteGravado']) / 52, 2);
 
     $sueldoSemana = round($this->empleado->dias_trabajados_semana * $this->empleado->salario_diario, 2);
     // Recorre los rangos de la tabla semanal de ISR para determinar en que
@@ -727,6 +729,8 @@ class finiquito
 
     // Suma todos los gravados diarios con salario diario. 200.23 $salarioDiario +
     $sumaImporteGravadosDiariosConOtros = $aguinaldoGravadoDiario + $primaVacacionalGravadoDiario + $vacacionesGravadoDiario + $sueldoSemana;
+    if ($this->despido)
+      $sumaImporteGravadosDiariosConOtros += $indemnizacionGravadoDiario;
     // echo "<pre>";
     //   var_dump($sumaImporteGravadosDiariosConOtros);
     // echo "</pre>";exit;
@@ -753,12 +757,12 @@ class finiquito
     //   var_dump($isrSemana, $isrSemanaSubsidio, $isrAnual, $isr);
     // echo "</pre>";exit;
 
-    if ($this->despido) {
-      // ISR para el calculo de las indemnizaciones
-      $sueldoMensual = round(7 * $this->empleado->salario_diario * 30, 2);
-      $taza_isr = $this->empleado->isr_ultima_semana/$sueldoMensual;
-      $isr += $this->empleado->nomina->percepciones['indemnizaciones']['ImporteGravado']*$taza_isr;
-    }
+    // if ($this->despido) {
+    //   // ISR para el calculo de las indemnizaciones
+    //   $sueldoMensual = round(7 * $this->empleado->salario_diario * 30, 2);
+    //   $taza_isr = $this->empleado->isr_ultima_semana/$sueldoMensual;
+    //   $isr += $this->empleado->nomina->percepciones['indemnizaciones']['ImporteGravado']*$taza_isr;
+    // }
 
     // $isrUltimaSemana = floatval($this->empleado->isr_ultima_semana / 7);
     // $isr = round(($isrAuxConOtros - $isrUltimaSemana) * $this->empleado->dias_trabajados, 2);

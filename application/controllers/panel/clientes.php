@@ -378,7 +378,7 @@ public function fecha($fecha)
 
 			array('field' => 'femail',
 						'label' => 'Email',
-						'rules' => 'max_length[250]'),
+						'rules' => 'max_length[600]'),
 			array('field' => 'fcuenta_cpi',
 						'label' => 'Cuenta ContpaqI',
 						'rules' => 'max_length[12]'),

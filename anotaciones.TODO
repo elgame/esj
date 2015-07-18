@@ -1,8 +1,10 @@
--en las ordenes de flete poder poner una descripcion, y q ponga el nombre del cliente y la fecha y hr de salida del producto q es el de la remision, numero de manifiesto de embarque
 -Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
 -Checar el reporte de diario con las nuevas cosas
 -al momento de hacer pagos tener la opcion de imprimir el sello de acuerdo a los formatos que la señora paso (va mandar otros)
 -en bascula poner limon apatzingan
+--en las ordenes de flete poder poner una descripcion, y q ponga el nombre del cliente y la fecha y hr de salida del producto q es el de la remision, numero de manifiesto de embarque
+---commit No 1
+-*Agregar en facturacion facturar en dolares con tipo de cambio y que en cuentas por pagar se registre en pesos
 -*Agregar el finiquito por despido fiscal timbrado y un recibo de finiquito con sueldo real
 -*Checar el recibo de finiquito, las vacaciones no salieron bien a norma
 -*En el recibo de incapasidad poner caja de % para q no calcule siempre con el 100%

@@ -6894,7 +6894,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-      $pdf->titulo2 = 'CALCULO DE RENUNCIA VOLUNTARIA';
+      $pdf->titulo2 = $filtros['despido']? 'CALCULO DE RENUNCIA VOLUNTARIA': 'CALCULO DE DESPIDO';
       $pdf->titulo3 = '';
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       // $pdf->AliasNbPages();

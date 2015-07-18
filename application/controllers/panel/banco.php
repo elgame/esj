@@ -22,6 +22,8 @@ class banco extends MY_Controller {
     'banco/get_cuentas_contpaq/',
     'banco/mover_movimiento/',
 
+    'banco/ajax_imprimir_sello/'
+
     'banco/rie_pdf/',
 		'banco/rie_xls/',
 		);
@@ -98,9 +100,12 @@ class banco extends MY_Controller {
 
 		$this->load->model('banco_cuentas_model');
 		$this->load->model('empresas_model');
+		$this->load->model('compras_ordenes_model');
 		$params['data']    = $this->banco_cuentas_model->getSaldoCuentaData();
 		$params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 		$params['bancos']  = $this->banco_cuentas_model->getBancos(false);
+
+		$params['impresoras'] = $this->compras_ordenes_model->impresoras();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -122,6 +127,12 @@ class banco extends MY_Controller {
 		$this->load->model('banco_cuentas_model');
     	$this->banco_cuentas_model->getSaldoCuentaExcel();
 	}
+
+	public function ajax_imprimir_sello()
+  {
+    $this->load->model('banco_cuentas_model');
+    $this->banco_cuentas_model->imprimir_sellotxt($_GET['idm'], $_GET['ruta']);
+  }
 
 	public function conciliacion()
 	{

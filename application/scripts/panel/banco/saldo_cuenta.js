@@ -49,6 +49,18 @@ $(function(){
   var $btn = $('#cambia-fecha-movi');
   $btn.attr('href', $btn.attr('href') + '&ids=' + ids.join(','));
 
+  $("a.modalimprimir").on('click', function(event) {
+    $("#BtnImprimir").attr('idm', $(this).attr('data-idm'));
+    $("#modal-imprimir").modal('show');
+  });
+  $("#BtnImprimir").on('click', function(event) {
+    var datos = '?idm='+$(this).attr('data-idm')+'&idc='+$(this).attr('data-idc')+'&ruta='+$("#lista_impresoras").val();
+    $.get(base_url+'panel/banco/ajax_imprimir_sello/'+datos,
+    function() {
+      console.log("dd");
+    });
+  });
+
   // Autocomplete clientes
   // $("#dcliente").autocomplete({
   //   source: function(request, response) {

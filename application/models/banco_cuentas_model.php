@@ -449,6 +449,42 @@ class banco_cuentas_model extends banco_model {
 		}
 	}
 
+	public function getInfoSelloEntrada($idm)
+	{
+		$res = $this->db->query("SELECT
+				m.id_movimiento,
+				Date(m.fecha) AS fecha,
+				Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+				bb.nombre AS banco,
+				bc.alias AS cuenta
+			FROM banco_movimientos AS m
+				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
+				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
+				LEFT JOIN banco_cuentas AS bc ON bc.id_cuenta = m.id_cuenta
+				LEFT JOIN banco_bancos AS bb ON bb.id_banco = bc.id_banco
+			WHERE m.id_movimiento = {$idm}")->row();
+	}
+
+	public function imprimir_sellotxt($idm, $ruta)
+  {
+    $data = $this->getInfoSelloEntrada($idm);
+
+    $file = fopen(APPPATH."media/imprimir/entradatxt.txt", "w");
+    fwrite($file, "----------------------------------------\r\n");
+    fwrite($file, '     INGRESO ALMACEN '.$data->almacen . "\r\n");
+    fwrite($file, $data->empresa . "\r\n");
+    fwrite($file, 'FECHA: '.String::fechaATexto($data->fecha, '/c').'  REG. No '.$data->folio_almacen . "\r\n");
+    fwrite($file, $data->proveeor . "\r\n");
+    fwrite($file, 'FOLIO: '.String::formatoNumero($data->folio, 2, '').'  IMPORTE: '.String::formatoNumero($data->total) . "\r\n");
+    fwrite($file, 'RECIBI: '.$data->recibio . "\r\n");
+    fwrite($file, "----------------------------------------\r\n");
+    fclose($file);
+
+    shell_exec("c:\\xampp\\htdocs\\sanjorge\\application\\media\\imprimir\\printApp.exe c:\\xampp\\htdocs\\sanjorge\\application\\media\\imprimir\\entradatxt.txt ".base64_decode($ruta));
+    echo base64_decode($ruta);
+    // exec('C:\Users\gama\Documents\sanjorge\application\printApp\printApp\bin\Debug\printApp.exe entradatxt.txt '.base64_decode($ruta));
+  }
+
 	public function showConciliacion()
 	{
 		$res = $this->getSaldoCuentaData();

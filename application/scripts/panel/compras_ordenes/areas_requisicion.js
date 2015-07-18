@@ -27,6 +27,9 @@
           },100)
 
           $tr.find('#codigoAreaId').val(ui.item.id);
+
+          if ($this.attr('data-call').length > 0)
+            funciones[$this.attr('data-call')].call(this, $tr);
         }
       }).keydown(function(event){
         if(event.which == 8 || event == 46) {
@@ -68,6 +71,10 @@
       if (passes) {
         objCodigoArea.val(radioSel.attr('data-codfin'));
         objCodigoArea.parent().find('#codigoAreaId').val(radioSel.val());
+
+        if (objCodigoArea.attr('data-call').length > 0)
+          funciones[objCodigoArea.attr('data-call')].call(this, objCodigoArea.parent().parent());
+
         $("#modalAreas").modal('hide');
         objCodigoArea = undefined;
       }
@@ -95,6 +102,18 @@
         }
       }
     );
+  };
+
+  var funciones = {
+    ComprasOrdenes: function ($tr) {
+      msb.confirm('Estas seguro de modificar el area?', 'Ordenes de Compras', this, function(){
+        var datos = "?id_orden="+$tr.find('#prodIdOrden').val()+'&id_area='+$tr.find('#codigoAreaId').val()+'&num_row='+$tr.find('#prodIdNumRow').val();
+        $.get(base_url+'panel/compras_ordenes/ajax_cambia_area/'+datos,
+        function() {
+          console.log("dd");
+        });
+      });
+    },
   };
 
 });

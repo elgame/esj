@@ -15,4 +15,4 @@
 |http://localhost/sanjorge/   http://sanjorge.dev/
 */
 
-$config['jsv']	= '1.30';
+$config['jsv']	= '1.31';
