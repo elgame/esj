@@ -36,9 +36,21 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="despido">Despido</label>
+                  <label class="control-label" for="indem_cons">Indemnización constitucional</label>
                   <div class="controls">
-                    <input type="checkbox" name="despido" id="despido" value="true" <?php echo $this->input->get('despido')=='true'? 'checked': '';  ?>>
+                    <input type="checkbox" name="indem_cons" id="indem_cons" value="true" <?php echo $this->input->get('indem_cons')=='true'? 'checked': '';  ?>>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="indem">Indemnización</label>
+                  <div class="controls">
+                    <input type="checkbox" name="indem" id="indem" value="true" <?php echo $this->input->get('indem')=='true'? 'checked': '';  ?>>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="prima">Prima de antigüedad</label>
+                  <div class="controls">
+                    <input type="checkbox" name="prima" id="prima" value="true" <?php echo $this->input->get('prima')=='true'? 'checked': '';  ?>>
                   </div>
                 </div>
 

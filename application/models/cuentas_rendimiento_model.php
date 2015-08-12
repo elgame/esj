@@ -8,19 +8,25 @@ class cuentas_rendimiento_model extends CI_Model {
       $id_area = $this->areas_model->getAreaDefault();
 
     $info = array(
-      'saldo_inicial'            => 0,
-      'facturas'                 => array(),
-      'existencia'               => array(),
-      'otros_ingresos'           => array(),
-      'existencia_anterior'      => array(),
-      'compras_empacadas'        => array(),
-      'compras_bascula'          => array(),
-      'compras_bascula_bonifica' => array(),
-      'compras_apatzingan'       => array(),
-      'costo_venta'              => array(),
-      'industrial'               => 0,
-      'rendimientos'             => array(),
+      'info'                         => null,
+      'saldo_inicial'                => 0,
+      'facturas'                     => array(),
+      'existencia'                   => array(),
+      'otros_ingresos'               => array(),
+      'existencia_anterior'          => array(),
+      'compras_empacadas'            => array(),
+      'compras_bascula'              => array(),
+      'compras_bascula_bonifica'     => array(),
+      'ingresos_movimientos_bascula' => array(),
+      'compras_apatzingan'           => array(),
+      'costo_venta'                  => array(),
+      'industrial'                   => 0,
+      'rendimientos'                 => array(),
     );
+
+    $info['info'] = $this->db->query("SELECT *
+                               FROM cuentas_rendimiento
+                               WHERE id_area = {$id_area} AND fecha = '{$fecha}'")->row();
 
     // facturas del dia
     $facturas = $this->db->query(
@@ -135,6 +141,13 @@ class cuentas_rendimiento_model extends CI_Model {
       GROUP BY c.id_calidad"
     );
     $info['compras_bascula_bonifica'] = $compras_bascula_bonifica->row();
+
+    $ingresos_movimientos_bascula = $this->db->query(
+      "SELECT bultos cajas, kilos, precio, importe
+      FROM cuentas_rendimiento_compras_tecoman
+      WHERE id_area = {$id_area} AND fecha = '{$fecha}'"
+    );
+    $info['ingresos_movimientos_bascula'] = $ingresos_movimientos_bascula->result();
 
     $compras_apatzingan = $this->db->query(
       "SELECT cre.nombre, cre.unidad, cre.precio, cre.cantidad, (cre.precio*cre.cantidad) importe
@@ -273,6 +286,19 @@ class cuentas_rendimiento_model extends CI_Model {
 
   public function guardar($data)
   {
+    // informacion del dia
+    $result = $this->db->query("SELECT id
+                               FROM cuentas_rendimiento
+                               WHERE fecha = '{$data['fecha_caja_chica']}' AND id_area = {$data['id_area']}")->row();
+    if (isset($result->id) && $result->id > 0) {
+      $this->db->update('cuentas_rendimiento', array('descuento_parcial' => $data['descuento_parcial_ventas']),
+        "fecha = '{$data['fecha_caja_chica']}' AND id_area = {$data['id_area']}");
+    } else {
+      $this->db->insert('cuentas_rendimiento',
+        array('fecha' => $data['fecha_caja_chica'], 'id_area' => $data['id_area'],
+          'status' => $data['cerrar_dia'], 'descuento_parcial' => $data['descuento_parcial_ventas']));
+    }
+
     // exitencias
     $exitencias = array();
     if (isset($data['prod_did_prod']) && count($data['prod_did_prod']) > 0) {
@@ -317,6 +343,34 @@ class cuentas_rendimiento_model extends CI_Model {
     if (count($compras) > 0)
     {
       $this->db->insert_batch('cuentas_rendimiento_compras_empacadas', $compras);
+    }
+
+    // compra tecoman ingresos x mov
+    $movimientos_bascula = array();
+    if (isset($data['ingresos_movimientos_bascula_importe']) && count($data['ingresos_movimientos_bascula_importe']) > 0) {
+      foreach ($data['ingresos_movimientos_bascula_importe'] as $key => $ingreso)
+      {
+        if ($data['ingresos_movimientos_bascula_caja'][$key] > 0 &&
+            $data['ingresos_movimientos_bascula_kilos'][$key] > 0 &&
+            $data['ingresos_movimientos_bascula_precio'][$key] > 0 &&
+            $data['ingresos_movimientos_bascula_importe'][$key] > 0) {
+          $movimientos_bascula[] = array(
+            'fecha'   => $data['fecha_caja_chica'],
+            'id_area' => $data['id_area'],
+            'row'     => $key,
+            'bultos'  => $data['ingresos_movimientos_bascula_caja'][$key],
+            'kilos'   => $data['ingresos_movimientos_bascula_kilos'][$key],
+            'precio'  => $data['ingresos_movimientos_bascula_precio'][$key],
+            'importe' => $data['ingresos_movimientos_bascula_importe'][$key],
+          );
+        }
+      }
+    }
+
+    $this->db->delete('cuentas_rendimiento_compras_tecoman', array('fecha' => $data['fecha_caja_chica'], 'id_area' => $data['id_area']));
+    if (count($movimientos_bascula) > 0)
+    {
+      $this->db->insert_batch('cuentas_rendimiento_compras_tecoman', $movimientos_bascula);
     }
 
     // apatzingan
@@ -500,14 +554,29 @@ class cuentas_rendimiento_model extends CI_Model {
     if($pdf->GetY() >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(106);
-    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(25, 25, 25, 25));
-    $pdf->Row(array(
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(100, 25, 25, 25, 25));
+    $pdf->Row(array('TOTAL',
         String::formatoNumero($total_exis_bultos, 2, ''),
         String::formatoNumero($total_exis_kilos, 2, ''),
-        '',
+        '--',
         String::formatoNumero($total_existencias, 2, '$'),
+        ), true, true);
+    $pdf->SetX(6);
+    $descuento_parcial_ventas = (isset($rpt['info']->descuento_parcial)? $rpt['info']->descuento_parcial: 0);
+    $pdf->Row(array('DESCUENTO PARCIAL S/O VENTA',
+        '--',
+        '--',
+        '--',
+        String::formatoNumero($descuento_parcial_ventas, 2, '$'),
+        ), true, true);
+    $pdf->SetX(6);
+    $pdf->Row(array('SUMA TOTALES',
+        String::formatoNumero($total_exis_bultos+$total_bultos, 2, ''),
+        String::formatoNumero($total_exis_kilos+$total_kilos, 2, ''),
+        '--',
+        String::formatoNumero($total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$'),
         ), true, true);
 
     // OTROS INGRESOS
@@ -541,7 +610,7 @@ class cuentas_rendimiento_model extends CI_Model {
 
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array(
-        $otr_ingreso->ccodigo,
+        "({$otr_ingreso->ccodigo}) ".$otr_ingreso->cnombre,
         String::formatoNumero($otr_ingreso->cantidad, 2, ''),
         $otr_ingreso->unidad,
         String::formatoNumero($otr_ingreso->precio_unitario, 2, '$'),
@@ -671,14 +740,29 @@ class cuentas_rendimiento_model extends CI_Model {
     if($pdf->GetY() >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(106);
-    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(25, 25, 25, 25));
-    $pdf->Row(array(
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(100, 25, 25, 25, 25));
+    $pdf->Row(array('TOTAL',
         String::formatoNumero($total_compra_empa_bultos, 2, ''),
         String::formatoNumero($total_compra_empa_kilos, 2, ''),
-        '',
+        '--',
         String::formatoNumero($total_compra_empa, 2, '$'),
+        ), true, true);
+    $pdf->SetX(6);
+    $descuento_parcial_ventas = (isset($rpt['info']->descuento_parcial)? $rpt['info']->descuento_parcial: 0);
+    $pdf->Row(array('SUMA TOTALES',
+        String::formatoNumero($total_exis_anterior_bultos+$total_compra_empa_bultos, 2, ''),
+        String::formatoNumero($total_exis_anterior_kgs+$total_compra_empa_kilos, 2, ''),
+        '--',
+        String::formatoNumero($total_exis_anterior+$total_compra_empa, 2, '$'),
+        ), true, true);
+    $pdf->SetX(6);
+    $pdf->Row(array('VENTA NETA DEL DIA',
+        String::formatoNumero(($total_exis_bultos+$total_bultos)-($total_exis_anterior_bultos+$total_compra_empa_bultos), 2, ''),
+        String::formatoNumero(($total_exis_kilos+$total_kilos)-($total_exis_anterior_kgs+$total_compra_empa_kilos), 2, ''),
+        '--',
+        String::formatoNumero(($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas)-($total_exis_anterior+$total_compra_empa), 2, '$'),
         ), true, true);
 
     // COMPRAS LIMON TECOMAN
@@ -720,13 +804,32 @@ class cuentas_rendimiento_model extends CI_Model {
         String::formatoNumero($compra->importe, 2, '$')
         ), false, true);
     }
+    if(count($rpt['ingresos_movimientos_bascula']) > 0) {
+      foreach ($rpt['ingresos_movimientos_bascula'] as $key => $compra) {
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $total_compra_bascula        += floatval($compra->importe);
+        $total_compra_bascula_bultos += floatval($compra->cajas);
+        $total_compra_bascula_kgs    += floatval($compra->kilos);
+
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array(
+          'INGRESOS X MOVIMIENTOS',
+          String::formatoNumero($compra->cajas, 2, ''),
+          String::formatoNumero($compra->kilos, 2, ''),
+          String::formatoNumero($compra->precio, 2, '$'),
+          String::formatoNumero($compra->importe, 2, '$')
+          ), false, true);
+      }
+    }
     if($pdf->GetY() >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetFont('Arial','B', 6);
-    $pdf->SetX(86);
-    $pdf->SetAligns(array('R', 'R', 'R', 'R'));
-    $pdf->SetWidths(array(30, 30, 30, 30));
-    $pdf->Row(array(
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(80, 30, 30, 30, 30));
+    $pdf->Row(array('TOTAL',
         String::formatoNumero($total_compra_bascula_bultos, 2, ''),
         String::formatoNumero($total_compra_bascula_kgs, 2, ''),
         '',

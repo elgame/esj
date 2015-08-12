@@ -160,6 +160,7 @@ class facturacion extends MY_Controller {
 
     $this->load->library('cfdi');
     $this->load->model('facturacion_model');
+    $this->load->model('empresas_model');
 
     if ( ! isset($_POST['borrador']))
     {
@@ -204,13 +205,14 @@ class facturacion extends MY_Controller {
     else // Parametros por default.
     {
       // Obtiene los datos de la empresa predeterminada.
-      $params['empresa_default'] = $this->db
-        ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
-                  e.no_exterior, e.no_interior, e.rfc")
-        ->from("empresas AS e")
-        ->where("e.predeterminado", "t")
-        ->get()
-        ->row();
+      $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+      // $this->db
+      //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org, e.calle, e.colonia, e.cp, e.estado, e.localidad, e.municipio, e.pais,
+      //             e.no_exterior, e.no_interior, e.rfc")
+      //   ->from("empresas AS e")
+      //   ->where("e.predeterminado", "t")
+      //   ->get()
+      //   ->row();
 
       $dire = [];
       if ($params['empresa_default']->calle) array_push($dire, $params['empresa_default']->calle);

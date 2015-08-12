@@ -34,6 +34,7 @@
 								<button class="btn">Buscar</button>
 
 								<a href="<?php echo base_url('panel/compras_areas/imprimir_catalogo'); ?>" class="btn btn-info pull-right" target="_blank"><i class="icon icon-print"></i> Lista</a>
+								<a href="<?php echo base_url('panel/compras_areas/xls_catalogo'); ?>" class="btn btn-info pull-right" target="_blank"><i class="icon icon-table"></i> Excel</a>
 							</fieldset>
 						</form>
 

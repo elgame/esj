@@ -1,8 +1,21 @@
--Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
--Checar el reporte de diario con las nuevas cosas
--al momento de hacer pagos tener la opcion de imprimir el sello de acuerdo a los formatos que la señora paso (va mandar otros)
+
+
+--Todos los reportes q se exporten a excel
+--Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
+--Checar el reporte de diario con las nuevas cosas
+---commit No 2
+--*otro catalogo de como el de la maquinaria para el punto de venta
+--*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar
+--*Que seleccionen una empresa y trabaje en esa empresa por default como si fuera sanjorge
 -en bascula poner limon apatzingan
 --en las ordenes de flete poder poner una descripcion, y q ponga el nombre del cliente y la fecha y hr de salida del producto q es el de la remision, numero de manifiesto de embarque
+--*el reporte de prestamos de trabajadores poder mostrar todos los trabajadores y su saldo
+-*Bascula al registrar boletas de salida se sale
+-*En reporte de nomina checar no suma el premio de asistencia cuando se calcula las vacaciones (semana 29 MALDONADO GALVEZ FRANCISCO JAVIER)
+--*descargar en exel los reportes de existencias
+-*Cambiar los reportes de nomina al apartado de nomina
+--*al momento de hacer pagos tener la opcion de imprimir el sello de acuerdo a los formatos que la señora paso (va mandar otros)
+-*caja chica que no muestre todo el listado de cheques
 ---commit No 1
 -*Agregar en facturacion facturar en dolares con tipo de cambio y que en cuentas por pagar se registre en pesos
 -*Agregar el finiquito por despido fiscal timbrado y un recibo de finiquito con sueldo real
@@ -13,7 +26,7 @@
 -*Bascula validar q si rosy ya puso los quilos no modifique la informacion desde el empaque
 -*en nomina de gomez marca error al exportar en exel el reporte
 -*en remisiones no esta separando los productos de fletes, seguros y esos
-
+-siap
 
 
 -*En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no hay ventas) y que tenga saldo

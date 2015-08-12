@@ -58,8 +58,16 @@
   							<i class="icon-user"></i><span class="hidden-phone"> <?php echo $this->session->userdata('usuario'); ?></span>
   							<span class="caret"></span>
   						</a>
-  						<ul class="dropdown-menu">
+  						<ul class="dropdown-menu" style="color:#000;">
   							<li><a href="<?php echo base_url('panel/home/logout'); ?>">Cerrar sesión</a></li>
+
+              <?php
+              foreach ($this->usuarios_model->getEmpresasPermiso() as $key => $value) {
+              ?>
+                <li><label><input type="radio" name="miemps" class="empresasSelects" value="<?php echo $value->url_accion ?>" <?php echo ($value->url_accion==$this->session->userdata('selempresa')? 'checked':'') ?>> <?php echo $value->nombre ?></label></li>
+              <?php
+              } ?>
+
   						</ul>
   					</div>
   					<!-- user dropdown ends -->

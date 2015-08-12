@@ -70,6 +70,7 @@ class cuentas_rendimiento extends MY_Controller {
     }
     else
     {
+      $_POST['cerrar_dia'] = 'f';
       $res_mdl = $this->cuentas_rendimiento_model->guardar($_POST);
 
       if(!$res_mdl['error'])

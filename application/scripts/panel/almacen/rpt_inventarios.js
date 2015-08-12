@@ -103,6 +103,27 @@ $(function(){
   $("#btnAddProducto").on('click', addProducto);
   $(document).on('click', '.remove_producto', removeProducto);
 
+  $('#form').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          did_empresa: $("#did_empresa").val(),
+          fid_producto: $("#fid_producto").val(),
+          con_existencia: $("#con_existencia").is(':checked')? 'si': '',
+          con_movimiento: $("#con_movimiento").is(':checked')? 'si': '',
+
+          ffamilias: [],
+        };
+    $("input.familiass[type=checkbox]:checked").each(function(index, el) {
+      url.ffamilias.push($(this).val());
+    });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
 });
 
 function cargaListaFamlias ($empresaId) {

@@ -162,10 +162,11 @@ class bascula extends MY_Controller {
       if (isset($_GET['p']))
         $ticket = '&p=t';
 
-      if ($this->input->post('ptipo') === 'en')
+      if ($this->input->post('ptipo') === 'en') {
         $boletar = $res_mdl['new_boleta']? '&br='.$res_mdl['idb']: '';
+      }
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
-      if( ! $res_mdl['error']){
+      if( $res_mdl['error'] == false){
         redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
       }
     }

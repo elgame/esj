@@ -22,7 +22,7 @@ class banco extends MY_Controller {
     'banco/get_cuentas_contpaq/',
     'banco/mover_movimiento/',
 
-    'banco/ajax_imprimir_sello/'
+    'banco/ajax_imprimir_sello/',
 
     'banco/rie_pdf/',
 		'banco/rie_xls/',

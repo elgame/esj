@@ -158,6 +158,7 @@ class documentos extends MY_Controller {
   {
     $this->load->model('documentos_model');
     $this->load->model('areas_model');
+    $this->load->model('empresas_model');
 
     if ( ! isset($this->facturacion_model))
     {
@@ -197,12 +198,13 @@ class documentos extends MY_Controller {
     // echo "</pre>";exit;
 
     // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("id_empresa, nombre_fiscal, rfc, calle, no_exterior, colonia, localidad, municipio, estado")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("id_empresa, nombre_fiscal, rfc, calle, no_exterior, colonia, localidad, municipio, estado")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
 
     // Construye la vista del listado de documentos.
     return $this->load->view('panel/documentos/agregar_listado', $params, true);

@@ -8,12 +8,15 @@ class inventario extends MY_Controller {
   private $excepcion_privilegio = array(
     'inventario/cproveedor_pdf/',
     'inventario/cproductos_pdf/',
+    'inventario/cproductos_xls/',
     'inventario/cproducto_pdf/',
     'inventario/cunproductos_pdf/',
     'inventario/cseguimiento_pdf/',
 
     'inventario/epu_pdf/',
+    'inventario/epu_xls/',
     'inventario/epc_pdf/',
+    'inventario/epc_xls/',
     'inventario/promedio_pdf/',
     'inventario/ueps_pdf/',
     'inventario/pueps_pdf/',
@@ -109,8 +112,8 @@ class inventario extends MY_Controller {
     $this->inventario_model->getCProductosPdf();
   }
   public function cproductos_xls(){
-    $this->load->model('cuentas_pagar_model');
-    $this->cuentas_pagar_model->cuentasPagarExcel();
+    $this->load->model('inventario_model');
+    $this->inventario_model->getCProductosXls();
   }
   public function cproducto_pdf()
   {
@@ -188,6 +191,11 @@ class inventario extends MY_Controller {
     $this->inventario_model->getEPUPdf();
 
   }
+  public function epu_xls(){
+    $this->load->model('inventario_model');
+    $this->inventario_model->getEPUXls();
+  }
+
   public function saldos_xls(){
     $this->load->model('cuentas_pagar_model');
     $this->cuentas_pagar_model->cuentasPagarExcel();
@@ -226,8 +234,8 @@ class inventario extends MY_Controller {
     $this->inventario_model->getEPCPdf();
   }
   public function epc_xls(){
-    $this->load->model('cuentas_pagar_model');
-    $this->cuentas_pagar_model->cuentasPagarExcel();
+    $this->load->model('inventario_model');
+    $this->inventario_model->getEPCXls();
   }
 
 

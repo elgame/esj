@@ -476,6 +476,13 @@ $(function(){
     }else
       $(this).val($(this).val());
   });
+  $("#pkilos_tara").keydown(function(event) {
+    var key = event.which;
+    if (key == 13 && $('#ptipo option:selected').val() == 'sa') {
+      event.preventDefault();
+      $("#pcajas_prestadas").focus();
+    }
+  });
 
   // Obtiene el pesaje de los brutos al tener el foco el input.
 

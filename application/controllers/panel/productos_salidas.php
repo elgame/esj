@@ -80,6 +80,7 @@ class productos_salidas extends MY_Controller {
 
     $this->load->model('productos_salidas_model');
     $this->load->model('compras_areas_model');
+    $this->load->model('empresas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -114,12 +115,13 @@ class productos_salidas extends MY_Controller {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
 
     $this->load->view('panel/header', $params);
     $this->load->view('panel/general/menu', $params);

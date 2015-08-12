@@ -53,6 +53,7 @@ class gastos extends MY_Controller {
     $this->load->model('gastos_model');
     $this->load->model('proveedores_model');
     $this->load->model('banco_cuentas_model');
+    $this->load->model('empresas_model');
 
     $this->configAddGasto();
     if ($this->form_validation->run() == FALSE)
@@ -82,12 +83,13 @@ class gastos extends MY_Controller {
     }
 
     // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
 
     $params['proveedores'] = $this->db->query(
       "SELECT p.id_proveedor, p.nombre_fiscal

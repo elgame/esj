@@ -190,8 +190,10 @@ class bascula_model extends CI_Model {
 
         $info_boleta = $this->getBasculaInfo($idb);
         if($info_boleta['info'][0]->fecha_tara != '' && strtotime(substr($info_boleta['info'][0]->fecha_tara, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
+          $data2['fecha_bruto'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_bruto, 11, 8);
+          $data2['fecha_tara'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_tara, 11, 8);
           // $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
-          $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          // $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
         }else
           $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
 
@@ -248,6 +250,7 @@ class bascula_model extends CI_Model {
 
       return array('passes'=>true, 'msg'=>$msg, 'idb' => $idb, 'new_boleta' => $new_boleta);
     }
+
 
     $this->db->insert('bascula', $data);
     return array('passes'=>true);
@@ -2123,7 +2126,7 @@ class bascula_model extends CI_Model {
       {
         if (array_key_exists($campoDb, $camposIds))
         {
-          if ($data[$campoDb] === null)
+          if (isset($data[$campoDb]) && $data[$campoDb] === null)
           {
             $data[$campoDb] = 0;
           }

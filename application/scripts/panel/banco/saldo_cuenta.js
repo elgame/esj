@@ -50,7 +50,7 @@ $(function(){
   $btn.attr('href', $btn.attr('href') + '&ids=' + ids.join(','));
 
   $("a.modalimprimir").on('click', function(event) {
-    $("#BtnImprimir").attr('idm', $(this).attr('data-idm'));
+    $("#BtnImprimir").attr('data-idm', $(this).attr('data-idm'));
     $("#modal-imprimir").modal('show');
   });
   $("#BtnImprimir").on('click', function(event) {

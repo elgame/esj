@@ -10,6 +10,7 @@ class compras_areas extends MY_Controller {
 			'compras_areas/ajax_get_areas/',
 			'compras_areas/ajax_get_areasauto/',
 			'compras_areas/imprimir_catalogo/',
+			'compras_areas/xls_catalogo/',
 		);
 
 	public function _remap($method){
@@ -181,6 +182,19 @@ class compras_areas extends MY_Controller {
 	{
 		$this->load->model('compras_areas_model');
 		$this->compras_areas_model->listaAreas();
+	}
+
+	public function xls_catalogo()
+	{
+		$this->load->model('compras_areas_model');
+
+		header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=catalogo_cuentas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+		echo $this->compras_areas_model->getAreasXls(0, true);
+		exit;
 	}
 
 

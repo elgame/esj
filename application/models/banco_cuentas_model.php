@@ -451,32 +451,190 @@ class banco_cuentas_model extends banco_model {
 
 	public function getInfoSelloEntrada($idm)
 	{
-		$res = $this->db->query("SELECT
+		$movimiento = $this->db->query("SELECT
 				m.id_movimiento,
 				Date(m.fecha) AS fecha,
-				Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+				m.monto,
+				Coalesce(p.nombre_fiscal, m.a_nombre_de, '') AS proveedor,
 				bb.nombre AS banco,
-				bc.alias AS cuenta
+				bc.alias AS cuenta,
+				Count(bmc.id_movimiento) AS compra,
+				Count(bmb.id_movimiento) AS bascula,
+				e.nombre_fiscal AS empresa,
+				m.metodo_pago, m.concepto
 			FROM banco_movimientos AS m
-				LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
+				INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = m.id_cuenta
+				INNER JOIN banco_bancos AS bb ON bb.id_banco = bc.id_banco
+				INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
 				LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
-				LEFT JOIN banco_cuentas AS bc ON bc.id_cuenta = m.id_cuenta
-				LEFT JOIN banco_bancos AS bb ON bb.id_banco = bc.id_banco
-			WHERE m.id_movimiento = {$idm}")->row();
+				LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = m.id_movimiento
+				LEFT JOIN banco_movimientos_bascula AS bmb ON bmb.id_movimiento = m.id_movimiento
+			WHERE m.id_movimiento = {$idm}
+			GROUP BY m.id_movimiento, Date(m.fecha), m.monto, p.nombre_fiscal, bb.nombre,
+				bc.alias, e.nombre_fiscal, m.metodo_pago, m.concepto")->row();
+
+
+		if ($movimiento->compra > 0) { //pago de compras
+			// lista de compras ligadas a un mov
+			$movimiento->compras = $this->db->query("SELECT
+					c.id_compra, c.serie, c.folio, Date(c.fecha) AS fecha, c.total, c.isgasto
+				FROM banco_movimientos_compras bmc
+					INNER JOIN compras_abonos ca ON ca.id_abono = bmc.id_compra_abono
+					INNER JOIN compras c ON c.id_compra = ca.id_compra
+				WHERE bmc.id_movimiento = {$idm}")->result();
+
+			if (count($movimiento->compras) > 0) {
+				$ids_comprs = array_reduce($movimiento->compras, function ($carry, $obj) {
+					if ($carry) $carry .= ',';
+	    		return $carry . $obj->id_compra;
+				});
+
+				// lista de ordenes ligadas a un mov de las compras
+				$movimiento->ordenes = $this->db->query("SELECT
+						co.folio, Date(co.fecha_autorizacion) AS fecha_autorizo, Date(co.fecha_aceptacion) AS fecha_acepto,
+						Sum(cp.total) AS total, cea.folio AS ent_folio, Date(cea.fecha) AS ent_fecha, (u.nombre || ' ' || u.apellido_paterno) AS ent_recibio,
+						string_agg(cp.id_area::text, ',') AS id_area, (SELECT (nombre || ' ' || apellido_paterno) FROM usuarios WHERE id = co.id_empleado) AS registro
+					FROM compras_facturas cf
+						INNER JOIN compras_ordenes co ON co.id_orden = cf.id_orden
+						INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+						INNER JOIN compras_entradas_almacen cea ON cea.id_orden = co.id_orden
+						INNER JOIN usuarios u ON u.id = cea.id_recibio
+					WHERE cf.id_compra in({$ids_comprs})
+					GROUP BY co.id_empleado, co.folio, co.fecha_autorizacion, co.fecha_aceptacion, cea.folio, cea.fecha, u.nombre, u.apellido_paterno")->result();
+			}
+
+		} elseif($movimiento->bascula > 0) { // pago de bascula
+			// lista de boletas ligadas al pago
+				$movimiento->boletas = $this->db->query("SELECT
+						b.folio, b.kilos_neto, b.importe, Date(b.fecha_bruto) AS fecha, b.no_lote, bp.concepto
+					FROM banco_movimientos_bascula bmb
+						INNER JOIN bascula_pagos bp ON bp.id_pago = bmb.id_bascula_pago
+						INNER JOIN bascula_pagos_basculas bpb ON bp.id_pago = bpb.id_pago
+						INNER JOIN bascula b ON b.id_bascula = bpb.id_bascula
+					WHERE bmb.id_movimiento = {$idm} AND bp.status = 't'")->result();
+		} else { // pago de
+
+		}
+
+		return $movimiento;
+	}
+
+	public function sellotxt_compra(&$file, &$data)
+	{
+		$total_ordenes = 0;
+    $codigoAreas = $registro = $recibio = array();
+    $text_ingreso = '';
+    foreach ($data->ordenes as $key => $orden) {
+    	fwrite($file, ($key==0? 'O COMPRA: ':'          ').$orden->folio. '   '. String::fechaATexto($orden->fecha_autorizo, '/c'). "\r\n");
+    	$total_ordenes += $orden->total;
+
+    	$text_ingreso .= ($key==0? 'REG #: ':'       ').$orden->ent_folio. '   '. String::fechaATexto($orden->fecha_acepto, '/c'). "\r\n";
+
+    	if ($orden->id_area != '') {
+	    	foreach (explode(',', $orden->id_area) as $kar => $area) {
+		    	if($area!= '' && !array_key_exists($area, $codigoAreas))
+		      	$codigoAreas[$area] = $this->compras_areas_model->getDescripCodigo($area);
+	    	}
+    	}
+
+    	if($orden->registro!= '' && !array_key_exists($orden->registro, $registro))
+      	$registro[$orden->registro] = $orden->registro;
+      if($orden->ent_recibio!= '' && !array_key_exists($orden->ent_recibio, $recibio))
+      	$recibio[$orden->ent_recibio] = $orden->ent_recibio;
+    }
+    fwrite($file, 'IMPORTE: '.String::formatoNumero($total_ordenes) . "\r\n");
+    $str_registro = array_reduce($registro, function ($carry, $val) {
+				if ($carry) $carry .= ',';
+    		return $carry . $val;
+			});
+    fwrite($file, 'REG:'.$str_registro . "\r\n");
+
+    fwrite($file, 'PROV: '.$data->proveedor . "\r\n");
+
+    fwrite($file, '              APLICACION' . "\r\n");
+
+    fwrite($file, implode(' - ', $codigoAreas) . "\r\n");
+
+    fwrite($file, "----------------------------------------\r\n");
+    fwrite($file, '           INGRESO ALMACEN' . "\r\n");
+    fwrite($file, $text_ingreso);
+    $folios_comprs = array_reduce($data->compras, function ($carry, $obj) {
+				if ($carry) $carry .= ',';
+    		return $carry . $obj->serie.$obj->folio;
+			});
+    fwrite($file, 'FACT:'.$folios_comprs . "\r\n");
+    fwrite($file, 'IMPORTE: '.String::formatoNumero($total_ordenes) . "\r\n");
+    fwrite($file, 'REG:'.$str_registro . "\r\n");
+    $str_recibio = array_reduce($recibio, function ($carry, $val) {
+				if ($carry) $carry .= ',';
+    		return $carry . $val;
+			});
+    fwrite($file, 'RBO:'.$str_recibio . "\r\n");
+
+    fwrite($file, "----------------------------------------\r\n");
+    fwrite($file, '           DATOS DEL PAGO' . "\r\n");
+    fwrite($file, 'FACT:'.$folios_comprs. "\r\n");
+    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
+    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+	}
+
+	public function sellotxt_bascula(&$file, &$data)
+	{
+    fwrite($file, 'PROV: '.$data->proveedor . "\r\n");
+    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+    fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
+    if(count($data->boletas)>0)
+    	fwrite($file, $data->boletas[0]->concepto . "\r\n");
+
+    fwrite($file, "----------------------------------------\r\n");
+		$total_kilos = $total_importe = 0;
+    fwrite($file, 'BOLETA  LOTE KILOS  PREC IMPORTE'. "\r\n");
+    foreach ($data->boletas as $key => $boleta) {
+    	$row =  str_pad(substr($boleta->folio, 0, 7), 7, ' ', STR_PAD_LEFT).' '.
+    		str_pad(substr($boleta->no_lote, 0, 4), 4, ' ', STR_PAD_LEFT).' '.
+    		str_pad(substr($boleta->kilos_neto, 0, 6), 6, ' ', STR_PAD_LEFT).' '.
+    		str_pad(substr(round($boleta->importe/$boleta->kilos_neto, 2), 0, 4), 4, ' ', STR_PAD_LEFT).' '.
+    		str_pad(substr($boleta->importe, 0, 9), 9, ' ', STR_PAD_LEFT);
+    	fwrite($file, $row. "\r\n");
+			$total_importe += $boleta->importe;
+			$total_kilos   += $boleta->kilos_neto;
+    }
+    fwrite($file, "----------------------------------------\r\n");
+    $row = str_pad('TOTAL', 8).' '.
+    	str_pad(substr($total_kilos, 0, 10), 10, ' ', STR_PAD_LEFT).' '.
+  		str_pad(substr(round($total_importe/$total_kilos, 2), 0, 5), 5, ' ', STR_PAD_LEFT).' '.
+  		str_pad(substr($total_importe, 0, 9), 9, ' ', STR_PAD_LEFT);
+  	fwrite($file, $row. "\r\n");
+	}
+
+	public function sellotxt_banco(&$file, &$data)
+	{
+    fwrite($file, 'PROV: '.$data->proveedor . "\r\n");
+    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+    fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
+    fwrite($file, $data->concepto . "\r\n");
 	}
 
 	public function imprimir_sellotxt($idm, $ruta)
   {
+  	$this->load->model('compras_areas_model');
     $data = $this->getInfoSelloEntrada($idm);
 
-    $file = fopen(APPPATH."media/imprimir/entradatxt.txt", "w");
+    $file = fopen(APPPATH."media/imprimir/bancostxt.txt", "w");
     fwrite($file, "----------------------------------------\r\n");
-    fwrite($file, '     INGRESO ALMACEN '.$data->almacen . "\r\n");
     fwrite($file, $data->empresa . "\r\n");
-    fwrite($file, 'FECHA: '.String::fechaATexto($data->fecha, '/c').'  REG. No '.$data->folio_almacen . "\r\n");
-    fwrite($file, $data->proveeor . "\r\n");
-    fwrite($file, 'FOLIO: '.String::formatoNumero($data->folio, 2, '').'  IMPORTE: '.String::formatoNumero($data->total) . "\r\n");
-    fwrite($file, 'RECIBI: '.$data->recibio . "\r\n");
+
+    if ($data->compra > 0) { //pago de compras
+    	$this->sellotxt_compra($file, $data);
+		} elseif($data->bascula > 0) { // pago de bascula
+    	$this->sellotxt_bascula($file, $data);
+		} else { // pago de
+			$this->sellotxt_banco($file, $data);
+		}
+
     fwrite($file, "----------------------------------------\r\n");
     fclose($file);
 

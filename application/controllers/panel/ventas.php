@@ -115,6 +115,7 @@ class ventas extends MY_Controller {
     $this->load->library('cfdi');
     $this->load->model('facturacion_model');
     $this->load->model('ventas_model');
+    $this->load->model('empresas_model');
 
     $this->configAddModFactura();
     if($this->form_validation->run() == FALSE)
@@ -149,12 +150,13 @@ class ventas extends MY_Controller {
 
     // Parametros por default.
     // Obtiene los datos de la empresa predeterminada.
-    $params['empresa_default'] = $this->db
-      ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
-      ->from("empresas AS e")
-      ->where("e.predeterminado", "t")
-      ->get()
-      ->row();
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    // $this->db
+    //   ->select("e.id_empresa, e.nombre_fiscal, e.cer_caduca, e.cfdi_version, e.cer_org")
+    //   ->from("empresas AS e")
+    //   ->where("e.predeterminado", "t")
+    //   ->get()
+    //   ->row();
 
     // Obtiene el numero de certificado de la empresa predeterminada.
     $params['no_certificado'] = $this->cfdi->obtenNoCertificado($params['empresa_default']->cer_org);

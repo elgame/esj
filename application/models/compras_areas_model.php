@@ -41,7 +41,7 @@ class compras_areas_model extends CI_Model{
 			"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
 				cat.nombre AS tipo
 			FROM compras_areas ca
-				INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
+				LEFT JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
 			WHERE 1 = 1 {$sql}
 			ORDER BY ca.codigo_fin ASC
 		", $params, true);
@@ -68,7 +68,7 @@ class compras_areas_model extends CI_Model{
 				"SELECT ca.id_area, cat.id_tipo, ca.codigo, ca.codigo_fin, ca.nombre, ca.status, ca.id_padre,
 					cat.nombre AS tipo
 				FROM compras_areas ca
-					INNER JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
+					LEFT JOIN compras_areas_tipo cat ON ca.id_tipo = cat.id_tipo
 				WHERE ca.id_area = {$id}
 				ORDER BY ca.codigo_fin ASC");
 		if($res->num_rows() > 0)
@@ -458,6 +458,65 @@ class compras_areas_model extends CI_Model{
 
 		return $newpag;
   }
+
+  public function getAreasXls($id_submenu=0, $firs=true, $nivel=0){
+		$html = "";
+		$bande = true;
+		$sql_subm = $id_submenu==0? 'id_padre IS NULL': "id_padre = '{$id_submenu}'";
+
+		$res = $this->db
+			->select("id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre")
+			->from('compras_areas')
+			->where("status = 't' AND {$sql_subm}")
+			->order_by('codigo_fin', 'asc')
+		->get();
+
+		if($firs) {
+			$this->load->model('empresas_model');
+    	$empresa = $this->empresas_model->getInfoEmpresa(2);
+			$titulo1 = $empresa['info']->nombre_fiscal;
+	    $titulo2 = 'Catalogo de maquinaria, equipos e instalaciones';
+			$html .= '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    }
+		foreach($res->result() as $data){
+			$res1 = $this->db
+				->select('Count(id_area) AS num')
+				->from('compras_areas')
+				->where("id_padre = '".$data->id_area."'")
+			->get();
+			$data1 = $res1->row();
+
+			$html .= '
+        <tr>
+          <td colspan="'.$nivel.'"></td>
+          <td>'.$data->codigo.'</td>
+          <td>'.utf8_decode($data->nombre).'</td>
+        </tr>';
+
+			if($data1->num > 0){
+				$html .= $this->getAreasXls($data->id_area, false, $nivel+1);
+			}
+			$res1->free_result();
+		}
+		$res->free_result();
+
+		if($firs) {
+			$html .= '</tbody>
+    	</table>';
+    }
+
+		return $html;
+	}
 
 
 

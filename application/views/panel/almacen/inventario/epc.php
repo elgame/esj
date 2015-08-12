@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/inventario/epc_pdf/'); ?>" method="GET" class="form-search" target="frame_reporte">
+            <form id="form" action="<?php echo base_url('panel/inventario/epc_pdf/'); ?>" method="GET" class="form-search" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -36,7 +36,7 @@
                   <?php foreach ($data['familias'] as $key => $value)
                   {
                   ?>
-                    <li><label><input type="checkbox" name="ffamilias[]" value="<?php echo $value->id_familia; ?>" checked> <?php echo $value->nombre; ?></label></li>
+                    <li><label><input type="checkbox" name="ffamilias[]" class="familiass" value="<?php echo $value->id_familia; ?>" checked> <?php echo $value->nombre; ?></label></li>
                   <?php
                   } ?>
                     </ul>
@@ -72,7 +72,15 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/inventario/epc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <div class="box span12">
+        <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/inventario/epc_xls'); ?>" class="linksm" target="_blank">
+          <i class="icon-table"></i> Excel</a>
+        <div class="box-content">
+          <div class="row-fluid">
+            <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/inventario/epc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+          </div>
+        </div>
+      </div><!--/span-->
 
     </div><!--/#content.span9-->
 

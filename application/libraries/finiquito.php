@@ -160,9 +160,12 @@ class finiquito
    *
    * @return [type] [description]
    */
-  public function procesar($despido=false)
+  public function procesar($despido)
   {
-    $this->despido = $despido;
+    if ($despido['indem_cons'] || $despido['indem'] || $despido['prima']) {
+      $this->despido_det = $despido;
+      $this->despido     = true;
+    }
 
     $this->empleado->anios_trabajados      = $this->aniosTrabajadosEmpleado();
     $this->empleado->dias_trabajados      = $this->diasTrabajadosEmpleado();
@@ -281,16 +284,26 @@ class finiquito
    */
   public function indemnizaciones()
   {
-    // 3 meses de sueldo
-    $despido_injustificado = $this->empleado->salario_diario_integrado*90;
+    $despido_injustificado = 0;
+    if ($this->despido_det['indem_cons']) {
+      // 3 meses de sueldo
+      $despido_injustificado = $this->empleado->salario_diario_integrado*90;
+    }
 
-    // 20 días de sueldo por cada año de servicios prestados
-    $indemnisacion_negativa = 20*$this->empleado->anios_trabajados*$this->empleado->salario_diario_integrado;
-    $indemnisacion_negativa += ($this->empleado->dias_anio_vacaciones*20/365)*$this->empleado->salario_diario_integrado;
+    $indemnisacion_negativa = 0;
+    if ($this->despido_det['indem']) {
+      // 20 días de sueldo por cada año de servicios prestados
+      $indemnisacion_negativa = 20*$this->empleado->anios_trabajados*$this->empleado->salario_diario_integrado;
+      $indemnisacion_negativa += 20*($this->empleado->dias_anio_vacaciones/365)*$this->empleado->salario_diario_integrado;
+    }
 
-    // Prima de antigüedad 12 días de salario por cada año de servicio
-    $prima_antiguedad = 12*$this->empleado->anios_trabajados*$this->empleado->salario_diario_integrado;
-    $prima_antiguedad += ($this->empleado->dias_anio_vacaciones*12/365)*$this->empleado->salario_diario_integrado;
+    $prima_antiguedad = 0;
+    if ($this->despido_det['prima']) {
+      // Prima de antigüedad 12 días de salario por cada año de servicio
+      // SalariozonaB*2*años_trabajados*12
+      $prima_antiguedad = floatval($this->salariosZonasConfig->zona_b)*2*$this->empleado->anios_trabajados*12;
+      $prima_antiguedad += floatval($this->salariosZonasConfig->zona_b)*2*($this->empleado->dias_anio_vacaciones/365)*12;
+    }
 
     return round($despido_injustificado+$indemnisacion_negativa+$prima_antiguedad, 4);
   }
@@ -498,7 +511,7 @@ class finiquito
    */
   public function pIndemnizaciones()
   {
-    $anios_trabajados = $this->empleado->anios_trabajados+($this->empleado->dias_anio_vacaciones>0? 1: 0);
+    $anios_trabajados = $this->empleado->anios_trabajados+($this->empleado->dias_anio_vacaciones/365); //($this->empleado->dias_anio_vacaciones>0? 1: 0)
     $topeExcento = 90 * floatval($this->salariosZonasConfig->zona_a)*$anios_trabajados;
 
     // Si los que se le dara de indemnizacion al empleado excede el tope excento.
@@ -732,7 +745,7 @@ class finiquito
     if ($this->despido)
       $sumaImporteGravadosDiariosConOtros += $indemnizacionGravadoDiario;
     // echo "<pre>";
-    //   var_dump($sumaImporteGravadosDiariosConOtros);
+    //   var_dump($sumaImporteGravadosDiariosConOtros, $indemnizacionGravadoDiario);
     // echo "</pre>";exit;
 
     // Recorre los rangos de la tabla diaria de ISR para determinar en que
@@ -754,7 +767,7 @@ class finiquito
     $isrAnual = $isrSemaAgu * 52;
     $isr = floatval($isrSemana - $isrSemanaSubsidio + $isrAnual);
     // echo "<pre>";
-    //   var_dump($isrSemana, $isrSemanaSubsidio, $isrAnual, $isr);
+    //   var_dump($isrSemana, $isrAuxConOtros, $isrSemanaSubsidio, $isrAnual, $isr);
     // echo "</pre>";exit;
 
     // if ($this->despido) {
@@ -833,7 +846,7 @@ class finiquito
    */
   private function aniosTrabajadosEmpleado()
   {
-    $fechaActual = new DateTime($this->empleado->fecha_salida);
+    $fechaActual = new DateTime( (!isset($this->empleado->fecha_salida{0})? date('Y-m-d'): $this->empleado->fecha_salida) );
     $fechaInicioTrabajar = new DateTime($this->empleado->fecha_entrada);
     return intval($fechaInicioTrabajar->diff($fechaActual)->y);
   }

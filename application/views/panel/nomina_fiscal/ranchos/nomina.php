@@ -149,7 +149,7 @@
                       <td><input type="text" name="domingo[]" id="domingo" value="<?php echo $value->domingo; ?>" class="span11 vpositive tchange" <?php echo $readonly ?>></td>
                       <td><input type="text" name="total_lam[]" id="total_lam" value="<?php echo $value->total_lam; ?>" class="span11" readonly></td>
                       <td><input type="text" name="total_lvrd[]" id="total_lvrd" value="<?php echo $value->total_lvrd; ?>" class="span11" readonly></td>
-                      <td><input type="text" name="prestamo[]" id="prestamo" value="<?php echo $value->prestamo['total']; ?>" class="span11 vpositie tchange" readonly>
+                      <td><input type="text" name="prestamo[]" id="prestamo" value="<?php echo $value->prestamo['total']; ?>" class="span11 vpositie tchange">
                         <input type="hidden" name="prestamos_ids[]" id="prestamos_ids" value="<?php echo $value->prestamo['prestamos_ids']; ?>" class="span11 vpositive tchange">
                       </td>
                       <td><input type="text" name="total_pagar[]" id="total_pagar" value="<?php echo $value->total_pagar; ?>" class="span11" readonly></td>

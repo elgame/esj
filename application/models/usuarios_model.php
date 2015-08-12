@@ -195,7 +195,7 @@ class Usuarios_model extends privilegios_model {
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');
-      
+
 			$data_privilegios = $this->input->post('dprivilegios');
 		}
 
@@ -388,6 +388,29 @@ class Usuarios_model extends privilegios_model {
 		}
 		return false;
 	}
+
+  public function getEmpresasPermiso()
+  {
+    if ($this->session->userdata('selempresa') == false) {
+      $this->load->model('empresas_model');
+      $emp = $this->empresas_model->getDefaultEmpresa();
+      $this->session->set_userdata('selempresa', $emp->id_empresa);
+    }
+    $result = $this->db->query(
+      "SELECT p.id, p.nombre, p.url_accion
+      FROM usuarios u
+        INNER JOIN usuarios_privilegios up ON u.id = up.usuario_id
+        INNER JOIN privilegios p ON p.id = up.privilegio_id
+      WHERE u.id = ".$this->session->userdata('id_usuario')."
+        AND up.privilegio_id in(SELECT id FROM privilegios WHERE id_padre = 382)");
+    return $result->result();
+  }
+
+  public function changeEmpresaSel($empresa)
+  {
+    $this->session->set_userdata('selempresa', $empresa);
+    return true;
+  }
 
 	/*
 		|	Logea al usuario y crea la session con los parametros

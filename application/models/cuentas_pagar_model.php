@@ -1422,7 +1422,7 @@ class cuentas_pagar_model extends privilegios_model{
           $proveedor->saldo -= $proveedor->facturas[$key]->abonos_total;
           $proveedor->facturas[$key]->saldo -= $proveedor->facturas[$key]->abonos_total;
 
-          if($proveedor->facturas[$key]->saldo <= 0 && $all_facturas == false)
+          if(round($proveedor->facturas[$key]->saldo, 4) <= 0 && $all_facturas == false)
             unset($proveedor->facturas[$key]);
         }
 

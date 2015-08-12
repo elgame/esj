@@ -1,5 +1,13 @@
 $(function(){
 	panel.init();
+
+	$("input.empresasSelects").change(function(){
+		$.post(base_url + 'panel/usuarios/ajax_change_empresa/',
+		{empresa: $(this).val()},
+		function(data, textStatus, xhr) {
+			console.log(data);
+		});
+	});
 });
 
 

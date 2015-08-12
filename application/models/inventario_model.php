@@ -302,6 +302,78 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
+  public function getCProductosXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_x_producto.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getCProductosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras por Producto';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre (Producto, Servicio)</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+      </tr>';
+    $familia = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $producto) {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$producto->nombre.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+        </tr>';
+
+      $proveedor_cantidad  += $producto->cantidad;
+      $proveedor_importe   += $producto->importe;
+      $proveedor_impuestos += $producto->impuestos;
+      $proveedor_total     += $producto->total;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2">TOTALES</td>
+          <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+          <td style="border:1px solid #000;">'.$proveedor_impuestos.'</td>
+          <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
   /**
    * Reporte existencias por unidad
    * @return
@@ -870,8 +942,8 @@ class inventario_model extends privilegios_model{
 	public function getEPUPdf(){
 		$res = $this->getEPUData();
 
-	    $this->load->model('empresas_model');
-	    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
@@ -1003,46 +1075,148 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('epu.pdf', 'I');
 	}
 
-	public function cuentasPagarExcel(){
-		$res = $this->getCuentasPagarData(60);
+	public function getEPUXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=epu.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
 
-		$this->load->library('myexcel');
-		$xls = new myexcel();
+		$res = $this->getEPUData();
 
-		$worksheet =& $xls->workbook->addWorksheet();
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
-		$xls->titulo2 = 'Cuentas por pagar';
-		$xls->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
-		$xls->titulo4 = ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': $this->input->get('ftipo') == 'pp'? 'Pendientes por pagar': 'Todas');
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Existencia por unidades';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
 
-		$data_fac = $res['cuentas'];
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Entradas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Salidas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Existencia</td>
+        </tr>';
 
-		$row=0;
-		//Header
-		$xls->excelHead($worksheet, $row, 8, array(
-				array($xls->titulo2, 'format_title2'),
-				array($xls->titulo3, 'format_title3'),
-				array($xls->titulo4, 'format_title3')
-		));
+    $familia = '';
+    $totales = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($key==0){
 
-		$row +=3;
-		$xls->excelContent($worksheet, $row, $data_fac, array(
-				'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo'),
-				'conte' => array(
-						array('name' => 'nombre', 'format' => 'format4', 'sum' => -1),
-						array('name' => 'total', 'format' => 'format4', 'sum' => 0),
-						array('name' => 'abonos', 'format' => 'format4', 'sum' => 0),
-						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
-					)
-		));
+        if ($key == 0)
+        {
+          $familia = $item->nombre;
+          $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+        }
+      }
 
-		foreach ($data_fac as $key => $cuenta) {
-			$_GET['id_proveedor'] = $cuenta->id_proveedor;
-			$this->cuentaProveedorExcel($xls, false);
-		}
+      if ($familia <> $item->nombre)
+      {
+        if($key > 0){
+          $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>';
+        }
+        $totales['familia'] = array(0,0,0,0);
 
-		$xls->workbook->send('cuentas_pagar.xls');
-		$xls->workbook->close();
+        $familia = $item->nombre;
+        $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+      }
+
+      $imprimir = true;
+      $existencia = $item->saldo_anterior+$item->entradas-$item->salidas;
+      if($this->input->get('con_existencia') == 'si')
+        if($existencia <= 0)
+          $imprimir = false;
+      if($this->input->get('con_movimiento') == 'si')
+        if($item->entradas <= 0 && $item->salidas <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        $totales['familia'][0] += $item->saldo_anterior;
+        $totales['familia'][1] += $item->entradas;
+        $totales['familia'][2] += $item->salidas;
+        $totales['familia'][3] += $existencia;
+
+        $totales['general'][0] += $item->saldo_anterior;
+        $totales['general'][1] += $item->entradas;
+        $totales['general'][2] += $item->salidas;
+        $totales['general'][3] += $existencia;
+
+        $html .= '<tr>
+              <td style="width:30px;border:1px solid #000;"></td>
+              <td style="width:300px;border:1px solid #000;">'.$item->nombre_producto.' ('.$item->abreviatura.')'.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->saldo_anterior.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->entradas.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->salidas.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$existencia.'</td>
+            </tr>';
+      }
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">GENERAL</td>
+              <td style="border:1px solid #000;">'.$totales['general'][0].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][1].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][2].'</td>
+              <td style="border:1px solid #000;">'.$totales['general'][3].'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
 	}
 
 
@@ -1670,6 +1844,149 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('epc.pdf', 'I');
 	}
 
+  public function getEPCXls() {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=epc.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getEPCData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Existencia por costos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Entradas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Salidas</td>
+          <td style="width:200px;border:1px solid #000;background-color: #cccccc;">Existencia</td>
+        </tr>';
+
+    $familia = '';
+    $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($key==0){
+
+        if ($key == 0)
+        {
+          $familia = $item->nombre;
+          $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+        }
+      }
+
+      if ($familia <> $item->nombre)
+      {
+        if($key > 0){
+          $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>';
+        }
+        $totaltes['familia'] = array(0,0,0,0);
+
+        $familia = $item->nombre;
+        $html .= '<tr>
+              <td colspan="6" style="font-size:16px;border:1px solid #000;">'.$familia.'</td>
+            </tr>';
+      }
+
+      $imprimir = true;
+      if($this->input->get('con_existencia') == 'si')
+        if($item->data['saldo'][2] <= 0)
+          $imprimir = false;
+      if($this->input->get('con_movimiento') == 'si')
+        if($item->data['salida'][2] <= 0 && ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        $totaltes['familia'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['familia'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['familia'][2] += $item->data['salida'][2];
+        $totaltes['familia'][3] += $item->data['saldo'][2];
+
+        $totaltes['general'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['general'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['general'][2] += $item->data['salida'][2];
+        $totaltes['general'][3] += $item->data['saldo'][2];
+
+        $html .= '<tr>
+              <td style="width:30px;border:1px solid #000;"></td>
+              <td style="width:300px;border:1px solid #000;">'.$item->nombre_producto.' ('.$item->abreviatura.')'.'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->data_saldo['saldo'][2].'</td>
+              <td style="width:200px;border:1px solid #000;">'.($item->data['entrada'][2] - $item->data_saldo['saldo'][2]).'</td>
+              <td style="width:200px;border:1px solid #000;">'.$item->data['salida'][2].'</td>
+              <td style="width:200px;border:1px solid #000;">'.($item->data['saldo'][2]).'</td>
+            </tr>';
+      }
+    }
+
+    $html .= '
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">TOTALES</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][0].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][1].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][2].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['familia'][3].'</td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>
+            <tr style="font-weight:bold">
+              <td></td>
+              <td style="border:1px solid #000;">GENERAL</td>
+              <td style="border:1px solid #000;">'.$totaltes['general'][0].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['general'][1].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['general'][2].'</td>
+              <td style="border:1px solid #000;">'.$totaltes['general'][3].'</td>
+            </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
+  }
+
   /**
    * Reporte de existencias por costo
    * @return [type] [description]
@@ -1914,7 +2231,11 @@ class inventario_model extends privilegios_model{
 
 				$row['saldo'][0] = $value->cantidad+$result[$key]['saldo'][0];
 				$row['saldo'][2] = $row['entrada'][2]+$result[$key]['saldo'][2];
-        $row['saldo'][1] = abs($row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]));
+        $row['saldo'][1] = ($row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]));
+        if ($row['saldo'][1]<0) {
+          $row['saldo'][1] = $row['entrada'][1];
+          $row['saldo'][2] = $row['saldo'][0]*$row['saldo'][1];
+        }
 				// $row['saldo'][3] = $row['saldo'][2]/($row['saldo'][0]==0? 1: $row['saldo'][0]);
 			}else
 			{

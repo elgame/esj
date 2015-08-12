@@ -8,6 +8,7 @@ class usuarios extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
     'usuarios/ajax_get_usuarios/',
+    'usuarios/ajax_change_empresa/',
   );
 
 	public function _remap($method){
@@ -191,6 +192,12 @@ class usuarios extends MY_Controller {
    {
       $this->load->model('usuarios_model');
       echo json_encode($this->usuarios_model->getUsuariosAjax());
+   }
+
+   public function ajax_change_empresa()
+   {
+      $this->load->model('usuarios_model');
+      echo json_encode($this->usuarios_model->changeEmpresaSel($_POST['empresa']));
    }
 
 

@@ -842,7 +842,7 @@ class nomina
    */
   private function aniosTrabajadosEmpleado()
   {
-    $fechaActual = new DateTime(date('Y-m-d'));
+    $fechaActual = new DateTime( (!isset($this->empleado->fecha_salida{0})? date('Y-m-d'): $this->empleado->fecha_salida) );
     $fechaInicioTrabajar = new DateTime($this->empleado->fecha_entrada);
     return intval($fechaInicioTrabajar->diff($fechaActual)->y);
   }

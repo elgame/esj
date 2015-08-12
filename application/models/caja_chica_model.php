@@ -376,8 +376,8 @@ class caja_chica_model extends CI_Model {
        LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
        INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
        LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
-       WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0
-       ORDER BY ci.id_ingresos ASC
+       WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0 AND DATE(bm.fecha) > (Now() - interval '4 months')
+       ORDER BY bm.fecha ASC, ci.id_ingresos ASC
     ");
 
     return $movimientos->result();

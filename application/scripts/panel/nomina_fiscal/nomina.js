@@ -311,6 +311,11 @@
       totalPercepciones += parseFloat($aguinaldo.val());
     }
 
+    // Si tiene premio de asistencia.
+    if (parseFloat($parent.find('.premio_asistencia').val()) > 0) {
+      totalPercepciones += parseFloat($parent.find('.premio_asistencia').val());
+    }
+
     // Percepciones.
     totalPercepciones += parseFloat($sueldo.val()) + parseFloat($hExtras.val()) + parseFloat($subsidio.val()) + parseFloat($ptu.val());
     if( $esta_asegurado.val() == 't' )

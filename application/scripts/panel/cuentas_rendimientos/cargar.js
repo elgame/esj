@@ -31,6 +31,8 @@
     $('#total_exis_kilos_txt').text( util.darFormatoNum(total_exis_kilos.toFixed(2), '') );
     $('#total_existencias_txt').text( util.darFormatoNum(total_existencias.toFixed(2)) );
 
+    var descuento_parcial_ventas = parseFloat($("#descuento_parcial_ventas").val())||0;
+
     // SUMA TOTALES *****************
     $("#suma_totales_bultos").text( util.darFormatoNum(
         parseFloat(total_exis_bultos.toFixed(2)) +
@@ -44,7 +46,8 @@
     );
     $("#suma_totales_existencias").text( util.darFormatoNum(
         parseFloat(total_existencias.toFixed(2)) +
-        Number(parseFloat($("#total_facturas").val()||0).toFixed(2))
+        Number(parseFloat($("#total_facturas").val()||0).toFixed(2)) -
+        descuento_parcial_ventas
       )
     );
 
@@ -58,7 +61,8 @@
     $("#total_ingres").text( util.darFormatoNum(
         parseFloat(total_existencias.toFixed(2)) +
         Number(parseFloat($("#total_facturas").val()||0).toFixed(2)) +
-        Number(parseFloat($("#total_otsingr").val()||0).toFixed(2))
+        Number(parseFloat($("#total_otsingr").val()||0).toFixed(2)) -
+        descuento_parcial_ventas
       )
     );
 
@@ -84,6 +88,23 @@
     $('#total_compra_empa_bultos_txt').text( util.darFormatoNum(total_compra_empa_bultos.toFixed(2), '') );
     $('#total_compra_empa_kilos_txt').text( util.darFormatoNum(total_compra_empa_kilos.toFixed(2), '') );
     $('#total_compra_empa_txt').text( util.darFormatoNum(total_compra_empa.toFixed(2)) );
+
+
+    $('#table-compra_tecoman input#ingresos_movimientos_bascula_importe').each(function(index, el) {
+      var $this = $(el),
+      $tr      = $this.parent().parent(),
+      $bultos  = $("#total_compra_bascula_bultos"),
+      $kgs     = $("#total_compra_bascula_kgs"),
+      $bascula = $("#total_compra_bascula");
+
+      $bultos.val( (parseFloat($bultos.attr('data-value'))||0) + (parseFloat($tr.find('#ingresos_movimientos_bascula_caja').val())||0) );
+      $kgs.val( (parseFloat($kgs.attr('data-value'))||0) + (parseFloat($tr.find('#ingresos_movimientos_bascula_kilos').val())||0) );
+      $bascula.val( (parseFloat($bascula.attr('data-value'))||0) + (parseFloat($tr.find('#ingresos_movimientos_bascula_importe').val())||0) );
+
+      $('#total_compra_bascula_bultos_txt').text( util.darFormatoNum(Number($bultos.val()).toFixed(2), '') );
+      $('#total_compra_bascula_kgs_txt').text( util.darFormatoNum(Number($kgs.val()).toFixed(2), '') );
+      $('#total_compra_bascula_txt').text( util.darFormatoNum(Number($bascula.val()).toFixed(2)) );
+    });
 
 
     var total_apatzin = 0;
@@ -127,7 +148,7 @@
 
   eventsCalculos = function () {
     // Ingresos
-    $('#table-existencia').on('keyup', 'input#prod_bultos, input#prod_precio', function(e) {
+    $('#table-existencia').on('keyup', 'input#prod_bultos, input#prod_precio, input#descuento_parcial_ventas', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent();
@@ -157,6 +178,17 @@
       var key = e.which;
 
       calculaGastos();
+    });
+
+    // compra tecoman
+    $('#table-compra_tecoman').on('keyup', 'input#ingresos_movimientos_bascula_caja, input#ingresos_movimientos_bascula_kilos, input#ingresos_movimientos_bascula_importe', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr   = $this.parent().parent();
+
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        calculaGastos();
+      }
     });
 
     // apatzinGAN

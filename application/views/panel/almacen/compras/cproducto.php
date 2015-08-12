@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" method="GET" class="form-search" id="frmverformprod" target="frame_reporte">
+            <form action="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" method="GET" class="form-search" id="form" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -35,7 +35,7 @@
                     <div class="input-append span12">
                       <input type="text" name="fproductor" value="" id="fproductor" class="span9" placeholder="Buscar">
                       <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="fid_producto" value="" id="fid_producto">
+                      <input type="hidden" name="fid_producto" value="" class="fid_producto">
                     </div>
                     <div class="clearfix"></div>
                     <div style="height:130px;overflow-y: scroll;background-color:#eee;">
@@ -67,7 +67,18 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <div class="row-fluid">
+        <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/inventario/cproductos_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
+          <div class="box-content">
+            <div class="row-fluid">
+              <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/inventario/cproductos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+            </div>
+          </div>
+        </div><!--/span-->
+      </div><!--/row-->
 
     </div><!--/#content.span9-->
 

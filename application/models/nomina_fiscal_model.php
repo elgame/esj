@@ -1034,7 +1034,7 @@ class nomina_fiscal_model extends CI_Model {
     return array('status' => true);
   }
 
-  public function finiquito($empleadoId, $fechaSalida, $despido=false)
+  public function finiquito($empleadoId, $fechaSalida, $despido)
   {
     $this->load->library('finiquito');
 
@@ -1199,12 +1199,16 @@ class nomina_fiscal_model extends CI_Model {
     return $empleado;
   }
 
-  public function add_finiquito($empleadoId, $fechaSalida, $despido=false)
+  public function add_finiquito($empleadoId, $fechaSalida, $despido)
   {
     $this->load->library('cfdi');
     $this->load->library('facturartebarato_api');
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
+
+    $despido2 = false;
+    if ($despido['indem_cons'] || $despido['indem'] || $despido['prima'])
+      $despido2 = true;
 
     // Obtiene la info del empleado.
     $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
@@ -1289,7 +1293,7 @@ class nomina_fiscal_model extends CI_Model {
                    $empleadoFiniquito[0]->nomina->percepciones['aguinaldo']['ImporteExcento'];
 
       $indemnizaciones = 0;
-      if ($despido) {
+      if ($despido2) {
         $indemnizaciones = $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteGravado'] +
                             $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteExcento'];
       }
@@ -1354,7 +1358,7 @@ class nomina_fiscal_model extends CI_Model {
         'subsidio'                  => $subsidio,
         'deduccion_otros'           => $otros,
       );
-      if ($despido) {
+      if ($despido2) {
         $data['indemnizaciones']          = $indemnizaciones;
         $data['indemnizaciones_grabable'] = $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteGravado'];
         $data['indemnizaciones_exento']   = $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteExcento'];
@@ -1776,12 +1780,13 @@ class nomina_fiscal_model extends CI_Model {
             DATE(na.fecha_ini) as fecha_ini,
             DATE(na.fecha_fin) as fecha_fin
            FROM nomina_asistencia na
-           WHERE na.id_usuario = {$navalue['id_usuario']} AND na.tipo = 'in' AND DATE(na.fecha_ini) >= '{$semana['fecha_inicio']}'
-           AND DATE(na.fecha_fin) > '{$semana['fecha_final']}'
-        ")->result();
+           WHERE na.id_usuario = {$navalue['id_usuario']} AND na.tipo = 'in' AND DATE(na.fecha_ini) <= '{$semana['fecha_inicio']}'
+           AND DATE(na.fecha_fin) <= '{$semana['fecha_final']}'
+        ")->result(); // DATE(na.fecha_ini) >= '{$semana['fecha_inicio']}' AND DATE(na.fecha_fin) > '{$semana['fecha_final']}'
         foreach ($queryFi as $dkey => $rquit) {
           if ( strtotime($navalue['fecha_ini']) >= strtotime($rquit->fecha_ini) && strtotime($navalue['fecha_fin']) <= strtotime($rquit->fecha_fin)) {
             unset($nominaAsistencia[$nakey]);
+            break;
           }
         }
       }
@@ -2223,14 +2228,14 @@ class nomina_fiscal_model extends CI_Model {
   {
     $id_empresa = $id_empresa!=null? $id_empresa : $_GET['cid_empresa'];
     $sql = '';
-    if ($id_empresa==2 && $departamento == 1) $sql=" AND LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'"; //sanjorge
-    elseif($id_empresa==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%AGUINALDO%'"; //sanjorge
-    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%aguinaldos%'"; //francis -
+    if ($id_empresa==2 && $departamento == 1) $sql=" AND LOWER(nombre) LIKE '%indemnizaciones%' AND id_padre = '1296'"; //sanjorge
+    elseif($id_empresa==2 && $departamento != 1) $sql=" AND LOWER(nombre) LIKE '%indemnizaciones%' AND id_padre = '1296'"; //$sql=" AND id_padre IN(2036, 2037) AND nombre like '%AGUINALDO%'"; //sanjorge
+    elseif($id_empresa==6) $sql=" AND LOWER(nombre) LIKE '%indemnizaciones%'"; //francis -
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
     else{
-      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'"; //tests carga las de sanjorge
+      $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%indemnizaciones%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
     $query = $this->db->query(
       "SELECT *
@@ -6591,7 +6596,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       // $pdf->titulo1 S= $empresa['info']->nombre_fiscal;
       // $pdf->logo = $empresa['info']->logo;
-      $pdf->titulo2 = $empleado['info'][0]->nombre;
+      $pdf->titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno;
       $pdf->titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -6865,6 +6870,13 @@ class nomina_fiscal_model extends CI_Model {
   {
     if ($filtros['fid_trabajador'] !== '' && $filtros['fsalario_real'] !== '' && $filtros['ffecha1'] && $filtros['ffecha2'])
     {
+      $filtros['indem_cons'] = isset($filtros['indem_cons'])? $filtros['indem_cons']: false;
+      $filtros['indem'] = isset($filtros['indem'])? $filtros['indem']: false;
+      $filtros['prima'] = isset($filtros['prima'])? $filtros['prima']: false;
+      $despido = false;
+      if ($filtros['indem_cons'] || $filtros['indem'] || $filtros['prima'])
+        $despido = true;
+
       $this->load->model('usuarios_model');
       $this->load->model('empresas_model');
       $this->load->library('mypdf');
@@ -6875,6 +6887,9 @@ class nomina_fiscal_model extends CI_Model {
 
       $this->load->library('nomina');
       $configuraciones = $this->configuraciones();
+
+      $empleado['info'][0]->fecha_entrada = $filtros['ffecha1'];
+      $empleado['info'][0]->fecha_salida = $filtros['ffecha2'];
       $empleado['info'][0] = $this->nomina
           ->setEmpresaConfig($configuraciones['nomina'][0])
           ->setVacacionesConfig($configuraciones['vacaciones'])
@@ -6884,7 +6899,7 @@ class nomina_fiscal_model extends CI_Model {
           ->calculoBasico($empleado['info'][0]);
 
       // echo "<pre>";
-      //   var_dump($empleado);
+      //   var_dump($empleado['info'][0]);
       // echo "</pre>";exit;
 
       // Creación del objeto de la clase heredada
@@ -6894,7 +6909,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->logo = $empresa['info']->logo;
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-      $pdf->titulo2 = $filtros['despido']? 'CALCULO DE RENUNCIA VOLUNTARIA': 'CALCULO DE DESPIDO';
+      $pdf->titulo2 = !$despido? 'CALCULO DE RENUNCIA VOLUNTARIA': 'CALCULO DE DESPIDO';
       $pdf->titulo3 = '';
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       // $pdf->AliasNbPages();
@@ -6959,20 +6974,31 @@ class nomina_fiscal_model extends CI_Model {
           $anio_anterior->setTimestamp(strtotime($res_vacaciones->fecha));
       }
       $empleado['info'][0]->dias_anio_vacaciones = $anio_anterior->diff($fechaSalida)->days + 1;
+
+      $empleado['info'][0]->dias_vacaciones = $empleado['info'][0]->dias_vacaciones==0? 6: $empleado['info'][0]->dias_vacaciones;
       $diasProporcionVacaciones = round(($empleado['info'][0]->dias_anio_vacaciones / 365) * $empleado['info'][0]->dias_vacaciones, 2);
 
       $indemnisaciones = 0;
-      if ($filtros['despido']) {
-        // 3 meses de sueldo
-        $despido_injustificado = $filtros['fsalario_real']*90;
+      if ($despido) {
+        $despido_injustificado = 0;
+        if ($filtros['indem_cons']) {
+          // 3 meses de sueldo
+          $despido_injustificado = $filtros['fsalario_real']*90;
+        }
 
-        // 20 días de sueldo por cada año de servicios prestados
-        $indemnisacion_negativa = 20*$empleado['info'][0]->anios_trabajados*$filtros['fsalario_real'];
-        $indemnisacion_negativa += ($empleado['info'][0]->dias_anio_vacaciones*20/365)*$filtros['fsalario_real'];
+        $indemnisacion_negativa = 0;
+        if ($filtros['indem']) {
+          // 20 días de sueldo por cada año de servicios prestados
+          $indemnisacion_negativa = 20*$empleado['info'][0]->anios_trabajados*$filtros['fsalario_real'];
+          $indemnisacion_negativa += 20*($empleado['info'][0]->dias_anio_vacaciones/365)*$filtros['fsalario_real'];
+        }
 
-        // Prima de antigüedad 12 días de salario por cada año de servicio
-        $prima_antiguedad = 12*$empleado['info'][0]->anios_trabajados*$filtros['fsalario_real'];
-        $prima_antiguedad += ($empleado['info'][0]->dias_anio_vacaciones*12/365)*$filtros['fsalario_real'];
+        $prima_antiguedad = 0;
+        if ($filtros['prima']) {
+          // Prima de antigüedad 12 días de salario por cada año de servicio
+          $prima_antiguedad = floatval($configuraciones['salarios_zonas'][0]->zona_b)*2*$empleado['info'][0]->anios_trabajados*12;
+          $prima_antiguedad += floatval($configuraciones['salarios_zonas'][0]->zona_b)*2*($empleado['info'][0]->dias_anio_vacaciones/365)*12;
+        }
 
         $indemnisaciones = round($despido_injustificado+$indemnisacion_negativa+$prima_antiguedad, 4);
       }
@@ -7024,20 +7050,26 @@ class nomina_fiscal_model extends CI_Model {
 
       // --------------------------------
 
-      if ($filtros['despido']) {
+      if ($despido) {
         $pdf->SetFont('Arial','B', 8);
         $pdf->SetXY(60, $pdf->GetY() + 3);
         $pdf->Row(array("INDEMNIZACIONES", ""), false, false);
 
         $pdf->SetFont('Arial','', 8);
-        $pdf->SetX(60);
-        $pdf->Row(array("3 meses de sueldo", String::formatoNumero($despido_injustificado, 2, '$', false)), false, false);
+        if ($filtros['indem_cons']) {
+          $pdf->SetX(60);
+          $pdf->Row(array("3 meses de sueldo", String::formatoNumero($despido_injustificado, 2, '$', false)), false, false);
+        }
 
-        $pdf->SetX(60);
-        $pdf->Row(array("Indemnisacion negativa", String::formatoNumero($indemnisacion_negativa, 2, '$', false)), false, false);
+        if ($filtros['indem']) {
+          $pdf->SetX(60);
+          $pdf->Row(array("Indemnisacion negativa", String::formatoNumero($indemnisacion_negativa, 2, '$', false)), false, false);
+        }
 
-        $pdf->SetX(60);
-        $pdf->Row(array("Prima antiguedad", String::formatoNumero($prima_antiguedad, 2, '$', false)), false, false);
+        if ($filtros['prima']) {
+          $pdf->SetX(60);
+          $pdf->Row(array("Prima antiguedad", String::formatoNumero($prima_antiguedad, 2, '$', false)), false, false);
+        }
 
         $pdf->SetX(60);
         $pdf->Row(array("TOTAL", String::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
@@ -7059,7 +7091,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array("PRIMA VACACIONAL", String::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
       $pdf->SetX(60);
       $pdf->Row(array("AGUINALDO", String::formatoNumero($aguinaldo, 2, '$', false)), false, false);
-      if ($filtros['despido']) {
+      if ($despido) {
         $pdf->SetX(60);
         $pdf->Row(array("INDEMNIZACIONES", String::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
       }
@@ -7161,7 +7193,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('Arial','B', 11);
       $pdf->SetXY(33, $pdf->GetY() + 5);
-      $incapacidad_patron = ($total - $filtros['fincapacidad_seguro'])*($filtros['fporcentaje']/100);
+      $incapacidad_patron = ($total*$filtros['fporcentaje']/100) + ( ($total*(100-$filtros['fporcentaje'])/100) - $filtros['fincapacidad_seguro']);
       $pdf->Row(array("INCAPACIDAD PAGADA POR EL PATRON", String::formatoNumero($incapacidad_patron, 2, '$', false)), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 10);

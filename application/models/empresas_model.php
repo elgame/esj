@@ -84,10 +84,14 @@ class empresas_model extends CI_Model{
 	}
 
 	public function getDefaultEmpresa(){
-		$params = $this->db->select("*")
-      ->from("empresas")
-      ->where("predeterminado", "t")
-      ->get()
+		$this->db->select("*")->from("empresas");
+
+      if ($this->session->userdata('selempresa') == false) {
+      	$this->db->where("predeterminado", "t");
+      } else {
+      	$this->db->where("id_empresa", $this->session->userdata('selempresa'));
+      }
+      $params = $this->db->get()
       ->row();
       if (isset($params->id_empresa))
       	return $params;
