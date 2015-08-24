@@ -7,6 +7,21 @@
   $(function(){
     autocompleteEmpresas();
     autocompleteClientes();
+
+    $('#rptremidetall').on('submit', function(event) {
+      var linkDownXls = $("#linkDownXls"),
+          url = {
+            ffecha1: $("#ffecha1").val(),
+            ffecha2: $("#ffecha2").val(),
+            dempresa: $("#dempresa").val(),
+            did_empresa: $("#did_empresa").val(),
+            ffacturadas: $("#ffacturadas:checked").val(),
+          };
+
+      linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+      console.log(linkDownXls.attr('href'));
+    });
   });
 
   var autocompleteEmpresas = function () {

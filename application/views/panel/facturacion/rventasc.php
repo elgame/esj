@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" method="GET" class="form-search" id="frmverform" target="frame_reporte">
+            <form action="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" method="GET" class="form-search" id="frmventclin" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -53,7 +53,7 @@
                 <div class="control-group">
                   <label class="control-label" for="dtipo_factura">Tipo</label>
                   <div class="controls">
-                    <select name="dtipo_factura">
+                    <select name="dtipo_factura" id="dtipo_factura">
                       <option value="">Todas</option>
                       <option value="t">Facturas</option>
                       <option value="f">Remision</option>
@@ -83,7 +83,18 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe name="frame_reporte" id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <div class="row-fluid">
+        <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/facturacion/rventasc_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
+          <div class="box-content">
+            <div class="row-fluid">
+              <iframe name="frame_reporte" id="frame_reporte" src="<?php echo base_url('panel/facturacion/rventasc_pdf/'); ?>" style="width: 100%;height: 550px;"></iframe>
+            </div>
+          </div>
+        </div><!--/span-->
+      </div><!--/row-->
 
     </div><!--/#content.span9-->
 

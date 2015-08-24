@@ -1,4 +1,20 @@
 $(function(){
+  $('#form').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          fechaini: $("#fechaini").val(),
+          fechaend: $("#fechaend").val(),
+          farea: $("#farea").val(),
+          fproveedor: $("#fproveedor").val(),
+          fid_proveedor: $("#fid_proveedor").val(),
+          fstatusp: $("#fstatusp").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   $('#fechaini').datepicker({
     dateFormat: 'yy-mm-dd', //formato de la fecha - dd,mm,yy=dia,mes,año numericos  DD,MM=dia,mes en texto
     //minDate: '-2Y', maxDate: '+1M +10D', //restringen a un rango el calendario - ej. +10D,-2M,+1Y,-3W(W=semanas) o alguna fecha

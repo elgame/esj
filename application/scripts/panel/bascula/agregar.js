@@ -573,7 +573,7 @@ $(function(){
       url: base_url + 'panel/bascula/puede_modificar/',
       type: 'get',
       dataType: 'json',
-      data: {folio: $('#pfolio').val()},
+      data: {pidb: $('#pidb').val()},
     })
     .done(function(response) {
       if (response.puede_modificar == false)

@@ -8,12 +8,60 @@ $(function(){
         did_empresa: $("#did_empresa").val(),
         dcon_mov: $("#dcon_mov:checked").val(),
 
-        fid_producto: [],
+        ids_productos: [],
       };
 
-    $("input.fid_producto").each(function(index, el) {
-      url.fid_producto.push($(this).val());
+    $("input.ids_productos").each(function(index, el) {
+      url.ids_productos.push($(this).val());
     });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+
+    // if (url.dareas.length == 0) {
+    //   noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
+    //   return false;
+    // }
+  });
+
+  $('#frmrptcproform').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+      url = {
+        ffecha1: $("#ffecha1").val(),
+        ffecha2: $("#ffecha2").val(),
+        dempresa: $("#dempresa").val(),
+        did_empresa: $("#did_empresa").val(),
+        fproducto: $("#fproducto").val(),
+        fid_producto: $("#fid_producto").val(),
+        dcon_mov: $("#dcon_mov:checked").val(),
+
+        ids_proveedores: [],
+      };
+
+    $("input.ids_proveedores").each(function(index, el) {
+      url.ids_proveedores.push($(this).val());
+    });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+
+    // if (url.dareas.length == 0) {
+    //   noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
+    //   return false;
+    // }
+  });
+
+  $('#frmrptcompras').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+      url = {
+        ffecha1: $("#ffecha1").val(),
+        ffecha2: $("#ffecha2").val(),
+        dempresa: $("#dempresa").val(),
+        did_empresa: $("#did_empresa").val(),
+        tipoOrden: $("#tipoOrden").val(),
+      };
 
     linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
 

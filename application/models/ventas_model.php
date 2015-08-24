@@ -2026,6 +2026,136 @@ class Ventas_model extends privilegios_model{
 
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
+    public function getRNotasCredXls()
+    {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=Notas_credito.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+       $res = $this->getRNotasCredData();
+
+      $con_mov = $this->input->get('dcon_mov')=='si'? false: true;
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = 'Notas de credito';
+      $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="7"></td>
+          </tr>';
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Serie</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Factura</td>
+        </tr>';
+
+      $total_subtotal_g2 = 0;
+      $total_impuesto_g2 = 0;
+      $total_total_g2 = 0;
+      $total_cantidad_g2 = 0;
+      $total_saldo_g2 = 0;
+      $total_saldo_cliente_g2 = 0;
+      $auxEmpresa = '';
+      $auxcliente = '';
+      foreach ($res as $keye => $dempresa) {
+        $total_subtotal_g = 0;
+        $total_impuesto_g = 0;
+        $total_total_g = 0;
+        $total_cantidad_g = 0;
+        $total_saldo_g = 0;
+        $total_saldo_cliente_g = 0;
+
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="7">'.$dempresa['empresa'].'</td>
+          </tr>';
+
+        foreach($dempresa['clientes'] as $key => $item) {
+          if (count($item['facturas']) > 0 || $con_mov)
+          {
+            $total_total = 0;
+            $total_cantidad = 0;
+
+            $html .= '<tr style="font-weight:bold">
+                <td colspan="1">CLIENTE:</td>
+                <td colspan="6">'.$item['cuenta_cpi'].'</td>
+              </tr>
+              <tr style="font-weight:bold">
+                <td colspan="1">NOMBRE:</td>
+                <td colspan="6">'.$item['cliente'].'</td>
+              </tr>';
+
+            foreach ($item['facturas'] as $keyf => $factura)
+            {
+              $total_cantidad += $factura->cantidad;
+              $total_total += $factura->total;
+
+              $total_cantidad_g += $factura->cantidad;
+              $total_total_g += $factura->total;
+
+              $total_cantidad_g2 += $factura->cantidad;
+              $total_total_g2 += $factura->total;
+
+              $html .= '<tr>
+                  <td style="width:150px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->serie.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->folio.'</td>
+                  <td style="width:400px;border:1px solid #000;">'.$factura->descripcion.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->cantidad.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->total.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->factura.'</td>
+                </tr>';
+            }
+            $html .= '
+                <tr style="font-weight:bold">
+                  <td colspan="4"></td>
+                  <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+                  <td style="border:1px solid #000;">'.$total_total.'</td>
+                  <td></td>
+                </tr>';
+          }
+        }
+
+        $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="4">TOTAL EMPRESA</td>
+              <td style="border:1px solid #000;">'.$total_cantidad_g.'</td>
+              <td style="border:1px solid #000;">'.$total_total_g.'</td>
+              <td></td>
+            </tr>';
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="4">TOTAL GRAL</td>
+            <td style="border:1px solid #000;">'.$total_cantidad_g2.'</td>
+            <td style="border:1px solid #000;">'.$total_total_g2.'</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
+    }
 
     /**
      * Reporte de facturas y notas de credito
@@ -2678,5 +2808,76 @@ class Ventas_model extends privilegios_model{
         ), false);
 
     $pdf->Output('reporte_ventas.pdf', 'I');
+  }
+  public function getRVencidasXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_ventas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRVencidasData();
+
+    $con_saldo = isset($_GET['con_saldo']{0})? true: false;
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = ($_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS').' VENCIDAS';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S. Anterior</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S. En fechas</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">S. Total</td>
+      </tr>';
+    $total_total = 0;
+    $total_saldo = 0;
+    foreach($res as $key => $factura){
+      $saldoo = String::float( String::formatoNumero($factura->saldo_anterior+$factura->saldo, 2, '', false) );
+
+      if ($con_saldo==false || $saldoo > 0)
+      {
+        $total_saldo += $factura->saldo_anterior;
+        $total_total += $factura->saldo;
+
+        $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.$factura->nombre_fiscal.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->saldo_anterior.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->saldo.'</td>
+            <td style="width:150px;border:1px solid #000;">'.($factura->saldo_anterior+$factura->saldo).'</td>
+          </tr>';
+      }
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td></td>
+          <td style="border:1px solid #000;">'.$total_saldo.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+          <td style="border:1px solid #000;">'.($total_total+$total_saldo).'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 }

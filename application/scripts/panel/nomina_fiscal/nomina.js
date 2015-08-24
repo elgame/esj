@@ -260,6 +260,7 @@
         $playeras   = $parent.find('.descuento-playeras'),
         $dotros     = $parent.find('.descuento-otros'),
         $isr        = $parent.find('.isr'),
+        $fondo_ahorro = $parent.find('.fondo_ahorro'),
 
         $bonos      = $parent.find('.bonos'),
         $otros      = $parent.find('.otros'),
@@ -328,7 +329,8 @@
     }
 
     // Deducciones.
-    totalDeducciones =  parseFloat($infonavit.val()) + parseFloat($imss.val()) + parseFloat($prestamos.val()) + parseFloat($isr.val()); // + parseFloat($playeras.val());
+    totalDeducciones =  parseFloat($infonavit.val()) + parseFloat($imss.val()) + parseFloat($prestamos.val()) + parseFloat($isr.val()) + parseFloat($fondo_ahorro.val());
+    // + parseFloat($playeras.val());
     if( $esta_asegurado.val() == 't' )
     {
       $totalDeducciones.val(totalDeducciones);

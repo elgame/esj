@@ -15,4 +15,4 @@ SET DBDUMP=respaldo_bd.backup
 %PGPATH%pg_dump -Fc -h localhost -p 5432 -U %DBUSR% %PRJDB% > %SVPATH%%DBDUMP%
 
 echo Backup Taken Complete %SVPATH%%DBDUMP%
-pause
+::pause

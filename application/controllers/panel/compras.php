@@ -10,7 +10,9 @@ class compras extends MY_Controller {
   'compras/ajax_producto_by_codigo/',
   'compras/ajax_producto/',
   'compras/rpt_compras_pdf/',
+  'compras/rpt_compras_xls/',
   'compras/rpt_compras_productos_pdf/',
+  'compras/rpt_compras_productos_xls/',
   );
 
   public function _remap($method){
@@ -239,6 +241,10 @@ class compras extends MY_Controller {
     $this->load->model('compras_model');
     $this->compras_model->getRptComprasPdf();
   }
+  public function rpt_compras_xls(){
+    $this->load->model('compras_model');
+    $this->compras_model->getRptComprasXls();
+  }
 
   public function rpt_compras_productos()
   {
@@ -265,6 +271,10 @@ class compras extends MY_Controller {
   public function rpt_compras_productos_pdf(){
     $this->load->model('compras_model');
     $this->compras_model->getRptComprasProductosPdf();
+  }
+  public function rpt_compras_productos_xls(){
+    $this->load->model('compras_model');
+    $this->compras_model->getRptComprasProductosXls();
   }
 
 

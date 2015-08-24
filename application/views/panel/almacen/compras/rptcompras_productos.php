@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/compras/rpt_compras_productos_pdf/'); ?>" method="get" class="form-search" id="frmverformprod" target="frame_reporte">
+            <form action="<?php echo base_url('panel/compras/rpt_compras_productos_pdf/'); ?>" method="get" class="form-search" id="frmrptcompras" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -44,7 +44,18 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/compras/rpt_compras_productos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <div class="row-fluid">
+        <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/compras/rpt_compras_productos_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
+          <div class="box-content">
+            <div class="row-fluid">
+              <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/compras/rpt_compras_productos_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+            </div>
+          </div>
+        </div><!--/span-->
+      </div><!--/row-->
 
     </div><!--/#content.span9-->
 

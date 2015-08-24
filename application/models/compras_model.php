@@ -892,6 +892,107 @@ class compras_model extends privilegios_model{
     $pdf->Output('compras_proveedor.pdf', 'I');
   }
 
+  public function getRptComprasXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_proveedor.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptComprasData();
+    $tipos_orden = array('p' => 'Productos', 'd' => 'Servicios', 'oc' => 'Orden de compra', 'f' => 'Fletes');
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Factura</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Proveedor</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio Almacen</td>
+      </tr>';
+    $tipoaux = '';
+    $proveedor_tipo = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $factura){
+      if ($tipoaux !== $factura->tipo_orden) {
+        if ($key > 0) {
+          $datos = array('Total',
+            '', '',
+            String::formatoNumero($proveedor_tipo, 2, '', false),
+            '', '',
+            );
+          $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="3">Total</td>
+              <td style="border:1px solid #000;">'.$proveedor_tipo.'</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td colspan="6"></td>
+            </tr>';
+        }
+        $html .= '<tr>
+          <td colspan="6" style="font-weight:bold">'.$tipos_orden[$factura->tipo_orden].'</td>
+        </tr>';
+        $tipoaux        = $factura->tipo_orden;
+        $proveedor_tipo = 0;
+      }
+
+      $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->serie.$factura->folio.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->nombre_fiscal.'</td>
+            <td style="width:150px;border:1px solid #000;">'.String::formatoNumero($factura->total, 2, '', false).'</td>
+            <td style="width:150px;border:1px solid #000;">'.($factura->status=='p'? 'Pendiente': 'Pagada').'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->folio_almacen.'</td>
+          </tr>';
+
+      $proveedor_importe   += $factura->total;
+      $proveedor_tipo   += $factura->total;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3">Total</td>
+          <td style="border:1px solid #000;">'.$proveedor_tipo.'</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="3">Total General</td>
+          <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
   public function getRptComprasProductosData()
   {
     $sql = '';
@@ -1003,7 +1104,85 @@ class compras_model extends privilegios_model{
     $pdf->SetWidths(array(162, 20));
     $pdf->Row($datos, false);
 
-    $pdf->Output('compras_proveedor.pdf', 'I');
+    $pdf->Output('compras_productos.pdf', 'I');
+  }
+  public function getRptComprasProductosXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_productos.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptComprasProductosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras y Productos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Factura</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Proveedor</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">P.U.</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio A</td>
+      </tr>';
+    $compra_aux = '';
+    $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+    foreach($res as $key => $factura){
+
+      $html .= '<tr>
+            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): '').'</td>
+            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: '').'</td>
+            <td style="width:400px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: '').'</td>
+            <td style="width:400px;border:1px solid #000;">'.$factura->nombre.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->cantidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->unidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->precio_unitario.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->importe.'</td>
+            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? ($factura->status=='p'? 'Pendiente': 'Pagada'): '').'</td>
+            <td style="width:150px;border:1px solid #000;">'.$factura->folio_almacen.'</td>
+          </tr>';
+
+      if($compra_aux !== $factura->id_compra )
+        $compra_aux = $factura->id_compra;
+      $proveedor_importe   += $factura->importe;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="7">Total General</td>
+          <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
 }

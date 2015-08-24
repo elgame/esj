@@ -10,6 +10,7 @@ class ventas extends MY_Controller {
     'ventas/rventasr_pdf/',
     'ventas/rventasr_xls/',
     'ventas/rpsaldo_vencido_pdf/',
+    'ventas/rpsaldo_vencido_xls/',
     'ventas/rventas_nc_pdf/',
     'ventas/rventas_nc_xls/',
 
@@ -323,6 +324,10 @@ class ventas extends MY_Controller {
   public function rpsaldo_vencido_pdf(){
     $this->load->model('ventas_model');
     $this->ventas_model->getRVencidasPdf();
+  }
+  public function rpsaldo_vencido_xls(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRVencidasXls();
   }
 
   /**

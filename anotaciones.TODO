@@ -1,8 +1,8 @@
 
 
---Todos los reportes q se exporten a excel
---Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
 --Checar el reporte de diario con las nuevas cosas
+--*Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
+--*Todos los reportes q se exporten a excel
 ---commit No 2
 --*otro catalogo de como el de la maquinaria para el punto de venta
 --*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar

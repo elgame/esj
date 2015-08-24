@@ -312,6 +312,7 @@
                       ?>
                                 <tr data-kneto="">
                                   <td><?php echo $caja ?>
+                                    <input type="hidden" name="pnum_registro[]" value="<?php echo $_POST['pnum_registro'][$key] ?>" id="pnum_registro">
                                     <input type="hidden" name="pcajas[]" value="<?php echo $caja ?>" id="pcajas">
                                     <input type="hidden" name="pcalidad[]" value="<?php echo $_POST['pcalidad'][$key] ?>" id="pcalidad">
                                     <input type="hidden" name="pcalidadtext[]" value="<?php echo $_POST['pcalidadtext'][$key] ?>" id="pcalidadtext">

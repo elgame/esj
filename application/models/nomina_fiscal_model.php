@@ -81,7 +81,7 @@ class nomina_fiscal_model extends CI_Model {
     if(isset($filtros['asegurado']))
     {
       $sql .= " AND u.esta_asegurado = 't'";
-      $sqlpt .= " AND u.esta_asegurado = 't'";
+      $sqlpt .= " AND nptu.esta_asegurado = 't'";
       $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".esta_asegurado = 't'";
       $sqlsegu .= " AND esta_asegurado = 't'";
     }
@@ -556,7 +556,7 @@ class nomina_fiscal_model extends CI_Model {
         ->procesar();
     }
     if ($nm_tipo == 'pt' && $empleadoId > 0) { // es ptu
-      return [$empleado];
+      return [(isset($empleados[0])? $empleados[0]: 0)];
     }
 
     // echo "<pre>";
@@ -8927,7 +8927,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Lama el metodo cancelar para que realiza la peticion al webservice.
     $result = $this->facturartebarato_api->cancelar($params);
-
+    $cancelada = false;
     if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
     {
       $this->db->delete('nomina_fiscal', "id_empleado = {$idEmpleado} AND id_empresa = {$idEmpresa} AND anio = '{$anio}' AND semana = '{$semana}'");
@@ -8941,9 +8941,10 @@ class nomina_fiscal_model extends CI_Model {
           $this->db->update('nomina_prestamos', array('status' => 't'), "id_prestamo = {$value->id_prestamo}");
         }
       }
+      $cancelada = true;
     }
 
-    return array('msg' => $result->data->status_uuid, 'empresa' => $query->nombre_fiscal);
+    return array('msg' => $result->data->status_uuid, 'empresa' => $query->nombre_fiscal, 'cancelada' => $cancelada);
   }
 
   public function pdfReciboNominaFiscalAguinaldo($empleadoId, $semana, $anio, $empresaId, $pdf=null)

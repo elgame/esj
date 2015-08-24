@@ -237,6 +237,117 @@ class Bascula_rpts_model extends Bascula_model {
       $pdf->Output('reporte_bonificaciones.pdf', 'I');
   }
 
+  public function bonificaciones_xls()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->getBonificaciones();
+
+    // echo "<pre>";
+    //   var_dump($data['totales']);
+    // echo "</pre>";exit;
+
+    $rmc = $data['movimientos'];
+
+    $area = $data['area'];
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=REPORTE_DIARIO_ENTRADAS_{$area['info']->nombre}.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $fechaini = new DateTime($_GET['fechaini']);
+    $fechaend = new DateTime($_GET['fechaend']);
+
+    $tipo = "ENTRADAS/SALIDAS";
+    if ($this->input->get('ftipop') != '')
+      if ($this->input->get('ftipop') === '1')
+        $tipo = "ENTRADAS";
+      else
+        $tipo = "SALIDAS";
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "BONIFICACIONES - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
+    $titulo3 = '';
+    if (isset($data['proveedor']))
+      $titulo3 = strtoupper($data['proveedor']['info']->nombre_fiscal) . " (CTA: " .$data['proveedor']['info']->cuenta_cpi . ")";
+    $titulo3 .= " \n FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="9" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="9" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="9"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">PROVEEDOR</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CAJS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRECIO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">TIPO PAGO</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CONCEPTO</td>
+      </tr>';
+    foreach($rmc as $key => $caja)
+    {
+      $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$caja->folio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->fecha.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$caja->nombre_fiscal.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->cajas.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->kilos.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->precio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->importe.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$caja->tipo_pago.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$caja->concepto.'</td>
+        </tr>';
+
+    }
+
+    $prom_total = floatval($data['totales']['kilos'])/(floatval($data['totales']['cajas'])>0? floatval($data['totales']['cajas']): 1);
+    $html .= '
+      <tr style="font-weight:bold">
+        <td colspan="3"></td>
+        <td style="border:1px solid #000;">'.$data['totales']['cajas'].'</td>
+        <td style="border:1px solid #000;">'.$data['totales']['kilos'].'</td>
+        <td></td>
+        <td style="border:1px solid #000;">'.$data['totales']['importe'].'</td>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td colspan="9"></td>
+      </tr>';
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2" style="border:1px solid #000;">PAGADO</td>
+          <td style="border:1px solid #000;">NO PAGADO</td>
+          <td colspan="2" style="border:1px solid #000;">TOTAL IMPORTE</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="2" style="border:1px solid #000;">'.$data['totales']['pagados'].'</td>
+          <td style="border:1px solid #000;">'.$data['totales']['no_pagados'].'</td>
+          <td colspan="2" style="border:1px solid #000;">'.$data['totales']['importe'].'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 
 }
 

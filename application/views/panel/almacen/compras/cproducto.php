@@ -35,7 +35,7 @@
                     <div class="input-append span12">
                       <input type="text" name="fproductor" value="" id="fproductor" class="span9" placeholder="Buscar">
                       <button class="btn" type="button" id="btnAddProducto" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="fid_producto" value="" class="fid_producto">
+                      <input type="hidden" name="fid_producto" id="fid_producto" value="" class="fid_producto">
                     </div>
                     <div class="clearfix"></div>
                     <div style="height:130px;overflow-y: scroll;background-color:#eee;">

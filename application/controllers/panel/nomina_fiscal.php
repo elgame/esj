@@ -981,6 +981,11 @@ class nomina_fiscal extends MY_Controller {
       $this->load->model('nomina_fiscal_model');
       $response = $this->nomina_fiscal_model->cancelaFactura($_GET['empleadoId'], $_GET['anio'], $_GET['semana'], $_GET['empresaId']);
 
+      if ($response['cancelada']) {
+        $this->db->delete('nomina_fiscal_guardadas', array('id_empresa' => $_GET['empresaId'], 'anio' => $_GET['anio'],
+          'semana' => $_GET['semana'], 'tipo' => 'se'));
+      }
+
       redirect(base_url("panel/nomina_fiscal/?msg={$response['msg']}&anio={$_GET['anio']}&empresa={$response['empresa']}&empresaId={$_GET['empresaId']}&semana={$_GET['semana']}"));
     }
   }

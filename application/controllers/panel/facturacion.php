@@ -15,9 +15,12 @@ class facturacion extends MY_Controller {
     'facturacion/prodfact_pdf/',
     'facturacion/prodfact_xls/',
     'facturacion/rventasc_pdf/',
+    'facturacion/rventasc_xls/',
     'facturacion/rventasc_detalle_pdf/',
     'facturacion/remisiones_detalle_pdf/',
+    'facturacion/remisiones_detalle_xls/',
     'facturacion/rnotas_cred_pdf/',
+    'facturacion/rnotas_cred_xls/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -1464,11 +1467,10 @@ class facturacion extends MY_Controller {
   public function rventasc_pdf(){
     $this->load->model('facturacion_model');
     $this->facturacion_model->getRVentascPdf();
-
   }
   public function rventasc_xls(){
-    $this->load->model('cuentas_pagar_model');
-    $this->cuentas_pagar_model->cuentasPagarExcel();
+    $this->load->model('facturacion_model');
+    $this->facturacion_model->getRVentascXls();
   }
 
   public function rnotas_cred()
@@ -1497,6 +1499,10 @@ class facturacion extends MY_Controller {
   public function rnotas_cred_pdf(){
     $this->load->model('ventas_model');
     $this->ventas_model->getRNotasCredPdf();
+  }
+  public function rnotas_cred_xls(){
+    $this->load->model('ventas_model');
+    $this->ventas_model->getRNotasCredXls();
   }
 
   public function rventasc_detalle_pdf()
@@ -1540,6 +1546,19 @@ class facturacion extends MY_Controller {
     ), $_GET);
 
     $this->facturacion_model->remisionesDetallePdf($_GET);
+  }
+  public function remisiones_detalle_xls()
+  {
+    $this->load->model('facturacion_model');
+
+    $_GET = array_merge(array(
+      'ffecha1' => isset($_GET['ffecha1']) ?: date('Y-m-d'),
+      'ffecha2' => isset($_GET['ffecha2']) ?: date('Y-m-d'),
+      'did_empresa' => isset($_GET['did_empresa']) ?:false,
+      'ffacturadas' => isset($_GET['ffacturadas']) ?:false,
+    ), $_GET);
+
+    $this->facturacion_model->remisionesDetalleXls($_GET);
   }
 
   /*

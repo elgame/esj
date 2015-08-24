@@ -1,4 +1,31 @@
 $(function(){
+  $('#form').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+      url = {
+        ffecha1: $("#ffecha1").val(),
+        ffecha2: $("#ffecha2").val(),
+        dempresa: $("#dempresa").val(),
+        did_empresa: $("#did_empresa").val(),
+        // dcon_mov: $("#dcon_mov:checked").val(),
+
+        ids_productos: [],
+      };
+
+    $("input.ids_productos").each(function(index, el) {
+      url.ids_productos.push($(this).val());
+    });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+
+    // if (url.dareas.length == 0) {
+    //   noty({"text": 'Seleccione una area', "layout":"topRight", "type": 'error'});
+    //   return false;
+    // }
+  });
+
+
 	// Autocomplete Empresas
   $("#dempresa").autocomplete({
     source: base_url + 'panel/empresas/ajax_get_empresas/',

@@ -172,6 +172,102 @@ class inventario_model extends privilegios_model{
 		$pdf->Output('compras_proveedor.pdf', 'I');
 	}
 
+  public function getCProveedorXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getCProveedorData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Compras por Proveedor';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre (Producto, Servicio)</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Unidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+      </tr>';
+    $familia = '';
+    $total_cantidad = $total_importe = $total_impuestos = $total_total = 0;
+    foreach($res as $key => $item){
+      $html .= '<tr>
+          <td colspan="6" style="font-weight:bold">'.$item->nombre_fiscal.'</td>
+        </tr>';
+
+      $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+      foreach ($item->productos as $key => $producto)
+      {
+        $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.$producto->nombre.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->abreviatura.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->importe.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+          </tr>';
+
+        $proveedor_cantidad  += $producto->cantidad;
+        $proveedor_importe   += $producto->importe;
+        $proveedor_impuestos += $producto->impuestos;
+        $proveedor_total     += $producto->total;
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="2">Total Proveedor</td>
+            <td style="border:1px solid #000;">'.$proveedor_cantidad.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_importe.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_impuestos.'</td>
+            <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>';
+      $total_cantidad  += $proveedor_cantidad;
+      $total_importe   += $proveedor_importe;
+      $total_impuestos += $proveedor_impuestos;
+      $total_total     += $proveedor_total;
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="2">Total General</td>
+          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$total_importe.'</td>
+          <td style="border:1px solid #000;">'.$total_impuestos.'</td>
+          <td style="border:1px solid #000;">'.$total_total.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 	/**
 	 * Reporte existencias por unidad
 	 *
@@ -565,6 +661,97 @@ class inventario_model extends privilegios_model{
     $pdf->Row($datos, false, false);
 
     $pdf->Output('compras_proveedor.pdf', 'I');
+  }
+  public function getCUnProductosXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=compras_x_proveedor.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getCUnProductosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de seguimientos x Producto';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Proveedor</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Concepto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">P. Unitario</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuestos</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+      </tr>';
+    $familia = '';
+    $total_general = 0;
+    foreach($res as $key22 => $productos)
+    {
+      if(count($productos) > 0)
+      {
+
+        $proveedor_cantidad = $proveedor_importe = $proveedor_impuestos = $proveedor_total = 0;
+        $html .= '<tr>
+            <td colspan="6" style="font-weight:bold">'.(isset($productos[0]->nombre)? $productos[0]->nombre: '').'</td>
+          </tr>';
+        foreach($productos as $key => $producto)
+        {
+          $html .= '<tr>
+              <td style="width:400px;border:1px solid #000;">'.$producto->fecha.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->serie.' '.$producto->folio.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->proveedor.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->cantidad.' '.$producto->abreviatura.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->precio_unitario.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->impuestos.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$producto->total.'</td>
+            </tr>';
+
+          $proveedor_cantidad  += $producto->cantidad;
+          $proveedor_importe   += $producto->importe;
+          $proveedor_impuestos += $producto->impuestos;
+          $proveedor_total     += $producto->total;
+          $total_general += $producto->total;
+
+        }
+        $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="6">Total</td>
+            <td style="border:1px solid #000;">'.$proveedor_total.'</td>
+          </tr>
+          <tr>
+            <td colspan="6"></td>
+          </tr>';
+      }
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="6">Total General</td>
+          <td style="border:1px solid #000;">'.$total_general.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
 	/**
@@ -1555,13 +1742,139 @@ class inventario_model extends privilegios_model{
 
     $pdf->SetXY(6, $pdf->GetY()+5);
     $pdf->Row(array('TOTAL GENERAL',
-      String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-      String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-      String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-      String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+      String::formatoNumero($totaltes['general'][0], 2, '$', false),
+      String::formatoNumero($totaltes['general'][1] , 2, '$', false),
+      String::formatoNumero($totaltes['general'][2], 2, '$', false),
+      String::formatoNumero($totaltes['general'][3], 2, '$', false),
       ), false);
 
     $pdf->Output('epc.pdf', 'I');
+  }
+  public function getUEPSXls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=epc.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getUEPSData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Existencia por costos UEPS';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Entradas</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Salidas</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Existencia</td>
+      </tr>';
+
+    $familia = '';
+    $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if ($key == 0)
+      {
+        $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="5">'.$item->nombre.'</td>
+            </tr>';
+        $familia = $item->nombre;
+      }
+
+      if ($familia <> $item->nombre)
+      {
+        if ($key > 0)
+        {
+          $html .= '
+              <tr style="font-weight:bold">
+                <td style="border:1px solid #000;">TOTAL</td>
+                <td style="border:1px solid #000;">'.$totaltes['familia'][0].'</td>
+                <td style="border:1px solid #000;">'.$totaltes['familia'][1].'</td>
+                <td style="border:1px solid #000;">'.$totaltes['familia'][2].'</td>
+                <td style="border:1px solid #000;">'.$totaltes['familia'][3].'</td>
+              </tr>';
+        }
+        $totaltes['familia'] = array(0,0,0,0);
+
+        $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="5">'.$item->nombre.'</td>
+          </tr>';
+        $familia = $item->nombre;
+      }
+
+      $imprimir = true;
+      if($this->input->get('con_existencia') == 'si')
+        if($item->data['saldo'][2] <= 0)
+          $imprimir = false;
+      if($this->input->get('con_movimiento') == 'si')
+        if($item->data['salida'][2] <= 0 && ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]) <= 0)
+          $imprimir = false;
+
+
+      if($imprimir)
+      {
+        $totaltes['familia'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['familia'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['familia'][2] += $item->data['salida'][2];
+        $totaltes['familia'][3] += $item->data['saldo'][2];
+
+        $totaltes['general'][0] += $item->data_saldo['saldo'][2];
+        $totaltes['general'][1] += ($item->data['entrada'][2] - $item->data_saldo['saldo'][2]);
+        $totaltes['general'][2] += $item->data['salida'][2];
+        $totaltes['general'][3] += $item->data['saldo'][2];
+
+        $html .= '<tr>
+            <td style="width:400px;border:1px solid #000;">'.$item->nombre_producto.' ('.$item->abreviatura.')'.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$item->data_saldo['saldo'][2].'</td>
+            <td style="width:150px;border:1px solid #000;">'.($item->data['entrada'][2] - $item->data_saldo['saldo'][2]).'</td>
+            <td style="width:150px;border:1px solid #000;">'.$item->data['salida'][2].'</td>
+            <td style="width:150px;border:1px solid #000;">'.$item->data['saldo'][2].'</td>
+          </tr>';
+      }
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;">TOTAL</td>
+          <td style="border:1px solid #000;">'.$totaltes['familia'][0].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['familia'][1].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['familia'][2].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['familia'][3].'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;">TOTAL GENERAL</td>
+          <td style="border:1px solid #000;">'.$totaltes['general'][0].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['general'][1].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['general'][2].'</td>
+          <td style="border:1px solid #000;">'.$totaltes['general'][3].'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 
   public function getPUEPSPdf()

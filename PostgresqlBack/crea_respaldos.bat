@@ -1,3 +1,7 @@
-ROBOCOPY C:\Users\Administrador\Documents\COESFI \\LaCie-d2\RESPALDO\RESPALDO\COESFI /E /V /XO /LOG:C:\Users\Administrador\Documents\log_respaldo_COESFI.txt
+:: cuenta Gmail empaquesanjorgemx@gmail.com S4nj0rg3V14n3y
+:: cuenta mandrill empaquesanjorgemx@gmail.com S4nj0rg3V14n3y
+:: cuenta Dropbox empaquesanjorgemx@gmail.com S4nj0rg3V14n3y
 
-ROBOCOPY C:\Compac \\LaCie-d2\RESPALDO\RESPALDO\Compac /E /V /XO /LOG:C:\Users\Administrador\Documents\log_respaldo_Compac.txt
+ROBOCOPY C:\xampp\htdocs\sanjorge C:\Dropbox\sanjorge /E /V /XO /LOG:C:\Users\Administrator\Documents\log_respaldo_app.txt
+
+ROBOCOPY C:\xampp\htdocs\Respaldos C:\Dropbox\Respaldos /E /V /XO /LOG:C:\Users\Administrator\Documents\log_respaldo_resp.txt

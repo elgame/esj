@@ -2629,6 +2629,157 @@ class facturacion_model extends privilegios_model{
       $pdf->Output('reporte_ventas.pdf', 'I');
     }
 
+    public function getRVentascXls()
+    {
+      header('Content-type: application/vnd.ms-excel; charset=utf-8');
+      header("Content-Disposition: attachment; filename=compras_x_producto.xls");
+      header("Pragma: no-cache");
+      header("Expires: 0");
+
+      $res = $this->getRVentascData();
+
+      $con_mov = $this->input->get('dcon_mov')=='si'? false: true;
+
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = 'Ventas por Cliente';
+      $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+
+      $html = '<table>
+        <tbody>
+          <tr>
+            <td colspan="9" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+          </tr>
+          <tr>
+            <td colspan="9" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+          </tr>
+          <tr>
+            <td colspan="9" style="text-align:center;">'.$titulo3.'</td>
+          </tr>
+          <tr>
+            <td colspan="9"></td>
+          </tr>';
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Serie</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Neto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Impuesto</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Total</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Saldo</td>
+        </tr>';
+
+      $total_subtotal_g2 = 0;
+      $total_impuesto_g2 = 0;
+      $total_total_g2 = 0;
+      $total_cantidad_g2 = 0;
+      $total_saldo_g2 = 0;
+      $total_saldo_cliente_g2 = 0;
+      foreach ($res as $keye => $dempresa) {
+        $total_subtotal_g = 0;
+        $total_impuesto_g = 0;
+        $total_total_g = 0;
+        $total_cantidad_g = 0;
+        $total_saldo_g = 0;
+        $total_saldo_cliente_g = 0;
+
+        $html .= '<tr style="font-weight:bold">
+            <td colspan="9">'.$dempresa['empresa']['info']->nombre_fiscal.'</td>
+          </tr>';
+
+        foreach($dempresa['facturas'] as $key => $item) {
+          if (count($item->facturas) > 0 || $con_mov)
+          {
+            $total_subtotal = 0;
+            $total_impuesto = 0;
+            $total_total = 0;
+            $total_cantidad = 0;
+            $total_saldo = 0;
+
+            $html .= '<tr style="font-weight:bold">
+                <td colspan="1">CLIENTE:</td>
+                <td colspan="8">'.$item->cuenta_cpi.'</td>
+              </tr>
+              <tr style="font-weight:bold">
+                <td colspan="1">NOMBRE:</td>
+                <td colspan="8">'.$item->nombre_fiscal.'</td>
+              </tr>';
+
+            foreach ($item->facturas as $keyf => $factura)
+            {
+              $total_subtotal += $factura->subtotal;
+              $total_saldo += $factura->saldo;
+              $total_cantidad += $factura->cantidad_productos;
+              $total_impuesto += $factura->importe_iva;
+              $total_total += $factura->total;
+
+              $total_subtotal_g += $factura->subtotal;
+              $total_saldo_g += $factura->saldo;
+              $total_cantidad_g += $factura->cantidad_productos;
+              $total_impuesto_g += $factura->importe_iva;
+              $total_total_g += $factura->total;
+
+              $total_subtotal_g2 += $factura->subtotal;
+              $total_saldo_g2 += $factura->saldo;
+              $total_cantidad_g2 += $factura->cantidad_productos;
+              $total_impuesto_g2 += $factura->importe_iva;
+              $total_total_g2 += $factura->total;
+
+              $html .= '<tr>
+                  <td style="width:150px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->serie.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->folio.'</td>
+                  <td style="width:400px;border:1px solid #000;">'.$factura->concepto.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->cantidad_productos.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->subtotal.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->importe_iva.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->total.'</td>
+                  <td style="width:150px;border:1px solid #000;">'.$factura->saldo.'</td>
+                </tr>';
+            }
+            $html .= '
+                <tr style="font-weight:bold">
+                  <td colspan="4"></td>
+                  <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+                  <td style="border:1px solid #000;">'.$total_subtotal.'</td>
+                  <td style="border:1px solid #000;">'.$total_impuesto.'</td>
+                  <td style="border:1px solid #000;">'.$total_total.'</td>
+                  <td style="border:1px solid #000;">'.$total_saldo.'</td>
+                </tr>';
+          }
+        }
+
+        $html .= '
+            <tr style="font-weight:bold">
+              <td colspan="4"></td>
+              <td style="border:1px solid #000;">'.$total_cantidad_g.'</td>
+              <td style="border:1px solid #000;">'.$total_subtotal_g.'</td>
+              <td style="border:1px solid #000;">'.$total_impuesto_g.'</td>
+              <td style="border:1px solid #000;">'.$total_total_g.'</td>
+              <td style="border:1px solid #000;">'.$total_saldo_g.'</td>
+            </tr>';
+      }
+
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="4">TOTAL GRAL</td>
+            <td style="border:1px solid #000;">'.$total_cantidad_g2.'</td>
+            <td style="border:1px solid #000;">'.$total_subtotal_g2.'</td>
+            <td style="border:1px solid #000;">'.$total_impuesto_g2.'</td>
+            <td style="border:1px solid #000;">'.$total_total_g2.'</td>
+            <td style="border:1px solid #000;">'.$total_saldo_g2.'</td>
+          </tr>
+        </tbody>
+      </table>';
+
+      echo $html;
+    }
+
     /**
      * Reporte compras x cliente
      *
@@ -3560,8 +3711,7 @@ class facturacion_model extends privilegios_model{
     return $remisiones;
   }
 
-  public function remisionesDetallePdf($filtros)
-  {
+  public function remisionesDetalleData(&$filtros) {
     // echo "<pre>";
     //   var_dump($filtros);
     // echo "</pre>";exit;
@@ -3645,6 +3795,11 @@ class facturacion_model extends privilegios_model{
     // echo "<pre>";
     //   var_dump($remisiones);
     // echo "</pre>";exit;
+    return ['rem' => $remisiones, 'titulo2' => $titulo2];
+  }
+  public function remisionesDetallePdf($filtros)
+  {
+    $remisiones = $this->remisionesDetalleData($filtros);
 
     $empresa = $this->empresas_model->getInfoEmpresa($filtros['did_empresa']);
 
@@ -3656,7 +3811,7 @@ class facturacion_model extends privilegios_model{
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = $titulo2;
+    $pdf->titulo2 = $remisiones['titulo2'];
     $pdf->titulo3 = 'Del: '.$filtros['ffecha1']." Al ".$filtros['ffecha2']."\n";
     // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
     $pdf->AliasNbPages();
@@ -3668,7 +3823,7 @@ class facturacion_model extends privilegios_model{
     $header = array('Cliente', 'Fecha', 'Serie', 'Folio', 'Importe');
 
     $total = 0;
-    foreach($remisiones as $key => $item)
+    foreach($remisiones['rem'] as $key => $item)
     {
       if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
         $pdf->AddPage();
@@ -3778,5 +3933,98 @@ class facturacion_model extends privilegios_model{
     $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '', false)), false);
 
     $pdf->Output('reporte_remisiones.pdf', 'I');
+  }
+  public function remisionesDetalleXls($filtros)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_remisiones.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $remisiones = $this->remisionesDetalleData($filtros);
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = $remisiones['titulo2'];
+    $titulo3 = 'Del: '.$filtros['ffecha1']." Al ".$filtros['ffecha2']."\n";
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+      $html .= '<tr style="font-weight:bold">
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Serie</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+      </tr>';
+
+    $total = 0;
+    foreach($remisiones['rem'] as $key => $item)
+    {
+      $color = 'FFFFFF';
+      if ($item->tipo === 'factura')
+      {
+        $color = 'FFFFCC';
+      }
+
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;background-color: #'.$color.';">'.$item->cliente.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #'.$color.';">'.$item->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #'.$color.';">'.$item->serie.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #'.$color.';">'.$item->folio.'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #'.$color.';">'.$item->total.'</td>
+        </tr>';
+
+      if (isset($item->remisiones))
+      {
+        foreach ($item->remisiones as $keya => $cliente)
+        {
+          $html .= '<tr>
+              <td style="width:400px;border:1px solid #000;">     '.$cliente['cliente'].'</td>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;"></td>
+            </tr>';
+
+          foreach ($cliente['remisiones'] as $remi)
+          {
+            $html .= '<tr>
+                <td style="width:400px;border:1px solid #000;"></td>
+                <td style="width:150px;border:1px solid #000;">'.String::fechaATexto($remi->fecha, '/c').'</td>
+                <td style="width:150px;border:1px solid #000;">'.$remi->serie.'</td>
+                <td style="width:150px;border:1px solid #000;">'.$remi->folio.'</td>
+                <td style="width:150px;border:1px solid #000;">('.$remi->total.')</td>
+              </tr>';
+          }
+        }
+      }
+      $total += floatval($item->total);
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="4">TOTAL</td>
+          <td style="border:1px solid #000;">'.$total.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
   }
 }

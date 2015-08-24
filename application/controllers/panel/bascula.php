@@ -34,8 +34,10 @@ class bascula extends MY_Controller {
     'bascula/rde_pdf/',
     'bascula/rde_xls/',
     'bascula/r_acumulados_pdf/',
+    'bascula/r_acumulados_xls/',
 	  'bascula/rmc_pdf/',
     'bascula/rbp_pdf/',
+    'bascula/rbp_xls/',
 
     'bascula/imprimir_pagadas/',
 
@@ -48,6 +50,7 @@ class bascula extends MY_Controller {
     'bascula/rmc_pdf2/',
 
     'bascula/bonificaciones_pdf/',
+    'bascula/bonificaciones_xls/',
     'bascula/bitacora_pdf/',
 
     'bascula/imprimir_recepcion/',
@@ -366,9 +369,9 @@ class bascula extends MY_Controller {
 
   public function puede_modificar()
   {
-    if (isset($_GET['folio'])) {
+    if (isset($_GET['pidb'])) {
       $this->load->model('bascula_model');
-      $info = $this->bascula_model->getBasculaInfo(0, $_GET['folio']);
+      $info = $this->bascula_model->getBasculaInfo($_GET['pidb']);
       echo json_encode(array('puede_modificar' => $info['info'][0]->no_impresiones > 0 ? false : true));
     } else
       echo json_encode(array('puede_modificar' => false));
@@ -554,6 +557,7 @@ class bascula extends MY_Controller {
               $_POST['ppromedio'][]    = $c->promedio;
               $_POST['pprecio'][]      = $c->precio;
               $_POST['pimporte'][]     = $c->importe;
+              $_POST['pnum_registro'][] = $c->num_registro;
             }
           }
 
@@ -693,6 +697,11 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_model');
     $this->bascula_model->rbp_pdf();
+  }
+  public function rbp_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->rbp_xls();
   }
 
   /**
@@ -860,6 +869,11 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->bascula_model->r_acumulados_pdf();
   }
+  public function r_acumulados_xls()
+  {
+    $this->load->model('bascula_model');
+    $this->bascula_model->r_acumulados_xls();
+  }
 
   /**
    * Muestra la vista para el reporte bonificaciones.
@@ -913,6 +927,11 @@ class bascula extends MY_Controller {
   {
     $this->load->model('bascula_rpts_model');
     $this->bascula_rpts_model->bonificaciones_pdf();
+  }
+  public function bonificaciones_xls()
+  {
+    $this->load->model('bascula_rpts_model');
+    $this->bascula_rpts_model->bonificaciones_xls();
   }
 
 

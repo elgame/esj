@@ -52,7 +52,7 @@
                       <option value="f">Remision</option>
                       <option value="t">Facturas</option>
                     </select>
-                   | <label class="control-label" for="dtipo_factura">Con saldo <input type="checkbox" name="con_saldo" value="si"></label>
+                   | <label class="control-label" for="dtipo_factura">Con saldo <input type="checkbox" name="con_saldo" id="con_saldo" value="si"></label>
                   </div>
                 </div>
 
@@ -71,7 +71,18 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" src="<?php echo base_url('panel/ventas/rpsaldo_vencido_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <div class="row-fluid">
+        <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/ventas/rpsaldo_vencido_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
+          <div class="box-content">
+            <div class="row-fluid">
+              <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/ventas/rpsaldo_vencido_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+            </div>
+          </div>
+        </div><!--/span-->
+      </div><!--/row-->
 
     </div><!--/#content.span9-->
 

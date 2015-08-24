@@ -8,10 +8,35 @@ $(function(){
           dempresa: $("#dempresa").val(),
           did_empresa: $("#did_empresa").val(),
           dtipo_factura: $("#dtipo_factura").val(),
+          con_saldo: ($("#con_saldo").is(':checked')? 'si': ''),
+
           ids_clientes: [],
         };
     $("#lista_clientes .ids_clientes").each(function(index, el) {
       url.ids_clientes.push($(this).val());
+    });
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
+  $('#frmventclin').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          dtipo_factura: $("#dtipo_factura").val(),
+          dcon_mov: ($("#dcon_mov").is(':checked')? 'si': ''),
+
+          did_empresa: [],
+          ids_clientes: [],
+        };
+    $("#lista_clientes .ids_clientes").each(function(index, el) {
+      url.ids_clientes.push($(this).val());
+    });
+    $("#did_empresa option:selected").each(function() {
+      url.did_empresa.push($(this).val());
     });
 
     linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));

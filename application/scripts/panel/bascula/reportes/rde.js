@@ -82,9 +82,29 @@ $(function(){
           fcalidad: $("#fcalidad").val(),
           ftipo: $("#ftipo").val(),
           fproveedor: $("#fproveedor").val(),
+          fid_proveedor: $("#fid_proveedor").val(),
           fempresa: $("#fempresa").val(),
+          fid_empresa: $("#fid_empresa").val(),
           fstatus: $("#fstatus").val(),
+          fid_chofer: $("#fid_chofer").val(),
           fefectivo: $("#fefectivo").is(':checked')? 'si': '',
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
+  $('#rptbascacumulados').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          farea: $("#farea").val(),
+          ftipo: $("#ftipo").val(),
+          fempresa: $("#fempresa").val(),
+          fid_empresa: $("#fid_empresa").val(),
+          fstatus: $("#fstatus").val(),
         };
 
     linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
