@@ -4233,7 +4233,7 @@ class nomina_fiscal_model extends CI_Model {
       $ver_total_otros     += $_POST['bonos'][$key]+$_POST['otros'][$key];
     }
 
-    $columnas = array('n' => array(), 'w' => array(6, 64, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R'));
+    $columnas = array('n' => array(), 'w' => array(6, 60, 20, 20, 20), 'a' => array('L', 'L', 'R', 'R', 'R'));
     $columnas['n'][] = 'No';
     $columnas['n'][] = 'NOMBRE';
     $columnas['n'][] = 'SUELDO';
@@ -4250,14 +4250,14 @@ class nomina_fiscal_model extends CI_Model {
     if ($ver_total_domingo != 0)
     {
       $columnas['n'][] = 'DOMINGO';
-      $columnas['w'][] = 20;
+      $columnas['w'][] = 15;
       $columnas['a'][] = 'R';
     }
 
     if ($ver_total_prestamos != 0)
     {
       $columnas['n'][] = 'PTMO';
-      $columnas['w'][] = 20;
+      $columnas['w'][] = 15;
       $columnas['a'][] = 'R';
     }
 
@@ -4271,13 +4271,13 @@ class nomina_fiscal_model extends CI_Model {
     if ($ver_infonavit != 0)
     {
       $columnas['n'][] = 'INFONAVIT';
-      $columnas['w'][] = 20;
+      $columnas['w'][] = 15;
       $columnas['a'][] = 'R';
     }
 
     if($ver_des_playera){
       $columnas['n'][] = 'DESC. PLAY';
-      $columnas['w'][] = 20;
+      $columnas['w'][] = 15;
       $columnas['a'][] = 'R';
     }
     if($ver_des_otro){
@@ -4528,7 +4528,7 @@ class nomina_fiscal_model extends CI_Model {
       if ($ver_total_domingo != 0)
         $dataarr[] = String::formatoNumero(0, 2, '$', false);
       if ($ver_total_prestamos != 0)
-        $dataarr[] = String::formatoNumero($empleado->total_deduccion, 2, '$', false);
+        $dataarr[] = String::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '$', false);
 
       if ($ver_fondo_arro != 0)
       {
@@ -5153,7 +5153,7 @@ class nomina_fiscal_model extends CI_Model {
 
       if ($ver_total_prestamos != 0)
       {
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
+        $dataarr[] = String::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '', false);
       }
 
       if ($ver_fondo_arro != 0)

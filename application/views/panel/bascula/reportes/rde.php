@@ -48,6 +48,16 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="fempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="fempresa"
+                      value="<?php echo set_value('fempresa') ?>" id="fempresa" class="span12 getjsval" placeholder="Empresa">
+                    <input type="hidden" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa" class="getjsval">
+                  </div>
+                </div>
+
+
+                <div class="control-group">
                   <label class="control-label autocomplet_en" for="fproveedor">Proveedor</label>
                   <label class="control-label autocomplet_sa hide" for="fproveedor">Cliente</label>
                   <div class="controls">
@@ -58,20 +68,11 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="fchofer">Chofer</label>
+                  <label class="control-label" for="fproductor">Productor</label>
                   <div class="controls">
-                    <input type="text" name="fchofer" class="span12 getjsval" id="fchofer"
-                      value="<?php echo set_value('fchofer', $this->input->post('fchofer')) ?>" placeholder="Proveedor que es Chofer">
-                    <input type="hidden" name="fid_chofer" value="<?php echo set_value('fid_chofer', $this->input->post('fid_chofer')) ?>" id="fid_chofer">
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label" for="fempresa">Empresa</label>
-                  <div class="controls">
-                    <input type="text" name="fempresa"
-                      value="<?php echo set_value('fempresa') ?>" id="fempresa" class="span12 getjsval" placeholder="Empresa">
-                    <input type="hidden" name="fid_empresa" value="<?php echo set_value('fid_empresa') ?>" id="fid_empresa" class="getjsval">
+                    <input type="text" name="fproductor" class="span12 getjsval" id="fproductor"
+                      value="<?php echo set_value('fproductor', $this->input->post('fproductor')) ?>" placeholder="Productor">
+                    <input type="hidden" name="fid_productor" value="<?php echo set_value('fid_productor', $this->input->post('fid_productor')) ?>" id="fid_productor">
                   </div>
                 </div>
 

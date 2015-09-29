@@ -137,11 +137,12 @@ class compras_areas_model extends CI_Model{
 
 	public function getAreasEspesifico($area, $padre=null)
 	{
-		$sql = $padre? " AND id_padre = {$padre}": '';
+		$sql = $padre? " AND id_padre = {$padre}": ' AND id_padre IS NULL';
+		// $sql .= $area>0? " AND (id_tipo = {$area} OR id_tipo IS NULL)": '';
 		$query = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
 		                           FROM compras_areas
-		                           WHERE status = 't' AND id_tipo = {$area} {$sql}
-		                           ORDER BY codigo ASC");
+		                           WHERE status = 't' {$sql}
+		                           ORDER BY (id_area, codigo) ASC");
 
 		return $query->result();
 	}

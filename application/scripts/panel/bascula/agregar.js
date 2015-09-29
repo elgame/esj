@@ -214,6 +214,34 @@ $(function(){
     }
   });
 
+  // Autocomplete Proveedor
+  $("#pproductor").autocomplete({
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#pid_empresa").val()) > 0)
+        params.did_empresa = $("#pid_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/productores/ajax_get_productores/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#pid_productor").val(ui.item.id);
+      $("#pproductor").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+     $(this).css({'background-color': '#FFD9B3'});
+      $('#pid_productor').val('');
+    }
+  });
+
   // Autocomplete RANCHOS
   $("#prancho").autocomplete({
     source: base_url + 'panel/bascula/ajax_get_ranchos/',

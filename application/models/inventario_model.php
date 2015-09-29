@@ -1417,11 +1417,12 @@ class inventario_model extends privilegios_model{
   public function uepsData($id_producto, $fecha1, $fecha2)
   {
     $res = $this->db->query(
-    "SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
+    "SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, tipo
     FROM
       (
         (
-        SELECT cp.id_producto, cp.num_row, cp.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+        SELECT cp.id_producto, cp.num_row, co.fecha_creacion AS fecha, cp.fecha_aceptacion AS fecha_reg,
+          cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
         FROM compras_ordenes AS co
         INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
         WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
@@ -1429,23 +1430,26 @@ class inventario_model extends privilegios_model{
         )
         UNION ALL
         (
-        SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+        SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
+          sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
         FROM compras_salidas AS sa
         INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
-        WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca' AND Date(sa.fecha_registro) <= '{$fecha2}'
+        WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
+          AND Date(sa.fecha_registro) <= '{$fecha2}'
         )
       ) AS t
-    ORDER BY fecha ASC");
+    ORDER BY fecha_reg ASC");
 
     $result   = array();
     $result[] = array('fecha' => 'S. Anterior',
+            'fecha_reg' => '',
             'entrada' => array(0, 0, 0, 0),
             'salida' => array(0, 0, 0, 0),
             'saldo' => array(0, 0, 0, 0), );
 
     foreach ($res->result() as $key => $value)
     {
-      $row = array('fecha' => $value->fecha, 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+      $row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
       if ($value->tipo == 'c')
       {
         $row['entrada'][0] = $value->cantidad;
@@ -1466,7 +1470,7 @@ class inventario_model extends privilegios_model{
         {
         	if($result[$ci]['entrada'][0] > 0)
         	{
-	          $row = array('fecha' => $value->fecha, 'misma_salida' => ($row==NULL? '' : '&&'), 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
+	          $row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'misma_salida' => ($row==NULL? '' : '&&'), 'entrada' => array('', '', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0));
 	          if($aux_cantidad >= floatval($result[$ci]['entrada'][3]) && floatval($result[$ci]['entrada'][3]) > 0)
 	          {
 	            $row['salida'][0] = $result[$ci]['entrada'][3];
@@ -1505,7 +1509,7 @@ class inventario_model extends privilegios_model{
     $valkey = $entro = 0;
     foreach ($result as $key => $value)
     {
-      if(strtotime($fecha1) > strtotime($value['fecha']))
+      if(strtotime($fecha1) > strtotime($value['fecha_reg']))
       {
         $valkey = $key-1;
         unset($result[$valkey]);
@@ -2505,11 +2509,12 @@ class inventario_model extends privilegios_model{
     }
 
 		$res = $this->db->query(
-		"SELECT id_producto, Date(fecha) AS fecha, cantidad, precio_unitario, importe, tipo
+		"SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, tipo
 		FROM
 			(
 				(
-				SELECT cp.id_producto, cp.num_row, cp.fecha_aceptacion AS fecha, cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
+				SELECT cp.id_producto, cp.num_row, co.fecha_creacion AS fecha, cp.fecha_aceptacion AS fecha_reg,
+          cp.cantidad, cp.precio_unitario, cp.importe, 'c' AS tipo
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
@@ -2518,7 +2523,8 @@ class inventario_model extends privilegios_model{
 				)
 				UNION ALL
 				(
-				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_registro AS fecha, sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
+				SELECT sp.id_producto, sp.no_row AS num_row, sa.fecha_creacion AS fecha, sa.fecha_registro AS fecha_reg,
+        sp.cantidad, sp.precio_unitario, (sp.cantidad * sp.precio_unitario) AS importe, 's' AS tipo
 				FROM compras_salidas AS sa
 				INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
 				WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
@@ -2526,16 +2532,17 @@ class inventario_model extends privilegios_model{
           {$sql_sal}
 				)
 			) AS t
-		ORDER BY fecha ASC, tipo ASC");
+		ORDER BY fecha_reg ASC, tipo ASC");
 
 		$result   = array();
 		$result[] = array('fecha' => 'S. Anterior',
+              'fecha_reg' => '',
 						'entrada' => array(0, 0, 0),
 						'salida' => array(0, 0, 0),
 						'saldo' => array(0, 0, 0, 0), );
 		foreach ($res->result() as $key => $value)
 		{
-			$row = array('fecha' => $value->fecha, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0));
+			$row = array('fecha' => $value->fecha, 'fecha_reg' => $value->fecha_reg, 'entrada' => array('', '', ''), 'salida' => array('', '', ''), 'saldo' => array(0, 0, 0, 0));
 			if ($value->tipo == 'c')
 			{
 				$row['entrada'][0] = $value->cantidad;
@@ -2568,7 +2575,7 @@ class inventario_model extends privilegios_model{
 		$valkey = $entro = 0;
 		foreach ($result as $key => $value)
 		{
-			if($fecha1 > $value['fecha'])
+			if($fecha1 > $value['fecha_reg'])
 			{
 				$valkey = $key-1;
 				unset($result[$valkey]);
@@ -2714,7 +2721,8 @@ class inventario_model extends privilegios_model{
 
 	    $query = BDUtil::pagination(
 	    	"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
-	    		COALESCE((SELECT precio_unitario FROM compras_productos WHERE status = 'a' AND precio_unitario > 0 AND id_producto = p.id_producto ORDER BY fecha_aceptacion DESC LIMIT 1), 0) AS ul_precio_unitario
+	    		COALESCE((SELECT cp.precio_unitario FROM compras_ordenes co INNER JOIN compras_productos cp ON co.id_orden = cp.id_orden
+                  WHERE co.status <> 'ca' AND cp.status = 'a' AND cp.precio_unitario > 0 AND cp.id_producto = p.id_producto ORDER BY cp.fecha_aceptacion DESC LIMIT 1), 0) AS ul_precio_unitario
 			FROM productos AS p
 				INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
 				INNER JOIN productos_unidades AS pu ON pu.id_unidad = p.id_unidad

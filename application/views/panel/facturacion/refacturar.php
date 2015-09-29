@@ -352,7 +352,7 @@
                           foreach ($_POST['prod_did_prod'] as $k => $v) {
                             // if ($_POST['prod_importe'][$k] != 0) {
                           ?>
-                              <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>">
+                              <tr data-pallets="<?php echo $_POST['pallets_id'][$k] ?>" data-remisiones="<?php echo $_POST['remisiones_id'][$k] ?>">
                                 <td>
                                   <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                   <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">

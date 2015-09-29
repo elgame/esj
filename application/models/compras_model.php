@@ -489,7 +489,7 @@ class compras_model extends privilegios_model{
         'id_compra' => $id,
         'num_row' => $key,
         'id_producto' => $data['productoId'][$key],
-        'id_presentacion' => $data['asdasd'][$key],
+        // 'id_presentacion' => $data['asdasd'][$key],
         'descripcion' => $concepto,
         'cantidad' => $data['cantidad'][$key],
         'precio_unitario' => $data['valorUnitario'][$key],
@@ -629,8 +629,9 @@ class compras_model extends privilegios_model{
   {
     $this->load->model('cuentas_pagar_model');
     $pagada = false;
-    $inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id_compra);
-    if (($inf_factura['saldo']+$total_nc_update) <= $total){ //se ajusta
+    $inf_factura = $this->cuentas_pagar_model->getDetalleVentaFacturaData($id_compra, 'f');
+    // if (($inf_factura['saldo']+$total_nc_update) <= $total){ //se ajusta
+    if ($inf_factura['saldo'] <= 0) {
       $pagada = true;
     }
     //verifica si la factura se pago, se cambia el status

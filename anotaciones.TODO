@@ -1,18 +1,20 @@
 
+2h--*Imprimir formato de remiciones en ticket
+8h--*Generar Catalogo de Productores y agregarlo a bascula y reportes => Cambiar el campo tipo a 40 chars
 
 --Checar el reporte de diario con las nuevas cosas
---*Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
---*Todos los reportes q se exporten a excel
+14h--*Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
+8h--*Todos los reportes q se exporten a excel
 ---commit No 2
---*otro catalogo de como el de la maquinaria para el punto de venta
---*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar
---*Que seleccionen una empresa y trabaje en esa empresa por default como si fuera sanjorge
+7h--*otro catalogo de como el de la maquinaria para el punto de venta
+4h--*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar
+9h--*Que seleccionen una empresa y trabaje en esa empresa por default como si fuera sanjorge
 -en bascula poner limon apatzingan
 --en las ordenes de flete poder poner una descripcion, y q ponga el nombre del cliente y la fecha y hr de salida del producto q es el de la remision, numero de manifiesto de embarque
 --*el reporte de prestamos de trabajadores poder mostrar todos los trabajadores y su saldo
 -*Bascula al registrar boletas de salida se sale
 -*En reporte de nomina checar no suma el premio de asistencia cuando se calcula las vacaciones (semana 29 MALDONADO GALVEZ FRANCISCO JAVIER)
---*descargar en exel los reportes de existencias
+1h--*descargar en exel los reportes de existencias
 -*Cambiar los reportes de nomina al apartado de nomina
 --*al momento de hacer pagos tener la opcion de imprimir el sello de acuerdo a los formatos que la señora paso (va mandar otros)
 -*caja chica que no muestre todo el listado de cheques
@@ -22,7 +24,7 @@
 -*Checar el recibo de finiquito, las vacaciones no salieron bien a norma
 -*En el recibo de incapasidad poner caja de % para q no calcule siempre con el 100%
 -*En nomina, en los reportes, cuando carga los finiquitos no pone el nombre completo del trabajador y falta el SDI
--*Bascula crear reporte de las boletas que el chofer son productores
+2h--*Bascula crear reporte de las boletas que el chofer son productores
 -*Bascula validar q si rosy ya puso los quilos no modifique la informacion desde el empaque
 -*en nomina de gomez marca error al exportar en exel el reporte
 -*en remisiones no esta separando los productos de fletes, seguros y esos

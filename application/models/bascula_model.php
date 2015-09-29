@@ -122,6 +122,8 @@ class bascula_model extends CI_Model {
           'tipo'         => $this->input->post('ptipo'),
           'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'],
           'certificado' => isset($_POST['certificado']) ? 't' : 'f',
+
+          'id_productor' => empty($_POST['pid_productor']) ? null : $_POST['pid_productor'],
         );
 
         if ($this->input->post('ptipo') === 'en')
@@ -187,6 +189,8 @@ class bascula_model extends CI_Model {
 
         $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
         $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
+
+        $data2['id_productor'] = empty($_POST['pid_productor']) ? null : $_POST['pid_productor'];
 
         $info_boleta = $this->getBasculaInfo($idb);
         if($info_boleta['info'][0]->fecha_tara != '' && strtotime(substr($info_boleta['info'][0]->fecha_tara, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
@@ -315,6 +319,7 @@ class bascula_model extends CI_Model {
                 cl.cuenta_cpi AS cpi_cliente,
                 b.tipo,
                 b.no_impresiones,
+                pr.nombre_fiscal AS productor,
                 b.certificado")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
@@ -323,6 +328,7 @@ class bascula_model extends CI_Model {
       ->join('clientes AS cl', 'cl.id_cliente = b.id_cliente', "left")
       ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "left")
       ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "left")
+      ->join('otros.productor AS pr', 'pr.id_productor = b.id_productor', "left")
       ->where("b.id_bascula", $id)
       ->or_where('b.folio', $folio)
       ->get();
@@ -926,10 +932,10 @@ class bascula_model extends CI_Model {
         $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
         $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
         $tipo_rpt = "Salida";
-      } elseif ($this->input->get('fid_chofer') > 0) {
-        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
-        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
-        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
+      } elseif ($this->input->get('fid_productor') > 0) {
+        $campos = "CONCAT(ch.nombre_fiscal || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN otros.productor ch ON ch.id_productor = b.id_productor';
+        $sql .= " AND ch.id_productor = {$_GET['fid_productor']}";
       }
 
       $this->load->model('areas_model');
@@ -1042,7 +1048,8 @@ class bascula_model extends CI_Model {
       }
 
       $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
-      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
+      $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -1268,7 +1275,8 @@ class bascula_model extends CI_Model {
     }
 
     $titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
-    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
     $html = '<table>
       <tbody>
@@ -1605,10 +1613,10 @@ class bascula_model extends CI_Model {
         $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
         $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
         $tipo_rpt = "Salida";
-      } elseif ($this->input->get('fid_chofer') > 0) {
-        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
-        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
-        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
+      } elseif ($this->input->get('fid_productor') > 0) {
+        $campos = "CONCAT(ch.nombre_fiscal || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN otros.productor ch ON ch.id_productor = b.id_productor';
+        $sql .= " AND ch.id_productor = {$_GET['fid_productor']}";
       }
 
       $query = $this->db->query(
@@ -1694,7 +1702,8 @@ class bascula_model extends CI_Model {
       }
 
       $pdf->titulo2 = "REPORTE BOLETAS PAGADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
-      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
+      $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -1803,7 +1812,8 @@ class bascula_model extends CI_Model {
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = "REPORTE BOLETAS PAGADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
-    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$this->input->get('fproveedor').' | '.$this->input->get('fempresa');
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
 
     $html = '<table>
@@ -2268,6 +2278,7 @@ class bascula_model extends CI_Model {
       'id_empresa'      => 'Empresa',
       'id_cliente'      => 'Cliente',
       'id_proveedor'    => 'Proveedor',
+      'id_productor'    => 'Productor',
       'rancho'          => 'Rancho',
       'id_camion'       => 'Camion',
       'id_chofer'       => 'Chofer',
@@ -2295,6 +2306,7 @@ class bascula_model extends CI_Model {
       'id_proveedor' => "SELECT nombre_fiscal as dato FROM proveedores WHERE id_proveedor = ?",
       'id_camion'    => "SELECT placa as dato FROM camiones WHERE id_camion = ?",
       'id_chofer'    => "SELECT nombre as dato FROM choferes WHERE id_chofer = ?",
+      'id_productor' => "SELECT nombre_fiscal as dato FROM otros.productor WHERE id_productor = ?",
     );
 
     // Obtiene la informacion de la pesada.

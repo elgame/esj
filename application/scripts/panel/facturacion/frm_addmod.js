@@ -947,6 +947,8 @@ function calculaTotal ($calculaT) {
   var $sinCosto = $('#dsincosto'),
       isCheckedSinCosto = $sinCosto.is(':checked');
 
+    console.log("dadasd");
+
   $('input#prod_importe').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
     if ( ! isCheckedSinCosto) {

@@ -13,6 +13,7 @@ class ventas extends MY_Controller {
     'ventas/rpsaldo_vencido_xls/',
     'ventas/rventas_nc_pdf/',
     'ventas/rventas_nc_xls/',
+    'ventas/imprimir_tk/',
 
     'facturacion/rvc_pdf/',
     'facturacion/rvp_pdf/',
@@ -664,6 +665,17 @@ class ventas extends MY_Controller {
     {
       $this->load->model('ventas_model');
       $this->ventas_model->generaNotaRemisionPdf($_GET['id']);
+    }
+    else
+      redirect(base_url('panel/ventas/?msg=1'));
+  }
+
+  public function imprimir_tk()
+  {
+    if(isset($_GET['id']{0}))
+    {
+      $this->load->model('ventas_model');
+      $this->ventas_model->ticketNotaRemisionPdf($_GET['id']);
     }
     else
       redirect(base_url('panel/ventas/?msg=1'));

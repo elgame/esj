@@ -1592,6 +1592,447 @@ class Ventas_model extends privilegios_model{
       $pdf->Output('Venta_Remision', 'I');
   }
 
+  public function ticketNotaRemisionPdf($idVenta, $path = null)
+  {
+    // include(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+    $factura = $this->getInfoVenta($idVenta);
+    $hist    = $this->getHistRemision($idVenta);
+
+    // echo "<pre>";
+    //   var_dump($hist);
+    // echo "</pre>";exit;
+
+    // echo "<pre>";
+    //   var_dump($factura, $factura['info']->cliente->rfc);
+    // echo "</pre>";exit;
+
+    $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $factura['info']->xml));
+
+    // echo "<pre>";
+    //   var_dump($factura, $xml);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 270));
+    $pdf->show_head = false;
+    $pdf->AddPage();
+    $pdf->AddFont($pdf->fount_num, '');
+
+
+    // Título
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetXY(0, 3);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $factura['info']->empresa->nombre_fiscal, 0, 'C');
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, 'RFC: '.$factura['info']->empresa->rfc, 0, 'L');
+
+    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array(
+        $factura['info']->empresa->calle.' No. '.$factura['info']->empresa->no_exterior.
+        ((isset($factura['info']->empresa->no_interior)) ? ' Int. '.$factura['info']->empresa->no_interior : '').
+        ((isset($factura['info']->empresa->colonia)) ? ' Col. '.$factura['info']->empresa->colonia : '').
+        ((isset($factura['info']->empresa->estado)) ? ', '.$factura['info']->empresa->estado : '').
+        ((isset($factura['info']->empresa->pais)) ? ', '.$factura['info']->empresa->pais : '')
+      ), false, false, 5);
+
+    $pdf->SetXY(0, $pdf->GetY()+2);
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+    $pdf->SetWidths(array($pdf->pag_size[0]-31, 30));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(1, 1));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array(($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'),
+                  "Folio: ".$factura['info']->serie.'-'.$factura['info']->folio ), false, false, 5);
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->SetX(0);
+    $pdf->Row2(array( "RECEPTOR" ), false, false, 5);
+
+    $pdf->SetX(0);
+    $pdf->Row2(array( $factura['info']->cliente->nombre_fiscal ), false, false, 6);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array( "RFC: ".$factura['info']->cliente->rfc ), false, false, 5);
+
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array(
+        (isset($factura['info']->cliente->calle) ? $factura['info']->cliente->calle : '').
+        ' No. '.(isset($factura['info']->cliente->no_exterior) ? $factura['info']->cliente->no_exterior : '').
+        ((isset($factura['info']->cliente->no_interior)) ? ' Int. '.$factura['info']->cliente->no_interior : '').
+        ((isset($factura['info']->cliente->colonia)) ? ' Col. '.$factura['info']->cliente->colonia : '').
+        ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
+        ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
+     ), false, false, 7);
+
+    $pdf->SetXY(0, $pdf->GetY()+1);
+    $pdf->Row2(array( "TEL: ".$factura['info']->cliente->telefono ), false, false, 5);
+
+
+    ///////////////
+    // Productos //
+    ///////////////
+    $conceptos = $factura['productos'];
+
+    $pdf->SetWidths(array(12, 27, 13, 14));
+    $pdf->SetAligns(array('L','L','R','R'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-1));
+    $pdf->SetXY(0, $pdf->GetY()+1);
+    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'PRECIO', 'IMPORTE'), false, true, 4.5);
+
+    $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                   array(.5,-1,-1,-1));
+    $traslado11 = 0;
+    $traslado16 = 0;
+
+    $pdf->limiteY = 250;
+
+    $pdf->setY($pdf->GetY() + 1);
+    $hay_prod_certificados = false;
+    $gastos = array();
+    $bultoss = 0;
+    foreach($conceptos as $key => $item)
+    {
+      $printRow = true;
+      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+          $item->id_clasificacion == '53'){
+        if($factura['info']->sin_costo_nover == 'f')
+        {
+          $printRow = false;
+          $gastos[] = $item;
+        } else {
+          $printRow = false;
+        }
+      }
+
+      if ($item->certificado === 't')
+        $hay_prod_certificados = true;
+
+      if($printRow)
+      {
+        if ($item->porcentaje_iva == '11')
+          $traslado11 += $item->iva;
+        elseif ($item->porcentaje_iva == '16')
+          $traslado16 += $item->iva;
+
+        $descripcion_ext = '';
+        if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+            $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+            $item->id_clasificacion == '53'){
+          if($item->id_clasificacion == '49' && isset($factura['seguro']))
+            $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+          elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
+            $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+          elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
+            $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+        }else
+          $bultoss += $item->cantidad;
+
+        $pdf->SetXY(0, $pdf->GetY()-1.5);
+        $pdf->Row2(array(
+          $item->cantidad, //.' '.$item->unidad
+          substr($item->descripcion, 0, 25), //.$descripcion_ext
+          String::formatoNumero($item->precio_unitario, 2, '', true),
+          String::formatoNumero($item->importe, 2, '', true),), false, false);
+      }
+    }
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+    foreach($gastos as $key => $item)
+    {
+      if($factura['info']->sin_costo == 'f')
+      {
+        if ($item->porcentaje_iva == '11')
+          $traslado11 += $item->iva;
+        elseif ($item->porcentaje_iva == '16')
+          $traslado16 += $item->iva;
+      }
+
+      if ($item->certificado === 't')
+        $hay_prod_certificados = true;
+
+      $descripcion_ext = '';
+      if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
+          $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
+          $item->id_clasificacion == '53'){
+        if($item->id_clasificacion == '49' && isset($factura['seguro']))
+          $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+        elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
+          $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+        elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
+          $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+      }
+
+      $pdf->SetXY(0, $pdf->GetY()-1.5);
+      $pdf->Row2(array(
+        $item->cantidad, //.' '.$item->unidad
+        substr($item->descripcion, 0, 25), //.$descripcion_ext
+        String::formatoNumero($item->precio_unitario, 2, '', true),
+        String::formatoNumero($item->importe, 2, '', true),), false, false);
+    }
+
+    // /////////////
+    // // Totales //
+    // /////////////
+
+    $pdf->SetXY(0, $pdf->GetY()+2);
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+    $pdf->SetWidths(array($pdf->pag_size[0]-31, 30));
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(0, 0));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array("Subtotal", String::formatoNumero($factura['info']->subtotal, 2, '', true) ), false, false, 5);
+
+    // Pinta traslados, retenciones
+
+    if ($traslado11 != 0)
+    {
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array("IVA(11%)", String::formatoNumero($traslado11, 2, '', true) ), false, false, 5);
+    }
+
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array("IVA(16%)", String::formatoNumero($traslado16, 2, '', true) ), false, false, 5);
+
+    if ($factura['info']->retencion_iva != 0)
+    {
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array("IVA Retenido", String::formatoNumero($factura['info']->retencion_iva, 2, '', true) ), false, false, 5);
+    }
+
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array("TOTAL", String::formatoNumero($factura['info']->total, 2, '', true) ), false, false, 5);
+
+    $pdf->SetXY(0, $pdf->GetY()+2);
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(0));
+
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array($factura['info']->total_letra ), false, false, 6);
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array($factura['info']->forma_pago ), false, false, 5);
+
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row2(array($factura['info']->metodo_pago ), false, false, 5);
+
+
+    // ///////////////////
+    // // Observaciones //
+    // ///////////////////
+
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    if ( ! empty($factura['info']->observaciones))
+      $pdf->Row2(array("Observaciones: ".$factura['info']->observaciones ), false, false, 5);
+
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '_____________________________________', 0, 'C');
+    $pdf->SetXY(0, $pdf->GetY()+1.5);
+    $pdf->MultiCell($pdf->pag_size[0], 2, 'FIRMA', 0, 'C');
+
+
+    // if($hay_prod_certificados)
+    // {
+    //   if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
+    //       $pdf->AddPage();
+
+    //   $pdf->SetFont('helvetica', 'B', 8);
+    //   $pdf->SetXY(10, $pdf->GetY());
+    //   $pdf->SetAligns(array('L'));
+    //   $pdf->SetWidths(array(196));
+    //   $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
+    // }
+
+    // ////////////////////
+    // // historial      //
+    // ////////////////////
+
+    // if($pdf->GetY() + 15 >= $pdf->limiteY) //salta de pagina si exede el max
+    //     $pdf->AddPage();
+
+    // $yaux = $pdf->GetY()+5;
+    // if (count($hist['facturas']) > 0) {
+    //   $pdf->SetFont('helvetica', 'B', 8);
+    //   $pdf->SetXY(5, $pdf->GetY()+5);
+    //   $pdf->SetAligns(array('L'));
+    //   $pdf->SetWidths(array(19, 20, 30));
+    //   $pdf->Row(array('Fecha', 'Folio', 'Status'), false, true);
+    //   $pdf->SetFont('helvetica', '', 7.5);
+    //   $pdf->SetXY(5, $pdf->GetY()-1);
+    //   foreach ($hist['facturas'] as $key => $value) {
+    //     $status = 'Pendiente';
+    //     if ($value->status == 'pa')
+    //       $status = 'Pagada';
+    //     elseif($value->status == 'ca')
+    //       $status = 'Cancelada';
+    //     elseif($value->status == 'b')
+    //       $status = 'Borrador';
+    //     $pdf->Row(array($value->fecha, $value->serie.$value->folio, $status), false, false);
+    //     $pdf->SetXY(5, $pdf->GetY()-2);
+    //   }
+    // }
+
+    // if (count($hist['abonos_remision']['abonos']) > 0 || count($hist['abonos_factura']['abonos']) > 0) {
+    //   $pdf->SetFont('helvetica', 'B', 8);
+    //   $pdf->SetXY(75, $yaux);
+    //   $pdf->SetAligns(array('L'));
+    //   $pdf->SetWidths(array(19, 20, 70, 25));
+    //   $pdf->Row(array('Fecha', 'Folio', 'Concepto', 'Abono'), false, true);
+    //   $pdf->SetFont('helvetica', '', 7.5);
+    //   $pdf->SetXY(75, $pdf->GetY()-1);
+    //   $total_abanos = 0;
+    //   if (count($hist['abonos_remision']['abonos']) > 0)
+    //     foreach($hist['abonos_remision']['abonos'] as $key => $value) {
+    //       $pdf->Row(array(
+    //           $value->fecha,
+    //           $hist['abonos_remision']['cobro'][0]->serie.$hist['abonos_remision']['cobro'][0]->folio,
+    //           $value->concepto,
+    //           String::formatoNumero($value->abono, 2, '$', false)), false, false);
+    //       $total_abanos += $value->abono;
+    //       $pdf->SetXY(75, $pdf->GetY()-2);
+    //     }
+    //   if (count($hist['abonos_factura']['abonos']) > 0)
+    //     foreach ($hist['abonos_factura']['abonos'] as $key => $value) {
+    //       $pdf->Row(array(
+    //           $value->fecha,
+    //           $hist['abonos_factura']['cobro'][0]->serie.$hist['abonos_factura']['cobro'][0]->folio,
+    //           $value->concepto,
+    //           String::formatoNumero($value->abono, 2, '$', false)), false, false);
+    //       $total_abanos += $value->abono;
+    //       $pdf->SetXY(75, $pdf->GetY()-2);
+    //     }
+    //   $pdf->SetFont('helvetica', 'B', 8);
+    //   $pdf->SetX(184);
+    //   $pdf->SetWidths(array(19, 20, 70, 25));
+    //   $pdf->Row(array(String::formatoNumero($total_abanos, 2, '$', false)), false, false);
+    // }
+
+    // //------------ IMAGEN CANDELADO --------------------
+
+    // if($factura['info']->status === 'ca'){
+    //   $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
+    // }
+
+    if ($path)
+      $pdf->Output($path.'Venta_Remision.pdf', 'F');
+    else
+      $pdf->Output('Venta_Remision', 'I');
+  }
+
+  public function imprimir_salidaticket($salidaID, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+
+    $orden = $this->info($salidaID, true);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+    $pdf->AddPage();
+    $pdf->AddFont($pdf->fount_num, '');
+
+    // Título
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetXY(0, 3);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
+    $pdf->SetFont($pdf->fount_txt, '', 7);
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS', 0, 'C');
+
+    $pdf->SetX(0);
+    $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
+    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size);
+
+    $pdf->SetWidths(array(12, 27, 13, 14));
+    $pdf->SetAligns(array('L','L','R','R'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-1));
+    $pdf->SetX(0);
+    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'PRECIO', 'IMPORTE'), false, true, 5);
+
+    $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
+                   array(.5,-1,-1,-1));
+    $subtotal = $iva = $total = $retencion = $ieps = 0;
+    $tipoCambio = 0;
+    $codigoAreas = array();
+    foreach ($orden['info'][0]->productos as $key => $prod) {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array(
+        $prod->cantidad.' '.$prod->abreviatura,
+        $prod->producto,
+        String::formatoNumero($prod->precio_unitario, 2, '', true),
+        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+
+      $total += floatval($prod->precio_unitario*$prod->cantidad);
+
+      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
+        $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+    }
+
+    // $pdf->SetX(29);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(13, 20));
+    // $pdf->SetX(29);
+    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetX(30);
+    $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+
+    $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(66, 0));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row2(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado), '' ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('SOLICITA: '.strtoupper($orden['info'][0]->solicito)), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('RECIBE: '.strtoupper($orden['info'][0]->recibio)), false, false);
+
+    $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->Row2(array('_____________________________________________'), false, false);
+    $yy2 = $pdf->GetY();
+    if(count($codigoAreas) > 0){
+      $yy2 = $pdf->GetY();
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    if ($orden['info'][0]->trabajador != '') {
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
+    }
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
   /*
    |-------------------------------------------------------------------------
    |  REPORTES

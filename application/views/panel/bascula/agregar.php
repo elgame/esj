@@ -228,7 +228,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pkilos_brutos|pkilos_tara" <?php echo $disabled.$bmod['chofer']; ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pproductor" <?php echo $disabled.$bmod['chofer']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-40x600">Agregar</a>
                       </span>
@@ -275,6 +275,19 @@
                     </div>
                   </div>
                   <?php } ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="pproductor">Productor</label>
+                    <div class="controls">
+                      <input type="text" name="pproductor"
+                        value="<?php echo set_value('pproductor', $this->input->post('pproductor')) ?>" data-next="pkilos_brutos|pkilos_tara"
+                        id="pproductor" class="span12" placeholder="Productor" <?php echo $disabled.$bmod['proveedor']; ?>>
+                      <span class="help-inline">
+                        <a href="<?php echo base_url('panel/productores/show_view_agregar_productor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
+                      </span>
+                      <input type="hidden" name="pid_productor" value="<?php echo set_value('pid_productor', $this->input->post('pid_productor')) ?>" id="pid_productor">
+                    </div>
+                  </div>
 
                   <div class="control-group">
                     <!-- <label class="control-label">Finalizado?</label> -->

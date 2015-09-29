@@ -12,6 +12,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_get_proveedores/',
     'bascula/ajax_get_clientes/',
     'bascula/ajax_get_choferes/',
+    'bascula/ajax_get_productor/',
     'bascula/ajax_get_camiones/',
     'bascula/ajax_get_calidades/',
     'bascula/ajax_get_precio_calidad/',
@@ -214,6 +215,12 @@ class bascula extends MY_Controller {
 
           $_POST['pcliente']    = $cliente['info']->nombre_fiscal;
           $_POST['pid_cliente'] = $info['info'][0]->id_cliente;
+        }
+
+        if ($info['info'][0]->id_productor != null)
+        {
+          $_POST['pproductor']    = $info['info'][0]->productor;
+          $_POST['pid_productor'] = $info['info'][0]->id_productor;
         }
 
         if ($info['info'][0]->id_chofer != null)
@@ -1742,6 +1749,12 @@ class bascula extends MY_Controller {
   {
     $this->load->model('choferes_model');
     echo json_encode($this->choferes_model->getChoferesAjax());
+  }
+
+  public function ajax_get_productor()
+  {
+    $this->load->model('productores_model');
+    echo json_encode($this->productores_model->getProductorAjax());
   }
 
   /**

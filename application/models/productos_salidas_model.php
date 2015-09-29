@@ -93,7 +93,7 @@ class productos_salidas_model extends CI_Model {
         'id_empleado'    => $this->session->userdata('id_usuario'),
         'folio'          => $_POST['folio'],
         'fecha_creacion' => str_replace('T', ' ', $_POST['fecha']),
-        'fecha_registro' => str_replace('T', ' ', $_POST['fecha']),
+        'fecha_registro' => date("Y-m-d H:i:s"),
         // 'concepto'    => '', //$_POST['conceptoSalida']
         'status'         => 's',
         'solicito'       => $_POST['solicito'],

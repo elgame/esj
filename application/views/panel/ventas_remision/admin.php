@@ -121,6 +121,10 @@
                         'attrs' => array('target' => "_blank"))
                       );
 
+                      if($this->usuarios_model->tienePrivilegioDe('', 'ventas/imprimir/'))
+                        echo '<a class="btn btn-info" href="'.base_url().'panel/ventas/imprimir_tk/?id='.$fact->id_factura.'" title="Ticket" target="_blank">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Ticket</span></a>';
+
                       if ($fact->status !== 'ca')
                       {
                         echo $this->usuarios_model->getLinkPrivSm('ventas/cancelar/', array(

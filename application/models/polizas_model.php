@@ -104,7 +104,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '4% RETENCION IVA X PAGAR'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA X PAGAR'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
@@ -117,7 +117,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '4% RETENCION IVA PAGADO'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA PAGADO'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
@@ -195,7 +195,7 @@ class polizas_model extends CI_Model {
     if ($this->empresaId==2) $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //sanjorge
     elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%REBAJAS Y BONIFICA%'"; //francis -
     elseif($this->empresaId==4) $sql=""; //Raul jorge
-    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==3) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //tests carga las de sanjorge
@@ -369,6 +369,7 @@ class polizas_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     return $basic? $data->cuenta: $data;
   }
+
 
   public function setEspacios($texto, $posiciones, $direccion='l')
   {
@@ -1053,7 +1054,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($impuesto['cuenta_cpi'],30).
                             $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
                             $this->setEspacios($impuesto['tipo'],1).  //clientes es un abono = 1
-                            $this->setEspacios( '-'.$this->numero($impuesto['importe']) , 20).
+                            $this->setEspacios( $this->numero($impuesto['importe']) , 20).
                             $this->setEspacios('0',10).
                             $this->setEspacios('0.0',20).
                             $this->setEspacios($inf_factura['info']->proveedor->nombre_fiscal,100).
