@@ -64,7 +64,7 @@
         </select>
 
         <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica">
-          <?php $totalIngresos = 0; $totalSaldoIngresos = $caja['saldo_inicial']; ?>
+          <?php $totalIngresos = 0; $totalSaldoIngresos = 0; ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
             <div class="row-fluid">
@@ -74,9 +74,6 @@
               <div class="span2" style="text-align: right;">
                 <div class="row-fluid">
                   <div class="span12">Fecha <input type="date" name="fecha_caja_chica" value="<?php echo set_value('fecha_caja_chica', isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d')) ?>" id="fecha_caja" class="input-medium" readonly></div>
-                </div>
-                <div class="row-fluid" style="margin: 3px 0;">
-                  <div class="span12">Saldo Inicial <input type="text" name="saldo_inicial" value="<?php echo set_value('saldo_inicial', $caja['saldo_inicial']) ?>" id="saldo_inicial" class="input-medium vpositive" <?php echo $readonly ?>></div>
                 </div>
               </div>
               <div class="span4">
@@ -105,177 +102,170 @@
               <div class="row-fluid">
                 <div class="span12">
 
-                    <!-- Ingresos por Reposicion-->
-                    <div class="row-fluid">
-                      <div class="span12" style="margin-top: 1px;">
-                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
-                          <thead>
-                            <tr>
-                              <th colspan="4">INGRESOS DIVERSOS
-                                <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
-                                <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a>
-                              </th>
-                              <th colspan="2">IMPORTE</th>
-                            </tr>
-                            <tr>
-                              <th>EMPRESA</th>
-                              <th>NOM</th>
-                              <th>POLIZA</th>
-                              <th>NOMBRE Y/O CONCEPTO</th>
-                              <th>ABONO</th>
-                              <th></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <?php
-                              if (isset($_POST['ingreso_concepto'])) {
-                                foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
-                                    $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
-                                  ?>
-                                  <tr>
-                                    <td style="width: 100px;">
-                                      <input type="text" name="ingreso_empresa[]" value="<?php echo $_POST['ingreso_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                      <input type="hidden" name="ingreso_empresa_id[]" value="<?php echo $_POST['ingreso_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
-                                    </td>
-                                    <td style="width: 40px;">
-                                      <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
-                                        <?php foreach ($nomenclaturas as $n) { ?>
-                                          <option value="<?php echo $n->id ?>" <?php echo $_POST['ingreso_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
-                                        <?php } ?>
-                                      </select>
-                                    </td>
-                                    <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $_POST['ingreso_poliza'][$key] ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly ?>></td>
-                                    <td>
-                                      <input type="text" name="ingreso_concepto[]" value="<?php echo $concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                      <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $_POST['ingreso_concepto_id'][$key] ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
-                                    </td>
-                                    <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $_POST['ingreso_monto'][$key] ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
-                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                  </tr>
-                            <?php }} else {
-                                  foreach ($caja['ingresos'] as $ingreso) {
-                                      $totalIngresos += floatval($ingreso->monto);
-                                    ?>
-                                    <tr>
-                                      <td style="width: 100px;">
-                                        <input type="text" name="ingreso_empresa[]" value="<?php echo $ingreso->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="ingreso_empresa_id[]" value="<?php echo $ingreso->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                      </td>
-                                      <td style="width: 40px;">
-                                        <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
-                                          <?php foreach ($nomenclaturas as $n) { ?>
-                                            <option value="<?php echo $n->id ?>" <?php echo $ingreso->nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
-                                          <?php } ?>
-                                        </select>
-                                      </td>
-                                      <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $ingreso->poliza ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly ?>></td>
-                                      <td>
-                                        <input type="text" name="ingreso_concepto[]" value="<?php echo $ingreso->concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $ingreso->id_movimiento ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
-                                      </td>
-                                      <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                    </tr>
-                            <?php }} ?>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                    <!--/ Ingresos por Reposicion-->
-
-                    <!-- Ingresos Clientes-->
+                    <!-- Cuentas x cobrar -->
                     <div class="row-fluid">
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
                           <thead>
                             <tr>
-                              <th colspan="4">INGRESOS CLIENTES
-                                <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
-                                <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a>
-                              </th>
-                              <th colspan="2">IMPORTE</th>
+                              <th colspan="5">CUENTAS POR COBRAR</th>
+                              <th colspan="1">IMPORTE</th>
                             </tr>
                             <tr>
-                              <th>EMPRESA</th>
-                              <th>REMISION</th>
-                              <th>FOLIO</th>
-                              <th>NOMBRE</th>
-                              <th>ABONO</th>
-                              <th></th>
+                              <th>FECHA</th>
+                              <th>CLIENTE</th>
+                              <th>REM No.</th>
+                              <th>S/ANTERIOR.</th>
+                              <th>CONTADO</th>
+                              <th>S/ACTUAL</th>
                             </tr>
                           </thead>
                           <tbody>
                             <?php
-                              if (isset($_POST['remision_concepto'])) {
-                                foreach ($_POST['remision_concepto'] as $key => $concepto) {
-                                  // $totalIngresos += floatval($_POST['otros_monto'][$key]);
-                                ?>
-                                  <tr>
-                                    <td style="width: 100px;">
-                                      <input type="text" name="remision_empresa[]" value="<?php echo $_POST['remision_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                      <input type="hidden" name="remision_empresa_id[]" value="<?php echo $_POST['remision_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
-                                    </td>
-                                    <td style="width: 70px;"><input type="text" name="remision_numero[]" value="<?php echo $_POST['remision_numero'][$key] ?>" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;" <?php echo $readonly ?>></td>
-                                    <td style="width: 100px;"><input type="text" name="remision_folio[]" value="<?php echo $_POST['remision_folio'][$key] ?>" class="remision_folio" placeholder="Folio" style="width: 100px;" <?php echo $readonly ?>></td>
-                                    <td>
-                                      <input type="text" name="remision_concepto[]" value="<?php echo $concepto ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                      <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
-                                    </td>
-                                    <td style="width: 100px;"><input type="text" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive input-small" placeholder="Importe" required <?php echo $readonly ?>></td>
-                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
-                                  </tr>
-                            <?php }} else {
-                                  foreach ($caja['remisiones'] as $remision) {
-                                    // $totalIngresos += floatval($otro->monto);
+                                  $totalSalAnt = $totalCont = $totalSal = 0;
+                                  foreach ($caja['cts_cobrar'] as $ct_cobrar) {
+                                    $totalSalAnt += floatval($ct_cobrar->saldo_ant);
+                                    $totalCont += floatval($ct_cobrar->abonos_hoy);
+                                    $totalSal += floatval($ct_cobrar->saldo);
                                   ?>
                                     <tr>
-                                      <td style="width: 100px;">
-                                        <input type="text" name="remision_empresa[]" value="<?php echo $remision->empresa ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="remision_empresa_id[]" value="<?php echo $remision->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                      </td>
-                                      <td style="width: 70px;"><input type="text" name="remision_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;" <?php echo $readonly ?>></td>
-                                      <td style="width: 100px;"><input type="text" name="remision_folio[]" value="<?php echo $remision->folio_factura ?>" class="remision_folio" placeholder="Folio" style="width: 100px;" <?php echo $readonly ?>></td>
-                                      <td>
-                                        <input type="text" name="remision_concepto[]" value="<?php echo $remision->observacion ?>" class="remision-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
-                                        <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
-                                      </td>
-                                      <td style="width: 100px;"><input type="text" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive input-small" placeholder="Importe" required <?php echo $readonly ?>></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                      <td style="width: 50px;"><?php echo $ct_cobrar->fecha ?></td>
+                                      <td style="width: 120px;"><?php echo $ct_cobrar->cliente ?></td>
+                                      <td style="width: 70px;"><?php echo $ct_cobrar->serie.$ct_cobrar->folio ?></td>
+                                      <td style="width: 100px;"><?php echo $ct_cobrar->saldo_ant ?></td>
+                                      <td style="width: 100px;"><?php echo $ct_cobrar->abonos_hoy ?></td>
+                                      <td style="width: 100px;"><?php echo $ct_cobrar->saldo ?></td>
                                     </tr>
-                            <?php }} ?>
-
-                            <?php if (isset($_POST['remision_concepto'])) {
-                              foreach ($_POST['remision_concepto'] as $key => $remision) {
-                                  $totalIngresos += floatval($_POST['remision_importe'][$key]);
-                                ?>
-                            <?php }} else {
-                              foreach ($caja['remisiones'] as $remision) {
-                                  $totalIngresos += floatval($remision->monto);
-                                ?>
-                            <?php }} ?>
+                            <?php } ?>
 
                             <tr class='row-total'>
-                              <td colspan="4"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td></td>
-                            </tr>
-
-                            <tr>
-                              <td colspan="4"></td>
-                              <td style="width: 100px;">
-                                <?php $totalReporteCaja = $totalSaldoIngresos + $totalIngresos ?>
-                                <input type="text" name="tota_saldo_ingresos" value="<?php echo String::float(String::formatoNumero($totalReporteCaja, 2, '')) ?>" class="span12" id="total-saldo-ingresos" maxlength="500" readonly style="text-align: right;">
-                              </td>
-                              <td></td>
+                              <td colspan="3"></td>
+                              <td><input type="text" name="totalSalAnt" value="<?php echo String::float(String::formatoNumero($totalSalAnt, 2, '')) ?>" class="span12" id="totalSalAnt" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="totalCont" value="<?php echo String::float(String::formatoNumero($totalCont, 2, '')) ?>" class="span12" id="totalCont" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="totalSal" value="<?php echo String::float(String::formatoNumero($totalSal, 2, '')) ?>" class="span12" id="totalSal" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
                       </div>
                     </div>
-                    <!--/ Ingresos Clientes-->
+                    <!--/ Cuentas x cobrar -->
 
-                    <!-- Boletas Pesadas -->
+                    <!-- Existencia anterior -->
+                    <div class="row-fluid">
+                      <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
+                          <thead>
+                            <tr>
+                              <th colspan="4">EXISTENCIA ANTERIOR</th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>REM No.</th>
+                              <th>PROVEEDOR</th>
+                              <th>CLASIF.</th>
+                              <th>BULTOS</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                                  $totalExisAnt = $bultosExisAnt = $aux = 0;
+                                  foreach ($caja['existencia_ant'] as $exis_ant) {
+                                    if ($aux == $exis_ant->id_factura) {
+                                      $exis_ant->nombre_fiscal = '';
+                                      $exis_ant->serie = '';
+                                      $exis_ant->folio = '';
+                                    } else
+                                      $aux = $exis_ant->id_factura;
+                                    $totalExisAnt += floatval($exis_ant->importe);
+                                    $bultosExisAnt += floatval($exis_ant->cantidad);
+                                  ?>
+                                    <tr>
+                                      <td style="width: 50px;"><?php echo $exis_ant->serie.$exis_ant->folio ?></td>
+                                      <td style="width: 120px;"><?php echo $exis_ant->nombre_fiscal ?>
+                                      </td>
+                                      <td style="width: 70px;"><?php echo $exis_ant->codigo ?></td>
+                                      <td style="width: 50px;"><?php echo $exis_ant->cantidad ?></td>
+                                      <td style="width: 70px;"><?php echo $exis_ant->precio_unitario ?></td>
+                                      <td style="width: 100px;"><?php echo $exis_ant->importe ?></td>
+                                    </tr>
+                            <?php } ?>
+
+                            <tr class='row-total'>
+                              <td colspan="3"></td>
+                              <td><input type="text" name="bultos_exis_ant" value="<?php echo String::float(String::formatoNumero($bultosExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="pu_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Existencia anterior -->
+
+                    <!-- Ingresos del dia -->
+                    <div class="row-fluid">
+                      <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
+                          <thead>
+                            <tr>
+                              <th colspan="4">INGRESOS DE MERCANCIAS
+                                <!-- <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                <!-- <a href="#modal-remisiones" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-remisiones" style="padding: 2px 7px 2px; float: right; <?php echo $display ?>">Remisiones</a> -->
+                              </th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>REM No.</th>
+                              <th>PROVEEDOR</th>
+                              <th>CLASIF.</th>
+                              <th>BULTOS</th>
+                              <th>PRECIO</th>
+                              <th>IMPORTE</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                                  $totalIngresos = $bultosIngresos = $aux = 0;
+                                  foreach ($caja['remisiones'] as $remision) {
+                                    if ($aux == $remision->id_factura) {
+                                      $remision->nombre_fiscal = '';
+                                      $remision->serie = '';
+                                      $remision->folio = '';
+                                    } else
+                                      $aux = $remision->id_factura;
+                                    $totalIngresos += floatval($remision->importe);
+                                    $bultosIngresos += floatval($remision->cantidad);
+                                  ?>
+                                    <tr>
+                                      <td style="width: 50px;"><?php echo $remision->serie.$remision->folio ?></td>
+                                      <td style="width: 120px;"><?php echo $remision->nombre_fiscal ?>
+                                        <input type="hidden" name="remision_id_factura[]" value="<?php echo $remision->id_factura ?>">
+                                      </td>
+                                      <td style="width: 70px;"><?php echo $remision->codigo ?></td>
+                                      <td style="width: 50px;"><?php echo $remision->cantidad ?></td>
+                                      <td style="width: 70px;"><?php echo $remision->precio_unitario ?></td>
+                                      <td style="width: 100px;"><?php echo $remision->importe ?></td>
+                                    </tr>
+                            <?php } ?>
+
+                            <tr class='row-total'>
+                              <td colspan="3"></td>
+                              <td><input type="text" name="bultos_ingresos" value="<?php echo String::float(String::formatoNumero($bultosIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="pu_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Ingresos del dia -->
+
+                    <!-- Ventas del dia -->
                     <div class="row-fluid" style="margin-top: 5px;">
                       <div class="span12">
                         <div class="row-fluid">
@@ -289,35 +279,64 @@
                                   <table class="table table-striped table-bordered table-hover table-condensed" id="table-boletas">
                                     <thead>
                                       <tr>
-                                        <th>BOLETA</th>
-                                        <th>FECHA</th>
-                                        <th>FOLIO</th>
-                                        <th>FACTURADOR Y/O PRODUCTOR</th>
+                                        <th colspan="4">VENTAS DEL DIA</th>
+                                        <th colspan="2">IMPORTE</th>
+                                        <th colspan="3"><?php echo $_GET['ffecha'] ?>
+                                          <?php echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                                              'params'   => "",
+                                              'btn_type' => 'btn-success pull-right btn_abonos_masivo',
+                                              'attrs' => array('style' => 'display:none;', 'rel' => 'superbox-50x500') )
+                                            ); ?>
+                                        </th>
+                                      </tr>
+                                      <tr>
+                                        <th>REM No.</th>
+                                        <th>CLIENTE</th>
+                                        <th>CLASIF.</th>
+                                        <th>BULTOS</th>
+                                        <th>PRECIO</th>
                                         <th>IMPORTE</th>
+                                        <th>ABONOS HOY</th>
+                                        <th>T. ABONOS</th>
+                                        <th>SALDO</th>
                                       </tr>
                                     </thead>
                                     <tbody>
-                                      <?php
-                                        $totalBoletas = 0;
-                                        foreach ($caja['boletas'] as $key => $boleta) {
-                                          $totalBoletas += floatval($boleta->importe);
-                                        ?>
-                                        <tr>
-                                          <td>
-                                            <?php echo $boleta->boleta ?>
-                                            <input type="hidden" name="boletas_id[]" value="<?php echo $boleta->id_bascula ?>">
-                                          </td>
-                                          <td><?php echo $boleta->fecha ?></td>
-                                          <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td>
-                                          <td><?php echo $boleta->proveedor ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe, 2, '$') ?></td>
-                                        </tr>
+                                      <?php $bultosVentas = $totalVentas = $abonoshVentas = $abonosVentas = $saldoVentas = 0;
+                                            foreach ($caja['ventas'] as $venta) {
+                                              $totalVentas += floatval($venta->importe);
+                                              $bultosVentas += floatval($venta->cantidad);
+                                              $abonoshVentas += floatval($venta->abonos_hoy);
+                                              $abonosVentas += floatval($venta->abonos);
+                                              $saldoVentas += floatval($venta->saldo);
+                                            ?>
+                                              <tr>
+                                                <td style="width: 50px;"><?php echo $venta->serie.$venta->folio ?></td>
+                                                <td style="width: 120px;"><?php echo $venta->cliente ?>
+                                                  <input type="hidden" name="venta_id_factura[]" value="<?php echo $venta->id_factura ?>">
+                                                </td>
+                                                <td style="width: 70px;"><?php echo $venta->codigo ?></td>
+                                                <td style="width: 50px;text-align: right;"><?php echo $venta->cantidad ?></td>
+                                                <td style="width: 70px;text-align: right;"><?php echo $venta->precio_unitario ?></td>
+                                                <td style="width: 100px;text-align: right;"><?php echo $venta->importe ?></td>
+                                                <td style="width: 100px;text-align: right;"><?php echo $venta->abonos_hoy ?></td>
+                                                <td style="width: 100px;text-align: right;"><?php echo $venta->abonos ?></td>
+                                                <td style="width: 100px;text-align: right;" class="<?php echo $venta->cliente!=''?'sel_abonom':''; ?>"
+                                                  data-id="<?php echo $venta->id_factura; ?>" data-tipo="f"><?php echo $venta->saldo ?></td>
+                                              </tr>
                                       <?php } ?>
                                     </tbody>
                                     <tbody>
                                       <tr>
-                                        <td colspan="4"><input type="hidden" value="<?php echo $totalBoletas ?>" id="total-boletas"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletas, 2, '$') ?></td>
+                                        <td colspan="3"><input type="hidden" value="<?php echo $totalVentas ?>" id="total-boletas"></td>
+                                        <td><?php echo String::formatoNumero($bultosVentas, 2, '') ?></td>
+                                        <td><?php echo String::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalVentas, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($abonoshVentas, 2, '$') ?>
+                                          <input type="hidden" name="abonoshVentas" id="abonoshVentas" value="<?php echo $abonoshVentas ?>">
+                                        </td>
+                                        <td style="text-align: right;"><?php echo String::formatoNumero($abonosVentas, 2, '$') ?></td>
+                                        <td style="text-align: right;"><?php echo String::formatoNumero($saldoVentas, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -329,7 +348,82 @@
                         </div>
                       </div>
                     </div>
-                    <!-- /Boletas Pesadas -->
+                    <!-- /Ventas del dia -->
+
+                    <!-- Existencia del dia -->
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">REPORTE CAJA "COMPRAS LIMON"</div> -->
+                              <div class="row-fluid">
+                                <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">INGRESOS <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px;"><i class="icon-plus"></i></button></div> -->
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-boletas">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="4">EXISTENCIA DEL DIA</th>
+                                        <th colspan="2">IMPORTE</th>
+                                      </tr>
+                                      <tr>
+                                        <th>REM No.</th>
+                                        <th>PROVEEDOR</th>
+                                        <th>CLASIF.</th>
+                                        <th>BULTOS</th>
+                                        <th>PRECIO</th>
+                                        <th>IMPORTE</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php $bultosExisD = $totalExisD = 0; $aux = 0;
+                                            foreach ($caja['existencia_dia'] as $exis_dia) {
+                                              if ($aux == $exis_dia->id_factura) {
+                                                $exis_dia->nombre_fiscal = '';
+                                                $exis_dia->serie = '';
+                                                $exis_dia->folio = '';
+                                              } else
+                                                $aux = $exis_dia->id_factura;
+                                              $totalExisD += floatval($exis_dia->importe);
+                                              $bultosExisD += floatval($exis_dia->cantidad);
+                                            ?>
+                                              <tr>
+                                                <td style="width: 50px;"><?php echo $exis_dia->serie.$exis_dia->folio ?></td>
+                                                <td style="width: 120px;"><?php echo $exis_dia->nombre_fiscal ?>
+                                                  <input type="hidden" name="exisd_id_factura[]" value="<?php echo $exis_dia->id_factura ?>">
+                                                  <input type="hidden" name="exisd_id_unidad[]" value="<?php echo $exis_dia->id_unidad ?>">
+                                                  <input type="hidden" name="exisd_descripcion[]" value="<?php echo $exis_dia->descripcion ?>">
+                                                  <input type="hidden" name="exisd_cantidad[]" value="<?php echo $exis_dia->cantidad ?>">
+                                                  <input type="hidden" name="exisd_precio_unitario[]" value="<?php echo $exis_dia->precio_unitario ?>">
+                                                  <input type="hidden" name="exisd_importe[]" value="<?php echo $exis_dia->importe ?>">
+                                                  <input type="hidden" name="exisd_id_clasificacion[]" value="<?php echo $exis_dia->id_clasificacion ?>">
+                                                </td>
+                                                <td style="width: 70px;"><?php echo $exis_dia->codigo ?></td>
+                                                <td style="width: 50px;"><?php echo $exis_dia->cantidad ?></td>
+                                                <td style="width: 70px;"><?php echo $exis_dia->precio_unitario ?></td>
+                                                <td style="width: 100px;"><?php echo $exis_dia->importe ?></td>
+                                              </tr>
+                                      <?php } ?>
+                                    </tbody>
+                                    <tbody>
+                                      <tr>
+                                        <td colspan="3"><input type="hidden" value="<?php echo $totalExisD ?>" id="total-boletas"></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($bultosExisD, 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD, 2, '$') ?></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Existencia del dia -->
 
                 </div>
               </div>
@@ -440,10 +534,21 @@
               <!-- Tabulacion -->
               <div class="row-fluid">
                 <div class="span12">
+                  <div class="span12" style="font-weight: bold; min-height: 25px;">
+                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($totalCont+$abonoshVentas-$totalGastos, 2, '$') ?></span>
+                    <input type="hidden" name="ttotal-corte" value="<?php echo $totalCont+$abonoshVentas-$totalGastos ?>" id="ttotal-corte">
+                  </div>
+                </div>
+              </div>
+              <!--/Tabulacion -->
+
+              <!-- Tabulacion -->
+              <div class="row-fluid">
+                <div class="span12">
                   <div class="span12" style="text-align: center; font-weight: bold; min-height: 20px;">TABULACION DE EFECTIVO</div>
                   <div class="row-fluid">
 
-                    <div class="span6" style="margin-top: 1px;">
+                    <div class="span12" style="margin-top: 1px;">
                       <table class="table table-striped table-bordered table-hover table-condensed" id="table-tabulaciones">
                         <thead>
                           <tr>
@@ -489,64 +594,13 @@
                             <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
                           </tr>
                           <tr>
-                            <td colspan="2">TOTAL DIFERENCIA</td>
-                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
+                            <td colspan="2">TOTAL DIFERENCIA
+                            <input type="hidden" name="total_diferencia" value="<?php echo ($totalCont+$abonoshVentas-$totalGastos)-$totalEfectivo ?>" id="ttotal-diferencia"></td>
+                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero(($totalCont+$abonoshVentas-$totalGastos)-$totalEfectivo, 2, '$') ?></td>
                           </tr>
                         </tbody>
                       </table>
                     </div>
-
-                    <!--Totales -->
-                    <div class="span4 pull-right">
-                      <div class="row-fluid">
-                        <table class="table table-striped table-bordered table-hover table-condensed">
-                          <thead>
-                            <tr>
-                              <th></th>
-                              <th>TOTALES</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td>SALDO INICIAL:</td>
-                              <td><input type="text" name="" value="<?php echo $caja['saldo_inicial'] ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>TOTAL INGRESOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalIngresos ?>" class="input-small vpositive" id="total-saldo-ingresos" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>PAGO TOTAL LIMON:</td>
-                              <td><input type="text" name="" value="<?php echo $totalBoletas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>PAGO TOTAL GASTOS:</td>
-                              <td><input type="text" name="" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
-                            </tr>
-                            <tr>
-                              <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletas - $totalGastos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletas - $totalGastos) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
-                            </tr>
-                          </tbody>
-                        </table>
-
-                        <div class="span12" style="margin-left: 0;"> <br>
-                          <?php if ($show){ ?>
-                            <div class="span5"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
-                          <?php } ?>
-
-                          <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/bodega_guadalajara/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
-                          <?php } ?>
-
-                          <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/bodega_guadalajara/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
-                          <?php }  ?>
-                        </div>
-                      </div>
-                    </div>
-                    <!--/Totales -->
 
                   </div>
                 </div>

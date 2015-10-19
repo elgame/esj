@@ -53,6 +53,15 @@ $(function(){
         actualFolio = data;
       });
     }
+
+    // cambia el tipo de cajas
+    if (getData.tipo == 'sa') {
+      $("#box-cajas").hide();
+      $("#box-cajas-salidas").show();
+    }else {
+      $("#box-cajas").show();
+      $("#box-cajas-salidas").hide();
+    }
   });
 
   $('#newPesada').on('click', function(event) {

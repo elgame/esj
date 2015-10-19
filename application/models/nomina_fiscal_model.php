@@ -4514,6 +4514,9 @@ class nomina_fiscal_model extends CI_Model {
       $total_pagar = $empleado->total_percepcion +
         $bonos_suma -  //bonos + otros
         $empleado->total_deduccion;
+      if($empleado->cuenta_banco == ''){
+        $empleado->total_neto = 0;
+      }
       $pdf->SetXY(6, $pdf->GetY());
 
       $dataarr = array();

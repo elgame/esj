@@ -76,8 +76,10 @@ class bodega_guadalajara extends MY_Controller {
       array('libs/jquery.numeric.js'),
       array('libs/jquery.filtertable.min.js'),
       array('general/msgbox.js'),
+      array('general/supermodal.js'),
       array('general/util.js'),
-      array('panel/caja_chica/cargar.js'),
+      array('panel/facturacion/cuentas_cobrar.js'),
+      array('panel/bodega_guadalajara/cargar.js'),
       array('panel/bodega_guadalajara/catalogo_bodega.js'),
     ));
 
@@ -104,14 +106,12 @@ class bodega_guadalajara extends MY_Controller {
     $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
     $_GET['ffecha'] = $fecha;
 
-    $params['caja'] = $this->bodega_guadalajara_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1') );
 
     $params['areas'] = $this->bodega_catalogo_model->getTipoAreas();
 
-    $params['remisiones'] = $this->bodega_guadalajara_model->getRemisiones();
-    $params['movimientos'] = $this->bodega_guadalajara_model->getMovimientos();
     $params['nomenclaturas'] = $this->bodega_guadalajara_model->nomenclaturas();
 
+    $params['caja'] = $this->bodega_guadalajara_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'));
     // echo "<pre>";
     //   var_dump($params['remisiones']);
     // echo "</pre>";exit;
@@ -219,64 +219,48 @@ class bodega_guadalajara extends MY_Controller {
       array('field' => 'fecha_caja_chica',
             'label' => '',
             'rules' => 'required'),
-      array('field' => 'saldo_inicial',
-            'label' => 'Saldo Inicial',
-            'rules' => 'required|numeric'),
+      // array('field' => 'saldo_inicial',
+      //       'label' => 'Saldo Inicial',
+      //       'rules' => 'required|numeric'),
       array('field' => 'fno_caja',
             'label' => 'No Caja',
             'rules' => 'required|numeric'),
     );
 
-    if (isset($_POST['ingreso_concepto']))
+    if (isset($_POST['remision_id_factura']))
     {
-      $rules[] = array('field' => 'ingreso_empresa[]',
-                      'label' => 'Ingreso Emprea',
-                      'rules' => '');
-      $rules[] = array('field' => 'ingreso_empresa_id[]',
-                      'label' => 'Ingreso Emprea',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'ingreso_nomenclatura[]',
-                      'label' => 'Ingreso Nomenclatura',
-                      'rules' => 'required');
-      $rules[] = array('field' => 'ingreso_poliza[]',
-                      'label' => 'Ingreso Poliza',
-                      'rules' => '');
-      $rules[] = array('field' => 'ingreso_concepto_id[]',
-                      'label' => 'Ingreso Conceptos',
-                      'rules' => '');
-
-      $rules[] = array('field' => 'ingreso_concepto[]',
+      $rules[] = array('field' => 'remision_id_factura[]',
                       'label' => 'Ingreso Conceptos',
                       'rules' => 'required');
-
-      $rules[] = array('field' => 'ingreso_monto[]',
-                      'label' => 'Ingreso Monto',
-                      'rules' => 'required|numeric');
     }
 
-    if (isset($_POST['remision_concepto']))
+    if (isset($_POST['venta_id_factura']))
     {
-      $rules[] = array('field' => 'remision_empresa[]',
-                        'label' => 'Concepto Otros',
-                        'rules' => '');
-      $rules[] = array('field' => 'remision_empresa_id[]',
-                        'label' => 'Empresa Remisiones',
-                        'rules' => 'required');
-      $rules[] = array('field' => 'remision_numero[]',
-                        'label' => 'Remision Remisiones',
-                        'rules' => '');
-      $rules[] = array('field' => 'remision_folio[]',
-                        'label' => 'Folio Remisiones',
-                        'rules' => '');
-      $rules[] = array('field' => 'remision_concepto[]',
-                        'label' => 'Concepto Remisiones',
-                        'rules' => 'required');
-      $rules[] = array('field' => 'remision_importe[]',
-                        'label' => 'Importe Remisiones',
-                        'rules' => 'required|numeric');
-      $rules[] = array('field' => 'remision_id[]',
+      $rules[] = array('field' => 'venta_id_factura[]',
                         'label' => 'Remision',
                         'rules' => 'required');
+    }
+
+    if (isset($_POST['exisd_id_factura']))
+    {
+      $rules[] = array('field' => 'exisd_id_factura[]',
+                        'label' => 'Remision',
+                        'rules' => 'required|numeric');
+      $rules[] = array('field' => 'exisd_id_unidad[]',
+                        'label' => 'Unidad',
+                        'rules' => 'required|numeric');
+      $rules[] = array('field' => 'exisd_descripcion[]',
+                        'label' => 'Desc',
+                        'rules' => 'required');
+      $rules[] = array('field' => 'exisd_cantidad[]',
+                        'label' => 'Cantidad',
+                        'rules' => 'required|numeric');
+      $rules[] = array('field' => 'exisd_precio_unitario[]',
+                        'label' => 'Precio u',
+                        'rules' => 'required|numeric');
+      $rules[] = array('field' => 'exisd_importe[]',
+                      'label' => 'Importe',
+                      'rules' => 'required|numeric');
     }
 
     $rules[] = array('field' => 'denominacion_cantidad[]',

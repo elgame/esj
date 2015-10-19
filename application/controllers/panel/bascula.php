@@ -119,8 +119,10 @@ class bascula extends MY_Controller {
       array('general/supermodal.js'),
       array('general/buttons.toggle.js'),
       array('general/keyjump.js'),
+      array('general/util.js'),
       array('panel/bascula/agregar.js'),
       array('panel/bascula/bonificacion.js'),
+      array('panel/bascula/clasif.js'),
     ));
 
     $this->load->model('bascula_model');
@@ -133,6 +135,7 @@ class bascula extends MY_Controller {
 
     $params['next_folio'] = $this->bascula_model->getSiguienteFolio('en');
     $params['areas']      = $this->areas_model->getAreas();
+    $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
     $params['empresa_default'] = $this->db->select("id_empresa, nombre_fiscal")
       ->from("empresas")
@@ -293,6 +296,24 @@ class bascula extends MY_Controller {
             $_POST['pprecio'][]      = $c->precio;
             $_POST['pimporte'][]     = $c->importe;
             $_POST['pnum_registro'][] = $c->num_registro;
+          }
+        }
+
+        if ( isset($info['cajas_clasf']) && count($info['cajas_clasf']) > 0) {
+          foreach ($info['cajas_clasf'] as $key => $p) {
+            $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
+            $_POST['prod_importe'][$key]            = $p->importe;
+            $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
+            $_POST['prod_dmedida'][$key]            = $p->unidad;
+            $_POST['prod_dcantidad'][$key]          = $p->cantidad;
+            $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
+            $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva;
+            $_POST['prod_diva_total'][$key]         = $p->iva;
+            $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
+            $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+
+
+            $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
           }
         }
 

@@ -1,3 +1,13 @@
+8h--En bascula acomodar los tickets de entrada y salida como la hoja de la señora
+--Reporte inventario/epc el total general no suma solo pone lo de la ultima familia
+--Reporte facturacion/rventasc tarda mucho en cargar por el saldo checar
+--En las cajas chicas ver porq tarda en cargar
+--Cuentas por cobrar y pagar checar lo del saldo inicial no arrastra bien el saldo, checar con javier renteria
+7.5--Agregar catalogos y lo que tiene el archivo de exel que me explico triana lo puse en indie-sanjorge
+
+
+
+15h--Hacer de nuevo la caja chica de bodega guadalajara como el archivo que pasaron
 
 2h--*Imprimir formato de remiciones en ticket
 8h--*Generar Catalogo de Productores y agregarlo a bascula y reportes => Cambiar el campo tipo a 40 chars

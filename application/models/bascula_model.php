@@ -223,25 +223,57 @@ class bascula_model extends CI_Model {
 
       }
 
-      $cajas = null;
-      if (isset($_POST['pcajas']))
+      if ($_POST['ptipo'] === 'en')
       {
-        $cajas = array();
-        foreach ($_POST['pcajas'] as $key => $caja)
+        $cajas = null;
+        if (isset($_POST['pcajas']))
         {
-          if ( (!empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0) || $bonificacion==false)
+          $cajas = array();
+          foreach ($_POST['pcajas'] as $key => $caja)
           {
-            $cajas[] = array(
-              'id_bascula'   => $idb,
-              'id_calidad'   => $_POST['pcalidad'][$key],
-              'cajas'        => $caja,
-              'kilos'        => $_POST['pkilos'][$key],
-              'promedio'     => $_POST['ppromedio'][$key],
-              'precio'       => $_POST['pprecio'][$key],
-              'importe'      => $_POST['pimporte'][$key],
-              'num_registro' => $key,
-              'aux_num_registro' => $_POST['pnum_registro'][$key],
-            );
+            if ( (!empty($_POST['pprecio'][$key]) && $_POST['pprecio'][$key] != 0) || $bonificacion==false)
+            {
+              $cajas[] = array(
+                'id_bascula'   => $idb,
+                'id_calidad'   => $_POST['pcalidad'][$key],
+                'cajas'        => $caja,
+                'kilos'        => $_POST['pkilos'][$key],
+                'promedio'     => $_POST['ppromedio'][$key],
+                'precio'       => $_POST['pprecio'][$key],
+                'importe'      => $_POST['pimporte'][$key],
+                'num_registro' => $key,
+                'aux_num_registro' => $_POST['pnum_registro'][$key],
+              );
+            }
+          }
+        }
+      } elseif ($_POST['ptipo'] === 'sa')
+      {
+        $cajas = null;
+        if (isset($_POST['prod_did_prod']))
+        {
+          $cajas = array();
+          foreach ($_POST['prod_did_prod'] as $key => $caja)
+          {
+            if ( (!empty($_POST['prod_did_prod'][$key]) && $_POST['prod_importe'][$key] != 0))
+            {
+              $cajas[] = array(
+                'id_bascula'           => $idb,
+                'id_clasificacion'     => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+                'num_row'              => $key,
+                'cantidad'             => $_POST['prod_dcantidad'][$key],
+                'descripcion'          => $_POST['prod_ddescripcion'][$key],
+                'precio_unitario'      => $_POST['prod_dpreciou'][$key],
+                'importe'              => $_POST['prod_importe'][$key],
+                'iva'                  => $_POST['prod_diva_total'][$key],
+                'unidad'               => $_POST['prod_dmedida'][$key],
+                'retencion_iva'        => 0,
+                'porcentaje_iva'       => $_POST['prod_diva_porcent'][$key],
+                'porcentaje_retencion' => 0,
+                'certificado'          => (isset($_POST['isCert'][$key])? ($_POST['isCert'][$key]=== '1' ? 't' : 'f'): 'f'),
+                'id_unidad'            => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+              );
+            }
           }
         }
       }
@@ -287,8 +319,13 @@ class bascula_model extends CI_Model {
 
     if ( ! is_null($cajas) && count($cajas) > 0)
     {
-      $this->db->delete('bascula_compra', array('id_bascula' => $id));
-      $this->db->insert_batch('bascula_compra', $cajas);
+      if ($data['tipo'] == 'en') {
+        $this->db->delete('bascula_compra', array('id_bascula' => $id));
+        $this->db->insert_batch('bascula_compra', $cajas);
+      } elseif ($data['tipo'] == 'sa') {
+        $this->db->delete('bascula_productos', array('id_bascula' => $id));
+        $this->db->insert_batch('bascula_productos', $cajas);
+      }
     }
 
     return array('passes' => true);
@@ -335,6 +372,7 @@ class bascula_model extends CI_Model {
 
     $data['info'] = array();
     $data['cajas'] = array();
+    $data['cajas_clasf'] = array();
 
     if ($sql_res->num_rows() > 0)
     {
@@ -354,6 +392,19 @@ class bascula_model extends CI_Model {
 
         if ($sql_res->num_rows() > 0)
           $data['cajas'] = $sql_res->result();
+
+        $sql_res = $this->db
+          ->select('fp.id_bascula, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
+                  fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion,
+                  u.id_unidad, u.codigo AS ucodigo, fp.certificado, cl.codigo AS ccodigo')
+          ->from('bascula_productos as fp')
+          ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
+          ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
+          ->where('id_bascula = ' . $data['info'][0]->id_bascula)->order_by('fp.num_row', 'asc')
+          ->get();
+
+        if ($sql_res->num_rows() > 0)
+          $data['cajas_clasf'] = $sql_res->result();
       }
     }
 
@@ -443,7 +494,7 @@ class bascula_model extends CI_Model {
     $pdf->SetFont('Arial','',8);
     $pdf->AddPage();
 
-    $pdf->printTicket($data['info'][0], $data['cajas']);
+    $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
 
     $pdf->AutoPrint(true);
     $pdf->Output();
@@ -451,7 +502,13 @@ class bascula_model extends CI_Model {
 
   public function imprimir_boletaR($id_boleta)
   {
+    $this->load->model('calidades_model');
+
     $data = $this->getBasculaInfo($id_boleta);
+    $areas = $this->calidades_model->getCalidades($data['info'][0]->id_area, false);
+    // echo "<pre>";
+    //   var_dump($areas);
+    // echo "</pre>";exit;
     $data = $data['info'][0];
 
     $this->load->library('mypdf');
@@ -463,6 +520,9 @@ class bascula_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetXY(0, 1);
     $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(20, 43));
+    $pdf->Row(array(($data->tipo=='en'? 'ENTRADA': 'SALIDA'), $data->area ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetWidths(array(43, 20));
     $pdf->Row(array('BOLETA DE RECEPCION', String::formatoNumero($data->folio, 2, '') ), false, false);
     $pdf->Line(43, $pdf->GetY()-1, 62, $pdf->GetY()-1);
@@ -481,15 +541,23 @@ class bascula_model extends CI_Model {
     $pdf->Row(array('Prov. '.$data->proveedor), false, false);
     $pdf->SetXY(2, $pdf->GetY()-2);
     $pdf->SetAligns(array('L', 'C', 'C'));
-    $pdf->SetWidths(array(14, 22, 22));
-    $pdf->Row(array('', 'CAJAS', 'PRECIO'), false, false);
+    $pdf->SetWidths(array(29, 29));
+    $pdf->Row(array('CAJAS', 'PRECIO'), false, false);
     $pdf->SetAligns(array('L', 'C', 'C'));
-    $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('IND', '________', '________'), false, false);
-    $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('ALIM', '________', '________'), false, false);
-    $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('FRUTA', '________', '________'), false, false);
+    $pdf->SetFont('helvetica','', 6.5);
+    foreach ($areas['calidades'] as $key => $value) {
+      $pdf->SetWidths(array(29, 29));
+      $pdf->SetXY(2, $pdf->GetY()-1);
+      $pdf->Row(array('_____________________', '_____________________'), false, false);
+      $pdf->SetWidths(array(58));
+      $pdf->SetXY(2, $pdf->GetY()-2);
+      $pdf->Row(array($value->nombre), false, false);
+    }
+    $pdf->SetFont('helvetica','', 8);
+    // $pdf->SetXY(2, $pdf->GetY());
+    // $pdf->Row(array('ALIM', '________', '________'), false, false);
+    // $pdf->SetXY(2, $pdf->GetY());
+    // $pdf->Row(array('FRUTA', '________', '________'), false, false);
     $pdf->SetXY(2, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L'));
     $pdf->SetWidths(array(14, 44));
@@ -2257,6 +2325,9 @@ class bascula_model extends CI_Model {
 
   public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true)
   {
+    if ($data['tipo'] == 'sa') {
+      return 'sa';
+    }
     $camposExcluidos = array(
       'fecha_bruto' => '',
       'fecha_tara'  => '',

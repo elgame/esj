@@ -342,7 +342,8 @@
                     <label class="control-label" for="pcajas_prestadas" style="width: 100px;">Cajas Prestadas</label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pcajas_prestadas" id="pcajas_prestadas" class="input-small vpos-int"
-                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>" <?php echo $disabled.$bmod['cajas_pres']; ?>>
+                        value="<?php echo set_value('pcajas_prestadas', $this->input->post('pcajas_prestadas')) ?>"
+                        data-next="icajas|prod_ddescripcion" <?php echo $disabled.$bmod['cajas_pres']; ?>>
                     </div>
                   </div>
                 </div>
@@ -360,7 +361,7 @@
           </div><!--/box span12-->
         </div><!--/row-fluid pesajes-->
 
-        <div class="row-fluid" id="box-cajas"><!--cajas-->
+        <div data-tipo="<?php echo $this->input->post('ptipo')=='sa'?'none':'block'; ?>" class="row-fluid" id="box-cajas"><!--cajas-->
           <div class="box span12">
             <div class="box-header well" data-original-title>
               <h2><i class="icon-road"></i> Cajas <span class="label label-warning">ALT + C</span></h2>
@@ -492,17 +493,213 @@
                   </div>
                 </div>
               </div>
-              <br>
-              <div class="row-fluid">
-                <div class="span12">
-                  <label class="" for="pobcervaciones">Descripción</label>
-                  <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5" <?php echo $disabled ?>><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
-                </div>
-              </div>
+
 
             </div><!--/box-content-->
           </div><!--/box span12-->
         </div><!--/row-fluid cajas-->
+
+        <div data-tipo="<?php echo $this->input->post('ptipo')=='sa'?'block':'none'; ?>" class="row-fluid box" id="box-cajas-salidas"><!--row-fluid salida cajas-->
+          <div class="box-header well" data-original-title>
+            <h2><i class="icon-road"></i> Cajas Salidas <span class="label label-warning">ALT + C</span></h2>
+            <div class="box-icon">
+              <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+            </div>
+          </div>
+          <div class="box-content">
+            <div class="row-fluid">
+              <div class="span12">
+                <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod">
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th>Medida</th>
+                      <th>Cant.</th>
+                      <th>P Unitario</th>
+                      <th>IVA%</th>
+                      <th>IVA</th>
+                      <th>Importe</th>
+                      <th>Cert.</th>
+                      <th>Accion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                          if (isset($borrador) && ! isset($_POST['prod_did_prod']))
+                          {
+                            // foreach ($borrador['productos'] as $key => $p) {
+                            //   $_POST['prod_did_prod'][$key]           = $p->id_clasificacion;
+                            //   $_POST['prod_importe'][$key]            = $p->importe;
+                            //   $_POST['prod_ddescripcion'][$key]       = $p->descripcion;
+                            //   $_POST['prod_dmedida'][$key]            = $p->unidad;
+                            //   $_POST['prod_dcantidad'][$key]          = $p->cantidad;
+                            //   $_POST['prod_dpreciou'][$key]           = $p->precio_unitario;
+                            //   $_POST['prod_diva_porcent'][$key]       = $p->porcentaje_iva;
+                            //   $_POST['prod_diva_total'][$key]         = $p->iva;
+                            //   $_POST['prod_dreten_iva_porcent'][$key] = $p->porcentaje_retencion;
+                            //   $_POST['prod_dreten_iva_total'][$key]   = $p->retencion_iva;
+                            //   $_POST['pallets_id'][$key]              = $p->ids_pallets;
+                            //   $_POST['remisiones_id'][$key]           = $p->ids_remisiones;
+                            //   $_POST['prod_dkilos'][$key]             = $p->kilos;
+                            //   $_POST['prod_dcajas'][$key]             = $p->cajas;
+                            //   $_POST['id_unidad_rendimiento'][$key]   = $p->id_unidad_rendimiento;
+                            //   $_POST['id_size_rendimiento'][$key]     = $p->id_size_rendimiento;
+
+                            //   $_POST['prod_dclase'][$key]             = $p->clase;
+                            //   $_POST['prod_dpeso'][$key]              = $p->peso;
+                            //   $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
+                            // }
+                          } ?>
+
+                          <?php if (isset($_POST['prod_did_prod'])) {
+                            foreach ($_POST['prod_did_prod'] as $k => $v) {
+                              if ($_POST['prod_importe'][$k] >= 0 && isset($_POST['prod_ddescripcion'][$k]{0}) && isset($_POST['prod_importe'][$k])) {
+                              ?>
+                                <tr>
+                                  <td>
+                                    <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
+                                    <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
+                                    <!-- <input type="hidden" name="pallets_id[]" value="<?php echo $_POST['pallets_id'][$k] ?>" id="pallets_id" class="span12">
+                                    <input type="hidden" name="remisiones_id[]" value="<?php echo $_POST['remisiones_id'][$k] ?>" id="remisiones_id" class="span12">
+                                    <input type="hidden" name="id_unidad_rendimiento[]" value="<?php echo $_POST['id_unidad_rendimiento'][$k] ?>" id="id_unidad_rendimiento" class="span12">
+                                    <input type="hidden" name="id_size_rendimiento[]" value="<?php echo $_POST['id_size_rendimiento'][$k] ?>" id="id_size_rendimiento" class="span12"> -->
+                                  </td>
+                                  <td>
+                                    <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                                      <?php foreach ($unidades as $key => $u) {
+                                        if ($_POST['prod_dmedida'][$k] == $u->nombre) $uid = $u->id_unidad; ?>
+                                        <option value="<?php echo $u->nombre ?>" <?php echo $_POST['prod_dmedida'][$k] == $u->nombre ? 'selected' : '' ?> data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
+                                      <?php } ?>
+                                    </select>
+                                    <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uid ?>" id="prod_dmedida_id" class="span12 vpositive">
+                                  </td>
+                                  <td>
+                                      <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
+                                      <!-- <input type="hidden" name="prod_dcajas[]" value="<?php echo $_POST['prod_dcajas'][$k] ?>" id="prod_dcajas" class="span12 vpositive">
+                                      <input type="hidden" name="prod_dkilos[]" value="<?php echo $_POST['prod_dkilos'][$k] ?>" id="prod_dkilos" class="span12 vpositive"> -->
+                                  </td>
+                                  <td>
+                                    <input type="text" name="prod_dpreciou[]" class="span12 vnumeric" value="<?php echo $_POST['prod_dpreciou'][$k]; ?>" id="prod_dpreciou">
+                                  </td>
+                                  <td>
+                                      <select name="diva" id="diva" class="span12">
+                                        <option value="0" <?php echo $_POST['prod_diva_porcent'][$k] == 0 ? 'selected' : ''; ?>>0%</option>
+                                        <option value="11" <?php echo $_POST['prod_diva_porcent'][$k] == 11 ? 'selected' : ''; ?>>11%</option>
+                                        <option value="16" <?php echo $_POST['prod_diva_porcent'][$k] == 16 ? 'selected' : ''; ?>>16%</option>
+                                      </select>
+
+                                      <!-- <input type="hidden" name="prod_diva_total[]" class="span12" value="<?php //echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total"> -->
+                                      <input type="hidden" name="prod_diva_porcent[]" class="span12" value="<?php echo $_POST['prod_diva_porcent'][$k]; ?>" id="prod_diva_porcent">
+                                  </td>
+                                  <td style="width: 80px;">
+                                    <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo $_POST['prod_diva_total'][$k]; ?>" id="prod_diva_total" readonly>
+                                  </td>
+                                   <td>
+                                    <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo $_POST['prod_importe'][$k]?>" id="prod_importe">
+                                  </td>
+                                  <td>
+                                    <input type="checkbox" class="is-cert-check" <?php echo ($_POST['isCert'][$k] == '1' ? 'checked' : '') ?>>
+                                    <input type="hidden" name="isCert[]" value="<?php echo $_POST['isCert'][$k] ?>" class="certificado">
+                                  </td>
+                                  <td>
+                                    <button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button>
+                                  </td>
+                                </tr>
+                          <?php }}} ?>
+                          <tr data-pallets="" data-remisiones="">
+                            <td>
+                              <input type="text" name="prod_ddescripcion[]" value="" id="prod_ddescripcion" class="span12" data-next="prod_dmedida">
+                              <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+                              <!-- <input type="hidden" name="pallets_id[]" value="" id="pallets_id" class="span12">
+                              <input type="hidden" name="remisiones_id[]" value="" id="remisiones_id" class="span12">
+                              <input type="hidden" name="id_unidad_rendimiento[]" value="" id="id_unidad_rendimiento" class="span12">
+                              <input type="hidden" name="id_size_rendimiento[]" value="" id="id_size_rendimiento" class="span12"> -->
+                            </td>
+                            <td>
+                              <!-- <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"> -->
+                              <select name="prod_dmedida[]" id="prod_dmedida" class="span12">
+                                <?php foreach ($unidades as $key => $u) {
+                                    if ($key === 0) $uni = $u->id_unidad;
+                                  ?>
+                                  <option value="<?php echo $u->nombre ?>" data-id="<?php echo $u->id_unidad ?>"><?php echo $u->nombre ?></option>
+                                <?php } ?>
+                                <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
+                              </select>
+                            </td>
+                            <td>
+                                <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
+                                <!-- <input type="hidden" name="prod_dcajas[]" value="0" id="prod_dcajas" class="span12 vpositive">
+                                <input type="hidden" name="prod_dkilos[]" value="0" id="prod_dkilos" class="span12 vpositive"> -->
+                            </td>
+                            <td>
+                              <input type="text" name="prod_dpreciou[]" value="0" id="prod_dpreciou" class="span12 vnumeric">
+                            </td>
+                            <td>
+                                <select name="diva" id="diva" class="span12">
+                                  <option value="0">0%</option>
+                                  <option value="11">11%</option>
+                                  <option value="16">16%</option>
+                                </select>
+
+                                <!-- <input type="hidden" name="prod_diva_total[]" value="0" id="prod_diva_total" class="span12"> -->
+                                <input type="hidden" name="prod_diva_porcent[]" value="0" id="prod_diva_porcent" class="span12">
+                            </td>
+                            <td style="width: 80px;">
+                              <input type="text" name="prod_diva_total[]" class="span12" value="0" id="prod_diva_total" readonly>
+                            </td>
+                            <td>
+                              <input type="text" name="prod_importe[]" value="0" id="prod_importe" class="span12 vpositive">
+                            </td>
+                            <td><input type="checkbox" class="is-cert-check"><input type="hidden" name="isCert[]" value="0" class="certificado"></td>
+                            <td><button type="button" class="btn btn-danger" id="delProd"><i class="icon-remove"></i></button></td>
+                          </tr>
+                  </tbody>
+                </table>
+
+                <table class="table">
+                  <tbody>
+                    <tr>
+                      <td rowspan="7" style="width:98%;max-width:98%;"></td>
+                    </tr>
+                    <tr>
+                      <td><em>Subtotal</em></td>
+                      <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                      <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
+                    </tr>
+                    <tr>
+                      <td>Descuento</td>
+                      <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0))?></td>
+                      <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
+                    </tr>
+                    <tr>
+                      <td>SUBTOTAL</td>
+                      <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0))?></td>
+                      <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', isset($borrador) ? $borrador['info']->subtotal : 0); ?>">
+                    </tr>
+                    <tr>
+                      <td>IVA</td>
+                      <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0))?></td>
+                      <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', isset($borrador) ? $borrador['info']->importe_iva : 0); ?>">
+                    </tr>
+                    <tr style="font-weight:bold;font-size:1.2em;">
+                      <td>TOTAL</td>
+                      <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0))?></td>
+                      <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', isset($borrador) ? $borrador['info']->total : 0); ?>">
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div><!--/row-fluid salida cajas-->
+
+
+        <div class="row-fluid">
+          <div class="span12">
+            <label class="" for="pobcervaciones">Descripción</label>
+            <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5" <?php echo $disabled ?>><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
+          </div>
+        </div>
 
         <div class="form-actions">
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ESC</span>
