@@ -811,7 +811,6 @@ class facturacion_model extends privilegios_model{
 
     if ($result['passes'])
     {
-      $this->generaFacturaPdf($idFactura, $pathDocs);
 
       $xmlName = explode('/', $archivos['pathXML']);
 
@@ -836,6 +835,8 @@ class facturacion_model extends privilegios_model{
           $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
         }
       }
+
+      $this->generaFacturaPdf($idFactura, $pathDocs);
 
       // si probiene de una venta se asigna
       if (isset($_GET['id_vd'])) {

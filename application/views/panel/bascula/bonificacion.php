@@ -34,7 +34,7 @@
           <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + N</span>
         </a>
 
-        <button type="submit" class="btn btn-primary pull-right" id="btnGuardar" style="margin-right: 5px;">
+        <button type="submit" class="btn btn-primary pull-right bonificar" id="btnGuardar" style="margin-right: 5px;">
           Guardar
           <!-- <span class="label label-warning" style="margin: 5px 5px 0 0;">ALT + G</span> -->
         </button>

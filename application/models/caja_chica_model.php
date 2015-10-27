@@ -341,10 +341,12 @@ class caja_chica_model extends CI_Model {
     $this->load->model('cuentas_cobrar_model');
 
     $remisiones = $this->db->query(
-      "SELECT f.id_factura, DATE(f.fecha) as fecha, serie, folio, total, c.nombre_fiscal as cliente,
-            COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), null) as folio_factura
+      "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
+            COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), null) as folio_factura,
+            sfr.saldo
        FROM facturacion f
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+       INNER JOIN saldos_facturas_remisiones sfr ON f.id_factura = sfr.id_factura
        LEFT JOIN cajachica_remisiones cr ON cr.id_remision = f.id_factura
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
        WHERE is_factura = 'f' AND f.status = 'p'
@@ -353,11 +355,14 @@ class caja_chica_model extends CI_Model {
     // COALESCE(cr.id_remision, 0) = 0
 
     $response = $remisiones->result();
-    foreach ($response as $key => $value)
-    {
-      $inf_factura = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value->id_factura, 'f');
-      $value->saldo = $inf_factura['saldo'];
-    }
+    // foreach ($response as $key => $value)
+    // {
+    //   $inf_factura = $this->cuentas_cobrar_model->saldoFactura($value->id_factura);
+    //   echo "<pre>";
+    //     var_dump($value->id_factura, $inf_factura);
+    //   echo "</pre>";
+    //   $value->saldo = $inf_factura->saldo;
+    // }
 
     return $response;
   }

@@ -373,7 +373,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
 		        ) fh ON f.id_factura = fh.id_remision
           WHERE c.id_cliente = '{$_GET['id_cliente']}' AND f.status <> 'ca' AND f.status <> 'b'
-             AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'
+             AND f.id_abono_factura IS NULL AND id_nc IS NULL
+             AND Date(f.fecha) < '{$fecha1}'
              AND COALESCE(fh.id_remision, 0) = 0 {$sql}
           GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
 
@@ -850,6 +851,17 @@ class cuentas_cobrar_model extends privilegios_model{
 		$_GET['id'] = $id_factura_aux;
 
 		return $response;
+	}
+
+	public function saldoFactura($id_factura)
+	{
+		$data = $this->db->query(
+				"SELECT id_factura, serie, folio, id_cliente,
+						nombre_fiscal, id_empresa, empresa, total,
+						iva, abonos, saldo, tipo
+					FROM saldos_facturas_remisiones
+					WHERE id_factura={$id_factura}")->row();
+		return $data;
 	}
 
 

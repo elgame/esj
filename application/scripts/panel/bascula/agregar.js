@@ -605,7 +605,7 @@ $(function(){
     }
   });
 
-  $('button#btnGuardar').on('click' , function(event) {
+  $('button#btnGuardar:not(.bonificar)').on('click' , function(event) {
     $.ajax({
       url: base_url + 'panel/bascula/puede_modificar/',
       type: 'get',

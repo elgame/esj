@@ -168,6 +168,7 @@ class bascula_model extends CI_Model {
         'obcervaciones' => $this->input->post('pobcervaciones'),
         'rancho'       => mb_strtoupper($this->input->post('prancho'), 'UTF-8'),
         'certificado' => isset($_POST['certificado']) ? 't' : 'f',
+        'tipo' => $this->input->post('ptipo')
       );
 
       if ($_POST['paccion'] === 'en' || $_POST['paccion'] === 'sa' ||
@@ -2325,7 +2326,7 @@ class bascula_model extends CI_Model {
 
   public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true)
   {
-    if ($data['tipo'] == 'sa') {
+    if (isset($data['tipo']) && $data['tipo'] == 'sa') {
       return 'sa';
     }
     $camposExcluidos = array(
