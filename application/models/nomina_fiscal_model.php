@@ -3040,7 +3040,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Fondo Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
             $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3288,7 +3288,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Fondo Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3911,7 +3911,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Fondo Ahorro', String::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -5798,7 +5798,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Fondo Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
         $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
         if($pdf->GetY() >= $pdf->limiteY)

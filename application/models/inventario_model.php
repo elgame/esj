@@ -2152,10 +2152,10 @@ class inventario_model extends privilegios_model{
 
 		$pdf->SetXY(6, $pdf->GetY()+5);
 		$pdf->Row(array('TOTAL GENERAL',
-			String::formatoNumero($totaltes['familia'][0], 2, '$', false),
-			String::formatoNumero($totaltes['familia'][1] , 2, '$', false),
-			String::formatoNumero($totaltes['familia'][2], 2, '$', false),
-			String::formatoNumero($totaltes['familia'][3], 2, '$', false),
+			String::formatoNumero($totaltes['general'][0], 2, '$', false),
+			String::formatoNumero($totaltes['general'][1] , 2, '$', false),
+			String::formatoNumero($totaltes['general'][2], 2, '$', false),
+			String::formatoNumero($totaltes['general'][3], 2, '$', false),
 			), false);
 
 		$pdf->Output('epc.pdf', 'I');

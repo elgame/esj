@@ -2425,9 +2425,9 @@ class facturacion_model extends privilegios_model{
       $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
       $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
 
-      if($this->input->get('fid_producto') != ''){
-        $sql .= " AND cp.id_producto = ".$this->input->get('fid_producto');
-      }
+      // if($this->input->get('fid_producto') != ''){
+      //   $sql .= " AND cp.id_producto = ".$this->input->get('fid_producto');
+      // }
 
       $this->load->model('empresas_model');
       $client_default   = $this->empresas_model->getDefaultEmpresa();
@@ -2446,7 +2446,28 @@ class facturacion_model extends privilegios_model{
 
       foreach ($did_empresa as $key => $value) {
         $_GET['did_empresa'] = $value;
-        $response[] = array('facturas' => $this->cuentas_cobrar_model->getEstadoCuentaData($sql_clientes, true, true, $tipo_factura),
+        $facturas = $this->db->query("SELECT id_factura, serie, folio, id_cliente, nombre_fiscal, id_empresa, empresa,
+            subtotal, total, iva AS importe_iva, abonos, saldo, tipo, is_factura, fecha, cantidad_productos,
+            (CASE is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END) AS concepto
+          FROM saldos_facturas_remisiones
+          WHERE id_empresa = {$value} AND fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$tipo_factura[1]} {$sql_clientes}
+          ORDER BY id_empresa ASC, id_cliente ASC, serie ASC, folio ASC")->result();
+        $clientes = array();
+        $aux=0;
+        foreach ($facturas as $keyf => $fact) {
+          if ($aux != $fact->id_cliente) {
+            $clientes[] = (object) array(
+              'id_cliente' => $fact->id_cliente,
+              'nombre_fiscal' => $fact->nombre_fiscal,
+              'cuenta_cpi' => '',
+              'facturas' => array(),
+              );
+            $aux = $fact->id_cliente;
+          }
+          $clientes[count($clientes)-1]->facturas[] = $fact;
+        }
+
+        $response[] = array('facturas' => $clientes,
           'empresa' => $this->empresas_model->getInfoEmpresa($value));
       }
 

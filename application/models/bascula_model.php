@@ -508,7 +508,7 @@ class bascula_model extends CI_Model {
     $data = $this->getBasculaInfo($id_boleta);
     $areas = $this->calidades_model->getCalidades($data['info'][0]->id_area, false);
     // echo "<pre>";
-    //   var_dump($areas);
+    //   var_dump($data, $areas);
     // echo "</pre>";exit;
     $data = $data['info'][0];
 
@@ -550,9 +550,12 @@ class bascula_model extends CI_Model {
       $pdf->SetWidths(array(29, 29));
       $pdf->SetXY(2, $pdf->GetY()-1);
       $pdf->Row(array('_____________________', '_____________________'), false, false);
-      $pdf->SetWidths(array(58));
-      $pdf->SetXY(2, $pdf->GetY()-2);
-      $pdf->Row(array($value->nombre), false, false);
+      if ($data->area != 'INSUMOS') {
+        $pdf->SetWidths(array(58));
+        $pdf->SetXY(2, $pdf->GetY()-2);
+        $pdf->Row(array($value->nombre), false, false);
+      }elseif ($data->area == 'INSUMOS' && $key == 4)
+        break;
     }
     $pdf->SetFont('helvetica','', 8);
     // $pdf->SetXY(2, $pdf->GetY());
@@ -675,12 +678,12 @@ class bascula_model extends CI_Model {
                b.accion as status,
                b.folio,
                DATE(b.fecha_bruto) as fecha,
-               ca.nombre as calidad,
-               bc.cajas,
-               bc.promedio,
+               COALESCE(ca.nombre, bp.descripcion) as calidad,
+               COALESCE(bc.cajas, bp.cantidad) AS cajas,
+               COALESCE(bc.promedio, 0) AS promedio,
                Coalesce(bc.kilos, b.kilos_neto) AS kilos,
-               bc.precio,
-               bc.importe,
+               COALESCE(bc.precio, bp.precio_unitario) AS precio,
+               COALESCE(bc.importe, bp.importe) AS importe,
                b.importe as importe_todas,
                b.tipo,
                pagos.tipo_pago,
@@ -690,6 +693,7 @@ class bascula_model extends CI_Model {
                COALESCE((SELECT id_pago FROM banco_pagos_bascula WHERE status = 'f' AND id_bascula = b.id_bascula), 0) AS en_pago
         FROM bascula AS b
           LEFT JOIN bascula_compra AS bc ON b.id_bascula = bc.id_bascula
+          LEFT JOIN bascula_productos AS bp ON b.id_bascula = bp.id_bascula
           {$table_ms}
           LEFT JOIN calidades AS ca ON ca.id_calidad = bc.id_calidad
           LEFT JOIN (SELECT bpb.id_bascula, bp.tipo_pago, bp.concepto

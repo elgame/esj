@@ -349,7 +349,7 @@ class caja_chica_model extends CI_Model {
        INNER JOIN saldos_facturas_remisiones sfr ON f.id_factura = sfr.id_factura
        LEFT JOIN cajachica_remisiones cr ON cr.id_remision = f.id_factura
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
-       WHERE is_factura = 'f' AND f.status = 'p'
+       WHERE f.is_factura = 'f' AND f.status = 'p'
        ORDER BY (f.fecha, f.serie, f.folio) DESC"
     );
     // COALESCE(cr.id_remision, 0) = 0

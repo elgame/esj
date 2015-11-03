@@ -81,7 +81,7 @@ class Ventas_model extends privilegios_model{
 	/**
 	 * Obtiene la informacion de una factura
 	 */
-	public function getInfoVenta($id, $info_basic=false)
+	public function getInfoVenta($id, $info_basic=false, $moneda=false)
   {
 		$res = $this->db
             ->select("*")
@@ -94,6 +94,14 @@ class Ventas_model extends privilegios_model{
 			$response['info'] = $res->row();
       $response['info']->fechaT = str_replace(' ', 'T', substr($response['info']->fecha, 0, 16));
       $response['info']->fecha = substr($response['info']->fecha, 0, 10);
+
+      //si hay que hacer conversion de moneda
+      if ($moneda) {
+        $response['info']->subtotal      = ($response['info']->subtotal/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+        $response['info']->importe_iva   = ($response['info']->importe_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+        $response['info']->retencion_iva = ($response['info']->retencion_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+        $response['info']->total         = ($response['info']->total/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+      }
 
 			$res->free_result();
 
@@ -121,6 +129,15 @@ class Ventas_model extends privilegios_model{
         ->get();
 
       $response['productos'] = $res->result();
+      //si hay que hacer conversion de moneda
+      if ($moneda) {
+        foreach ($response['productos'] as $key => $value) {
+          $value->precio_unitario = ($value->precio_unitario/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+          $value->importe = ($value->importe/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+          $value->iva = ($value->iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+          $value->retencion_iva = ($value->retencion_iva/($response['info']->tipo_cambio>0? $response['info']->tipo_cambio: 1));
+        }
+      }
 
       // Obtiene los pallets que tiene la factura.
       $response['pallets'] = array();
@@ -270,6 +287,7 @@ class Ventas_model extends privilegios_model{
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'is_factura'          => 'f',
       'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
+      'moneda'              => $_POST['moneda'],
     );
     //Si existe el parametro es una nota de credito de la factura
     $bitacora_accion = 'la nota de remision';
@@ -279,6 +297,12 @@ class Ventas_model extends privilegios_model{
       $datosFactura['status'] = 'pa';
       $bitacora_accion = 'la nota de credito';
     }
+
+    // Tipo de cambio y moneda
+    if ($datosFactura['moneda'] !== 'M.N.')
+      $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
+    else
+      $datosFactura['tipo_cambio'] = '1';
 
     $this->db->insert('facturacion', $datosFactura);
     $id_venta = $this->db->insert_id();
@@ -426,6 +450,26 @@ class Ventas_model extends privilegios_model{
     else
       $datosFactura['docs_finalizados'] = 't';
 
+    //Si es otra moneda actualiza al tipo de cambio
+    if($datosFactura['moneda'] !== 'M.N.')
+    {
+      $datosFactura1 = array();
+      $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $this->db->update('facturacion', $datosFactura1, array('id_factura' => $id_venta));
+
+      foreach ($productosFactura as $key => $value)
+      {
+        $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+      }
+    }
+
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
     // // Registra la salida de productos si tiene pallets
@@ -473,7 +517,19 @@ class Ventas_model extends privilegios_model{
       'sin_costo'           => isset($_POST['dsincosto']) ? 't' : 'f',
       'is_factura'          => 'f',
       'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
+      'moneda'              => $_POST['moneda'],
     );
+
+    //Si es otra moneda actualiza al tipo de cambio
+    if($datosFactura['moneda'] !== 'M.N.')
+    {
+      $datosFactura['tipo_cambio']   = $_POST['tipoCambio'];
+      $datosFactura['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+      $datosFactura['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+    } else
+      $datosFactura['tipo_cambio'] = '1';
 
     // Bitacora
     $id_bitacora = $this->bitacora_model->_update('facturacion', $id_venta, $datosFactura,
@@ -620,6 +676,19 @@ class Ventas_model extends privilegios_model{
     //   $this->db->insert_batch('facturacion_documentos', $docsCliente);
     // else
     //   $datosFactura['docs_finalizados'] = 't';
+
+    //Si es otra moneda actualiza al tipo de cambio
+    if($datosFactura['moneda'] !== 'M.N.')
+    {
+      foreach ($productosFactura as $key => $value)
+      {
+        $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+        $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+      }
+    }
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
@@ -1008,7 +1077,7 @@ class Ventas_model extends privilegios_model{
   {
     // include(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $factura = $this->getInfoVenta($idVenta);
+    $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
 
     // echo "<pre>";
@@ -1316,8 +1385,8 @@ class Ventas_model extends privilegios_model{
           $item->unidad,
           $item->descripcion.$descripcion_ext,
           $item->certificado === 't' ? 'Certificado' : '',
-          String::formatoNumero($item->precio_unitario, 2, '$', false),
-          String::formatoNumero($item->importe, 2, '$', false),
+          String::formatoNumero( $item->precio_unitario, 2, '$', false),
+          String::formatoNumero( $item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
       }
     }
@@ -1382,8 +1451,8 @@ class Ventas_model extends privilegios_model{
         $item->unidad,
         $item->descripcion.$descripcion_ext,
         $item->certificado === 't' ? 'Certificado' : '',
-        String::formatoNumero($item->precio_unitario, 2, '$', false),
-        String::formatoNumero($item->importe, 2, '$', false),
+        String::formatoNumero( $item->precio_unitario, 2, '$', false),
+        String::formatoNumero( $item->importe, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -1444,8 +1513,7 @@ class Ventas_model extends privilegios_model{
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
-
+    $pdf->Cell(30, 5, String::formatoNumero( $factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
     // Pinta traslados, retenciones
 
     if ($traslado11 != 0)
@@ -1454,14 +1522,14 @@ class Ventas_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,String::formatoNumero( $traslado11, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,String::formatoNumero( $traslado16, 2, '$', false), 1, 0, 'R', 1);
 
     if ($factura['info']->retencion_iva != 0)
     {
@@ -1469,14 +1537,14 @@ class Ventas_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,String::formatoNumero( $factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,String::formatoNumero( $factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Observaciones //
@@ -1596,7 +1664,7 @@ class Ventas_model extends privilegios_model{
   {
     // include(APPPATH.'libraries/phpqrcode/qrlib.php');
 
-    $factura = $this->getInfoVenta($idVenta);
+    $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
 
     // echo "<pre>";

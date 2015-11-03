@@ -172,7 +172,7 @@ class ventas extends MY_Controller {
     $params['getId'] = '';
     if (isset($_GET['id_nr']) || isset($_GET['id_nrc']))
     {
-      $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']) );
+      $params['borrador'] = $this->ventas_model->getInfoVenta( (isset($_GET['id_nr'])? $_GET['id_nr']: $_GET['id_nrc']), false, true );
       if(isset($_GET['id_nr']))
         $params['fecha']    = isset($params['borrador']) ? $params['borrador']['info']->fechaT : $params['fecha'];
       if(isset($_GET['id_nrc']))

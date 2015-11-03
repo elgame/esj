@@ -347,6 +347,8 @@ $(function(){
     }
   });
 
+  EventOnChangeMoneda();
+
   $('#modal-seguro, #modal-certificado51, #modal-certificado52').modal({
     backdrop: 'static',
     keyboard: false,
@@ -370,6 +372,15 @@ $(function(){
     }
   });
 });
+
+var EventOnChangeMoneda = function () {
+  $('#moneda').on('change', function(event) {
+    if($(this).val() !== 'M.N.')
+      $("#tipoCambio").show().focus();
+    else
+      $("#tipoCambio").val().hide();
+  });
+};
 
 var EventKeyPressFolioPallet = function () {
   $('#folioPallet').on('keypress', function(event) {
@@ -804,7 +815,7 @@ function calculaTotal ($calculaT) {
   $('#totfac-format').html(util.darFormatoNum(total_factura));
   $('#total_totfac').val(total_factura);
 
-  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()));
+  $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()) );
 }
 
 function loadSerieFolio (ide, forceLoad) {

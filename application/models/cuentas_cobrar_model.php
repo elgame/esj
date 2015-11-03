@@ -940,6 +940,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		}
 		$_POST['dfecha'] = $fecha_pago;
 
+		$this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+
 		return $resp;
 	}
 
@@ -1058,8 +1060,10 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		if($masivo)
 			return $data;
-		else
+		else{
+			$this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
 			return $resp;
+		}
 	}
 
 	public function removeAbono($id=null, $tipo=null, $ida=null)
