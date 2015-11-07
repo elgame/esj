@@ -1101,6 +1101,8 @@ class cuentas_cobrar_model extends privilegios_model{
 		//Se cambia el estado de la factura
 		$this->db->update($camps[2], array('status' => 'p'), "{$camps[3]} = {$id}");
 
+		$this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+
 		return true;
 	}
 

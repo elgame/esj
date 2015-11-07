@@ -1,10 +1,15 @@
-*--Agregar lo de dolares en ventas de remision
-9h--En bascula acomodar los tickets de entrada y salida como la hoja de la señora
+1.5h*--normex y sagarpa (de sagarpa se capturaran gastos en consepto ira nacional o internacional con esto en cuentas por pagar de normex separar por estos 2 tipos y agregar las facturas de sagarpa al final calcular la diferencia)
+2h*--Crear poliza de diarios de productos como el reporte de acumulados de productos
+1h*--En los recibos de nomina poner el subsidio en el lado de deducciones en negativo, checar imss
+*--caja chica checar las duplicadas, chuy agregarle permisis de gomez gudiño
+*--poliza de ingresos checar carga remisiones
+4h*--Agregar lo de dolares en ventas de remision
+9h*--En bascula acomodar los tickets de entrada y salida como la hoja de la señora
 *--Reporte inventario/epc el total general no suma solo pone lo de la ultima familia
 *--Reporte facturacion/rventasc tarda mucho en cargar por el saldo checar
 *--En las cajas chicas ver porq tarda en cargar
 *--Cuentas por cobrar y pagar checar lo del saldo inicial no arrastra bien el saldo, checar con javier renteria
-7.5--Agregar catalogos y lo que tiene el archivo de exel que me explico triana lo puse en indie-sanjorge
+7.5h--Agregar catalogos y lo que tiene el archivo de exel que me explico triana lo puse en indie-sanjorge
 
 
 

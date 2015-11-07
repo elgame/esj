@@ -2938,22 +2938,6 @@ class nomina_fiscal_model extends CI_Model {
             }
           }
 
-          // Subsidio
-          if ($empleado->nomina_fiscal_subsidio > 0)
-          {
-            $pdf->SetXY(6, $pdf->GetY());
-            $pdf->SetAligns(array('L', 'L', 'R'));
-            $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
-            $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
-            $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
-            if($pdf->GetY() >= $pdf->limiteY)
-            {
-              $pdf->AddPage();
-              $y2 = $pdf->GetY();
-            }
-          }
-
           // // PTU
           // if ($empleado->nomina_fiscal_ptu > 0)
           // {
@@ -2993,6 +2977,23 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetFont('Helvetica','', 9);
 
           $pdf->SetY($y2);
+
+          // Subsidio
+          if ($empleado->nomina_fiscal_subsidio > 0)
+          {
+            $pdf->SetXY(108, $pdf->GetY());
+            $pdf->SetAligns(array('L', 'L', 'R'));
+            $pdf->SetWidths(array(15, 62, 25));
+            $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+            $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
+            $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
+            if($pdf->GetY() >= $pdf->limiteY)
+            {
+              $pdf->AddPage();
+              $y2 = $pdf->GetY();
+            }
+          }
+
           if ($empleado->infonavit > 0)
           {
             $pdf->SetXY(108, $pdf->GetY());
@@ -3011,7 +3012,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3087,6 +3088,10 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $y + 2);
           $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+
+          $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio;
+          $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio;
+
           $total_dep['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
           $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
@@ -5696,22 +5701,6 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // Subsidio
-      if ($empleado->nomina_fiscal_subsidio > 0)
-      {
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'R'));
-        $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
-        $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
-        $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
-        if($pdf->GetY() >= $pdf->limiteY)
-        {
-          $pdf->AddPage();
-          $y2 = $pdf->GetY();
-        }
-      }
-
       // // PTU
       // if ($empleado->nomina_fiscal_ptu > 0)
       // {
@@ -5751,6 +5740,23 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','', 9);
 
       $pdf->SetY($y2);
+
+      // Subsidio
+      if ($empleado->nomina_fiscal_subsidio > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
+        $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
       if ($empleado->infonavit > 0)
       {
         $pdf->SetXY(108, $pdf->GetY());
@@ -5769,7 +5775,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       if($pdf->GetY() >= $pdf->limiteY)
@@ -5845,6 +5851,10 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $y + 2);
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+
+      $empleado->nomina_fiscal_total_percepciones -= $empleado->nomina_fiscal_subsidio;
+      $empleado->nomina_fiscal_total_deducciones -= $empleado->nomina_fiscal_subsidio;
+
       $total_dep['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
       $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
       $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;

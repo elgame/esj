@@ -354,7 +354,7 @@ class cuentas_pagar_model extends privilegios_model{
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha)) AS dias_transc,
-				('Factura ' || f.serie || f.folio) AS concepto,
+				('Factura ' || f.serie || f.folio) AS concepto, f.concepto AS concepto2,
 				'f'::text as tipo, f.status,
         COALESCE((SELECT id_pago FROM banco_pagos_compras WHERE status = 'f' AND id_compra = f.id_compra), 0) AS en_pago
 			FROM
@@ -458,95 +458,36 @@ class cuentas_pagar_model extends privilegios_model{
 		$pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por pagar');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
-		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
-		$widths = array(17, 11, 20, 40, 23, 23, 23, 16, 17, 15);
-		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D. Trans.');
+		$response = $this->cuentaProveedorCurpPdf($pdf, $res);
 
-		$total_cargo = 0;
-		$total_abono = 0;
-		$total_saldo = 0;
+		//si es normex y sagarpa
+		if ($_GET['id_proveedor'] == 807) {
+			$aux = $_GET['id_proveedor'];
 
-		$bad_saldo_ante = true;
-		if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
-			$total_cargo += $res['anterior']->total;
-			$total_abono += $res['anterior']->abonos;
-			$total_saldo += $res['anterior']->saldo;
-		}else{
-			$res['anterior'] = new stdClass();
-			$res['anterior']->total = 0;
-			$res['anterior']->abonos = 0;
-			$res['anterior']->saldo = 0;
+			$_GET['id_proveedor'] = 147;
+			$res = $this->getCuentaProveedorData();
+			$response2 = $this->cuentaProveedorCurpPdf($pdf, $res, false, $response[1]);
+
+			$_GET['id_proveedor'] = $aux;
+
+			// $pdf->SetFont('Arial','B',10);
+			// $pdf->SetTextColor(0,0,0);
+			// $pdf->SetXY(6, $pdf->GetY()+2);
+			// $pdf->SetAligns(array('L'));
+			// $pdf->SetWidths(array(150));
+			// $pdf->Row(array('Nacional: '.String::formatoNumero($response2[2]['nacional'], 2, '$', false)), false, false);
+			// $pdf->SetXY(6, $pdf->GetY());
+			// $pdf->Row(array('Internacional: '.String::formatoNumero($response2[2]['internacional'], 2, '$', false)), false, false);
 		}
-		$res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
-    $comprasids = array();
-		foreach($res['cuentas'] as $key => $item){
-      $comprasids[] = $item->id_compra;
-			$band_head = false;
-			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
-				$pdf->AddPage();
-
-				$pdf->SetFont('Arial','B',8);
-				$pdf->SetTextColor(255,255,255);
-				$pdf->SetFillColor(160,160,160);
-				$pdf->SetX(6);
-				$pdf->SetAligns($aligns);
-				$pdf->SetWidths($widths);
-				$pdf->Row($header, true);
-			}
-
-			$pdf->SetFont('Arial','',8);
-			$pdf->SetTextColor(0,0,0);
-			if($bad_saldo_ante){
-				$pdf->SetX(6);
-				$pdf->SetAligns($aligns);
-				$pdf->SetWidths($widths);
-				$pdf->Row(array('', '', '', $res['anterior']->concepto,
-					String::formatoNumero($res['anterior']->total, 2, '$', false),
-					String::formatoNumero($res['anterior']->abonos, 2, '$', false),
-					String::formatoNumero($res['anterior']->saldo, 2, '$', false),
-					'', '', ''), false);
-				$bad_saldo_ante = false;
-			}
-
-			$datos = array($item->fecha,
-									$item->serie,
-									$item->folio,
-									$item->concepto,
-									String::formatoNumero($item->cargo, 2, '$', false),
-									String::formatoNumero($item->abono, 2, '$', false),
-									String::formatoNumero($item->saldo, 2, '$', false),
-									$item->estado, $item->fecha_vencimiento,
-									$item->dias_transc);
-
-			$total_cargo += $item->cargo;
-			$total_abono += $item->abono;
-			$total_saldo += $item->saldo;
-
-			$pdf->SetX(6);
-			$pdf->SetAligns($aligns);
-			$pdf->SetWidths($widths);
-			$pdf->Row($datos, false);
-		}
-
-		$pdf->SetX(6);
-		$pdf->SetFont('Arial','B',8);
-		$pdf->SetTextColor(255,255,255);
-		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
-		$pdf->SetWidths(array(88, 23, 23, 23));
-		$pdf->Row(array('Totales:',
-				String::formatoNumero($total_cargo, 2, '$', false),
-				String::formatoNumero($total_abono, 2, '$', false),
-				String::formatoNumero($total_saldo, 2, '$', false)), true);
 
     // Productos ligados de facturacion
     if($pdf->GetY()+11 >= $pdf->limiteY)
       $pdf->AddPage();
     $this->load->model('gastos_model');
     $fac_ligados = array();
-    if(count($comprasids) > 0){
-      $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $comprasids), true);
+    if(count($response[0]) > 0){
+      $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $response[0]), true);
       $pdf->SetXY(6, $pdf->GetY()+10);
       $pdf->SetFont('Arial','B', 10);
       $pdf->SetTextColor(0,0,0);
@@ -616,7 +557,129 @@ class cuentas_pagar_model extends privilegios_model{
       $pdf->Row(array('Total General', String::formatoNumero($totla_general, 2, '$', false)), false);
     }
 
+    //si es normex y sagarpa
+		if ($_GET['id_proveedor'] == 807) {
+			$pdf->SetFont('Arial','B',10);
+			$pdf->SetTextColor(0,0,0);
+			$pdf->SetXY(6, $pdf->GetY()+2);
+			$pdf->SetAligns(array('L'));
+			$pdf->SetWidths(array(150));
+			$pdf->Row(array('Diferencia: '.String::formatoNumero($totla_general-($response[1]+$response2[1]), 2, '$', false)), false, false);
+		}
+
 		$pdf->Output('cuentas_proveedor.pdf', 'I');
+	}
+
+	private function cuentaProveedorCurpPdf(&$pdf, &$res, $first=true, $total_antr=0)
+	{
+		if (!$first) {
+			$pdf->SetFont('Arial','B',8);
+			$pdf->SetTextColor(0,0,0);
+			$pdf->SetXY(6, $pdf->GetY()+2);
+			$pdf->SetAligns(array('L'));
+			$pdf->SetWidths(array(150));
+			$pdf->Row(array($res['proveedor']->nombre_fiscal), false, false);
+		}
+
+		$pdf->SetFont('Arial','',8);
+
+		$aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
+		$widths = array(17, 11, 20, 40, 23, 23, 23, 16, 17, 15);
+		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D. Trans.');
+
+		$total_cargo = 0;
+		$total_abono = 0;
+		$total_saldo = 0;
+		$totales_x_tipo = array('nacional' => 0, 'internacional' => 0);
+
+		$bad_saldo_ante = true;
+		if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
+			$total_cargo += $res['anterior']->total;
+			$total_abono += $res['anterior']->abonos;
+			$total_saldo += $res['anterior']->saldo;
+		}else{
+			$res['anterior'] = new stdClass();
+			$res['anterior']->total = 0;
+			$res['anterior']->abonos = 0;
+			$res['anterior']->saldo = 0;
+		}
+		$res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
+    $comprasids = array();
+		foreach($res['cuentas'] as $key => $item){
+      $comprasids[] = $item->id_compra;
+			$band_head = false;
+			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+				if ($first || $pdf->GetY() >= $pdf->limiteY)
+					$pdf->AddPage();
+
+				$pdf->SetFont('Arial','B',8);
+				$pdf->SetTextColor(255,255,255);
+				$pdf->SetFillColor(160,160,160);
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row($header, true);
+			}
+
+			$pdf->SetFont('Arial','',8);
+			$pdf->SetTextColor(0,0,0);
+			if($bad_saldo_ante){
+				$pdf->SetX(6);
+				$pdf->SetAligns($aligns);
+				$pdf->SetWidths($widths);
+				$pdf->Row(array('', '', '', $res['anterior']->concepto,
+					String::formatoNumero($res['anterior']->total, 2, '$', false),
+					String::formatoNumero($res['anterior']->abonos, 2, '$', false),
+					String::formatoNumero($res['anterior']->saldo, 2, '$', false),
+					'', '', ''), false);
+				$bad_saldo_ante = false;
+			}
+
+			if (preg_match('/internacional/', $item->concepto2)) {
+				$totales_x_tipo['internacional'] += $item->cargo;
+			} else {
+				$totales_x_tipo['nacional'] += $item->cargo;
+			}
+
+			$datos = array($item->fecha,
+									$item->serie,
+									$item->folio,
+									$item->concepto.(!$first? ' '.$item->concepto2: ''),
+									String::formatoNumero($item->cargo, 2, '$', false),
+									String::formatoNumero($item->abono, 2, '$', false),
+									String::formatoNumero($item->saldo, 2, '$', false),
+									$item->estado, $item->fecha_vencimiento,
+									$item->dias_transc);
+
+			$total_cargo += $item->cargo;
+			$total_abono += $item->abono;
+			$total_saldo += $item->saldo;
+
+			$pdf->SetX(6);
+			$pdf->SetAligns($aligns);
+			$pdf->SetWidths($widths);
+			$pdf->Row($datos, false);
+		}
+
+		$pdf->SetX(6);
+		$pdf->SetFont('Arial','B',8);
+		$pdf->SetTextColor(255,255,255);
+		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
+		$pdf->SetWidths(array(88, 23, 23, 23));
+		$pdf->Row(array('Totales:',
+				String::formatoNumero($total_cargo, 2, '$', false),
+				String::formatoNumero($total_abono, 2, '$', false),
+				String::formatoNumero($total_saldo, 2, '$', false)), true);
+
+		if (!$first) {
+			$pdf->SetX(6);
+			$pdf->Row(array('Total General:',
+					'',
+					'',
+					String::formatoNumero($total_saldo+$total_antr, 2, '$', false)), true);
+		}
+
+		return array($comprasids, $total_saldo, $totales_x_tipo);
 	}
 
 	public function cuentaProveedorExcel(&$xls=null, $close=true){

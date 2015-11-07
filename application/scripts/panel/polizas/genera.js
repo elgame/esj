@@ -20,30 +20,45 @@ $(function(){
 
   $("#ftipo").on("change", function(){
     var vthis = $(this);
-    if(vthis.val() == '3')
+    if(vthis.val() == '3'){
       $("#grupftipo2").show();
-    else
+      $("#grupftipo22").show();
+    }
+    else{
       $("#grupftipo2").hide();
+      $("#grupftipo22").hide();
+    }
 
-    if(vthis.val() == '2')
+    if(vthis.val() == '2'){
       $("#grupftipo3").show();
-    else
+    }
+    else{
       $("#grupftipo3").hide();
+    }
 
     getFolioPoliza();
   });
-  $("#ftipo2, #ftipo3").on("change", function(){
+  $("#ftipo2, #ftipo3, #ftipo22").on("change", function(){
+    var vthis = $(this);
+    if(vthis.val() == 'pr' && vthis.attr('id') == 'ftipo2'){
+      $("#grupftipo22").show();
+    }
+    else if(vthis.attr('id') == 'ftipo2'){
+      $("#grupftipo22").hide();
+    }
+
     getFolioPoliza();
   });
 });
 
 
 function getFolioPoliza () {
-  $.post(base_url+"panel/polizas/get_folio", 
+  $.post(base_url+"panel/polizas/get_folio",
     {
       'tipo'  : $("#ftipo").val(),
       'tipo2' : $("#ftipo2").val(),
       'tipo3' : $("#ftipo3").val(),
+      'tipo22' : $("#ftipo22").val(),
     }, function(data){
       if (data.folio.folio == "")
         noty({"text":"Los folios para este tipo de poliza se teminaron", "layout":"topRight", "type":"error"});

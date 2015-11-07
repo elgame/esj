@@ -1489,8 +1489,8 @@ class banco_cuentas_model extends banco_model {
 	          $mov->fecha,
 	          $mov->cuenta,
 	          substr($mov->tipo, 0, 5),
-	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', true): '',
-	          $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', true): '',
+	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
+	          $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
 	          substr($mov->a_nombre_de, 0, 33),
 	          $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
 	        ), false);
@@ -1509,8 +1509,8 @@ class banco_cuentas_model extends banco_model {
       $pdf->SetAligns(array('R','R'));
       $pdf->SetWidths(array(30, 30));
       $pdf->Row(array(
-        String::formatoNumero($total_importes_ingre, 2, '$', true),
-        String::formatoNumero($total_importes_egre, 2, '$', true)
+        String::formatoNumero($total_importes_ingre, 2, '$', false),
+        String::formatoNumero($total_importes_egre, 2, '$', false)
       ), false);
     }
 
@@ -1521,8 +1521,8 @@ class banco_cuentas_model extends banco_model {
     $pdf->SetAligns(array('R','R'));
     $pdf->SetWidths(array(30, 30));
     $pdf->Row(array(
-      String::formatoNumero($total_importes_total_ingre, 2, '$', true),
-      String::formatoNumero($total_importes_total_egre, 2, '$', true)
+      String::formatoNumero($total_importes_total_ingre, 2, '$', false),
+      String::formatoNumero($total_importes_total_egre, 2, '$', false)
     ), false);
 
 

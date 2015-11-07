@@ -402,15 +402,17 @@ class polizas_model extends CI_Model {
     * OBTIENE EL FOLIO PARA LA POLIZA CON RANGOS DE ACUERDO AL TIPO
     * @return [type]
     */
-  public function getFolio($tipo=null, $tipo2=null, $tipo3=null){
+  public function getFolio($tipo=null, $tipo2=null, $tipo3=null, $tipo22=null){
     $tipo  = $tipo!=null? $tipo: $this->input->post('tipo');
     $tipo2 = $tipo2!=null? $tipo2: $this->input->post('tipo2');
     $tipo3 = $tipo3!=null? $tipo3: $this->input->post('tipo3');
+    $tipo22 = $tipo22!=null? $tipo22: $this->input->post('tipo22');
 
     $rangos = array(
       'diario_ventas'    => array(1, 50),
       'diario_ventas_nc' => array(51, 100),
       'diario_gastos'    => array(101, 200),
+      'diario_productos' => array(101, 200),
       'nomina'           => array(201, 250),
       'ingresos'         => array(1, 1000),
       'egreso_limon'     => array(1, 299),
@@ -437,6 +439,12 @@ class polizas_model extends CI_Model {
       {
         $response['concepto'] = "Nomina ".String::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'nomina';
+      }elseif ($tipo2 == 'pr')
+      {
+        $result = $this->db->query("SELECT id_area, nombre
+            FROM areas WHERE id_area = ".$tipo22)->row();
+        $response['concepto'] = "Compra de {$result->nombre} al ".String::fechaATexto(date("Y-m-d"));
+        $rango_sel            = 'diario_productos';
       }
       $sql = " AND tipo = {$tipo} AND tipo2 = '{$tipo2}'";
     }elseif ($tipo == '1') //Ingresos
@@ -1359,6 +1367,134 @@ class polizas_model extends CI_Model {
     }
 
     $response['folio'] = $folio-1;
+    $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
+
+    return $response;
+  }
+
+  /**
+   * GENERA UNA POLIZA DE DIARIOS PARA LOS PRODUCTOS
+   * @return [type] [description]
+   */
+  public function polizaDiarioProducto()
+  {
+    $response = array('data' => '', 'facturas' => array(), 'folio' => '');
+    $sql = $sql2 = '';
+
+    if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+      $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m-d");
+      $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+    }
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+      $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      $sql .= " AND Date(b.fecha_tara) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    }
+
+    if (isset($_GET['ftipo2']{0}) && $_GET['ftipo2'] == 'pr') {
+      $this->load->model('areas_model'); // aria poliza diario producto
+      $_GET['ftipo22'] = $this->input->get('ftipo22') != '' ? $_GET['ftipo22'] : $this->areas_model->getAreaDefault();
+      if ($this->input->get('ftipo22') != '')
+        $sql .= " AND b.id_area = " . $_GET['ftipo22'];
+    }
+
+    $cuenta_cpi1 = '13000049';
+    $cuenta_cpi2 = '43000010';
+
+    if ($this->input->get('fid_empresa') != '')
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+
+    $sql .= " AND b.tipo = 'en'";
+
+    $fecha = $_GET['ffecha1'];
+    if($_GET['ffecha1'] > $_GET['ffecha2'])
+      $fecha = $_GET['ffecha2'];
+
+    $folio = $this->input->get('ffolio');
+
+    $query = $this->db->query(
+        "SELECT Sum(b.kilos_neto) AS kilos,
+            Sum(b.total_cajas) AS cajas,
+            Sum(b.importe) AS importe,
+            (CASE Sum(b.kilos_neto) WHEN 0 THEN (Sum(b.importe)/1) ELSE (Sum(b.importe)/Sum(b.kilos_neto)) END) AS precio,
+            p.id_proveedor, p.nombre_fiscal AS proveedor, p.cuenta_cpi
+         FROM bascula b
+         JOIN ( SELECT bascula_compra.id_bascula, sum(bascula_compra.precio) / count(bascula_compra.id_calidad)::double precision AS precio
+                 FROM bascula_compra
+                GROUP BY bascula_compra.id_bascula) bc ON b.id_bascula = bc.id_bascula
+         LEFT JOIN proveedores p ON p.id_proveedor = b.id_proveedor
+        WHERE b.status = true
+           {$sql}
+        GROUP BY p.id_proveedor, p.nombre_fiscal, p.cuenta_cpi
+        ORDER BY p.nombre_fiscal ASC
+        "
+      );
+
+    if($query->num_rows() > 0)
+    {
+      $response['facturas'] = $query->result();
+
+      $impuestos = array('iva_acreditar' => array('cuenta_cpi' => $this->getCuentaIvaXAcreditar(), 'importe' => 0, 'tipo' => '1'),
+                           'iva_retenido' => array('cuenta_cpi' => $this->getCuentaIvaRetXPagar(), 'importe' => 0, 'tipo' => '0'),
+                           'isr_retenido' => array('cuenta_cpi' => $this->getCuentaIsrRetXPagar(), 'importe' => 0, 'tipo' => '0'), );
+
+      //Agregamos el header de la poliza
+      $response['data'] .= $this->setEspacios('P',2).
+                          $this->setEspacios(str_replace('-', '', $fecha),8).$this->setEspacios('3',4,'r').  //tipo poliza = 3 poliza diarios
+                          $this->setEspacios($folio,9,'r').  //folio poliza
+                          $this->setEspacios('1',1). //clase
+                          $this->setEspacios('0',10). //iddiario
+                          $this->setEspacios($this->input->get('fconcepto'),100). //concepto
+                          $this->setEspacios('11',2). //sistema de origen
+                          $this->setEspacios('0',1). //impresa
+                          $this->setEspacios('0',1)."\r\n"; //ajuste
+      $total_proveedores = 0;
+      //Contenido de la Poliza
+      foreach ($response['facturas'] as $key => $value)
+      {
+        //Colocamos el Cargo del proveedor
+        $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
+                          $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, proveedor es un cargo = 1
+                          $this->setEspacios( $this->numero($value->importe) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        $total_proveedores += $value->importe;
+      }
+
+      //Colocamos el abono del total
+      $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                        $this->setEspacios($cuenta_cpi1,30).  //cuenta contpaq
+                        $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+                        $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
+                        $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
+                        $this->setEspacios('0',10).  //iddiario poner 0
+                        $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                        $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+                        $this->setEspacios('',4)."\r\n"; //segmento de negocio
+      $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                        $this->setEspacios($cuenta_cpi1,30).  //cuenta contpaq
+                        $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+                        $this->setEspacios('1',1).  //tipo movimiento, proveedor es un abono = 0
+                        $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
+                        $this->setEspacios('0',10).  //iddiario poner 0
+                        $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                        $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+                        $this->setEspacios('',4)."\r\n"; //segmento de negocio
+      $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                        $this->setEspacios($cuenta_cpi2,30).  //cuenta contpaq
+                        $this->setEspacios('PD'.$folio,10).  //referencia movimiento
+                        $this->setEspacios('0',1).  //tipo movimiento, proveedor es un abono = 0
+                        $this->setEspacios( $this->numero($total_proveedores) , 20).  //importe movimiento - retencion
+                        $this->setEspacios('0',10).  //iddiario poner 0
+                        $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                        $this->setEspacios($this->input->get('fconcepto'), 100). //concepto
+                        $this->setEspacios('',4)."\r\n"; //segmento de negocio
+    }
+
+    $response['folio'] = $folio;
     $response['data'] = mb_strtoupper($response['data'], 'UTF-8');
 
     return $response;
@@ -2385,7 +2521,7 @@ class polizas_model extends CI_Model {
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
         }
-      }else //nomina diario
+      }elseif($this->input->get('ftipo2') == 'no') //nomina diario
       {
         $response = $this->polizaDiarioNomina();
 
@@ -2413,6 +2549,20 @@ class polizas_model extends CI_Model {
 
 
             $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
+            $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
+          // }
+        }
+      }elseif($this->input->get('ftipo2') == 'pr') //producto
+      {
+        $area = $this->db->query("SELECT id_area, nombre
+            FROM areas WHERE id_area = ".$this->input->get('ftipo22'))->row();
+        $response = $this->polizaDiarioProducto();
+
+        //actualizamos el estado de la factura y bascula y descarga el archivo
+        if (isset($_POST['poliza']{0}))
+        {
+            $_GET['poliza_nombre'] = 'polizadiariopr '.String::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }

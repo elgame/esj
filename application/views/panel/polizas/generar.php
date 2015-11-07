@@ -8,9 +8,9 @@
 
                 <div class="control-group">
                   <div class="controls">
-                    <label for="ffecha1" class="pull-left span6">Del <input type="date" name="ffecha1" class="span12" id="ffecha1" 
+                    <label for="ffecha1" class="pull-left span6">Del <input type="date" name="ffecha1" class="span12" id="ffecha1"
                       value="<?php echo date('Y-m-d'); ?>"></label>
-                    <label for="ffecha2" class="pull-left span6">Al <input type="date" name="ffecha2" class="span12" id="ffecha2" 
+                    <label for="ffecha2" class="pull-left span6">Al <input type="date" name="ffecha2" class="span12" id="ffecha2"
                       value="<?php echo date('Y-m-d'); ?>"></label>
                   </div>
                 </div>
@@ -43,6 +43,7 @@
                       <option value="g">Gastos</option>
                       <option value="gnc">Gastos Notas Credito</option>
                       <option value="no">Nomina</option>
+                      <option value="pr">Productos</option>
                     </select>
                   </div>
                 </div>
@@ -53,6 +54,17 @@
                       <option value="el">Limon</option>
                       <option value="ec">Cheques</option>
                       <option value="eg">Gastos</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group" id="grupftipo22" style="display: none;">
+                  <label class="control-label" for="ftipo22">Area</label>
+                  <div class="controls">
+                    <select name="ftipo22" id="ftipo22">
+                      <?php foreach ($areas['areas'] as $area) { ?>
+                        <?php echo '<option value="'.$area->id_area.'">'.$area->nombre.'</option>' ?>
+                      <?php } ?>
                     </select>
                   </div>
                 </div>
