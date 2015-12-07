@@ -111,7 +111,8 @@ class bodega_guadalajara extends MY_Controller {
 
     $params['nomenclaturas'] = $this->bodega_guadalajara_model->nomenclaturas();
 
-    $params['caja'] = $this->bodega_guadalajara_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'));
+    $params['caja']     = $this->bodega_guadalajara_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1'));
+    $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
     // echo "<pre>";
     //   var_dump($params['remisiones']);
     // echo "</pre>";exit;

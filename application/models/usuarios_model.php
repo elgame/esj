@@ -74,7 +74,7 @@ class Usuarios_model extends privilegios_model {
         ->limit(1)
         ->get();
 
-      $noEmpleado = $query->num_rows === 0 ? 1 : ++$query->row()->no_empleado;
+      // $noEmpleado = $query->num_rows === 0 ? 1 : ++$query->row()->no_empleado;
 
 			$data = array(
 						'nombre'           => mb_strtoupper($this->input->post('fnombre'), 'utf-8'),
@@ -117,7 +117,8 @@ class Usuarios_model extends privilegios_model {
 						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 
-            'no_empleado' => $noEmpleado,
+            // 'no_empleado' => $noEmpleado,
+            'no_empleado'    => trim($this->input->post('dno_trabajador'))?$this->input->post('dno_trabajador'): '',
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -188,10 +189,11 @@ class Usuarios_model extends privilegios_model {
 						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
 
 						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
-						'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
-						'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
-						'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
-            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+            'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+            'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+            'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'         => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+						'no_empleado'       => trim($this->input->post('dno_trabajador'))?$this->input->post('dno_trabajador'): '',
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');

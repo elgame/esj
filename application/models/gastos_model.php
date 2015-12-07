@@ -267,17 +267,18 @@ class gastos_model extends privilegios_model{
     $sql .= isset($datos['id_cliente']{0})? " AND f.id_cliente = {$datos['id_cliente']}": '';
     $sql .= isset($datos['folio']{0})? " AND f.folio = '{$datos['folio']}'": '';
     $result = $this->db->query("SELECT cf.id_compra, f.id_factura, f.serie, f.folio, f.fecha, f.cliente
-          FROM compras_facturacion_prodc AS cf RIGHT JOIN
-          (
-            SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente
-            FROM facturacion AS f
-              INNER JOIN facturacion_productos AS fp ON f.id_factura = fp.id_factura
-              INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
-            WHERE f.id_empresa = {$datos['id_empresa']} AND fp.id_clasificacion = {$datos['id_clasificacion']}
-              {$sql}
-            GROUP BY f.id_factura, c.nombre_fiscal
-            ORDER BY f.folio DESC
-          ) AS f ON f.id_factura = cf.id_factura AND cf.id_clasificacion = {$datos['id_clasificacion']}
+          FROM compras c INNER JOIN compras_facturacion_prodc AS cf ON (c.id_compra = cf.id_compra AND c.status <> 'ca')
+            RIGHT JOIN
+            (
+              SELECT f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha, c.nombre_fiscal AS cliente
+              FROM facturacion AS f
+                INNER JOIN facturacion_productos AS fp ON f.id_factura = fp.id_factura
+                INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
+              WHERE f.id_empresa = {$datos['id_empresa']} AND fp.id_clasificacion = {$datos['id_clasificacion']}
+                {$sql}
+              GROUP BY f.id_factura, c.nombre_fiscal
+              ORDER BY f.folio DESC
+            ) AS f ON f.id_factura = cf.id_factura AND cf.id_clasificacion = {$datos['id_clasificacion']}
           WHERE cf.id_compra IS NULL");
     $response = array();
     if($result->num_rows() > 0)

@@ -905,16 +905,16 @@ class facturacion extends MY_Controller {
         }
 
       } else {
-        $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
+        // $anoLimite = date('Y-m-d',strtotime($this->input->post('dano_aprobacion') . " + 730 day"));
 
-        $hoy = date('Y-m-d');
-        // $hoy = '2015-07-19';
+        // $hoy = date('Y-m-d');
+        // // $hoy = '2015-07-19';
 
-        if (strtotime($hoy) > strtotime($anoLimite))
-        {
-          $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya caducaron, no pueden ser utilizados.');
-          return false;
-        }
+        // if (strtotime($hoy) > strtotime($anoLimite))
+        // {
+        //   $this->form_validation->set_message('seriefolio_check', 'El serie y folio ya caducaron, no pueden ser utilizados.');
+        //   return false;
+        // }
       }
     }
     return true;

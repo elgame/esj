@@ -109,8 +109,15 @@
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-remisiones">
                           <thead>
                             <tr>
-                              <th colspan="5">CUENTAS POR COBRAR</th>
-                              <th colspan="1">IMPORTE</th>
+                              <th colspan="4">CUENTAS POR COBRAR</th>
+                              <th>IMPORTE</th>
+                              <th>
+                                <?php echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/agregar_abono/', array(
+                                  'params'   => "",
+                                  'btn_type' => 'btn-success pull-right btn_abonos_masivo',
+                                  'attrs' => array('style' => 'display:none;', 'rel' => 'superbox-50x500') )
+                                ); ?>
+                              </th>
                             </tr>
                             <tr>
                               <th>FECHA</th>
@@ -135,7 +142,9 @@
                                       <td style="width: 70px;"><?php echo $ct_cobrar->serie.$ct_cobrar->folio ?></td>
                                       <td style="width: 100px;"><?php echo $ct_cobrar->saldo_ant ?></td>
                                       <td style="width: 100px;"><?php echo $ct_cobrar->abonos_hoy ?></td>
-                                      <td style="width: 100px;"><?php echo $ct_cobrar->saldo ?></td>
+                                      <!-- <td style="width: 100px;"><?php echo $ct_cobrar->saldo ?></td> -->
+                                      <td style="width: 100px;text-align: right;" class="<?php echo $ct_cobrar->cliente!=''?'sel_abonom':''; ?>"
+                                        data-id="<?php echo $ct_cobrar->id_factura; ?>" data-tipo="f"><?php echo $ct_cobrar->saldo ?></td>
                                     </tr>
                             <?php } ?>
 
@@ -264,6 +273,128 @@
                       </div>
                     </div>
                     <!--/ Ingresos del dia -->
+
+                    <!-- Prestamos de bodegas -->
+                    <div class="row-fluid" style="margin-top: 5px;">
+                      <div class="span12">
+                        <div class="row-fluid">
+                          <div class="span12">
+                            <div class="row-fluid">
+                              <!-- <div class="span12" style="background-color: #DADADA; text-align: center; font-weight: bold; min-height: 20px;">PRESTAMOS <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;float: right;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></div> -->
+                              <div class="row-fluid">
+                                <div class="span12" style="margin-top: 1px;overflow-y: auto;max-height: 480px;">
+                                  <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamos">
+                                    <thead>
+                                      <tr>
+                                        <th colspan="5">PRESTAMOS Y DEVOLUCIONES <button type="button" class="btn btn-success" id="btn-add-prestamos" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                        <th colspan="3">IMPORTE</th>
+                                      </tr>
+                                      <tr>
+                                        <th>CONCEPTO</th>
+                                        <th>CLASIF.</th>
+                                        <th>UNIDAD</th>
+                                        <th>BULTOS</th>
+                                        <th>PRECIO</th>
+                                        <th>IMPORTE</th>
+                                        <th>TIPO</th>
+                                        <th></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <?php
+                                        $totalPrestamos = $totalPrestamosBultos = 0;
+                                        if (isset($_POST['prestamo_descripcion'])) {
+                                          foreach ($_POST['prestamo_descripcion'] as $key => $concepto) {
+                                            $totalPrestamos       += floatval($_POST['prestamo_importe'][$key]);
+                                            $totalPrestamosBultos += floatval($_POST['prestamo_cantidad'][$key]);
+                                          ?>
+                                              <tr>
+                                                <td style="width: 120px;">
+                                                  <input type="text" name="prestamo_concepto[]" value="<?php echo $_POST['prestamo_concepto'][$key] ?>" class="span12" <?php echo $readonly ?>>
+                                                </td>
+                                                <td style="width: 120px;">
+                                                  <input type="text" name="prestamo_descripcion[]" value="<?php echo $_POST['prestamo_descripcion'][$key] ?>" id="prestamo_descripcion" class="span12" <?php echo $readonly ?>>
+                                                  <input type="hidden" name="prestamo_id_prod[]" value="<?php echo $_POST['prestamo_id_prod'][$key] ?>" id="prestamo_id_prod" class="span12">
+                                                </td>
+                                                <td style="width: 70px;">
+                                                  <select name="prestamo_umedida[]" id="prestamo_umedida" class="span12">
+                                                    <?php foreach ($unidades as $key => $u) { ?>
+                                                      <option value="<?php echo $u->id_unidad ?>" <?php echo $_POST['prestamo_umedida'][$k] == $u->id_unidad ? 'selected' : '' ?>><?php echo $u->nombre ?></option>
+                                                    <?php } ?>
+                                                  </select>
+                                                </td>
+                                                <td style="width: 50px;">
+                                                  <input type="text" name="prestamo_cantidad[]" value="<?php echo $_POST['prestamo_cantidad'][$key] ?>" class="span12 vpositive prestamo_cantidad" <?php echo $readonly ?>>
+                                                </td>
+                                                <td style="width: 50px;">
+                                                  <input type="text" name="prestamo_precio[]" value="<?php echo $_POST['prestamo_precio'][$key] ?>" class="span12 vpositive prestamo_precio" <?php echo $readonly ?>>
+                                                </td>
+                                                <td style="width: 50px;">
+                                                  <input type="text" name="prestamo_importe[]" value="<?php echo $_POST['prestamo_importe'][$key] ?>" class="span12 vpositive prestamo_importe" readonly>
+                                                </td>
+                                                <td style="width: 50px;">
+                                                  <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
+                                                    <option value="t" <?php echo $_POST['prestamo_tipo'][$k] == 't' ? 'selected' : '' ?>>Prestamo</option>
+                                                    <option value="f" <?php echo $_POST['prestamo_tipo'][$k] == 'f' ? 'selected' : '' ?>>Pago</option>
+                                                  </select>
+                                                </td>
+                                                <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                              </tr>
+                                      <?php }} else {
+                                        foreach ($caja['prestamos'] as $prestamo) {
+                                          $totalPrestamos += floatval($prestamo->importe);
+                                          $totalPrestamosBultos += floatval($prestamo->cantidad);
+                                        ?>
+                                          <tr>
+                                            <td style="width: 120px;">
+                                              <input type="text" name="prestamo_concepto[]" value="<?php echo $prestamo->concepto ?>" class="span12" <?php echo $readonly ?>>
+                                            </td>
+                                            <td style="width: 120px;">
+                                              <input type="text" name="prestamo_descripcion[]" value="<?php echo $prestamo->descripcion ?>" id="prestamo_descripcion" class="span12" <?php echo $readonly ?>>
+                                              <input type="hidden" name="prestamo_id_prod[]" value="<?php echo $prestamo->id_clasificacion ?>" id="prestamo_id_prod" class="span12">
+                                            </td>
+                                            <td style="width: 70px;">
+                                              <select name="prestamo_umedida[]" id="prestamo_umedida" class="span12">
+                                                <?php foreach ($unidades as $key => $u) { ?>
+                                                  <option value="<?php echo $u->id_unidad ?>" <?php echo $prestamo->id_unidad == $u->id_unidad ? 'selected' : '' ?>><?php echo $u->nombre ?></option>
+                                                <?php } ?>
+                                              </select>
+                                            </td>
+                                            <td style="width: 50px;">
+                                              <input type="text" name="prestamo_cantidad[]" value="<?php echo $prestamo->cantidad ?>" class="span12 vpositive prestamo_cantidad" <?php echo $readonly ?>>
+                                            </td>
+                                            <td style="width: 50px;">
+                                              <input type="text" name="prestamo_precio[]" value="<?php echo $prestamo->precio_unitario ?>" class="span12 vpositive prestamo_precio" <?php echo $readonly ?>>
+                                            </td>
+                                            <td style="width: 50px;">
+                                              <input type="text" name="prestamo_importe[]" value="<?php echo $prestamo->importe ?>" class="span12 vpositive prestamo_importe" readonly>
+                                            </td>
+                                            <td style="width: 50px;">
+                                              <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
+                                                <option value="t" <?php echo $prestamo->tipo == 't' ? 'selected' : '' ?>>Prestamo</option>
+                                                <option value="f" <?php echo $prestamo->tipo == 'f' ? 'selected' : '' ?>>Pago</option>
+                                              </select>
+                                            </td>
+                                            <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                          </tr>
+                                      <?php }} ?>
+                                      <tr class="row-total">
+                                        <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                        <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamosBultos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-bultos" style="text-align: right;" readonly></td>
+                                        <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero(($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1)) , 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-precio" style="text-align: right;" readonly></td>
+                                        <td colspan="2"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly></td>
+                                        <td></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /Prestamos de bodegas -->
 
                     <!-- Ventas del dia -->
                     <div class="row-fluid" style="margin-top: 5px;">

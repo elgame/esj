@@ -6073,7 +6073,7 @@ class nomina_fiscal_model extends CI_Model {
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $finiquitos->xml));
 
     // echo "<pre>";
-    //   var_dump($nomina, $xml);
+    //   var_dump($finiquitos, $xml);
     // echo "</pre>";exit;
 
     if ($pdf == null)
@@ -6188,20 +6188,6 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // Subsidio
-      if ($finiquitos->subsidio > 0)
-      {
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'R'));
-        $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
-        if($pdf->GetY() >= $pdf->limiteY)
-        {
-          $pdf->AddPage();
-          $y2 = $pdf->GetY();
-        }
-      }
-
       // Aguinaldo
       if ($finiquitos->aguinaldo > 0)
       {
@@ -6216,6 +6202,20 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
+      // Aguinaldo
+      if ($finiquitos->indemnizaciones > 0)
+      {
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Indemnizaciones', String::formatoNumero($finiquitos->indemnizaciones, 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
       $y = $pdf->GetY();
 
       // Deducciones
@@ -6223,6 +6223,20 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','', 9);
 
       $pdf->SetY($y2);
+
+      // Subsidio
+      if ($finiquitos->subsidio > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y = $pdf->GetY();
+        }
+      }
 
       if ($finiquitos->deduccion_otros > 0) //prestamos
       {
@@ -6256,6 +6270,8 @@ class nomina_fiscal_model extends CI_Model {
       }
 
       // Total percepciones y deducciones
+      $finiquitos->total_percepcion -= $finiquitos->subsidio;
+      $finiquitos->total_deduccion -= $finiquitos->subsidio;
       $pdf->SetXY(6, $y + 2);
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));

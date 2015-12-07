@@ -187,13 +187,20 @@ class empleados extends MY_Controller {
 	{
 		if (isset($_GET['id']))
 		{
-			$this->load->model('usuarios_model');
-			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
-			if($res_mdl)
-				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+      $this->load->library('form_validation');
+      $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
+
+      if ($this->validano_empleado($user->no_empleado))
+      {
+  			$this->load->model('usuarios_model');
+  			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
+  			if($res_mdl)
+  				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+      } else
+        redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=8'));
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=9'));
 	}
 
   public function historial()
@@ -448,6 +455,9 @@ class empleados extends MY_Controller {
 							array('field' => 'dno_seguro',
 										'label' => 'No seguro',
 										'rules' => ''),
+              array('field' => 'dno_trabajador',
+                    'label' => 'No Trabajador',
+                    'rules' => 'required|max_length[8]|callback_validano_empleado'),
 
               array('field' => 'fdepartamente',
                     'label' => 'Departamento',
@@ -561,6 +571,28 @@ class empleados extends MY_Controller {
     }
   }
 
+  public function validano_empleado($no_empleado)
+  {
+    if ($no_empleado != '')
+    {
+      $sql = isset($_GET['id'])? "id <> {$_GET['id']} AND": '';
+      $query = $this->db->query("SELECT *
+                                 FROM usuarios
+                                 WHERE {$sql} no_empleado = '{$no_empleado}' AND status = 't'");
+
+      if ($query->num_rows() > 0)
+      {
+        $dt = $query->row();
+        $this->form_validation->set_message('validano_empleado', 'Ya existe un empleado con el mismo No de Trabajador, '.$dt->nombre.' '.$dt->apellido_paterno);
+        return false;
+      }
+    }else{
+      $this->form_validation->set_message('validano_empleado', 'Es requerido el No de Trabajador');
+      return false;
+    }
+    return true;
+  }
+
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
@@ -610,6 +642,16 @@ class empleados extends MY_Controller {
         $txt = 'Se cambio el sueldo correctamente.';
         $icono = 'success';
         break;
+
+      case 8:
+        $txt = 'Ya existe un empleado con el mismo No de Trabajador.';
+        $icono = 'error';
+        break;
+      case 9:
+        $txt = 'Es requerido el No de Trabajador.';
+        $icono = 'error';
+        break;
+
 		}
 
 		return array(

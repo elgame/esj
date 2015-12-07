@@ -1888,6 +1888,8 @@ class polizas_model extends CI_Model {
       $sql2 .= " AND bc.id_empresa = '".$_GET['fid_empresa']."'";
     }
 
+    $cuenta_cuadre = $this->getCuentaCuadreGasto();
+
     if($tipo_movimientos == 'cheque'){
       $order_by = 't.id_movimiento';
       $sql_union_bascula = "UNION
@@ -1909,6 +1911,27 @@ class polizas_model extends CI_Model {
              {$sql}
           GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref
           ORDER BY fa.id_pago ASC
+        )
+        UNION
+        (
+          SELECT
+            bm.id_movimiento, bm.numero_ref AS ref_movimiento, 'CANCELADO' AS concepto, bm.monto AS total_abono, 0 AS retencion_isr,
+            bc.cuenta_cpi, bm.monto AS subtotal, 0 AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps,
+            COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,
+            COALESCE(c.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor, bm.metodo_pago, Date(bm.fecha) AS fecha,
+            Count(bmc.id_movimiento) AS es_compra, COALESCE(bm.id_traspaso, 0) AS es_traspaso, 'banco-chc'::character varying AS tipoo,
+            bm.desglosar_iva, bm.cuenta_cpi as banco_cuenta_contpaq, 0 AS tcambio
+          FROM banco_movimientos AS bm
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = bm.id_cuenta
+            LEFT JOIN proveedores AS c ON c.id_proveedor = bm.id_proveedor
+            LEFT JOIN banco_movimientos_compras AS bmc ON bmc.id_movimiento = bm.id_movimiento
+            LEFT JOIN cuentas_contpaq AS cc ON cc.cuenta = bm.cuenta_cpi
+          WHERE bm.status = 'f' AND bm.tipo = 'f' AND bm.clasificacion <> 'elimon'
+            {$sql2} AND LOWER(bm.metodo_pago) = 'cheque'
+          GROUP BY bm.id_movimiento, bm.numero_ref, bm.concepto, bm.monto, bc.cuenta_cpi,
+            bm.monto, bc.alias, c.cuenta_cpi, bm.metodo_pago, Date(bm.fecha), bm.id_traspaso
+          HAVING Count(bmc.id_movimiento) = 0
+          ORDER BY bm.fecha ASC
         )";
       $sql .= " AND LOWER(bm.metodo_pago) = 'cheque' ";
       $sql2 .= " AND LOWER(bm.metodo_pago) = 'cheque' ";
@@ -1918,7 +1941,6 @@ class polizas_model extends CI_Model {
       $sql2 .= " AND LOWER(bm.metodo_pago) <> 'cheque' ";
     }
 
-    $cuenta_cuadre = $this->getCuentaCuadreGasto();
     $query = $this->db->query(
       "SELECT *
       FROM
@@ -2316,6 +2338,27 @@ class polizas_model extends CI_Model {
                             $this->setEspacios('',4)."\r\n";
             }
           }
+        }elseif($value->tipoo == 'banco-chc') {
+          //Agregamos el header de la poliza
+          $response['data'] .= $this->setEspacios('P',2).
+                              $this->setEspacios(str_replace('-', '', $value->fecha),8).$this->setEspacios('2',4,'r').  //tipo poliza = 2 poliza egreso
+                              $this->setEspacios($folio,9,'r').  //folio poliza
+                              $this->setEspacios('1',1). //clase
+                              $this->setEspacios('0',10). //iddiario
+                              $this->setEspacios($value->concepto, 100). //concepto
+                              $this->setEspacios('11',2). //sistema de origen
+                              $this->setEspacios('0',1). //impresa
+                              $this->setEspacios('0',1)."\r\n"; //ajuste
+          //Colocamos el Abono al Banco que se deposito el dinero
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($value->cuenta_cpi,30).  //cuenta contpaq
+                            $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                            $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
+                            $this->setEspacios( $this->numero($value->total) , 20).  //importe movimiento
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios($value->nombre_fiscal,100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
         }else  // Poliza de limon de cheques
         {
           //Agregamos el header de la poliza

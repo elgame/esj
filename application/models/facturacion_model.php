@@ -836,6 +836,8 @@ class facturacion_model extends privilegios_model{
         }
       }
 
+      $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+
       $this->generaFacturaPdf($idFactura, $pathDocs);
 
       // si probiene de una venta se asigna
@@ -843,6 +845,7 @@ class facturacion_model extends privilegios_model{
         $this->load->model('ventas_dia_model');
         $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $idFactura, 'id_venta' => $_GET['id_vd']));
       }
+
 
       // Elimina el borrador.
       // if (isset($_GET['idb']))
@@ -1126,8 +1129,10 @@ class facturacion_model extends privilegios_model{
         // Elimina la salida de productos q se dio si se ligaron pallets
         $this->db->delete('compras_salidas', array('id_factura' => $idFactura));
 
+        $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
 
         $this->enviarEmail($idFactura);
+
       }
     }else{
       $this->db->update('facturacion',

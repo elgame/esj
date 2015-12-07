@@ -1,0 +1,2 @@
+[04-Dec-2015 12:20:28 America/Mexico_City] PHP Fatal error:  Call to a member function set_message() on a non-object in /home/elgame/www/sanjorge/application/controllers/panel/empleados.php on line 585
+[06-Dec-2015 12:44:16 America/Mexico_City] PHP Fatal error:  Call to a member function result() on a non-object in /home/elgame/www/sanjorge/application/models/bodega_guadalajara_model.php on line 450

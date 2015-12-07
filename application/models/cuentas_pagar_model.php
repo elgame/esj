@@ -501,7 +501,7 @@ class cuentas_pagar_model extends privilegios_model{
 
       $pdf->SetFont('Arial','', 8);
       $aux_clasif = 0;
-      $total_producto = $totla_general = 0;
+      $total_producto = $totla_general = $iva_general = 0;
       foreach ($fac_ligados['ligadas'] as $key => $value)
       {
         if($value->id_clasificacion != $aux_clasif)
@@ -528,6 +528,7 @@ class cuentas_pagar_model extends privilegios_model{
           ), false);
         $total_producto += $value->importe;
         $totla_general += $value->importe;
+        $iva_general += $value->iva;
       }
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(166, 30));
@@ -550,11 +551,17 @@ class cuentas_pagar_model extends privilegios_model{
           ), false);
         $total_producto += $value->importe;
         $totla_general += $value->importe;
+        $iva_general += $value->iva;
       }
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(166, 30));
-      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-      $pdf->Row(array('Total General', String::formatoNumero($totla_general, 2, '$', false)), false);
+      if ($total_producto > 0) {
+      	$pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+      }
+
+      $pdf->Row(array('SubTotal General', String::formatoNumero($totla_general, 2, '$', false)), false);
+      $pdf->Row(array('IVA', String::formatoNumero($iva_general, 2, '$', false)), false);
+      $pdf->Row(array('Total General', String::formatoNumero($totla_general+$iva_general, 2, '$', false)), false);
     }
 
     //si es normex y sagarpa
@@ -564,7 +571,7 @@ class cuentas_pagar_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()+2);
 			$pdf->SetAligns(array('L'));
 			$pdf->SetWidths(array(150));
-			$pdf->Row(array('Diferencia: '.String::formatoNumero($totla_general-($response[1]+$response2[1]), 2, '$', false)), false, false);
+			$pdf->Row(array('Diferencia: '.String::formatoNumero(($totla_general+$iva_general)-($response[1]+$response2[1]), 2, '$', false)), false, false);
 		}
 
 		$pdf->Output('cuentas_proveedor.pdf', 'I');

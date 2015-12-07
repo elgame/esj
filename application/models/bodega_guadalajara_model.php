@@ -8,6 +8,7 @@ class bodega_guadalajara_model extends CI_Model {
       'cts_cobrar'     => $this->bodega_guadalajara_model->getAbonosVentasPasadas($fecha),
       'remisiones'     => $this->bodega_guadalajara_model->getRemisiones($fecha),
       'ventas'         => $this->bodega_guadalajara_model->getVentas($fecha),
+      'prestamos'      => $this->bodega_guadalajara_model->getPrestamos($fecha),
       'existencia_ant' => array(),
       'existencia_dia' => array(),
       'denominaciones' => array(),
@@ -32,16 +33,64 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos la existencia anterior
     foreach ($info['existencia_ant'] as $key => $value) {
-      $info['existencia_dia'][$value->id_factura.'-'.$value->id_unidad.'-'.$key] = clone $value;
+      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+          $value->id_clasificacion != '53')
+      {
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+      }
     }
 
     // Agregamos los ingresos del dia
     foreach ($info['remisiones'] as $key => $value) {
-      $info['existencia_dia'][$value->id_factura.'-'.$value->id_unidad.'-'.$key] = clone $value;
+      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+          $value->id_clasificacion != '53')
+      {
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+      }
     }
+
+    // sumamos o restamos los prestamos de ese dia
+    foreach ($info['prestamos'] as $key => $value) {
+      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+          $value->id_clasificacion != '53' AND $value->tipo == 't')
+      {
+        $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
+      }
+    }
+    foreach ($info['prestamos'] as $key => $value) {
+      if ($value->tipo == 'f')
+      {
+        $keys = preg_grep( '/^[0-9]+-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
+        $cantidad = $value->cantidad;
+        foreach ($keys as $k) {
+          if ($info['existencia_dia'][$k]->cantidad < $cantidad) {
+            $cantidad -= $info['existencia_dia'][$k]->cantidad;
+            unset($info['existencia_dia'][$k]);
+          } else {
+            $info['existencia_dia'][$k]->cantidad -= $cantidad;
+            $info['existencia_dia'][$k]->importe -= $cantidad*$info['existencia_dia'][$k]->precio_unitario;
+            $cantidad = 0;
+
+            if ($info['existencia_dia'][$k]->cantidad === 0)
+              unset($info['existencia_dia'][$k]);
+
+            break;
+          }
+        }
+        if ($cantidad > 0) {
+          $info['existencia_dia'][$key]           = clone $value;
+          $info['existencia_dia'][$key]->cantidad = $cantidad*-1;
+          $info['existencia_dia'][$key]->importe  = $info['existencia_dia'][$key]->cantidad*$info['existencia_dia'][$key]->precio_unitario;
+        }
+      }
+    }
+
     // restamos las ventas del dia
     foreach ($info['ventas'] as $key => $value) {
-      $keys = preg_grep( '/^[0-9]+-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
+      $keys = preg_grep( '/^[0-9]+-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
       $cantidad = $value->cantidad;
       foreach ($keys as $k) {
         if ($info['existencia_dia'][$k]->cantidad < $cantidad) {
@@ -51,6 +100,10 @@ class bodega_guadalajara_model extends CI_Model {
           $info['existencia_dia'][$k]->cantidad -= $cantidad;
           $info['existencia_dia'][$k]->importe -= $cantidad*$info['existencia_dia'][$k]->precio_unitario;
           $cantidad = 0;
+
+          if ($info['existencia_dia'][$k]->cantidad === 0)
+            unset($info['existencia_dia'][$k]);
+
           break;
         }
       }
@@ -179,6 +232,32 @@ class bodega_guadalajara_model extends CI_Model {
 
   public function guardar($data)
   {
+    // prestamos
+    $this->db->delete('otros.bodega_prestamos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    if (isset($data['prestamo_id_prod']))
+    {
+      $prestamos = array();
+
+      foreach ($data['prestamo_id_prod'] as $key => $remi)
+      {
+        $prestamos[] = array(
+          'fecha'            => $data['fecha_caja_chica'],
+          'row'              => $key,
+          'id_unidad'        => $data['prestamo_umedida'][$key],
+          'id_clasificacion' => $data['prestamo_id_prod'][$key],
+          'descripcion'      => $data['prestamo_descripcion'][$key],
+          'concepto'         => $data['prestamo_concepto'][$key],
+          'cantidad'         => $data['prestamo_cantidad'][$key],
+          'precio_unitario'  => $data['prestamo_precio'][$key],
+          'importe'          => $data['prestamo_importe'][$key],
+          'no_caja'          => $data['fno_caja'],
+          'tipo'             => $data['prestamo_tipo'][$key],
+        );
+      }
+
+      $this->db->insert_batch('otros.bodega_prestamos', $prestamos);
+    }
+
     // ventas
     $ventas = array();
     if (isset($data['venta_id_factura'])) {
@@ -226,26 +305,45 @@ class bodega_guadalajara_model extends CI_Model {
     }
 
     // Existencias del dia
+    $caja = $this->bodega_guadalajara_model->get($data['fecha_caja_chica'], $data['fno_caja']);
     $this->db->delete('otros.bodega_existencia', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
-    if (isset($data['exisd_id_factura']))
+    // if (isset($data['exisd_id_factura']))
+    if (count($caja['existencia_dia']) > 0)
     {
       $existencia_dia = array();
 
-      foreach ($data['exisd_id_factura'] as $key => $id_factura)
-      {
+      $key = 0;
+      foreach ($caja['existencia_dia'] as $exk => $exist) {
         $existencia_dia[] = array(
           'fecha'           => $data['fecha_caja_chica'],
-          'id_factura'      => $id_factura,
+          'id_factura'      => $exist->id_factura,
           'no_caja'         => $data['fno_caja'],
           'row'             => $key,
-          'id_unidad'       => $data['exisd_id_unidad'][$key],
-          'descripcion'     => $data['exisd_descripcion'][$key],
-          'cantidad'        => $data['exisd_cantidad'][$key],
-          'precio_unitario' => $data['exisd_precio_unitario'][$key],
-          'importe'         => $data['exisd_importe'][$key],
-          'id_clasificacion'=> $data['exisd_id_clasificacion'][$key],
+          'id_unidad'       => $exist->id_unidad,
+          'descripcion'     => $exist->descripcion,
+          'cantidad'        => $exist->cantidad,
+          'precio_unitario' => $exist->precio_unitario,
+          'importe'         => $exist->importe,
+          'id_clasificacion'=> $exist->id_clasificacion,
         );
+        ++$key;
       }
+
+      // foreach ($data['exisd_id_factura'] as $key => $id_factura)
+      // {
+      //   $existencia_dia[] = array(
+      //     'fecha'           => $data['fecha_caja_chica'],
+      //     'id_factura'      => $id_factura,
+      //     'no_caja'         => $data['fno_caja'],
+      //     'row'             => $key,
+      //     'id_unidad'       => $data['exisd_id_unidad'][$key],
+      //     'descripcion'     => $data['exisd_descripcion'][$key],
+      //     'cantidad'        => $data['exisd_cantidad'][$key],
+      //     'precio_unitario' => $data['exisd_precio_unitario'][$key],
+      //     'importe'         => $data['exisd_importe'][$key],
+      //     'id_clasificacion'=> $data['exisd_id_clasificacion'][$key],
+      //   );
+      // }
 
       $this->db->insert_batch('otros.bodega_existencia', $existencia_dia);
     }
@@ -304,7 +402,7 @@ class bodega_guadalajara_model extends CI_Model {
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
       WHERE f.is_factura = 'f' AND f.serie = 'R' AND c.nombre_fiscal = 'BODEGA DE GUADALAJARA'
-        AND Date(f.fecha) = '{$fecha}'
+        AND Date(f.fecha + interval '1 day') = '{$fecha}' AND f.folio <> 4487
       ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC"
     );
     // COALESCE(cr.id_remision, 0) = 0
@@ -343,7 +441,7 @@ class bodega_guadalajara_model extends CI_Model {
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
-      WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'BODEGA DE GUADALAJARA'
+      WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
         AND Date(f.fecha) = '{$fecha}'
       ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC
     ");
@@ -378,6 +476,22 @@ class bodega_guadalajara_model extends CI_Model {
     return $response;
   }
 
+  public function getPrestamos($fecha)
+  {
+    // Obtener los prestamos de otras bodegas
+    $prestamos = $this->db->query(
+      "SELECT DATE(bp.fecha) as fecha, bp.descripcion, bp.cantidad, bp.precio_unitario, bp.importe, u.nombre AS unidad, cl.id_clasificacion,
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, bp.concepto, bp.tipo, 0 AS id_factura
+      FROM otros.bodega_prestamos bp
+        INNER JOIN unidades u ON u.id_unidad = bp.id_unidad
+        INNER JOIN clasificaciones cl ON cl.id_clasificacion = bp.id_clasificacion
+      WHERE Date(bp.fecha) = '{$fecha}'
+      ORDER BY (bp.fecha, bp.descripcion) ASC"
+    )->result();
+
+    return $prestamos;
+  }
+
   public function getAbonosVentasPasadas($fecha)
   {
     $this->load->model('cuentas_cobrar_model');
@@ -385,14 +499,17 @@ class bodega_guadalajara_model extends CI_Model {
     // $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
     //  AND bc.id_empresa = {$defaultEmpresa->id_empresa}
 
+    // INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+    // AND Date(fa.fecha) = '{$fecha}'
     $ventas = $this->db->query(
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente
-      FROM facturacion_abonos fa
-        INNER JOIN facturacion f ON f.id_factura = fa.id_factura
+      FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
         INNER JOIN empresas e ON e.id_empresa = f.id_empresa
-      WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'BODEGA DE GUADALAJARA'
-        AND Date(fa.fecha) = '{$fecha}' AND Date(f.fecha) < '{$fecha}'
+        LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) = '{$fecha}')
+      WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+        AND Date(f.fecha) < '{$fecha}' AND (f.status = 'p' OR (f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'))
+      GROUP BY f.id_factura, e.id_empresa, c.id_cliente
       ORDER BY (f.fecha, f.serie, f.folio) ASC
     ");
 
@@ -855,6 +972,43 @@ class bodega_guadalajara_model extends CI_Model {
       String::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '', false),
       String::formatoNumero($totalIngresos, 2, '', false)), false, true);
 
+    // PRESTAMOS Y DEVOLUCIONES
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(140, 55));
+    $pdf->Row(array('PRESTAMOS Y DEVOLUCIONES', 'IMPORTE'), true, true);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'R', 'R', 'R', 'L'));
+    $pdf->SetWidths(array(60, 35, 25, 25, 25, 25));
+    $pdf->Row(array('CONCEPTO', 'CLASIF', 'BULTOS', 'PRECIO', 'IMPORTE', 'TIPO'), true, true);
+
+    $totalPrestamos = $totalPrestamosBultos = 0;
+    foreach ($caja['prestamos'] as $prestamo) {
+      $totalPrestamos += floatval($prestamo->importe);
+      $totalPrestamosBultos += floatval($prestamo->cantidad);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $prestamo->concepto,
+        $prestamo->codigo,
+        String::formatoNumero($prestamo->cantidad, 2, '', false),
+        String::formatoNumero($prestamo->precio_unitario, 2, '', false),
+        String::formatoNumero($prestamo->importe, 2, '', false),
+        ($prestamo->tipo=='t'? 'Prestamo': 'Pago')
+      ), false, true);
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array('', '', '',
+      String::formatoNumero($totalPrestamosBultos, 2, '', false),
+      String::formatoNumero($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1), 2, '', false),
+      String::formatoNumero($totalPrestamos, 2, '', false)), false, true);
+
     // VENTAS DEL DIA
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -944,7 +1098,6 @@ class bodega_guadalajara_model extends CI_Model {
       String::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '', false),
       String::formatoNumero($totalExisD, 2, '', false)), false, true);
 
-
     // $ttotalGastos = 0;
     // foreach ($caja['gastos'] as $gasto)
     // {
@@ -975,6 +1128,8 @@ class bodega_guadalajara_model extends CI_Model {
         $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R'));
+        $pdf->SetWidths(array(30, 65, 25, 50, 25));
         $pdf->Row(array('COD', 'EMPRESA', 'NOM', 'CONCEPTO', 'CARGO'), true, true);
       }
 

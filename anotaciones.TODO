@@ -1,3 +1,13 @@
+
+1h--*Cuentas por pagar en normex, 1er total general es la suma de los 2 proveedores de lo que se muestra,
+  2do total general agregarle la suma del iva de los productos = total final,
+  la diferencia = total final - 1er total general
+--nomina registro de actividad x trabajadores poner otros ranchos por empleado, el catalogo de lavores pasarlo a nomina
+  Agregar una columna para seleccionar si ese dia es falta, incapa, permis, asiste y que modifique el modulo de asistencia,
+  cuando le agreguen hrs extras registrar bonos en mod asistencias
+--*Poner en trabajadores un numero de empleado y validar que no se repita
+2h*--Pder agregar clasificaciones de prestamo o de pago cuando les presten limon
+
 1.5h*--normex y sagarpa (de sagarpa se capturaran gastos en consepto ira nacional o internacional con esto en cuentas por pagar de normex separar por estos 2 tipos y agregar las facturas de sagarpa al final calcular la diferencia)
 2h*--Crear poliza de diarios de productos como el reporte de acumulados de productos
 1h*--En los recibos de nomina poner el subsidio en el lado de deducciones en negativo, checar imss
@@ -10,7 +20,6 @@
 *--En las cajas chicas ver porq tarda en cargar
 *--Cuentas por cobrar y pagar checar lo del saldo inicial no arrastra bien el saldo, checar con javier renteria
 7.5h--Agregar catalogos y lo que tiene el archivo de exel que me explico triana lo puse en indie-sanjorge
-
 
 
 15h--Hacer de nuevo la caja chica de bodega guadalajara como el archivo que pasaron

@@ -338,6 +338,13 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="dno_trabajador">No Trabajador </label>
+                    <div class="controls">
+                      <input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo isset($data['info'][0]->no_empleado)?$data['info'][0]->no_empleado:''; ?>" maxlength="8" placeholder="# Trabajador">
+                    </div>
+                  </div>
+
                   <input type="hidden" name="duser_nomina" value="t">
 
                 </div> <!--/span-->
