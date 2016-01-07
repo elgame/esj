@@ -15,6 +15,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_gastos_xls/',
     'caja_chica/rpt_ingresos_pdf/',
     'caja_chica/rpt_ingresos_xls/',
+    'caja_chica/print_vale/',
   );
 
   public function _remap($method)
@@ -638,6 +639,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+  }
+
+  public function print_vale()
+  {
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->printVale($_GET['id']);
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')

@@ -157,7 +157,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     }
   }
 
-  public function rptTrabajadoresPrestamosPdf($usuarioId, $fecha1, $fecha2, $todos = false)
+  public function rptTrabajadoresPrestamosPdf($usuarioId, $fecha1, $fecha2, $todos = false, $id_empresa=0)
   {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_model');
@@ -179,10 +179,14 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
     $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
 
+    $sql = '';
+    if ($id_empresa > 0)
+      $sql = " AND u.id_empresa = ".$id_empresa;
+
     $empleados = $this->db->query("SELECT u.id_empresa, np.id_usuario
       FROM nomina_prestamos np
         INNER JOIN usuarios u ON u.id = np.id_usuario
-      WHERE np.status = 't' AND Date(np.fecha) >= '{$fecha1}' AND Date(np.fecha) <= '{$fecha2}'
+      WHERE np.status = 't' AND Date(np.fecha) >= '{$fecha1}' AND Date(np.fecha) <= '{$fecha2}' {$sql}
       GROUP BY u.id_empresa, np.id_usuario
       ORDER BY u.id_empresa ASC, np.id_usuario ASC")->result();
 

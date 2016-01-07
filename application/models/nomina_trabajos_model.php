@@ -9,7 +9,7 @@ class nomina_trabajos_model extends CI_Model {
     $data = array(
       'fecha'           => $datos['fecha'],
       'id_empresa'      => $datos['id_empresa'],
-      'id_area'         => $datos['id_area'],
+      // 'id_area'         => $datos['id_area'],
       'id_usuario'      => $datos['id_usuario'],
       'sueldo_diario'   => floatval($datos['sueldo_diario']),
       'hrs_extra'       => floatval($datos['hrs_extra']),
@@ -18,37 +18,39 @@ class nomina_trabajos_model extends CI_Model {
       'horas'           => floatval($datos['horas']),
       'importe_trabajo' => floatval($datos['importe_trabajo']),
       'importe_extra'   => floatval($datos['importe_extra']),
+      'tipo_asistencia' => $datos['tipo_asistencia'],
     );
 
-    $data_labores = array(
-      'id_labor' => $datos["flabor_id"],
-      'horas'    => $datos["fhoras"],
-      );
+    $data_labores = isset($datos['arealhr'])? $datos['arealhr']: [];
 
-    if ($data['id_area'] > 0 && $data['horas'] > 5 && $data['importe_trabajo'] > 0 &&
-      $data['fecha'] != '' && $data['id_empresa'] > 0 && count($data_labores['id_labor']) > 0) {
+    // si existe el registro
+    $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_trabajos_dia WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}")->row();
 
-      // si existe el registro
-      $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_trabajos_dia WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_area = {$data['id_area']}")->row();
+    if ($data['horas'] > 5 && $data['importe_trabajo'] > 0 &&
+      $data['fecha'] != '' && $data['id_empresa'] > 0 && count($data_labores) > 0 &&
+      $data['tipo_asistencia'] == 'a') {
 
       if ($existe->num > 0)
-        $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_area = {$data['id_area']}");
+        $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
       else {
         $this->db->insert('nomina_trabajos_dia', $data);
       }
 
-      $this->db->delete('nomina_trabajos_dia_labores', "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_area = {$data['id_area']}");
-      if (count($data_labores['id_labor']) > 0) {
+      $this->db->delete('nomina_trabajos_dia_labores', "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
+      if (count($data_labores) > 0) {
         $dias_labores = array();
-        foreach ($data_labores['id_labor'] as $key => $value) {
-          if (isset($value{0}) && isset($data_labores['horas'][$key]{0})) {
-            $dias_labores[] = array(
-              'id_usuario' => $data['id_usuario'],
-              'fecha'      => $data['fecha'],
-              'id_area'    => $data['id_area'],
-              'id_labor'   => $value,
-              'horas'      => $data_labores['horas'][$key],
-              );
+        foreach ($data_labores as $key => $value) {
+          foreach ($value['flabor_id'] as $lkey => $labor) {
+            if (isset($labor{0}) && isset($value['fhoras'][$lkey]{0})) {
+              $dias_labores[] = array(
+                'id_usuario' => $data['id_usuario'],
+                'id_empresa' => $data['id_empresa'],
+                'fecha'      => $data['fecha'],
+                'id_area'    => $value['id_area'],
+                'id_labor'   => $labor,
+                'horas'      => $value['fhoras'][$lkey],
+                );
+            }
           }
         }
         if (count($dias_labores) > 0) {
@@ -58,14 +60,18 @@ class nomina_trabajos_model extends CI_Model {
 
       // Registra los Bonos
       if($data['importe_extra'] > 0) {
-        $this->db->delete('nomina_percepciones_ext', array('id_usuario' => $data['id_usuario'], 'fecha' => $data['fecha']));
-        $this->db->insert('nomina_percepciones_ext', array(
-              'id_usuario' => $data['id_usuario'],
-              'fecha'      => $data['fecha'],
-              'bono'       => $data['importe_extra'],
-              'otro'       => 0,
-              'domingo'    => 0,
-            ));
+        // si esta igual o cambio el bono
+        $existe_bono = $this->db->query("SELECT Count(*) AS num FROM nomina_percepciones_ext WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND bono = {$data['importe_extra']}")->row();
+        if ($existe_bono->num == 0) {
+          $this->db->delete('nomina_percepciones_ext', array('id_usuario' => $data['id_usuario'], 'fecha' => $data['fecha']));
+          $this->db->insert('nomina_percepciones_ext', array(
+                'id_usuario' => $data['id_usuario'],
+                'fecha'      => $data['fecha'],
+                'bono'       => $data['importe_extra'],
+                'otro'       => 0,
+                'domingo'    => 0,
+              ));
+        }
       }
 
       // Quita la falta al trabajador
@@ -73,13 +79,23 @@ class nomina_trabajos_model extends CI_Model {
 
       return array('passess' => true);
     } else {
+      if ($existe->num > 0)
+        $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
+      else {
+        $this->db->insert('nomina_trabajos_dia', $data);
+      }
+
+      $tipo = explode('-', $data['tipo_asistencia']);
+      if ($tipo[0] == 'a')
+        $tipo[0] = 'f';
       // Registra falta al trabajador
       $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
       $this->db->insert('nomina_asistencia', array(
             'id_usuario' => $data['id_usuario'],
             'fecha_ini'  => $data['fecha'],
             'fecha_fin'  => $data['fecha'],
-            'tipo'       => 'f',
+            'tipo'       => $tipo[0],
+            'id_clave'   => isset($tipo[1])? $tipo[1]: null,
           ));
       return array('passess' => false);
     }
@@ -103,29 +119,38 @@ class nomina_trabajos_model extends CI_Model {
     $data = array();
 
     $sql = $this->db->query(
-      "SELECT ntd.id_usuario, ntd.fecha, ntd.id_area, ntd.horas, ntd.hrs_extra, ntd.descripcion,
+      "SELECT ntd.id_usuario, ntd.fecha, ca.id_area, ntd.horas AS total_horas, ntd.hrs_extra, ntd.descripcion,
         ntd.importe, ntd.sueldo_diario, ntd.id_empresa, ntd.importe_trabajo, ntd.importe_extra,
-        ca.nombre AS area, ca.codigo_fin, e.nombre_fiscal, ntdl.id_labor, csl.nombre AS labor, ntdl.horas
+        ca.nombre AS area, ca.codigo_fin, e.nombre_fiscal, ntdl.id_labor, csl.nombre AS labor, ntdl.horas,
+        ntd.tipo_asistencia
       FROM nomina_trabajos_dia ntd
-        INNER JOIN compras_areas ca ON ca.id_area = ntd.id_area
         INNER JOIN empresas e ON e.id_empresa = ntd.id_empresa
-        INNER JOIN nomina_trabajos_dia_labores ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdL.fecha AND ntd.id_area = ntdl.id_area)
-        INNER JOIN compras_salidas_labores csl ON csl.id_labor = ntdl.id_labor
+        LEFT JOIN nomina_trabajos_dia_labores ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdl.fecha AND ntd.id_empresa = ntdl.id_empresa)
+        LEFT JOIN compras_areas ca ON ca.id_area = ntdl.id_area
+        LEFT JOIN compras_salidas_labores csl ON csl.id_labor = ntdl.id_labor
       WHERE ntd.fecha = '{$fecha}' AND e.id_empresa = {$id_empresa}
-      ORDER BY ntd.id_usuario ASC
+      ORDER BY ntd.id_usuario ASC, ca.id_area ASC
       ");
 
     $response = array();
     if ($sql->num_rows() > 0) {
       // $data = $sql->result();
       $aux = '';
+      $aux_area = '';
       foreach ($sql->result() as $key => $value) {
         if ($aux != $value->id_usuario) {
-          $response[$value->id_usuario] = $value;
-          $response[$value->id_usuario]->labores = array();
+          $response[$value->id_usuario] = array();
+          // $response[$value->id_usuario]['info'] = $value;
+          $response[$value->id_usuario][$value->id_area] = $value;
+          $response[$value->id_usuario][$value->id_area]->labores = array();
           $aux = $value->id_usuario;
+        }elseif ($aux_area != $value->id_area) {
+          $response[$value->id_usuario][$value->id_area] = $value;
+          $response[$value->id_usuario][$value->id_area]->labores = array();
         }
-        $response[$value->id_usuario]->labores[] = array('id_labor' => $value->id_labor, 'labor' => $value->labor, 'horas' => $value->horas);
+        $aux_area = $value->id_area;
+
+        $response[$value->id_usuario][$value->id_area]->labores[] = array('id_labor' => $value->id_labor, 'labor' => $value->labor, 'horas' => $value->horas);
       }
     }
 

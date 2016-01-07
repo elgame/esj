@@ -46,7 +46,7 @@
                   $tuvoEmpleados = false;
                   if ( ! isset($_GET['puestoId']) || ($_GET['puestoId'] == $puesto->id_departamento || $_GET['puestoId'] == '')) {
                 ?>
-                    <table class="table table-striped table-bordered bootstrap-datatable tableClasif">
+                    <table class="table table-striped table-bordered bootstrap-datatable tableClasif" id="actividades_tra">
                       <caption style="text-align: left;"><?php echo $puesto->nombre; ?></caption>
                       <thead>
                         <tr>
@@ -56,6 +56,7 @@
                           <th>Horas</th>
                           <th>Hrs Extras</th>
                           <th>Descripcion</th>
+                          <th>Asis</th>
                           <th>Costo</th>
                           <th></th>
                         </tr>
@@ -64,60 +65,134 @@
                     <?php foreach($empleados as $e) {
                             if ($puesto->id_departamento === $e->id_departamente) {
                               $tuvoEmpleados = true;
+                              $info_e = null;
                     ?>
                           <tr class="trempleado">
                             <td class="empleado-dbl-click"><?php echo $e->nombre; ?></td>
-                            <td class="">
-                              <input type="text" id="fcentro_costo" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->area: ''; ?>" class="span11 pull-left showCodigoAreaAuto">
-                              <input type="hidden" id="fcentro_costo_id" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->id_area: ''; ?>" class="span12">
-                              <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                            <td class="tdCostosLabores" colspan="3">
                               <input type="hidden" id="fempleado_id" value="<?php echo $e->id ?>">
                               <input type="hidden" id="fsalario_diario" value="<?php echo $e->salario_diario ?>">
-                            </td>
-                            <td colspan="2">
-                              <table>
+                          <?php if (isset($infoE[$e->id]) && count($infoE[$e->id]) > 0) {
+                            foreach ($infoE[$e->id] as $keyare => $val_area) {
+                              $info_e = $val_area;
+                          ?>
+                              <table class="tablesinborders tableCosto">
                                 <tbody>
-                              <?php if (isset($infoE[$e->id])) {
-                                foreach ($infoE[$e->id]->labores as $keyinf => $ie) {
-                              ?>
                                   <tr>
-                                    <td>
-                                      <input type="text" id="flabor<?php echo $e->id ?>" value="<?php echo $ie['labor'] ?>" class="span12 showLabores">
-                                      <input type="hidden" id="flabor<?php echo $e->id ?>_id" value="<?php echo $ie['id_labor'] ?>" class="span12 hideLabor">
+                                    <td class="tdCodArea">
+                                      <input type="text" id="fcentro_costo<?php echo $e->id ?>" value="<?php echo $val_area->area; ?>" class="span12 pull-left showCodigoAreaAuto">
+                                      <input type="hidden" id="fcentro_costo<?php echo $e->id ?>_id" value="<?php echo $val_area->id_area; ?>" class="span12 hideCCosto">
+                                      <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                                      <i class="ico icon-plus pull-right addNewCosto" style="cursor:pointer"></i>
                                     </td>
-                                    <td>
-                                      <input type="text" id="fhoras<?php echo $e->id ?>" value="<?php echo $ie['horas'] ?>" class="span11 pull-left vpositive laborhoras">
-                                      <i class="ico pull-right <?php echo $keyinf==0? 'icon-plus addNewlabor': 'icon-remove removelabor'; ?>" style="cursor:pointer"></i>
+                                    <td> <!-- labores y horas -->
+                                      <table>
+                                        <tbody>
+                                        <?php if (isset($val_area->labores) && count($val_area->labores) > 0) {
+                                        foreach ($val_area->labores as $keyinf => $ie) {
+                                        ?>
+                                          <tr>
+                                            <td>
+                                              <input type="text" id="flabor<?php echo $e->id.$val_area->id_area; ?>" data-id="<?php echo $e->id ?>" value="<?php echo $ie['labor'] ?>" class="span12 showLabores">
+                                              <input type="hidden" id="flabor<?php echo $e->id.$val_area->id_area; ?>_id" value="<?php echo $ie['id_labor'] ?>" class="span12 hideLabor">
+                                            </td>
+                                            <td class="tdLabHoras">
+                                              <input type="text" id="fhoras<?php echo $e->id.$val_area->id_area; ?>" value="<?php echo $ie['horas'] ?>" class="span12 pull-left vpositive laborhoras">
+                                              <i class="ico pull-right <?php echo $keyinf==0? 'icon-plus addNewlabor': 'icon-remove removelabor'; ?>" style="cursor:pointer"
+                                                title="<?php echo $keyinf==0? 'Agregar Labor': 'Borrar Labor'; ?>"></i>
+                                            </td>
+                                          </tr>
+                                        <?php
+                                        }
+                                        }else{ ?>
+                                          <tr>
+                                            <td>
+                                              <input type="text" id="flabor<?php echo $e->id.$val_area->id_area; ?>" data-id="<?php echo $e->id ?>" value="aaaaaaa" class="span12 showLabores">
+                                              <input type="hidden" id="flabor<?php echo $e->id.$val_area->id_area; ?>_id" value="" class="span12 hideLabor">
+                                            </td>
+                                            <td class="tdLabHoras">
+                                              <input type="text" id="fhoras<?php echo $e->id.$val_area->id_area; ?>" value="" class="span12 pull-left vpositive laborhoras">
+                                              <i class="ico icon-plus pull-right addNewlabor" style="cursor:pointer" title="<?php echo 'Agregar Labor'; ?>"></i>
+                                            </td>
+                                          </tr>
+                                        <?php } ?>
+                                        </tbody>
+                                      </table>
                                     </td>
                                   </tr>
-                              <?php
-                                }
-                              }else{ ?>
-                                  <tr>
-                                    <td>
-                                      <input type="text" id="flabor<?php echo $e->id ?>" value="" class="span12 showLabores">
-                                      <input type="hidden" id="flabor<?php echo $e->id ?>_id" value="" class="span12 hideLabor">
-                                    </td>
-                                    <td>
-                                      <input type="text" id="fhoras<?php echo $e->id ?>" value="" class="span11 pull-left vpositive laborhoras">
-                                      <i class="ico icon-plus pull-right addNewlabor" style="cursor:pointer"></i>
-                                    </td>
-                                  </tr>
-                              <?php } ?>
                                 </tbody>
                               </table>
+                          <?php }
+                            } else { ?>
+                              <table class="tablesinborders tableCosto">
+                                <tbody>
+                                  <tr>
+                                    <td class="tdCodArea">
+                                      <input type="text" id="fcentro_costo<?php echo $e->id ?>" value="" class="span12 pull-left showCodigoAreaAuto">
+                                      <input type="hidden" id="fcentro_costo<?php echo $e->id ?>_id" value="" class="span12 hideCCosto">
+                                      <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                                      <i class="ico icon-plus pull-right addNewCosto" style="cursor:pointer"></i>
+                                    </td>
+                                    <td> <!-- labores y horas -->
+                                      <table>
+                                        <tbody>
+                                          <tr>
+                                            <td>
+                                              <input type="text" id="flabor<?php echo $e->id; ?>" data-id="<?php echo $e->id ?>" value="" class="span12 showLabores">
+                                              <input type="hidden" id="flabor<?php echo $e->id; ?>_id" value="" class="span12 hideLabor">
+                                            </td>
+                                            <td class="tdLabHoras">
+                                              <input type="text" id="fhoras<?php echo $e->id; ?>" value="" class="span12 pull-left vpositive laborhoras">
+                                              <i class="ico icon-plus pull-right addNewlabor" style="cursor:pointer" title="<?php echo 'Agregar Labor'; ?>"></i>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                          <?php } ?>
                             </td>
                             <td>
-                              <input type="text" id="fhrs_extras" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->hrs_extra: ''; ?>" class="span12 fhrs_extras<?php echo $e->id ?> vpositive">
+                              <input type="text" id="fhrs_extras" value="<?php echo isset($info_e)? $info_e->hrs_extra: ''; ?>" class="span12 fhrs_extras<?php echo $e->id ?> vpositive">
                             </td>
                             <td>
-                              <input type="text" id="fdescripcion" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->descripcion: ''; ?>" class="span12">
+                          <?php
+                            $selected_a = '';
+                            $selected_f = '';
+                            $selected_in = '';
+                            $select_color = 'green';
+                            if (isset($info_e->tipo_asistencia)) {
+                              if ($info_e->tipo_asistencia === 'a') {
+                                $selected_a = 'selected';
+                              }elseif ($info_e->tipo_asistencia === 'f') {
+                                $selected_f = 'selected';
+                                $select_color = 'red';
+                              }else{
+                                $selected_in = $info_e->tipo_asistencia;
+                                $select_color = 'yellow';
+                              }
+                            }
+                          ?>
+                              <select id="tipo_asistencia" class="span12 select-tipo" style="margin-bottom: 0px;background-color: <?php echo $select_color ?>;">
+                                <option value="a" style="background-color: green;" <?php echo $selected_a ?>></option>
+                                <option value="f" style="background-color: red;" <?php echo $selected_f ?>></option>
+
+                                <?php foreach ($sat_incapacidades as $key => $tipo) { ?>
+                                  <option value="in-<?php echo $tipo->id_clave ?>" style="background-color: yellow;" <?php echo ('in-'.$tipo->id_clave == $selected_in ? 'selected' : '') ?>><?php echo $tipo->nombre ?></option>
+                                <?php } ?>
+
+                              </select>
                             </td>
                             <td>
-                              <input type="text" id="fcosto" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->importe: ''; ?>" class="span12 vpositive" readonly>
-                              <input type="hidden" id="fhrs_trabajo" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->horas: ''; ?>">
-                              <input type="hidden" id="fhrs_trabajo_importe" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->importe_trabajo: ''; ?>">
-                              <input type="hidden" id="fhrs_extra_importe" value="<?php echo isset($infoE[$e->id])? $infoE[$e->id]->importe_extra: ''; ?>">
+                              <input type="text" id="fdescripcion" value="<?php echo isset($info_e)? $info_e->descripcion: ''; ?>" class="span12">
+                            </td>
+                            <td>
+                              <input type="text" id="fcosto" value="<?php echo isset($info_e)? $info_e->importe: ''; ?>" class="span12 vpositive" readonly>
+                              <input type="hidden" id="fhrs_trabajo" value="<?php echo isset($info_e)? $info_e->total_horas: ''; ?>">
+                              <input type="hidden" id="fhrs_trabajo_importe" value="<?php echo isset($info_e)? $info_e->importe_trabajo: ''; ?>">
+                              <input type="hidden" id="fhrs_extra_importe" value="<?php echo isset($info_e)? $info_e->importe_extra: ''; ?>">
                             </td>
                             <td><button type="button" class="btn btn-success" id="btnAddClasif">Guardar</button></td>
                           </tr>
@@ -126,6 +201,7 @@
                     <?php if ( ! $tuvoEmpleados){ ?>
                         <tr style="color: red;">
                           <td>Sin Registros</td>
+                          <td style="width: 100px;"></td>
                           <td style="width: 100px;"></td>
                           <td style="width: 100px;"></td>
                           <td style="width: 100px;"></td>

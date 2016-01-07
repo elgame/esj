@@ -1086,6 +1086,7 @@ class facturacion_model extends privilegios_model{
 
     if ($factura['info']->uuid != '')
     {
+      $status_uuid = '708';
       // Carga los datos fiscales de la empresa dentro de la lib CFDI.
       $this->cfdi->cargaDatosFiscales($factura['info']->id_empresa);
 

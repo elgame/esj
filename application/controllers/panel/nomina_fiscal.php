@@ -600,6 +600,7 @@ class nomina_fiscal extends MY_Controller {
     $despido['indem_cons'] = isset($_GET['indem_cons'])? true: false;
     $despido['indem']      = isset($_GET['indem'])? true: false;
     $despido['prima']      = isset($_GET['prima'])? true: false;
+    $despido['aguin']      = isset($_GET['aguin'])? true: false;
 
     // Datos para la vista.
     if (isset($_GET['empleadoId']) && $_GET['empleadoId'] !== '' && isset($_GET['fechaSalida']) && $_GET['fechaSalida'] !== '')
@@ -631,6 +632,7 @@ class nomina_fiscal extends MY_Controller {
     $despido['indem_cons'] = isset($_GET['indem_cons'])? true: false;
     $despido['indem']      = isset($_GET['indem'])? true: false;
     $despido['prima']      = isset($_GET['prima'])? true: false;
+    $despido['aguin']      = isset($_GET['aguin'])? true: false;
     $result = $this->nomina_fiscal_model->add_finiquito($_GET['empleadoId'], $_GET['fechaSalida'], $despido);
 
     if ( ! $result['errorTimbrar'])
@@ -702,11 +704,12 @@ class nomina_fiscal extends MY_Controller {
     $fecha1 = isset($_GET['ffecha1']) ? $_GET['ffecha1'] : false;
     $fecha2 = isset($_GET['ffecha2']) ? $_GET['ffecha2'] : false;
     $todos = isset($_GET['ftodos']) ? true : false;
+    $id_empresa = isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : '0';
 
     if ($trabajadorId > 0)
-      $this->nomina_fiscal_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos);
+      $this->nomina_fiscal_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
     else
-      $this->nomina_fiscal_otros_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos);
+      $this->nomina_fiscal_otros_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
   }
 
   public function rpt_vacaciones_pdf()

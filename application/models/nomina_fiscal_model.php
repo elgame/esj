@@ -907,7 +907,7 @@ class nomina_fiscal_model extends CI_Model {
             $prestamosEmpleados[] = array(
               'id_empleado' => $empleadoId,
               'id_empresa' => $empresaId,
-              'anio' => date('Y'),
+              'anio' => $fechasSemana['anio'],
               'semana' => $datos['numSemana'],
               'id_prestamo' => $prestamo['id_prestamo'],
               'monto' => $prestamo['pago_semana_descontar'],
@@ -1307,7 +1307,7 @@ class nomina_fiscal_model extends CI_Model {
       // Compara que halla prestamos.
       if (floatval($empleadoFiniquito[0]->prestamos) > 0)
       {
-        $semana = $this->semanaActualDelMes(date('y'));
+        $semana = $this->semanaActualDelMes(substr($fechaSalida, 0, 4));
 
         // Recorre los prestamos del empleado para
         foreach ($empleadoFiniquito[0]->prestamos_pendientes as $prestamo)
@@ -1315,7 +1315,7 @@ class nomina_fiscal_model extends CI_Model {
           $prestamosEmpleados[] = array(
             'id_empleado' => $empleadoId,
             'id_empresa'  => $empleadoFiniquito[0]->id_empresa,
-            'anio'        => date('Y'),
+            'anio'        => $semana['anio'],
             'semana'      => $semana['semana'],
             'id_prestamo' => $prestamo->id_prestamo,
             'monto'       => floatval($prestamo->prestado) - floatval($prestamo->pagado),
@@ -1364,7 +1364,7 @@ class nomina_fiscal_model extends CI_Model {
         $data['indemnizaciones_exento']   = $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteExcento'];
       }
 
-      $fechaSalida = date('Y-m-d H:i:s');
+      $fechaSalida .= ' '.date('H:i:s');
 
       $this->db->update('usuarios', array('status' => 'f', 'fecha_salida' => $fechaSalida), array('id' => $empleadoFiniquito[0]->id));
 
@@ -5718,7 +5718,7 @@ class nomina_fiscal_model extends CI_Model {
       // }
 
       // Aguinaldo
-      if ($empleado->nomina_fiscal_aguinaldo > 0)
+      if ($empleado->nomina_fiscal_aguinaldo > 0 && false)
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
@@ -6550,7 +6550,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->Output('Nomina.pdf', 'I');
   }
 
-  public function rptTrabajadoresPrestamosPdf($usuarioId, $fecha1, $fecha2, $todos = false)
+  public function rptTrabajadoresPrestamosPdf($usuarioId, $fecha1, $fecha2, $todos = false, $id_empresa=0)
   {
     if ($usuarioId)
     {
@@ -9088,7 +9088,7 @@ class nomina_fiscal_model extends CI_Model {
       $percepciones = $empleado->nomina->percepciones;
 
       // AGUINALDO
-      if ($empleado->nomina_fiscal_ptu > 0)
+      if ($empleado->nomina_fiscal_aguinaldo > 0)
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
@@ -10049,34 +10049,78 @@ class nomina_fiscal_model extends CI_Model {
     $empleados = $this->nomina($configuraciones, $filtros);
     $nombre = "PAGO-AGUINALDO-{$semana['anio']}.txt";
 
-    $content = array();
-    $contador = 1;
+    $content           = array();
+    $contentSantr      = array();
+    $contador          = 1;
+    $contadorSantr     = 1;
+    $cuentaSantr       = '92001449876'; // Cuenta cargo santander
+    $total_nominaSantr = 0;
+
+    //header santader
+    $contentSantr[] = "100001E" . date("mdY") . $this->formatoBanco($cuentaSantr, ' ', 16, 'D') . date("mdY");
     foreach ($empleados as $key => $empleado)
     {
       if($empleado->cuenta_banco != '' && $empleado->esta_asegurado == 't'){
-        $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
-                    $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
-                    $this->formatoBanco('99', ' ', 2, 'I') .
-                    $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
-                    $this->formatoBanco($empleado->nomina_fiscal_aguinaldo_total_neto, '0', 15, 'I', true) .
-                    $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
-                    $this->formatoBanco('001', ' ', 3, 'D') .
-                    $this->formatoBanco('001', ' ', 3, 'D');
-        $contador++;
+        if($empleado->banco == 'santr') {
+          $contentSantr[] = "2" . $this->formatoBanco($contadorSantr+1, '0', 5, 'I') .
+                      $this->formatoBanco($contadorSantr, ' ', 7, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->apellido_paterno), ' ', 30, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->apellido_materno), ' ', 20, 'D') .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre2), ' ', 30, 'D') .
+                      $this->formatoBanco($empleado->cuenta_banco, ' ', 16, 'D') .
+                      $this->formatoBanco($empleado->nomina_fiscal_aguinaldo_total_neto, '0', 18, 'I', true);
+          $contadorSantr++;
+          $total_nominaSantr += number_format($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '.', '');
+        } else {
+          $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
+                      $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
+                      $this->formatoBanco('99', ' ', 2, 'I') .
+                      $this->formatoBanco($empleado->cuenta_banco, ' ', 20, 'D') .
+                      $this->formatoBanco($empleado->nomina_fiscal_aguinaldo_total_neto, '0', 15, 'I', true) .
+                      $this->formatoBanco($this->removeTrash($empleado->nombre), ' ', 40, 'D') .
+                      $this->formatoBanco('001', ' ', 3, 'D') .
+                      $this->formatoBanco('001', ' ', 3, 'D');
+          $contador++;
+        }
       }
     }
 
-    $content[] = '';
-    $content = implode("\r\n", $content);
+    //footer santader
+    $contentSantr[] = "3" . $this->formatoBanco($contadorSantr+1, '0', 5, 'I') . $this->formatoBanco($contadorSantr-1, '0', 5, 'I') .
+                      $this->formatoBanco($total_nominaSantr, '0', 18, 'I', true);
 
-    $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
-    fwrite($fp,$content);
-    fclose($fp);
+    $content[]      = '';
+    $contentSantr[] = '';
+    $content        = implode("\r\n", $content);
+    $contentSantr   = implode("\r\n", $contentSantr);
 
-    header('Content-Type: text/plain');
-    header("Content-disposition: attachment; filename={$nombre}");
-    readfile(APPPATH."media/temp/{$nombre}");
-    unlink(APPPATH."media/temp/{$nombre}");
+    $zip = new ZipArchive;
+    if ($zip->open(APPPATH."media/temp/{$nombre}.zip", ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+    {
+      $zip->addFromString('SANTANDER.txt', $contentSantr);
+      $zip->addFromString('BBVA Bancomer.txt', $content);
+
+      $zip->close();
+    }
+    else
+    {
+      exit('Error al intentar crear el ZIP.');
+    }
+
+    header('Content-Type: application/zip');
+    header("Content-disposition: attachment; filename={$nombre}.zip");
+    readfile(APPPATH."media/temp/{$nombre}.zip");
+
+    unlink(APPPATH."media/temp/{$nombre}.zip");
+
+    // $fp = fopen(APPPATH."media/temp/{$nombre}", "wb");
+    // fwrite($fp,$content);
+    // fclose($fp);
+
+    // header('Content-Type: text/plain');
+    // header("Content-disposition: attachment; filename={$nombre}");
+    // readfile(APPPATH."media/temp/{$nombre}");
+    // unlink(APPPATH."media/temp/{$nombre}");
   }
 }
 /* End of file nomina_fiscal_model.php */

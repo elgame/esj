@@ -48,6 +48,8 @@ class finiquito
 
   private $despido = false;
 
+  private $con_aguin = true;
+
   /*
    |------------------------------------------------------------------------
    | Setters
@@ -167,8 +169,12 @@ class finiquito
       $this->despido     = true;
     }
 
+    if ($despido['aguin']) {
+      $this->con_aguin = false;
+    }
+
     $this->empleado->anios_trabajados      = $this->aniosTrabajadosEmpleado();
-    $this->empleado->dias_trabajados      = $this->diasTrabajadosEmpleado();
+    $this->empleado->dias_trabajados       = $this->diasTrabajadosEmpleado();
     $this->empleado->dias_vacaciones       = $this->diasDeVacaciones();
     $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
     $this->empleado->factor_integracion    = $this->factorIntegracion();
@@ -221,7 +227,10 @@ class finiquito
    */
   public function aguinaldo()
   {
-    $diasAguinaldo = round(($this->empleado->dias_trabajados / 365 ) * $this->empresaConfig->aguinaldo, 2);
+    $diasAguinaldo = 0;
+    if ($this->con_aguin) {
+      $diasAguinaldo = round(($this->empleado->dias_trabajados / 365 ) * $this->empresaConfig->aguinaldo, 2);
+    }
     return $diasAguinaldo * $this->empleado->salario_diario;
   }
 

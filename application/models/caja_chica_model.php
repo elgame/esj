@@ -986,6 +986,79 @@ class caja_chica_model extends CI_Model {
     return $res->result();
   }
 
+  public function printVale($id_gasto)
+  {
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
+          cg.no_caja
+       FROM cajachica_gastos cg
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
+       WHERE cg.id_gasto = '{$id_gasto}'
+       ORDER BY cg.id_gasto ASC"
+    )->row();
+
+    // echo "<pre>";
+    //   var_dump($gastos);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+
+    // $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('VALE PROVISIONAL DE CAJA'), false, false);
+
+    $pdf->SetWidths(array(20, 43));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: '.$gastos->no_caja, String::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('CANTIDAD:'), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array(String::num2letras($gastos->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->Row(array('COD. AREA:'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($gastos->codigo_fin.' '.$gastos->nombre_codigo), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($gastos->concepto), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', $gastos->fecha), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
 
   /**
    * Reporte gastos caja chica

@@ -1762,14 +1762,14 @@ class Ventas_model extends privilegios_model{
     ///////////////
     $conceptos = $factura['productos'];
 
-    $pdf->SetWidths(array(12, 27, 13, 14));
+    $pdf->SetWidths(array(11, 27, 11, 14));
     $pdf->SetAligns(array('L','L','R','R'));
-    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-1));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1.5,-1.5,-1.5,-1.5));
     $pdf->SetXY(0, $pdf->GetY()+1);
     $pdf->Row2(array('CANT.', 'DESCRIPCION', 'PRECIO', 'IMPORTE'), false, true, 4.5);
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(.5,-1,-1,-1));
+                   array(-1,-1.5,-1,-1));
     $traslado11 = 0;
     $traslado16 = 0;
 

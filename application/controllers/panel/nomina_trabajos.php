@@ -31,6 +31,9 @@ class nomina_trabajos extends MY_Controller {
    */
   public function index()
   {
+    $this->carabiner->css(array(
+      array('panel/general_sanjorge.css')
+    ));
     $this->carabiner->js(array(
       array('general/msgbox.js'),
       array('general/keyjump.js'),
@@ -77,6 +80,7 @@ class nomina_trabajos extends MY_Controller {
 
     $_GET['did_empresa'] = $filtros['empresaId'];
     $params['puestos'] = $this->usuarios_departamentos_model->getPuestos(false); //puestos();
+    $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
 
     // $params['semanasDelAno'] = $this->nomina_fiscal_model->semanasDelAno($dia, $filtros['anio']);
 

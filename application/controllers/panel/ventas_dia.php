@@ -156,7 +156,7 @@ class ventas_dia extends MY_Controller {
 
     $this->load->library('cfdi');
     $this->load->model('ventas_dia_model');
-    $this->load->module('empresas_model');
+    $this->load->model('empresas_model');
 
     // if ( ! isset($_POST['borrador']))
     // {

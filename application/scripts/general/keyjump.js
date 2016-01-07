@@ -134,6 +134,7 @@
       }
 
     });
+    return $elem;
   };
 
   $.fn.keyJump.off  = function () {

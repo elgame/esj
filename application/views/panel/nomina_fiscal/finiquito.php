@@ -31,6 +31,8 @@
                 <label for="empleado">Fecha de Salida</label>
                 <input type="date" name="fechaSalida" value="<?php echo set_value_get('fechaSalida', date('Y-m-d'))  ?>">
 
+                <label for="aguin">Sin Aguinaldo
+                <input type="checkbox" name="aguin" id="aguin" value="true" <?php echo $this->input->get('aguin')=='true'? 'checked': '';  ?>></label>
                 <label for="indem_cons">Indem const
                 <input type="checkbox" name="indem_cons" id="indem_cons" value="true" <?php echo $this->input->get('indem_cons')=='true'? 'checked': '';  ?>></label>
                 <label for="indem">Indemnización

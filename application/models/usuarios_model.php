@@ -118,7 +118,7 @@ class Usuarios_model extends privilegios_model {
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 
             // 'no_empleado' => $noEmpleado,
-            'no_empleado'    => trim($this->input->post('dno_trabajador'))?$this->input->post('dno_trabajador'): '',
+            'no_empleado'    => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -193,7 +193,7 @@ class Usuarios_model extends privilegios_model {
             'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
             'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
             'de_rancho'         => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
-						'no_empleado'       => trim($this->input->post('dno_trabajador'))?$this->input->post('dno_trabajador'): '',
+            'no_empleado'       => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');

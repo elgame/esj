@@ -12,6 +12,7 @@
     autocompleteEmpresas();
     showCodigoArea();
     btnModalAreasSel();
+    addNewCentroCosto();
     addNewlabor();
 
     $('#box-content').keyJump();
@@ -101,14 +102,20 @@
         selectFirst: true,
         select: function( event, ui ) {
           var $this = $(this),
-              $tr = $this.parent().parent();
+              $tr = $this.parent().parent(),
+              $trparent = $this.parents('tr.trempleado');
 
-          $this.css("background-color", "#B0FFB0");
-          setTimeout(function(){
-            $this.val(ui.item.item.codigo_fin);
-          },100)
+          if ($trparent.find('.hideCCosto[value='+ui.item.id+']').length == 0) {
+            $this.css("background-color", "#B0FFB0");
+            setTimeout(function(){
+              $this.val(ui.item.item.codigo_fin);
+            },100)
 
-          $tr.find('#'+$this.attr('id')+'_id').val(ui.item.id);
+            $tr.find('#'+$this.attr('id')+'_id').val(ui.item.id);
+
+            calculaTotalesHrs($trparent);
+          }else
+            noty({"text": 'El Centro de costo ya esta seleccionada para el trabajador', "layout":"topRight", "type": 'error'});
         }
       }).keydown(function(event){
         if(event.which == 8 || event == 46) {
@@ -130,11 +137,14 @@
         selectFirst: true,
         select: function( event, ui ) {
           var $this = $(this),
-              $tr = $this.parent().parent();
+              $tr = $this.parent().parent(),
+              $tableCosto = $this.parents('table.tableCosto'),
+              $trparent = $this.parents('tr.trempleado');
 
-          if ($tr.parent().find('#'+$this.attr('id')+'_id[value='+ui.item.id+']').length == 0) {
+          if ($tableCosto.find('.hideLabor[value='+ui.item.id+']').length == 0) {
             $this.css("background-color", "#B0FFB0");
             $tr.find('#'+$this.attr('id')+'_id').val(ui.item.id);
+            calculaTotalesHrs($trparent);
           }else
             noty({"text": 'La labor ya esta seleccionada para el trabajador', "layout":"topRight", "type": 'error'});
         }
@@ -155,7 +165,6 @@
 
     postData.fecha           = $('#ffecha').val();
     postData.id_empresa      = $('#empresaId').val();
-    postData.id_area         = $tr.find('#fcentro_costo_id').val();
     postData.id_usuario      = $tr.find('#fempleado_id').val();
     postData.sueldo_diario   = $tr.find('#fsalario_diario').val();
     postData.hrs_extra       = $tr.find('#fhrs_extras').val();
@@ -164,17 +173,37 @@
     postData.horas           = $tr.find('#fhrs_trabajo').val();
     postData.importe_trabajo = $tr.find('#fhrs_trabajo_importe').val();
     postData.importe_extra   = $tr.find('#fhrs_extra_importe').val();
-    postData.flabor_id       = [];
-    postData.fhoras          = [];
+    postData.tipo_asistencia = $tr.find('#tipo_asistencia').val();
 
-    $tr.find('.hideLabor').each(function(index, el) {
-      postData.flabor_id.push($(this).val());
-    });
-    $tr.find('.laborhoras').each(function(index, el) {
-      postData.fhoras.push($(this).val());
+    postData.arealhr         = [];
+    // postData.flabor_id       = [];
+    // postData.fhoras          = [];
+
+    $tr.find('.hideCCosto').each(function(index, el) {
+      if ($(this).val() != "") {
+        var $trcc = $(this).parent().parent(),
+        item = {
+          id_area: $(this).val(),
+          flabor_id: [],
+          fhoras: []
+        };
+
+        $trcc.find('.hideLabor').each(function(index, el) {
+          // if($(this).val() != "")
+            item.flabor_id.push($(this).val());
+        });
+        $trcc.find('.laborhoras').each(function(index, el) {
+          // if($(this).val() != "")
+            item.fhoras.push($(this).val());
+        });
+
+        postData.arealhr.push(item);
+      }
     });
 
-    if ( validTrabajador(postData, $tr) ) {
+    console.log(postData);
+    var res_val = validTrabajador(postData, $tr);
+    if ( res_val[0] ) {
       $.post(base_url + 'panel/nomina_trabajos/ajax_save/', postData, function(data) {
 
         if (data.passess) {
@@ -187,12 +216,12 @@
         }
       }, "json");
     } else {
-      $tr.find('#fcentro_costo').focus();
+      $tr.find('.showCodigoAreaAuto:first').focus();
       var colorini = $tr.find('td').css('background-color');
       $tr.find('td').animate({backgroundColor: 'red'}, 200, function() {
         $tr.find('td').animate({backgroundColor: colorini}, 200);
       });
-      noty({"text": 'Todos los campos son requeridos!', "layout":"topRight", "type": 'error'});
+      noty({"text": (res_val[1]!=''? res_val[1]:'Todos los campos son requeridos!'), "layout":"topRight", "type": 'error'});
     }
   };
 
@@ -224,27 +253,100 @@
   };
 
   var validTrabajador = function (datos, $trdata) {
-    var isValid = true, $trdata = $trdata? $trdata: undefined;
+    var isValid = true, $trdata = $trdata? $trdata: undefined, msg='';
     // for (var i in datos) {
-    //   if (i != 'hrs_extra' && i != 'descripcion' && i != 'flabor_id' && i != 'fhoras' && $.trim(datos[i]) == '') {
+    //   if (i != 'hrs_extra' && i != 'descripcion' && i != 'arealhr' && $.trim(datos[i]) == '') {
     //     isValid = false;
     //     break;
     //   }
     // }
-    // console.log(datos.flabor_id, datos.fhoras);
-    // for (var i in datos.flabor_id) {
-    //   if ($.trim(datos.flabor_id[i]) == '' || $.trim(datos.fhoras[i]) == '') {
-    //     isValid = false;
-    //     break;
-    //   }
-    // }
-    return isValid;
+
+    for (var i in datos.arealhr) {
+      if ($.trim(datos.arealhr[i].id_area) == '') {
+        isValid = false;
+        msg = "El Centro Costo es requerido.";
+        break;
+      } else {
+        for (var ii in datos.arealhr[i].flabor_id) {
+          if ($.trim(datos.arealhr[i].flabor_id[ii]) == '' || $.trim(datos.arealhr[i].fhoras[ii]) == '') {
+            isValid = false;
+            msg = "Ingresa la labor y las horas.";
+            break;
+          }
+        }
+      }
+    }
+    return [isValid, msg];
   };
 
   var jumpIndex = 0;
+  var addNewCentroCosto = function () {
+    // Agrega los inputs extras de labores
+    $(".addNewCosto").on('click', function(event) {
+      var $tdc = $(this).parents("td.tdCostosLabores"),
+      objIdE = $tdc.find('#fempleado_id'),
+      jumpAux = jumpIndex;
+      idE = objIdE.val(); // id empleado
+
+      var html = '<table class="tablesinborders tableCosto">'+
+                  '  <tbody>'+
+                  '    <tr>'+
+                  '      <td class="tdCodArea">'+
+                  '        <input type="text" id="fcentro_costo'+idE+'_'+jumpIndex+'" value="" class="span12 pull-left showCodigoAreaAuto" data-next="flabor'+idE+'_'+(++jumpIndex)+'">'+
+                  '        <input type="hidden" id="fcentro_costo'+idE+'_'+(jumpIndex-1)+'_id" value="" class="span12 hideCCosto">'+
+                  '        <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>'+
+                  '        <i class="ico icon-remove pull-right removeCosto" style="cursor:pointer"></i>'+
+                  '      </td>'+
+                  '      <td> <!-- labores y horas -->'+
+                  '        <table>'+
+                  '          <tbody>'+
+                  '            <tr>'+
+                  '              <td>'+
+                  '                <input type="text" id="flabor'+idE+'_'+jumpIndex+'" data-id="'+idE+'" value="" class="span12 showLabores" data-next="fhoras'+idE+'_'+(++jumpIndex)+'">'+
+                  '                <input type="hidden" id="flabor'+idE+'_'+(jumpIndex-1)+'_id" value="" class="span12 hideLabor">'+
+                  '              </td>'+
+                  '              <td class="tdLabHoras">'+
+                  '                <input type="text" id="fhoras'+idE+'_'+jumpIndex+'" value="" class="span12 pull-left vpositive laborhoras" data-next="fhrs_extras'+idE+'">'+
+                  '                <i class="ico icon-plus pull-right addNewlabor" style="cursor:pointer" title="Agregar Labor"></i>'+
+                  '              </td>'+
+                  '            </tr>'+
+                  '          </tbody>'+
+                  '        </table>'+
+                  '      </td>'+
+                  '    </tr>'+
+                  '  </tbody>'+
+                  '</table>';
+      $tdc.append(html);
+
+      $.fn.keyJump.setElem($('#fcentro_costo'+idE+'_'+jumpAux)).focus();
+      ++jumpAux;
+      $.fn.keyJump.setElem($('#flabor'+idE+'_'+jumpAux));
+      ++jumpAux;
+      $.fn.keyJump.setElem($('#fhoras'+idE+'_'+jumpAux));
+
+
+      // ++jumpIndex;
+
+      $.fn.removeNumeric();
+      // $('#box-content').keyJump.off();
+      // $('#box-content').keyJump({
+      //   'next': 13,
+      // });
+      $.fn.setNumericDefault();
+    });
+
+    // Elimina los inputs extras de labores
+    $("td.tdCostosLabores").on('click', '.removeCosto', function(event) {
+      var $trparent = $(this).parents('tr.trempleado'), $table = $(this).parent().parent().parent().parent().remove();
+
+      calculaTotalesHrs($trparent);
+    });
+
+  };
+
   var addNewlabor = function () {
     // Agrega los inputs extras de labores
-    $(".addNewlabor").on('click', function(event) {
+    $("#actividades_tra").on('click', '.addNewlabor', function(event) {
       var $tr = $(this).parent().parent(),
       $trnew = $tr.clone();
       $trnew.find('.addNewlabor').removeClass('icon-plus addNewlabor').addClass('icon-remove removelabor');
@@ -252,7 +354,7 @@
       $trnew.find('.ui-helper-hidden-accessible').remove();
 
       var objIdE = $trnew.find('.showLabores').removeClass('ui-autocomplete-input'),
-      idE = objIdE.attr('id').replace('flabor', ''); // id empleado
+      idE = objIdE.attr('data-id'); // id empleado
 
       $.fn.keyJump.setElem( objIdE.attr('data-next', 'laborhoras'+idE+'_'+jumpIndex) );
       $.fn.keyJump.setElem(
@@ -290,12 +392,13 @@
         $fhoras      = $tr.find('input[id^=fhoras]'),
         $fdia_semana = $('#fdia_semana'),
         hrs          = 0,
-        salario_hr   = (parseFloat($fsalario_diario.val()) || 0) / ($fdia_semana.val() == '6'? 6: 8)
+        salario_hr   = (parseFloat($fsalario_diario.val()) || 0) / ($fdia_semana.val() == '6'? 6: 8),
+        total_hrs_extra = 0,
         total = 0;
 
     $fhoras.each(function(index, el) {
-      var $parent = $(this).parent().parent();
-      if ( $parent.find('.hideLabor').val() != '')
+      var $parent = $(this).parents(".tablesinborders");
+      if ( $parent.find('.hideLabor').val() != '' && $parent.find('.hideCCosto').val() != '')
         hrs += parseFloat($(this).val()) || 0;
     });
 
@@ -304,10 +407,11 @@
 
       $tr.find('#fhrs_trabajo_importe').val(total.toFixed(2));
     }
-    total += (parseFloat($fhrs_extras.val())||0)*salario_hr; // hrs extras
+    total_hrs_extra = ( (parseFloat($fhrs_extras.val())||0)*salario_hr ).toFixed(2); // para registrar bono
+    total += parseFloat(total_hrs_extra); // hrs extras
 
     $tr.find('#fhrs_trabajo').val(hrs);
-    $tr.find('#fhrs_extra_importe').val( ((parseFloat($fhrs_extras.val())||0)*salario_hr).toFixed(2) );
+    $tr.find('#fhrs_extra_importe').val( total_hrs_extra );
     $tr.find('#fcosto').val(total.toFixed(2));
 
   };
@@ -352,10 +456,18 @@
 
 
       if (passes) {
-        objCodigoArea.val(radioSel.attr('data-codfin'));
-        objCodigoArea.parent().find('#'+objCodigoArea.attr('id')+'_id').val(radioSel.val());
-        $("#modalAreas").modal('hide');
-        objCodigoArea = undefined;
+        var $trparent = objCodigoArea.parents('tr.trempleado');
+
+        if ($trparent.find('.hideCCosto[value='+radioSel.val()+']').length == 0) {
+          objCodigoArea.css("background-color", "#B0FFB0");
+          objCodigoArea.val(radioSel.attr('data-codfin'));
+          objCodigoArea.parent().find('#'+objCodigoArea.attr('id')+'_id').val(radioSel.val());
+          $("#modalAreas").modal('hide');
+          objCodigoArea = undefined;
+
+          calculaTotalesHrs($trparent);
+        }else
+          noty({"text": 'El Centro de costo ya esta seleccionada para el trabajador', "layout":"topRight", "type": 'error'});
       }
 
     });

@@ -454,16 +454,18 @@
       },
     })
     .done(function(empleado) {
-      $tr.find('.subsidio').val(empleado[0].nomina.percepciones.subsidio.total);
-      $tr.find('.subsidio-span').text(util.darFormatoNum(empleado[0].nomina.percepciones.subsidio.total));
+      if (empleado[0]) {
+        $tr.find('.subsidio').val(empleado[0].nomina.percepciones.subsidio.total);
+        $tr.find('.subsidio-span').text(util.darFormatoNum(empleado[0].nomina.percepciones.subsidio.total));
 
-      $tr.find('.isr').val(empleado[0].nomina.deducciones.isr.total);
-      $tr.find('.isr-span').text(util.darFormatoNum(empleado[0].nomina.deducciones.isr.total));
+        $tr.find('.isr').val(empleado[0].nomina.deducciones.isr.total);
+        $tr.find('.isr-span').text(util.darFormatoNum(empleado[0].nomina.deducciones.isr.total));
 
-      $tr.find('.ptu').val(empleado[0].nomina.percepciones.ptu.total);
-      $tr.find('.ptu-span').text(util.darFormatoNum(empleado[0].nomina.percepciones.ptu.total));
+        $tr.find('.ptu').val(empleado[0].nomina.percepciones.ptu.total);
+        $tr.find('.ptu-span').text(util.darFormatoNum(empleado[0].nomina.percepciones.ptu.total));
 
-      recalculaEmpleado($tr);
+        recalculaEmpleado($tr);
+      }
       loader.close();
     })
     .fail(function() {
