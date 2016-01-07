@@ -1,4 +1,22 @@
 $(function(){
+
+  $('#frmpresta').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          ffecha1: $("#ffecha1").val(),
+          ffecha2: $("#ffecha2").val(),
+          dempresa: $("#dempresa").val(),
+          did_empresa: $("#did_empresa").val(),
+          ftrabajador: $("#ftrabajador").val(),
+          fid_trabajador: $("#fid_trabajador").val(),
+          ftodos: ($("#ftodos").is(':checked')? '1': ''),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   // Autocomplete Empresas
   $("#ftrabajador").autocomplete({
     source: base_url + 'panel/usuarios/ajax_get_usuarios/?empleados=si',

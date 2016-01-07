@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/nomina_fiscal/rpt_pdf/'); ?>" method="GET" id="form-search" class="form-search" target="rdeReporte">
+            <form action="<?php echo base_url('panel/nomina_fiscal/rpt_pdf/'); ?>" method="GET" class="form-search" target="rdeReporte" id="frmpresta">
               <div class="form-actions form-filters">
 
                 <div class="control-group">
@@ -73,6 +73,9 @@
 
       <div class="row-fluid">
         <div class="box span12">
+          <a href="" id="linkDownXls" data-url="<?php echo base_url('panel/nomina_fiscal/rpt_xls'); ?>" class="linksm" target="_blank">
+            <i class="icon-table"></i> Excel</a>
+
           <div class="box-content">
             <div class="row-fluid">
               <iframe name="rdeReporte" id="iframe-reporte" class="span12" src="<?php echo base_url('panel/nomina_fiscal/rpt_pdf/')?>" style="height:520px;"></iframe>

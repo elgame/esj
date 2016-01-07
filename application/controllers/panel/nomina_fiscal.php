@@ -48,6 +48,7 @@ class nomina_fiscal extends MY_Controller {
 
     'nomina_fiscal/rpt_vacaciones_pdf/',
     'nomina_fiscal/rpt_pdf/',
+    'nomina_fiscal/rpt_xls/',
     'nomina_fiscal/asistencia_pdf/',
     'nomina_fiscal/cancelar/',
     'nomina_fiscal/cancelar_ptu/',
@@ -710,6 +711,22 @@ class nomina_fiscal extends MY_Controller {
       $this->nomina_fiscal_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
     else
       $this->nomina_fiscal_otros_model->rptTrabajadoresPrestamosPdf($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
+  }
+
+  public function rpt_xls()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('nomina_fiscal_otros_model');
+    $trabajadorId = isset($_GET['fid_trabajador']) ? $_GET['fid_trabajador'] : false;
+    $fecha1 = isset($_GET['ffecha1']) ? $_GET['ffecha1'] : false;
+    $fecha2 = isset($_GET['ffecha2']) ? $_GET['ffecha2'] : false;
+    $todos = isset($_GET['ftodos']) && $_GET['ftodos']=='1' ? true : false;
+    $id_empresa = isset($_GET['did_empresa']{0}) ? $_GET['did_empresa'] : '0';
+
+    if ($trabajadorId > 0)
+      $this->nomina_fiscal_otros_model->rptTrabajadoresPrestamosXls1($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
+    else
+      $this->nomina_fiscal_otros_model->rptTrabajadoresPrestamosXls($trabajadorId, $fecha1, $fecha2, $todos, $id_empresa);
   }
 
   public function rpt_vacaciones_pdf()

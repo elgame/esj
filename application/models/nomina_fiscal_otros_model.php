@@ -203,6 +203,330 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     $pdf->Output('Reporte_Prestamos_Trabajador.pdf', 'I');
   }
 
+  public function rptTrabajadoresPrestamosXls1($usuarioId, $fecha1, $fecha2, $todos = false, $id_empresa=0)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rpt_prestamos_trabajador.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    if ($usuarioId)
+    {
+      $this->load->model('empresas_model');
+      $this->load->model('usuarios_model');
+      $empleado = $this->usuarios_model->get_usuario_info($usuarioId);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      $semanas = $this->semanasDelAno($empresa['info']->dia_inicia_semana);
+
+      $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
+      $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
+
+      $sql = '';
+
+      if ($fecha1 != '')
+      {
+        $sql .= " AND DATE(np.fecha) >= '{$fecha1}'";
+      }
+
+      if ($fecha2 != '')
+      {
+        $semana = array();
+        foreach ($semanas as $s)
+        {
+          if (strtotime($fecha2) <= strtotime($s['fecha_final']))
+          {
+            $semana = $s;
+            break;
+          }
+        }
+
+        $sql .= " AND DATE(np.fecha) <= '{$fecha2}'";
+      }
+
+      if ($usuarioId && $usuarioId !== '')
+      {
+        $sql .= " AND np.id_usuario = {$usuarioId}";
+      }
+
+      $having = '';
+      if ( ! $todos)
+      {
+        $having .= " HAVING (np.prestado - COALESCE(SUM(nfp.monto), 0)) > 0";
+      }
+
+      $data = $this->db->query(
+        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - COALESCE(SUM(nfp.monto), 0) as total_pagado
+        FROM nomina_prestamos as np
+        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo AND (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
+        WHERE '1' {$sql}
+        GROUP BY np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha), DATE(np.inicio_pago)
+        {$having}
+        ORDER BY fecha ASC
+        ")->result();
+
+      foreach ($data as $key => $prestamo)
+      {
+        $prestamo->prestamos = $this->db->query(
+          "SELECT nfp.anio, nfp.semana, nfp.monto
+          FROM nomina_fiscal_prestamos as nfp
+          WHERE id_prestamo = $prestamo->id_prestamo AND
+            (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
+          ORDER BY (nfp.anio, nfp.semana)
+          ")->result();
+      }
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+      $titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno;
+      $titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
+
+      $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+      $columnas = '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA INICIO PAGO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PAGO X SEMANA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALDO</td>
+      </tr>';
+      $html .= $columnas;
+
+      $columnas2 = '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;"></td>
+        <td style="width:150px;border:1px solid #000;"></td>
+        <td style="width:150px;border:1px solid #000;">AÑO</td>
+        <td style="width:150px;border:1px solid #000;">SEMANA</td>
+        <td style="width:150px;border:1px solid #000;">MONTO</td>
+      </tr>';
+
+      foreach ($data as $key => $prestamo)
+      {
+        $html .= '<tr>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->inicio_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->prestado.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->pago_semana.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->total_pagado.'</td>
+        </tr>';
+
+        if ($prestamo->prestamos)
+        {
+          $html .= $columnas2;
+
+          foreach ($prestamo->prestamos as $p)
+          {
+            $html .= '<tr>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;">'.$p->anio.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$p->semana.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$p->monto.'</td>
+            </tr>';
+          }
+        }
+      }
+
+      echo $html;
+    }
+  }
+
+  public function getPrestamoTrabajadorXls($usuarioId, $fecha1, $fecha2, $todos = false)
+  {
+    $html = '';
+    if ($usuarioId)
+    {
+      $empleado = $this->usuarios_model->get_usuario_info($usuarioId);
+      $empresa = $this->empresas_model->getInfoEmpresa($empleado['info'][0]->id_empresa);
+
+      $semanas = $this->semanasDelAno($empresa['info']->dia_inicia_semana);
+
+      $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
+      $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
+
+      $sql = '';
+
+      if ($fecha1 != '')
+      {
+        $sql .= " AND DATE(np.fecha) >= '{$fecha1}'";
+      }
+
+      if ($fecha2 != '')
+      {
+        $semana = array();
+        foreach ($semanas as $s)
+        {
+          if (strtotime($fecha2) <= strtotime($s['fecha_final']))
+          {
+            $semana = $s;
+            break;
+          }
+        }
+
+        $sql .= " AND DATE(np.fecha) <= '{$fecha2}'";
+      }
+
+      if ($usuarioId && $usuarioId !== '')
+      {
+        $sql .= " AND np.id_usuario = {$usuarioId}";
+      }
+
+      $having = '';
+      if ( ! $todos)
+      {
+        $having .= " HAVING (np.prestado - COALESCE(SUM(nfp.monto), 0)) > 0";
+      }
+
+      $data = $this->db->query(
+        "SELECT np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha) as fecha, DATE(np.inicio_pago) as inicio_pago, np.prestado - COALESCE(SUM(nfp.monto), 0) as total_pagado
+        FROM nomina_prestamos as np
+        LEFT JOIN nomina_fiscal_prestamos as nfp ON nfp.id_prestamo = np.id_prestamo AND (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
+        WHERE '1' {$sql}
+        GROUP BY np.id_prestamo, np.id_usuario, np.prestado, np.pago_semana, np.status, DATE(np.fecha), DATE(np.inicio_pago)
+        {$having}
+        ORDER BY fecha ASC
+        ")->result();
+
+      foreach ($data as $key => $prestamo)
+      {
+        $prestamo->prestamos = $this->db->query(
+          "SELECT nfp.anio, nfp.semana, nfp.monto
+          FROM nomina_fiscal_prestamos as nfp
+          WHERE id_prestamo = $prestamo->id_prestamo AND
+            (nfp.anio < {$semana['anio']} OR (nfp.anio <= {$semana['anio']} AND nfp.semana <= {$semana['semana']}))
+          ORDER BY (nfp.anio, nfp.semana)
+          ")->result();
+      }
+
+      $html .= '<tr style="font-weight:bold">
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_paterno.'</td>
+        <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.$empleado['info'][0]->nombre_fiscal.'</td>
+      </tr>';
+
+      $columnas = '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">FECHA INICIO PAGO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PRESTADO</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">PAGO X SEMANA</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">SALDO</td>
+      </tr>';
+      $html .= $columnas;
+
+      $columnas2 = '<tr style="font-weight:bold">
+        <td style="width:150px;border:1px solid #000;"></td>
+        <td style="width:150px;border:1px solid #000;"></td>
+        <td style="width:150px;border:1px solid #000;">AÑO</td>
+        <td style="width:150px;border:1px solid #000;">SEMANA</td>
+        <td style="width:150px;border:1px solid #000;">MONTO</td>
+      </tr>';
+
+      foreach ($data as $key => $prestamo)
+      {
+        $html .= '<tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->fecha.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->inicio_pago.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->prestado.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->pago_semana.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$prestamo->total_pagado.'</td>
+        </tr>';
+
+        $this->rptPrestamosSaldos += $prestamo->total_pagado;
+
+        if ($prestamo->prestamos)
+        {
+          $html .= $columnas2;
+
+          foreach ($prestamo->prestamos as $p)
+          {
+            $html .= '<tr style="font-weight:bold">
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;"></td>
+              <td style="width:150px;border:1px solid #000;">'.$p->anio.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$p->semana.'</td>
+              <td style="width:150px;border:1px solid #000;">'.$p->monto.'</td>
+            </tr>';
+          }
+        }
+      }
+    }
+
+    return $html;
+  }
+
+  public function rptTrabajadoresPrestamosXls($usuarioId, $fecha1, $fecha2, $todos = false, $id_empresa=0)
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=rpt_prestamos_trabajador.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('empresas_model');
+    $this->load->model('usuarios_model');
+
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Todos los trabajadores";
+    $titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
+
+    $fecha1 = $fecha1 ? $fecha1 : date('Y-m-d');
+    $fecha2 = $fecha2 ? $fecha2 : date('Y-m-d');
+
+    $sql = '';
+    if ($id_empresa > 0)
+      $sql = " AND u.id_empresa = ".$id_empresa;
+
+    $empleados = $this->db->query("SELECT u.id_empresa, np.id_usuario
+      FROM nomina_prestamos np
+        INNER JOIN usuarios u ON u.id = np.id_usuario
+      WHERE np.status = 't' AND Date(np.fecha) >= '{$fecha1}' AND Date(np.fecha) <= '{$fecha2}' {$sql}
+      GROUP BY u.id_empresa, np.id_usuario
+      ORDER BY u.id_empresa ASC, np.id_usuario ASC")->result();
+
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+
+    foreach ($empleados as $key => $value) {
+      $html .= $this->getPrestamoTrabajadorXls($value->id_usuario, $fecha1, $fecha2, $todos);
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3"></td>
+          <td style="border:1px solid #000;">Saldo General</td>
+          <td style="border:1px solid #000;">'.$this->rptPrestamosSaldos.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 
   public function rpt_dim()
   {

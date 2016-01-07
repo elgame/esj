@@ -34,7 +34,7 @@
 
 --Checar el reporte de diario con las nuevas cosas
 14h--*Poner un boton para q borreo toda la informacion del sistema, programar para q la informacion se respalde diario en dropbox y genere un respaldo mensual
-8h--*Todos los reportes q se exporten a excel
+9h--*Todos los reportes q se exporten a excel
 ---commit No 2
 7h--*otro catalogo de como el de la maquinaria para el punto de venta
 4h--*limitar a que solo cargue una empresa para el punto de venta, ventas, remisiom, clientes, proveedores, facturacion, compras, cuentas pagar, cuentas cobrar
