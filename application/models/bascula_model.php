@@ -124,6 +124,7 @@ class bascula_model extends CI_Model {
           'certificado' => isset($_POST['certificado']) ? 't' : 'f',
 
           'id_productor' => empty($_POST['pid_productor']) ? null : $_POST['pid_productor'],
+          'id_usuario' => $this->session->userdata('id_usuario'),
         );
 
         if ($this->input->post('ptipo') === 'en')
@@ -358,7 +359,8 @@ class bascula_model extends CI_Model {
                 b.tipo,
                 b.no_impresiones,
                 pr.nombre_fiscal AS productor,
-                b.certificado")
+                b.certificado,
+                (u.nombre || '(' || u.usuario || ')') AS creadox")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
@@ -367,6 +369,8 @@ class bascula_model extends CI_Model {
       ->join('choferes AS ch', 'ch.id_chofer = b.id_chofer', "left")
       ->join('camiones AS ca', 'ca.id_camion = b.id_camion', "left")
       ->join('otros.productor AS pr', 'pr.id_productor = b.id_productor', "left")
+      ->join('usuarios AS u', 'u.id = b.id_usuario', "left")
+
       ->where("b.id_bascula", $id)
       ->or_where('b.folio', $folio)
       ->get();

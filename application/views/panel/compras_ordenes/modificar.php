@@ -422,6 +422,7 @@
 
                                 <input type="hidden" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
                                 <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12">
+                                <input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12">
                               </td>
                               <td>
                                   <?php echo $concepto ?>
@@ -551,6 +552,7 @@
 
                                     <input type="text" name="codigoArea[]" value="<?php echo $prod->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto" data-call="ComprasOrdenes">
                                     <input type="hidden" name="codigoAreaId[]" value="<?php echo $prod->id_area ?>" id="codigoAreaId" class="span12">
+                                    <input type="hidden" name="codigoCampo[]" value="<?php echo $prod->campo ?>" id="codigoCampo" class="span12">
                                     <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                    <!-- <input type="hidden" name="codigoArea[]" value="<?php echo $prod->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
                                    <input type="hidden" name="codigoAreaId[]" value="<?php echo $prod->id_area ?>" id="codigoAreaId" class="span12"> -->

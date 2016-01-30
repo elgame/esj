@@ -372,6 +372,7 @@
                             <td style="width: 60px;">
                               <input type="text" name="codigoArea[]" value="<?php echo $concepto->codigo_fin ?>" id="codigoArea" class="span12 showCodigoAreaAuto">
                               <input type="hidden" name="codigoAreaId[]" value="<?php echo $concepto->id_area ?>" id="codigoAreaId" class="span12">
+                              <input type="hidden" name="codigoCampo[]" value="<?php echo $concepto->campo ?>" id="codigoCampo" class="span12">
                               <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                             </td>
                             <td style="width: 60px;">

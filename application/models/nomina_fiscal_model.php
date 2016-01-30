@@ -816,6 +816,7 @@ class nomina_fiscal_model extends CI_Model {
                 'semana' => $datos['numSemana'],
                 'id_prestamo' => $prestamo['id_prestamo'],
                 'monto' => $prestamo['pago_semana_descontar'],
+                'fecha' => $fechasSemana['fecha_final'],
               );
 
               // Suma lo que lleva pagado mas lo que se esta abonando.
@@ -911,6 +912,7 @@ class nomina_fiscal_model extends CI_Model {
               'semana' => $datos['numSemana'],
               'id_prestamo' => $prestamo['id_prestamo'],
               'monto' => $prestamo['pago_semana_descontar'],
+              'fecha' => $fechasSemana['fecha_final'],
             );
 
             // Suma lo que lleva pagado mas lo que se esta abonando.
@@ -1319,6 +1321,7 @@ class nomina_fiscal_model extends CI_Model {
             'semana'      => $semana['semana'],
             'id_prestamo' => $prestamo->id_prestamo,
             'monto'       => floatval($prestamo->prestado) - floatval($prestamo->pagado),
+            'fecha'       => $fechaSalida,
           );
 
           $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo->id_prestamo));

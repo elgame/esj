@@ -280,8 +280,10 @@
     var $table = $('#table-gastos').find('tbody .row-total'),
         tr =  '<tr>' +
                 '<td style="width: 60px;">'+
+                  '<input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">'+
                   '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
                   '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                  '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
                   '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                 '</td>'+
                 '<td style="width: 100px;">' +
@@ -297,6 +299,10 @@
                 '<td style="">' +
                   '<input type="text" name="gasto_concepto[]" value="" class="span12 gasto-concepto">' +
                 '</td>' +
+                '<td style="width: 20px;">'+
+                  '<input type="checkbox" value="si" class="gasto-reposicion">'+
+                  '<input type="hidden" name="gasto_reposicion[]" value="f" class="gasto-reposicionhid">'+
+                '</td>'+
                 '<td style="width: 100px;"><input type="text" name="gasto_importe[]" value="0" class="span12 vpositive gasto-importe"></td>' +
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
               '</tr>';
@@ -323,6 +329,12 @@
 
       calculaTotalGastos();
       calculaCorte();
+    });
+
+    $('#table-gastos').on('change', '.gasto-reposicion', function(event) {
+      var $tr = $(this).parents('tr');
+      $tr.find('.gasto-reposicionhid').val( ($(this).is(':checked')? 't': 'f') );
+      console.log($tr.find('.gasto-reposicionhid').val());
     });
   };
 

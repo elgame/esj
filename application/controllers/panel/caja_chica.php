@@ -75,6 +75,25 @@ class caja_chica extends MY_Controller {
     $this->load->view('panel/footer',$params);
   }
 
+  public function caja3()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Caja chica 3');
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index3',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
   public function cargar()
   {
     $this->carabiner->js(array(
@@ -312,6 +331,9 @@ class caja_chica extends MY_Controller {
       $rules[] = array('field' => 'gasto_concepto[]',
                       'label' => 'Concepto Gastos',
                       'rules' => 'required|max_length[500]');
+      $rules[] = array('field' => 'gasto_reposicion[]',
+                      'label' => 'Reposicion Gastos',
+                      'rules' => '');
       $rules[] = array('field' => 'gasto_importe[]',
                       'label' => 'Importe Gastos',
                       'rules' => 'required|numeric');

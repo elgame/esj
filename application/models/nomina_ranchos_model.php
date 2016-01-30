@@ -180,6 +180,7 @@ class nomina_ranchos_model extends CI_Model {
           'anio'        => $fechasSemana['anio'],
           'semana'      => $fechasSemana['semana'],
           'monto'       => $pagar,
+          'fecha'       => $fechasSemana['fecha_final'],
           ));
 
         if( ($saldo - $pagar) == 0 ) // se pago el prestamo

@@ -190,7 +190,7 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_empleado($user->no_empleado))
+      if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
       {
   			$this->load->model('usuarios_model');
   			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
@@ -571,14 +571,15 @@ class empleados extends MY_Controller {
     }
   }
 
-  public function validano_empleado($no_empleado)
+  public function validano_empleado($no_empleado, $id_empresa='')
   {
     if ($no_empleado != '')
     {
+      $id_empresa = $id_empresa!=''? $id_empresa: $this->input->post('did_empresa');
       $sql = isset($_GET['id'])? "id <> {$_GET['id']} AND": '';
-      $query = $this->db->query("SELECT *
-                                 FROM usuarios
-                                 WHERE {$sql} no_empleado = '{$no_empleado}' AND status = 't'");
+      $query = $this->db->query("SELECT * FROM usuarios
+                                 WHERE {$sql} id_empresa = ".$id_empresa."
+                                  AND no_empleado = '{$no_empleado}' AND status = 't'");
 
       if ($query->num_rows() > 0)
       {

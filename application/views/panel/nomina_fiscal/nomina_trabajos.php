@@ -55,8 +55,8 @@
                           <th>Labor(s)</th>
                           <th>Horas</th>
                           <th>Hrs Extras</th>
-                          <th>Descripcion</th>
                           <th>Asis</th>
+                          <th>Descripcion</th>
                           <th>Costo</th>
                           <th></th>
                         </tr>

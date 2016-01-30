@@ -401,7 +401,8 @@
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
-        var idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", "");
+        var $fconcepto = $(this),
+        idval = $fconcepto.parents("div[id^=productos]").attr('id').replace("productos", "");
 
         $(this).css("background-color", "#FDFC9A");
         $("#productos #fcodigo").val("");
@@ -849,6 +850,7 @@
                   '<td style="width: 60px;">' +
                     '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" >' +
                     '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" readonly>' +
+                    '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12">' +
                     '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                   '</td>' +
                   '<td style="width: 60px;">' +

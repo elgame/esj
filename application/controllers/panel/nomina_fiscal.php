@@ -31,6 +31,7 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/recibo_finiquito_pdf/',
     'nomina_fiscal/recibo_incapacidad_pdf/',
     'nomina_fiscal/recibos_nomina_pdf/',
+    'nomina_fiscal/recibo_tfiniquito_pdf/',
 
     'nomina_fiscal/recibo_nomina_ptu_pdf/',
     'nomina_fiscal/recibos_nomina_ptu_pdf/',
@@ -944,6 +945,13 @@ class nomina_fiscal extends MY_Controller {
     $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->pdfReciboNominaFiscal($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
+  }
+
+  public function recibo_tfiniquito_pdf()
+  {
+    $anio = isset($_GET['anio'])?$_GET['anio']:date("Y");
+    $this->load->model('nomina_fiscal_model');
+    $this->nomina_fiscal_model->pdfReciboNominaFiscalFiniquito($_GET['empleadoId'], $_GET['semana'], $anio, $_GET['empresaId']);
   }
 
   public function recibos_nomina_pdf()

@@ -18,6 +18,8 @@ class MYpdf extends FPDF {
     var $limiteY     = 0;
     var $noShowPages = true;
 
+    var $auxy = 0;
+
 	/**
 	 * P:Carta Vertical, L:Carta Horizontal, lP:Legal vertical, lL:Legal Horizontal
 	 * @param unknown_type $orientation
@@ -48,6 +50,8 @@ class MYpdf extends FPDF {
 		    // Salto de línea
 		    $this->Ln(20);
     	}
+
+        $this->auxy = 0;
     }
 
     // Page footer

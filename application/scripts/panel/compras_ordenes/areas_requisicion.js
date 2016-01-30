@@ -14,7 +14,8 @@
   var autocompleteCodigos = function () {
     $('#table-productos').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
-        source: base_url+'panel/compras_areas/ajax_get_areasauto/',
+        source: base_url+'panel/catalogos_sft/ajax_get_codigosauto/',
+        // source: base_url+'panel/compras_areas/ajax_get_areasauto/',
         minLength: 1,
         selectFirst: true,
         select: function( event, ui ) {
@@ -23,12 +24,13 @@
 
           $this.css("background-color", "#B0FFB0");
           setTimeout(function(){
-            $this.val(ui.item.item.codigo_fin);
+            $this.val(ui.item.item.codigo);
           },100)
 
           $tr.find('#codigoAreaId').val(ui.item.id);
+          $tr.find('#codigoCampo').val('id_cat_codigos'); // campo del area new catalogo
 
-          if ($this.attr('data-call').length > 0)
+          if ($this.attr('data-call') && $this.attr('data-call').length > 0)
             funciones[$this.attr('data-call')].call(this, $tr);
         }
       }).keydown(function(event){
@@ -47,7 +49,7 @@
       var $tr = $(this).parent().parent();
       objCodigoArea = $tr.find('.showCodigoAreaAuto');
       $("div[id^=tblAreas]").hide();
-      getAjaxAreas($(".tblAreasFirs").attr('data-id'), null);
+      getAjaxAreas(1, null);
       $("#modalAreas").modal('show');
     });
 
@@ -71,8 +73,9 @@
       if (passes) {
         objCodigoArea.val(radioSel.attr('data-codfin'));
         objCodigoArea.parent().find('#codigoAreaId').val(radioSel.val());
+        objCodigoArea.parent().find('#codigoCampo').val('id_cat_codigos'); // campo del area new catalogo
 
-        if (objCodigoArea.attr('data-call').length > 0)
+        if (objCodigoArea.attr('data-call') && objCodigoArea.attr('data-call').length > 0)
           funciones[objCodigoArea.attr('data-call')].call(this, objCodigoArea.parent().parent());
 
         $("#modalAreas").modal('hide');
@@ -83,13 +86,14 @@
   };
 
   var getAjaxAreas = function(area, padre) {
-    $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
+    $.getJSON(base_url+'panel/catalogos_sft/ajax_get_codigos',
+    // $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
       {id_area: area, id_padre: padre},
       function(json, textStatus) {
         var html = '';
         for (var i = 0; i < json.length; i++) {
-          html += '<tr class="areaClick" data-id="'+json[i].id_area+'" data-sig="'+(parseFloat(json[i].id_tipo)+1)+'">'+
-                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+json[i].codigo_fin+'" data-uniform="false"></td>'+
+          html += '<tr class="areaClick" data-id="'+json[i].id_area+'" data-sig="'+(parseInt(area)+1)+'">'+
+                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+json[i].codigo+'" data-uniform="false"></td>'+
                   '<td>'+json[i].codigo+'</td>'+
                   '<td>'+json[i].nombre+'</td>'+
                 '</tr>';

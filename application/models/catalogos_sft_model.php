@@ -160,42 +160,6 @@ class catalogos_sft_model extends CI_Model{
 		return $response;
 	}
 
-
-	public function getDescripCodigo($id_area, $tipo='nombre', $nivel=0)
-	{
-		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
-		                           FROM compras_areas
-		                           WHERE id_area = {$id_area}")->row();
-		if($tipo === 'nombre')
-		{
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).'/'.$data->nombre;
-			else
-				$nombre = $data->nombre;
-			return $nombre;
-		}elseif($tipo === 'id') {
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).','.$data->id_area;
-			else
-				$nombre = $data->id_area;
-			return $nombre;
-		}elseif($tipo === 'nivel') {
-			if($data->id_padre != '') {
-				$nivel++;
-				$nivel = $this->getDescripCodigo($data->id_padre, $tipo, $nivel);
-			} else
-				$nivel++;
-			return $nivel;
-		}else
-		{
-			if($data->id_padre != '')
-				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).$data->codigo;
-			else
-				$nombre = $data->codigo;
-			return $nombre;
-		}
-	}
-
 	public function getHijos($id_area)
 	{
 		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre,
@@ -552,12 +516,47 @@ class catalogos_sft_model extends CI_Model{
 	{
 		$sql = $padre? " AND id_padre = {$padre}": ' AND id_padre IS NULL';
 		// $sql .= $area>0? " AND (id_tipo = {$area} OR id_tipo IS NULL)": '';
-		$query = $this->db->query("SELECT id_cat_codigos, codigo, nombre, descripcion, ubicacion, otro_dato, status, id_padre
+		$query = $this->db->query("SELECT id_cat_codigos AS id_area, codigo, nombre, descripcion, ubicacion, otro_dato, status, id_padre
 		                           FROM otros.cat_codigos
 		                           WHERE status = 't' {$sql}
 		                           ORDER BY (id_cat_codigos, codigo) ASC");
 
 		return $query->result();
+	}
+
+	public function getDescripCodigo($id_area, $tipo='nombre', $nivel=0)
+	{
+		$data = $this->db->query("SELECT id_cat_codigos AS id_area, codigo, nombre, descripcion, ubicacion, otro_dato, status, id_padre
+		                           FROM otros.cat_codigos
+		                           WHERE id_cat_codigos = {$id_area}")->row();
+		if($tipo === 'nombre')
+		{
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).'/'.$data->nombre;
+			else
+				$nombre = $data->nombre;
+			return $nombre;
+		}elseif($tipo === 'id') {
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).','.$data->id_area;
+			else
+				$nombre = $data->id_area;
+			return $nombre;
+		}elseif($tipo === 'nivel') {
+			if($data->id_padre != '') {
+				$nivel++;
+				$nivel = $this->getDescripCodigo($data->id_padre, $tipo, $nivel);
+			} else
+				$nivel++;
+			return $nivel;
+		}else
+		{
+			if($data->id_padre != '')
+				$nombre = $this->getDescripCodigo($data->id_padre, $tipo).$data->codigo;
+			else
+				$nombre = $data->codigo;
+			return $nombre;
+		}
 	}
 
 	/**
@@ -572,7 +571,7 @@ class catalogos_sft_model extends CI_Model{
 				lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')";
 		// if($this->input->get('type') !== false)
 		// 	$sql .= " AND id_area = {$this->input->get('type')}";
-		$res = $this->db->query(" SELECT id_cat_codigos, codigo, nombre, status, id_padre
+		$res = $this->db->query(" SELECT id_cat_codigos AS id_area, codigo, nombre, status, id_padre
 				FROM otros.cat_codigos
 				WHERE status = 't' {$sql}
 				ORDER BY (id_cat_codigos, codigo) ASC
@@ -582,7 +581,7 @@ class catalogos_sft_model extends CI_Model{
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
 				$response[] = array(
-						'id'    => $itm->id_cat_codigos,
+						'id'    => $itm->id_area,
 						'label' => $itm->codigo.' - '.$itm->nombre,
 						'value' => $itm->codigo.' - '.$itm->nombre,
 						'item'  => $itm,

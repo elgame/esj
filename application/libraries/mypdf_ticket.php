@@ -260,10 +260,15 @@ class mypdf_ticket extends FPDF {
       $this->SetFounts(array($this->fount_num, $this->fount_txt), array(1, 0));
       $this->Row(array(substr(date("Y-m-d H:i:s"), 0, 19), $txt_impresion), false, false);
 
+      $this->SetFounts(array($this->fount_txt, $this->fount_txt), array(1, 0));
+      $this->SetWidths(array($this->pag_size[0]));
+      $this->SetAligns(array('L'));
+      $this->SetY($this->GetY() - 2);
+      $this->Row(array('CREADO POR: '.$data->creadox ), false, false);
+
+      $this->SetAligns(array('C'));
       $this->SetFont($this->fount_txt, '', $this->font_size);
       $this->SetY($this->GetY() + 5);
-      $this->SetWidths(array($this->pag_size[0]));
-      $this->SetAligns(array('C'));
       $this->Row(array('--------------------------------------------------'), false, false);
 
       $this->SetY($this->GetY() - 3);

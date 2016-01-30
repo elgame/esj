@@ -78,15 +78,17 @@
                   <th>Cargos</th>
                   <th>Abonos</th>
                   <th>Saldo</th>
+                  <th>Saldo TC</th>
                 </tr>
               </thead>
               <tbody>
             <?php
-            $total_saldo = $total_abono = $total_cargo = 0;
+            $total_saldo_cambio = $total_saldo = $total_abono = $total_cargo = 0;
             foreach($data['cuentas'] as $cuenta){
               $total_cargo += $cuenta->total;
               $total_abono += $cuenta->abonos;
               $total_saldo += $cuenta->saldo;
+              $total_saldo_cambio += $cuenta->saldo_cambio;
             ?>
                 <tr>
                   <td><a href="<?php echo base_url('panel/cuentas_cobrar/cuenta').'?id_cliente='.$cuenta->id_cliente.'&'.
@@ -94,6 +96,7 @@
                   <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->total, 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abonos, 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo_cambio, 2, '$', false); ?></td>
                 </tr>
             <?php }?>
                 <tr style="background-color:#ccc;font-weight: bold;">
@@ -101,12 +104,14 @@
                   <td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($total_saldo_cambio, 2, '$', false); ?></td>
                 </tr>
                 <tr style="background-color:#ccc;font-weight: bold;">
                   <td class="a-r">Total:</td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_cargos'], 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_abonos'], 2, '$', false); ?></td>
                   <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_saldo'], 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo String::formatoNumero($data['ttotal_saldo_cambio'], 2, '$', false); ?></td>
                 </tr>
               </tbody>
             </table>

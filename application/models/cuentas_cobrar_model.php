@@ -57,7 +57,9 @@ class cuentas_cobrar_model extends privilegios_model{
 				SUM(total) as total,
 				SUM(iva) as iva,
 				SUM(abonos) as abonos,
-				SUM(saldo) as saldo
+				SUM(saldo) as saldo,
+				SUM(total_cambio) as total_cambio,
+				SUM(saldo_cambio) as saldo_cambio
 			FROM
 			(
 				(
@@ -66,73 +68,75 @@ class cuentas_cobrar_model extends privilegios_model{
 						c.nombre_fiscal,
 						Sum(f.total) AS total,
 						Sum(f.importe_iva) AS iva,
-						COALESCE(faa.abonos,0) AS abonos,
-						COALESCE(Sum(f.total) - COALESCE(faa.abonos,0), 0) AS saldo
+						COALESCE(Sum(faa.abonos), 0) AS abonos,
+						COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+						(CASE WHEN f.tipo_cambio > 1 THEN Sum(f.total/f.tipo_cambio) ELSE 0 END) AS total_cambio,
+						(CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(Sum(faa.abonos)/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
 					FROM
 						clientes AS c
 						INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
 						LEFT JOIN (
-							SELECT ffaa.id_cliente, Sum(ffaa.abonos) AS abonos
+							SELECT ffaa.id_factura, Sum(ffaa.abonos) AS abonos
 							FROM (
 								(
 									SELECT
-										f.id_cliente,
+										f.id_factura,
 										Sum(fa.total) AS abonos
 									FROM
 										facturacion AS f INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
 									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
 										AND Date(fa.fecha) <= '{$fecha}'{$sql}
-									GROUP BY f.id_cliente
+									GROUP BY f.id_factura
 								)
 								UNION
 								(
 									SELECT
-										f.id_cliente,
+										f.id_factura,
 										Sum(f.total) AS abonos
 									FROM
 										facturacion AS f
 									WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
 										AND Date(f.fecha) <= '{$fecha}'{$sql}
-									GROUP BY f.id_cliente
+									GROUP BY f.id_factura
 								)
 							) AS ffaa
-							GROUP BY ffaa.id_cliente
-						) AS faa ON c.id_cliente = faa.id_cliente
+							GROUP BY ffaa.id_factura
+						) AS faa ON f.id_factura = faa.id_factura
 						LEFT JOIN (SELECT id_remision, id_factura, status
 		                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
 		        ) fh ON f.id_factura = fh.id_remision
 					WHERE  f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND Date(f.fecha) <= '{$fecha}'
 						AND COALESCE(fh.id_remision, 0) = 0 {$sql}
-					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
+					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
 				)
-				UNION
-				(
-					SELECT
-						c.id_cliente,
-						c.nombre_fiscal,
-						Sum(f.total) AS total,
-						Sum(f.importe_iva) AS iva,
-						COALESCE(faa.abonos,0) AS abonos,
-						COALESCE(Sum(f.total) - COALESCE(faa.abonos,0), 0) AS saldo
-					FROM
-						clientes AS c
-						INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-						LEFT JOIN (
-							(
-								SELECT
-									f.id_cliente,
-									Sum(fa.total) AS abonos
-								FROM
-									facturacion_ventas_remision AS f INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-								WHERE f.status <> 'ca'
-									AND Date(fa.fecha) <= '{$fecha}'{$sqlt}
-								GROUP BY f.id_cliente
-							)
+				-- UNION
+				-- (
+				-- 	SELECT
+				-- 		c.id_cliente,
+				-- 		c.nombre_fiscal,
+				-- 		Sum(f.total) AS total,
+				-- 		Sum(f.importe_iva) AS iva,
+				-- 		COALESCE(faa.abonos,0) AS abonos,
+				-- 		COALESCE(Sum(f.total) - COALESCE(faa.abonos,0), 0) AS saldo
+				-- 	FROM
+				-- 		clientes AS c
+				-- 		INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
+				-- 		LEFT JOIN (
+				-- 			(
+				-- 				SELECT
+				-- 					f.id_cliente,
+				-- 					Sum(fa.total) AS abonos
+				-- 				FROM
+				-- 					facturacion_ventas_remision AS f INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
+				-- 				WHERE f.status <> 'ca'
+				-- 					AND Date(fa.fecha) <= '{$fecha}'{$sqlt}
+				-- 				GROUP BY f.id_cliente
+				-- 			)
 
-						) AS faa ON c.id_cliente = faa.id_cliente
-					WHERE  f.status <> 'ca' AND Date(f.fecha) <= '{$fecha}'{$sqlt}
-					GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
-				)
+				-- 		) AS faa ON c.id_cliente = faa.id_cliente
+				-- 	WHERE  f.status <> 'ca' AND Date(f.fecha) <= '{$fecha}'{$sqlt}
+				-- 	GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos
+				-- )
 			) AS tsaldos
 			GROUP BY id_cliente, nombre_fiscal
 			ORDER BY nombre_fiscal ASC
@@ -140,21 +144,23 @@ class cuentas_cobrar_model extends privilegios_model{
 		$res = $this->db->query($query['query']);
 
 		$response = array(
-				'cuentas' => array(),
-				'total_rows' 		=> $query['total_rows'],
-				'items_per_page' 	=> $params['result_items_per_page'],
-				'result_page' 		=> $params['result_page'],
-				'ttotal_cargos' => 0,
-				'ttotal_abonos' => 0,
-				'ttotal_saldo' => 0,
+				'cuentas'             => array(),
+				'total_rows'          => $query['total_rows'],
+				'items_per_page'      => $params['result_items_per_page'],
+				'result_page'         => $params['result_page'],
+				'ttotal_cargos'       => 0,
+				'ttotal_abonos'       => 0,
+				'ttotal_saldo'        => 0,
+				'ttotal_saldo_cambio' => 0,
 		);
 		if($res->num_rows() > 0)
 			$response['cuentas'] = $res->result();
 
 		foreach ($query['resultset']->result() as $cliente) {
-			$response['ttotal_cargos'] += $cliente->total;
-			$response['ttotal_abonos'] += $cliente->abonos;
-			$response['ttotal_saldo'] += $cliente->saldo;
+			$response['ttotal_cargos']       += $cliente->total;
+			$response['ttotal_abonos']       += $cliente->abonos;
+			$response['ttotal_saldo']        += $cliente->saldo;
+			$response['ttotal_saldo_cambio'] += $cliente->saldo_cambio;
 		}
 
 		return $response;
@@ -182,13 +188,13 @@ class cuentas_cobrar_model extends privilegios_model{
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('L', 'R', 'R', 'R');
-		$widths = array(100, 35, 35, 35);
-		$header = array('Cliente', 'Cargos', 'Abonos', 'Saldo');
+		$aligns = array('L', 'R', 'R', 'R', 'R');
+		$widths = array(85, 30, 30, 30, 30);
+		$header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Saldo TC');
 
 		$res = $this->getCuentasCobrarData(60);
 
-		$total_cargos = $total_abonos = $total_saldo = 0;
+		$total_saldo_cambio = $total_cargos = $total_abonos = $total_saldo = 0;
 		foreach($res['cuentas'] as $key => $item){
 			$band_head = false;
 			if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
@@ -209,10 +215,12 @@ class cuentas_cobrar_model extends privilegios_model{
 				String::formatoNumero($item->total, 2, '$', false),
 				String::formatoNumero($item->abonos, 2, '$', false),
 				String::formatoNumero($item->saldo, 2, '$', false),
+				String::formatoNumero($item->saldo_cambio, 2, '$', false),
 				);
 			$total_cargos += $item->total;
 			$total_abonos += $item->abonos;
 			$total_saldo += $item->saldo;
+			$total_saldo_cambio += $item->saldo_cambio;
 
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
@@ -227,6 +235,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			String::formatoNumero($total_cargos, 2, '$', false),
 			String::formatoNumero($total_abonos, 2, '$', false),
 			String::formatoNumero($total_saldo, 2, '$', false),
+			String::formatoNumero($total_saldo_cambio, 2, '$', false),
 			), true);
 
 		$pdf->Output('cuentas_x_cobrar.pdf', 'I');
@@ -256,12 +265,13 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $data_fac, array(
-				'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo'),
+				'head' => array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Saldo TC'),
 				'conte' => array(
 						array('name' => 'nombre', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'total', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'abonos', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
+						array('name' => 'saldo_cambio', 'format' => 'format4', 'sum' => 0),
 					)
 		));
 
@@ -321,6 +331,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				Sum(iva) AS iva,
 				Sum(abonos) AS abonos,
 				Sum(saldo)::numeric(12, 2) AS saldo,
+				SUM(saldo_cambio) as saldo_cambio,
 				tipo
 			FROM
 				(
@@ -331,6 +342,7 @@ class cuentas_cobrar_model extends privilegios_model{
             Sum(f.importe_iva) AS iva,
             COALESCE(Sum(faa.abonos),0) as abonos,
             COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+            (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio,
             'f' as tipo
           FROM
             clientes AS c
@@ -376,37 +388,37 @@ class cuentas_cobrar_model extends privilegios_model{
              AND f.id_abono_factura IS NULL AND id_nc IS NULL
              AND Date(f.fecha) < '{$fecha1}'
              AND COALESCE(fh.id_remision, 0) = 0 {$sql}
-          GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
+          GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
 
-					UNION ALL
+					-- UNION ALL
 
-					SELECT
-						c.id_cliente,
-						c.nombre_fiscal,
-						Sum(f.total) AS total,
-						0 AS iva,
-						COALESCE(Sum(taa.abonos), 0) as abonos,
-						COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
-						'nv' as tipo
-					FROM
-						clientes AS c
-						INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-						LEFT JOIN (
-							SELECT
-								f.id_cliente,
-								f.id_venta,
-								Sum(fa.total) AS abonos
-							FROM
-								facturacion_ventas_remision AS f
-									INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-							WHERE f.id_cliente = '{$_GET['id_cliente']}'
-								AND f.status <> 'ca'
-								AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
-							GROUP BY f.id_cliente, f.id_venta
-						) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
-					WHERE c.id_cliente = '{$_GET['id_cliente']}'
-								AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
-					GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
+					-- SELECT
+					-- 	c.id_cliente,
+					-- 	c.nombre_fiscal,
+					-- 	Sum(f.total) AS total,
+					-- 	0 AS iva,
+					-- 	COALESCE(Sum(taa.abonos), 0) as abonos,
+					-- 	COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
+					-- 	'nv' as tipo
+					-- FROM
+					-- 	clientes AS c
+					-- 	INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
+					-- 	LEFT JOIN (
+					-- 		SELECT
+					-- 			f.id_cliente,
+					-- 			f.id_venta,
+					-- 			Sum(fa.total) AS abonos
+					-- 		FROM
+					-- 			facturacion_ventas_remision AS f
+					-- 				INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
+					-- 		WHERE f.id_cliente = '{$_GET['id_cliente']}'
+					-- 			AND f.status <> 'ca'
+					-- 			AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
+					-- 		GROUP BY f.id_cliente, f.id_venta
+					-- 	) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
+					-- WHERE c.id_cliente = '{$_GET['id_cliente']}'
+					-- 			AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
+					-- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
 
 				) AS sal
 			{$sql2}
@@ -424,6 +436,7 @@ class cuentas_cobrar_model extends privilegios_model{
 				COALESCE(f.importe_iva, 0) AS iva,
 				COALESCE(ac.abono, 0) AS abono,
 				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+				(CASE WHEN f.tipo_cambio > 1 THEN (COALESCE(f.total/f.tipo_cambio, 0) - COALESCE(ac.abono/f.tipo_cambio, 0))::numeric(100,2) ELSE 0 END) AS saldo_cambio,
 				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
 				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
 				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
@@ -466,37 +479,37 @@ class cuentas_cobrar_model extends privilegios_model{
 				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
 				AND COALESCE(fh.id_remision, 0) = 0 {$sql}
 
-			UNION ALL
+			-- UNION ALL
 
-			(SELECT
-				f.id_venta as id_factura,
-				'' as serie,
-				f.folio,
-				Date(f.fecha) AS fecha,
-				COALESCE(f.total, 0) AS cargo,
-				0 AS iva,
-				COALESCE(ac.abono, 0) AS abono,
-				(COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) AS saldo,
-				(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
-				Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
-				(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
-				('Notas de venta ' || f.folio) AS concepto,
-				'v' as tipo
-			FROM
-				facturacion_ventas_remision AS f
-				LEFT JOIN (
-					SELECT
-						id_venta,
-						Sum(total) AS abono
-					FROM
-						facturacion_ventas_remision_abonos
-					WHERE Date(fecha) <= '{$fecha2}'
-					GROUP BY id_venta
-				) AS ac ON f.id_venta = ac.id_venta {$sqlt}
-			WHERE f.id_cliente = {$_GET['id_cliente']}
-				AND f.status <> 'ca'
-				AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'){$sqlt}
-				)
+			-- (SELECT
+			-- 	f.id_venta as id_factura,
+			-- 	'' as serie,
+			-- 	f.folio,
+			-- 	Date(f.fecha) AS fecha,
+			-- 	COALESCE(f.total, 0) AS cargo,
+			-- 	0 AS iva,
+			-- 	COALESCE(ac.abono, 0) AS abono,
+			-- 	(COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) AS saldo,
+			-- 	(CASE (COALESCE(f.total, 0) - COALESCE(ac.abono, 0)) WHEN 0 THEN 'Pagada' ELSE 'Pendiente' END) AS estado,
+			-- 	Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+			-- 	(Date('{$fecha2}'::timestamp with time zone)-Date(f.fecha + (f.plazo_credito || ' days')::interval)) AS dias_transc,
+			-- 	('Notas de venta ' || f.folio) AS concepto,
+			-- 	'v' as tipo
+			-- FROM
+			-- 	facturacion_ventas_remision AS f
+			-- 	LEFT JOIN (
+			-- 		SELECT
+			-- 			id_venta,
+			-- 			Sum(total) AS abono
+			-- 		FROM
+			-- 			facturacion_ventas_remision_abonos
+			-- 		WHERE Date(fecha) <= '{$fecha2}'
+			-- 		GROUP BY id_venta
+			-- 	) AS ac ON f.id_venta = ac.id_venta {$sqlt}
+			-- WHERE f.id_cliente = {$_GET['id_cliente']}
+			-- 	AND f.status <> 'ca'
+			-- 	AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}'){$sqlt}
+			-- 	)
 
 			ORDER BY fecha ASC, serie ASC, folio ASC
 			");
@@ -518,6 +531,7 @@ class cuentas_cobrar_model extends privilegios_model{
 			//verifica q no sea negativo o exponencial el saldo
 			foreach ($response['cuentas'] as $key => $cuenta) {
 				$cuenta->saldo = floatval(String::float($cuenta->saldo));
+				$cuenta->saldo_cambio = floatval(String::float($cuenta->saldo_cambio));
 				// anticipos a fruta
 				if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
 					$cuenta->cargo = 0;
@@ -548,9 +562,10 @@ class cuentas_cobrar_model extends privilegios_model{
 			$response['anterior'] = $saldo_anterior->result();
 			foreach ($response['anterior'] as $key => $c) {
 				if ($key > 0){
-					$response['anterior'][0]->total += $c->total;
-					$response['anterior'][0]->abonos += $c->abonos;
-					$response['anterior'][0]->saldo += $c->saldo;
+					$response['anterior'][0]->total        += $c->total;
+					$response['anterior'][0]->abonos       += $c->abonos;
+					$response['anterior'][0]->saldo        += $c->saldo;
+					$response['anterior'][0]->saldo_cambio += $c->saldo_cambio;
 				}
 			}
 		}
@@ -581,24 +596,26 @@ class cuentas_cobrar_model extends privilegios_model{
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
 
-		$aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'C', 'C', 'C');
-		$widths = array(17, 11, 20, 40, 23, 23, 23, 16, 17, 15);
-		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Estado', 'F. Ven.', 'D. Trans.');
+		$aligns = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'R', 'C', 'C', 'C');
+		$widths = array(17, 11, 15, 38, 23, 23, 20, 17, 16, 17, 10);
+		$header = array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Saldo TC', 'Estado', 'F. Ven.', 'Trans');
 
 		$total_cargo = 0;
 		$total_abono = 0;
-		$total_saldo = 0;
+		$total_saldo_cambio = $total_saldo = 0;
 
 		$bad_saldo_ante = true;
 		if(isset($res['anterior']->saldo)){ //se suma a los totales del saldo anterior
-			$total_cargo += $res['anterior']->total;
-			$total_abono += $res['anterior']->abonos;
-			$total_saldo += $res['anterior']->saldo;
+			$total_cargo        += $res['anterior']->total;
+			$total_abono        += $res['anterior']->abonos;
+			$total_saldo        += $res['anterior']->saldo;
+			$total_saldo_cambio += $res['anterior']->saldo_cambio;
 		}else{
 			$res['anterior'] = new stdClass();
-			$res['anterior']->total = 0;
-			$res['anterior']->abonos = 0;
-			$res['anterior']->saldo = 0;
+			$res['anterior']->total        = 0;
+			$res['anterior']->abonos       = 0;
+			$res['anterior']->saldo        = 0;
+			$res['anterior']->saldo_cambio = 0;
 		}
 		$res['anterior']->concepto = 'Saldo anterior a '.$res['fecha1'];
 
@@ -626,6 +643,7 @@ class cuentas_cobrar_model extends privilegios_model{
 					String::formatoNumero($res['anterior']->total, 2, '$', false),
 					String::formatoNumero($res['anterior']->abonos, 2, '$', false),
 					String::formatoNumero($res['anterior']->saldo, 2, '$', false),
+					String::formatoNumero($res['anterior']->saldo_cambio, 2, '$', false),
 					'', '', ''), false);
 				$bad_saldo_ante = false;
 			}
@@ -637,12 +655,14 @@ class cuentas_cobrar_model extends privilegios_model{
 									String::formatoNumero($item->cargo, 2, '$', false),
 									String::formatoNumero($item->abono, 2, '$', false),
 									String::formatoNumero($item->saldo, 2, '$', false),
+									String::formatoNumero($item->saldo_cambio, 2, '$', false),
 									$item->estado, $item->fecha_vencimiento,
 									$item->dias_transc > 0 ? $item->dias_transc : '0');
 
-			$total_cargo += $item->cargo;
-			$total_abono += $item->abono;
-			$total_saldo += $item->saldo;
+			$total_cargo        += $item->cargo;
+			$total_abono        += $item->abono;
+			$total_saldo        += $item->saldo;
+			$total_saldo_cambio += $item->saldo_cambio;
 
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
@@ -653,12 +673,13 @@ class cuentas_cobrar_model extends privilegios_model{
 		$pdf->SetX(6);
 		$pdf->SetFont('Arial','B',8);
 		$pdf->SetTextColor(255,255,255);
-		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
-		$pdf->SetWidths(array(88, 23, 23, 23));
+		$pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
+		$pdf->SetWidths(array(81, 23, 23, 20, 17));
 		$pdf->Row(array('Totales:',
 				String::formatoNumero($total_cargo, 2, '$', false),
 				String::formatoNumero($total_abono, 2, '$', false),
-				String::formatoNumero($total_saldo, 2, '$', false)), true);
+				String::formatoNumero($total_saldo, 2, '$', false),
+				String::formatoNumero($total_saldo_cambio, 2, '$', false) ), true);
 
 		$pdf->Output('cuentas_proveedor.pdf', 'I');
 	}
@@ -681,15 +702,16 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		if(is_array($res['anterior'])){
 			$res['anterior'] = new stdClass();
-			$res['anterior']->cargo = 0;
-			$res['anterior']->abono = 0;
-			$res['anterior']->saldo = 0;
+			$res['anterior']->cargo        = 0;
+			$res['anterior']->abono        = 0;
+			$res['anterior']->saldo        = 0;
+			$res['anterior']->saldo_cambio = 0;
 		}else{
 			$res['anterior']->cargo = $res['anterior']->total;
 			$res['anterior']->abono = $res['anterior']->abonos;
 		}
-		$res['anterior']->fecha = $res['anterior']->serie = $res['anterior']->folio = '';
-		$res['anterior']->concepto = $res['anterior']->estado = $res['anterior']->fecha_vencimiento = '';
+		$res['anterior']->fecha       = $res['anterior']->serie = $res['anterior']->folio = '';
+		$res['anterior']->concepto    = $res['anterior']->estado = $res['anterior']->fecha_vencimiento = '';
 		$res['anterior']->dias_transc = '';
 
 		array_unshift($res['cuentas'], $res['anterior']);
@@ -706,7 +728,7 @@ class cuentas_cobrar_model extends privilegios_model{
 
 		$row +=3;
 		$xls->excelContent($worksheet, $row, $data_fac, array(
-				'head' => array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
+				'head' => array('Fecha', 'Serie', 'Folio', 'Concepto', 'Cargo', 'Abono', 'Saldo', 'Saldo TC', 'Estado', 'Fecha Vencimiento', 'Dias Trans.'),
 				'conte' => array(
 						array('name' => 'fecha', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'serie', 'format' => 'format4', 'sum' => -1),
@@ -715,6 +737,7 @@ class cuentas_cobrar_model extends privilegios_model{
 						array('name' => 'cargo', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'abono', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'saldo', 'format' => 'format4', 'sum' => 0),
+						array('name' => 'saldo_cambio', 'format' => 'format4', 'sum' => 0),
 						array('name' => 'estado', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'fecha_vencimiento', 'format' => 'format4', 'sum' => -1),
 						array('name' => 'dias_transc', 'format' => 'format4', 'sum' => -1))
@@ -1509,6 +1532,7 @@ class cuentas_cobrar_model extends privilegios_model{
 	    foreach ($clientes->result() as $keyc => $cliente)
 	    {
 	    	$cliente->saldo = 0;
+	    	$cliente->saldo_cambio = 0;
 
 	    	/*** Saldo anterior ***/
   			$saldo_anterior = $this->db->query(
@@ -1518,6 +1542,7 @@ class cuentas_cobrar_model extends privilegios_model{
             Sum(iva) AS iva,
             Sum(abonos) AS abonos,
             Sum(saldo)::numeric(12, 2) AS saldo,
+            SUM(saldo_cambio)::numeric(12, 2) AS saldo_cambio,
             tipo
           FROM
             (
@@ -1528,6 +1553,7 @@ class cuentas_cobrar_model extends privilegios_model{
                 Sum(f.importe_iva) AS iva,
                 COALESCE(Sum(faa.abonos),0) as abonos,
                 COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+                (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio,
                 'f' as tipo
               FROM
                 clientes AS c
@@ -1572,37 +1598,37 @@ class cuentas_cobrar_model extends privilegios_model{
 				        ) fh ON f.id_factura = fh.id_remision
               WHERE c.id_cliente = '{$cliente->id_cliente}' AND f.status <> 'ca' AND f.status <> 'b'
                 AND COALESCE(fh.id_remision, 0) = 0 AND f.id_abono_factura IS NULL AND Date(f.fecha) < '{$fecha1}'{$sql} {$sqlext[0]}
-              GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo
+              GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, tipo, f.tipo_cambio
 
-              UNION ALL
+              -- UNION ALL
 
-              SELECT
-                c.id_cliente,
-                c.nombre_fiscal,
-                Sum(f.total) AS total,
-                0 AS iva,
-                COALESCE(Sum(taa.abonos), 0) as abonos,
-                COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
-                'nv' as tipo
-              FROM
-                clientes AS c
-                INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
-                LEFT JOIN (
-                  SELECT
-                    f.id_cliente,
-                    f.id_venta,
-                    Sum(fa.total) AS abonos
-                  FROM
-                    facturacion_ventas_remision AS f
-                      INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
-                  WHERE f.id_cliente = '{$cliente->id_cliente}'
-                    AND f.status <> 'ca'
-                    AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
-                  GROUP BY f.id_cliente, f.id_venta
-                ) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
-              WHERE c.id_cliente = '{$cliente->id_cliente}'
-                    AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
-              GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
+              -- SELECT
+              --   c.id_cliente,
+              --   c.nombre_fiscal,
+              --   Sum(f.total) AS total,
+              --   0 AS iva,
+              --   COALESCE(Sum(taa.abonos), 0) as abonos,
+              --   COALESCE(Sum(f.total) - COALESCE(Sum(taa.abonos),0), 0) AS saldo,
+              --   'nv' as tipo
+              -- FROM
+              --   clientes AS c
+              --   INNER JOIN facturacion_ventas_remision AS f ON c.id_cliente = f.id_cliente
+              --   LEFT JOIN (
+              --     SELECT
+              --       f.id_cliente,
+              --       f.id_venta,
+              --       Sum(fa.total) AS abonos
+              --     FROM
+              --       facturacion_ventas_remision AS f
+              --         INNER JOIN facturacion_ventas_remision_abonos AS fa ON f.id_venta = fa.id_venta
+              --     WHERE f.id_cliente = '{$cliente->id_cliente}'
+              --       AND f.status <> 'ca'
+              --       AND Date(fa.fecha) <= '{$fecha2}'{$sqlt}
+              --     GROUP BY f.id_cliente, f.id_venta
+              --   ) AS taa ON c.id_cliente = taa.id_cliente AND f.id_venta=taa.id_venta
+              -- WHERE c.id_cliente = '{$cliente->id_cliente}'
+              --       AND f.status <> 'ca' AND Date(f.fecha) < '{$fecha1}'{$sqlt}
+              -- GROUP BY c.id_cliente, c.nombre_fiscal, taa.abonos, tipo
 
             ) AS sal
           {$sql2}
@@ -1683,8 +1709,10 @@ class cuentas_cobrar_model extends privilegios_model{
 
   			$cliente->saldo_anterior = $saldo_anterior->row();
   			$saldo_anterior->free_result();
-  			if( isset($cliente->saldo_anterior->saldo) )
+  			if( isset($cliente->saldo_anterior->saldo) ) {
   				$cliente->saldo = $cliente->saldo_anterior->saldo;
+  				$cliente->saldo_cambio = $cliente->saldo_anterior->saldo_cambio;
+  			}
 
   			/** Facturas ***/
   			$sql_field_cantidad = '';
@@ -1692,6 +1720,7 @@ class cuentas_cobrar_model extends privilegios_model{
   				$sql_field_cantidad = ", (SELECT Sum(cantidad) FROM facturacion_productos WHERE id_factura = f.id_factura) AS cantidad_productos";
   			$facturas = $this->db->query("SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
   					(CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
+  					(f.total/f.tipo_cambio) AS total_cambio, f.tipo_cambio,
   					Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
   				FROM facturacion as f
   				LEFT JOIN (SELECT id_remision, id_factura, status
@@ -1709,8 +1738,10 @@ class cuentas_cobrar_model extends privilegios_model{
   			$tiene_abonos = false;
   			foreach ($cliente->facturas as $key => $factura)
   			{
-  				$cliente->saldo += $factura->total;
-  				$cliente->facturas[$key]->saldo = $factura->total;
+					$cliente->saldo                        += $factura->total;
+					$cliente->saldo_cambio                 += $factura->total_cambio;
+					$cliente->facturas[$key]->saldo        = $factura->total;
+					$cliente->facturas[$key]->saldo_cambio = $factura->total_cambio;
 
   				/** abonos **/
   				$abonos = $this->db->query("SELECT id_abono, serie, folio, fecha, concepto, abono
@@ -1760,8 +1791,10 @@ class cuentas_cobrar_model extends privilegios_model{
   					$cliente->facturas[$key]->abonos[$keyab]->concepto = str_replace('()', '', $abono->concepto);
   					$cliente->facturas[$key]->abonos_total += $abono->abono;
   				}
-  				$cliente->saldo -= $cliente->facturas[$key]->abonos_total;
-  				$cliente->facturas[$key]->saldo -= $cliente->facturas[$key]->abonos_total;
+					$cliente->saldo                        -= $cliente->facturas[$key]->abonos_total;
+					$cliente->saldo_cambio                 -= $cliente->facturas[$key]->abonos_total/$cliente->facturas[$key]->tipo_cambio;
+					$cliente->facturas[$key]->saldo        -= $cliente->facturas[$key]->abonos_total;
+					$cliente->facturas[$key]->saldo_cambio -= $cliente->facturas[$key]->abonos_total/$cliente->facturas[$key]->tipo_cambio;
 
 					// anticipos a fruta
 					if ((strtolower($cliente->facturas[$key]->serie) == 'an')) {
@@ -1836,6 +1869,7 @@ class cuentas_cobrar_model extends privilegios_model{
   			$total_cargo = 0;
   			$total_abono = 0;
   			$total_saldo = 0;
+  			$total_saldo_cambio = 0;
         $totalVencido = 0;
 
         if (isset($item->saldo_anterior_vencido->saldo))
@@ -1871,7 +1905,8 @@ class cuentas_cobrar_model extends privilegios_model{
 					$datos = array('', '', '',
 							'Saldo Inicial',
 							String::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
-							'', '', '',
+							String::formatoNumero($item->saldo_anterior->saldo_cambio, 2, '', false),
+							'', '',
 						);
 					$pdf->SetXY(6, $pdf->GetY()-2);
 					$pdf->SetAligns($aligns);
@@ -1881,8 +1916,9 @@ class cuentas_cobrar_model extends privilegios_model{
         //Facturas del cliente
         foreach ($item->facturas as $keyf => $factura)
         {
-          $total_cargo += $factura->total;
-          $total_saldo += $factura->saldo;
+					$total_cargo        += $factura->total;
+					$total_saldo        += $factura->saldo;
+					$total_saldo_cambio += $factura->saldo_cambio;
 
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
@@ -1946,6 +1982,8 @@ class cuentas_cobrar_model extends privilegios_model{
   					String::formatoNumero($total_saldo, 2, '', false)), false);
 
   			$saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
+  			$saldo_cliente_cambio = (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo_cambio: 0) + $total_saldo_cambio;
+  			$saldo_cliente_cambio = $saldo_cliente == $saldo_cliente_cambio? 0: $saldo_cliente_cambio;
   			$pdf->SetAligns(array('R', 'R', 'R', 'R'));
   			$pdf->SetWidths(array(50, 23, 23, 23));
   			$pdf->SetX(65);
@@ -1956,7 +1994,7 @@ class cuentas_cobrar_model extends privilegios_model{
   			$pdf->SetX(65);
   			$pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
   			$pdf->SetX(65);
-  			$pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false)), false);
+  			$pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false), String::formatoNumero( $saldo_cliente_cambio , 2, '', false)), false);
 
   			$total_saldo_cliente += $saldo_cliente;
       }

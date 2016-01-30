@@ -97,7 +97,8 @@
   var autocompleteCodigos = function () {
     $('.tableClasif').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
       $(this).autocomplete({
-        source: base_url+'panel/compras_areas/ajax_get_areasauto/',
+        source: base_url+'panel/catalogos_sft/ajax_get_codigosauto/',
+        // source: base_url+'panel/compras_areas/ajax_get_areasauto/',
         minLength: 1,
         selectFirst: true,
         select: function( event, ui ) {
@@ -108,7 +109,7 @@
           if ($trparent.find('.hideCCosto[value='+ui.item.id+']').length == 0) {
             $this.css("background-color", "#B0FFB0");
             setTimeout(function(){
-              $this.val(ui.item.item.codigo_fin);
+              $this.val(ui.item.item.codigo);
             },100)
 
             $tr.find('#'+$this.attr('id')+'_id').val(ui.item.id);
@@ -434,7 +435,7 @@
       var $tr = $(this).parent().parent();
       objCodigoArea = $(this).parent().find('.showCodigoAreaAuto');
       $("div[id^=tblAreas]").hide();
-      getAjaxAreas($(".tblAreasFirs").attr('data-id'), null);
+      getAjaxAreas(1, null);
       $("#modalAreas").modal('show');
     });
 
@@ -474,13 +475,14 @@
   };
 
   var getAjaxAreas = function(area, padre) {
-    $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
+    $.getJSON(base_url+'panel/catalogos_sft/ajax_get_codigos',
+    // $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
       {id_area: area, id_padre: padre},
       function(json, textStatus) {
         var html = '';
         for (var i = 0; i < json.length; i++) {
-          html += '<tr class="areaClick" data-id="'+json[i].id_area+'" data-sig="'+(parseFloat(json[i].id_tipo)+1)+'">'+
-                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+json[i].codigo_fin+'" data-uniform="false"></td>'+
+          html += '<tr class="areaClick" data-id="'+json[i].id_area+'" data-sig="'+(parseInt(area)+1)+'">'+
+                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+json[i].codigo+'" data-uniform="false"></td>'+
                   '<td>'+json[i].codigo+'</td>'+
                   '<td>'+json[i].nombre+'</td>'+
                 '</tr>';

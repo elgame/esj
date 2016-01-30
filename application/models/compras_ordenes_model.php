@@ -349,7 +349,8 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => $prod_id_compra,
-          'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'retencion_isr'        => $_POST['ret_isrTotal'][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
         );
@@ -625,12 +626,15 @@ class compras_ordenes_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.porcentaje_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
            LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area
+           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cp.id_cat_codigos
            WHERE id_orden = {$data['info'][0]->id_orden} {$sql_produc}");
 
         $data['info'][0]->productos = array();
@@ -817,7 +821,8 @@ class compras_ordenes_model extends CI_Model {
         'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
         'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
         'id_compra'            => $prod_id_compra,
-        'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+        // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+        $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
         'retencion_isr'        => $_POST['ret_isrTotal'][$key],
         'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
       );
@@ -848,7 +853,8 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
           'id_compra'            => NULL,
-          'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'retencion_isr'        => $_POST['ret_isrTotal'][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
         );
@@ -1219,6 +1225,7 @@ class compras_ordenes_model extends CI_Model {
    public function print_orden_compra($ordenId, $path = null)
    {
       $this->load->model('compras_areas_model');
+      $this->load->model('catalogos_sft_model');
 
       $orden = $this->info($ordenId, true);
 
@@ -1258,8 +1265,8 @@ class compras_ordenes_model extends CI_Model {
       ), false, false);
 
       $aligns = array('C', 'C', 'L', 'R', 'R');
-      $widths = array(35, 25, 94, 25, 25);
-      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'PRECIO', 'IMPORTE');
+      $widths = array(25, 35, 76, 18, 25, 25);
+      $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'F COMPRA', 'PRECIO', 'IMPORTE');
 
       $subtotal = $iva = $total = $retencion = $ieps = 0;
 
@@ -1294,6 +1301,7 @@ class compras_ordenes_model extends CI_Model {
           $prod->cantidad.' '.$prod->abreviatura,
           $prod->codigo.'/'.$prod->codigo_fin,
           $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+          $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
           String::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
           String::formatoNumero($prod->importe/$tipoCambio, 2, '$', false),
         );
@@ -1308,7 +1316,7 @@ class compras_ordenes_model extends CI_Model {
         $ieps      += floatval($prod->ieps/$tipoCambio);
 
         if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
-          $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+          $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
       }
 
       $yy = $pdf->GetY();
@@ -1473,6 +1481,14 @@ class compras_ordenes_model extends CI_Model {
       {
         $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
       }
+   }
+
+   public function getFechaUltimaCompra($id_producto, $id_codigo, $campo)
+   {
+    $query = $this->db->query("SELECT Date(fecha_aceptacion) AS fecha
+                               FROM compras_productos
+                               WHERE id_producto = {$id_producto} AND {$campo} = {$id_codigo}")->row();
+    return isset($query->fecha)? $query->fecha: '';
    }
 
   public function getInfoEntrada($folio, $empresa, $id_orden=null)
@@ -1699,12 +1715,14 @@ class compras_ordenes_model extends CI_Model {
   }
 
   /**
+   * ------------
    * Reporte de gastos
    * @return [type] [description]
    */
   public function getDataGastos()
   {
     $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
     $sql = $sql2 = '';
 
     //Filtro de fecha.

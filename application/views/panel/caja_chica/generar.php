@@ -349,7 +349,7 @@
                             <table class="table table-striped table-bordered table-hover table-condensed" id="table-gastos">
                               <thead>
                                 <tr>
-                                  <th colspan="5">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
+                                  <th colspan="6">GASTOS DEL DIA <button type="button" class="btn btn-success" id="btn-add-gasto" style="padding: 2px 7px 2px;margin-right: 2px;<?php echo $display ?>"><i class="icon-plus"></i></button></th>
                                   <th colspan="2">IMPORTE</th>
                                 </tr>
                                 <tr>
@@ -358,6 +358,7 @@
                                   <th>NOM</th>
                                   <th>FOLIO</th>
                                   <th>CONCEPTO</th>
+                                  <th>REP</th>
                                   <th>CARGO</th>
                                   <th></th>
                                 </tr>
@@ -370,8 +371,10 @@
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
                                         <tr>
                                           <td style="width: 60px;">
+                                            <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
                                             <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                             <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                           </td>
                                           <td style="width: 100px;">
@@ -389,6 +392,10 @@
                                           <td style="">
                                             <input type="text" name="gasto_concepto[]" value="<?php echo $_POST['gasto_concepto'][$key] ?>" class="span12 gasto-concepto"  <?php echo $readonly ?>>
                                           </td>
+                                          <td style="width: 20px;">
+                                            <input type="checkbox" value="si" class="gasto-reposicion" <?php echo $readonly; ?>>
+                                            <input type="hidden" name="gasto_reposicion[]" value="<?php echo $_POST['gasto_reposicion'][$key] ?>" class="gasto-reposicionhid">
+                                          </td>
                                           <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $_POST['gasto_importe'][$key] ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
                                           <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
                                         </tr>
@@ -398,8 +405,10 @@
                                   ?>
                                   <tr>
                                     <td style="width: 60px;">
+                                      <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
                                       <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                       <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                       <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
                                         <i class="ico icon-print" style="cursor:pointer"></i></a>
@@ -419,12 +428,16 @@
                                     <td style="">
                                       <input type="text" name="gasto_concepto[]" value="<?php echo $gasto->concepto ?>" class="span12 gasto-concepto" <?php echo $readonly ?>>
                                     </td>
+                                    <td style="width: 20px;">
+                                      <input type="checkbox" value="si" class="gasto-reposicion" <?php echo ($gasto->reposicion=='t'? 'checked ': ' ').$readonly; ?>>
+                                      <input type="hidden" name="gasto_reposicion[]" value="<?php echo $gasto->reposicion ?>" class="gasto-reposicionhid">
+                                    </td>
                                     <td style="width: 60px;"><input type="text" name="gasto_importe[]" value="<?php echo $gasto->monto ?>" class="span12 vpositive gasto-importe" <?php echo $readonly ?>></td>
                                     <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-gasto" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
                                   </tr>
                                 <?php }} ?>
                                 <tr class="row-total">
-                                  <td colspan="5" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                  <td colspan="6" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                   <td><input type="text" value="<?php echo $totalGastos ?>" class="input-small vpositive" id="ttotal-gastos" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>

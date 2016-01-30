@@ -137,7 +137,8 @@ class productos_salidas_model extends CI_Model {
           'no_row'          => $key,
           'cantidad'        => $_POST['cantidad'][$key],
           'precio_unitario' => $saldo,
-          'id_area'         => $_POST['codigoAreaId'][$key],
+          // 'id_area'         => $_POST['codigoAreaId'][$key],
+          $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
           'tipo_orden'      => $_POST['tipoProducto'][$key],
         );
       }
@@ -202,11 +203,15 @@ class productos_salidas_model extends CI_Model {
                   csp.id_producto, pr.nombre AS producto, pr.codigo,
                   pu.abreviatura, pu.nombre as unidad,
                   csp.cantidad, csp.precio_unitario, csp.tipo_orden,
-                  ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin
+                  COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+                  COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_salidas_productos AS csp
              INNER JOIN productos AS pr ON pr.id_producto = csp.id_producto
              LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
              LEFT JOIN compras_areas AS ca ON ca.id_area = csp.id_area
+             LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = csp.id_cat_codigos
            WHERE csp.id_salida = {$data['info'][0]->id_salida}");
 
         $data['info'][0]->productos = array();
@@ -243,6 +248,7 @@ class productos_salidas_model extends CI_Model {
   public function print_orden_compra($salidaID, $path = null)
   {
     $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
 
     $orden = $this->info($salidaID, true);
 
@@ -321,7 +327,7 @@ class productos_salidas_model extends CI_Model {
       $total     += floatval($prod->precio_unitario*$prod->cantidad);
 
       if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
-        $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+        $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
     }
 
     $yy = $pdf->GetY();
@@ -399,6 +405,7 @@ class productos_salidas_model extends CI_Model {
   public function imprimir_salidaticket($salidaID, $path = null)
   {
     $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
 
     $orden = $this->info($salidaID, true);
 
@@ -445,7 +452,8 @@ class productos_salidas_model extends CI_Model {
       $total += floatval($prod->precio_unitario*$prod->cantidad);
 
       if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
-        $codigoAreas[$prod->id_area] = $this->compras_areas_model->getDescripCodigo($prod->id_area);
+        $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
+      $this->load->model('catalogos_sft_model');
     }
 
     // $pdf->SetX(29);

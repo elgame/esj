@@ -119,17 +119,17 @@ class nomina_trabajos_model extends CI_Model {
     $data = array();
 
     $sql = $this->db->query(
-      "SELECT ntd.id_usuario, ntd.fecha, ca.id_area, ntd.horas AS total_horas, ntd.hrs_extra, ntd.descripcion,
+      "SELECT ntd.id_usuario, ntd.fecha, cca.id_cat_codigos AS id_area, ntd.horas AS total_horas, ntd.hrs_extra, ntd.descripcion,
         ntd.importe, ntd.sueldo_diario, ntd.id_empresa, ntd.importe_trabajo, ntd.importe_extra,
-        ca.nombre AS area, ca.codigo_fin, e.nombre_fiscal, ntdl.id_labor, csl.nombre AS labor, ntdl.horas,
+        cca.nombre AS area, cca.codigo AS codigo_fin, e.nombre_fiscal, ntdl.id_labor, csl.nombre AS labor, ntdl.horas,
         ntd.tipo_asistencia
       FROM nomina_trabajos_dia ntd
         INNER JOIN empresas e ON e.id_empresa = ntd.id_empresa
         LEFT JOIN nomina_trabajos_dia_labores ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdl.fecha AND ntd.id_empresa = ntdl.id_empresa)
-        LEFT JOIN compras_areas ca ON ca.id_area = ntdl.id_area
+        LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = ntdl.id_area
         LEFT JOIN compras_salidas_labores csl ON csl.id_labor = ntdl.id_labor
       WHERE ntd.fecha = '{$fecha}' AND e.id_empresa = {$id_empresa}
-      ORDER BY ntd.id_usuario ASC, ca.id_area ASC
+      ORDER BY ntd.id_usuario ASC, cca.id_cat_codigos ASC
       ");
 
     $response = array();

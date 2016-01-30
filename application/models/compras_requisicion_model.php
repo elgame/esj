@@ -188,7 +188,8 @@ class compras_requisicion_model extends CI_Model {
             'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
             'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
             'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-            'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+            'id_cat_codigos'       => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
             'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
             'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
           );
@@ -376,7 +377,8 @@ class compras_requisicion_model extends CI_Model {
               'ieps'                 => is_numeric($_POST['iepsTotal'.$value][$key]) ? $_POST['iepsTotal'.$value][$key] : 0,
               'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
               'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
-              'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+              // 'id_area'              => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+              $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
               'prod_sel'             => $prod_sel,
               'retencion_isr'        => $_POST['retIsrTotal'.$value][$key],
               'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
@@ -503,7 +505,8 @@ class compras_requisicion_model extends CI_Model {
             'ieps'                 => $prod->ieps,
             'porcentaje_ieps'      => $prod->porcentaje_ieps,
             'tipo_cambio'          => $prod->tipo_cambio,
-            'id_area'              => $prod->id_area,
+            // 'id_area'              => $prod->id_area,
+            $prod->campo           => $prod->id_area,
             'retencion_isr'        => $prod->retencion_isr,
             'porcentaje_isr'       => $prod->porcentaje_isr,
           );
@@ -684,6 +687,7 @@ class compras_requisicion_model extends CI_Model {
   public function info($idOrden, $full = false, $prodAcep=false, $idCompra=NULL)
   {
     $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
 
     $query = $this->db->query(
       "SELECT co.id_requisicion,
@@ -730,13 +734,16 @@ class compras_requisicion_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
            LEFT JOIN productos_presentaciones AS pp ON pp.id_presentacion = cp.id_presentacion
            LEFT JOIN productos_unidades AS pu ON pu.id_unidad = pr.id_unidad
            LEFT JOIN compras_areas AS ca ON ca.id_area = cp.id_area
+           LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cp.id_cat_codigos
            WHERE cp.id_requisicion = {$data['info'][0]->id_requisicion} {$sql_produc}
            ORDER BY p.id_proveedor ASC, cp.id_producto ASC");
 
@@ -757,7 +764,8 @@ class compras_requisicion_model extends CI_Model {
             if($provee == $value->id_proveedor)
             {
               if($value->id_area != '')
-                $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
+                // $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
+                $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
 
               $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;

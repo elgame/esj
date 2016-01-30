@@ -14,6 +14,8 @@ class catalogos_sft extends MY_Controller {
 
 			'catalogos_sft/imprimir_catalogo_codigos/',
 			'catalogos_sft/xls_catalogo_codigos/',
+			'catalogos_sft/ajax_get_codigos/',
+			'catalogos_sft/ajax_get_codigosauto/',
 		);
 
 	public function _remap($method){
@@ -395,7 +397,7 @@ class catalogos_sft extends MY_Controller {
 	public function ajax_get_codigos()
 	{
 		$this->load->model('catalogos_sft_model');
-		$response = $this->catalogos_sft_model->getAreasEspesifico($_GET['id_area'], $_GET['id_padre']);
+		$response = $this->catalogos_sft_model->getCatCodigosEspesifico($_GET['id_area'], $_GET['id_padre']);
 		echo json_encode($response);
 	}
 
@@ -403,7 +405,7 @@ class catalogos_sft extends MY_Controller {
    {
       $this->load->model('catalogos_sft_model');
 
-      echo json_encode($this->catalogos_sft_model->ajaxAreas());
+      echo json_encode($this->catalogos_sft_model->ajaxCatCodigos());
    }
 
   public function imprimir_catalogo_codigos()

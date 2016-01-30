@@ -1391,12 +1391,14 @@ class banco_cuentas_model extends banco_model {
     // Obtenemos los rendimientos en los lotes de ese dia
     $query = $this->db->query(
       "SELECT bm.id_movimiento, Date(bm.fecha) AS fecha, bm.numero_ref, initcap(bm.metodo_pago) AS tipo,
-      	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta, bm.tipo tipomov
+      	bm.concepto, bm.monto, bm.a_nombre_de, e.id_empresa, e.nombre_fiscal, bc.alias AS cuenta, bm.tipo tipomov,
+      	bm.status
       FROM banco_movimientos bm
         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
         INNER JOIN empresas e ON e.id_empresa = bc.id_empresa
-      WHERE bm.status = 't' {$sql}
-      ORDER BY e.id_empresa ASC, bc.alias ASC");
+      WHERE 1 = 1 {$sql}
+      ORDER BY e.id_empresa ASC, bc.alias ASC, bm.id_movimiento ASC");
+    //bm.status = 't'
     if($query->num_rows() > 0) {
     	$aux = '';
       foreach ($query->result() as $key => $value) {
@@ -1491,16 +1493,18 @@ class banco_cuentas_model extends banco_model {
 	          substr($mov->tipo, 0, 5),
 	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
 	          $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
-	          substr($mov->a_nombre_de, 0, 33),
+	          ($mov->status=='f'? 'Cancelado': substr($mov->a_nombre_de, 0, 33)),
 	          $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
 	        ), false);
 
-	      if ($mov->tipomov=='t') {
-					$total_importes_ingre       += $mov->monto;
-					$total_importes_total_ingre += $mov->monto;
-	      } else {
-	      	$total_importes_egre       += $mov->monto;
-					$total_importes_total_egre += $mov->monto;
+	      if ($mov->status == 't') {
+		      if ($mov->tipomov=='t') {
+						$total_importes_ingre       += $mov->monto;
+						$total_importes_total_ingre += $mov->monto;
+		      } else {
+		      	$total_importes_egre       += $mov->monto;
+						$total_importes_total_egre += $mov->monto;
+		      }
 	      }
       }
 
@@ -1585,12 +1589,14 @@ class banco_cuentas_model extends banco_model {
           <td style="border:1px solid #000;">'.$mov->cuenta.'</td>
           <td style="border:1px solid #000;">'.substr($mov->tipo, 0, 5).'</td>
           <td style="border:1px solid #000;">'.$mov->monto.'</td>
-          <td style="border:1px solid #000;">'.substr($mov->a_nombre_de, 0, 33).'</td>
+          <td style="border:1px solid #000;">'.($mov->status=='f'? 'Cancelado': substr($mov->a_nombre_de, 0, 33)).'</td>
           <td style="border:1px solid #000;">'.$mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto.'</td>
         </tr>';
 
-				$total_importes       += $mov->monto;
-				$total_importes_total += $mov->monto;
+				if ($mov->status == 't') {
+					$total_importes       += $mov->monto;
+					$total_importes_total += $mov->monto;
+				}
     	}
 
     	//total

@@ -658,6 +658,20 @@ class String{
     return $semanas;
   }
 
+  public static function obtenerSemanaDeFecha($fecha, $diaEmpieza = 0)
+  {
+  	$fecha_split = explode('-', $fecha);
+  	$semanas = self::obtenerSemanasDelAnioV2($fecha_split[0], 0, $diaEmpieza);
+
+    foreach ($semanas as $key => $value) {
+    	if ($value['fecha_inicio'] <= $fecha && $value['fecha_final'] >= $fecha) {
+    		return $value;
+    	}
+    }
+
+    return false;
+  }
+
   /**
    * Obtiene las fechas de X cantidad de dias apartir de la fecha
    * especificada.
