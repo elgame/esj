@@ -14,6 +14,7 @@
     btnModalAreasSel();
     addNewCentroCosto();
     addNewlabor();
+    addNewHrExtra();
 
     $('#box-content').keyJump();
 
@@ -33,7 +34,7 @@
     // });
 
     // Asigna evento focusout a los inputs que estan en existete, linea1, linea2
-    $('.tableClasif').on('focusout', '#fhrs_extras, input[id^=fhoras]', function(event) {
+    $('.tableClasif').on('focusout', 'input[id^=fhrs_extras], input[id^=fhoras]', function(event) {
       var $this = $(this),
           $tr =  $this.parents('tr.trempleado');
 
@@ -43,7 +44,7 @@
     });
 
     // Evento para asignar los keys del 0 al 9.
-    $('.tableClasif').on('keyup', '#fhrs_extras, input[id^=fhoras]', function(e) {
+    $('.tableClasif').on('keyup', 'input[id^=fhrs_extras], input[id^=fhoras]', function(e) {
       var key = e.which,
 
           $this = $(this),
@@ -104,9 +105,10 @@
         select: function( event, ui ) {
           var $this = $(this),
               $tr = $this.parent().parent(),
-              $trparent = $this.parents('tr.trempleado');
+              $trparent = $this.parents('tr.trempleado'),
+              classe = $this.is('.hrsex')? '.hrsex': '';
 
-          if ($trparent.find('.hideCCosto[value='+ui.item.id+']').length == 0) {
+          if ($trparent.find('.hideCCosto'+classe+'[value='+ui.item.id+']').length == 0) {
             $this.css("background-color", "#B0FFB0");
             setTimeout(function(){
               $this.val(ui.item.item.codigo);
@@ -168,7 +170,7 @@
     postData.id_empresa      = $('#empresaId').val();
     postData.id_usuario      = $tr.find('#fempleado_id').val();
     postData.sueldo_diario   = $tr.find('#fsalario_diario').val();
-    postData.hrs_extra       = $tr.find('#fhrs_extras').val();
+    // postData.hrs_extra       = $tr.find('#fhrs_extras').val();
     postData.descripcion     = $tr.find('#fdescripcion').val();
     postData.importe         = $tr.find('#fcosto').val();
     postData.horas           = $tr.find('#fhrs_trabajo').val();
@@ -177,11 +179,21 @@
     postData.tipo_asistencia = $tr.find('#tipo_asistencia').val();
 
     postData.arealhr         = [];
+    postData.hrs_extra         = [];
     // postData.flabor_id       = [];
     // postData.fhoras          = [];
 
     $tr.find('.hideCCosto').each(function(index, el) {
-      if ($(this).val() != "") {
+      if ($(this).val() != "" && $(this).is('[id^=fcosto_hrs_ext]')) {
+        var $trcc = $(this).parent(),
+        item = {
+          id_area: $(this).val(),
+          fhoras: $trcc.find('.fhrs_extras').val(),
+          fimporte: $trcc.find('.fhrs_extras_importe').val()
+        };
+
+        postData.hrs_extra.push(item);
+      } else {
         var $trcc = $(this).parent().parent(),
         item = {
           id_area: $(this).val(),
@@ -386,13 +398,56 @@
 
   };
 
+  var addNewHrExtra = function () {
+    // Agrega los inputs extras de labores
+    $(".addNewHrsx").on('click', function(event) {
+      var $tdc = $(this).parents("td.tdCostosHrsExt"),
+      objIdE = $tdc.parents("tr.trempleado").find('#fempleado_id'),
+      jumpAux = jumpIndex;
+      idE = objIdE.val(); // id empleado
+
+      var html = '<div class="tdCodAreaHrs">'+
+                    '<input type="text" id="fcosto_hrs_ext'+idE+'_'+jumpIndex+'" value="" class="span12 pull-left showCodigoAreaAuto hrsex" data-next="fhrs_extras'+idE+'_'+(++jumpIndex)+'" placeholder="Centro Costo">'+
+                    '<input type="hidden" id="fcosto_hrs_ext'+idE+'_'+(jumpIndex-1)+'_id" value="" class="span12 hideCCosto hrsex">'+
+                    '<i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>'+
+                    '<i class="ico icon-remove pull-right removeHrsx" style="cursor:pointer"></i>'+
+                    '<input type="text" id="fhrs_extras'+idE+'_'+jumpIndex+'" value="" class="span12 fhrs_extras vpositive" placeholder="Horas extras" data-next="tipo_asistencia'+idE+'">'+
+                    '<input type="hidden" id="importe_fhrs_extras'+idE+'" value="" class="span12 fhrs_extras_importe">'+
+                  '</div>';
+      $tdc.append(html);
+
+      $.fn.keyJump.setElem($('#fcosto_hrs_ext'+idE+'_'+jumpAux)).focus();
+      ++jumpAux;
+      $.fn.keyJump.setElem($('#fhrs_extras'+idE+'_'+jumpAux));
+
+
+      // ++jumpIndex;
+
+      $.fn.removeNumeric();
+      // $('#box-content').keyJump.off();
+      // $('#box-content').keyJump({
+      //   'next': 13,
+      // });
+      $.fn.setNumericDefault();
+    });
+
+    // Elimina los inputs extras de labores
+    $("td.tdCostosHrsExt").on('click', '.removeHrsx', function(event) {
+      var $trparent = $(this).parents('tr.trempleado'), $table = $(this).parent().remove();
+
+      calculaTotalesHrs($trparent);
+    });
+
+  };
+
   var calculaTotalesHrs = function ($tr) {
 
     var $fsalario_diario = $tr.find('#fsalario_diario'),
-        $fhrs_extras = $tr.find('#fhrs_extras'),
+        $fhrs_extras = $tr.find('input[id^=fhrs_extras]'),
         $fhoras      = $tr.find('input[id^=fhoras]'),
         $fdia_semana = $('#fdia_semana'),
         hrs          = 0,
+        hrs_extra    = 0,
         salario_hr   = (parseFloat($fsalario_diario.val()) || 0) / ($fdia_semana.val() == '6'? 6: 8),
         total_hrs_extra = 0,
         total = 0;
@@ -403,12 +458,20 @@
         hrs += parseFloat($(this).val()) || 0;
     });
 
+    $fhrs_extras.each(function(index, el) {
+      var $parent = $(this).parents(".tdCodAreaHrs");
+      if ( $parent.find('.hideCCosto').val() != '') {
+        hrs_extra = ( (parseFloat($(this).val()) || 0)*salario_hr ).toFixed(2); // para registrar bono
+        $parent.find('.fhrs_extras_importe').val(hrs_extra);
+        total_hrs_extra += parseFloat(hrs_extra);
+      }
+    });
+
     if (hrs > 5) {
       total += (parseFloat($fsalario_diario.val()) || 0); // dia de trabajo
 
       $tr.find('#fhrs_trabajo_importe').val(total.toFixed(2));
     }
-    total_hrs_extra = ( (parseFloat($fhrs_extras.val())||0)*salario_hr ).toFixed(2); // para registrar bono
     total += parseFloat(total_hrs_extra); // hrs extras
 
     $tr.find('#fhrs_trabajo').val(hrs);

@@ -734,9 +734,7 @@ class compras_requisicion_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
-                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto

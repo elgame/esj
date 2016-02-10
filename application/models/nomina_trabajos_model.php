@@ -12,7 +12,7 @@ class nomina_trabajos_model extends CI_Model {
       // 'id_area'         => $datos['id_area'],
       'id_usuario'      => $datos['id_usuario'],
       'sueldo_diario'   => floatval($datos['sueldo_diario']),
-      'hrs_extra'       => floatval($datos['hrs_extra']),
+      'hrs_extra'       => 0,
       'descripcion'     => $datos['descripcion'],
       'importe'         => floatval($datos['importe']),
       'horas'           => floatval($datos['horas']),
@@ -22,6 +22,25 @@ class nomina_trabajos_model extends CI_Model {
     );
 
     $data_labores = isset($datos['arealhr'])? $datos['arealhr']: [];
+    $hrs_extra = isset($datos['hrs_extra'])? $datos['hrs_extra']: [];
+
+    // total de hrs extras
+    $total_hrsext = 0;
+    $insert_hrs_extras = [];
+    foreach ($hrs_extra as $key => $value) {
+      if ($value['fhoras'] > 0) {
+        $total_hrsext += $value['fhoras'];
+        $insert_hrs_extras[] = array(
+            'id_usuario' => $data['id_usuario'],
+            'id_empresa' => $data['id_empresa'],
+            'fecha'      => $data['fecha'],
+            'id_area'    => $value['id_area'],
+            'horas'      => $value['fhoras'],
+            'importe'    => $value['fimporte'],
+            );
+      }
+    }
+    $data['hrs_extra'] = $total_hrsext;
 
     // si existe el registro
     $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_trabajos_dia WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}")->row();
@@ -49,6 +68,7 @@ class nomina_trabajos_model extends CI_Model {
                 'id_area'    => $value['id_area'],
                 'id_labor'   => $labor,
                 'horas'      => $value['fhoras'][$lkey],
+                'importe'    => round(($value['fhoras'][$lkey] * $data['importe_trabajo'] / $data['horas']), 4),
                 );
             }
           }
@@ -56,6 +76,12 @@ class nomina_trabajos_model extends CI_Model {
         if (count($dias_labores) > 0) {
           $this->db->insert_batch('nomina_trabajos_dia_labores', $dias_labores);
         }
+      }
+
+      // registra las hrs extras
+      $this->db->delete('nomina_trabajos_dia_hrsext', "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
+      if (count($insert_hrs_extras) > 0) {
+        $this->db->insert_batch('nomina_trabajos_dia_hrsext', $insert_hrs_extras);
       }
 
       // Registra los Bonos
@@ -143,6 +169,17 @@ class nomina_trabajos_model extends CI_Model {
           // $response[$value->id_usuario]['info'] = $value;
           $response[$value->id_usuario][$value->id_area] = $value;
           $response[$value->id_usuario][$value->id_area]->labores = array();
+
+          $response[$value->id_usuario]['hrs_extra'] = $this->db->query(
+            "SELECT ntd.id_usuario, ntd.fecha, ntd.id_empresa, cca.id_cat_codigos AS id_area, ntdl.horas, ntdl.importe,
+              cca.nombre AS area, cca.codigo AS codigo_fin
+            FROM nomina_trabajos_dia ntd
+              LEFT JOIN nomina_trabajos_dia_hrsext ntdl ON (ntd.id_usuario = ntdl.id_usuario AND ntd.fecha = ntdl.fecha AND ntd.id_empresa = ntdl.id_empresa)
+              LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = ntdl.id_area
+            WHERE ntd.id_usuario = {$value->id_usuario} AND ntd.fecha = '{$fecha}' AND ntd.id_empresa = {$id_empresa}
+            ORDER BY ntd.id_usuario ASC, cca.id_cat_codigos ASC
+            ")->result();
+
           $aux = $value->id_usuario;
         }elseif ($aux_area != $value->id_area) {
           $response[$value->id_usuario][$value->id_area] = $value;

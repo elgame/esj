@@ -10,4 +10,5 @@ Todos los Productos2.txt
 *.pem
 *.csv
 *.sql
+*.xlsx
 application/logs

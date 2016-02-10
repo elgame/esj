@@ -50,15 +50,15 @@
                       <caption style="text-align: left;"><?php echo $puesto->nombre; ?></caption>
                       <thead>
                         <tr>
-                          <th>Nombre</th>
-                          <th>Centro Costo</th>
-                          <th>Labor(s)</th>
-                          <th>Horas</th>
-                          <th>Hrs Extras</th>
-                          <th>Asis</th>
-                          <th>Descripcion</th>
-                          <th>Costo</th>
-                          <th></th>
+                          <th style="width:18%;">Nombre</th>
+                          <th style="width:10%;">Centro Costo</th>
+                          <th style="width:10%;">Labor(s)</th>
+                          <th style="width:9%;">Horas</th>
+                          <th style="width:10%;">Hrs Extras</th>
+                          <th style="width:10%;">Asis</th>
+                          <th style="width:10%;">Descripcion</th>
+                          <th style="width:8%;">Costo</th>
+                          <th style="width:5%;"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -74,7 +74,8 @@
                               <input type="hidden" id="fsalario_diario" value="<?php echo $e->salario_diario ?>">
                           <?php if (isset($infoE[$e->id]) && count($infoE[$e->id]) > 0) {
                             foreach ($infoE[$e->id] as $keyare => $val_area) {
-                              $info_e = $val_area;
+                              if (intval($keyare) > 0) {
+                                $info_e = $val_area;
                           ?>
                               <table class="tablesinborders tableCosto">
                                 <tbody>
@@ -123,6 +124,7 @@
                                 </tbody>
                               </table>
                           <?php }
+                              }
                             } else { ?>
                               <table class="tablesinborders tableCosto">
                                 <tbody>
@@ -154,8 +156,28 @@
                               </table>
                           <?php } ?>
                             </td>
-                            <td>
-                              <input type="text" id="fhrs_extras" value="<?php echo isset($info_e)? $info_e->hrs_extra: ''; ?>" class="span12 fhrs_extras<?php echo $e->id ?> vpositive">
+                            <td class="tdCostosHrsExt">
+                          <?php if (isset($infoE[$e->id]['hrs_extra']) && count($infoE[$e->id]['hrs_extra']) > 0) {
+                            foreach ($infoE[$e->id]['hrs_extra'] as $keyhre => $val_hrse) { ?>
+                              <div class="tdCodAreaHrs">
+                                <input type="text" id="fcosto_hrs_ext<?php echo $e->id ?>" value="<?php echo $val_hrse->codigo_fin ?>" class="span12 pull-left showCodigoAreaAuto hrsex" placeholder="Centro Costo">
+                                <input type="hidden" id="fcosto_hrs_ext<?php echo $e->id ?>_id" value="<?php echo $val_hrse->id_area ?>" class="span12 hideCCosto hrsex">
+                                <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                                <i class="ico pull-right <?php echo ($keyhre>0? 'icon-remove removeHrsx': 'icon-plus addNewHrsx'); ?>" style="cursor:pointer"></i>
+                                <input type="text" id="fhrs_extras<?php echo $e->id ?>" value="<?php echo $val_hrse->horas ?>" class="span12 fhrs_extras vpositive" placeholder="Horas extras">
+                                <input type="hidden" id="importe_fhrs_extras<?php echo $e->id ?>" value="<?php echo $val_hrse->importe ?>" class="span12 fhrs_extras_importe">
+                              </div>
+                        <?php }
+                          } else { ?>
+                              <div class="tdCodAreaHrs">
+                                <input type="text" id="fcosto_hrs_ext<?php echo $e->id ?>" value="" class="span12 pull-left showCodigoAreaAuto hrsex" placeholder="Centro Costo">
+                                <input type="hidden" id="fcosto_hrs_ext<?php echo $e->id ?>_id" value="" class="span12 hideCCosto hrsex">
+                                <i class="ico icon-list pull-right showCodigoArea" style="cursor:pointer"></i>
+                                <i class="ico icon-plus pull-right addNewHrsx" style="cursor:pointer"></i>
+                                <input type="text" id="fhrs_extras<?php echo $e->id ?>" value="" class="span12 fhrs_extras vpositive" placeholder="Horas extras">
+                                <input type="hidden" id="importe_fhrs_extras<?php echo $e->id ?>" value="" class="span12 fhrs_extras_importe">
+                              </div>
+                        <?php } ?>
                             </td>
                             <td>
                           <?php

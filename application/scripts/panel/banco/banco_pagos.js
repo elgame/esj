@@ -48,10 +48,11 @@ $(function(){
   $("#cuenta_retiro").on('change', function(event) {
     var banamex = $("#downloadBanamex").attr('href').split('&cuentaretiro'),
     interban = $("#downloadInterban").attr('href').split('&cuentaretiro'),
-    aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro');
-    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val());
-    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val());
-    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val());
+    aplicarPagos = $("#aplicarPagos").attr('href').split('?cuentaretiro'),
+    id_empresa = $("#did_empresa").val();
+    $("#downloadBanamex").attr('href', banamex[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#downloadInterban").attr('href', interban[0]+"&cuentaretiro="+$(this).val()+"&ide="+id_empresa);
+    $("#aplicarPagos").attr('href', aplicarPagos[0]+"?cuentaretiro="+$(this).val()+"&ide="+id_empresa);
   });
 
   $("#dempresa").autocomplete({

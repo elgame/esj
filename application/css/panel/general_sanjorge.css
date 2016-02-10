@@ -34,3 +34,19 @@
 	top: 10px;
 	right: 4px;
 }
+
+#actividades_tra .tdCodAreaHrs {
+	position: relative;
+	border-right: 1px #999 solid;
+}
+#actividades_tra .tdCodAreaHrs .showCodigoArea{
+	position: absolute;
+	top: 16px;
+	right: 2px;
+}
+#actividades_tra .tdCodAreaHrs .addNewHrsx,
+#actividades_tra .tdCodAreaHrs .removeHrsx{
+	position: absolute;
+	top: -5px;
+	right: 4px;
+}
