@@ -205,7 +205,7 @@ class productos_salidas_model extends CI_Model {
                   csp.cantidad, csp.precio_unitario, csp.tipo_orden,
                   COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
                   COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
-                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+                  COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_salidas_productos AS csp
              INNER JOIN productos AS pr ON pr.id_producto = csp.id_producto

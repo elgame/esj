@@ -627,7 +627,7 @@ class compras_ordenes_model extends CI_Model {
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.porcentaje_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.status, cp.faltantes, cp.observacion,
                   cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-                  COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+                  COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
                   (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_productos AS cp
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
@@ -1485,9 +1485,11 @@ class compras_ordenes_model extends CI_Model {
 
    public function getFechaUltimaCompra($id_producto, $id_codigo, $campo)
    {
-    $query = $this->db->query("SELECT Date(fecha_aceptacion) AS fecha
-                               FROM compras_productos
-                               WHERE id_producto = {$id_producto} AND {$campo} = {$id_codigo}")->row();
+    if ($id_producto > 0 && $id_codigo > 0) {
+      $query = $this->db->query("SELECT Date(fecha_aceptacion) AS fecha
+                                 FROM compras_productos
+                                 WHERE id_producto = {$id_producto} AND {$campo} = {$id_codigo}")->row();
+    }
     return isset($query->fecha)? $query->fecha: '';
    }
 

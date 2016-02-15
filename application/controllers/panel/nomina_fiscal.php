@@ -545,7 +545,7 @@ class nomina_fiscal extends MY_Controller {
   public function add_prestamos()
   {
     $this->load->model('nomina_fiscal_model');
-    $this->nomina_fiscal_model->addPrestamos($_GET['eid'], $_POST, $_GET['sem']);
+    $this->nomina_fiscal_model->addPrestamos($_GET['eid'], $_POST, $_GET['sem'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
   }

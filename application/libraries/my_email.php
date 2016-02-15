@@ -54,7 +54,7 @@ class my_email {
     $mail = new PHPMailer;
 
     $mail->IsSMTP();
-    $mail->SMTPDebug  = 0;
+    $mail->SMTPDebug  = 1;
     $mail->Host       = 'smtp.mandrillapp.com'; //smtp.gmail.com
     $mail->SMTPAuth   = true;
     $mail->Username   = $this->data['correoEmisor'];

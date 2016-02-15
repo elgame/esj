@@ -372,6 +372,7 @@
                                         <tr>
                                           <td style="width: 60px;">
                                             <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
+                                            <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                             <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                             <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
                                             <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
@@ -406,6 +407,7 @@
                                   <tr>
                                     <td style="width: 60px;">
                                       <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
+                                      <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                       <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                       <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
                                       <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">

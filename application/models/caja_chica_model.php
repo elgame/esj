@@ -73,14 +73,18 @@ class caja_chica_model extends CI_Model {
     }
 
     // boletas
-    if($noCaja == '1')
+    if($noCaja == '1' || $noCaja == '3')
     {
+      $sql = ' AND b.id_area <> 7';
+      if ($noCaja == '3') {
+        $sql = " AND b.id_area = 7";
+      }
       $boletas = $this->db->query(
         "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor, b.importe, cb.folio as folio_caja_chica
          FROM bascula b
          INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
          LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
-         WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'
+         WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'{$sql}
          ORDER BY (b.folio) ASC"
       );
 
@@ -173,7 +177,8 @@ class caja_chica_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo, COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion
        FROM cajachica_gastos cg
@@ -321,10 +326,16 @@ class caja_chica_model extends CI_Model {
     // $this->db->delete('cajachica_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_concepto']))
     {
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
       $gastos_udt = $gastos = array();
       foreach ($data['gasto_concepto'] as $key => $gasto)
       {
-        if (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+        if (isset($data['gasto_del'][$key]) && $data['gasto_del'][$key] == 'true' &&
+          isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
+
+          $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        }elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
@@ -337,9 +348,10 @@ class caja_chica_model extends CI_Model {
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
           );
+
           $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
         } else {
-          $gastos[] = array(
+          $gastos = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
             'folio'           => $data['gasto_folio'][$key],
@@ -351,10 +363,15 @@ class caja_chica_model extends CI_Model {
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
           );
+          $this->db->insert('cajachica_gastos', $gastos);
+          $gastos_ids['adds'][] = $this->db->insert_id();
         }
       }
 
-      $this->db->insert_batch('cajachica_gastos', $gastos);
+      if (count($gastos_ids['adds']) > 0 || count($gastos_ids['delets']) > 0) {
+        $this->enviarEmail($gastos_ids);
+        // $this->db->insert_batch('cajachica_gastos', $gastos);
+      }
     }
 
     return true;
@@ -529,6 +546,134 @@ class caja_chica_model extends CI_Model {
     }
 
     return $response;
+  }
+
+  public function enviarEmail($gastos_ids)
+  {
+      $this->load->library('my_email');
+
+      // Obtiene la informacion de la factura.
+      $html_adds = $txt_adds = '';
+      $caja = '';
+      foreach ($gastos_ids['adds'] as $key => $value) {
+        $gasto = $this->getDataGasto($value);
+        $html_adds .= '<table width="652" border="0">
+        <tbody><tr>
+        <td align="left"><b>Fecha:</b></td><td align="left">'.$gasto->fecha.'</td>
+        </tr>
+        <tr>
+        <td align="left" width="142"><b>Operacion:</b></td><td align="left" width="510">Se agrego gasto</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Concepto:</b></td><td align="left">'.$gasto->concepto.'</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Importe:</b></td><td align="left">'.String::formatoNumero($gasto->monto).'</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Codigo gasto:</b></td><td align="left">'.$gasto->codigo_fin.'/'.$gasto->nombre_codigo.'</td>
+        </tr>
+        </tbody></table>';
+        $txt_adds .= "Fecha: ".$gasto->fecha.", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".String::formatoNumero($gasto->monto)."\r\n";
+        $caja = $gasto->no_caja;
+      }
+      foreach ($gastos_ids['delets'] as $key => $gasto) {
+        $html_adds .= '<table width="652" border="0">
+        <tbody><tr>
+        <td align="left"><b>Fecha:</b></td><td align="left">'.date("Y-m-d").'</td>
+        </tr>
+        <tr>
+        <td align="left" width="142"><b>Operacion:</b></td><td align="left" width="510">Se elimino el gasto '.$gasto->id_gasto.'</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Concepto:</b></td><td align="left">'.$gasto->concepto.'</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Importe:</b></td><td align="left">'.String::formatoNumero($gasto->monto).'</td>
+        </tr>
+        <tr>
+        <td align="left"><b>Codigo gasto:</b></td><td align="left">'.$gasto->codigo_fin.'/'.$gasto->nombre_codigo.'</td>
+        </tr>
+        </tbody></table>';
+        $txt_adds .= "Fecha: ".date("Y-m-d").", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".String::formatoNumero($gasto->monto)."\r\n";
+        $caja = $gasto->no_caja;
+      }
+
+      if ($caja == '3') {
+        //////////////////
+        // Datos Correo //
+        //////////////////
+
+        $asunto = "Operacion realizada en Caja {$caja}";
+        $altBody = "Notificacion, se registro un movimiento en la Caja {$caja}";
+
+        $body = '<p>Notificacion, se registro un movimiento en la Caja '.$caja.'</p>
+          <table border="0" width="652">
+          <tbody>
+          <tr>
+          <td align="left" style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;font-size:22px;color:#004785">Datos de las operaciones
+            </td>
+          </tr>
+          <tr>
+          <td height="25">&nbsp;</td>
+          </tr>
+          <tr>
+          <td width="652">
+          '.$html_adds.'
+          </td>
+          </tr>
+          </tbody></table>
+          <br>
+          <p>EMPAQUE SAN JORGE</p>';
+
+        //////////////////////
+        // Datos del Emisor //
+        //////////////////////
+
+        $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+        $nombreEmisor   = 'EMPAQUE SAN JORGE';
+        $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth. empaquesanjorgemx@gmail.com (mandrill)
+        $contrasena     = "2x02pxeexCUpiKncoWI50Q"; // Contraseña de $correEmisor S4nj0rg3V14n3y
+
+        ////////////////////////
+        // Datos del Receptor //
+        ////////////////////////
+
+        $correoDestino = array('gamameso@gmail.com');
+
+        $nombreDestino = 'Gamaliel';
+        $datosEmail = array(
+            'correoEmisorEm' => $correoEmisorEm,
+            'correoEmisor'   => $correoEmisor,
+            'nombreEmisor'   => $nombreEmisor,
+            'contrasena'     => $contrasena,
+            'asunto'         => $asunto,
+            'altBody'        => $altBody,
+            'body'           => $body,
+            'correoDestino'  => $correoDestino,
+            'nombreDestino'  => $nombreDestino,
+            'cc'             => '',
+            'adjuntos'       => array()
+        );
+
+        // Envia el email.
+        $result = $this->my_email->setData($datosEmail)->send();
+
+        $response = array(
+            'passes' => true,
+            'msg'    => 10
+        );
+
+        if (isset($result['error']))
+        {
+            $response = array(
+            'passes' => false,
+            'msg'    => 9
+            );
+        }
+
+        return $response;
+      }
   }
 
 
@@ -1011,15 +1156,13 @@ class caja_chica_model extends CI_Model {
     return $res->result();
   }
 
-  public function printVale($id_gasto)
+  public function getDataGasto($id_gasto)
   {
-    $this->load->model('compras_areas_model');
-    $this->load->model('catalogos_sft_model');
-
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa, cc.nombre as empresal,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo, COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja
        FROM cajachica_gastos cg
@@ -1030,6 +1173,16 @@ class caja_chica_model extends CI_Model {
        WHERE cg.id_gasto = '{$id_gasto}'
        ORDER BY cg.id_gasto ASC"
     )->row();
+
+    return $gastos;
+  }
+
+  public function printVale($id_gasto)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $gastos = $this->getDataGasto($id_gasto);
 
     // echo "<pre>";
     //   var_dump($gastos);
@@ -1134,7 +1287,7 @@ class caja_chica_model extends CI_Model {
     $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
           cn.id AS id_nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-          COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.reposicion
         FROM cajachica_gastos cg

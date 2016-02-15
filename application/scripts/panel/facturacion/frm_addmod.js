@@ -209,7 +209,7 @@ $(function(){
           $table.find('tbody tr').each(function(index, el) {
             var $this = $(this);
 
-            if ($this.attr('data-remisiones') !== '') {
+            if ($this.attr('data-remisiones') != '' && $.trim($this.attr('data-remisiones')).length > 0) {
               var auxRemisiones = $this.attr('data-remisiones').split('-');
               for (var iir in auxRemisiones) {
                 if (auxRemisiones[iir] == remisionesIds[ir]) {

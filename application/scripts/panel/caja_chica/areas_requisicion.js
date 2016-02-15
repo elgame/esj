@@ -24,7 +24,8 @@
 
           $this.css("background-color", "#B0FFB0");
           setTimeout(function(){
-            $this.val(ui.item.item.codigo);
+            if ($.trim(ui.item.item.codigo) != '')
+              $this.val(ui.item.item.codigo);
           },100)
 
           $tr.find('#codigoAreaId').val(ui.item.id);
@@ -83,10 +84,11 @@
     // $.getJSON(base_url+'panel/compras_areas/ajax_get_areas',
       {id_area: area, id_padre: padre},
       function(json, textStatus) {
-        var html = '';
+        var html = '', attrval = '';
         for (var i = 0; i < json.length; i++) {
+          attrval = json[i].codigo!=''? json[i].codigo: json[i].nombre;
           html += '<tr class="areaClick" data-id="'+json[i].id_area+'" data-sig="'+(parseInt(area)+1)+'">'+
-                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+json[i].codigo+'" data-uniform="false"></td>'+
+                  '<td><input type="radio" name="modalRadioSel" value="'+json[i].id_area+'" data-codfin="'+attrval+'" data-uniform="false"></td>'+
                   '<td>'+json[i].codigo+'</td>'+
                   '<td>'+json[i].nombre+'</td>'+
                 '</tr>';

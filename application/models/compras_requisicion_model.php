@@ -734,7 +734,9 @@ class compras_requisicion_model extends CI_Model {
                   cp.descripcion, cp.cantidad, cp.precio_unitario, cp.importe,
                   cp.iva, cp.retencion_iva, cp.retencion_isr, cp.total, cp.porcentaje_iva,
                   cp.porcentaje_retencion, cp.porcentaje_isr, cp.observacion, cp.prod_sel,
-                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, ca.id_area, ca.codigo_fin
+                  cp.ieps, cp.porcentaje_ieps, cp.tipo_cambio, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
+                  COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
+                  (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo
            FROM compras_requisicion_productos AS cp
            LEFT JOIN proveedores AS p ON p.id_proveedor = cp.id_proveedor
            LEFT JOIN productos AS pr ON pr.id_producto = cp.id_producto
@@ -761,9 +763,10 @@ class compras_requisicion_model extends CI_Model {
 
             if($provee == $value->id_proveedor)
             {
-              if($value->id_area != '')
                 // $data['info'][0]->data_desCodigos[] = $this->compras_areas_model->getDescripCodigo($value->id_area);
-                $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
+                // $data['info'][0]->data_desCodigos[] = $this->catalogos_sft_model->getDescripCodigo($value->id_area);
+              if($value->id_area != '')
+                $data['info'][0]->data_desCodigos[] = $this->{($value->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($value->id_area);
 
               $data['info'][0]->productos[$value->id_producto.$value->num_row]                                           = $value;
               $data['info'][0]->productos[$value->id_producto.$value->num_row]->{'precio_unitario'.$value->id_proveedor} = $value->precio_unitario;

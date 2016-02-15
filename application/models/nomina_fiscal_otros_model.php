@@ -543,7 +543,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
               Sum(t.isr) AS isr, Sum(t.aguinaldo) AS aguinaldo, Sum(t.aguinaldo_grabable) AS aguinaldo_grabable, Sum(t.aguinaldo_exento) AS aguinaldo_exento,
               Sum(t.ptu) AS ptu, Sum(t.ptu_exento) AS ptu_exento, Sum(t.ptu_grabable) AS ptu_grabable,
               Sum(t.vacaciones) AS vacaciones, Sum(t.prima_vacacional_grabable) AS prima_vacacional_grabable,
-              Sum(t.prima_vacacional_exento) AS prima_vacacional_exento, Sum(t.prima_vacacional) AS prima_vacacional, Sum(t.anios) AS anios
+              Sum(t.prima_vacacional_exento) AS prima_vacacional_exento, Sum(t.prima_vacacional) AS prima_vacacional, Sum(t.anios) AS anios,
+              Sum(t.pasistencia) AS pasistencia, Sum(t.fondo_ahorro) AS fondo_ahorro
         FROM
         (
               SELECT u.id, u.nombre, u.apellido_paterno, u.apellido_materno, u.rfc, u.curp, max(date_part('month', nf.fecha_inicio)) AS semana_max,
@@ -552,7 +553,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
                     Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
                     Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional,
-                    date_part('years', age(COALESCE(u.fecha_salida, now()), COALESCE(u.fecha_imss, u.fecha_entrada))) AS anios
+                    date_part('years', age(COALESCE(u.fecha_salida, now()), COALESCE(u.fecha_imss, u.fecha_entrada))) AS anios,
+                    Sum(nf.pasistencia) AS pasistencia, Sum(nf.fondo_ahorro) AS fondo_ahorro
               FROM nomina_fiscal nf INNER JOIN usuarios u ON u.id = nf.id_empleado
               WHERE nf.id_empresa = {$_GET['empresaId']} AND nf.anio = {$_GET['anio']} AND nf.esta_asegurado = 't'
               GROUP BY u.id
@@ -561,7 +563,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
                     Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                     0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
-                    0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios
+                    0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
+                    0 AS pasistencia, 0 AS fondo_ahorro
               FROM nomina_aguinaldo nf INNER JOIN usuarios u ON u.id = nf.id_empleado
               WHERE nf.id_empresa = {$_GET['empresaId']} AND nf.anio = {$_GET['anio']} AND nf.esta_asegurado = 't'
               GROUP BY u.id
@@ -570,7 +573,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     min(date_part('month', nf.fecha_inicio)) AS semana_min, 0 AS dias, 0 AS subsidio, 0 AS sueldo_semanal,
                     Sum(nf.isr) AS isr, 0 AS aguinaldo, 0 AS aguinaldo_grabable, 0 AS aguinaldo_exento,
                     Sum(nf.ptu) AS ptu, Sum(nf.ptu_exento) AS ptu_exento, Sum(nf.ptu_grabable) AS ptu_grabable,
-                    0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios
+                    0 AS vacaciones, 0 AS prima_vacacional_grabable, 0 AS prima_vacacional_exento, 0 AS prima_vacacional, 0 AS anios,
+                    0 AS pasistencia, 0 AS fondo_ahorro
               FROM nomina_ptu nf INNER JOIN usuarios u ON u.id = nf.id_empleado
               WHERE nf.id_empresa = {$_GET['empresaId']} AND nf.anio = {$_GET['anio']} AND nf.esta_asegurado = 't'
               GROUP BY u.id
@@ -580,7 +584,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
                     Sum(nf.isr) AS isr, Sum(nf.aguinaldo) AS aguinaldo, Sum(nf.aguinaldo_grabable) AS aguinaldo_grabable, Sum(nf.aguinaldo_exento) AS aguinaldo_exento,
                     0 AS ptu, 0 AS ptu_exento, 0 AS ptu_grabable,
                     Sum(nf.vacaciones) AS vacaciones, Sum(nf.prima_vacacional_grabable) AS prima_vacacional_grabable,
-                    Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional, 0 AS anios
+                    Sum(nf.prima_vacacional_exento) AS prima_vacacional_exento, Sum(nf.prima_vacacional) AS prima_vacacional, 0 AS anios,
+                    0 AS pasistencia, 0 AS fondo_ahorro
               FROM finiquito nf INNER JOIN usuarios u ON u.id = nf.id_empleado
               WHERE nf.id_empresa = {$_GET['empresaId']} AND Date(nf.fecha_salida) BETWEEN '{$_GET['anio']}-01-01' AND '{$_GET['anio']}-12-31'
               GROUP BY u.id
@@ -590,7 +595,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $row = 4;
       foreach ($result->result() as $key => $value) {
         $gravado = $value->sueldo_semanal+$value->vacaciones+$value->aguinaldo_grabable+$value->prima_vacacional_grabable+$value->ptu_grabable;
-        $exento = $value->aguinaldo_exento+$value->prima_vacacional_exento+$value->ptu_exento;
+        $exento = $value->aguinaldo_exento+$value->prima_vacacional_exento+$value->ptu_exento+$value->pasistencia;
         $objPHPExcel->setActiveSheetIndex(0)->getCellByColumnAndRow(0, $row)->setValueExplicit((strlen($value->semana_min)==1?'0':'').$value->semana_min, PHPExcel_Cell_DataType::TYPE_STRING); // -- Mes inicial
         $objPHPExcel->setActiveSheetIndex(0)->getCellByColumnAndRow(1, $row)->setValueExplicit((strlen($value->semana_max)==1?'0':'').$value->semana_max, PHPExcel_Cell_DataType::TYPE_STRING); // -- Mes final
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2, $row, $value->rfc); // -- rfc
@@ -666,7 +671,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(72, $row, '0'); // Contribuciones a cargo del trab(Gravado)
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(73, $row, '0'); // Contribuciones a cargo del trab(Exento)
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(74, $row, '0'); // -- Premios por puntualidad (Gravado)
-        $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(75, $row, '0'); // -- Premios por puntualidad (Exento)
+        $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(75, $row, round($value->pasistencia)); // -- Premios por puntualidad (Exento)
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(76, $row, '0'); // Prima de seguro de vida (Gravado)
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(77, $row, '0'); // Prima de seguro de vida (Exento)
         $objPHPExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(78, $row, '0'); // Seguro de gastos médicos mayores (Gravado)

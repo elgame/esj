@@ -534,7 +534,8 @@ class caja_chica_prest_model extends CI_Model {
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
           cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
-          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo, COALESCE(cca.codigo, ca.codigo_fin) AS codigo_fin,
+          COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
+          COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
           cg.no_caja
        FROM cajachica_gastos cg
