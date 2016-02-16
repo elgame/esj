@@ -97,7 +97,7 @@ class facturartebarato_api {
 
       $postData = array('xml' => $this->xml64);
 
-      $apiURL = "https://{$this->user}:{$this->password}@{$this->apiURL}timbre";
+      $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}timbre";
 
       // Checa si ahi conexion a internet.
       $this->resultAPI = $this->post($apiURL, $postData);
@@ -195,7 +195,7 @@ class facturartebarato_api {
    */
   public function verificarPendiente()
   {
-    $apiURL = "https://{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
+    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
 
     // Obtiene la respues del webservice.
     $this->resultAPI = $this->get($apiURL);
@@ -211,7 +211,7 @@ class facturartebarato_api {
    */
   public function cancelar(Array $params)
   {
-    $apiURL = "https://{$this->user}:{$this->password}@{$this->apiURL}cancel";
+    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}cancel";
 
     $resultAPI = $this->post($apiURL, $params);
 

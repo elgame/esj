@@ -106,13 +106,27 @@
                   </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group" style="display:none;">
                   <label class="control-label" for="dno_aprobacion">No. Aprobación</label>
                   <div class="controls">
                     <!-- <input type="text" name="dno_aprobacion" class="span9" id="dno_aprobacion" value="<?php //echo set_value('dno_aprobacion', $factura['info']->no_aprobacion); ?>" size="25" readonly> -->
                     <input type="text" name="dno_aprobacion" class="span9" id="dno_aprobacion" value="<?php echo set_value('dno_aprobacion'); ?>" size="25" readonly>
                   </div>
                 </div>
+                <div class="control-group">
+                <label class="control-label" for="moneda">Moneda</label>
+                <div class="controls">
+                  <?php $moneda_borrado = isset($factura) ? $factura['info']->moneda : (isset($_POST['moneda'])? $_POST['moneda']: 'M.N.');
+                  $moneda_borradover = (set_select('moneda', 'M.N.', false, $moneda_borrado)==' selected="selected"' || $moneda_borrado=='M.N.')? 'none': 'block';
+                  ?>
+                  <select name="moneda" class="span8 pull-left" id="moneda">
+                    <option value="M.N." <?php echo set_select('moneda', 'M.N.', false, $moneda_borrado); ?>>Peso mexicano (M.N.)</option>
+                    <option value="USD" <?php echo set_select('moneda', 'USD', false, $moneda_borrado); ?>>Dólar estadounidense (USD)</option>
+                  </select>
+                  <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="<?php echo set_value('tipoCambio', isset($factura) ? $factura['info']->tipo_cambio : ''); ?>"
+                    style="display:<?php echo $moneda_borradover; ?>" placeholder="Tipo de Cambio">
+                </div>
+              </div>
 
                 <div class="control-group">
                   <label class="control-label" for="dno_aprobacion">Tipo comprobante</label>

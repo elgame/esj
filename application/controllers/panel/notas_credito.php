@@ -59,7 +59,7 @@ class notas_credito extends MY_Controller {
       }
       else
       {
-        $_POST['moneda'] = 'M.N.';
+        // $_POST['moneda'] = 'M.N.';
         $respons = $this->facturacion_model->addFactura();
 
         if($respons['passes'])

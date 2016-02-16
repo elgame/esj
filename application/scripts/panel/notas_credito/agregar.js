@@ -16,6 +16,8 @@
       eventKeyUp();
       eventChangeIva();
       eventChangeRetIva();
+
+      EventOnChangeMoneda();
   });
 
   /*
@@ -131,6 +133,15 @@
    | EVENTOS
    |------------------------------------------------------------------------
    */
+
+  var EventOnChangeMoneda = function () {
+    $('#moneda').on('change', function(event) {
+      if($(this).val() !== 'M.N.')
+        $("#tipoCambio").show().focus();
+      else
+        $("#tipoCambio").val().hide();
+    });
+  };
 
   // Evento click. Elimina un producto del listado.
   var delProducto = function () {
@@ -346,7 +357,7 @@
     $('#totfac-format').html(util.darFormatoNum(total_factura));
     $('#total_totfac').val(total_factura);
 
-    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString()))
+    $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()))
 
   }
 
