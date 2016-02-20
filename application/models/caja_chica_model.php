@@ -335,7 +335,7 @@ class caja_chica_model extends CI_Model {
           $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
 
           $this->db->delete('cajachica_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
-        }elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+        } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
           $gastos_udt = array(
             'id_categoria'    => $data['gasto_empresa_id'][$key],
             'id_nomenclatura' => $data['gasto_nomenclatura'][$key],

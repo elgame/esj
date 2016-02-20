@@ -30,7 +30,16 @@
 
   var btnDelPrestamo = function () {
     $('#table-ingresos').on('click', '.btn-del-prestamo', function(event) {
-      $(this).parents('tr').remove();
+      var $tr = $(this).parents('tr'),
+      $prestamo_id_prestamo = $tr.find('#prestamo_id_prestamo'),
+      $prestamo_del = $tr.find('#prestamo_del');
+
+      if ($prestamo_id_prestamo.val() != '') {
+        $prestamo_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
       calculaTotalPrestamos();
     });
   };
@@ -42,6 +51,7 @@
                   '<input type="text" name="prestamo_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>'+
                   '<input type="hidden" name="prestamo_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
                   '<input type="hidden" name="prestamo_id_prestamo[]" value="" class="input-small vpositive">'+
+                  '<input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">'+
                   '<input type="hidden" name="prestamo_id_prestamo_nom[]" value="" class="input-small vpositive">'+
                   '<input type="hidden" name="prestamo_id_empleado[]" value="" class="input-small vpositive">'+
                 '</td>'+
@@ -140,6 +150,7 @@
                     '<input type="text" name="pago_empresa[]" value="" class="span12 gasto-cargo" required>'+
                     '<input type="hidden" name="pago_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
                     '<input type="hidden" name="pago_id[]" value="" class="input-small vpositive">'+
+                    '<input type="hidden" name="pago_del[]" value="" id="pago_del">'+
                     '<input type="hidden" name="pago_id_empleado[]" value="" class="input-small vpositive">'+
                     '<input type="hidden" name="pago_id_empresa[]" value="" class="input-small vpositive">'+
                     '<input type="hidden" name="pago_anio[]" value="" class="input-small vpositive">'+
@@ -165,11 +176,18 @@
   var btnDelPagos = function () {
     $('#table-gastos').on('click', '.btn-del-pagos', function(event) {
       var $tr = $(this).parents('tr'),
-          id = $tr.find('.gasto-cargo-id').val(),
+          id         = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
-          total = 0;
+          total      = 0,
+          $pago_id   = $tr.find('#pago_id'),
+          $pago_del  = $tr.find('#pago_del');
 
-      $tr.remove();
+      if ($pago_id.val() != '') {
+        $pago_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
 
       calculaTotalPagos();
     });

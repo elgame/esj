@@ -170,7 +170,12 @@ class caja_chica_prest_model extends CI_Model {
     // prestamos
     foreach ($data['prestamo_monto'] as $key => $ingreso)
     {
-      if ($data['prestamo_id_prestamo'][$key] > 0) {
+      if (isset($data['prestamo_del'][$key]) && $data['prestamo_del'][$key] == 'true' &&
+        isset($data['prestamo_id_prestamo'][$key]) && floatval($data['prestamo_id_prestamo'][$key]) > 0) {
+        // $gastos_ids['delets'][] = $this->getDataGasto($data['prestamo_id_prestamo'][$key]);
+
+        $this->db->delete('otros.cajaprestamo_prestamos', "id_prestamo = ".$data['prestamo_id_prestamo'][$key]);
+      } elseif ($data['prestamo_id_prestamo'][$key] > 0) {
         $prestamos_updt = array(
           'id_prestamo_nom' => ($data['prestamo_id_prestamo_nom'][$key]!=''? $data['prestamo_id_prestamo_nom'][$key]: NULL),
           'id_empleado'     => ($data['prestamo_id_empleado'][$key]!=''? $data['prestamo_id_empleado'][$key]: NULL),
@@ -208,7 +213,12 @@ class caja_chica_prest_model extends CI_Model {
     // pagos
     foreach ($data['pago_importe'] as $key => $ingreso)
     {
-      if ($data['pago_id'][$key] > 0) {
+      if (isset($data['pago_del'][$key]) && $data['pago_del'][$key] == 'true' &&
+        isset($data['pago_id'][$key]) && floatval($data['pago_id'][$key]) > 0) {
+        // $gastos_ids['delets'][] = $this->getDataGasto($data['pago_id'][$key]);
+
+        $this->db->delete('otros.cajaprestamo_pagos', "id_pago = ".$data['pago_id'][$key]);
+      } elseif ($data['pago_id'][$key] > 0) {
         $pagos_updt = array(
           // 'id_pago' => $data['pago_id'][$key],
           'id_empleado'     => ($data['pago_id_empleado'][$key]!=''? $data['pago_id_empleado'][$key]: NULL),

@@ -134,7 +134,8 @@
                                       <td style="width: 100px;">
                                         <input type="text" name="prestamo_empresa[]" value="<?php echo $prestamo->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
                                         <input type="hidden" name="prestamo_empresa_id[]" value="<?php echo $prestamo->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                        <input type="hidden" name="prestamo_id_prestamo[]" value="<?php echo $prestamo->id_prestamo ?>" class="input-small vpositive">
+                                        <input type="hidden" name="prestamo_id_prestamo[]" value="<?php echo $prestamo->id_prestamo ?>" id="prestamo_id_prestamo" class="input-small vpositive">
+                                        <input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">
                                         <input type="hidden" name="prestamo_id_prestamo_nom[]" value="<?php echo $prestamo->id_prestamo_nom ?>" class="input-small vpositive">
                                         <input type="hidden" name="prestamo_id_empleado[]" value="<?php echo $prestamo->id_empleado ?>" class="input-small vpositive">
                                       </td>
@@ -201,7 +202,8 @@
                                     <td style="width: 100px;">
                                       <input type="text" name="pago_empresa[]" value="<?php echo $pago->categoria ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>
                                       <input type="hidden" name="pago_empresa_id[]" value="<?php echo $pago->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                      <input type="hidden" name="pago_id[]" value="<?php echo $pago->id_pago ?>" class="input-small vpositive">
+                                      <input type="hidden" name="pago_id[]" value="<?php echo $pago->id_pago ?>" id="pago_id" class="input-small vpositive">
+                                      <input type="hidden" name="pago_del[]" value="" id="pago_del">
                                       <input type="hidden" name="pago_id_empleado[]" value="<?php echo $pago->id_empleado ?>" class="input-small vpositive">
                                       <input type="hidden" name="pago_id_empresa[]" value="<?php echo $pago->id_empresa ?>" class="input-small vpositive">
                                       <input type="hidden" name="pago_anio[]" value="<?php echo $pago->anio ?>" class="input-small vpositive">
