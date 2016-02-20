@@ -6,7 +6,7 @@
 .33h--*En el ticket de gasto en caja chica que salga de que empresa es en el encabezado,
    y que salga detallada la info de las areas
 0.73h--*En las cajas chicas 1 y 2 poner en el apartado de gastos una opcion para marcar el gasto como reposicion, en reporte de gasto poder visualizar el total de reposicion
---Apartado para generar contra recibo de las facturas de compras como la hoja
+4h--*Apartado para generar contra recibo de las facturas de compras como la hoja
 .42h--En ordenes para cada producto y codigo poner la fecha de la ultima compra al imprimirla
 8.66h--El reporte de piña que me dio pao
 2h--*Reporte para consultar los saldos y del nuevo catalogo (como el reporte que esta del catalogo viejo)

@@ -1,6 +1,6 @@
 
 
- ☐ Contrarecibos
+ ✔ Contrarecibos @done (16-02-19 19:17)
     CREATE TABLE otros.contrarecibos
     (
       id_contrarecibo bigserial NOT NULL,
