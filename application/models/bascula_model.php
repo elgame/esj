@@ -1489,7 +1489,6 @@ class bascula_model extends CI_Model {
     echo $html;
   }
 
-
   public function rde_xls()
   {
     $res = $this->rde_data();
@@ -1542,6 +1541,387 @@ class bascula_model extends CI_Model {
 
     $xls->workbook->send('reporte_diario_entradas.xls');
     $xls->workbook->close();
+  }
+
+  // Reporte diario de entrada cuando son de tipo salida
+  public function rdes_data()
+  {
+    $sql3 = $sql = $sql2 = '';
+
+    $_GET['ffecha1'] = $this->input->get('ffecha1') != '' ? $_GET['ffecha1'] : date('Y-m-d');
+    $_GET['ffecha2'] = $this->input->get('ffecha2') != '' ? $_GET['ffecha2'] : date('Y-m-d');
+    $fecha_compara = 'fecha_tara';
+
+    $this->load->model('areas_model');
+    $_GET['farea'] = $this->input->get('farea') != '' ? $_GET['farea'] : $this->areas_model->getAreaDefault();
+    if ($this->input->get('farea') != '') {
+      if ($this->input->get('farea') != 'all') {
+        // $sql .= " AND b.id_area = " . $_GET['farea'];
+        // $sql2 .= " AND b.id_area = " . $_GET['farea'];
+        $sql3 = " AND id_area = " . $_GET['farea'];
+      }
+    }
+
+    $calidad_val = null;
+    if(isset($_GET['fcalidad']{0})) {
+      $calidad_val = $_GET['fcalidad'];
+    }
+
+    if ($this->input->get('fid_proveedor') != ''){
+      if($this->input->get('ftipo') == 'sa'){
+        $sql .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+        $sql2 .= " AND b.id_cliente = '".$_GET['fid_proveedor']."'";
+      }else{
+        $sql .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+        $sql2 .= " AND b.id_proveedor = '".$_GET['fid_proveedor']."'";
+      }
+    }
+
+    if ($this->input->get('fid_empresa') != ''){
+      $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+      $sql2 .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+    }
+    if ($this->input->get('fstatus') != '')
+    {
+      if ($this->input->get('fstatus') === '1')
+        if($this->input->get('fefectivo') == 'si')
+        {
+          $sql .= " AND b.accion = 'p'";
+          $fecha_compara = 'fecha_pago';
+        }
+        else
+          $sql .= " AND (b.accion = 'p' OR b.accion = 'b')";
+      else
+        $sql .= " AND (b.accion = 'en' OR b.accion = 'sa')";
+    }
+
+    $sql .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    $sql2 .= " AND DATE(b.{$fecha_compara}) BETWEEN '".$_GET['ffecha1']."'  AND '".$_GET['ffecha2']."' ";
+
+    //Filtros del tipo de pesadas
+    if ($this->input->get('ftipo') != '') {
+      $sql .= " AND b.tipo = '{$_GET['ftipo']}'";
+      $sql2 .= " AND b.tipo = '{$_GET['ftipo']}'";
+    }
+
+    $campos = "c.nombre_fiscal AS proveedor, c.cuenta_cpi, ";
+    $table_ms = 'LEFT JOIN clientes c ON c.id_cliente = b.id_cliente';
+    $tipo_rpt = "Salida";
+
+    $response = [];
+
+    $query = $this->db->query(
+      "SELECT b.id_bascula,
+        b.total_cajas AS cajas,
+        b.kilos_neto AS kilos,
+        (b.kilos_neto/(CASE WHEN b.total_cajas>0 THEN b.total_cajas ELSE 1 END)) AS promedio,
+        (b.importe/(CASE WHEN b.kilos_neto>0 THEN b.kilos_neto ELSE 1 END)) AS precio,
+        b.importe,
+        {$campos}
+        b.folio,
+        b.accion AS pagado,
+        Date(b.{$fecha_compara}) AS fecha
+      FROM bascula AS b
+      {$table_ms}
+      WHERE b.status = true
+            {$sql}
+      ORDER BY (b.folio) ASC
+      "
+    );
+
+    $cancelados = $this->db->query(
+      "SELECT SUM(b.importe) as cancelado
+      FROM bascula AS b
+      WHERE b.id_bonificacion is null AND
+            b.status = false
+            {$sql2}
+      ")->row()->cancelado;
+
+    $response['boletas']    = $query->result();
+    $response['cancelados'] = $cancelados;
+    $response['tipo']       = $tipo_rpt;
+    // LEFT JOIN bascula_productos AS bc ON b.id_bascula = bc.id_bascula
+
+    return $response;
+  }
+
+  public function rdes_pdf()
+  {
+      // Obtiene los datos del reporte.
+      $data = $this->rdes_data();
+
+      // echo "<pre>";
+      //   var_dump($data);
+      // echo "</pre>";exit;
+
+      // $rde = $data['rde'];
+
+      // $area = $data['area'];
+      // echo "<pre>";
+      //   var_dump($area);
+      // echo "</pre>";exit;
+
+      $fecha = new DateTime($_GET['ffecha1']);
+      $fecha2 = new DateTime($_GET['ffecha2']);
+
+      $this->load->library('mypdf');
+      // Creación del objeto de la clase heredada
+      $pdf = new MYpdf('P', 'mm', 'Letter');
+
+      if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+      {
+        $this->load->model('empresas_model');
+        $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('fid_empresa'));
+
+        if ($empresa['info']->logo !== '')
+          $pdf->logo = $empresa['info']->logo;
+        $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+      }
+
+      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data['tipo'].'>';
+      $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+      $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+
+      $pdf->AliasNbPages();
+      $pdf->AddPage();
+      $pdf->SetFont('helvetica','', 8);
+
+      $aligns = array('C', 'C', 'C', 'L', 'C', 'C', 'C', 'C', 'C');
+      $aligns1 = array('C', 'C', 'C', 'L', 'R', 'R', 'R', 'R', 'R');
+      $widths = array(6, 20, 17, 55, 16, 25, 25, 17, 25);
+      $header = array('',   'FECHA', 'BOLETA','NOMBRE', 'PROM',
+                      'CAJAS', 'KILOS', 'PRECIO','IMPORTE');
+
+      $pdf->SetFont('helvetica','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      $promedio = 0;
+      $cajas    = 0;
+      $kilos    = 0;
+      $precio   = 0;
+      $importe  = 0;
+      $totalPagado = 0;
+      $totalNoPagado = 0;
+
+      foreach ($data['boletas'] as $key => $caja)
+      {
+        if($pdf->GetY() >= $pdf->limiteY || $key == 0) //salta de pagina si exede el max
+        {
+          if ($key > 0)
+            $pdf->AddPage();
+
+          $pdf->SetFont('helvetica','B', 8);
+          $pdf->SetTextColor(0,0,0);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, false);
+          $pdf->SetY($pdf->GetY()+2);
+        }
+
+        $pdf->SetFont('helvetica','',8);
+        $pdf->SetTextColor(0,0,0);
+
+        $promedio += $caja->promedio;
+        $cajas    += $caja->cajas;
+        $kilos    += $caja->kilos;
+        $precio   += $caja->precio;
+        $importe  += $caja->importe;
+
+        if ($caja->pagado === 'p' || $caja->pagado === 'b')
+          $totalPagado += $caja->importe;
+        else
+          $totalNoPagado += $caja->importe;
+
+        $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
+                       $caja->fecha,
+                       $caja->folio,
+                       substr($caja->proveedor, 0, 28),
+                       String::formatoNumero($caja->promedio, 2, '', false),
+                       $caja->cajas,
+                       $caja->kilos,
+                       String::formatoNumero($caja->precio, 2, '$', false),
+                       String::formatoNumero($caja->importe, 2, '$', false));
+
+        $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns1);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false, false);
+      }
+
+      $pdf->SetY($pdf->GetY()-1);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
+      $pdf->Row(array(
+        'TOTALES',
+        String::formatoNumero($kilos/($cajas>0? $cajas: 1), 2, '', false),
+        $cajas,
+        $kilos,
+        String::formatoNumero($importe/($kilos>0? $kilos: 1), 2, '$', false),
+        String::formatoNumero($importe, 2, '$', false)), false, false);
+
+      if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+      }
+
+      $pdf->SetFont('helvetica','B', 8);
+      // $pdf->SetX(6);
+      $pdf->SetY($pdf->getY() + 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(50, 50, 50, 50));
+      $pdf->Row(array(
+        'PAGADO',
+        'NO PAGADO',
+        'CANCELADO',
+        'TOTAL IMPORTE'), false);
+
+      $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+
+      if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+      }
+      $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(50, 50, 50, 50));
+      $pdf->Row(array(
+        String::formatoNumero($totalPagado, 2, '$', false),
+        String::formatoNumero($totalNoPagado, 2, '$', false),
+        String::formatoNumero($data['cancelados'], 2, '$', false),
+        String::formatoNumero($totalImporte, 2, '$', false)), false);
+
+      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$fecha->format('d/m/Y').'.pdf', 'I');
+  }
+
+  public function rdesfull_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_diario_entradas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    // Obtiene los datos del reporte.
+    $data = $this->rdes_data();
+
+    // $rde = $data['rde'];
+
+    // $area = $data['area'];
+
+    $fecha = new DateTime($_GET['ffecha1']);
+    $fecha2 = new DateTime($_GET['ffecha2']);
+
+    $titulo1 = '';
+    if (isset($_GET['fid_empresa']) && $_GET['fid_empresa'] !== '')
+    {
+      $this->load->model('empresas_model');
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+      $titulo1 = $empresa['info']->nombre_fiscal;
+    }
+
+    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data['tipo'].'>';
+    $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
+    $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:30px;border:1px solid #000;background-color: #cccccc;"></td>
+          <td style="width:50px;border:1px solid #000;background-color: #cccccc;">BOLETA</td>
+          <td style="width:80px;border:1px solid #000;background-color: #cccccc;">CUENTA</td>
+          <td style="width:300px;border:1px solid #000;background-color: #cccccc;">NOMBRE</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">PROM</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">CAJAS</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">KILOS</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">PRECIO</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">IMPORTE</td>
+        </tr>';
+        $promedio = 0;
+        $cajas    = 0;
+        $kilos    = 0;
+        $precio   = 0;
+        $importe  = 0;
+        $totalPagado = 0;
+        $totalNoPagado = 0;
+
+
+        foreach ($data['boletas'] as $caja)
+        {
+          $promedio += $caja->promedio;
+          $cajas    += $caja->cajas;
+          $kilos    += $caja->kilos;
+          $precio   += $caja->precio;
+          $importe  += $caja->importe;
+
+          if ($caja->pagado === 'p' || $caja->pagado === 'b')
+            $totalPagado += $caja->importe;
+          else
+            $totalNoPagado += $caja->importe;
+
+          $html .= '<tr>
+              <td style="width:30px;border:1px solid #000;">'.(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '').'</td>
+              <td style="width:50px;border:1px solid #000;">'.$caja->folio.'</td>
+              <td style="width:80px;border:1px solid #000;">'.$caja->cuenta_cpi.'</td>
+              <td style="width:300px;border:1px solid #000;">'.substr($caja->proveedor, 0, 28).'</td>
+              <td style="width:100px;border:1px solid #000;">'.$caja->promedio.'</td>
+              <td style="width:100px;border:1px solid #000;">'.$caja->cajas.'</td>
+              <td style="width:100px;border:1px solid #000;">'.$caja->kilos.'</td>
+              <td style="width:100px;border:1px solid #000;">'.$caja->precio.'</td>
+              <td style="width:100px;border:1px solid #000;">'.$caja->importe.'</td>
+            </tr>';
+        }
+
+        $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="4">TOTALES</td>
+            <td style="border:1px solid #000;">'.($kilos/($cajas>0?$cajas:1)).'</td>
+            <td style="border:1px solid #000;">'.$cajas.'</td>
+            <td style="border:1px solid #000;">'.$kilos.'</td>
+            <td style="border:1px solid #000;">'.($importe/($kilos>0?$kilos:1)).'</td>
+            <td style="border:1px solid #000;">'.$importe.'</td>
+          </tr>
+          <tr>
+            <td colspan="9"></td>
+          </tr>
+          <tr>
+            <td colspan="9"></td>
+          </tr>';
+
+      $totalImporte = (floatval($totalPagado) + floatval($totalNoPagado)) - floatval($data['cancelados']);
+      $html .= '
+          <tr style="font-weight:bold">
+            <td colspan="3">PAGADO</td>
+            <td colspan="2">NO PAGADO</td>
+            <td colspan="2">CANCELADO</td>
+            <td colspan="2">TOTAL IMPORTE</td>
+          </tr>
+          <tr style="font-weight:bold">
+            <td colspan="3">'.$totalPagado.'</td>
+            <td colspan="2">'.$totalNoPagado.'</td>
+            <td colspan="2">'.$data['cancelados'].'</td>
+            <td colspan="2">'.$totalImporte.'</td>
+          </tr>';
+
+    $html .= '</tbody>
+    </table>';
+
+    echo $html;
   }
 
   /**
@@ -2334,9 +2714,9 @@ class bascula_model extends CI_Model {
 
   public function logBitacora($logBitacora, $idBascula, $data, $usuario_auth, $cajas = null, $all = true)
   {
-    if (isset($data['tipo']) && $data['tipo'] == 'sa') {
-      return 'sa';
-    }
+    // if (isset($data['tipo']) && $data['tipo'] == 'sa') {
+    //   return 'sa';
+    // }
     $camposExcluidos = array(
       'fecha_bruto' => '',
       'fecha_tara'  => '',

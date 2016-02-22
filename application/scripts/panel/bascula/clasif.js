@@ -940,7 +940,8 @@ function calculaTotal ($calculaT) {
       total_descuentos  = 0,
       total_ivas        = 0,
       total_retenciones = 0,
-      total_factura     = 0;
+      total_factura     = 0,
+      total_cajas       = 0;
 
   var $sinCosto = $('#dsincosto'),
       isCheckedSinCosto = $sinCosto.is(':checked');
@@ -958,6 +959,19 @@ function calculaTotal ($calculaT) {
     }
   });
   total_importes = trunc2Dec(total_importes);
+
+  $('input#prod_dcantidad').each(function(i, e) {
+    var $parent = $(this).parent().parent(), idProd;
+    if ( ! isCheckedSinCosto) {
+      total_cajas += parseFloat($(this).val());
+    } else {
+      idProd = $parent.find('#prod_did_prod').val();
+      if (idProd != '49' && idProd != '50' && idProd != '51' && idProd != '52' && idProd != '53') {
+        total_cajas += parseFloat($(this).val());
+      }
+    }
+  });
+  total_cajas = trunc2Dec(total_cajas);
 
   $('input#prod_ddescuento').each(function(i, e) {
     var $parent = $(this).parent().parent(), idProd;
@@ -1019,6 +1033,8 @@ function calculaTotal ($calculaT) {
 
   $('#totfac-format').html(util.darFormatoNum(total_factura));
   $('#total_totfac').val(total_factura);
+  $('#ptotal_cajas').val(total_cajas);
+  $('#ptotal').val(total_factura);
 
   $('#total_letra').val(util.numeroToLetra.covertirNumLetras(total_factura.toString(), $('#moneda').val()) );
 }

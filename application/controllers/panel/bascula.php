@@ -665,7 +665,10 @@ class bascula extends MY_Controller {
   public function rde_pdf()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->rde_pdf();
+    if ($this->input->get('ftipo') == 'sa') {
+      $this->bascula_model->rdes_pdf();
+    } else
+      $this->bascula_model->rde_pdf();
   }
 
   public function rde_xls()
@@ -677,7 +680,10 @@ class bascula extends MY_Controller {
   public function rdefull_xls()
   {
     $this->load->model('bascula_model');
-    $this->bascula_model->rdefull_xls();
+    if ($this->input->get('ftipo') == 'sa')
+      $this->bascula_model->rdesfull_xls();
+    else
+      $this->bascula_model->rdefull_xls();
   }
 
   public function get_calidades()

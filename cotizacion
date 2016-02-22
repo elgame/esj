@@ -8,10 +8,41 @@
 
 
 
--*En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no hay ventas) y que tenga saldo
-  el proveedor de los anticipos y de ahi pueda pagar facturas o ventas echas sin que se refleje en el banco
-- En ordenes de compra y de requi poner impuestos de retencion de iva e isr y ponerlo en las polizas en compras tambien
+2h--Vale de caja chica como en el correo y bodega
+.30h--*reporte de prestamos poner mostrar los prestamos por empresa de cada trabajador (filtro de empresa)
+1h--*Cuentas por pagar en normex, 1er total general es la suma de los 2 proveedores de lo que se muestra,
+  2do total general agregarle la suma del iva de los productos = total final,
+  la diferencia = total final - 1er total general
 
+- 2h Crear catalogo de lavores para el modulo de actividades por trabajador
+- 22.5h Nomina registro de actividad por trabajadores agregar actividades por dia, poder agregar multiples ranchos, lavores y horas extras por empleado,
+  el catalogo de lavores pasarlo al menu nomina, Agregar una columna para seleccionar falta, asistencia, oncapasidad, permiso,
+  y que modifique el modulo de asistencia de nomina. Las horas extras que se agreguen como bonos en la nomina.
+- 1.5h Normex y Sagarpa (en sagarpa se capturaran gastos y en cuentas por pagar de Normex mostrar el reporte de certificados y demas productos ligados a las compras de los 2 proveedores)
+- 3h Crear poliza de diarios de productos
+- 2h En los recibos de nomina poner el subsidio del lado de deducciones en negativo
+- 7.5h Crear los catalogos de software y sistema con las opciones del archivo que me pasaron
+- 10h En bascula en las boletas de salida que agreguen las clasificaciones y las de entradas las areas, modificar reportes
+- 6h En remisiones y facturacion poder registrar en dolares, pedir el tipo de cambio para hacer la conversion
+- 15h Hacer de nuevo la caja chica de bodega como el archivo que me dieron
+- 2h Imprimir las remisiones en formato de ticket
+- 8h Crear un catalogo de productores y poner la opcion en bascula para que los seleccionen
+- 14h Poner un boton para que borreo toda la informacion del sistema, programar para que la informacion se respalde diario en dropbox y genere un respaldo mensual
+- 9h Exportar a excel los demas reportes faltantes
+- 7h Crear un catalogo independiente para la bodega
+- 13h Agregar opcion para seleccionar una empresa y en los modulos (ordenes, compras, facturacion, etc) que cargue en automatico la empresa seleccionada
+- 1h Descargar en excel los reportes de existencias
+- 2h Crear reporte de las boletas que el chofer son productores
+
+- Poner en trabajadores un numero de empleado y validar que no se repita
+- Modificar el reporte de prestamos de trabajadores para poder mostrar todos los trabajadores y su saldo
+- Agregar la opcion de finiquito fiscal por despido (calculo de indemnizaciones) y en el recibo de finiquito con sueldo real.
+- En las incapasidades que pida el % que se va subsidiar
+- En los reportes de nomina poner nombre completo del trabajador y el SDI
+- No dejar modificar las boletas cuendo ya se capturaron los kilos de salida, asi no se modifiquen desde el empaque
+- En cuentas por cobrar poder agregar anticipos a un proveedor (al agregar que se refleje el movimiento en bancos pero no cobranza) y que tenga saldo
+  a favor el proveedor de los anticipos y de ese saldo que se pague las facturas o ventas.
+- En ordenes de compra y de requisicion poner impuestos de retencion de iva e isr y ponerlo en las polizas en compras tambien
 - Estados de cuenta bancos poner filtros de ingresos y gastos
 - Reporte diario de entrada de bascula poner que salgan todas las areas
 - Ordenes de flete poner la fecha de la factura ligada
