@@ -366,7 +366,7 @@
                               <tbody>
                                 <?php
                                   $totalGastos = 0;
-                                  if (count($caja['gastos']) == 0) {
+                                  if (count($caja['gastos']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
                                     foreach ($_POST['gasto_concepto'] as $key => $concepto) {
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
                                         <tr>

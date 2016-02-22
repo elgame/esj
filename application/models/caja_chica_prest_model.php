@@ -61,9 +61,11 @@ class caja_chica_prest_model extends CI_Model {
         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
         WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
         UNION
-        SELECT cp.id_pago, np.id_empleado, np.id_empresa, np.anio, np.semana, np.id_prestamo, cp.id_categoria, cp.concepto, np.monto, np.fecha,
-          cp.id_nomenclatura, null AS categoria, null AS nomenclatura
+        SELECT cp.id_pago, np.id_empleado, np.id_empresa, np.anio, np.semana, np.id_prestamo, cp.id_categoria,
+          (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || '; Sem ' || np.semana) AS concepto,
+          np.monto, np.fecha, cp.id_nomenclatura, null AS categoria, null AS nomenclatura
         FROM nomina_fiscal_prestamos np
+        INNER JOIN usuarios u ON u.id = np.id_empleado
         LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
         WHERE np.fecha = '{$fecha}' AND cp.id_pago IS NULL
       ) AS t
