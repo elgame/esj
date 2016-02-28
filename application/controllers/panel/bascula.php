@@ -325,6 +325,8 @@ class bascula extends MY_Controller {
         // Indicara si se necesita autorizacion para modificar.
         $params['autorizar'] = $info['info'][0]->no_impresiones > 0 ? true : false;
         $params['certificado'] = $info['info'][0]->certificado === 't' ? '1' : '0';
+
+        $params['fotos'] = $info['bascula_fotos'];
       }
       else
       {

@@ -161,6 +161,8 @@ class bascula_model extends CI_Model {
         $this->db->insert('bascula', $data);
         $idb = $this->db->insert_id();
         $new_boleta = true;
+
+        $this->addSnapshot($idb, $data['accion']);
       }
 
       $data2 = array(
@@ -284,6 +286,10 @@ class bascula_model extends CI_Model {
         $this->updateBascula($idb, $data2, $cajas, $logBitacora, $usuario_auth);
       // }
 
+      if (!$bonificacion && isset($data2['accion']) && $data2['accion'] == 'sa') {
+        $this->addSnapshot($idb, $data2['accion']);
+      }
+
       $msg = '7';
       if ($bonificacion)
         $msg = '12';
@@ -333,6 +339,56 @@ class bascula_model extends CI_Model {
     return array('passes' => true);
   }
 
+  public function addSnapshot($idBascula, $tipo='en')
+  {
+    $path = UploadFiles::validaDir(date("Y-m"), 'application/media/bascula_snap/');
+
+    if ($this->urlExists($this->config->item('snapshot_cam1'))) {
+      $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
+          ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 1')->where("tipo = '{$tipo}'")->get()->row();
+      if (!isset($sql_res->id_bascula)) {
+        $url = $path."{$idBascula}_cam1_{$tipo}.jpg";
+        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam1')));
+        $datos = [
+          'id_bascula' => $idBascula,
+          'no_camara'  => '1',
+          'url_foto'   => $url,
+          'tipo'       => $tipo
+        ];
+        $this->db->insert('bascula_fotos', $datos);
+      }
+    }
+
+    if ($this->urlExists($this->config->item('snapshot_cam2'))) {
+      $sql_res = $this->db->select('id_bascula, no_camara, url_foto, tipo')
+          ->from('bascula_fotos')->where('id_bascula = ' . $idBascula)->where('no_camara = 2')->where("tipo = '{$tipo}'")->get()->row();
+      if (!isset($sql_res->id_bascula)) {
+        $url = $path."{$idBascula}_cam2_{$tipo}.jpg";
+        file_put_contents($url, file_get_contents($this->config->item('snapshot_cam2')));
+        $datos = [
+          'id_bascula' => $idBascula,
+          'no_camara'  => '2',
+          'url_foto'   => $url,
+          'tipo'       => $tipo
+        ];
+        $this->db->insert('bascula_fotos', $datos);
+      }
+    }
+
+  }
+
+  public function urlExists($url)
+  {
+    $file_headers = @get_headers($url);
+    if($file_headers[0] == 'HTTP/1.1 404 Not Found') {
+      $exists = false;
+    }
+    else {
+      $exists = true;
+    }
+    return $exists;
+  }
+
   /**
    * Obtiene la informacion de una bascula
    * @param  boolean $id
@@ -378,6 +434,7 @@ class bascula_model extends CI_Model {
     $data['info'] = array();
     $data['cajas'] = array();
     $data['cajas_clasf'] = array();
+    $data['bascula_fotos'] = array();
 
     if ($sql_res->num_rows() > 0)
     {
@@ -410,6 +467,16 @@ class bascula_model extends CI_Model {
 
         if ($sql_res->num_rows() > 0)
           $data['cajas_clasf'] = $sql_res->result();
+
+        $sql_res = $this->db
+          ->select('id_bascula, no_camara, url_foto, tipo')
+          ->from('bascula_fotos')
+          ->where('id_bascula = ' . $data['info'][0]->id_bascula)
+          ->order_by('no_camara', 'asc')->order_by('tipo', 'asc')
+          ->get();
+
+        if ($sql_res->num_rows() > 0)
+          $data['bascula_fotos'] = $sql_res->result();
       }
     }
 

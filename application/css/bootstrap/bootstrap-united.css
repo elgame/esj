@@ -2474,6 +2474,9 @@ input[type="submit"].btn.btn-mini {
   position: relative;
   *zoom: 1;
   *margin-left: .3em;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 .btn-group:before,
 .btn-group:after {

@@ -91,6 +91,17 @@
         if (isset($idb)) {
         ?>
           <a href="<?php echo base_url('panel/bascula/imprimir_recepcion/?id='.$idb) ?>" class="btn btn-primary" title="Recepción" target="_blank">Recepción</a>
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">Fotos <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+          <?php foreach ($fotos as $key => $value) {
+            $nombre = ($value->tipo=='en'? 'Entrada': 'Salida')." Cam {$value->no_camara}";
+          ?>
+              <li><a href="<?php echo base_url($value->url_foto) ?>" target="_blank"><?php echo $nombre ?></a></li>
+          <?php
+          } ?>
+            </ul>
+          </div>
         <?php
         }
         if ($accion !== 'n')

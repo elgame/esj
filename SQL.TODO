@@ -1,4 +1,7 @@
 
+ ☐ Bascula Snapshot
+   ALTER TABLE bascula_fotos DROP CONSTRAINT bascula_fotos_pkey;
+   ALTER TABLE bascula_fotos ADD CONSTRAINT bascula_fotos_pkey PRIMARY KEY(id_bascula, no_camara, tipo);
 
  ✔ Contrarecibos @done (16-02-19 19:17)
     CREATE TABLE otros.contrarecibos
