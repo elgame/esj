@@ -1,5 +1,5 @@
 
- ☐ Bascula Snapshot
+ ✔ Bascula Snapshot @done (16-03-03 11:37)
    ALTER TABLE bascula_fotos DROP CONSTRAINT bascula_fotos_pkey;
    ALTER TABLE bascula_fotos ADD CONSTRAINT bascula_fotos_pkey PRIMARY KEY(id_bascula, no_camara, tipo);
 
