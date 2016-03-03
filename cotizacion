@@ -1,24 +1,24 @@
-- Apartado de ordenes de requisición, comparación de hasta 3 proveedores en la orden y generación de orden de compra, se agrego la impresora selladora de documentos para las entradas de almacén.
-- Códigos de Maquinaria, equipos e instalaciones, incorporación en ordenes compra, ordenes requisición, caja chica
-- En cuentas por pagar y bancos se rediseño los pagos masivos
-- Bascula se agrego otro niveles de seguridad en las modificaciones, se agrego segunda impresora para las boletas de entrada
-- Cuentas por cobrar y facturación se adapto para agregar anticipos a clientes
 
-- Esquineros 4 chui, en los fleje poder poner varios en pallet
-
-
-
-2h--Vale de caja chica como en el correo y bodega
-.30h--*reporte de prestamos poner mostrar los prestamos por empresa de cada trabajador (filtro de empresa)
-1h--*Cuentas por pagar en normex, 1er total general es la suma de los 2 proveedores de lo que se muestra,
-  2do total general agregarle la suma del iva de los productos = total final,
-  la diferencia = total final - 1er total general
-
+- 2.2h Capturar fotos al registrar las boletas de bascula
+- 1.3h Poder crear notas de credito en dolares en facturacion y notas de remision
+- 6h Crear la caja No 3 (caja de prestamos) que es para controlar los prestamos a trabajadores
+- 2.2h Crear caja 4 para el registro de ingresos y gastos de coco hermana de la señora, mandar correo en cada gasto e imprimir en ticket
+- 1.66h En cuentas por cobrar poner la opcion de que muestre los estados de cuenta en dolares, que salga otra columna con esa informacion
+- .16h En la boleta de bascula poner quien imprimio, el usuario que registro la boleta
+- .33h En el ticket de gasto en caja chica, que salga de que empresa es el gasto, y que salga detallada la info de los codigos
+- 0.73h En las cajas chicas 1 y 2 poner en el apartado de gastos una opcion para marcar el gasto como reposicion, en reporte de gasto poder visualizar el total de reposicion
+- 4h Apartado para generar contra recibo de las facturas de compras como la hoja que me dio triana
+- .42h En imprimir las ordenes para cada producto y codigo poner columna con la fecha de la ultima compra
+- 8.66h Crear el reporte de piña para registrar las entradas, rendimientos y muestras como en la hoja que me dio paola
+- 2h Reporte para consultar los saldos de las cuentas del catalogo nuevo (como el reporte que esta del catalogo viejo)
+- 11h Cargar de nuevo los codigos de catalogo que va pasar la señora y en cajas chicas, reportes de cajas chicas, ordenes de requisicion, ordenes de compra, reportes de compras, en registro de actividades x trabajador (nomina), modificar para que use el nuevo catalogo
+- 2h Generar vale para los gastos en las cajas chicas
+- .30h En reporte de prestamos poner filtro de empresa y mostrar los prestamos agrupados por empresa
 - 2h Crear catalogo de lavores para el modulo de actividades por trabajador
 - 22.5h Nomina registro de actividad por trabajadores agregar actividades por dia, poder agregar multiples ranchos, lavores y horas extras por empleado,
   el catalogo de lavores pasarlo al menu nomina, Agregar una columna para seleccionar falta, asistencia, oncapasidad, permiso,
   y que modifique el modulo de asistencia de nomina. Las horas extras que se agreguen como bonos en la nomina.
-- 1.5h Normex y Sagarpa (en sagarpa se capturaran gastos y en cuentas por pagar de Normex mostrar el reporte de certificados y demas productos ligados a las compras de los 2 proveedores)
+- 2.5h Normex y Sagarpa (en sagarpa se capturaran gastos y en cuentas por pagar de Normex mostrar el reporte de certificados y demas productos ligados a las compras de los 2 proveedores), separar los totales por proveedor
 - 3h Crear poliza de diarios de productos
 - 2h En los recibos de nomina poner el subsidio del lado de deducciones en negativo
 - 7.5h Crear los catalogos de software y sistema con las opciones del archivo que me pasaron
@@ -92,3 +92,6 @@
 - Poner segunda cajas chica lo que capturen en una que no salga en la otra pero que los reportes sea lo mismo, manejaria 2 saldos diferentes una por cada caja
 
 - Se creo modulo de ventas del día, después se cambio a remisiones obligatorias, validación de productos requeridos al facturar
+- Bascula se agrego otro niveles de seguridad en las modificaciones, se agrego segunda impresora para las boletas de entrada
+- Apartado de ordenes de requisición, comparación de hasta 3 proveedores en la orden y generación de orden de compra, se agrego la impresora selladora de documentos para las entradas de almacén.
+- En cuentas por pagar y bancos se rediseño los pagos masivos
