@@ -426,6 +426,7 @@ $(function(){
     calculaTotales();
   });
 
+  var winFotos;
   // Evento click para el boton cargar folio.
   $('#loadFolio').on('click', function(event) {
     var $form = $('#form'),
@@ -456,6 +457,9 @@ $(function(){
         // location.href = base_url + 'panel/bascula/agregar?folio=' + $folio.val() + editar + focus;
 
         location.href = base_url + 'panel/bascula/agregar?idb=' + data + editar + focus;
+
+        winFotos = window.open(base_url + 'panel/bascula/fotos?idb=' + data, "Fotos");
+        // winFotos.location.reload();
 
         } else {
           noty({"text": 'El folio no existe para el tipo y area especificado!', "layout":"topRight", "type": 'error'});

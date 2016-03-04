@@ -20,6 +20,7 @@ class bascula extends MY_Controller {
     'bascula/ajax_check_limite_proveedor/',
     'bascula/ajax_get_ranchos/',
 
+    'bascula/fotos/',
     'bascula/ajax_pagar_boleta/',
     'bascula/auth_modify/',
     'bascula/puede_modificar/',
@@ -438,6 +439,28 @@ class bascula extends MY_Controller {
       $this->bascula_model->imprimir_boletaR($this->input->get('id'));
     else
       $this->load->view('panel/bascula/print_boleta_recepcion');
+  }
+
+  /**
+   * Ver las fotos capturadas
+   * @return [type] [description]
+   */
+  public function fotos()
+  {
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Fotos Bascula'
+    );
+
+    $this->load->model('bascula_model');
+    $info = $this->bascula_model->getBasculaInfo($_GET['idb']);
+    $params['fotos'] = $info['bascula_fotos'];
+    $params['noHeader'] = true;
+
+    $this->load->view('panel/header', $params);
+    // $this->load->view('panel/general/menu', $params);
+    $this->load->view('panel/bascula/fotos', $params);
+    $this->load->view('panel/footer');
   }
 
   /**

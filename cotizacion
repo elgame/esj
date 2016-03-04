@@ -1,3 +1,4 @@
+Total 202.46 hrs + lo de abajo que no tiene
 
 - 2.2h Capturar fotos al registrar las boletas de bascula
 - 1.3h Poder crear notas de credito en dolares en facturacion y notas de remision
@@ -64,7 +65,6 @@
 - Reporte de ventas poder seleccionar varias empresas y que ponga un total general de las empresas
 - Bascula poner boton de reimprimir la boleta de entrada
 - Poliza de nomina cambiaron la agrupacion de las cuentas de ingreso
-
 - Compras al ligar las facturas que seleccionen la empresa para que agreguen los certificados, en el reporte de cuentas por pagar que cargue los certificados de diferentes empresas
 - En todos los codigos del catalogo en caja chica, ordenes, salidas almacen, busque por codigo y por nombre en la caja de texto
 - Reporte de ingresos y gastos de caja chica
@@ -84,13 +84,11 @@
 	- Seleccionar codigos del catalogo por producto para los reportes
 	- Poner opcion para copiar el codigo a todos los productos de la salida y no sea uno por uno
 	- Poliza de ventas, quitar las facturas de pagos en parcialidades solo tienen que salir las totales no parciales
-
 - Pago en parcialidades para poder ligar los xml a las polizas por cada abono que realice el cliente
   - Al momento de agregar el abono generar en automatico la factura de pago en parcialidades si es que no se pago el total o si ya se habia agregado un abono indicar el consecutivo de dicho pago
   - Poner esas facturas en un apartado diferente para visualizar el listado de pagos en parcialidades
   - En Estado de cuenta poner las facturas de pagos en parcialidades y que ponga el folio de la factura e importes
 - Poner segunda cajas chica lo que capturen en una que no salga en la otra pero que los reportes sea lo mismo, manejaria 2 saldos diferentes una por cada caja
-
 - Se creo modulo de ventas del día, después se cambio a remisiones obligatorias, validación de productos requeridos al facturar
 - Bascula se agrego otro niveles de seguridad en las modificaciones, se agrego segunda impresora para las boletas de entrada
 - Apartado de ordenes de requisición, comparación de hasta 3 proveedores en la orden y generación de orden de compra, se agrego la impresora selladora de documentos para las entradas de almacén.
