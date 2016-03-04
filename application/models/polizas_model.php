@@ -2168,7 +2168,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios('0',1)."\r\n"; //ajuste
 
           if ($value->cuenta_cpi_proveedor != '' && $value->cuenta_cpi_proveedor != $cuenta_cuadre && $value->es_traspaso == 0) { //&& $value->banco_cuenta_contpaq != ''
-          // Pago a proveedores y sin cuenta seleccionada
+            // Pago a proveedores y sin cuenta seleccionada
             //Colocamos el Cargo al Proveedor que realizo el pago
             $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
                               $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
@@ -2191,19 +2191,20 @@ class polizas_model extends CI_Model {
                                 $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                                 $this->setEspacios($value->nombre_fiscal,100). //concepto
                                 $this->setEspacios('',4)."\r\n"; //segmento de negocio
+
+              //Colocamos el Abono al Proveedor que realizo el pago
+              $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                                $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
+                                $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
+                                $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
+                                $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)) , 20).  //importe movimiento
+                                $this->setEspacios('0',10).  //iddiario poner 0
+                                $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                                $this->setEspacios($value->nombre_fiscal,100). //concepto
+                                $this->setEspacios('',4)."\r\n"; //segmento de negocio
             }
-            //Colocamos el Abono al Proveedor que realizo el pago
-            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
-                              $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq
-                              $this->setEspacios($value->ref_movimiento,10).  //referencia movimiento
-                              $this->setEspacios('1',1).  //tipo movimiento, banco es un abono = 1
-                              $this->setEspacios( $this->numero((isset($total_retiro_banco)? $total_retiro_banco: $value->total)) , 20).  //importe movimiento
-                              $this->setEspacios('0',10).  //iddiario poner 0
-                              $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
-                              $this->setEspacios($value->nombre_fiscal,100). //concepto
-                              $this->setEspacios('',4)."\r\n"; //segmento de negocio
           } elseif($value->cuenta_cpi_proveedor == $cuenta_cuadre && $value->banco_cuenta_contpaq != '' && $value->es_traspaso == 0) {
-          // Pago de comisiones y Nomina, prestamos (cargo y abono)
+            // Pago de comisiones y Nomina, prestamos (cargo y abono)
             //Colocamos el Cargo a la cuenta que se selecciono
             $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
                               $this->setEspacios($value->banco_cuenta_contpaq,30).  //cuenta contpaq cuenta_cpi_proveedor
@@ -2215,7 +2216,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($value->nombre_fiscal,100). //concepto
                               $this->setEspacios('',4)."\r\n"; //segmento de negocio
           } elseif($value->es_traspaso > 0) {
-          // Traspaso de dinero
+            // Traspaso de dinero
             //Colocamos el Cargo a la cuenta que se selecciono
             $response['data'] .= $this->setEspacios('M',2). //movimiento = hw_Modifyobject(connection, object_to_change, remove, add)
                               $this->setEspacios($value->cuenta_cpi_proveedor,30).  //cuenta contpaq cuenta_cpi_proveedor
