@@ -268,6 +268,7 @@ class cuentas_pagar_model extends privilegios_model{
 			$fecha2 = $_GET['ffecha2'];
 			$fecha1 = $_GET['ffecha1'];
 		}
+		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
 
 		$sql = $sqlt = $sql2 = '';
 		if($this->input->get('ftipo')=='pv'){
@@ -293,52 +294,59 @@ class cuentas_pagar_model extends privilegios_model{
 			FROM
 				(
 					SELECT
-						c.id_proveedor,
-						c.nombre_fiscal,
-						Sum(f.total) AS total,
-						Sum(f.importe_iva) AS iva,
-						COALESCE(Sum(faa.abonos),0) as abonos,
-						COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-						'f'::text as tipo
-					FROM
-						proveedores AS c
-						INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
-						LEFT JOIN (
-							(
-								SELECT
-									f.id_proveedor,
-									f.id_compra,
-									Sum(fa.total) AS abonos
-								FROM
-									compras AS f
-										INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
-								WHERE f.status <> 'ca'
-									AND f.id_proveedor = '{$_GET['id_proveedor']}'
-									AND Date(fa.fecha) <= '{$fecha2}'{$sql}
-								GROUP BY f.id_proveedor, f.id_compra
-							)
-							UNION
-							(
-								SELECT
-									f.id_proveedor,
-									f.id_compra,
-									Sum(f.total) AS abonos
-								FROM
-									compras AS f
-								WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
-									AND f.id_proveedor = '{$_GET['id_proveedor']}'
-									AND Date(f.fecha) <= '{$fecha2}'{$sql}
-								GROUP BY f.id_proveedor, f.id_compra
-							)
-						) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
-					WHERE c.id_proveedor = '{$_GET['id_proveedor']}' AND f.status <> 'ca' AND f.status <> 'b'
-						AND Date(f.fecha) < '{$fecha1}'{$sql}
-					GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
+            c.id_proveedor,
+            c.nombre_fiscal,
+            Sum(f.total) AS total,
+            Sum(f.importe_iva) AS iva,
+            COALESCE(Sum(faa.abonos),0) as abonos,
+            COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+            'f'::text as tipo
+          FROM
+            proveedores AS c
+            INNER JOIN compras AS f ON c.id_proveedor = f.id_proveedor
+            LEFT JOIN (
+              SELECT
+                d.id_proveedor,
+                d.id_compra,
+                Sum(d.abonos) AS abonos
+              FROM
+              (
+                SELECT
+                  f.id_proveedor,
+                  f.id_compra,
+                  Sum(fa.total) AS abonos
+                FROM
+                  compras AS f
+                    INNER JOIN compras_abonos AS fa ON f.id_compra = fa.id_compra
+                WHERE f.status <> 'ca' AND f.status <> 'b'
+                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  AND Date(fa.fecha) <= '{$fecha2}'{$sql}
+                GROUP BY f.id_proveedor, f.id_compra
 
+                UNION
+
+                SELECT
+                  f.id_proveedor,
+                  f.id_nc AS id_compra,
+                  Sum(f.total) AS abonos
+                FROM
+                  compras AS f
+                WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL
+                  AND f.id_proveedor = '{$_GET['id_proveedor']}'
+                  AND Date(f.fecha) <= '{$fecha2}'{$sql}
+                GROUP BY f.id_proveedor, f.id_compra
+              ) AS d
+              GROUP BY d.id_proveedor, d.id_compra
+            ) AS faa ON f.id_proveedor = faa.id_proveedor AND f.id_compra = faa.id_compra
+          WHERE c.id_proveedor = '{$_GET['id_proveedor']}' AND f.status <> 'ca' AND f.status <> 'b'
+             AND id_nc IS NULL
+             AND Date(f.fecha) < '{$fecha1}'
+             {$sql}
+          GROUP BY c.id_proveedor, c.nombre_fiscal, faa.abonos, tipo
 				) AS sal
 			{$sql2}
 			GROUP BY id_proveedor, tipo
-		");
+			");
 
 		/*** Facturas y ventas en el rango de fechas ***/
 		$res = $this->db->query(

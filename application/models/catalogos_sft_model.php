@@ -456,7 +456,8 @@ class catalogos_sft_model extends CI_Model{
 	 */
 	public function getInfoCatCodigos($id){
 		$res = $this->db->query(
-				"SELECT ca.id_cat_codigos, ca.codigo, ca.descripcion, ca.nombre, ca.ubicacion, ca.otro_dato, ca.status, ca.id_padre
+				"SELECT ca.id_cat_codigos, ca.codigo, ca.descripcion, ca.nombre, ca.ubicacion, ca.otro_dato, ca.status, ca.id_padre,
+          COALESCE(ca.nombre, ca.descripcion) AS nombre_full
 				FROM otros.cat_codigos ca
 				WHERE ca.id_cat_codigos = {$id}
 				ORDER BY ca.codigo ASC");

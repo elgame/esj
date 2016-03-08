@@ -273,7 +273,16 @@ class mypdf_ticket extends FPDF {
 
       $this->SetY($this->GetY() - 3);
       $this->SetFounts(array($this->fount_txt), array(1));
-      $this->Row(array('FIRMA'), false, false);
+      $this->Row(array('FIRMA CHOFER'), false, false);
+
+      $this->SetAligns(array('C'));
+      $this->SetFont($this->fount_txt, '', $this->font_size);
+      $this->SetY($this->GetY() + 5);
+      $this->Row(array('--------------------------------------------------'), false, false);
+
+      $this->SetY($this->GetY() - 3);
+      $this->SetFounts(array($this->fount_txt), array(1));
+      $this->Row(array('FIRMA RECIBIDO'), false, false);
     }
 
     public function printTicket($data, $data_prod, $cajas_clasf){

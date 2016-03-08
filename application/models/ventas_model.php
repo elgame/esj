@@ -1702,13 +1702,14 @@ class Ventas_model extends privilegios_model{
     $pdf->MultiCell($pdf->pag_size[0], 4, $factura['info']->empresa->nombre_fiscal, 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 8);
     $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, 'RFC: '.$factura['info']->empresa->rfc, 0, 'L');
+    $pdf->MultiCell($pdf->pag_size[0], 4, 'RFC: '.$factura['info']->empresa->rfc, 0, 'C');
 
     $pdf->SetWidths(array($pdf->pag_size[0]));
-    $pdf->SetAligns(array('L'));
+    $pdf->SetAligns(array('C'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array(
+        ($factura['info']->id_empresa==11? 'Sucursal: Bodega Mercado de Abastos, ': '').
         $factura['info']->empresa->calle.' No. '.$factura['info']->empresa->no_exterior.
         ((isset($factura['info']->empresa->no_interior)) ? ' Int. '.$factura['info']->empresa->no_interior : '').
         ((isset($factura['info']->empresa->colonia)) ? ' Col. '.$factura['info']->empresa->colonia : '').
@@ -1724,7 +1725,7 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_txt), array(1, 1));
     $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array(($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'),
+    $pdf->Row2(array(($factura['info']->id_nc==''? 'Venta '.($factura['info']->condicion_pago=='cr'? 'a Credito': 'al Contado'): 'Nota de Credito'),
                   "Folio: ".$factura['info']->serie.'-'.$factura['info']->folio ), false, false, 5);
 
     $pdf->SetXY(0, $pdf->GetY());
@@ -1735,10 +1736,10 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('L'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->SetX(0);
-    $pdf->Row2(array( "RECEPTOR" ), false, false, 5);
-
+    $pdf->Row2(array( "FECHA: ".String::fechaATexto($factura['info']->fecha, '/c') ), false, false, 4);
     $pdf->SetX(0);
-    $pdf->Row2(array( $factura['info']->cliente->nombre_fiscal ), false, false, 6);
+    $pdf->Row2(array( "CLIENTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
+
     $pdf->SetXY(0, $pdf->GetY());
     $pdf->Row2(array( "RFC: ".$factura['info']->cliente->rfc ), false, false, 5);
 
@@ -1903,28 +1904,51 @@ class Ventas_model extends privilegios_model{
 
     $pdf->SetWidths(array($pdf->pag_size[0]));
     $pdf->SetAligns(array('L'));
-    $pdf->SetFounts(array($pdf->fount_txt), array(0));
+    if ($factura['info']->condicion_pago == 'cr') {
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-18);
+      $pdf->SetAligns(array('R'));
+      $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array( "OTORGANTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
+      // $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array(
+          'DOMICILIO: '.(isset($factura['info']->cliente->calle) ? $factura['info']->cliente->calle : '').
+          ' No. '.(isset($factura['info']->cliente->no_exterior) ? $factura['info']->cliente->no_exterior : '').
+          ((isset($factura['info']->cliente->no_interior)) ? ' Int. '.$factura['info']->cliente->no_interior : '').
+          ((isset($factura['info']->cliente->colonia)) ? ' Col. '.$factura['info']->cliente->colonia : '').
+          ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
+          ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
+       ), false, false);
+    } else {
+      $pdf->SetFounts(array($pdf->fount_txt), array(0));
 
-    $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array($factura['info']->total_letra ), false, false, 6);
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array($factura['info']->total_letra ), false, false, 6);
 
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row2(array($factura['info']->forma_pago ), false, false, 5);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array($factura['info']->forma_pago ), false, false, 5);
 
-    $pdf->SetXY(0, $pdf->GetY()-1);
-    $pdf->Row2(array($factura['info']->metodo_pago ), false, false, 5);
+      $pdf->SetXY(0, $pdf->GetY()-1);
+      $pdf->Row2(array($factura['info']->metodo_pago ), false, false, 5);
+    }
 
 
     // ///////////////////
     // // Observaciones //
     // ///////////////////
-
-    $pdf->SetXY(0, $pdf->GetY()-1);
-    if ( ! empty($factura['info']->observaciones))
+    $pdf->SetAligns(array('L'));
+    if ( ! empty($factura['info']->observaciones)){
+      $pdf->SetXY(0, $pdf->GetY()+2);
       $pdf->Row2(array("Observaciones: ".$factura['info']->observaciones ), false, false, 5);
+    }
 
 
-    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetXY(0, $pdf->GetY()+7);
     $pdf->SetFont($pdf->fount_txt, '', 8);
     $pdf->MultiCell($pdf->pag_size[0], 2, '_____________________________________', 0, 'C');
     $pdf->SetXY(0, $pdf->GetY()+1.5);
