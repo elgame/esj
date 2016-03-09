@@ -290,5 +290,38 @@ var util = {
         return ['EURO', 'EUROS'];
       }
     }
+	},
+
+	// Obtiene las hrs transcurridas entre 2 horas
+	// Formato hh:mm
+	restarHoras: function(inicio, fin) {
+		// 0:hrs,1:min
+		inicio = inicio.split(':');
+		if (inicio.length != 2) return false;
+		// 0:hrs,1:min
+		fin = fin.split(':');
+		if (fin.length != 2) return false;
+
+		transcurridoMinutos = fin[1] - inicio[1];
+		transcurridoHoras = fin[0] - inicio[0];
+
+		if (transcurridoMinutos < 0) {
+			transcurridoHoras--;
+			transcurridoMinutos = 60 + transcurridoMinutos;
+		}
+
+		horas = transcurridoHoras.toString();
+		minutos = transcurridoMinutos.toString();
+
+		if (horas.length < 2) {
+			horas = "0"+horas;
+		}
+		if (horas.length < 2) {
+			horas = "0"+horas;
+		}
+		if (minutos.length < 2) {
+			minutos = "0"+minutos;
+		}
+		return horas+":"+minutos;
 	}
 };

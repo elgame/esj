@@ -47,6 +47,13 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dcontiene">Contiene:</label>
+                  <div class="controls">
+                    <input type="text" name="dcontiene" class="input-xlarge search-query" id="dcontiene" value="<?php echo set_value_get('dcontiene'); ?>" size="73">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dcliente">Cliente</label>
                   <div class="controls">
                     <input type="text" name="dcliente" class="input-xlarge search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">

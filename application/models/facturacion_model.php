@@ -2001,14 +2001,24 @@ class facturacion_model extends privilegios_model{
       $sql = '';
       $response = array();
 
-      if ( !is_array($this->input->get('ids_productos')) )
+      if ( !is_array($this->input->get('ids_productos')) && $this->input->get('dcontiene') == '')
       {
         exit();
       }
 
+      if ($this->input->get('dcontiene') != '') {
+        $_GET['ids_productos'] = array($this->input->get('dcontiene'));
+      }
+
       foreach ($this->input->get('ids_productos') as $key => $prod)
       {
-        $sql = "WHERE fp.id_clasificacion = {$prod}";
+        $sql = "WHERE 1 = 1";
+        if (is_numeric($prod)) {
+          $sql .= " AND fp.id_clasificacion = {$prod}";
+        } else {
+          $prod = mb_strtoupper($prod, 'UTF-8');
+          $sql .= " AND UPPER(fp.descripcion) LIKE '%{$prod}%'";
+        }
 
         //Filtro de fecha.
         if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '')
@@ -2052,8 +2062,13 @@ class facturacion_model extends privilegios_model{
             GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado
             ORDER BY f.fecha ASC");
 
-        $prodcto = $this->db->query(
-            "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
+        if (is_numeric($prod)) {
+          $prodcto = $this->db->query(
+              "SELECT id_clasificacion, nombre FROM clasificaciones WHERE id_clasificacion = ".$prod)->row();
+        } else {
+          $prodcto = $this->db->query(
+              "SELECT 0 AS id_clasificacion, '{$prod}' AS nombre")->row();
+        }
 
         $response[] = array('producto' => $prodcto, 'listado' => $query->result());
         $query->free_result();

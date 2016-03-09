@@ -41,7 +41,7 @@
                   <div class="control-group">
                     <label class="control-label" for="ffecha">Fecha </label>
                     <div class="controls">
-                      <input type="date" name="ffecha" id="ffecha" class="span12" value="<?php echo isset($data->fecha_captura)?$data->fecha_captura:''; ?>"
+                      <input type="date" name="ffecha" id="ffecha" class="span12" value="<?php echo isset($data->fecha)?$data->fecha:''; ?>"
                         required autofocus>
                     </div>
                   </div>
@@ -67,16 +67,16 @@
                   <div class="control-group">
                     <label class="control-label" for="fchofer">Chofer </label>
                     <div class="controls">
-                      <input type="text" name="fchofer" id="fchofer" class="span10" value="<?php echo isset($data->chofer->id)?$data->chofer->nombre.' '.$data->chofer->apellido_paterno:''; ?>" required>
-                      <input type="hidden" name="fchoferId" id="fchoferId" class="span10" value="<?php echo isset($data->chofer->id)?$data->chofer->id:''; ?>">
+                      <input type="text" name="fchofer" id="fchofer" class="span10" value="<?php echo isset($data->chofer[0]->id)?$data->chofer[0]->nombre.' '.$data->chofer[0]->apellido_paterno:''; ?>" required>
+                      <input type="hidden" name="fchoferId" id="fchoferId" class="span10" value="<?php echo isset($data->chofer[0]->id)?$data->chofer[0]->id:''; ?>">
                     </div>
                   </div>
 
                   <div class="control-group">
                     <label class="control-label" for="fencargado">Encargado </label>
                     <div class="controls">
-                      <input type="text" name="fencargado" id="fencargado" class="span10" value="<?php echo isset($data->encargado->id)?$data->encargado->nombre.' '.$data->encargado->apellido_paterno:''; ?>" required>
-                      <input type="hidden" name="fencargadoId" id="fencargadoId" class="span10" value="<?php echo isset($data->encargado->id)?$data->encargado->id:''; ?>">
+                      <input type="text" name="fencargado" id="fencargado" class="span10" value="<?php echo isset($data->encargado[0]->id)?$data->encargado[0]->nombre.' '.$data->encargado[0]->apellido_paterno:''; ?>" required>
+                      <input type="hidden" name="fencargadoId" id="fencargadoId" class="span10" value="<?php echo isset($data->encargado[0]->id)?$data->encargado[0]->id:''; ?>">
                     </div>
                   </div>
 
@@ -117,30 +117,6 @@
                           <td><input type="text" name="prod_altura[]" value="<?php echo $value->altura; ?>" class="prod_altura" maxlength="30"></td>
                           <td><input type="text" name="prod_cantidad[]" value="<?php echo $value->cantidad; ?>" class="prod_cantidad vpositive"></td>
                           <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
-                      </tr>
-                      <tr>
-                          <td>
-                            <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
-                            <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
-                          </td>
-                          <td>
-                            <select name="fbanco[]" class="fbanco" <?php echo $editar_cuenta ?>>
-                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
-                            ?>
-                                <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco, false, $value->id_banco); ?>><?php echo $valueb->nombre; ?></option>
-                            <?php
-                            }?>
-                            </select>
-                          </td>
-                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $value->alias; ?>" class="cuentas_alias" <?php echo $editar_cuenta ?>></td>
-                          <td><input type="text" name="cuentas_sucursal[]" value="<?php echo $value->sucursal; ?>" class="cuentas_sucursal vpositive" <?php echo ($value->is_banamex=='t'? '': 'readonly'); ?> <?php echo $editar_cuenta ?>></td>
-                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $value->cuenta; ?>" class="cuentas_cuenta vpositive" <?php echo $editar_cuenta ?>></td>
-                          <td><input type="text" name="cuentas_ref[]" value="<?php echo $value->referencia; ?>" class="cuentas_ref vpositive" maxlength="<?php echo ($value->is_banamex=='t'? '7': '10'); ?>" <?php echo $editar_cuenta ?>></td>
-                          <td>
-                             <?php if($editar_cuenta !== 'readonly'){ ?>
-                              <button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button>
-                            <?php } ?>
-                          </td>
                       </tr>
                     <?php
                       }

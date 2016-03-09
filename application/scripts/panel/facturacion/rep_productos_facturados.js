@@ -31,10 +31,10 @@
 
       console.log(linkDownXls.attr('href'));
 
-      if (url.ids_productos.length == 0) {
-        noty({"text": 'Seleccione un producto', "layout":"topRight", "type": 'error'});
-        return false;
-      }
+      // if (url.ids_productos.length == 0) {
+      //   noty({"text": 'Seleccione un producto', "layout":"topRight", "type": 'error'});
+      //   return false;
+      // }
     });
 
     $("#btnAddProducto").on('click', addProducto);

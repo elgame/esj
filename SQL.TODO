@@ -1,4 +1,78 @@
 
+ ☐ Trabajo agricola
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Trabajo agricola',0,TRUE,'btrabajo_agricola/','folder-close',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Crear formatos',423,TRUE,'btrabajo_agricola/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',423,FALSE,'btrabajo_agricola/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',423,FALSE,'btrabajo_agricola/printEntrada/','print',FALSE);
+
+ ☐ Entrega de fruta
+    CREATE TABLE otros.entrega_fruta
+    (
+      id_entrega_fruta bigserial NOT NULL,
+      id_area integer NOT NULL,
+      folio integer NOT NULL DEFAULT 0,
+      fecha_registro date NOT NULL DEFAULT now(),
+      fecha_captura date,
+      id_cat_codigos_rnch bigint, -- rancho del catalogo de codigos
+      id_vehiculo bigint,
+      id_usuario bigint, -- id del chofer
+      no character varying(10), -- No melga / No seccion
+      id_encargado bigint, -- encargado
+      total double precision DEFAULT 0,
+      CONSTRAINT entrega_fruta_pkey PRIMARY KEY (id_entrega_fruta),
+      CONSTRAINT entrega_fruta_id_area_fkey FOREIGN KEY (id_area)
+          REFERENCES areas (id_area) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT entrega_fruta_id_cat_codigos_rnch_fkey FOREIGN KEY (id_cat_codigos_rnch)
+          REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT entrega_fruta_id_encargado_fkey FOREIGN KEY (id_encargado)
+          REFERENCES usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT entrega_fruta_id_usuario_fkey FOREIGN KEY (id_usuario)
+          REFERENCES usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT entrega_fruta_id_vehiculo_fkey FOREIGN KEY (id_vehiculo)
+          REFERENCES compras_vehiculos (id_vehiculo) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.entrega_fruta
+      OWNER TO programa;
+    COMMENT ON COLUMN otros.entrega_fruta.id_cat_codigos_rnch IS 'rancho del catalogo de codigos';
+    COMMENT ON COLUMN otros.entrega_fruta.id_usuario IS 'id del chofer';
+    COMMENT ON COLUMN otros.entrega_fruta.no IS 'No melga / No seccion';
+    COMMENT ON COLUMN otros.entrega_fruta.id_encargado IS 'encargado';
+
+    CREATE TABLE otros.entrega_fruta_cantidad
+    (
+      id_entrega_fruta bigint NOT NULL,
+      "row" integer NOT NULL DEFAULT 0,
+      id_clasificacion integer,
+      piso double precision DEFAULT 0,
+      estibas double precision DEFAULT 0,
+      altura character varying(30),
+      cantidad double precision DEFAULT 0,
+      CONSTRAINT entrega_fruta_cantidad_pkey PRIMARY KEY (id_entrega_fruta, "row"),
+      CONSTRAINT entrega_fruta_cantidad_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+          REFERENCES clasificaciones (id_clasificacion) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT entrega_fruta_cantidad_id_entrega_fruta_fkey FOREIGN KEY (id_entrega_fruta)
+          REFERENCES otros.entrega_fruta (id_entrega_fruta) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.entrega_fruta_cantidad
+      OWNER TO programa;
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Entrega de Fruta',0,TRUE,'entrega_fruta/','folder-close',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Crear formatos',419,TRUE,'entrega_fruta/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',419,FALSE,'entrega_fruta/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',419,FALSE,'entrega_fruta/printEntrada/','print',FALSE);
+
  ✔ Bascula Snapshot @done (16-03-03 11:37)
    ALTER TABLE bascula_fotos DROP CONSTRAINT bascula_fotos_pkey;
    ALTER TABLE bascula_fotos ADD CONSTRAINT bascula_fotos_pkey PRIMARY KEY(id_bascula, no_camara, tipo);

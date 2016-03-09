@@ -46,7 +46,7 @@
   };
 
   var showCodigoArea = function() {
-    $("#productos").on('click', '.showCodigoArea', function(event) {
+    $("#productos, .tblproductos0").on('click', '.showCodigoArea', function(event) {
       var $tr = $(this).parent().parent();
       objCodigoArea = $tr.find('.showCodigoAreaAuto');
       $("div[id^=tblAreas]").hide();
