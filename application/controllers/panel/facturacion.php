@@ -6,6 +6,7 @@ class facturacion extends MY_Controller {
    * @var unknown_type
    */
   private $excepcion_privilegio = array(
+    'facturacion/agregar/',
     'facturacion/get_folio/',
     'facturacion/get_series/',
     'facturacion/email/',
@@ -146,6 +147,9 @@ class facturacion extends MY_Controller {
    */
   public function agregar()
   {
+    if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/agregar/') == false && !isset($_GET['id_nr']))
+      redirect(base_url('panel/home?msg=1'));
+
     $this->carabiner->js(array(
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),

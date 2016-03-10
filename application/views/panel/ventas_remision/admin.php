@@ -147,11 +147,9 @@
 
                       if ($fact->facturada == 0 && $fact->id_nc == '') //&& $fact->status != 'ca'
                       {
-                        echo $this->usuarios_model->getLinkPrivSm('facturacion/agregar/', array(
-                          'params'   => 'id_nr='.$fact->id_factura,
-                          'btn_type' => 'btn-success',
-                          'attrs' => array('onclick' => "msb.confirm('Estas seguro de agregar una factura con los datos de la nota de remisión?', 'Notas de Remisión', this); return false;"))
-                        );
+                        echo '<a class="btn btn-success" href="'.base_url().'panel/facturacion/agregar/?id_nr='.$fact->id_factura.'" title="Facturar"
+                                onclick="msb.confirm(\'Estas seguro de agregar una factura con los datos de la nota de remisión?\', \'Notas de Remisión\', this); return false;">
+                              <i class="icon-print icon-white"></i> <span class="hidden-tablet">Facturar</span></a>';
                       }
 
                       echo $this->usuarios_model->getLinkPrivSm('ventas/enviar_documentos/', array(
