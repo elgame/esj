@@ -54,6 +54,17 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dtipo">Tipo:</label>
+                  <div class="controls">
+                    <select name="dtipo">
+                      <option value="f">Remisiones</option>
+                      <option value="t">Facturas</option>
+                      <option value="">Remisiones y facturas</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="dcliente">Cliente</label>
                   <div class="controls">
                     <input type="text" name="dcliente" class="input-xlarge search-query" id="dcliente" value="<?php echo set_value_get('dcliente'); ?>" size="73">

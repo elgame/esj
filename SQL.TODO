@@ -1,5 +1,62 @@
 
  ☐ Trabajo agricola
+    CREATE TABLE otros.trabajo_agricola
+    (
+      id_trabajo_agricola bigserial NOT NULL,
+      id_empresa integer NOT NULL,
+      folio integer NOT NULL DEFAULT 0,
+      fecha_registro date NOT NULL DEFAULT now(),
+      fecha_captura date,
+      id_cat_cod_vehiculo bigint, -- vehiculo del catalogo de codigos
+      id_operador bigint, -- id del chofer operador
+      horometro_ini double precision DEFAULT 0,
+      horometro_fin double precision DEFAULT 0,
+      horometro_total double precision DEFAULT 0,
+      hora_ini time with time zone,
+      hora_fin time with time zone,
+      total_hrs time with time zone,
+      CONSTRAINT trabajo_agricola_pkey PRIMARY KEY (id_trabajo_agricola),
+      CONSTRAINT trabajo_agricola_id_cat_cod_vehiculo_fkey FOREIGN KEY (id_cat_cod_vehiculo)
+          REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT trabajo_agricola_id_empresa_fkey FOREIGN KEY (id_empresa)
+          REFERENCES empresas (id_empresa) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT trabajo_agricola_id_operador_fkey FOREIGN KEY (id_operador)
+          REFERENCES usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.trabajo_agricola
+      OWNER TO programa;
+    COMMENT ON COLUMN otros.trabajo_agricola.id_cat_cod_vehiculo IS 'vehiculo del catalogo de codigos';
+    COMMENT ON COLUMN otros.trabajo_agricola.id_operador IS 'id del chofer operador';
+
+    CREATE TABLE otros.trabajo_agricola_labores
+    (
+      id_trabajo_agricola bigint NOT NULL,
+      "row" integer NOT NULL DEFAULT 0,
+      id_labor integer NOT NULL,
+      id_centro_costo bigint NOT NULL,
+      hora_ini time with time zone NOT NULL,
+      CONSTRAINT trabajo_agricola_labores_pkey PRIMARY KEY (id_trabajo_agricola, "row"),
+      CONSTRAINT trabajo_agricola_labores_id_centro_costo_fkey FOREIGN KEY (id_centro_costo)
+          REFERENCES otros.cat_codigos (id_cat_codigos) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT trabajo_agricola_labores_id_labor_fkey FOREIGN KEY (id_labor)
+          REFERENCES compras_salidas_labores (id_labor) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT trabajo_agricola_labores_id_trabajo_agricola_fkey FOREIGN KEY (id_trabajo_agricola)
+          REFERENCES otros.trabajo_agricola (id_trabajo_agricola) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH (
+      OIDS=FALSE
+    );
+    ALTER TABLE otros.trabajo_agricola_labores
+      OWNER TO programa;
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Trabajo agricola',0,TRUE,'btrabajo_agricola/','folder-close',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Crear formatos',423,TRUE,'btrabajo_agricola/agregar/','plus',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',423,FALSE,'btrabajo_agricola/modificar/','edit',FALSE);

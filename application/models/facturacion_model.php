@@ -2038,6 +2038,11 @@ class facturacion_model extends privilegios_model{
           $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
         }
 
+        if ($this->input->get('dtipo') != '')
+        {
+          $sql .= " AND f.is_factura = '" . $this->input->get('dtipo') . "'";
+        }
+
         // filtra por pagadas
         if (isset($_GET['dpagadas']))
         {

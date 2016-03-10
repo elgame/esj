@@ -1661,10 +1661,20 @@ class Ventas_model extends privilegios_model{
       $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
     }
 
+    $this->printValeSalida($factura, $conceptos, $pdf);
+
     if ($path)
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
     else
       $pdf->Output('Venta_Remision', 'I');
+  }
+
+  public function printValeSalida($factura, $conceptos, &$pdf)
+  {
+    $pdf->AddPage();
+    $pdf->SetXY(0, 0);
+    $logo = (file_exists($factura['info']->empresa->logo)) ? $factura['info']->empresa->logo : 'application/images/logo2.png' ;
+    $pdf->Image($logo, 10, null, 0, 21);
   }
 
   public function ticketNotaRemisionPdf($idVenta, $path = null)
@@ -2181,7 +2191,8 @@ class Ventas_model extends privilegios_model{
           COALESCE(f.total, 0) AS cargo,
           COALESCE(f.importe_iva, 0) AS iva,
           COALESCE(ac.abono, 0) AS abono,
-          (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo
+          (COALESCE(f.total, 0) - COALESCE(ac.abono, 0))::numeric(100,2) AS saldo,
+          (CASE WHEN fh.id_remision IS NOT NULL THEN 't' ELSE 'f' END) facturada
         FROM
           facturacion AS f
           INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -2211,6 +2222,9 @@ class Ventas_model extends privilegios_model{
             ) AS ffs
             GROUP BY id_factura
           ) AS ac ON f.id_factura = ac.id_factura
+          LEFT JOIN (SELECT id_remision, id_factura, status
+                    FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+          ) fh ON f.id_factura = fh.id_remision
         WHERE f.status <> 'b' AND id_nc IS NULL
           AND (Date(f.fecha) >= '{$_GET['ffecha1']}' AND Date(f.fecha) <= '{$_GET['ffecha2']}')
           {$sql}{$tipo_factura[0]}{$sql_clientes}
@@ -2264,15 +2278,22 @@ class Ventas_model extends privilegios_model{
 
         $pdf->SetFont('Arial','',8);
 
-        $total_saldo += ($factura->status=='ca'?0:$factura->saldo);
-        $total_total += ($factura->status=='ca'?0:$factura->cargo);
+        $txt = '';
+        if ($factura->status=='ca') {
+          $txt = ' (Cancelada)';
+        } elseif ($factura->facturada=='t') {
+          $txt = ' (Facturada)';
+        } else {
+          $total_saldo += $factura->saldo;
+          $total_total += $factura->cargo;
+        }
 
         $datos = array(String::fechaATexto($factura->fecha, '/c'),
                 $factura->serie,
                 $factura->folio,
-                $factura->nombre_fiscal.($factura->status=='ca'?' (Cancelada)':''),
-                String::formatoNumero($factura->status=='ca'? 0:$factura->cargo, 2, '', false),
-                String::formatoNumero( ($factura->status=='ca'?0:$factura->saldo) , 2, '', false),
+                $factura->nombre_fiscal.$txt,
+                String::formatoNumero($txt!=''? 0:$factura->cargo, 2, '', false),
+                String::formatoNumero( ($txt!=''?0:$factura->saldo) , 2, '', false),
               );
 
         $pdf->SetXY(6, $pdf->GetY()-1);
