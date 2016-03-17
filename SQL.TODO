@@ -1,5 +1,7 @@
 
- ☐ Trabajo agricola
+ ☐ ALTER TABLE facturacion ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+
+ ✔ Trabajo agricola @done (16-03-17 10:23)
     CREATE TABLE otros.trabajo_agricola
     (
       id_trabajo_agricola bigserial NOT NULL,
@@ -62,7 +64,7 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',423,FALSE,'btrabajo_agricola/modificar/','edit',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',423,FALSE,'btrabajo_agricola/printEntrada/','print',FALSE);
 
- ☐ Entrega de fruta
+ ✔ Entrega de fruta @done (16-03-17 10:16)
     CREATE TABLE otros.entrega_fruta
     (
       id_entrega_fruta bigserial NOT NULL,

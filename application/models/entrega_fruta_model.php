@@ -327,16 +327,16 @@ class entrega_fruta_model extends CI_Model {
 
   public function printRecibo($id_entrega, &$pdf=null, &$x=0, &$y=0)
   {
-  	$data = $this->getFormatoInfo($id_entrega)['info'];
-  	$pdf->SetFont('Arial','B',8);
-  	// $pdf->SetXY($x, $y);
+    $data = $this->getFormatoInfo($id_entrega)['info'];
+    $pdf->SetFont('Arial','B',8);
+    // $pdf->SetXY($x, $y);
 
 		$pdf->Image(APPPATH.(str_replace(APPPATH, '', $pdf->logo)), $x+43, $y+2, 20);
 
   	$pdf->SetXY($x, $y+8);
     $pdf->SetAligns(['L', 'R']);
     $pdf->SetWidths([53.5, 53.5]);
-    $pdf->Row(['Entrada de Fruta a Empaque', $data->area->nombre], false, false);
+    $pdf->Row(['Entrada de Fruta a Empaque', (isset($data->area->nombre)? $data->area->nombre: '')], false, false);
 
   	$pdf->SetFont('Arial', 'B', 8);
     $pdf->SetAligns(['R', 'L']);

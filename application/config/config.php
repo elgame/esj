@@ -14,7 +14,26 @@
 | path to your installation.
 |http://localhost/sanjorge/   http://sanjorge.dev/
 */
-$config['base_url'] = 'http://localhost/sanjorge/'; //http://192.168.1.100/sanjorge/
+function getBaseUrl()
+{
+  // output: /myproject/index.php
+  $currentPath = $_SERVER['PHP_SELF'];
+
+  // output: Array ( [dirname] => /myproject [basename] => index.php [extension] => php [filename] => index )
+  $pathInfo = pathinfo($currentPath);
+
+  // output: localhost
+  $hostName = $_SERVER['HTTP_HOST'];
+
+  // output: http://
+  $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https://'?'https://':'http://';
+
+  // return: http://localhost/myproject/
+  // .$pathInfo['dirname']."/"
+  return $protocol.$hostName;
+}
+
+$config['base_url'] = getBaseUrl().'/sanjorge/'; //http://192.168.1.100/sanjorge/
 $config['base_url_bascula'] = 'http://localhost/sanjorge_bascula/';
 
 $config['base_url_cam_salida_stream']  = 'http://192.168.1.42:8053/videostream.cgi?user=admin&pwd=&resolution=32&rate=0';

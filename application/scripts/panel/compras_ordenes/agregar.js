@@ -298,7 +298,7 @@
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
-              tipo: $('#tipoOrden').find('option:selected').val()
+              tipo: ($('#tipoOrden').find('option:selected').val()=='oc'? 'd': $('#tipoOrden').find('option:selected').val()),
             },
             success: function (data) {
               response(data);
@@ -525,12 +525,12 @@
 
       // Si el tipo de orden es producto entonces verifica si se selecciono
       // un producto, si no no deja agregar descripciones.
-      if ($('#tipoOrden').find('option:selected').val() === 'p') {
+      // if ($('#tipoOrden').find('option:selected').val() === 'p') {
         if ($fconceptoId.val() === '') {
           $fconcepto.css({'background-color': '#FDFC9A'});
           error = true;
         }
-      }
+      // }
 
       // Valida si el campo cantida es 0.
       if ($fcantidad.val() === '0') {

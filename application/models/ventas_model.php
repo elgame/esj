@@ -1134,7 +1134,7 @@ class Ventas_model extends privilegios_model{
 
     // $pdf->SetXY(109, 0);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Cell(50, 4, ($factura['info']->id_nc==''? 'Venta de Remisión': 'Nota de Credito'), 0, 0, 'L', 1);
+    $pdf->Cell(50, 4, ($factura['info']->id_nc==''? ($factura['info']->condicion_pago=='co'? 'Venta de Contado': 'Venta de Credito'): 'Nota de Credito'), 0, 0, 'L', 1);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(0, $pdf->GetY() + 4);
     $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
@@ -1196,6 +1196,16 @@ class Ventas_model extends privilegios_model{
     // $pdf->Cell(108, 4, $factura['info']->serie.'-'.$factura['info']->folio , 0, 0, 'C', 0);
 
     $pdf->SetXY(109, 0);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "Fecha y hora de impresión:", 0, 0, 'R', 1);
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
+
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(109, $pdf->GetY() + 4);
@@ -1579,16 +1589,45 @@ class Ventas_model extends privilegios_model{
         $pdf->Row(array($factura['info']->observaciones), true, 1);
     }
 
-    if($hay_prod_certificados)
-    {
       if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
           $pdf->AddPage();
 
-      $pdf->SetFont('helvetica', 'B', 8);
-      $pdf->SetXY(10, $pdf->GetY());
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(196));
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(10, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(196));
+    if($hay_prod_certificados)
+    {
       $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
+      $pdf->SetXY(10, $pdf->GetY());
+    }
+    $pdf->Row([($factura['info']->no_impresiones==0? 'Impresión original': 'Impresión copia #'.$factura['info']->no_impresiones)], false, 0);
+
+    ////////////////////
+    // pagare      //
+    ////////////////////
+    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetAligns(array('L'));
+    if ($factura['info']->condicion_pago == 'cr') {
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY()+1);
+      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->SetAligns(array('R'));
+      $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array( "OTORGANTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
+      // $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array(
+          'DOMICILIO: '.(isset($factura['info']->cliente->calle) ? $factura['info']->cliente->calle : '').
+          ' No. '.(isset($factura['info']->cliente->no_exterior) ? $factura['info']->cliente->no_exterior : '').
+          ((isset($factura['info']->cliente->no_interior)) ? ' Int. '.$factura['info']->cliente->no_interior : '').
+          ((isset($factura['info']->cliente->colonia)) ? ' Col. '.$factura['info']->cliente->colonia : '').
+          ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
+          ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
+       ), false, false);
     }
 
     ////////////////////
@@ -1661,7 +1700,10 @@ class Ventas_model extends privilegios_model{
       $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
     }
 
-    $this->printValeSalida($factura, $conceptos, $pdf);
+    // Actualiza el # de impresion
+    $this->db->update('facturacion', ['no_impresiones' => $factura['info']->no_impresiones+1], "id_factura = ".$factura['info']->id_factura);
+
+    // $this->printValeSalida($factura, $conceptos, $pdf);
 
     if ($path)
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
