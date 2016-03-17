@@ -126,7 +126,7 @@ class facturacion_model extends privilegios_model{
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
-        ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
+        ->join('unidades as u', "u.nombre = fp.unidad and u.status = 't'", 'left')
         ->where('id_factura = ' . $idFactura)->order_by('fp.num_row', 'asc')
         ->get();
 
