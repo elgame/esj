@@ -2974,7 +2974,9 @@ class facturacion_model extends privilegios_model{
     $pdf->AliasNbPages();
     $pdf->AddPage();
 
-
+    $pdf->SetFont('Arial','B', 70);
+    $pdf->SetTextColor(160,160,160);
+    $pdf->RotatedText(65, 130, ($factura['info']->no_impresiones==0? 'ORIGINAL': 'COPIA #'.$factura['info']->no_impresiones), 45);
 
     $pdf->SetXY(0, 0);
     /////////////////////////////////////
@@ -3640,26 +3642,23 @@ class facturacion_model extends privilegios_model{
       $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
     }
 
-    $pdf->SetXY(10, $pdf->GetY());
-    $pdf->Row([($factura['info']->no_impresiones==0? 'Impresión original': 'Impresión copia #'.$factura['info']->no_impresiones)], false, 0);
-
     ////////////////////
     // pagare      //
     ////////////////////
-    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetWidths(array(190));
     $pdf->SetAligns(array('L'));
     if ($factura['info']->condicion_pago == 'cr') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->SetXY(0, $pdf->GetY()+3);
+      $pdf->SetXY(10, $pdf->GetY()+3);
       $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
-      $pdf->SetXY(0, $pdf->GetY()+3);
+      $pdf->SetXY(10, $pdf->GetY()+3);
       $pdf->SetAligns(array('R'));
       $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
       $pdf->SetAligns(array('L'));
-      $pdf->SetXY(0, $pdf->GetY()+1);
+      $pdf->SetXY(10, $pdf->GetY()+1);
       $pdf->Row2(array( "OTORGANTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
       // $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->SetXY(10, $pdf->GetY());
       $pdf->Row2(array(
           'DOMICILIO: '.(isset($factura['info']->cliente->calle) ? $factura['info']->cliente->calle : '').
           ' No. '.(isset($factura['info']->cliente->no_exterior) ? $factura['info']->cliente->no_exterior : '').
@@ -3668,7 +3667,23 @@ class facturacion_model extends privilegios_model{
           ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
           ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
        ), false, false);
+      $pdf->SetXY(10, $pdf->GetY()+5);
+      $pdf->SetAligns(array('C'));
+      $pdf->Row2(array('______________________________________________'), false, false);
+      $pdf->Row2(array('FIRMA'), false, false);
     }
+
+    // $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(1));
+    $pdf->Row2(array('MANIFIESTO DEL CHOFER'), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->Row2(array('COMO CHOFER DEL CAMION ARRIBA DESCRITO, MANIFIESTO EN EL PRESENTE DOCUMENTO, QUE EL (LOS) PRODUCTO(S) TRASPORTADO FUE CARGADO EN MI PRESENCIA Y VERIFIQUE QUE VA LIBRE DE CUALQUIER TIPO DE ESTUPEFACIENTE (DROGAS) POR LO QUE EXIMO DE TODA RESPONSABILIDAD AL (LOS) CONTRATANTE(S) '.$factura['info']->empresa->nombre_fiscal.', Y AL (LOS) DESTINATARIO(S) DE CUALQUIER MERCANCIA NO DESCRITA EN EL PRESENTE EMBARQUE, FACTURA O PEDIDO., TENIENDO PROHIBIDO LLEVAR Y/O TRASPORTAR OTRA MERCANCIA Y SI POR ALGUNA CIRCUNSTANCIA LO HAGO, ASUMO LAS CONSECUENCIAS DERIVADAS DE LA VIOLACION A ESTAS DISPOSICIONES.'."\n".
+                      'ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE SI NO ENTREGO LA MERCANCIA CONFORME FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECANICO DE MI UNIDAD (CAMION ARRIBA DESCRITO), SE  ME  DESCONTARA  UN  20%  (VEINTE PORCIENTO) DEL  VALOR  DEL  FLETE,  ASI  COMO  CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRASPORTADA.'), false, false);
+    $pdf->SetAligns(array('C'));
+    $pdf->Row2(array('______________________________________________'), false, false);
+    $pdf->Row2(array('FIRMA'), false, false);
 
     if (isset($factura['carta_porte']))
     {

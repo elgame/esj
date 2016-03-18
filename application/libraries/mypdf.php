@@ -390,6 +390,16 @@ class MYpdf extends FPDF {
         }
     }
 
+    function _endpage()
+    {
+        if($this->angle!=0)
+        {
+            $this->angle=0;
+            $this->_out('Q');
+        }
+        parent::_endpage();
+    }
+
 
     /**
      * indica si se abre el dialogo de imprecion inmediatamente

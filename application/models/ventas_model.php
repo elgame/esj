@@ -1120,6 +1120,10 @@ class Ventas_model extends privilegios_model{
     $logo = (file_exists($factura['info']->empresa->logo)) ? $factura['info']->empresa->logo : 'application/images/logo2.png' ;
     $pdf->Image($logo, 10, null, 0, 21);
 
+    $pdf->SetFont('Arial','B', 70);
+    $pdf->SetTextColor(160,160,160);
+    $pdf->RotatedText(65, 120, ($factura['info']->no_impresiones==0? 'ORIGINAL': 'COPIA #'.$factura['info']->no_impresiones), 45);
+
     //////////////////////////
     // Rfc y Regimen Fiscal //
     //////////////////////////
@@ -1601,7 +1605,6 @@ class Ventas_model extends privilegios_model{
       $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
       $pdf->SetXY(10, $pdf->GetY());
     }
-    $pdf->Row([($factura['info']->no_impresiones==0? 'Impresión original': 'Impresión copia #'.$factura['info']->no_impresiones)], false, 0);
 
     ////////////////////
     // pagare      //
@@ -1628,7 +1631,22 @@ class Ventas_model extends privilegios_model{
           ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
           ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
        ), false, false);
+      $pdf->SetXY(10, $pdf->GetY()+5);
+      $pdf->SetAligns(array('C'));
+      $pdf->Row2(array('______________________________________________'), false, false);
+      $pdf->Row2(array('FIRMA'), false, false);
     }
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(1));
+    $pdf->Row2(array('MANIFIESTO DEL CHOFER'), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->Row2(array('COMO CHOFER DEL CAMION ARRIBA DESCRITO, MANIFIESTO EN EL PRESENTE DOCUMENTO, QUE EL (LOS) PRODUCTO(S) TRASPORTADO FUE CARGADO EN MI PRESENCIA Y VERIFIQUE QUE VA LIBRE DE CUALQUIER TIPO DE ESTUPEFACIENTE (DROGAS) POR LO QUE EXIMO DE TODA RESPONSABILIDAD AL (LOS) CONTRATANTE(S) '.$factura['info']->empresa->nombre_fiscal.', Y AL (LOS) DESTINATARIO(S) DE CUALQUIER MERCANCIA NO DESCRITA EN EL PRESENTE EMBARQUE, FACTURA O PEDIDO., TENIENDO PROHIBIDO LLEVAR Y/O TRASPORTAR OTRA MERCANCIA Y SI POR ALGUNA CIRCUNSTANCIA LO HAGO, ASUMO LAS CONSECUENCIAS DERIVADAS DE LA VIOLACION A ESTAS DISPOSICIONES.'."\n".
+                      'ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE SI NO ENTREGO LA MERCANCIA CONFORME FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECANICO DE MI UNIDAD (CAMION ARRIBA DESCRITO), SE  ME  DESCONTARA  UN  20%  (VEINTE PORCIENTO) DEL  VALOR  DEL  FLETE,  ASI  COMO  CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRASPORTADA.'), false, false);
+    $pdf->SetAligns(array('C'));
+    $pdf->Row2(array('______________________________________________'), false, false);
+    $pdf->Row2(array('FIRMA'), false, false);
 
     ////////////////////
     // historial      //
