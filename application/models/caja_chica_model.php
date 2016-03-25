@@ -57,9 +57,9 @@ class caja_chica_model extends CI_Model {
 
     // remisiones
     $remisiones = $this->db->query(
-      "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.folio_factura, cr.id_categoria, cc.abreviatura as empresa,
-              COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), null) as folio_factura,
-              cr.id_movimiento, cr.row, cr.fecha
+      "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
+              COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
+              cr.id_movimiento, cr.row, cr.fecha, cr.no_caja
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
@@ -260,32 +260,49 @@ class caja_chica_model extends CI_Model {
     // Remisiones
     //Elimina los movimientos de banco y cuentas por cobrar si ya se cerro el corte
     $this->load->model('banco_cuentas_model');
-    $corte_caja = $this->get($data['fecha_caja_chica'], $data['fno_caja']);
-    foreach ($corte_caja['remisiones'] as $key => $value)
-    {
-      if($value->id_movimiento != '')
-        $this->banco_cuentas_model->deleteMovimiento($value->id_movimiento);
-    }
-    $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    // $corte_caja = $this->get($data['fecha_caja_chica'], $data['fno_caja']);
+    // foreach ($corte_caja['remisiones'] as $key => $value)
+    // {
+    //   if($value->id_movimiento != '')
+    //     $this->banco_cuentas_model->deleteMovimiento($value->id_movimiento);
+    // }
+    // $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['remision_concepto']))
     {
+      $data_folio = $this->db->query("SELECT COALESCE( (SELECT folio FROM cajachica_remisiones ORDER BY folio DESC LIMIT 1), 0 ) AS folio")->row();
       $remisiones = array();
 
       foreach ($data['remision_concepto'] as $key => $concepto)
       {
-        $remisiones[] = array(
-          'observacion'   => $concepto,
-          'id_remision'   => $data['remision_id'][$key],
-          'fecha'         => $data['fecha_caja_chica'],
-          'monto'         => $data['remision_importe'][$key],
-          'row'           => $key,
-          'id_categoria'  => $data['remision_empresa_id'][$key],
-          'folio_factura' => empty($data['remision_folio'][$key]) ? null : $data['remision_folio'][$key],
-          'no_caja'       => $data['fno_caja'],
-        );
+        if (isset($data['remision_del'][$key]) && $data['remision_del'][$key] == 'true' &&
+          isset($data['remision_row'][$key]) && is_numeric($data['remision_row'][$key]) &&
+          isset($data['remision_id'][$key]) && $data['remision_id'][$key] > 0) {
+
+          $data_mov = $this->db->query("SELECT id_movimiento FROM cajachica_remisiones
+                                     WHERE fecha = '{$data['fecha_caja_chica']}' AND id_remision = {$data['remision_id'][$key]}
+                                      AND row = {$data['remision_row'][$key]} AND no_caja = {$data['fno_caja']}")->row();
+          if($data_mov->id_movimiento != '')
+            $this->banco_cuentas_model->deleteMovimiento($data_mov->id_movimiento);
+          $this->db->delete('cajachica_remisiones', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja'],
+                                                          'id_remision' => $data['remision_id'][$key], 'row' => $data['remision_row'][$key]));
+        } elseif (isset($data['remision_row'][$key]) && $data['remision_row'][$key] == '') {
+          $data_folio->folio += 1;
+          $remisiones[] = array(
+            'observacion'   => $concepto,
+            'id_remision'   => $data['remision_id'][$key],
+            'fecha'         => $data['fecha_caja_chica'],
+            'monto'         => $data['remision_importe'][$key],
+            'row'           => $key,
+            'id_categoria'  => $data['remision_empresa_id'][$key],
+            'folio_factura' => empty($data['remision_folio'][$key]) ? null : $data['remision_folio'][$key],
+            'no_caja'       => $data['fno_caja'],
+            'folio'         => $data_folio->folio,
+          );
+        }
       }
 
-      $this->db->insert_batch('cajachica_remisiones', $remisiones);
+      if (count($remisiones) > 0)
+        $this->db->insert_batch('cajachica_remisiones', $remisiones);
     }
 
     // Boletas
@@ -769,17 +786,19 @@ class caja_chica_model extends CI_Model {
     $corte_caja = $this->get($caja->fecha, $noCajas);
     foreach ($corte_caja['remisiones'] as $key => $value)
     {
-      $_POST['fmetodo_pago'] = 'efectivo';
-      $_GET['tipo'] = 'r';
-      $data = array('fecha'  => $caja->fecha,
-            'concepto'       => 'Pago en caja chica',
-            'total'          => $value->monto, //$total,
-            'id_cuenta'      => $banco_cuenta->id_cuenta,
-            'ref_movimiento' => 'Caja '.$noCajas,
-            'saldar'         => 'no' );
-      $resp = $this->cuentas_cobrar_model->addAbono($data, $value->id_remision);
-      $this->db->update('cajachica_remisiones', array('id_movimiento' => $resp['id_movimiento']),
-        "fecha = '{$value->fecha}' AND id_remision = {$value->id_remision} AND row = {$value->row}");
+      if ($value->id_movimiento == '') {
+        $_POST['fmetodo_pago'] = 'efectivo';
+        $_GET['tipo'] = 'r';
+        $data = array('fecha'  => $caja->fecha,
+              'concepto'       => 'Pago en caja chica',
+              'total'          => $value->monto, //$total,
+              'id_cuenta'      => $banco_cuenta->id_cuenta,
+              'ref_movimiento' => 'Caja '.$noCajas,
+              'saldar'         => 'no' );
+        $resp = $this->cuentas_cobrar_model->addAbono($data, $value->id_remision);
+        $this->db->update('cajachica_remisiones', array('id_movimiento' => $resp['id_movimiento']),
+          "fecha = '{$value->fecha}' AND id_remision = {$value->id_remision} AND row = {$value->row}");
+      }
     }
 
     return true;
@@ -1164,7 +1183,7 @@ class caja_chica_model extends CI_Model {
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.no_caja
+          cg.no_caja, cg.no_impresiones
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -1240,6 +1259,9 @@ class caja_chica_model extends CI_Model {
 
     $pdf->SetX(0);
     $pdf->Row(array($gastos->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($gastos->no_impresiones==0? 'ORIGINAL': 'COPIA '.$gastos->no_impresiones)), false, false);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
     $pdf->SetX(0);
@@ -1252,8 +1274,102 @@ class caja_chica_model extends CI_Model {
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
 
+    $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('cajachica_gastos');
+
     // $pdf->AutoPrint(true);
-    $pdf->Output();
+    $pdf->Output('vale_gastos.pdf', 'I');
+  }
+
+  public function getDataRemision($fecha, $id_remision, $row, $noCaja)
+  {
+    $remisiones = $this->db->query(
+      "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
+              COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
+              cr.id_movimiento, cr.row, cr.fecha, c.nombre_fiscal AS cliente, cc.nombre AS empresar, cr.folio AS folio_caja,
+              cr.no_impresiones, cr.no_caja
+       FROM cajachica_remisiones cr
+       INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+       INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+       INNER JOIN empresas e ON e.id_empresa = f.id_empresa
+       INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+       LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
+       WHERE cr.fecha = '{$fecha}' AND cr.id_remision = '{$id_remision}' AND cr.row = {$row} AND cr.no_caja = {$noCaja}"
+    )->row();
+
+    return $remisiones;
+  }
+
+  public function printValeRemision($fecha, $id_remision, $row, $noCaja)
+  {
+
+    $remisiones = $this->getDataRemision($fecha, $id_remision, $row, $noCaja);
+
+    // echo "<pre>";
+    //   var_dump($remisiones);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array($remisiones->empresar), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()+4);
+    $pdf->Row(array('PAGO DE REMISION EN CAJA'), false, false);
+
+    $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-6);
+    $pdf->Row(array('Folio: '.$remisiones->folio_caja), false, false);
+
+    $pdf->SetWidths(array(20, 43));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: '.$remisiones->no_caja, 'Remision: '.$remisiones->folio ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('CANTIDAD:', String::formatoNumero($remisiones->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(String::num2letras($remisiones->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($remisiones->observacion), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($remisiones->no_impresiones==0? 'ORIGINAL': 'COPIA '.$remisiones->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', $remisiones->fecha), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $this->db->update('cajachica_remisiones', ['no_impresiones' => $remisiones->no_impresiones+1],
+        "fecha = '{$fecha}' AND id_remision = '{$id_remision}' AND row = {$row} AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_remision.pdf', 'I');
   }
 
 

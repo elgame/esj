@@ -127,20 +127,26 @@
   <div class="row-fluid">
 
     <div class="span3"><!-- Listado de Pallets libres -->
-      <table class="table table-bordered table-condensed datatable">
+      <div class="row-fluid">
+        <input type="text" id="txtPalletsFolios" class="span6 pull-left" placeholder="Folios: 521 o 1 al 20">
+        <input type="text" id="txtPalletsClasif" class="span6 pull-left" placeholder="Limon verde, piña">
+      </div>
+      <table class="table table-bordered table-condensed" style="position: absolute;max-width:375px">
         <caption>Pallets Libres </caption>
         <thead>
           <tr>
             <th>Folio</th>
+            <th>Fecha</th>
             <th>Cajas</th>
             <th>Clasificación(es)</th>
           </tr>
 
         </thead>
-        <tbody>
-          <?php foreach ($factura['pallets'] as $key => $pallet) { ?>
+        <tbody id="tblPalletsLibres">
+          <?php foreach ($dataPallets as $key => $pallet) { ?>
               <tr>
                 <td><?php echo $pallet->folio ?></td>
+                <td><?php echo $pallet->fecha ?></td>
                 <td>
                   <div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="<?php echo $pallet->id_pallet ?>" data-kilos-pallet="<?php echo $pallet->kilos_pallet ?>" data-cajas="<?php echo $pallet->no_cajas ?>" data-clasificaciones="<?php echo $pallet->clasificaciones ?>" data-calibres="<?php echo $pallet->calibres ?>" data-etiquetas="<?php echo $pallet->etiquetas ?>" style="z-index: 10;">
                     <p><?php echo $pallet->no_cajas ?></p>
@@ -152,6 +158,7 @@
 
         </tbody>
       </table>
+      <div class="clearfix"></div>
 
     </div><!--/span3 -->
 
@@ -290,5 +297,7 @@
 
 
     </div><!--/span4 -->
+
+    <div class="clearfix"></div>
   </div><!--/row-fluid -->
 </form>

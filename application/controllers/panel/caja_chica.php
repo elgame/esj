@@ -16,6 +16,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_ingresos_pdf/',
     'caja_chica/rpt_ingresos_xls/',
     'caja_chica/print_vale/',
+    'caja_chica/print_vale_rm/',
   );
 
   public function _remap($method)
@@ -666,7 +667,23 @@ class caja_chica extends MY_Controller {
   public function print_vale()
   {
     $this->load->model('caja_chica_model');
-    $this->caja_chica_model->printVale($_GET['id']);
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printVale($_GET['id']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale/?id='.$this->input->get('id').'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_rm()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeRemision($_GET['fecha'], $_GET['id_remision'], $_GET['row'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_rm/?fecha='.$_GET['fecha'].'&id_remision='.$_GET['id_remision'].'&row='.$_GET['row'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
   }
 
   private function showMsgs($tipo, $msg='', $title='Usuarios')

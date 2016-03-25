@@ -502,6 +502,7 @@
       otrosCheckbox();
       otrosAdd();
       sendForm();
+      loadPalletsLibres();
 
       if ($('#total-kilos-pallets').val() !== '0') {
         $('#kilos-pallets').html($('#total-kilos-pallets').val());
@@ -511,19 +512,33 @@
     function draggable () {
       $("div.draggableitem").draggable({
         scroll: true,
-        // helper: 'clone',
+        // start: function(){
+        //   $(this).data("startingScrollTop",$(this).parent().scrollTop());
+        // },
+        // drag: function(event,ui){
+        //   var st = parseInt($(this).data("startingScrollTop"));
+        //   ui.position.top -= $(this).parent().scrollTop() - st;
+        // },
+        // // helper: 'clone',
         revert : function(event, ui) {
+          var $this = $(this);
           // on older version of jQuery use "draggable"
           // $(this).data("draggable")
-          $(this).data("uiDraggable").originalPosition = {
-            top : 0,
-            left : 0
+          $this.data("uiDraggable").originalPosition = {
+            top : $this.attr('data-pos-top'),
+            left : $this.attr('data-pos-left')
           };
           // return boolean
           return !event;
           // that evaluate like this:
           // return event !== false ? false : true;
         }
+        // revert : true
+      });
+
+      $("#tblPalletsLibres .draggableitem").each(function(index, el) {
+        var $this = $(this), poss = $this.position();
+        $this.attr('data-pos-top', poss.top).attr('data-pos-left', poss.left);
       });
     }
 
@@ -677,6 +692,41 @@
 
       });
     }
+
+    function loadPalletsLibres() {
+      $("#txtPalletsFolios, #txtPalletsClasif").on('keyup', function(event) {
+        $.ajax({
+            url: base_url + 'panel/documentos/ajax_get_pallets_libres/',
+            dataType: "json",
+            data: {
+                folios: $("#txtPalletsFolios").val(),
+                term : $("#txtPalletsClasif").val()
+            },
+            success: function(data) {
+              var html = '';
+              for (var i in data) {
+                html += '<tr>'+
+                  '<td>'+data[i].item.folio+'</td>'+
+                  '<td>'+data[i].item.fecha+'</td>'+
+                  '<td>'+
+                    '<div id="draggable" class="ui-widget-content draggableitem" data-id-pallet="'+data[i].item.id_pallet+'" '+
+                      'data-kilos-pallet="'+data[i].item.kilos_pallet+'" data-cajas="'+data[i].item.no_cajas+'" '+
+                      'data-clasificaciones="'+data[i].item.clasificaciones+'" data-calibres="'+data[i].item.calibres+'" '+
+                      'data-etiquetas="'+data[i].item.etiquetas+'" style="z-index: 10;position: absolute;height: 29px;">'+
+                      '<p>'+data[i].item.no_cajas+'</p>'+
+                    '</div>'+
+                  '</td>'+
+                  '<td>'+data[i].item.clasificaciones+'</td>'+
+                '</tr>';
+              }
+              $("#tblPalletsLibres").html(html);
+
+              draggable();
+            }
+        });
+      });
+    }
+
     return {
       'init': init
     };

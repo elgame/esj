@@ -489,46 +489,50 @@ class documentos_model extends CI_Model {
    */
   public function saveChoferCopiaIfe($idFactura, $idDocumento)
   {
-    if ($_FILES['pife_file']['tmp_name'] !== '')
+    if ($_FILES['pife_file']['tmp_name'] !== '' || isset($_POST['pife_check']))
     {
-      $this->load->library('my_upload');
+      if ($_FILES['pife_file']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path, //APPPATH.$path_lic
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'CHOFER COPIA DEL IFE',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('pife_file');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path, //APPPATH.$path_lic
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'CHOFER COPIA DEL IFE',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('pife_file');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url'   => $path,
+        'check' => (isset($_POST['pife_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -542,46 +546,51 @@ class documentos_model extends CI_Model {
    */
   public function saveChoferCopiaLicencia($idFactura, $idDocumento)
   {
-    if ($_FILES['plicencia_file']['tmp_name'] !== '')
+    if ($_FILES['plicencia_file']['tmp_name'] !== '' || isset($_POST['plicencia_check']))
     {
-      $this->load->library('my_upload');
+      $path = '';
+      if ($_FILES['plicencia_file']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'CHOFER COPIA LICENCIA',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('plicencia_file');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'CHOFER COPIA LICENCIA',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('plicencia_file');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url'   => $path,
+        'check' => (isset($_POST['plicencia_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -595,46 +604,50 @@ class documentos_model extends CI_Model {
    */
   public function saveSeguroCamion($idFactura, $idDocumento)
   {
-    if ($_FILES['fseguro_camion']['tmp_name'] !== '')
+    if ($_FILES['fseguro_camion']['tmp_name'] !== '' || isset($_POST['fseguro_check']))
     {
-      $this->load->library('my_upload');
+      if ($_FILES['fseguro_camion']['tmp_name'] !== '') {
+        $this->load->library('my_upload');
 
-      $this->load->model('facturacion_model');
-      // Obtiene la informacion de la factura.
-      $factura = $this->facturacion_model->getInfoFactura($idFactura);
+        $this->load->model('facturacion_model');
+        // Obtiene la informacion de la factura.
+        $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
-      // Obtiene la ruta donde se guardan los documentos del cliente.
-      $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        // Obtiene la ruta donde se guardan los documentos del cliente.
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
 
-      $dataJson = $this->db
-        ->select('data')
-        ->from('facturacion_documentos')
-        ->where('id_factura', $idFactura)
-        ->where('id_documento', $idDocumento)
-        ->get()->row()->data;
+        $dataJson = $this->db
+          ->select('data')
+          ->from('facturacion_documentos')
+          ->where('id_factura', $idFactura)
+          ->where('id_documento', $idDocumento)
+          ->get()->row()->data;
 
-      if ($dataJson !== '')
-      {
-        $dataJson = json_decode($dataJson);
-        unlink(str_replace('\\', '', $dataJson->url));
+        if ($dataJson !== '')
+        {
+          $dataJson = json_decode($dataJson);
+          unlink(str_replace('\\', '', $dataJson->url));
+        }
+
+        $config_upload = array(
+          'upload_path'     => $path,
+          'allowed_types'   => '*',
+          'max_size'        => '2048',
+          'encrypt_name'    => FALSE,
+          'file_name'       => 'SEGURO CAMION',
+          'remove_spaces'   => false,
+        );
+
+        $this->my_upload->initialize($config_upload);
+        $data_doc = $this->my_upload->do_upload('fseguro_camion');
+
+        $path = explode('application/', $data_doc['full_path']);
+        $path = APPPATH.$path[1];
       }
 
-      $config_upload = array(
-        'upload_path'     => $path,
-        'allowed_types'   => '*',
-        'max_size'        => '2048',
-        'encrypt_name'    => FALSE,
-        'file_name'       => 'SEGURO CAMION',
-        'remove_spaces'   => false,
-      );
-
-      $this->my_upload->initialize($config_upload);
-      $data_doc = $this->my_upload->do_upload('fseguro_camion');
-
-      $path = explode('application/', $data_doc['full_path']);
-
       $dataJson = array(
-        'url' => APPPATH.$path[1]
+        'url' => $path,
+        'check' => (isset($_POST['fseguro_check'])? true: false)
       );
 
       $this->updateDocumento($dataJson, $idFactura, $idDocumento);
@@ -799,6 +812,46 @@ class documentos_model extends CI_Model {
     $this->generaDoc($idFactura, $idDocumento, $path);
 
     return array('passes' => true);
+  }
+
+  public function ajaxGetPalletsLibres($sqlX = null){
+    $sql = '';
+    if ($this->input->get('folios') != '') {
+      $folios = explode('al', $this->input->get('folios'));
+      if (isset($folios[0]) && isset($folios[1]) && is_numeric(trim($folios[0])) && is_numeric(trim($folios[1]))) {
+        $sql = " AND folio BETWEEN ".trim($folios[0])." AND ".trim($folios[1])."";
+      } elseif (is_numeric(trim($folios[0]))) {
+        $sql = " AND folio = ".trim($folios[0])."";
+      }
+    }
+    if ($this->input->get('term') != '')
+      $sql .= " AND (lower(c.clasificaciones) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+
+    if ( ! is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+        "SELECT *
+        FROM embarque_pallets_libres AS c
+        WHERE 1 = 1
+          {$sql}
+        ORDER BY c.folio DESC
+        LIMIT 30"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_pallet,
+            'label' => $itm->clasificaciones,
+            'value' => $itm->clasificaciones,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
   }
 
   /*

@@ -3,7 +3,6 @@
   <?php
       $htmlLi = '';
       $htmlContent = '';
-
       $params['dataFactura']   = $factura; // Datos de la factura.
       $params['dataAreas']     = $areas;   // Areas.
       $params['dataPallets']   = $pallets; // Pallets disponibles.

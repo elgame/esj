@@ -90,8 +90,14 @@
 
   var btnDelOtros = function () {
     $('#table-remisiones').on('click', '.btn-del-otros', function(event) {
-      $(this).parents('tr').remove();
-      calculaTotalIngresos();
+      var $tr = $(this).parents('tr');
+      if ($tr.find('.remision_row').val() == '') {
+        $tr.remove();
+        calculaTotalIngresos();
+      } else {
+        $tr.find('#remision_del').val('true');
+        $tr.hide();
+      }
     });
   };
 
@@ -112,6 +118,7 @@
             '<td style="width: 100px;">' +
               '<input type="text" name="remision_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
               '<input type="hidden" name="remision_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+              '<input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">' +
             '</td>' +
             '<td style="width: 70px;"><input type="text" name="remision_numero[]" value="'+numRemision+'" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;"></td>' +
             '<td style="width: 100px;"><input type="text" name="remision_folio[]" value="'+foliofactura+'" class="remision_folio" placeholder="Folio" style="width: 100px;"></td>' +
@@ -120,7 +127,10 @@
               '<input type="hidden" name="remision_id[]" value="'+id+'" class="remision-id span12" required>' +
             '</td>' +
             '<td style="width: 100px;"><input type="text" name="remision_importe[]" value="'+abono+'" class="remision-importe vpositive input-small" placeholder="Importe" required></td>' +
-            '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+            '<td style="width: 30px;">'+
+              '<button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
+              '<input type="hidden" name="remision_del[]" value="" id="remision_del">'+
+            '</td>' +
           '</tr>';
 
     $(tr).insertBefore($table);

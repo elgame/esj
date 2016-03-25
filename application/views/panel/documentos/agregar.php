@@ -38,6 +38,10 @@
               <a class="btn btn-danger pull-right span2" href="<?php echo base_url('panel/documentos/finalizar_docs/?id='.$_GET['id']) ?>">Finalizar</a>
   <?php }} ?>
 
+  <?php if (isset($vale->id_vale_salida)){  ?>
+          <a class="btn btn-success span2" href="<?php echo base_url('panel/vales_salida/imprimir/?id='.$vale->id_vale_salida) ?>" target="_blank">Imprimir Vale de Salida</a>
+  <?php } ?>
+
   <div class="row-fluid">
     <div class="box span12">
       <div class="box-header well" data-original-title>

@@ -215,6 +215,7 @@
                                     <td style="width: 100px;">
                                       <input type="text" name="remision_empresa[]" value="<?php echo $_POST['remision_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
                                       <input type="hidden" name="remision_empresa_id[]" value="<?php echo $_POST['remision_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
+                                      <input type="hidden" name="remision_row[]" value="" class="input-small vpositive remision_row">
                                     </td>
                                     <td style="width: 70px;"><input type="text" name="remision_numero[]" value="<?php echo $_POST['remision_numero'][$key] ?>" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;" <?php echo $readonly ?>></td>
                                     <td style="width: 100px;"><input type="text" name="remision_folio[]" value="<?php echo $_POST['remision_folio'][$key] ?>" class="remision_folio" placeholder="Folio" style="width: 100px;" <?php echo $readonly ?>></td>
@@ -223,7 +224,10 @@
                                       <input type="hidden" name="remision_id[]" value="<?php echo $_POST['remision_id'][$key] ?>" class="remision-id span12" required>
                                     </td>
                                     <td style="width: 100px;"><input type="text" name="remision_importe[]" value="<?php echo $_POST['remision_importe'][$key] ?>" class="remision-importe vpositive input-small" placeholder="Importe" required <?php echo $readonly ?>></td>
-                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                    <td style="width: 30px;">
+                                      <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                      <input type="hidden" name="remision_del[]" value="" id="remision_del">
+                                    </td>
                                   </tr>
                             <?php }} else {
                                   foreach ($caja['remisiones'] as $remision) {
@@ -233,6 +237,9 @@
                                       <td style="width: 100px;">
                                         <input type="text" name="remision_empresa[]" value="<?php echo $remision->empresa ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
                                         <input type="hidden" name="remision_empresa_id[]" value="<?php echo $remision->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
+                                        <input type="hidden" name="remision_row[]" value="<?php echo $remision->row ?>" class="input-small vpositive remision_row">
+                                        <a href="<?php echo base_url('panel/caja_chica/print_vale_rm/?fecha='.$remision->fecha.'&id_remision='.$remision->id_remision.'&row='.$remision->row.'&noCaja='.$remision->no_caja)?>" target="_blank" title="Imprimir VALE DE CAJA CHICA">
+                                          <i class="ico icon-print" style="cursor:pointer"></i></a>
                                       </td>
                                       <td style="width: 70px;"><input type="text" name="remision_numero[]" value="<?php echo $remision->folio ?>" class="remision-numero vpositive input-small" placeholder="" readonly style="width: 70px;" <?php echo $readonly ?>></td>
                                       <td style="width: 100px;"><input type="text" name="remision_folio[]" value="<?php echo $remision->folio_factura ?>" class="remision_folio" placeholder="Folio" style="width: 100px;" <?php echo $readonly ?>></td>
@@ -241,7 +248,10 @@
                                         <input type="hidden" name="remision_id[]" value="<?php echo $remision->id_remision ?>" class="remision-id span12" required>
                                       </td>
                                       <td style="width: 100px;"><input type="text" name="remision_importe[]" value="<?php echo $remision->monto ?>" class="remision-importe vpositive input-small" placeholder="Importe" required <?php echo $readonly ?>></td>
-                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                      <td style="width: 30px;">
+                                        <button type="button" class="btn btn-danger btn-del-otros" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
+                                        <input type="hidden" name="remision_del[]" value="" id="remision_del">
+                                      </td>
                                     </tr>
                             <?php }} ?>
 

@@ -1,5 +1,51 @@
 
  ☐ ALTER TABLE facturacion ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+   ALTER TABLE cajachica_remisiones ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+   ALTER TABLE cajachica_gastos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+   ALTER TABLE cajachica_remisiones ALTER COLUMN "row" TYPE bigint;
+   ALTER TABLE cajachica_remisiones ADD COLUMN folio bigint;
+
+   UPDATE rastria_documentos SET orden=orden+1;
+   INSERT INTO rastria_documentos(nombre, url_form, url_print, status, orden) VALUES ('REMISION Y/O FACTURA', 'panel/documentos/remision_factura', '', TRUE, 1);
+   CREATE OR REPLACE VIEW embarque_pallets_libres AS
+       SELECT rp.id_pallet,
+          rp.no_cajas,
+          rp.kilos_pallet,
+          string_agg(clasi.nombre::text, ', '::text) AS clasificaciones,
+          rp.folio,
+          cali.calibres,
+          ( SELECT string_agg(etiq.nombre::text, ', '::text) AS etiquetas
+                 FROM rastria_pallets rp2
+                   JOIN ( SELECT rpr.id_pallet,
+                          et.nombre
+                         FROM rastria_pallets_rendimiento rpr
+                           JOIN etiquetas et ON rpr.id_etiqueta = et.id_etiqueta
+                        GROUP BY rpr.id_pallet, rpr.id_etiqueta, et.nombre
+                        ORDER BY rpr.id_pallet) etiq ON etiq.id_pallet = rp2.id_pallet
+                WHERE etiq.id_pallet = rp.id_pallet) AS etiquetas,
+          rp.fecha
+         FROM rastria_pallets rp
+           LEFT JOIN facturacion_doc_embarque_pallets fdp ON fdp.id_pallet = rp.id_pallet
+           JOIN ( SELECT rpr.id_pallet,
+                  cl.nombre
+                 FROM rastria_pallets_rendimiento rpr
+                   JOIN clasificaciones cl ON rpr.id_clasificacion = cl.id_clasificacion
+                GROUP BY rpr.id_pallet, rpr.id_clasificacion, cl.nombre
+                ORDER BY rpr.id_pallet) clasi ON clasi.id_pallet = rp.id_pallet
+           LEFT JOIN ( SELECT rpc.id_pallet,
+                  string_agg(cal.nombre::text, ', '::text) AS calibres
+                 FROM rastria_pallets_calibres rpc
+                   JOIN calibres cal ON rpc.id_calibre = cal.id_calibre
+                GROUP BY rpc.id_pallet
+                ORDER BY rpc.id_pallet) cali ON cali.id_pallet = rp.id_pallet
+        WHERE fdp.id_embarque IS NULL
+        GROUP BY rp.id_pallet, rp.no_cajas, rp.folio, cali.calibres, rp.kilos_pallet
+        ORDER BY rp.id_pallet DESC;
+        ALTER TABLE embarque_pallets_libres
+          OWNER TO programa;
+        COMMENT ON VIEW embarque_pallets_libres
+          IS 'Muestra los pallets que no han sido colocados en embarque.';
+
 
  ✔ Trabajo agricola @done (16-03-17 10:23)
     CREATE TABLE otros.trabajo_agricola

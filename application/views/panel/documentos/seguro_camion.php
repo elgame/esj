@@ -12,6 +12,8 @@
         <label class="control-label" for="fseguro_camion">Seguro Camión</label>
         <div class="controls">
           <input type="file" name="fseguro_camion" class="span12" id="fseguro_camion">
+          <label>Marcar como entregada sin subir el archivo:
+            <input type="checkbox" name="fseguro_check" value="si" <?php echo (isset($dataDocumento->check)? 'checked': '') ?>></label>
         </div>
       </div><!--/control-group -->
     </div>
@@ -23,7 +25,7 @@
 
             <?php
                 $span = '12';
-                if (count($dataDocumento) > 0) {
+                if (isset($dataDocumento->url{0})) {
                 $span = '6';
               ?>
                 <a href="<?php echo base_url($dataDocumento->url) ?>" class="btn btn-success btn-large span6" rel="superbox-80x600">Ver</a>

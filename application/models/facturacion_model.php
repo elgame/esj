@@ -1418,7 +1418,7 @@ class facturacion_model extends privilegios_model{
     public function getClienteDocs($idCliente, $idFactura = null)
     {
         $query = $this->db->query(
-          "SELECT id_documento
+          "SELECT id_documento, nombre
            FROM clientes_documentos
            WHERE id_cliente = {$idCliente}
            ORDER BY id_documento ASC"
@@ -1431,8 +1431,12 @@ class facturacion_model extends privilegios_model{
           {
             if (is_null($idFactura))
               $docs[] = $objDoc->id_documento;
-            else
-              $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento);
+            else {
+              $status = false;
+              if ($objDoc->nombre == "REMISION Y/O FACTURA")
+                $status = true;
+              $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento, 'status' => $status);
+            }
           }
         }
 

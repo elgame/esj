@@ -28,6 +28,7 @@ class documentos extends MY_Controller {
     'documentos/imprime_manifiesto_camion/',
 
     'documentos/acomodo_embarque/',
+    'documentos/ajax_get_pallets_libres/',
   );
 
   public function _remap($method)
@@ -131,8 +132,19 @@ class documentos extends MY_Controller {
             $params['finalizar'] = true;
         }
       }
-      else
+      else {
         $params['finalizados'] = true;
+        // si se completaron todos los documentos crea el vale
+        $params['vale'] = $this->db->query("SELECT * FROM otros.vales_salida
+                                   WHERE id_remision = {$params['factura']['info']->id_factura}")->row();
+        if (!isset($params['vale']->id_vale_salida)) { // crea el vale
+          $this->load->model('vales_salida_model');
+          $params['vale'] = $this->vales_salida_model->addVale([
+              'tipo'        => 'venta',
+              'id_remision' => $params['factura']['info']->id_factura
+            ]);
+        }
+      }
 
       // Obtiene la vista de los documentos del cliente.
       $params['documentos'] = $this->generaDocsView($params['factura']['info']->id_factura);
@@ -187,11 +199,7 @@ class documentos extends MY_Controller {
       ->get()->row()->docs_finalizados;
 
     // Obtiene los pallets libres.
-    $params['pallets'] = $this->db
-      ->select('*')
-      ->from("embarque_pallets_libres")
-      ->get()
-      ->result();
+    $params['pallets'] = []; //$this->db->select('*')->from("embarque_pallets_libres")->get()->result();
 
     // echo "<pre>";
     //   var_dump($params['pallets']);
@@ -456,6 +464,15 @@ class documentos extends MY_Controller {
     }
     else
       echo 0;
+  }
+
+  public function ajax_get_pallets_libres()
+  {
+    $this->load->model('documentos_model');
+
+    $data = $this->documentos_model->ajaxGetPalletsLibres();
+
+    echo json_encode($data);
   }
 
   /*
