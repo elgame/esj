@@ -45,6 +45,60 @@
           OWNER TO programa;
         COMMENT ON VIEW embarque_pallets_libres
           IS 'Muestra los pallets que no han sido colocados en embarque.';
+   CREATE TABLE otros.vales_salida
+      (
+        id_vale_salida bigserial NOT NULL,
+        tipo character varying(20) NOT NULL, -- venta,
+        id_remision bigint, -- id de la remision para salidas tipo venta
+        folio bigint NOT NULL,
+        id_autoriza bigint, -- id del usaurio que registro el vale
+        fecha timestamp with time zone NOT NULL DEFAULT now(),
+        no_impresiones integer NOT NULL DEFAULT 0,
+        CONSTRAINT vales_salida_pkey PRIMARY KEY (id_vale_salida),
+        CONSTRAINT vales_salida_id_autoriza_fkey FOREIGN KEY (id_autoriza)
+            REFERENCES usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT vales_salida_id_remision_fkey FOREIGN KEY (id_remision)
+            REFERENCES facturacion (id_factura) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.vales_salida
+        OWNER TO programa;
+      COMMENT ON COLUMN otros.vales_salida.tipo IS 'venta, ';
+      COMMENT ON COLUMN otros.vales_salida.id_remision IS 'id de la remision para salidas tipo venta';
+      COMMENT ON COLUMN otros.vales_salida.id_autoriza IS 'id del usaurio que registro el vale';
+   CREATE TABLE otros.control_acceso
+      (
+        id_control bigserial NOT NULL,
+        id_usaurio_ent bigint NOT NULL,
+        id_usuario_sal bigint,
+        id_vale_salida bigint,
+        nombre character varying(200) NOT NULL,
+        asunto character varying(200) NOT NULL,
+        departamento character varying(60) NOT NULL,
+        placas character varying(15) NOT NULL,
+        fecha_entrada timestamp with time zone NOT NULL DEFAULT now(),
+        fecha_salida timestamp with time zone,
+        CONSTRAINT control_acceso_pkey PRIMARY KEY (id_control),
+        CONSTRAINT control_acceso_id_usaurio_ent_fkey FOREIGN KEY (id_usaurio_ent)
+            REFERENCES usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT control_acceso_id_usuario_sal_fkey FOREIGN KEY (id_usuario_sal)
+            REFERENCES usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT control_acceso_id_vale_salida_fkey FOREIGN KEY (id_vale_salida)
+            REFERENCES otros.vales_salida (id_vale_salida) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.control_acceso
+        OWNER TO programa;
+
 
 
  ✔ Trabajo agricola @done (16-03-17 10:23)
