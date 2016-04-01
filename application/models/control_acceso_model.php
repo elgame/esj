@@ -149,7 +149,7 @@ class control_acceso_model extends CI_Model {
 	{
     // $id_cliente = (isset($_GET['id']))? $_GET['id']: $id_cliente;
     $sql = $id_control? " AND p.id_control = {$id_control}": '';
-		$sql .= $placas? " AND UPPER(p.placas) = UPPER('{$placas} AND p.fecha_salida IS NULL')": '';
+		$sql .= $placas? " AND UPPER(p.placas) = UPPER('{$placas}') AND p.fecha_salida IS NULL": '';
 
 		$result = $this->db->query("SELECT p.id_control, p.id_usaurio_ent, p.id_usuario_sal, p.id_vale_salida,
             (ue.nombre || ' ' || ue.apellido_paterno || ' ' || ue.apellido_materno) AS usuario_entrada,
@@ -162,6 +162,7 @@ class control_acceso_model extends CI_Model {
           WHERE 1 = 1 {$sql}
           ORDER BY p.id_control DESC
           ");
+
 		$data = $result->row();
 
 		return $data;

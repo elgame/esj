@@ -522,7 +522,9 @@
             <?php }} else  if (isset($borrador) && count($borrador['remisiones']) > 0) {
                 foreach ($borrador['remisiones'] as $remision) { ?>
                   <input type="hidden" value="<?php echo $remision->id_venta ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $remision->id_venta ?>">
-            <?php }} ?>
+            <?php }} else  if (isset($id_nr)) { ?>
+                  <input type="hidden" value="<?php echo $id_nr; ?>" name="remisionesIds[]" class="remision-selected" id="remision<?php echo $id_nr; ?>">
+            <?php } ?>
           </div>
 
           <div class="row-fluid">

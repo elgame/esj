@@ -17,7 +17,7 @@ class facturacion_model extends privilegios_model{
    * @return
 	 */
 	public function getFacturas($perpage = '40', $sql2='')
-    {
+  {
 		$sql = '';
 		//paginacion
 		$params = array(
@@ -1418,10 +1418,10 @@ class facturacion_model extends privilegios_model{
     public function getClienteDocs($idCliente, $idFactura = null)
     {
         $query = $this->db->query(
-          "SELECT id_documento, nombre
-           FROM clientes_documentos
-           WHERE id_cliente = {$idCliente}
-           ORDER BY id_documento ASC"
+          "SELECT rd.id_documento, rd.nombre
+           FROM clientes_documentos cd INNER JOIN rastria_documentos rd ON rd.id_documento = cd.id_documento
+           WHERE cd.id_cliente = {$idCliente}
+           ORDER BY rd.id_documento ASC"
         );
 
         if ($query->num_rows() > 0)
@@ -1432,9 +1432,9 @@ class facturacion_model extends privilegios_model{
             if (is_null($idFactura))
               $docs[] = $objDoc->id_documento;
             else {
-              $status = false;
+              $status = 'f';
               if ($objDoc->nombre == "REMISION Y/O FACTURA")
-                $status = true;
+                $status = 't';
               $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento, 'status' => $status);
             }
           }

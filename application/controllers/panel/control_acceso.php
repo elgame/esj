@@ -72,8 +72,9 @@ class control_acceso extends MY_Controller {
 
 		$tipo = 'entrada';
 		if ($this->input->get('placas') != '' || $this->input->get('id') > 0) {
-			if (isset($params['data']->id_control)) {
+			if ($this->input->get('placas') != '') {
 				$params['data'] = $this->control_acceso_model->getControlInfo(false, $this->input->get('placas'));
+
 				$tipo = 'salida';
 			}
 			if ($this->input->get('id') > 0) {

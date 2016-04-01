@@ -1,9 +1,14 @@
 
- ☐ ALTER TABLE facturacion ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+
+ ✔ ALTER TABLE facturacion ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0; @done (16-03-31 13:28)
    ALTER TABLE cajachica_remisiones ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
    ALTER TABLE cajachica_gastos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
    ALTER TABLE cajachica_remisiones ALTER COLUMN "row" TYPE bigint;
    ALTER TABLE cajachica_remisiones ADD COLUMN folio bigint;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Control de acceso', 0, TRUE, 'control_acceso/', 'resize-horizontal', FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Entrada y Salida', 427, TRUE, 'control_acceso/entrada_salida/', 'plus', FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar', 427, FALSE, 'control_acceso/modificar/', 'edit', FALSE);
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Remision y/o factura', 70, FALSE, 'documentos/remision_factura/', 'copy', FALSE);
 
    UPDATE rastria_documentos SET orden=orden+1;
    INSERT INTO rastria_documentos(nombre, url_form, url_print, status, orden) VALUES ('REMISION Y/O FACTURA', 'panel/documentos/remision_factura', '', TRUE, 1);
@@ -98,7 +103,6 @@
       );
       ALTER TABLE otros.control_acceso
         OWNER TO programa;
-
 
 
  ✔ Trabajo agricola @done (16-03-17 10:23)
