@@ -117,6 +117,8 @@ class areas extends MY_Controller {
 
 			$this->load->model('areas_model');
 			$this->load->model('clasificaciones_model');
+			$this->load->model('calidades_ventas_model');
+			$this->load->model('tamanos_ventas_model');
 			$this->load->model('calidades_model');
 
 			$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -144,6 +146,12 @@ class areas extends MY_Controller {
 
 			$params['clasificaciones']      = $this->clasificaciones_model->getClasificaciones($_GET['id']);
 			$params['html_clasificaciones'] = $this->load->view('panel/areas/clasificaciones/admin', $params, true);
+
+			$params['calidades_ventas']            = $this->calidades_ventas_model->getCalidades($_GET['id']);
+			$params['html_calidades_ventas']       = $this->load->view('panel/areas/calidades_ventas/admin', $params, true);
+
+			$params['tamanos_ventas']              = $this->tamanos_ventas_model->getTamanios($_GET['id']);
+			$params['html_tamanos_ventas']         = $this->load->view('panel/areas/tamanios/admin', $params, true);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);

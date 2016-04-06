@@ -1,5 +1,57 @@
 
 
+ ☐ INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Calidades Ventas', 15, FALSE, 'areas_otros/calidades/', 'list', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar calidad', 431, FALSE, 'areas_otros/agregar_calidad/', 'plus', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar', 431, FALSE, 'areas_otros/activar_calidad/', 'ok', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar', 431, FALSE, 'areas_otros/modificar_calidad/', 'edit', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar', 431, FALSE, 'areas_otros/eliminar_calidad/', 'remove', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Tamaños Ventas', 15, FALSE, 'areas_otros/tamanos/', 'list', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar tamaño', 436, FALSE, 'areas_otros/agregar_tamano/', 'plus', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar', 436, FALSE, 'areas_otros/activar_tamano/', 'ok', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar', 436, FALSE, 'areas_otros/modificar_tamano/', 'edit', FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar', 436, FALSE, 'areas_otros/eliminar_tamano/', 'remove', FALSE);
+
+    CREATE TABLE otros.areas_calidades
+      (
+        id_calidad bigserial NOT NULL,
+        id_area integer NOT NULL,
+        status boolean NOT NULL DEFAULT true,
+        nombre character varying(20) NOT NULL,
+        CONSTRAINT areas_calidades_pkey PRIMARY KEY (id_calidad),
+        CONSTRAINT areas_calidades_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.areas_calidades
+        OWNER TO programa;
+    CREATE TABLE otros.areas_tamanios
+      (
+        id_tamanio bigserial NOT NULL,
+        id_area integer NOT NULL,
+        nombre character varying(30) NOT NULL,
+        status boolean NOT NULL DEFAULT true,
+        CONSTRAINT areas_tamanios_pkey PRIMARY KEY (id_tamanio),
+        CONSTRAINT areas_tamanios_id_area_fkey FOREIGN KEY (id_area)
+            REFERENCES areas (id_area) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE otros.areas_tamanios
+        OWNER TO programa;
+    ALTER TABLE facturacion_productos ADD COLUMN id_calidad bigint;
+    ALTER TABLE facturacion_productos ADD COLUMN id_tamanio bigint;
+    ALTER TABLE facturacion_productos ADD COLUMN descripcion2 character varying(200);
+    ALTER TABLE facturacion_productos ADD CONSTRAINT facturacion_productos_id_calidad_fkey FOREIGN KEY (id_calidad)
+      REFERENCES otros.areas_calidades (id_calidad) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE facturacion_productos ADD CONSTRAINT facturacion_productos_id_tamanio_fkey FOREIGN KEY (id_tamanio)
+      REFERENCES otros.areas_tamanios (id_tamanio) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+
+
  ✔ ALTER TABLE facturacion ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0; @done (16-03-31 13:28)
    ALTER TABLE cajachica_remisiones ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
    ALTER TABLE cajachica_gastos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;

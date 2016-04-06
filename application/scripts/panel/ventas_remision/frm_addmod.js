@@ -538,7 +538,8 @@ function addProducto(unidades, prod) {
       $tr, addInputPalletId = true;
 
   var prod_nombre = '', prod_id = '', pallet = '', prod_cajas = 0,
-      ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false;;
+      ivaSelected = '0', prod_kilos = 0, cantidad = 0, prod_certificado = false,
+      prod_dcalidad = '', prod_did_calidad = '', prod_dtamanio = '', prod_did_tamanio = '', prod_ddescripcion2 = '';
 
   // Pasa los gastos a la otra tabla
   pasaGastosTabla();
@@ -574,6 +575,12 @@ function addProducto(unidades, prod) {
     idUnidadClasificacion = prod.id_unidad_clasificacion ? prod.id_unidad_clasificacion : '';
     ivaSelected = prod.iva_clasificacion ? prod.iva_clasificacion : '';
     prod_certificado =  prod.certificado === 't' ? true : false;
+
+    prod_dcalidad      = prod.areas_calidad;
+    prod_did_calidad   = prod.id_calidad;
+    prod_dtamanio      = prod.areas_tamanio;
+    prod_did_tamanio   = prod.id_tamanio;
+    prod_ddescripcion2 = prod.descripcion2;
 
   } else {
     idUnidad = unidades[0].id_unidad;
@@ -637,8 +644,30 @@ function addProducto(unidades, prod) {
     }
 
     trHtml = '<tr data-pallets="'+pallet+'">' +
+                '<td style="width:31px;">' +
+                  '<div class="btn-group">' +
+                    '<button type="button" class="btn ventasmore">' +
+                      '<span class="caret"></span>' +
+                    '</button>' +
+                    '<ul class="dropdown-menu ventasmore">' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="'+prod_dcalidad+'" id="prod_dcalidad" class="span9 pull-right jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                        '<input type="hidden" name="prod_did_calidad[]" value="'+prod_did_calidad+'" id="prod_did_calidad" class="span12">' +
+                      '</li>' +
+                      '<li class="divider"></li>' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">Tamaño:</label> <input type="text" name="prod_dtamanio[]" value="'+prod_dtamanio+'" id="prod_dtamanio" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                        '<input type="hidden" name="prod_did_tamanio[]" value="'+prod_did_tamanio+'" id="prod_did_tamanio" class="span12">' +
+                      '</li>' +
+                      '<li class="divider"></li>' +
+                      '<li class="clearfix">' +
+                        '<label class="pull-left">Descripción:</label> <input type="text" name="prod_ddescripcion2[]" value="'+prod_ddescripcion2+'" id="prod_ddescripcion2" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                      '</li>' +
+                    '</ul>' +
+                  '</div>' +
+                '</td>' +
                 '<td>' +
-                  '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                  '<input type="text" name="prod_ddescripcion[]" value="'+prod_nombre+'" id="prod_ddescripcion" class="span12 jump'+(jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
                   '<input type="hidden" name="prod_did_prod[]" value="'+prod_id+'" id="prod_did_prod" class="span12">' +
                   '<input type="hidden" name="pallets_id[]" value="'+pallet+'" id="pallets_id" class="span12">' +
                   '<input type="hidden" name="id_unidad_rendimiento[]" value="'+idUnidad+'" id="id_unidad_rendimiento" class="span12">' +
@@ -696,7 +725,8 @@ function addProducto(unidades, prod) {
     for (i = indexJump, max = jumpIndex; i <= max; i += 1)
       $.fn.keyJump.setElem($('.jump'+i));
 
-    $('.jump'+indexJump).focus();
+    // openGroupMore('.jump'+indexJump);
+    $('.jump'+(indexJump)).focus();
   }
 }
 
@@ -976,6 +1006,20 @@ function autocompleteClasifiLive () {
 
 function valida_agregar ($tr) {
   // $tr.find("#prod_did_prod").val() === '' ||
+  if($("#privAddDescripciones").length == 0 && $("#isNotaCredito").length == 0)
+  {
+    if ($tr.find("#prod_did_calidad").val() === '' || $tr.find("#prod_did_tamanio").val() == '') {
+      return false;
+    }
+  // Valida agregar descripciones
+    result = validaPrivDescripciones();
+    if(result == false)
+    {
+      noty({"text": 'No tienes permiso para agregar Descripciones, Selecciona los productos que salen en el listado.', "layout":"topRight", "type": 'error'});
+      event.preventDefault();
+      return false;
+    }
+  }
 
   if ($tr.find("#prod_dmedida").val() === '' || $tr.find("#prod_dcantidad").val() == 0 ||
       $tr.find("#prod_dpreciou").val() < 0) {

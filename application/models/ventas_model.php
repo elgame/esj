@@ -121,10 +121,13 @@ class Ventas_model extends privilegios_model{
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento')
+                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
+                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
+        ->join('otros.areas_calidades as ac', 'ac.id_calidad = fp.id_calidad', 'left')
+        ->join('otros.areas_tamanios as at', 'at.id_tamanio = fp.id_tamanio', 'left')
         ->where('id_factura = ' . $id)->order_by('fp.num_row', 'asc')
         ->get();
 
@@ -348,25 +351,28 @@ class Ventas_model extends privilegios_model{
       if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $productosFactura[] = array(
-          'id_factura'       => $id_venta,
-          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-          'num_row'          => intval($key),
-          'cantidad'         => $_POST['prod_dcantidad'][$key],
-          'descripcion'      => $descripcion,
-          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-          'importe'          => $_POST['prod_importe'][$key],
-          'iva'              => $_POST['prod_diva_total'][$key],
-          'unidad'           => $_POST['prod_dmedida'][$key],
-          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
-          'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-          'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'             => $_POST['prod_dkilos'][$key],
-          'cajas'             => $_POST['prod_dcajas'][$key],
+          'id_factura'            => $id_venta,
+          'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          'num_row'               => intval($key),
+          'cantidad'              => $_POST['prod_dcantidad'][$key],
+          'descripcion'           => $descripcion,
+          'precio_unitario'       => $_POST['prod_dpreciou'][$key],
+          'importe'               => $_POST['prod_importe'][$key],
+          'iva'                   => $_POST['prod_diva_total'][$key],
+          'unidad'                => $_POST['prod_dmedida'][$key],
+          'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
+          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
-          'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
-          'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+          'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+          'id_unidad'             => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+          'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
+          'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+          'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')
@@ -571,25 +577,28 @@ class Ventas_model extends privilegios_model{
       if ($_POST['prod_dcantidad'][$key] > 0)
       {
         $productosFactura[] = array(
-          'id_factura'       => $id_venta,
-          'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
-          'num_row'          => intval($key),
-          'cantidad'         => $_POST['prod_dcantidad'][$key],
-          'descripcion'      => $descripcion,
-          'precio_unitario'  => $_POST['prod_dpreciou'][$key],
-          'importe'          => $_POST['prod_importe'][$key],
-          'iva'              => $_POST['prod_diva_total'][$key],
-          'unidad'           => $_POST['prod_dmedida'][$key],
-          'retencion_iva'    => $_POST['prod_dreten_iva_total'][$key],
-          'porcentaje_iva'   => $_POST['prod_diva_porcent'][$key],
-          'porcentaje_retencion' => $_POST['prod_dreten_iva_porcent'][$key],
-          'ids_pallets'       => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
-          'kilos'             => $_POST['prod_dkilos'][$key],
-          'cajas'             => $_POST['prod_dcajas'][$key],
+          'id_factura'            => $id_venta,
+          'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
+          'num_row'               => intval($key),
+          'cantidad'              => $_POST['prod_dcantidad'][$key],
+          'descripcion'           => $descripcion,
+          'precio_unitario'       => $_POST['prod_dpreciou'][$key],
+          'importe'               => $_POST['prod_importe'][$key],
+          'iva'                   => $_POST['prod_diva_total'][$key],
+          'unidad'                => $_POST['prod_dmedida'][$key],
+          'retencion_iva'         => $_POST['prod_dreten_iva_total'][$key],
+          'porcentaje_iva'        => $_POST['prod_diva_porcent'][$key],
+          'porcentaje_retencion'  => $_POST['prod_dreten_iva_porcent'][$key],
+          'ids_pallets'           => $_POST['pallets_id'][$key] !== '' ? $_POST['pallets_id'][$key] : null,
+          'kilos'                 => $_POST['prod_dkilos'][$key],
+          'cajas'                 => $_POST['prod_dcajas'][$key],
           'id_unidad_rendimiento' => $_POST['id_unidad_rendimiento'][$key] !== '' ? $_POST['id_unidad_rendimiento'][$key] : null,
           'id_size_rendimiento'   => isset($_POST['id_size_rendimiento'][$key]) && $_POST['id_size_rendimiento'][$key] !== '' ? $_POST['id_size_rendimiento'][$key] : null,
-          'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
-          'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+          'certificado'           => $_POST['isCert'][$key] === '1' ? 't' : 'f',
+          'id_unidad'             => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+          'id_calidad'            => (isset($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
+          'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
+          'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')
@@ -1388,16 +1397,16 @@ class Ventas_model extends privilegios_model{
         elseif ($item->porcentaje_iva == '16')
           $traslado16 += $item->iva;
 
-        $descripcion_ext = '';
+        $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
         if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
             $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
             $item->id_clasificacion == '53'){
           if($item->id_clasificacion == '49' && isset($factura['seguro']))
-            $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+            $descripcion_ext .= " (No {$factura['seguro']->pol_seg})";
           elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
-            $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+            $descripcion_ext .= " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
           elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
-            $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+            $descripcion_ext .= " (No {$factura['supcarga']->certificado})";
         }else
           $bultoss += $item->cantidad;
 
@@ -1455,16 +1464,16 @@ class Ventas_model extends privilegios_model{
       if ($item->certificado === 't')
         $hay_prod_certificados = true;
 
-      $descripcion_ext = '';
+      $descripcion_ext = strlen($item->descripcion2)>0? " ({$item->descripcion2})": '';
       if ($item->id_clasificacion == '49' || $item->id_clasificacion == '50' ||
           $item->id_clasificacion == '51' || $item->id_clasificacion == '52' ||
           $item->id_clasificacion == '53'){
         if($item->id_clasificacion == '49' && isset($factura['seguro']))
-          $descripcion_ext = " (No {$factura['seguro']->pol_seg})";
+          $descripcion_ext .= " (No {$factura['seguro']->pol_seg})";
         elseif(($item->id_clasificacion == '51' || $item->id_clasificacion == '51') && isset($factura['certificado'.$item->id_clasificacion]))
-          $descripcion_ext = " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
+          $descripcion_ext .= " (No {$factura['certificado'.$item->id_clasificacion]->certificado})";
         elseif($item->id_clasificacion == '53' && isset($factura['supcarga']))
-          $descripcion_ext = " (No {$factura['supcarga']->certificado})";
+          $descripcion_ext .= " (No {$factura['supcarga']->certificado})";
       }
 
       $pdf->Row(array(
@@ -1718,15 +1727,15 @@ class Ventas_model extends privilegios_model{
       $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
     }
 
-    // Actualiza el # de impresion
-    $this->db->update('facturacion', ['no_impresiones' => $factura['info']->no_impresiones+1], "id_factura = ".$factura['info']->id_factura);
-
     // $this->printValeSalida($factura, $conceptos, $pdf);
 
-    if ($path)
+    if ($path) {
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
-    else
+    } else {
+      // Actualiza el # de impresion
+      $this->db->update('facturacion', ['no_impresiones' => $factura['info']->no_impresiones+1], "id_factura = ".$factura['info']->id_factura);
       $pdf->Output('Venta_Remision', 'I');
+    }
   }
 
   public function printValeSalida($factura, $conceptos, &$pdf)

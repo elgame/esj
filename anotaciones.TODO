@@ -1,5 +1,7 @@
+-- 2.16h Agregar catalogos de Calidad y tamaños en las areas para seleccionar en facturacion y ventas
+-- Modificar en ventas de remision y facturacion para que puedan espesificar la calidad y tamaño, asi como poder poner una descripcion en la clasificacion
 - Los correos en los gastos de cajas chica
-- en bascula agrandar la letra de original y copia
+- *en bascula agrandar la letra de original y copia
 
 --2.7h *En caja chica al registrar una remision que genere un ticket del abono, poner original o copias en gastos y ingresos remisiones
 --10h *Control de acceso y Vales de salida de ventas como check list de los documentos

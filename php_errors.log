@@ -7,3 +7,5 @@
 [23-Mar-2016 08:24:59 America/Mexico_City] PHP Fatal error:  Call to a member function tienePrivilegioDe() on null in /home/gama/www/sanjorge/application/views/panel/control_acceso/admin.php on line 78
 [23-Mar-2016 10:13:26 America/Mexico_City] PHP Parse error:  syntax error, unexpected '<' in /home/gama/www/sanjorge/application/views/panel/documentos/agregar_listado.php on line 14
 [24-Mar-2016 11:26:16 America/Mexico_City] PHP Fatal error:  Cannot redeclare barcode::__construct() in /home/gama/www/sanjorge/application/libraries/barcode.php on line 11
+[01-Apr-2016 12:43:04 America/Mexico_City] PHP Fatal error:  Call to a member function getCalidades() on null in /home/gama/www/sanjorge/application/controllers/panel/areas.php on line 148
+[01-Apr-2016 14:02:31 America/Mexico_City] PHP Fatal error:  Call to undefined method tamanos_ventas_model::getCalidadInfo() in /home/gama/www/sanjorge/application/controllers/panel/areas_otros.php on line 335

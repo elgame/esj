@@ -4350,3 +4350,12 @@ a.badge:hover {
 .invisible {
   visibility: hidden;
 }
+
+
+.btn-group ul.dropdown-menu.ventasmore {
+  width: 300px;
+  display: block;
+}
+.btn-group ul.dropdown-menu.ventasmore li.divider{
+  margin: 2px 1px;
+}

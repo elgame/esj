@@ -155,6 +155,7 @@ class facturacion extends MY_Controller {
         array('general/keyjump.js'),
         array('general/util.js'),
         array('panel/facturacion/frm_addmod.js'),
+        array('panel/facturacion/frm_otros.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
@@ -608,9 +609,6 @@ class facturacion extends MY_Controller {
               'label'   => 'Retecion IVA',
               'rules'   => ''),
 
-        array('field'   => 'prod_did_prod[]',
-              'label'   => 'prod_did_prod',
-              'rules'   => ''),
         array('field'   => 'prod_dcantidad[]',
               'label'   => 'prod_dcantidad',
               'rules'   => 'callback_check_max_decimales'),
@@ -622,6 +620,9 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'prod_ddescripcion[]',
               'label'   => 'prod_ddescripcion',
+              'rules'   => ''),
+        array('field'   => 'prod_ddescripcion2[]',
+              'label'   => 'prod_ddescripcion2',
               'rules'   => ''),
         array('field'   => 'prod_ddescuento[]',
               'label'   => 'prod_ddescuento',
@@ -707,6 +708,28 @@ class facturacion extends MY_Controller {
               'label'   => 'Carta Porte',
               'rules'   => ''),
     );
+
+    if (isset($_POST['privAddDescripciones']{0})) {
+      $rules[] = array('field'   => 'prod_did_prod[]',
+                      'label'   => 'prod_did_prod',
+                      'rules'   => '');
+      $rules[] = array('field'   => 'prod_did_calidad[]',
+                      'label'   => 'prod_did_calidad',
+                      'rules'   => '');
+      $rules[] = array('field'   => 'prod_did_tamanio[]',
+                      'label'   => 'prod_did_tamanio',
+                      'rules'   => '');
+    } else {
+      $rules[] = array('field'   => 'prod_did_prod[]',
+                    'label'   => 'prod_did_prod',
+                    'rules'   => 'required');
+      $rules[] = array('field'   => 'prod_did_calidad[]',
+                      'label'   => 'prod_did_calidad',
+                      'rules'   => 'required');
+      $rules[] = array('field'   => 'prod_did_tamanio[]',
+                      'label'   => 'prod_did_tamanio',
+                      'rules'   => 'required');
+    }
 
     if (isset($_POST['palletsIds']) && isset($_POST['timbrar']))
     {

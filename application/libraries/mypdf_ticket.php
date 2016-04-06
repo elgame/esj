@@ -250,7 +250,7 @@ class mypdf_ticket extends FPDF {
 
       $this->SetY($this->GetY());
 
-      $txt_impresion = $data->no_impresiones>0? 'Copia '.$data->no_impresiones: 'Original';
+      $txt_impresion = $data->no_impresiones>0? 'COPIA '.$data->no_impresiones: 'ORIGINAL';
 
       $this->SetFont($this->fount_txt, '', $this->font_size+1);
       $this->SetWidths(array(35, 27));
@@ -258,6 +258,7 @@ class mypdf_ticket extends FPDF {
       $this->Row(array('EXPEDIDO EL:' ), false, false);
       $this->SetY($this->GetY() - 3);
       $this->SetFounts(array($this->fount_num, $this->fount_txt), array(1, 0));
+      $this->SetFont($this->fount_txt, '', $this->font_size+1.5);
       $this->Row(array(substr(date("Y-m-d H:i:s"), 0, 19), $txt_impresion), false, false);
 
       $this->SetFounts(array($this->fount_txt, $this->fount_txt), array(1, 0));
