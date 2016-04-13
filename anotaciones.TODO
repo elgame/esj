@@ -1,7 +1,9 @@
 -- 2.16h Agregar catalogos de Calidad y tamaños en las areas para seleccionar en facturacion y ventas
--- Modificar en ventas de remision y facturacion para que puedan espesificar la calidad y tamaño, asi como poder poner una descripcion en la clasificacion
+-- 3.8h Modificar en ventas de remision y facturacion para que puedan espesificar la calidad y tamaño, asi como poder poner una descripcion en la clasificacion
 - Los correos en los gastos de cajas chica
 - *en bascula agrandar la letra de original y copia
+
+*************************************************************************************************************************************
 
 --2.7h *En caja chica al registrar una remision que genere un ticket del abono, poner original o copias en gastos y ingresos remisiones
 --10h *Control de acceso y Vales de salida de ventas como check list de los documentos
@@ -46,7 +48,6 @@ ERROR, CREO QUE IBAS A PONER UNA OPCION NO SE SI QUEDO LISTO?
 - Modulo en caceta para registrar las entradas y salidas de las boletas de salida
 - *Boleta de salida poner firma de recibido y del chofer
 
-*************************************************************************************************************************************
 
 2.2h-- *Capturar fotos al registrar las boletas de bascula
 1.3h-- *Poner notas de credito en dolares en facturacion

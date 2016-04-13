@@ -687,7 +687,12 @@ class ventas extends MY_Controller {
     if(isset($_GET['id']{0}))
     {
       $this->load->model('ventas_model');
-      $this->ventas_model->generaNotaRemisionPdf($_GET['id']);
+      if($this->input->get('p') == 'true')
+        $this->ventas_model->generaNotaRemisionPdf($_GET['id']);
+      else {
+        $params['url'] = 'panel/ventas/imprimir/?id='.$_GET['id'].'&p=true';
+        $this->load->view('panel/facturacion/print_view', $params);
+      }
     }
     else
       redirect(base_url('panel/ventas/?msg=1'));

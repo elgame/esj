@@ -711,23 +711,23 @@ class facturacion extends MY_Controller {
 
     if (isset($_POST['privAddDescripciones']{0})) {
       $rules[] = array('field'   => 'prod_did_prod[]',
-                      'label'   => 'prod_did_prod',
+                      'label'   => 'Clasificación',
                       'rules'   => '');
       $rules[] = array('field'   => 'prod_did_calidad[]',
-                      'label'   => 'prod_did_calidad',
+                      'label'   => 'Calidad',
                       'rules'   => '');
       $rules[] = array('field'   => 'prod_did_tamanio[]',
-                      'label'   => 'prod_did_tamanio',
+                      'label'   => 'Tamaño',
                       'rules'   => '');
     } else {
       $rules[] = array('field'   => 'prod_did_prod[]',
-                    'label'   => 'prod_did_prod',
+                    'label'   => 'Clasificación',
                     'rules'   => 'required');
       $rules[] = array('field'   => 'prod_did_calidad[]',
-                      'label'   => 'prod_did_calidad',
+                      'label'   => 'Calidad',
                       'rules'   => 'required');
       $rules[] = array('field'   => 'prod_did_tamanio[]',
-                      'label'   => 'prod_did_tamanio',
+                      'label'   => 'Tamaño',
                       'rules'   => 'required');
     }
 
@@ -855,7 +855,12 @@ class facturacion extends MY_Controller {
     if(isset($_GET['id']{0}))
     {
       $this->load->model('facturacion_model');
-      $this->facturacion_model->generaFacturaPdf($_GET['id']);
+      if($this->input->get('p') == 'true')
+        $this->facturacion_model->generaFacturaPdf($_GET['id']);
+      else {
+        $params['url'] = 'panel/facturacion/imprimir/?id='.$_GET['id'].'&p=true';
+        $this->load->view('panel/facturacion/print_view', $params);
+      }
     }
     else
       redirect(base_url('panel/facturacion/?msg=1'));
