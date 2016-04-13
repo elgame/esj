@@ -727,6 +727,8 @@ function addProducto(unidades, prod) {
 
     // openGroupMore('.jump'+indexJump);
     $('.jump'+(indexJump)).focus();
+    $(".vpositive").numeric({ negative: false });
+    $(".vnumeric").numeric();
   }
 }
 
