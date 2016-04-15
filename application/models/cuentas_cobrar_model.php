@@ -109,7 +109,7 @@ class cuentas_cobrar_model extends privilegios_model{
             ) fh ON f.id_factura = fh.id_remision
           WHERE f.status <> 'ca' AND f.status <> 'b'
              AND f.id_abono_factura IS NULL AND id_nc IS NULL
-             AND Date(f.fecha) < '{$fecha}'{$sql}
+             AND Date(f.fecha) <= '{$fecha}'{$sql}
              AND COALESCE(fh.id_remision, 0) = 0
           GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
         ) AS sal
