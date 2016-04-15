@@ -9,3 +9,4 @@
 [24-Mar-2016 11:26:16 America/Mexico_City] PHP Fatal error:  Cannot redeclare barcode::__construct() in /home/gama/www/sanjorge/application/libraries/barcode.php on line 11
 [01-Apr-2016 12:43:04 America/Mexico_City] PHP Fatal error:  Call to a member function getCalidades() on null in /home/gama/www/sanjorge/application/controllers/panel/areas.php on line 148
 [01-Apr-2016 14:02:31 America/Mexico_City] PHP Fatal error:  Call to undefined method tamanos_ventas_model::getCalidadInfo() in /home/gama/www/sanjorge/application/controllers/panel/areas_otros.php on line 335
+[14-Apr-2016 13:56:10 America/Mexico_City] PHP Fatal error:  Call to undefined method facturacion2_model::getRPF() in /home/elgame/www/sanjorge/application/models/facturacion2_model.php on line 108

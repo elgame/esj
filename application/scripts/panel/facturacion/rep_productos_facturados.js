@@ -3,6 +3,8 @@
 })(function ($, window) {
   $(function () {
     autocompleteProductos();
+    autocompleteCalidadLive();
+    autocompleteTamanioLive();
 
     $('#form').on('submit', function(event) {
       var linkDownXls = $("#linkDownXls"),
@@ -79,6 +81,56 @@
         $(this).css({'background-color': '#FFD9B3'});
         $('#did_empresa').val('');
       }
+    });
+  }
+
+  function autocompleteCalidadLive () {
+    $('#form').on('focus', 'input#dcalidad:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/areas_otros/ajax_get_calidades/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('#did_calidad').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#did_calidad').val('');
+        }
+      });
+    });
+  }
+
+  function autocompleteTamanioLive () {
+    $('#form').on('focus', 'input#dtamanio:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/areas_otros/ajax_get_tamano/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('#did_tamanio').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#did_tamanio').val('');
+        }
+      });
     });
   }
 

@@ -74,7 +74,7 @@
                               <input type="hidden" id="fsalario_diario" value="<?php echo $e->salario_diario ?>">
                           <?php if (isset($infoE[$e->id]) && count($infoE[$e->id]) > 0) {
                             foreach ($infoE[$e->id] as $keyare => $val_area) {
-                              if (intval($keyare) > 0) {
+                              if ($keyare != 'hrs_extra') {
                                 $info_e = $val_area;
                           ?>
                               <table class="tablesinborders tableCosto">

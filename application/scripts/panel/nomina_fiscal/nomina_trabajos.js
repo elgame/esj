@@ -15,6 +15,7 @@
     addNewCentroCosto();
     addNewlabor();
     addNewHrExtra();
+    changeAsistencia();
 
     $('#box-content').keyJump();
 
@@ -163,6 +164,12 @@
     });
   };
 
+  var changeAsistencia = function () {
+    $("#actividades_tra #tipo_asistencia").change(function(event) {
+      $(this).css('background-color', $("option:selected", this).css('background-color'));
+    });;
+  }
+
   var ajaxSave = function ($tr) {
 
     var postData = {};
@@ -276,13 +283,14 @@
     // }
 
     for (var i in datos.arealhr) {
-      if ($.trim(datos.arealhr[i].id_area) == '') {
+      if ($.trim(datos.arealhr[i].id_area) == '' && datos.tipo_asistencia != 'f') {
         isValid = false;
         msg = "El Centro Costo es requerido.";
         break;
       } else {
         for (var ii in datos.arealhr[i].flabor_id) {
-          if ($.trim(datos.arealhr[i].flabor_id[ii]) == '' || $.trim(datos.arealhr[i].fhoras[ii]) == '') {
+          if (($.trim(datos.arealhr[i].flabor_id[ii]) == '' || $.trim(datos.arealhr[i].fhoras[ii]) == '')
+               && datos.tipo_asistencia != 'f') {
             isValid = false;
             msg = "Ingresa la labor y las horas.";
             break;

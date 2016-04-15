@@ -22,6 +22,8 @@ class facturacion extends MY_Controller {
     'facturacion/remisiones_detalle_xls/',
     'facturacion/rnotas_cred_pdf/',
     'facturacion/rnotas_cred_xls/',
+    'facturacion/prodfact2_pdf/',
+    'facturacion/prodfact2_xls/',
 
     'facturacion/ajax_get_clasificaciones/',
     'facturacion/ajax_get_empresas_fac/',
@@ -1471,6 +1473,37 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
     $this->facturacion_model->prodfact_xls();
+  }
+
+  public function prodfact2()
+  {
+    $this->carabiner->js(array(
+      array('panel/facturacion/admin.js'),
+      array('panel/facturacion/rep_productos_facturados.js'),
+    ));
+
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
+    $params['seo']        = array('titulo' => 'Reporte Productos Facturados con Kilos');
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->view('panel/header',$params);
+    // $this->load->view('panel/general/menu',$params);
+    $this->load->view('panel/facturacion/rpf2',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function prodfact2_pdf()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->prodfact2_pdf();
+  }
+  public function prodfact2_xls()
+  {
+    $this->load->model('facturacion2_model');
+    $this->facturacion2_model->prodfact2_xls();
   }
 
   public function rventasc()

@@ -24,6 +24,9 @@ class nomina_trabajos_model extends CI_Model {
     $data_labores = isset($datos['arealhr'])? $datos['arealhr']: [];
     $hrs_extra = isset($datos['hrs_extra'])? $datos['hrs_extra']: [];
 
+    // echo "<pre>";
+    //   var_dump($data_labores, $hrs_extra);
+    // echo "</pre>";exit;
     // total de hrs extras
     $total_hrsext = 0;
     $insert_hrs_extras = [];
