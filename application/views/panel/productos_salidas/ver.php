@@ -118,7 +118,7 @@
                               <?php echo $concepto->producto ?>
                             </td>
                             <td style="width: 65px;">
-                              <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="1" <?php echo $modificar ? '' : 'readonly' ?>>
+                              <input type="number" step="any" name="cantidad[]" value="<?php echo $concepto->cantidad ?>" id="cantidad" class="span12 vpositive" min="0.001" <?php echo $modificar ? '' : 'readonly' ?>>
                             </td>
                             <td style="width: 90px;">
                               <input type="text" name="valorUnitario[]" value="<?php echo $concepto->precio_unitario ?>" id="valorUnitario" class="span12 vpositive" readonly>
