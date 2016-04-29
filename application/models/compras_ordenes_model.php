@@ -731,8 +731,8 @@ class compras_ordenes_model extends CI_Model {
 
       $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
       $nombreEmisor   = 'Empaque San Jorge';
-      $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
-      $contrasena     = "2x02pxeexCUpiKncoWI50Q"; // Contraseña de $correEmisor
+      $correoEmisor   = "postmaster@empaquesanjorge.com"; // Correo para el auth. empaquesanjorgemx@gmail.com (mandrill)
+      $contrasena     = "2b9f25bc4737f34edada0b29a56ff682"; // Contraseña de $correEmisor S4nj0rg3V14n3y
 
       $path = APPPATH . 'media/temp/';
 
@@ -2257,8 +2257,8 @@ class compras_ordenes_model extends CI_Model {
 
       $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
       $nombreEmisor   = 'Empaque San Jorge';
-      $correoEmisor   = "empaquesanjorgemx@gmail.com"; // Correo para el auth.
-      $contrasena     = "2x02pxeexCUpiKncoWI50Q"; // Contraseña de $correEmisor
+      $correoEmisor   = "postmaster@empaquesanjorge.com"; // Correo para el auth. empaquesanjorgemx@gmail.com (mandrill)
+      $contrasena     = "2b9f25bc4737f34edada0b29a56ff682"; // Contraseña de $correEmisor S4nj0rg3V14n3y
 
       $path = APPPATH . 'media/temp/';
 
