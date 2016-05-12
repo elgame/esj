@@ -302,6 +302,7 @@ class facturacion extends MY_Controller {
         array('general/keyjump.js'),
         array('general/util.js'),
         array('panel/facturacion/frm_addmod.js'),
+        array('panel/facturacion/frm_otros.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
