@@ -85,7 +85,7 @@
 											<tr>
 											    <td><input type="text" name="facturas_folio[]" value="<?php echo $_POST['facturas_folio'][$key]; ?>" class="facturas_folio"></td>
 											    <td><input type="date" name="facturas_fecha[]" value="<?php echo $_POST['facturas_fecha'][$key]; ?>" class="facturas_fecha"></td>
-											    <td><input type="text" name="facturas_importe[]" value="<?php echo $_POST['facturas_importe'][$key]; ?>" class="facturas_importe vpositive"></td>
+											    <td><input type="text" name="facturas_importe[]" value="<?php echo $_POST['facturas_importe'][$key]; ?>" class="facturas_importe vnumeric"></td>
                           <td><input type="text" name="facturas_observacion[]" value="<?php echo $_POST['facturas_observacion'][$key]; ?>" class="facturas_observacion" maxlength="200"></td>
 											    <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
 											</tr>
@@ -95,7 +95,7 @@
 										<tr>
 											<td><input type="text" name="facturas_folio[]" value="" class="facturas_folio"></td>
 											<td><input type="date" name="facturas_fecha[]" value="" class="facturas_fecha"></td>
-											<td><input type="text" name="facturas_importe[]" value="" class="facturas_importe vpositive"></td>
+											<td><input type="text" name="facturas_importe[]" value="" class="facturas_importe vnumeric"></td>
 											<td><input type="text" name="facturas_observacion[]" value="" class="facturas_observacion" maxlength="200"></td>
 											<td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
 										</tr>

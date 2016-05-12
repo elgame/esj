@@ -91,13 +91,13 @@ var cuentas = (function($){
 		trhtml = '<tr>'+
 								'<td><input type="text" name="facturas_folio[]" value="" class="facturas_folio jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 								'<td><input type="date" name="facturas_fecha[]" value="" class="facturas_fecha jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
-								'<td><input type="text" name="facturas_importe[]" value="" class="facturas_importe vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
+								'<td><input type="text" name="facturas_importe[]" value="" class="facturas_importe vnumeric jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>'+
 								'<td><input type="text" name="facturas_observacion[]" value="" class="facturas_observacion jump'+jumpIndex+'" maxlength="200"></td>'+
 								'<td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>'+
 							'</tr>';
 
 		$(trhtml).appendTo($tbody);
-		$(".vpositive").removeNumeric().numeric({ decimal: true, negative: false }); //Numero entero positivo
+		$(".vnumeric").removeNumeric().numeric({ decimal: true, negative: false }); //Numero entero positivo
 
 		for (i = indexJump, max = jumpIndex; i <= max; i += 1)
 			$.fn.keyJump.setElem($('.jump'+i));
