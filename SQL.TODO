@@ -1,6 +1,6 @@
 
 
- ☐ INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Calidades Ventas', 15, FALSE, 'areas_otros/calidades/', 'list', FALSE);
+ ✔ INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Calidades Ventas', 15, FALSE, 'areas_otros/calidades/', 'list', FALSE); @done (16-04-30 10:44)
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar calidad', 431, FALSE, 'areas_otros/agregar_calidad/', 'plus', FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar', 431, FALSE, 'areas_otros/activar_calidad/', 'ok', FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar', 431, FALSE, 'areas_otros/modificar_calidad/', 'edit', FALSE);
