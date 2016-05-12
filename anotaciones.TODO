@@ -1,3 +1,6 @@
+-- En remisiones ligar un numero de boleta de bascula y al imprimir la remision que imprima los archivos adjuntos de la ife y licencia conducir
+-- En bascula en las boletas poder capturar los kilos de la bascula del empaque e imprimir una boleta con esos datos
+
 -- 2.16h Agregar catalogos de Calidad y tamaños en las areas para seleccionar en facturacion y ventas
 -- 3.8h Modificar en ventas de remision y facturacion para que puedan espesificar la calidad y tamaño, asi como poder poner una descripcion en la clasificacion
 - Los correos en los gastos de cajas chica
