@@ -1096,6 +1096,12 @@ class Ventas_model extends privilegios_model{
     $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
 
+    $this->load->model('documentos_model');
+    $manifiesto_chofer = $this->documentos_model->getJsonDataDocus($idVenta, 1);
+    if (isset($manifiesto_chofer->chofer_id)) {
+      $data_chofer = $this->db->query("SELECT * FROM choferes WHERE id_chofer = {$manifiesto_chofer->chofer_id}")->row();
+    }
+
     // echo "<pre>";
     //   var_dump($hist);
     // echo "</pre>";exit;
@@ -1614,6 +1620,7 @@ class Ventas_model extends privilegios_model{
       $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
       $pdf->SetXY(10, $pdf->GetY());
     }
+    // $pdf->SetXY(10, $pdf->GetY()+3);
 
     ////////////////////
     // pagare      //
@@ -1622,16 +1629,18 @@ class Ventas_model extends privilegios_model{
     $pdf->SetAligns(array('L'));
     if ($factura['info']->condicion_pago == 'cr') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->SetXY(0, $pdf->GetY()+1);
-      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: _____________ Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a ____ % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false);
-      $pdf->SetXY(0, $pdf->GetY());
-      $pdf->SetAligns(array('R'));
-      $pdf->Row2(array($factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->SetXY(10, $pdf->GetY()+3);
+      $pdf->Row2(array('PAGARE No. '.$factura['info']->folio.' Bueno por: '.String::formatoNumero($factura['info']->total, 2, '', true).' VENCE: '.String::suma_fechas(substr($factura['info']->fecha, 0, 10), $factura['info']->plazo_credito).' Por este pagare reconozco(amos) deber y me(nos) obligo(amos) a pagar incondicionalmente a '.$factura['info']->empresa->nombre_fiscal.', en esta ciudad o en cualquier otra que se nos requiera el pago por la cantidad: '.$factura['info']->total_letra.'  Valor recibido en mercancía a mi(nuestra) entera satisfacción. Este pagare es mercantil y esta regido por la Ley General de Títulos y Operaciones de Crédito en su articulo 173 parte final y artículos correlativos por no ser pagare domiciliado. De no verificarse el pago de la cantidad que este pagare expresa el día de su vencimiento, causara intereses moratorios a 3 % mensual por todo el tiempo que este insoluto, sin perjuicio al cobro mas los gastos que por ello se originen. Reconociendo como obligación incondicional la de pagar la cantidad pactada y los intereses generados así como sus accesorios.' ), false, false, 18);
+
+      if($pdf->GetY() + 15 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+      $pdf->SetWidths(array(120));
+      $yaux = $pdf->GetY();
+      $pdf->SetXY(10, $pdf->GetY());
       $pdf->SetAligns(array('L'));
-      $pdf->SetXY(0, $pdf->GetY());
       $pdf->Row2(array( "OTORGANTE: ".$factura['info']->cliente->nombre_fiscal ), false, false, 5);
       // $pdf->SetFounts(array($pdf->fount_txt), array(-1));
-      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->SetXY(10, $pdf->GetY());
       $pdf->Row2(array(
           'DOMICILIO: '.(isset($factura['info']->cliente->calle) ? $factura['info']->cliente->calle : '').
           ' No. '.(isset($factura['info']->cliente->no_exterior) ? $factura['info']->cliente->no_exterior : '').
@@ -1640,22 +1649,72 @@ class Ventas_model extends privilegios_model{
           ((isset($factura['info']->cliente->estado)) ? ', '.$factura['info']->cliente->estado : '').
           ((isset($factura['info']->cliente->pais)) ? ', '.$factura['info']->cliente->pais : '')
        ), false, false);
-      $pdf->SetXY(10, $pdf->GetY()+5);
+      $pdf->SetXY(10, $pdf->GetY());
+      $pdf->SetAligns(array('L'));
+      $pdf->Row2(array('CIUDAD: '.$factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+      $pdf->SetWidths(array(70));
+      $pdf->SetXY(130, $yaux+3);
       $pdf->SetAligns(array('C'));
       $pdf->Row2(array('______________________________________________'), false, false);
+      $pdf->SetXY(130, $pdf->GetY());
       $pdf->Row2(array('FIRMA'), false, false);
     }
 
+    // datos del camion y chofer
+    if (isset($manifiesto_chofer->factura_id)) {
+      $pdf->SetY($pdf->GetY()+5);
+      if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+      $pdf->SetWidths(array(95));
+      $yaux = $pdf->GetY();
+      $pdf->SetAligns(array('C'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(1));
+      $pdf->Row2(array('DATOS DEL CAMION'), false, false);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetX(10);
+      $pdf->Row2(array('Camion Placas: '.$manifiesto_chofer->camion_placas), false, false, 4);
+      $pdf->SetX(10);
+      $pdf->Row2(array('Placas Termo: '.$manifiesto_chofer->camion_placas_termo), false, false, 4);
+      $pdf->SetX(10);
+      $pdf->Row2(array('Marca: '.$manifiesto_chofer->camion_marca), false, false, 4);
+      $pdf->SetX(10);
+      $pdf->Row2(array('Modelo: '.$manifiesto_chofer->camion_model), false, false, 4);
+      $pdf->SetX(10);
+      $pdf->Row2(array('Color: '.$manifiesto_chofer->camion_color), false, false, 4);
+      $yaux1 = $pdf->GetY();
+      $pdf->SetXY(105, $yaux);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(1));
+      $pdf->Row2(array('DATOS DEL CHOFER'), false, false);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetX(105);
+      $pdf->Row2(array('Chofer: '.$manifiesto_chofer->chofer), false, false, 4);
+      $pdf->SetX(105);
+      $pdf->Row2(array('Teléfono: '.$manifiesto_chofer->chofer_tel), false, false, 4);
+      $pdf->SetX(105);
+      $pdf->Row2(array('No. Licencia: '.$manifiesto_chofer->chofer_no_licencia), false, false, 4);
+      $pdf->SetX(105);
+      $pdf->Row2(array('No. IFE: '.$manifiesto_chofer->chofer_ife), false, false, 4);
+      $pdf->SetY($yaux1);
+    }
+
+    $pdf->SetWidths(array($pdf->pag_size[0]));
+    $pdf->SetAligns(array('L'));
+    if($pdf->GetY() + 40 >= $pdf->limiteY) //salta de pagina si exede el max
+      $pdf->AddPage();
+    $pdf->SetY($pdf->GetY()+3);
     $pdf->SetAligns(array('C'));
     $pdf->SetFounts(array($pdf->fount_txt), array(1));
     $pdf->Row2(array('MANIFIESTO DEL CHOFER'), false, false);
     $pdf->SetAligns(array('L'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->Row2(array('COMO CHOFER DEL CAMION ARRIBA DESCRITO, MANIFIESTO EN EL PRESENTE DOCUMENTO, QUE EL (LOS) PRODUCTO(S) TRASPORTADO FUE CARGADO EN MI PRESENCIA Y VERIFIQUE QUE VA LIBRE DE CUALQUIER TIPO DE ESTUPEFACIENTE (DROGAS) POR LO QUE EXIMO DE TODA RESPONSABILIDAD AL (LOS) CONTRATANTE(S) '.$factura['info']->empresa->nombre_fiscal.', Y AL (LOS) DESTINATARIO(S) DE CUALQUIER MERCANCIA NO DESCRITA EN EL PRESENTE EMBARQUE, FACTURA O PEDIDO., TENIENDO PROHIBIDO LLEVAR Y/O TRASPORTAR OTRA MERCANCIA Y SI POR ALGUNA CIRCUNSTANCIA LO HAGO, ASUMO LAS CONSECUENCIAS DERIVADAS DE LA VIOLACION A ESTAS DISPOSICIONES.'."\n".
-                      'ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE SI NO ENTREGO LA MERCANCIA CONFORME FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECANICO DE MI UNIDAD (CAMION ARRIBA DESCRITO), SE  ME  DESCONTARA  UN  20%  (VEINTE PORCIENTO) DEL  VALOR  DEL  FLETE,  ASI  COMO  CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRASPORTADA.'), false, false);
+                      'ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE SI NO ENTREGO LA MERCANCIA CONFORME FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECANICO DE MI UNIDAD (CAMION ARRIBA DESCRITO), SE  ME  DESCONTARA  UN  20%  (VEINTE PORCIENTO) DEL  VALOR  DEL  FLETE,  ASI  COMO  CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRASPORTADA.'), false, false, 30);
     $pdf->SetAligns(array('C'));
     $pdf->Row2(array('______________________________________________'), false, false);
-    $pdf->Row2(array('FIRMA'), false, false);
+    $pdf->Row2(array( (isset($data_chofer->nombre{0}) ? $data_chofer->nombre : 'FIRMA') ), false, false);
 
     ////////////////////
     // historial      //
@@ -1734,7 +1793,24 @@ class Ventas_model extends privilegios_model{
     } else {
       // Actualiza el # de impresion
       $this->db->update('facturacion', ['no_impresiones' => $factura['info']->no_impresiones+1], "id_factura = ".$factura['info']->id_factura);
-      $pdf->Output('Venta_Remision', 'I');
+      $file_name = 'Venta_Remision'.rand(0, 1000).'.pdf';
+      if (!isset($data_chofer->url_licencia{0}) || !isset($data_chofer->url_ife{0})) {
+        $pdf->Output('Venta_Remision', 'I');
+      } else {
+        $pdf->Output(APPPATH.'media/temp/'.$file_name, 'F');
+
+        $this->load->library('MyMergePdf');
+        // Creación del objeto de la clase heredada
+        $pdf = new MyMergePdf();
+        $pdf->addPDF(APPPATH.'media/temp/'.$file_name, 'all');
+        if (isset($data_chofer->url_licencia{0}))
+          $pdf->addPDF($data_chofer->url_licencia, 'all');
+        if (isset($data_chofer->url_ife{0}))
+          $pdf->addPDF($data_chofer->url_ife, 'all');
+
+        $pdf->merge('browser', 'Venta_Remision.pdf');
+        // unlink(APPPATH.'media/temp/'.$file_name);
+      }
     }
   }
 
