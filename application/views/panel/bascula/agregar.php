@@ -364,6 +364,10 @@
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_neto" id="pkilos_neto" class="input-small vpositive"
                         value="<?php echo set_value('pkilos_neto', $this->input->post('pkilos_neto')) ?>" readonly <?php echo $disabled ?>>
+                      <input type="hidden" name="pkilos_neto2" id="pkilos_neto2" class="input-small vpositive"
+                        value="<?php echo set_value('pkilos_neto2', $this->input->post('pkilos_neto2')) ?>" readonly>
+
+                      <p class="help-block" id="info_kilos_netos" style="cursor:pointer;color: red;"></p>
                     </div>
                   </div>
                 </div>

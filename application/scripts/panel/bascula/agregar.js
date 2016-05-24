@@ -525,6 +525,15 @@ $(function(){
     }
   });
 
+  // Evento click para seleccionar cual kilos neto usar (kilos neto , kilos neto 2).
+  $('#info_kilos_netos').on('click', function(event) {
+    var pkilos_neto  = parseFloat($('#pkilos_neto').val() || 0);
+    $('#pkilos_neto').val( parseFloat($('#info_kilos_netos').text() || 0) );
+    $('#info_kilos_netos').text(pkilos_neto);
+    $("#ppesada").val( $('#pkilos_neto').val() );
+    calculaTotales();
+  });
+
   // Obtiene el pesaje de los brutos al tener el foco el input.
 
   if ($('#isEditar').length !== 1) {
@@ -733,9 +742,17 @@ var calculaKilosNeto = function () {
   var $inputBruto  = $('#pkilos_brutos'),
       $inputTara   = $('#pkilos_tara'),
       $inputCajasP = $('#pcajas_prestadas'),
-      $inputNeto   = $('#pkilos_neto');
+      $inputNeto   = $('#pkilos_neto'),
+      $inputNeto2  = $('#pkilos_neto2'),
 
-  $inputNeto.val( Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2) );
+      kilos_netos = Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2);
+
+  if ( parseFloat($inputNeto2.val() || 0) > 0) {
+    $inputNeto.val( parseFloat($inputNeto2.val() || 0) - (parseFloat($inputCajasP.val() || 0) * 2) );
+    $("#info_kilos_netos").text(kilos_netos);
+  } else {
+    $inputNeto.val( kilos_netos );
+  }
 };
 
 var recargaTipo = function () {

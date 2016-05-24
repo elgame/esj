@@ -281,7 +281,8 @@ class bascula extends MY_Controller {
         $_POST['pkilos_brutos']    = $info['info'][0]->kilos_bruto;
         $_POST['pkilos_tara']      = $info['info'][0]->kilos_tara;
         $_POST['pcajas_prestadas'] = $info['info'][0]->cajas_prestadas;
-        $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto;
+        $_POST['pkilos_neto']      = $info['info'][0]->kilos_neto2 > 0? $info['info'][0]->kilos_neto2 : $info['info'][0]->kilos_neto;
+        $_POST['pkilos_neto2']     = $info['info'][0]->kilos_neto2;
 
         $_POST['pno_lote']         = $info['info'][0]->no_lote;
 
