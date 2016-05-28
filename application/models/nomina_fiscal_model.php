@@ -377,21 +377,41 @@ class nomina_fiscal_model extends CI_Model {
     // echo "</pre>";exit;
 
     $query->free_result();
+
     // Query para obtener las faltas o incapacidades de la semana.
-    $queryFi = $this->db->query(
-      "SELECT na.id_usuario,
-              DATE(na.fecha_ini) as fecha_ini,
-              DATE(na.fecha_fin) as fecha_fin,
-              na.tipo,
-              nsc.clave as sat_clave,
-              nsc.nombre as sat_descripcion
-       FROM nomina_asistencia na
-       LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
-       WHERE (DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
-        (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
-       ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
-    ");
+    if ($nm_tipo == 'pt') { // es ptu => obtiene de todo el año las faltas y incapasidades por enfermedad
+      $queryFi = $this->db->query(
+        "SELECT na.id_usuario,
+                DATE(na.fecha_ini) as fecha_ini,
+                DATE(na.fecha_fin) as fecha_fin,
+                na.tipo,
+                nsc.clave as sat_clave,
+                nsc.nombre as sat_descripcion,
+                COALESCE(na.dias_autorizados, 1) AS dias_autorizados
+         FROM nomina_asistencia na
+         LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
+         WHERE (na.tipo = 'in' AND (nsc.nombre = 'Maternidad' OR nsc.nombre = 'Riesgo de trabajo')) AND
+          ( (DATE(na.fecha_ini) >= '{$anioPtu}-01-01' AND DATE(na.fecha_ini) <= '{$anioPtu}-12-31') OR
+          (DATE(na.fecha_fin) >= '{$anioPtu}-01-01' AND DATE(na.fecha_fin) <= '{$anioPtu}-12-31') OR
+          (DATE(fecha_ini) < '{$anioPtu}-01-01' AND DATE(fecha_fin) > '{$anioPtu}-12-31') )
+         ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
+      ");
+    } else {
+      $queryFi = $this->db->query(
+        "SELECT na.id_usuario,
+                DATE(na.fecha_ini) as fecha_ini,
+                DATE(na.fecha_fin) as fecha_fin,
+                na.tipo,
+                nsc.clave as sat_clave,
+                nsc.nombre as sat_descripcion
+         FROM nomina_asistencia na
+         LEFT JOIN nomina_sat_claves nsc ON nsc.id_clave = na.id_clave
+         WHERE (DATE(na.fecha_ini) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_ini) <= '{$diaUltimoDeLaSemana}') OR
+          (DATE(na.fecha_fin) >= '{$diaPrimeroDeLaSemana}' AND DATE(na.fecha_fin) <= '{$diaUltimoDeLaSemana}') OR
+          (DATE(fecha_ini) < '{$diaPrimeroDeLaSemana}' AND DATE(fecha_fin) > '{$diaUltimoDeLaSemana}')
+         ORDER BY na.id_usuario, DATE(na.fecha_ini) ASC
+      ");
+    }
 
     $query->free_result();
     // Query para obtener los prestamos.
@@ -464,8 +484,15 @@ class nomina_fiscal_model extends CI_Model {
 
                 $diasIncapacidad = intval(String::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
 
-                // Le resta a los dias trabajados los de incapacidad.
-                $empleado->dias_trabajados -= $diasIncapacidad;
+                if ($nm_tipo == 'pt') { // es ptu
+                  // cuando es ptu a los dias trabajados se le suma las incapasidades por maternidad y riesgo de trabajo
+                  // ya que el ptu tiene que ser dias trabajados - faltas - incapasidades por enfermedad.
+                  // en ptu_dias_trabajados_empleado no tiene las faltas ni las incapasidades
+                  $empleado->ptu_dias_trabajados_empleado += $fi->dias_autorizados;
+                } else {
+                  // Le resta a los dias trabajados los de incapacidad.
+                  $empleado->dias_trabajados -= $diasIncapacidad;
+                }
 
                 // Agrega esa incapacidad al array de incapacidades.
                 // el descuento es multiplicado por el salario_diario que es el salario con el que
@@ -532,11 +559,19 @@ class nomina_fiscal_model extends CI_Model {
 
     $total_dias_trabajados = 0;
     if ($nm_tipo == 'pt') { // es ptu
+      // obtiene el total de dias trabajados de todos los trabajadores
+      // si tiene menos de 60 dias trabajados no aplica para ptu
       foreach ($empleados as $key => $value) {
         $value->ptu_dias_trabajados_empleado = round($value->ptu_dias_trabajados_empleado);
-        $total_dias_trabajados += $value->ptu_dias_trabajados_empleado;
-        if ($empleadoId > 0 && $empleadoId != $value->id) {
-          unset($empleados[$key]);
+        $value->ptu_dias_trabajados_empleado = $value->ptu_dias_trabajados_empleado<365? $value->ptu_dias_trabajados_empleado: 365;
+
+        if ($value->ptu_dias_trabajados_empleado > 60) {
+          $total_dias_trabajados += $value->ptu_dias_trabajados_empleado;
+          if ($empleadoId > 0 && $empleadoId != $value->id) {
+            unset($empleados[$key]);
+          }
+        } else {
+          // unset($empleados[$key]);
         }
       }
     }
