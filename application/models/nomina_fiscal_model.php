@@ -571,7 +571,7 @@ class nomina_fiscal_model extends CI_Model {
             unset($empleados[$key]);
           }
         } else {
-          // unset($empleados[$key]);
+          unset($empleados[$key]);
         }
       }
     }
@@ -591,7 +591,8 @@ class nomina_fiscal_model extends CI_Model {
         ->procesar();
     }
     if ($nm_tipo == 'pt' && $empleadoId > 0) { // es ptu
-      return [(isset($empleados[0])? $empleados[0]: 0)];
+      $empleados = array_pop($empleados);
+      return [(isset($empleados->id)? $empleados: 0)];
     }
 
     // echo "<pre>";
@@ -7341,7 +7342,7 @@ class nomina_fiscal_model extends CI_Model {
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
-            'dia_inicia_semana' => $empresa['info']->dia_inicia_semana, 'asegurado'  => true ),
+            'dia_inicia_semana' => $empresa['info']->dia_inicia_semana, 'asegurado'  => true, 'puestoId'  => '' ),
           $empleadoId,
           null,
           null,
@@ -7395,6 +7396,7 @@ class nomina_fiscal_model extends CI_Model {
           $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
           $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
           $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
+          $datosCadenaOriginal['is_ptu'] = "ptu";
 
           // Concepto de la nomina.
           $concepto = array(array(

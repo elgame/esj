@@ -38,6 +38,7 @@
         $prestamo_del.val('true');
         $tr.css('display', 'none');
       } else {
+        $tr.find('.gasto-cargo, .prestamo-concepto, .prestamo-monto').removeAttr('required');
         $tr.remove();
       }
       calculaTotalPrestamos();
@@ -50,7 +51,7 @@
                 '<td style="width: 100px;">'+
                   '<input type="text" name="prestamo_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>'+
                   '<input type="hidden" name="prestamo_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
-                  '<input type="hidden" name="prestamo_id_prestamo[]" value="" class="input-small vpositive">'+
+                  '<input type="hidden" name="prestamo_id_prestamo[]" id="prestamo_id_prestamo" value="" class="input-small vpositive">'+
                   '<input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">'+
                   '<input type="hidden" name="prestamo_id_prestamo_nom[]" value="" class="input-small vpositive">'+
                   '<input type="hidden" name="prestamo_id_empleado[]" value="" class="input-small vpositive">'+
@@ -149,7 +150,7 @@
                   '<td style="width: 100px;">'+
                     '<input type="text" name="pago_empresa[]" value="" class="span12 gasto-cargo" required>'+
                     '<input type="hidden" name="pago_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
-                    '<input type="hidden" name="pago_id[]" value="" class="input-small vpositive">'+
+                    '<input type="hidden" name="pago_id[]" id="pago_id" value="" class="input-small vpositive">'+
                     '<input type="hidden" name="pago_del[]" value="" id="pago_del">'+
                     '<input type="hidden" name="pago_id_empleado[]" value="" class="input-small vpositive">'+
                     '<input type="hidden" name="pago_id_empresa[]" value="" class="input-small vpositive">'+

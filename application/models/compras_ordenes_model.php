@@ -1202,7 +1202,7 @@ class compras_ordenes_model extends CI_Model {
     $query = $this->db->query("SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, f.is_factura, c.nombre_fiscal AS cliente
                                FROM facturacion AS f INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
                                WHERE c.id_cliente = {$datos['clienteId']} AND f.is_factura = '{$tipo}' AND f.status IN('p', 'pa') AND f.id_nc IS NULL
-                                {$filtro} AND f.fecha >= (now() - interval '5 months')
+                                {$filtro} AND f.fecha >= (now() - interval '115 months')
                                ORDER BY f.fecha DESC, f.folio DESC");
     $response = array();
     if($query->num_rows() > 0)

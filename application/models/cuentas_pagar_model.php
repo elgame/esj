@@ -443,6 +443,24 @@ class cuentas_pagar_model extends privilegios_model{
 		return $response;
 	}
 
+	public function getInfoOrdenesFlete($ids_ordenes)
+	{
+		$result = $this->db->query("SELECT co.id_orden,
+										replace(substr(replace(co.ids_facrem, 't:', ''), 1, length(replace(co.ids_facrem, 't:', ''))-1), '|', ',') AS ids_facrem
+									FROM compras_ordenes co INNER JOIN compras_facturas cf ON co.id_orden = cf.id_orden
+									WHERE co.tipo_orden = 'f' AND co.status = 'f' AND cf.id_compra in({$ids_ordenes}) ORDER BY co.id_orden ASC");
+		$response = $result->result();
+		foreach ($response as $key => $orden) {
+			$orden->facturas = $this->db->query("SELECT string_agg(f.serie || f.folio, ',') AS facturas, c.nombre_fiscal
+					FROM facturacion f INNER JOIN clientes c ON c.id_cliente = f.id_cliente WHERE f.id_factura in({$orden->ids_facrem})
+					GROUP BY c.id_cliente")->row();
+			$orden->productos = $this->db->query("SELECT id_producto, descripcion, cantidad, precio_unitario, importe, iva, retencion_iva, total
+							FROM compras_productos WHERE id_orden = {$orden->id_orden} ORDER BY id_orden ASC")->result();
+		}
+
+		return $response;
+	}
+
 	/**
 	 * Descarga el listado de cuentas por pagar en formato pdf
 	 */
@@ -469,6 +487,74 @@ class cuentas_pagar_model extends privilegios_model{
 
 		$response = $this->cuentaProveedorCurpPdf($pdf, $res);
 
+		// si tiene ordenes de flete carga los productos y facturas de las ordenes
+		if (count($response[0]) > 0) {
+			$datos_fletes = $this->getInfoOrdenesFlete(implode(',', $response[0]));
+			if (count($datos_fletes) > 0) {
+				$pdf->SetXY(6, $pdf->GetY()+10);
+	      $pdf->SetFont('Arial','B', 10);
+	      $pdf->SetTextColor(0,0,0);
+	      $pdf->SetAligns(array('L'));
+	      $pdf->SetWidths(array(205));
+	      $pdf->Row(array('Ordenes de flete'), false, false);
+	      $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R', 'R'));
+	      $pdf->SetWidths(array(27, 60, 30, 22.5, 18, 18, 22.5));
+	      $pdf->SetFont('Arial','B', 8);
+	      $pdf->Row(array('Facturas', 'Cliente', 'Cantidad', 'Importe', 'IVA', 'Ret IVA', 'Total'), false);
+
+	      $pdf->SetFont('Arial','', 8);
+	      $aux_clasif = 0;
+	      $total_iva = $total_retiva = $total_importe = $total_total = $total_cantidad = 0;
+	      foreach ($datos_fletes as $key => $orden)
+	      {
+	        // $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+	        // $pdf->SetWidths(array(23, 23, 120, 30));
+	        $pdf->Row(array(
+	          $orden->facturas->facturas,
+	          $orden->facturas->nombre_fiscal,
+	          (count($orden->productos)>0? $orden->productos[0]->cantidad.' '.$orden->productos[0]->descripcion: ''),
+	          (count($orden->productos)>0? String::formatoNumero($orden->productos[0]->importe, 2, '$', false): ''),
+	          (count($orden->productos)>0? String::formatoNumero($orden->productos[0]->iva, 2, '$', false): ''),
+	          (count($orden->productos)>0? String::formatoNumero($orden->productos[0]->retencion_iva, 2, '$', false): ''),
+	          (count($orden->productos)>0? String::formatoNumero($orden->productos[0]->total, 2, '$', false): ''),
+	          ), false);
+					$total_cantidad += (count($orden->productos)>0? $orden->productos[0]->cantidad: 0);
+					$total_importe  += (count($orden->productos)>0? $orden->productos[0]->importe: 0);
+					$total_iva      += (count($orden->productos)>0? $orden->productos[0]->iva: 0);
+					$total_retiva   += (count($orden->productos)>0? $orden->productos[0]->retencion_iva: 0);
+					$total_total    += (count($orden->productos)>0? $orden->productos[0]->total: 0);
+
+					if (count($orden->productos)>1) {
+						for ($i=1; $i < count($orden->productos); $i++) {
+							$pdf->Row(array(
+			          '',
+			          '',
+			          $orden->productos[$i]->cantidad.' '.$orden->productos[$i]->descripcion,
+			          String::formatoNumero($orden->productos[$i]->importe, 2, '$', false),
+			          String::formatoNumero($orden->productos[$i]->iva, 2, '$', false),
+			          String::formatoNumero($orden->productos[$i]->retencion_iva, 2, '$', false),
+			          String::formatoNumero($orden->productos[$i]->total, 2, '$', false),
+			          ), false);
+							$total_cantidad += $orden->productos[$i]->cantidad;
+							$total_importe  += $orden->productos[$i]->importe;
+							$total_iva      += $orden->productos[$i]->iva;
+							$total_retiva   += $orden->productos[$i]->retencion_iva;
+							$total_total    += $orden->productos[$i]->total;
+						}
+					}
+	      }
+	      $pdf->Row(array(
+	          'Total',
+	          '',
+	          $total_cantidad,
+	          String::formatoNumero($total_importe, 2, '$', false),
+	          String::formatoNumero($total_iva, 2, '$', false),
+	          String::formatoNumero($total_retiva, 2, '$', false),
+	          String::formatoNumero($total_total, 2, '$', false),
+	        ), false);
+			}
+		}
+
 		//si es normex y sagarpa
 		if ($_GET['id_proveedor'] == 807) {
 			$aux = $_GET['id_proveedor'];
@@ -488,90 +574,92 @@ class cuentas_pagar_model extends privilegios_model{
 			// $pdf->SetXY(6, $pdf->GetY());
 			// $pdf->Row(array('Internacional: '.String::formatoNumero($response2[2]['internacional'], 2, '$', false)), false, false);
 		}
-
-    // Productos ligados de facturacion
+		// si es normex y sagarpa
+    // Productos ligados de facturacion (Certificados de origen, filtro sanitario, seguros, etc)
     if($pdf->GetY()+11 >= $pdf->limiteY)
       $pdf->AddPage();
     $this->load->model('gastos_model');
     $fac_ligados = array();
     if(count($response[0]) > 0){
       $fac_ligados = $this->gastos_model->getFacturasLigadas(array('idc' => $response[0]), true);
-      $pdf->SetXY(6, $pdf->GetY()+10);
-      $pdf->SetFont('Arial','B', 10);
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(205));
-      $pdf->Row(array('Productos Facturados'), false, false);
-      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-      $pdf->SetWidths(array(23, 23, 120, 30));
-      $pdf->SetFont('Arial','B', 8);
-      $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
 
-      $pdf->SetFont('Arial','', 8);
-      $aux_clasif = 0;
-      $total_producto = $totla_general = $iva_general = 0;
-      foreach ($fac_ligados['ligadas'] as $key => $value)
-      {
-        if($value->id_clasificacion != $aux_clasif)
-        {
-          if($key > 0){
-            $pdf->SetAligns(array('R', 'R'));
-            $pdf->SetWidths(array(166, 30));
-            $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-          }
+      if (count($fac_ligados['ligadas']) > 0 || count($fac_ligados['ligadas']) > 0) {
+	      $pdf->SetXY(6, $pdf->GetY()+10);
+	      $pdf->SetFont('Arial','B', 10);
+	      $pdf->SetTextColor(0,0,0);
+	      $pdf->SetAligns(array('L'));
+	      $pdf->SetWidths(array(205));
+	      $pdf->Row(array('Productos Facturados'), false, false);
+	      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+	      $pdf->SetWidths(array(23, 23, 120, 30));
+	      $pdf->SetFont('Arial','B', 8);
+	      $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
 
-          $pdf->SetAligns(array('L'));
-          $pdf->SetWidths(array(205));
-          $pdf->Row(array($value->nombre), false, false);
-          $aux_clasif = $value->id_clasificacion;
-          $total_producto = 0;
-        }
-        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-        $pdf->SetWidths(array(23, 23, 120, 30));
-        $pdf->Row(array(
-          $value->fecha,
-          $value->serie.$value->folio,
-          $value->cliente,
-          String::formatoNumero($value->importe, 2, '$', false),
-          ), false);
-        $total_producto += $value->importe;
-        $totla_general += $value->importe;
-        $iva_general += $value->iva;
+	      $pdf->SetFont('Arial','', 8);
+	      $aux_clasif = 0;
+	      $total_producto = $totla_general = $iva_general = 0;
+	      foreach ($fac_ligados['ligadas'] as $key => $value)
+	      {
+	        if($value->id_clasificacion != $aux_clasif)
+	        {
+	          if($key > 0){
+	            $pdf->SetAligns(array('R', 'R'));
+	            $pdf->SetWidths(array(166, 30));
+	            $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+	          }
+
+	          $pdf->SetAligns(array('L'));
+	          $pdf->SetWidths(array(205));
+	          $pdf->Row(array($value->nombre), false, false);
+	          $aux_clasif = $value->id_clasificacion;
+	          $total_producto = 0;
+	        }
+	        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+	        $pdf->SetWidths(array(23, 23, 120, 30));
+	        $pdf->Row(array(
+	          $value->fecha,
+	          $value->serie.$value->folio,
+	          $value->cliente,
+	          String::formatoNumero($value->importe, 2, '$', false),
+	          ), false);
+	        $total_producto += $value->importe;
+	        $totla_general += $value->importe;
+	        $iva_general += $value->iva;
+	      }
+	      $pdf->SetAligns(array('R', 'R'));
+	      $pdf->SetWidths(array(166, 30));
+	      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+
+	      $total_producto = 0;
+	      foreach ($fac_ligados['canceladas'] as $key => $value)
+	      {
+	        $pdf->SetAligns(array('L'));
+	        $pdf->SetWidths(array(205));
+	        $pdf->Row(array('CANCELADAS'), false, false);
+
+	        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
+	        $pdf->SetWidths(array(23, 23, 120, 30));
+	        $pdf->Row(array(
+	          $value->fecha,
+	          $value->serie.$value->folio,
+	          $value->cliente,
+	          String::formatoNumero($value->importe, 2, '$', false),
+	          ), false);
+	        $total_producto += $value->importe;
+	        $totla_general += $value->importe;
+	        $iva_general += $value->iva;
+	      }
+	      $pdf->SetAligns(array('R', 'R'));
+	      $pdf->SetWidths(array(166, 30));
+	      if ($total_producto > 0) {
+	      	$pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
+	      }
+
+	      $pdf->Row(array('SubTotal General', String::formatoNumero($totla_general, 2, '$', false)), false);
+	      $pdf->Row(array('IVA', String::formatoNumero($iva_general, 2, '$', false)), false);
+	      $pdf->Row(array('Total General', String::formatoNumero($totla_general+$iva_general, 2, '$', false)), false);
       }
-      $pdf->SetAligns(array('R', 'R'));
-      $pdf->SetWidths(array(166, 30));
-      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-
-      $total_producto = 0;
-      foreach ($fac_ligados['canceladas'] as $key => $value)
-      {
-        $pdf->SetAligns(array('L'));
-        $pdf->SetWidths(array(205));
-        $pdf->Row(array('CANCELADAS'), false, false);
-
-        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-        $pdf->SetWidths(array(23, 23, 120, 30));
-        $pdf->Row(array(
-          $value->fecha,
-          $value->serie.$value->folio,
-          $value->cliente,
-          String::formatoNumero($value->importe, 2, '$', false),
-          ), false);
-        $total_producto += $value->importe;
-        $totla_general += $value->importe;
-        $iva_general += $value->iva;
-      }
-      $pdf->SetAligns(array('R', 'R'));
-      $pdf->SetWidths(array(166, 30));
-      if ($total_producto > 0) {
-      	$pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
-      }
-
-      $pdf->Row(array('SubTotal General', String::formatoNumero($totla_general, 2, '$', false)), false);
-      $pdf->Row(array('IVA', String::formatoNumero($iva_general, 2, '$', false)), false);
-      $pdf->Row(array('Total General', String::formatoNumero($totla_general+$iva_general, 2, '$', false)), false);
     }
-
     //si es normex y sagarpa
 		if ($_GET['id_proveedor'] == 807) {
 			$pdf->SetFont('Arial','B',10);

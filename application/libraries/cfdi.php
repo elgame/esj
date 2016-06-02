@@ -381,7 +381,7 @@ class cfdi{
     $datos['nomina'] = array('datos_cadena' => array());
     if ($isNomina)
     {
-      $datos['nomina'] = $this->nodoNomina($empleado);
+      $datos['nomina'] = $this->nodoNomina($empleado, $data);
     }
     // echo "<pre>";
     //   var_dump($datos['nomina']);
@@ -411,7 +411,7 @@ class cfdi{
     );
   }
 
-  public function nodoNomina($empleado)
+  public function nodoNomina($empleado, $data=array())
   {
     $nomina = array();
 
@@ -507,7 +507,7 @@ class cfdi{
     $nomina['Incapacidades'] = array();
     $nominaIncapacidades = array();
     $incapacidades = array();
-    if (count($empleado[0]->incapacidades) > 0)
+    if (count($empleado[0]->incapacidades) > 0 && (!isset($data['is_ptu'])))
     {
       foreach ($empleado[0]->incapacidades as $incapacidad)
       {

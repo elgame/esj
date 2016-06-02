@@ -63,7 +63,7 @@
           <?php } ?>
         </select>
 
-        <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica">
+        <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica" name="registerform">
           <?php $totalprestamos = $totalpagos = 0; ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
@@ -332,7 +332,7 @@
 
                         <div class="span12" style="margin-left: 0;"> <br>
                           <?php if ($show){ ?>
-                            <div class="span5"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
+                            <div class="span5"><button type="submit" class="btn btn-success btn-large span12">Guardar</button></div>
                           <?php } ?>
 
                           <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
