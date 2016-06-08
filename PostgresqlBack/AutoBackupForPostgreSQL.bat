@@ -2,7 +2,7 @@
 @setlocal enableextensions
 @cd /d "%~dp0"
 
-SET PGPATH=C:\"Program Files"\PostgreSQL\9.1\bin\
+SET PGPATH=C:\"Program Files"\PostgreSQL\9.3\bin\
 SET SVPATH=C:\xampp\htdocs\Respaldos\
 SET PRJDB=sanjorge
 SET DBUSR=postgres
@@ -15,4 +15,6 @@ SET DBDUMP=respaldo_bd.backup
 %PGPATH%pg_dump -Fc -h localhost -p 5432 -U %DBUSR% %PRJDB% > %SVPATH%%DBDUMP%
 
 echo Backup Taken Complete %SVPATH%%DBDUMP%
+
+%PGPATH%psql.exe -h localhost -p 5432 -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < current_timestamp - INTERVAL '15' MINUTE;"
 ::pause
