@@ -1542,7 +1542,7 @@ class Ventas_model extends privilegios_model{
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(78, $pdf->GetY());
-    $pdf->Cell(78, 4, "Pago en {$factura['info']->metodo_pago}", 0, 0, 'L', 1);
+    $pdf->Cell(78, 4, "Pago en ".String::getMetodoPago($factura['info']->metodo_pago), 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(156, $pdf->GetY() - 11);
@@ -2089,7 +2089,7 @@ class Ventas_model extends privilegios_model{
       $pdf->Row2(array($factura['info']->forma_pago ), false, false, 5);
 
       $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array($factura['info']->metodo_pago ), false, false, 5);
+      $pdf->Row2(array(String::getMetodoPago($factura['info']->metodo_pago) ), false, false, 5);
     }
 
 

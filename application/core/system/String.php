@@ -2,6 +2,34 @@
 
 class String{
 
+	public static function getMetodoPago($codigo)
+	{
+		$codigo = (string)$codigo;
+		$metodosPagos = [
+	    '01' => 'Efectivo',
+	    '02' => 'Cheque',
+	    '03' => 'Transferencia',
+	    '04' => 'Tarjetas de crédito',
+	    '05' => 'Monederos electrónicos',
+	    '06' => 'Dinero electrónico',
+	    '07' => 'Tarjetas digitales',
+	    '08' => 'Vales de despensa',
+	    '09' => 'Bienes',
+	    '10' => 'Servicio',
+	    '11' => 'Por cuenta de tercero',
+	    '12' => 'Dación en pago',
+	    '13' => 'Pago por subrogación',
+	    '14' => 'Pago por consignación',
+	    '15' => 'Condonación',
+	    '16' => 'Cancelación',
+	    '17' => 'Compensación',
+	    '98' => 'NA',
+	    '99' => 'Otros'
+	  ];
+
+	  return isset($metodosPagos[$codigo])? $codigo.' - '.$metodosPagos[$codigo]: $codigo;
+	}
+
 	/**
 	 * Da formato numerico a una cadena
 	 * @param unknown_type $number
