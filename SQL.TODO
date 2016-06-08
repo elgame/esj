@@ -1,5 +1,7 @@
 
  ☐ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < current_timestamp - INTERVAL '15' MINUTE;
+   update clientes set metodo_pago = '98' where lower(trim(metodo_pago)) = 'no identificado';
+   update clientes set metodo_pago = '03' where lower(trim(metodo_pago)) = 'transferencia';
 
  ✔ INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Calidades Ventas', 15, FALSE, 'areas_otros/calidades/', 'list', FALSE); @done (16-04-30 10:44)
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar calidad', 431, FALSE, 'areas_otros/agregar_calidad/', 'plus', FALSE);

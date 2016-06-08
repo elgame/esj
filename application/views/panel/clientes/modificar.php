@@ -182,12 +182,25 @@
                     <label class="control-label" for="fmetodo_pago">Metodo de Pago </label>
                     <div class="controls">
                       <select name="fmetodo_pago" class="span9" id="fmetodo_pago">
-                        <option value="no identificado" <?php echo $data->metodo_pago === 'no identificado' ? 'selected' : ''?>>No identificado</option>
-                        <option value="efectivo" <?php echo $data->metodo_pago === 'efectivo' ? 'selected' : ''?>>Efectivo</option>
-                        <option value="cheque" <?php echo $data->metodo_pago === 'cheque' ? 'selected' : ''?>>Cheque</option>
-                        <option value="tarjeta" <?php echo $data->metodo_pago === 'tarjeta' ? 'selected' : ''?>>Tarjeta</option>
-                        <option value="transferencia" <?php echo $data->metodo_pago === 'transferencia' ? 'selected' : ''?>>Transferencia</option>
-                        <option value="deposito" <?php echo $data->metodo_pago === 'deposito' ? 'selected' : ''?>>Deposito</option>
+                        <option value="98" <?php echo set_select('fmetodo_pago', '98', $data->metodo_pago === '98' ? true : false); ?>>NA</option>
+                        <option value="01" <?php echo set_select('fmetodo_pago', '01', $data->metodo_pago === '01' ? true : false); ?>>Efectivo</option>
+                        <option value="02" <?php echo set_select('fmetodo_pago', '02', $data->metodo_pago === '02' ? true : false); ?>>Cheque</option>
+                        <option value="03" <?php echo set_select('fmetodo_pago', '03', $data->metodo_pago === '03' ? true : false); ?>>Transferencia</option>
+                        <option value="04" <?php echo set_select('fmetodo_pago', '04', $data->metodo_pago === '04' ? true : false); ?>>Tarjetas de crédito</option>
+                        <option value="05" <?php echo set_select('fmetodo_pago', '05', $data->metodo_pago === '05' ? true : false); ?>>Monederos electrónicos</option>
+                        <option value="06" <?php echo set_select('fmetodo_pago', '06', $data->metodo_pago === '06' ? true : false); ?>>Dinero electrónico</option>
+                        <option value="07" <?php echo set_select('fmetodo_pago', '07', $data->metodo_pago === '07' ? true : false); ?>>Tarjetas digitales</option>
+                        <option value="08" <?php echo set_select('fmetodo_pago', '08', $data->metodo_pago === '08' ? true : false); ?>>Vales de despensa</option>
+                        <option value="09" <?php echo set_select('fmetodo_pago', '09', $data->metodo_pago === '09' ? true : false); ?>>Bienes</option>
+                        <option value="10" <?php echo set_select('fmetodo_pago', '10', $data->metodo_pago === '10' ? true : false); ?>>Servicio</option>
+                        <option value="11" <?php echo set_select('fmetodo_pago', '11', $data->metodo_pago === '11' ? true : false); ?>>Por cuenta de tercero</option>
+                        <option value="12" <?php echo set_select('fmetodo_pago', '12', $data->metodo_pago === '12' ? true : false); ?>>Dación en pago</option>
+                        <option value="13" <?php echo set_select('fmetodo_pago', '13', $data->metodo_pago === '13' ? true : false); ?>>Pago por subrogación</option>
+                        <option value="14" <?php echo set_select('fmetodo_pago', '14', $data->metodo_pago === '14' ? true : false); ?>>Pago por consignación</option>
+                        <option value="15" <?php echo set_select('fmetodo_pago', '15', $data->metodo_pago === '15' ? true : false); ?>>Condonación</option>
+                        <option value="16" <?php echo set_select('fmetodo_pago', '16', $data->metodo_pago === '16' ? true : false); ?>>Cancelación</option>
+                        <option value="17" <?php echo set_select('fmetodo_pago', '17', $data->metodo_pago === '17' ? true : false); ?>>Compensación</option>
+                        <option value="99" <?php echo set_select('fmetodo_pago', '99', $data->metodo_pago === '99' ? true : false); ?>>Otro</option>
                       </select>
                     </div>
                   </div>
