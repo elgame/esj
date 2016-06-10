@@ -1,5 +1,5 @@
 
- ☐ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < current_timestamp - INTERVAL '15' MINUTE;
+ ✔ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < current_timestamp - INTERVAL '15' MINUTE; @done (16-06-09 22:26)
    update clientes set metodo_pago = '98' where lower(trim(metodo_pago)) = 'no identificado';
    update clientes set metodo_pago = '03' where lower(trim(metodo_pago)) = 'transferencia';
 
