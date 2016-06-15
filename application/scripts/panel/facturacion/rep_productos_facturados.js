@@ -15,6 +15,10 @@
             did_empresa: $("#did_empresa").val(),
             dcliente: $("#dcliente").val(),
             fid_cliente: $("#fid_cliente").val(),
+            did_calidad: $("#did_calidad").val(),
+            dcalidad: $("#dcalidad").val(),
+            did_tamanio: $("#did_tamanio").val(),
+            dtamanio: $("#dtamanio").val(),
             ids_productos: [],
             did_producto: '',
           };

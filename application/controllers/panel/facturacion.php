@@ -1487,7 +1487,7 @@ class facturacion extends MY_Controller {
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo']        = array('titulo' => 'Reporte Productos Facturados con Kilos');
+    $params['seo']            = array('titulo' => 'Reporte Productos Facturados con Kilos');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
