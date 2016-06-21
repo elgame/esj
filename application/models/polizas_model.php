@@ -15,11 +15,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like 'IVA TRASLADADO'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaXTrasladar($basic=true){
     $sql = '';
@@ -28,11 +29,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like 'IVA X TRASLADAR'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetCobradoAc($basic=true){
     $sql = '';
@@ -41,11 +43,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXCobrarAc($basic=true){
     $sql = '';
@@ -54,11 +57,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNCVenta($basic=true){
     $sql = '';
@@ -67,11 +71,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaXAcreditar($basic=true){
     $sql = '';
@@ -80,11 +85,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE POR DIFERIR%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaAcreditado($basic=true){
     $sql = '';
@@ -93,11 +99,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE PAGADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXPagar($basic=true){
     $sql = '';
@@ -106,11 +113,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA X PAGAR'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetPagado($basic=true){
     $sql = '';
@@ -119,11 +127,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA PAGADO'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXPagarHono($basic=true){
     $sql = '';
@@ -132,11 +141,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO X PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetPagadoHono($basic=true){
     $sql = '';
@@ -145,11 +155,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO PAGADO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetXPagarHono($basic=true){
     $sql = '';
@@ -158,11 +169,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetPagadoHono($basic=true){
     $sql = '';
@@ -171,11 +183,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetXPagar($basic=true){
     $sql = '';
@@ -184,11 +197,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNCGasto($basic=true){
     $sql = '';
@@ -197,11 +211,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaCuadreGasto()
   {
@@ -223,11 +238,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%SUELDOS%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNVacaciones($basic=true, $departamento=null){
     $sql = '';
@@ -237,11 +253,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%VACACIONES%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNPrimaVacacional($basic=true, $departamento=null){
     $sql = '';
@@ -251,11 +268,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%PRIMA VACACIONAL%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNAguinaldo($basic=true, $departamento=null){
     $sql = '';
@@ -265,11 +283,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%AGUINALDO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNHorasHex($basic=true, $departamento=null){
     $sql = '';
@@ -279,11 +298,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%COMPENSACION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   private function getPAsistenciaContpaq($basic=true, $departamento=1)
   {
@@ -294,13 +314,14 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%ASISTENCIA%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
     $query = $this->db->query(
       "SELECT *
-       FROM cuentas_contpaq
-       WHERE id_empresa = {$this->empresaId} {$sql}")->result();
+ (isset($data->cuenta)?       FROM cuentas_contpaq
+ : ''        )       WHERE id_empresa = {$this->empresaId} {$sql}")->result();
 
     return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
@@ -311,11 +332,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNSubsidio($basic=true){
     $sql = '';
@@ -324,11 +346,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNImss($basic=true){
     $sql = '';
@@ -337,11 +360,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNInfonavit($basic=true){
     $sql = '';
@@ -350,11 +374,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNIsr($basic=true){
     $sql = '';
@@ -363,11 +388,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
-    return $basic? $data->cuenta: $data;
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
 
 
