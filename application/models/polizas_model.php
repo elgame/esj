@@ -1917,7 +1917,7 @@ class polizas_model extends CI_Model {
     $cuenta_cuadre = $this->getCuentaCuadreGasto();
 
     if($tipo_movimientos == 'cheque'){
-      $order_by = 't.id_movimiento';
+      $order_by = 't.fecha';
       $sql_union_bascula = "UNION
         (
           SELECT

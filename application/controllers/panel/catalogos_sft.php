@@ -441,12 +441,13 @@ class catalogos_sft extends MY_Controller {
     ));
 
     $this->load->model('catalogos_sft_model');
+    $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
     $params['seo']        = array('titulo' => 'Reporte codigos gastos');
 
-    // $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
     $this->catalogos_sft_model->class_treeAreas = 'treeviewcustom';
     $params['vehiculos'] = $this->catalogos_sft_model->getFrmCatCodigos();
 

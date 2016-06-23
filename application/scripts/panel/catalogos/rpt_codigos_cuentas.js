@@ -3,6 +3,7 @@
 })(function ($, window) {
   $(function () {
     setAutocomplete();
+    autocompleteEmpresa();
     // autocompleteProductos();
 
     $('#form').on('submit', function(event) {
@@ -12,6 +13,8 @@
           ffecha2: $("#ffecha2").val(),
           ddesglosado: $("#ddesglosado:checked").val(),
           dmovimientos: $("#dmovimientos:checked").val(),
+          dempresa: $("#dempresa").val(),
+          did_empresa: $("#did_empresa").val(),
           dareas: [],
         };
 
@@ -58,6 +61,24 @@
       $parent.parent().find('> ul > li > label > input').attr('checked', 'checked');
       $parent.parent().find('> .hitarea').click();
       setTimeout(function(){ $parent.find('input').removeAttr('checked'); }, 100);
+    });
+  }
+
+  function autocompleteEmpresa () {
+    // Autocomplete Empresas
+    $("#dempresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_empresa").val(ui.item.id);
+        $("#dempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        $('#did_empresa').val('');
+      }
     });
   }
 

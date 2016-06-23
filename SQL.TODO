@@ -1,6 +1,6 @@
 
 
- ☐ Reporte de productos facturados 2 con los datos de calidad, tamaño
+ ✔ Reporte de productos facturados 2 con los datos de calidad, tamaño @done (16-06-23 10:19)
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Productos Facturados con Kilos',362,TRUE,'facturacion/prodfact2/','print',TRUE);
 
  ✔ SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < current_timestamp - INTERVAL '15' MINUTE; @done (16-06-09 22:26)

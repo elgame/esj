@@ -1797,15 +1797,32 @@ class Ventas_model extends privilegios_model{
       if (!isset($data_chofer->url_licencia{0}) || !isset($data_chofer->url_ife{0})) {
         $pdf->Output('Venta_Remision', 'I');
       } else {
+        if (isset($data_chofer->url_licencia{0})){
+          $ext_lic = exif_imagetype($data_chofer->url_licencia);
+          if ($ext_lic == IMAGETYPE_GIF || $ext_lic == IMAGETYPE_JPEG || $ext_lic == IMAGETYPE_PNG) {
+            $pdf->AddPage();
+            $pdf->Image($data_chofer->url_licencia, 10, 10, 200);
+            $ext_lic = false;
+          }
+        }
+        if (isset($data_chofer->url_ife{0})){
+          $ext_ife = exif_imagetype($data_chofer->url_ife);
+          if ($ext_ife == IMAGETYPE_GIF || $ext_ife == IMAGETYPE_JPEG || $ext_ife == IMAGETYPE_PNG) {
+            $pdf->AddPage();
+            $pdf->Image($data_chofer->url_ife, 10, 10, 200);
+            $ext_ife = false;
+          }
+        }
+
         $pdf->Output(APPPATH.'media/temp/'.$file_name, 'F');
 
         $this->load->library('MyMergePdf');
         // Creación del objeto de la clase heredada
         $pdf = new MyMergePdf();
         $pdf->addPDF(APPPATH.'media/temp/'.$file_name, 'all');
-        if (isset($data_chofer->url_licencia{0}))
+        if (isset($data_chofer->url_licencia{0}) && $ext_lic !== false)
           $pdf->addPDF($data_chofer->url_licencia, 'all');
-        if (isset($data_chofer->url_ife{0}))
+        if (isset($data_chofer->url_ife{0}) && $ext_ife !== false)
           $pdf->addPDF($data_chofer->url_ife, 'all');
 
         $pdf->merge('browser', 'Venta_Remision.pdf');

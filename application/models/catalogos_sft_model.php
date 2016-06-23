@@ -829,23 +829,31 @@ class catalogos_sft_model extends CI_Model{
     //Filtro de fecha.
     if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
       $sql_caja .= " AND Date(cg.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
-      $sql_compras .= " AND Date(cp.fecha_aceptacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(co.fecha_creacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
     }
     elseif($this->input->get('ffecha1') != '') {
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha1')."'";
-      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha1')."'";
+      $sql_compras .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha1')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha1')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha1')."'";
     }
     elseif($this->input->get('ffecha2') != ''){
       $sql_caja .= " AND Date(cg.fecha) = '".$this->input->get('ffecha2')."'";
-      $sql_compras .= " AND Date(cp.fecha_aceptacion) = '".$this->input->get('ffecha2')."'";
+      $sql_compras .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha2')."'";
       $sql .= " AND Date(csc.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_dia .= " AND Date(ndl.fecha) = '".$this->input->get('ffecha2')."'";
       $sql_nom_hre .= " AND Date(ndh.fecha) = '".$this->input->get('ffecha2')."'";
+    }
+
+    if ($this->input->get('did_empresa') != '') {
+      $sql_caja .= " AND cc.id_empresa = ".$this->input->get('did_empresa')."";
+      $sql_compras .= " AND co.id_empresa = ".$this->input->get('did_empresa')."";
+      // $sql .= " AND Date(csc.id_empresa) = ".$this->input->get('did_empresa')."";
+      $sql_nom_dia .= " AND ndl.id_empresa = ".$this->input->get('did_empresa')."";
+      $sql_nom_hre .= " AND ndh.id_empresa = ".$this->input->get('did_empresa')."";
     }
 
     $sql2 = $sql;
@@ -867,7 +875,7 @@ class catalogos_sft_model extends CI_Model{
               WHERE cp.id_cat_codigos In({$ids_hijos}) {$sql_compras} AND cp.status = 'a' AND co.status <> 'ca'
               UNION
               SELECT Sum(cg.monto) importe
-              FROM cajachica_gastos cg
+              FROM cajachica_gastos cg INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
               WHERE cg.id_cat_codigos In({$ids_hijos}) {$sql_caja}
               UNION
               SELECT Sum(ndl.importe) importe
@@ -893,7 +901,7 @@ class catalogos_sft_model extends CI_Model{
             "SELECT *
               FROM (
                 SELECT
-                  ca.id_cat_codigos AS id_area, ca.nombre, Date(cp.fecha_aceptacion) fecha_orden, co.folio::text folio_orden,
+                  ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
                   Date(c.fecha) fecha_compra, (c.serie || c.folio) folio_compra, cp.descripcion producto,
                   cp.total importe
                 FROM compras_ordenes co
@@ -909,6 +917,7 @@ class catalogos_sft_model extends CI_Model{
                   cg.monto AS importe
                 FROM cajachica_gastos cg
                   INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cg.id_cat_codigos
+                  INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
                 WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_caja}
                 UNION
                 SELECT ca.id_cat_codigos AS id_area, ca.nombre, Date(ndl.fecha) fecha_orden, ''::text folio_orden,

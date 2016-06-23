@@ -264,7 +264,7 @@ class contrarecibo_model extends CI_Model {
     $pdf->SetAligns(array('L'));
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->SetX(0);
-    $pdf->Row2(array('Proveedor: '.$data['info']->proveedor->nombre_fiscal.' FJFJ FJSKDFJ FJJFKDFJ DKFKS'), false, false, 7);
+    $pdf->Row2(array('Proveedor: '.$data['info']->proveedor->nombre_fiscal), false, false, 7);
 
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
@@ -281,14 +281,16 @@ class contrarecibo_model extends CI_Model {
     $subtotal = $iva = $total = $retencion = $ieps = 0;
     $tipoCambio = 0;
     $codigoAreas = array();
+    $inc = 1;
     foreach ($facturas as $key => $prod) {
-      $pdf->SetXY(0, $pdf->GetY()-1);
-      $pdf->Row2(array(
+      $pdf->SetXY(0, $pdf->GetY()-$inc);
+      $pdf->Row(array(
         $prod->folio,
         $prod->fecha,
         String::formatoNumero($prod->importe, 2, '', true),
         $prod->observacion
       ), false, false);
+      $inc = 2;
     }
 
     // $pdf->SetX(29);
