@@ -25,7 +25,7 @@
         <form class="form-horizontal" action="<?php echo base_url('panel/facturacion/agregar?'.$getId); ?>" method="POST" id="form">
           <?php
             if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
-              <input type="text" value="si" name="privAddDescripciones" id="privAddDescripciones">
+              <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
           <?php } ?>
 
           <div class="row-fluid">

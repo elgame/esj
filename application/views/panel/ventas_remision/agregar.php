@@ -28,7 +28,7 @@
         <form class="form-horizontal" action="<?php echo base_url('panel/ventas/agregar/'.$getId.(isset($_GET['id_nr'])? '?id_nr='.$_GET['id_nr']:'')); ?>" method="POST" id="form">
           <?php
             if($this->usuarios_model->tienePrivilegioDe('', 'facturacion/prod_descripciones/')){ ?>
-              <input type="text" value="si" name="privAddDescripciones" id="privAddDescripciones">
+              <input type="hidden" value="si" name="privAddDescripciones" id="privAddDescripciones">
           <?php } ?>
 
           <div class="row-fluid">
