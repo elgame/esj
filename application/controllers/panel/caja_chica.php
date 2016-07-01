@@ -661,7 +661,12 @@ class caja_chica extends MY_Controller {
   public function print_caja()
   {
     $this->load->model('caja_chica_model');
-    $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+    if ($_GET['fno_caja'] == 'prest1') {
+      $_GET['fno_caja'] = '1';
+      $this->load->model('caja_chica_prest_model');
+      $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+    } else
+      $this->caja_chica_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
   }
 
   public function print_vale()
