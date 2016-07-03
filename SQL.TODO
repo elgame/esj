@@ -1,4 +1,13 @@
 
+ ☐ Usuario y fecha de creacion en los gastos y abonos de cajas chica
+   ALTER TABLE public.cajachica_gastos ADD COLUMN id_usuario bigint;
+   ALTER TABLE public.cajachica_gastos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
+   ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_usuario_fkey FOREIGN KEY (id_usuario)
+      REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   ALTER TABLE public.cajachica_remisiones ADD COLUMN id_usuario bigint;
+   ALTER TABLE public.cajachica_remisiones ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
+   ALTER TABLE public.cajachica_remisiones ADD CONSTRAINT cajachica_remisiones_id_usuario_fkey FOREIGN KEY (id_usuario)
+      REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 
  ✔ Reporte de productos facturados 2 con los datos de calidad, tamaño @done (16-06-23 10:19)
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Productos Facturados con Kilos',362,TRUE,'facturacion/prodfact2/','print',TRUE);

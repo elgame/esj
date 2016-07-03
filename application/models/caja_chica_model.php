@@ -297,6 +297,7 @@ class caja_chica_model extends CI_Model {
             'folio_factura' => empty($data['remision_folio'][$key]) ? null : $data['remision_folio'][$key],
             'no_caja'       => $data['fno_caja'],
             'folio'         => $data_folio->folio,
+            'id_usuario'    => $this->session->userdata('id_usuario'),
           );
         }
       }
@@ -379,6 +380,7 @@ class caja_chica_model extends CI_Model {
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
+            'id_usuario'      => $this->session->userdata('id_usuario'),
           );
           $this->db->insert('cajachica_gastos', $gastos);
           $gastos_ids['adds'][] = $this->db->insert_id();
@@ -1183,12 +1185,13 @@ class caja_chica_model extends CI_Model {
           COALESCE(cca.nombre, ca.nombre) AS nombre_codigo,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
           (CASE WHEN cca.id_cat_codigos IS NULL THEN 'id_area' ELSE 'id_cat_codigos' END) AS campo,
-          cg.no_caja, cg.no_impresiones
+          cg.no_caja, cg.no_impresiones, cg.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
        FROM cajachica_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
          LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+         LEFT JOIN usuarios AS u ON u.id = cg.id_usuario
        WHERE cg.id_gasto = '{$id_gasto}'
        ORDER BY cg.id_gasto ASC"
     )->row();
@@ -1274,6 +1277,13 @@ class caja_chica_model extends CI_Model {
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
 
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', $gastos->fecha_creacion), false, false);
+
     $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('cajachica_gastos');
 
     // $pdf->AutoPrint(true);
@@ -1286,13 +1296,14 @@ class caja_chica_model extends CI_Model {
       "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
               COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
               cr.id_movimiento, cr.row, cr.fecha, c.nombre_fiscal AS cliente, cc.nombre AS empresar, cr.folio AS folio_caja,
-              cr.no_impresiones, cr.no_caja
+              cr.no_impresiones, cr.no_caja, cr.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
        INNER JOIN empresas e ON e.id_empresa = f.id_empresa
        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
+       LEFT JOIN usuarios u ON u.id = cr.id_usuario
        WHERE cr.fecha = '{$fecha}' AND cr.id_remision = '{$id_remision}' AND cr.row = {$row} AND cr.no_caja = {$noCaja}"
     )->row();
 
@@ -1364,6 +1375,13 @@ class caja_chica_model extends CI_Model {
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $remisiones->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', $remisiones->fecha_creacion), false, false);
 
     $this->db->update('cajachica_remisiones', ['no_impresiones' => $remisiones->no_impresiones+1],
         "fecha = '{$fecha}' AND id_remision = '{$id_remision}' AND row = {$row} AND no_caja = {$noCaja}");
