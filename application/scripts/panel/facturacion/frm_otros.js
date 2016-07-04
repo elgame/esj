@@ -16,6 +16,16 @@ $(function(){
   autocompleteCalidadLive();
   autocompleteTamanioLive();
   closeGroupMoreOut();
+
+  // //tabs Comercio exterior
+  // $('#myTab a:first').tab('show');
+  // $('#myTab a').click(function (e) {
+  //   e.preventDefault();
+  //   $(this).tab('show');
+  // });
+  // //tooltip
+  // $('.icon-question-sign.helpover').tooltip({"placement":"bottom",delay: { show: 150, hide: 50 }});
+
 });
 
 function openGroupMore(select) {

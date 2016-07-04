@@ -130,20 +130,29 @@ $(function(){
 
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
-        option = $this.find('option:selected').val();
+        option = $this.find('option:selected').val(),
+        priv_modif_kilosbt = $("#modif_kilosbt").val();
 
     if (option === 'en') {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
 
-      $('#pkilos_brutos').prop("readonly", '');
-      $('#pkilos_tara').prop("readonly", 'readonly');
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+
+      if (priv_modif_kilosbt == 'true') {
+        $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", 'readonly');
+      }
     } else {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
 
-      $('#pkilos_brutos').prop("readonly", 'readonly');
-      $('#pkilos_tara').prop("readonly", '');
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
+
+      if (priv_modif_kilosbt == 'true') {
+        $('#pkilos_brutos').prop("readonly", 'readonly');
+        $('#pkilos_tara').prop("readonly", '');
+      }
     }
   });
 
@@ -756,13 +765,16 @@ var calculaKilosNeto = function () {
 };
 
 var recargaTipo = function () {
-  var option = $('#ptipo').find('option:selected').val();
+  var option = $('#ptipo').find('option:selected').val(),
+  priv_modif_kilosbt = $("#modif_kilosbt").val();
 
   if (option === 'en') {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
 
-    if ($('#paccion').val() === 'n') {
+    $("#pproductor").attr('data-next2', 'pkilos_brutos');
+
+    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
     }
@@ -770,7 +782,9 @@ var recargaTipo = function () {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
 
-    if ($('#paccion').val() === 'n') {
+    $("#pproductor").attr('data-next2', 'pkilos_tara');
+
+    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", 'readonly');
       $('#pkilos_tara').prop("readonly", '');
     }

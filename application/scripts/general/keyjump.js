@@ -42,7 +42,10 @@
 
             var options = $this.attr('data-next').split('|');
 
-            if (options.length > 1) {
+            if($this.attr('data-next2')) {
+              $('#'+$this.attr('data-next2')).focus();
+            }
+            else if (options.length > 1) {
               options.every(function (e) {
                 var $this = $('#'+e);
                 if ( $this.is(':visible') && $this.prop('readonly') !== true) {

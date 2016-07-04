@@ -123,6 +123,8 @@
 
         ?>
 
+        <input type="hidden" id="modif_kilosbt" value="<?php echo $modkbt? 'true':'false' ?>">
+
         <?php echo $autorizarInput ?>
         <a href="<?php echo base_url('panel/bascula/'); ?>" class="btn pull-right" style="margin-right: 5px;">Cancelar</a>
 
@@ -291,7 +293,7 @@
                     <label class="control-label" for="pproductor">Productor</label>
                     <div class="controls">
                       <input type="text" name="pproductor"
-                        value="<?php echo set_value('pproductor', $this->input->post('pproductor')) ?>" data-next="pkilos_brutos|pkilos_tara"
+                        value="<?php echo set_value('pproductor', $this->input->post('pproductor')) ?>" data-next="pkilos_brutos|pkilos_tara" data-next2="pkilos_brutos"
                         id="pproductor" class="span12" placeholder="Productor" <?php echo $disabled.$bmod['proveedor']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/productores/show_view_agregar_productor') ?>" class="btn" rel="superbox-80x550">Agregar</a>
@@ -329,7 +331,7 @@
                     <label class="control-label" for="pkilos_brutos" style="width: 100px;">Kilos Brutos <br><span class="label label-warning">ALT + B</span></label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_brutos" id="pkilos_brutos" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.$bmod['k_bruto'].' '.((($accion === 'n' && $e === false) || ($this->input->post('ptipo') === 'sa')) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_brutos', $this->input->post('pkilos_brutos')) ?>" <?php echo $disabled.$bmod['k_bruto'].' '.((($accion === 'n' && $e === false) || ($this->input->post('ptipo') === 'sa')) && $modkbt ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosBruto" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>
@@ -341,7 +343,7 @@
                     <label class="control-label" for="pkilos_tara" style="width: 100px;">Kilos Tara <br> <span class="label label-warning">ALT + T</span> </label>
                     <div class="controls" style="margin-left: 115px;">
                       <input type="text" name="pkilos_tara" id="pkilos_tara" class="input-small vpositive"
-                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.$bmod['k_tara'].' '.(((($accion === 'en' || $accion === 'sa') && $e === false) || ($this->input->post('ptipo') === 'en')) ? '' : $readonly) ?>>
+                        value="<?php echo set_value('pkilos_tara', $this->input->post('pkilos_tara')) ?>" <?php echo $disabled.$bmod['k_tara'].' '.(((($accion === 'en' || $accion === 'sa') && $e === false) || ($this->input->post('ptipo') === 'en')) && $modkbt ? '' : $readonly) ?>>
                       <span class="help-inline">
                         <button type="button" class="btn btn-info" id="btnKilosTara" data-loading-text="Cargando..." <?php echo $disabled ?> style="display: none;">Cargar</button>
                       </span>

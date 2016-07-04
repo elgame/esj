@@ -134,6 +134,8 @@ class bascula extends MY_Controller {
       'titulo' => 'Agregar Bascula'
     );
 
+    $params['modkbt'] = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar_kilosbt/');
+
     $params['next_folio'] = $this->bascula_model->getSiguienteFolio('en');
     $params['areas']      = $this->areas_model->getAreas();
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();

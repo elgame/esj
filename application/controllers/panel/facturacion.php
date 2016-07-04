@@ -153,6 +153,8 @@ class facturacion extends MY_Controller {
       redirect(base_url('panel/home?msg=1'));
 
     $this->carabiner->js(array(
+        array('bootstrap/bootstrap-tab.js'),
+        array('bootstrap/bootstrap-tooltip.js'),
         array('libs/jquery.numeric.js'),
         array('general/keyjump.js'),
         array('general/util.js'),
