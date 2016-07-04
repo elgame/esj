@@ -314,14 +314,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%ASISTENCIA%'"; //plasticos
+    elseif($this->empresaId==12) $sql=" AND UPPER(nombre) like '%ASISTENCIA%'"; //plasticos
     else{
-      $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
+      $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
     $query = $this->db->query(
-      "SELECT *
- (isset($data->cuenta)?       FROM cuentas_contpaq
- : ''        )       WHERE id_empresa = {$this->empresaId} {$sql}")->result();
+      "SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->result();
 
     return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
   }
