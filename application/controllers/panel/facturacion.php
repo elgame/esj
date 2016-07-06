@@ -173,6 +173,7 @@ class facturacion extends MY_Controller {
     $this->load->library('cfdi');
     $this->load->model('facturacion_model');
     $this->load->model('empresas_model');
+    $this->load->model('cunidadesmedida_model');
 
     if ( ! isset($_POST['borrador']))
     {
@@ -262,6 +263,8 @@ class facturacion extends MY_Controller {
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
     $params['remisiones'] = $this->facturacion_model->getRemisiones();
+
+    $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -847,6 +850,184 @@ class facturacion extends MY_Controller {
       'rules'   => ''
     );
 
+    if (isset($this->input->post('comercioExterior')['clave_pedimento']) ||
+      isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+      isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+      isset($this->input->post('comercioExterior')['incoterm']) ) {
+      array_push($rules,
+          array(
+            'field'   => 'comercioExterior[tipo_operacion]',
+            'label'   => '',
+            'rules'   => 'callback_comercio_exterior_check'
+          ),
+          array(
+            'field'   => 'comercioExterior[clave_pedimento]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[certificado_origen]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[num_certificado_origen]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[numero_exportador_confiable]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[incoterm]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[subdivision]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[observaciones]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[tipocambio_USD]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[total_USD]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Emisor][Curp]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Receptor][NumRegIdTrib]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Receptor][Curp]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][NumRegIdTrib]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Rfc]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Curp]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Nombre]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Calle]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][NumeroExterior]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][NumeroInterior]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Referencia]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Pais]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Estado]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Municipio]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Localidad]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][CodigoPostal]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Destinatario][Domicilio][Colonia]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][NoIdentificacion][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][FraccionArancelaria][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][CantidadAduana][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][UnidadAduana][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][ValorUnitarioAduana][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][ValorDolares][]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[Mercancias][DescripcionesEspecificas][]',
+            'label'   => '',
+            'rules'   => ''
+          )
+        );
+    }
+
     $this->form_validation->set_rules($rules);
   }
 
@@ -1008,6 +1189,383 @@ class facturacion extends MY_Controller {
     }
 
     return true;
+  }
+
+  // Validaciones extras del complemento ComercioExterior
+  public function comercio_exterior_check($str)
+  {
+    $this->load->model('monedas_model');
+    $monedas = $this->monedas_model->get();
+    unset($monedas['M.N.']);
+
+    $this->ineMessage = '';
+    $inputs = $this->input->post();
+
+    $this->load->model('empresas_model');
+    $this->load->model('clientes_model');
+
+    $empresa = $this->empresas_model->getInfoEmpresa($inputs['did_empresa'], true);
+    $cliente = $this->clientes_model->getClienteInfo($inputs['did_cliente'], true);
+    $empresa = isset($empresa['info']) ? $empresa['info'] : null;
+    $cliente = isset($cliente['info']) ? $cliente['info'] : null;
+
+    if (!isset($monedas[$inputs['moneda']])) { // cfdi:Comprobante:Moneda
+      $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Moneda no es valido, selecciona un valor diferente a '{$inputs['moneda']}'.");
+      return false;
+    }
+
+    // cfdi:Comprobante:TipoCambio
+    if (!isset($inputs['tipoCambio']) || preg_match('/^[0-9]{1,14}(.([0-9]{1,6}))?$/', $inputs['tipoCambio']) !== 1) {
+      $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Cambio es requerido y numerico.");
+      return false;
+    }
+
+    // cfdi:Comprobante:tipoDeComprobante
+    if (isset($inputs['comercioExterior']['tipo_operacion']) &&
+        ($inputs['comercioExterior']['tipo_operacion'] == 'A' || $inputs['comercioExterior']['tipo_operacion'] == '2')) {
+      if (!isset($inputs['dtipo_comprobante']) || $inputs['dtipo_comprobante'] != 'ingreso') {
+        $this->form_validation->set_message('comercio_exterior_check', "El tipo de comprobante debe ser ingreso, ya que tipo de operación del complemento es A o 2.");
+        return false;
+      }
+    }
+
+    // Emisor Nodos: DomicilioFiscal y ExpedidoEn
+    if (!is_array($empresa) && $empresa->pais != '' && $empresa->pais != 'MEX') {
+      $this->form_validation->set_message('comercio_exterior_check', "El campo país de la empresa tiene que ser MEX, modifica la empresa seleccionando del catalogo el país.");
+      return false;
+    }
+    if (!is_array($empresa) && $empresa->estado != '') {
+      $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$empresa->pais}' AND c_estado = '{$empresa->estado}'")->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo estado de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el estado del catalogo.");
+        return false;
+      }
+    }
+    if (!is_array($empresa) && $empresa->municipio != '') {
+      $num = $this->db->query("SELECT * FROM otros.c_municipios WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}'")->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo municipio de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el municipio del catalogo.");
+        return false;
+      }
+    }
+    if (!is_array($empresa) && $empresa->localidad != '') {
+      $num = $this->db->query("SELECT * FROM otros.c_localidades WHERE c_estado = '{$empresa->estado}' AND c_localidad = '{$empresa->localidad}'")->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo localidad de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el localidad del catalogo.");
+        return false;
+      }
+    }
+    if (!is_array($empresa) && $empresa->cp != '') {
+      $query = "SELECT * FROM otros.c_cps WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}' AND c_cp = '{$empresa->cp}'";
+      if (!is_array($empresa) && $empresa->localidad != '')
+        $query .= " AND c_localidad = '{$empresa->localidad}'";
+      $num = $this->db->query($query)->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo codigo postal de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el codigo postal del catalogo.");
+        return false;
+      }
+    }
+    if (!is_array($empresa) && $empresa->colonia != '') {
+      $num = $this->db->query("SELECT * FROM otros.c_colonias WHERE c_cp = '{$empresa->cp}' AND c_colonia = '{$empresa->colonia}'")->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo colonia de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el colonia del catalogo.");
+        return false;
+      }
+    }
+
+    // cfdi:Comprobante:Receptor
+    if (!is_array($cliente) && $cliente->rfc != 'XEXX010101000') { // cfdi:Comprobante:Receptor:rfc
+      $this->form_validation->set_message('comercio_exterior_check', "El RFC del cliente tiene que ser XEXX010101000.");
+      return false;
+    }
+    if (!is_array($cliente) && $cliente->nombre_fiscal == '') { // cfdi:Comprobante:Receptor:nombre
+      $this->form_validation->set_message('comercio_exterior_check', "El nombre del cliente es requerido.");
+      return false;
+    }
+    // cfdi:Comprobante:Receptor:Domicilio
+    if (isset($cliente->pais))
+      $pais = $this->db->query("SELECT * FROM otros.c_paises WHERE c_pais = '{$cliente->pais}' AND c_pais <> 'MEX'")->row();
+    if (!isset($pais->c_pais)) {
+      $this->form_validation->set_message('comercio_exterior_check', "El campo país del cliente tiene que ser un valor del catalogo y ser diferente a MEX, modifica el cliente seleccionando del catalogo el país.");
+      return false;
+    }
+    $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$cliente->pais}'")->result();
+    if (count($num) > 0) {
+      $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$cliente->pais}' AND c_estado = '{$cliente->estado}'")->result();
+      if (count($num) === 0) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo estado del cliente tiene que ser un valor del catalogo, modifica el cliente seleccionando del catalogo el estado.");
+        return false;
+      }
+    }
+    if (!is_array($cliente) && $cliente->cp != '') {
+      if ($pais->patron_cp != '') {
+        if (preg_match("/^{$pais->patron_cp}$/u", $cliente->cp) !== 1) {
+          $this->form_validation->set_message('comercio_exterior_check', "El formato del campo codigo postal del cliente no es valido.");
+          return false;
+        }
+      }
+    } else {
+      $this->form_validation->set_message('comercio_exterior_check', "El campo codigo postal del cliente es requerido.");
+      return false;
+    }
+
+    // cce:ComercioExterior:TipoOperacion
+    if ($inputs['comercioExterior']['tipo_operacion'] == 'A') {
+      $atributos = ['clave_pedimento' => 'str', 'certificado_origen' => 'str', 'num_certificado_origen' => 'str',
+                    'numero_exportador_confiable' => 'str', 'incoterm' => 'str', 'subdivision' => 'str', 'tipocambio_USD' => 'str',
+                    'total_USD' => 'str', 'Mercancias' => 'array'];
+      foreach ($atributos as $key => $value) {
+        if ($value == 'str' && isset($inputs['comercioExterior'][$key]{0})) {
+          $this->form_validation->set_message('comercio_exterior_check', "No debe existir ".str_replace('_', ' ', ucfirst($key)).", ya que Tipo operacion es Exportación de servicios.");
+          return false;
+        } elseif ($value == 'array' && isset($inputs['comercioExterior'][$key]) && count($inputs['comercioExterior'][$key]) > 0) {
+          $this->form_validation->set_message('comercio_exterior_check', "No debe existir ".str_replace('_', ' ', ucfirst($key)).", ya que Tipo operacion es Exportación de servicios.");
+          return false;
+        }
+      }
+    } else {
+      $atributos = ['clave_pedimento' => 'str', 'certificado_origen' => 'str', 'incoterm' => 'str', 'subdivision' => 'str',
+                    'tipocambio_USD' => 'str', 'total_USD' => 'str', 'Mercancias' => 'array'];
+      foreach ($atributos as $key => $value) {
+        if ($value == 'str' && !isset($inputs['comercioExterior'][$key]{0})) {
+          $this->form_validation->set_message('comercio_exterior_check', "Debe existir ".str_replace('_', ' ', ucfirst($key)).", ya que Tipo operacion es Exportación.");
+          return false;
+        } elseif ($value == 'array' && (!isset($inputs['comercioExterior'][$key]) || count($inputs['comercioExterior'][$key]) === 0)) {
+          $this->form_validation->set_message('comercio_exterior_check', "Debe existir ".str_replace('_', ' ', ucfirst($key)).", ya que Tipo operacion es Exportación.");
+          return false;
+        }
+      }
+    }
+
+    // cce:ComercioExterior:TotalUSD
+    if (isset($inputs['comercioExterior']['total_USD'])) {
+      $total_usd = 0;
+      if (isset($inputs['comercioExterior']['Mercancias']['NoIdentificacion'])) {
+        foreach ($inputs['comercioExterior']['Mercancias']['NoIdentificacion'] as $key => $value) {
+          if ( isset($inputs['comercioExterior']['Mercancias']['ValorDolares'][$key]{0}) )
+            $total_usd += floatval($inputs['comercioExterior']['Mercancias']['ValorDolares'][$key]);
+        }
+      }
+      if (!$total_usd == floatval($inputs['comercioExterior']['total_USD'])) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo Total USD no es valido, no es igual a la suma de Valor Dolares de las mercancias.");
+        return false;
+      }
+    }
+
+    // cce:ComercioExterior:CertificadoOrigen
+    if (isset($inputs['comercioExterior']['certificado_origen']) && $inputs['comercioExterior']['certificado_origen'] == '0' &&
+        isset($inputs['comercioExterior']['num_certificado_origen']{0}) ) {
+      $this->form_validation->set_message('comercio_exterior_check', "El Num de certificado no debe registrarse, ya que no funge como certificado de origen.");
+      return false;
+    }
+
+    // cce:ComercioExterior:Emisor:Curp
+    if (strlen($empresa->rfc) == 12 && isset($inputs['comercioExterior']['Emisor']['Curp']{0})) {
+      $this->form_validation->set_message('comercio_exterior_check', "La CURP del emisor no debe registrarse, ya que el emisor es una persona moral.");
+      return false;
+    }
+
+    // cce:ComercioExterior:Receptor:NumRegIdTrib
+    if ($pais->patron_rfc != '' && isset($inputs['comercioExterior']['Receptor']['NumRegIdTrib']{0})) {
+      if (preg_match("/^{$pais->patron_rfc}$/u", $inputs['comercioExterior']['Receptor']['NumRegIdTrib']) !== 1) {
+        $this->form_validation->set_message('comercio_exterior_check', "El Num Reg Id Trib del receptor no es valido el formato.");
+        return false;
+      }
+    }
+
+    // cce:ComercioExterior
+    if (!isset($inputs['comercioExterior']['Destinatario']['NumRegIdTrib']{0}) && !isset($inputs['comercioExterior']['Destinatario']['Rfc']{0})) {
+      $this->form_validation->set_message('comercio_exterior_check', "Debe existir el atributo Num Reg Id Trib o RFC del Destinatario.");
+      return false;
+    }
+    // cce:ComercioExterior:Destinatario:NumRegIdTrib
+    if ($pais->patron_rfc != '' && isset($inputs['comercioExterior']['Destinatario']['NumRegIdTrib']{0})) {
+      if (preg_match("/^{$pais->patron_rfc}$/u", $inputs['comercioExterior']['Destinatario']['NumRegIdTrib']) !== 1) {
+        $this->form_validation->set_message('comercio_exterior_check', "El Num Reg Id Trib del destinatario no es valido el formato.");
+        return false;
+      }
+    }
+    // cce:ComercioExterior:Destinatario:Rfc
+    if (isset($inputs['comercioExterior']['Destinatario']['Rfc']{0}) && $inputs['comercioExterior']['Destinatario']['Rfc'] != 'XAXX010101000'
+        && $inputs['comercioExterior']['Destinatario']['Rfc'] != 'XEXX010101000') {
+      $this->form_validation->set_message('comercio_exterior_check', "El RFC del destinatario no puede ser uno genérico.");
+      return false;
+    }
+    // cce:ComercioExterior:Destinatario:Domicilio
+    if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['Pais']{0})) {
+      $pais = $this->db->query("SELECT * FROM otros.c_paises WHERE c_pais = '{$inputs['comercioExterior']['Destinatario']['Domicilio']['Pais']}'")->row();
+      if (!isset($pais->c_pais)) {
+        $this->form_validation->set_message('comercio_exterior_check', "El campo país del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el país.");
+        return false;
+      }
+
+      echo "<pre>";
+        var_dump($empresa, $cliente);
+      echo "</pre>";exit;
+
+      $num = CEstado::where('c_pais', '=', $pais->c_pais)->count();
+      $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$cliente->pais}'")->result();
+      if ($num > 0) {
+        $num = CEstado::where('c_pais', '=', $pais->c_pais)->where('c_estado', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Estado'])->count();
+        $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$cliente->pais}' AND c_estado = '{$cliente->estado}'")->result();
+        if ($num === 0) {
+          $this->ineMessage = "El campo estado del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el estado.";
+          return false;
+        }
+      }
+
+      if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['Municipio']{0}) && $pais->c_pais == 'MEX') {
+        $num = CMunicipio::where('c_estado', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Estado'])->where('c_municipio', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Municipio'])->count();
+        if ($num === 0) {
+          $this->ineMessage = "El campo municipio del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el municipio.";
+          return false;
+        }
+      }
+      if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['Localidad']{0}) && $pais->c_pais == 'MEX') {
+        $num = CLocalidad::where('c_estado', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Estado'])->where('c_localidad', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Localidad'])->count();
+        if ($num === 0) {
+          $this->ineMessage = "El campo localidad del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el localidad.";
+          return false;
+        }
+      }
+      if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal']{0})) {
+        if ($pais->c_pais == 'MEX') {
+          $query = CCp::where('c_estado', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Estado'])->where('c_municipio', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Municipio'])
+                      ->where('c_cp', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal']);
+          if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['Localidad']{0}))
+            $query->where('c_localidad', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Localidad']);
+          $num = $query->count();
+          if ($num === 0) {
+            $this->ineMessage = "El campo codigo postal del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el codigo postal.";
+            return false;
+          }
+        } elseif ($pais->c_pais != 'MEX' && $pais->patron_cp != '') {
+          if (preg_match("/^{$pais->patron_cp}$/u", $inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal']) !== 1) {
+            $this->ineMessage = "El formato del campo codigo postal del destinatario no es valido.";
+            return false;
+          }
+        }
+      }
+      if (isset($inputs['comercioExterior']['Destinatario']['Domicilio']['Colonia']{0}) && $pais->c_pais == 'MEX' &&
+          strlen($inputs['comercioExterior']['Destinatario']['Domicilio']['Colonia']) != 4) {
+        $num = CColonias::where('c_cp', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal'])->where('c_colonia', '=', $inputs['comercioExterior']['Destinatario']['Domicilio']['Colonia'])->count();
+        if ($num === 0) {
+          $this->ineMessage = "El campo colonia del destinatario tiene que ser un valor del catalogo, selecciona del catalogo la colonia.";
+          return false;
+        }
+      }
+    }
+
+    // cce:ComercioExterior:Mercancias:Mercancia
+    if (isset($inputs['concepto']) && count($inputs['concepto']) > 0) {
+      foreach ($inputs['concepto'] as $key => $concepto) {
+        if (!isset($inputs['no_identificacion'][$key]{0})) {
+          $this->ineMessage = "El campo No Identificacion del producto '{$concepto}' es requerido.";
+          return false;
+        }
+        $res_val = $this->validaMercanciasCE($key, $inputs);
+        if (!$res_val['status']) {
+          $this->ineMessage = $res_val['msg'];
+          return $res_val['status'];
+        }
+      }
+    }
+
+    return true;
+  }
+  private function validaMercanciasCE($key_search, &$inputs)
+  {
+    $response = ['status' => true, 'msg' => ""];
+    $existe_producto = false;
+    $suma_fraccion_aran = 0; // fraccion 98010001
+    $count_mercancias = 0;
+    if (isset($inputs['comercioExterior']['Mercancias']) && count($inputs['comercioExterior']['Mercancias']) > 0)
+    {
+      foreach ($inputs['comercioExterior']['Mercancias']['NoIdentificacion'] as $key => $no_ident) {
+        if ($no_ident == $inputs['no_identificacion'][$key_search]) {
+          $existe_producto = true;
+          if (!isset($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0})) {
+            if (preg_match("/^[0-9]{1,14}(.([0-9]{1,3}))?$/u", $inputs['cantidad'][$key_search]) !== 1 || $inputs['cantidad'][$key_search] < 0.001) {
+              $response = ['status' => false, 'msg' => "El campo Cantidad del producto '{$inputs['concepto'][$key_search]}' debe ser mayor que 0.001 y cumplir con el formato numerico."];
+              break;
+            }
+
+            $unidades_medida = (new UnidadesMedida(new Collection))->getCE();
+            if (!$unidades_medida->has($inputs['unidad'][$key_search])) {
+              $response = ['status' => false, 'msg' => "El campo Unidad del producto '{$inputs['concepto'][$key_search]}' debe tener un valor del catálogo Unidad Comercio Exterior."];
+              break;
+            }
+
+            if (preg_match("/^[0-9]{1,14}(.([0-9]{1,3}))?$/u", $inputs['valorUnitario'][$key_search]) !== 1 || $inputs['valorUnitario'][$key_search] < 0.001) {
+              $response = ['status' => false, 'msg' => "El campo Precio unitario del producto '{$inputs['concepto'][$key_search]}' debe ser mayor que 0.001 y cumplir con el formato numerico."];
+              break;
+            }
+          }
+
+          if (isset($inputs['comercioExterior']['Mercancias']['FraccionArancelaria'][$key]{0}) && ($inputs['unidad'][$key_search] == 99 || $inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key] == 99)) {
+            $response = ['status' => false, 'msg' => "El campo Fraccion Arancelaria de la mercancia '{$no_ident}' no debe existir."];
+            break;
+          }
+
+          if ($inputs['comercioExterior']['Mercancias']['FraccionArancelaria'][$key] == '98010001') {
+            $suma_fraccion_aran += floatval($inputs['comercioExterior']['Mercancias']['ValorDolares'][$key]);
+          }
+
+          if (isset($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0}) ||
+              isset($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) ||
+              isset($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0})) {
+            if (!isset($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0}) &&
+                !isset($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) &&
+                !isset($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0})) {
+              $count_mercancias++;
+            }
+          }
+          if (isset($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) && $inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key] != 99) {
+            if (isset($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0}) && floatval($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]) > 0) {
+              $response = ['status' => false, 'msg' => "El Valor Unitario Aduana de la mercancia '{$no_ident}' no puede ser mayor que 0, ya que la Unidad Aduana es diferente de servicio."];
+              break;
+            }
+          }
+
+          if (isset($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0}))
+          {
+            $producto_merca = round(floatval($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key])*floatval($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]), 2);
+            if ($producto_merca != $inputs['comercioExterior']['Mercancias']['ValorDolares'][$key] && $inputs['comercioExterior']['Mercancias']['ValorDolares'][$key] != 1) {
+              $response = ['status' => false, 'msg' => "El Valor Dolares de la mercancia '{$no_ident}' no es un valor valido, tiene que ser el producto de Cantidad Aduana por Valor Unitario Aduana."];
+              break;
+            }
+          } else {
+            // if ($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key] == 99 || $inputs['unidad'][$key_search] == 99) {
+            //   $response = ['status' => false, 'msg' => "El Valor Dolares de la mercancia '{$no_ident}' no es un valor valido, tiene que ser el producto de Cantidad por Valor Unitario por Tipo Cambio entre Tipo Cambio USD."];
+            //   break;
+            // }
+            $tipo_cambio = (isset($inputs['comercioExterior']['tipocambio_USD']{0}) && $inputs['comercioExterior']['tipocambio_USD'] > 0 ? $inputs['comercioExterior']['tipocambio_USD']: 1);
+            $producto_merca = floatval($inputs['valorUnitario'][$key_search])*floatval($inputs['cantidad'][$key_search])*$inputs['TipoCambio']/$tipo_cambio;
+            if ($producto_merca != $inputs['comercioExterior']['Mercancias']['ValorDolares'][$key] || $inputs['comercioExterior']['Mercancias']['ValorDolares'][$key] != 1) {
+              $response = ['status' => false, 'msg' => "El Valor Dolares de la mercancia '{$no_ident}' no es un valor valido, tiene que ser el producto de Cantidad por Valor Unitario por Tipo Cambio entre Tipo Cambio USD."];
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!$existe_producto) {
+      $response = ['status' => false, 'msg' => "El campo No Identificacion del producto '{$inputs['concepto'][$key_search]}' no coincide con ningun producto de comercio exterior mercancías, el No Identificacion tiene que ser igual."];
+    }
+
+    if ($suma_fraccion_aran > 0) {
+      $suma_fraccion_aran = $suma_fraccion_aran*$inputs['TipoCambio'];
+      if ($inputs['descuento'] < $suma_fraccion_aran) {
+        $response = ['status' => false, 'msg' => "La suma del campo Valor Dolares con Fraccion Arancelaria 98010001 no debe ser menor al campo Descuento del comprobante."];
+      }
+    }
+
+    if ($count_mercancias > 0) {
+      $response = ['status' => false, 'msg' => "Los campos Cantidad Aduana, Unidad Aduana y Valor Unitario Aduana, son requeridos para todas las mercancias si alguno de estos existe."];
+    }
+
+    return $response;
   }
 
    /*

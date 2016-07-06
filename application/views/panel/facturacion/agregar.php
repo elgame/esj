@@ -220,6 +220,7 @@
                       <select name="moneda" class="span8 pull-left" id="moneda">
                         <option value="M.N." <?php echo set_select('moneda', 'M.N.', false, $moneda_borrado); ?>>Peso mexicano (M.N.)</option>
                         <option value="USD" <?php echo set_select('moneda', 'USD', false, $moneda_borrado); ?>>Dólar estadounidense (USD)</option>
+                        <option value="MXN" <?php echo set_select('moneda', 'MXN', false, $moneda_borrado); ?>>Peso Mexicano (MXN)</option>
                       </select>
                       <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="<?php echo set_value('tipoCambio', isset($borrador) ? $borrador['info']->tipo_cambio : ''); ?>"
                         style="display:<?php echo $moneda_borradover; ?>" placeholder="Tipo de Cambio">
