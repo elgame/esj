@@ -848,8 +848,11 @@ function addProducto(unidades, prod) {
                       '<span class="caret"></span>' +
                     '</button>' +
                     '<ul class="dropdown-menu ventasmore">' +
+                      '<li class="clearfix">'+
+                        '<label class="pull-left"># ident:</label> <input type="text" name="no_identificacion[]" value="" id="no_identificacion" class="span9 pull-right jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">'+
+                      '</li>'+
                       '<li class="clearfix">' +
-                        '<label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="'+prod_dcalidad+'" id="prod_dcalidad" class="span9 pull-right jump'+(++jumpIndex)+'" data-next="jump'+(++jumpIndex)+'">' +
+                        '<label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="'+prod_dcalidad+'" id="prod_dcalidad" class="span9 pull-right jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                         '<input type="hidden" name="prod_did_calidad[]" value="'+prod_did_calidad+'" id="prod_did_calidad" class="span12">' +
                       '</li>' +
                       '<li class="divider"></li>' +

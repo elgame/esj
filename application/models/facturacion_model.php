@@ -526,6 +526,7 @@ class facturacion_model extends privilegios_model{
         $productosCadOri[] = array(
           'cantidad'         => $_POST['prod_dcantidad'][$key],
           'unidad'           => $_POST['prod_dmedida'][$key],
+          'noIdentificacion' => $_POST['no_identificacion'][$key],
           'descripcion'      => $descripcion.$descripcioncad,
           'valorUnitario'    => $_POST['prod_dpreciou'][$key],
           'importe'          => $_POST['prod_importe'][$key],
@@ -574,6 +575,7 @@ class facturacion_model extends privilegios_model{
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
+          'no_identificacion'     => $_POST['no_identificacion'][$key],
         );
 
         if ($_POST['prod_did_prod'][$key] === '49')

@@ -403,6 +403,9 @@
                                         </button>
                                         <ul class="dropdown-menu ventasmore">
                                           <li class="clearfix">
+                                            <label class="pull-left"># ident:</label> <input type="text" name="no_identificacion[]" value="<?php echo $_POST['no_identificacion'][$k]?>" id="no_identificacion" class="span9 pull-right">
+                                          </li>
+                                          <li class="clearfix">
                                             <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="<?php echo $_POST['prod_dcalidad'][$k]?>" id="prod_dcalidad" class="span9 pull-right">
                                             <input type="hidden" name="prod_did_calidad[]" value="<?php echo $_POST['prod_did_calidad'][$k]?>" id="prod_did_calidad" class="span12">
                                           </li>
@@ -492,6 +495,9 @@
                                     <span class="caret"></span>
                                   </button>
                                   <ul class="dropdown-menu ventasmore">
+                                    <li class="clearfix">
+                                      <label class="pull-left"># ident:</label> <input type="text" name="no_identificacion[]" value="" id="no_identificacion" class="span9 pull-right">
+                                    </li>
                                     <li class="clearfix">
                                       <label class="pull-left">Calidad:</label> <input type="text" name="prod_dcalidad[]" value="" id="prod_dcalidad" class="span9 pull-right">
                                       <input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span12">

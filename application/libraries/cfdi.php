@@ -336,6 +336,7 @@ class cfdi{
         {
           $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
           $datos['concepto'][] = $producto['unidad'];
+          $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] :;
           $datos['concepto'][] = $producto['descripcion'];
           $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
           $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -345,6 +346,7 @@ class cfdi{
       {
         $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
         $datos['concepto'][] = $producto['unidad'];
+        $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] :;
         $datos['concepto'][] = $producto['descripcion'];
         $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
         $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -386,6 +388,13 @@ class cfdi{
     // echo "<pre>";
     //   var_dump($datos['nomina']);
     // echo "</pre>";exit;
+
+    // ----------> COMERCIO EXTERIOR
+    $datos['nomina'] = array('datos_cadena' => array());
+    if ($isNomina)
+    {
+      $datos['nomina'] = $this->nodoNomina($empleado, $data);
+    }
 
     $mergeDatos = array_merge(
       array_values($datos['comprobante']),
@@ -525,6 +534,151 @@ class cfdi{
     );
 
     return array('datos_cadena' => $cadena, 'nomina' => $nomina);
+  }
+
+  public function comercioExterior($data)
+  {
+
+    $response = [
+      'Version'                   => '1.0',
+      'TipoOperacion'             => $data['comercioExterior']['tipo_operacion'],
+      'ClaveDePedimento'          => $data['comercioExterior']['clave_pedimento'],
+      'CertificadoOrigen'         => $data['comercioExterior']['certificado_origen'],
+      'NumCertificadoOrigen'      => $data['comercioExterior']['num_certificado_origen'],
+      'NumeroExportadorConfiable' => $data['comercioExterior']['numero_exportador_confiable'],
+      'Incoterm'                  => $data['comercioExterior']['incoterm'],
+      'Subdivision'               => $data['comercioExterior']['subdivision'],
+      'Observaciones'             => $data['comercioExterior']['observaciones'],
+      'TipoCambioUSD'             => $data['comercioExterior']['tipocambio_USD'],
+      'TotalUSD'                  => $data['comercioExterior']['total_USD'],
+
+      // 'Emisor'                    => $this->emisor(),
+      // 'Receptor'                  => $this->receptor(),
+      // 'Destinatario'              => $this->destinatario(),
+      // 'Mercancias'                => $this->mercancias(),
+    ];
+
+    if (isset($data['comercioExterior']['Emisor']['Curp']{0})) {
+      $response['Emisor'] = ['Curp' => $data['comercioExterior']['Emisor']['Curp']];
+    }
+
+    $receptor = [];
+    if (isset($data['comercioExterior']['Receptor']['Curp']{0})) {
+      $receptor['Curp'] = $data['comercioExterior']['Receptor']['Curp'];
+    }
+    $receptor['NumRegIdTrib'] = $data['comercioExterior']['Receptor']['NumRegIdTrib'];
+    $response['Receptor'] = $receptor;
+
+
+    $destinatario = [];
+    foreach ($data['comercioExterior']['Destinatario'] as $key => $value) {
+      if ( !is_array($data['comercioExterior']['Destinatario'][$key]) && isset($data['comercioExterior']['Destinatario'][$key]{0}) )
+        $destinatario[$key] = $data['comercioExterior']['Destinatario'][$key];
+      elseif (is_array($data['comercioExterior']['Destinatario'][$key])) {
+        foreach ($data['comercioExterior']['Destinatario'][$key] as $key2 => $value2) {
+          if ( isset($data['comercioExterior']['Destinatario'][$key][$key2]{0}) )
+            $destinatario[$key][$key2] = $data['comercioExterior']['Destinatario'][$key][$key2];
+        }
+      }
+    }
+    $domicilio = [];
+    if (isset($destinatario['Domicilio'])) {
+      (isset($destinatario['Domicilio']['Calle']) ? $domicilio['Calle']                   = $destinatario['Domicilio']['Calle'] : '');
+      (isset($destinatario['Domicilio']['NumeroExterior']) ? $domicilio['NumeroExterior'] = $destinatario['Domicilio']['NumeroExterior'] : '');
+      (isset($destinatario['Domicilio']['NumeroInterior']) ? $domicilio['NumeroInterior'] = $destinatario['Domicilio']['NumeroInterior'] : '');
+      (isset($destinatario['Domicilio']['Colonia']) ? $domicilio['Colonia']               = $destinatario['Domicilio']['Colonia'] : '');
+      (isset($destinatario['Domicilio']['Localidad']) ? $domicilio['Localidad']           = $destinatario['Domicilio']['Localidad'] : '');
+      (isset($destinatario['Domicilio']['Referencia']) ? $domicilio['Referencia']         = $destinatario['Domicilio']['Referencia'] : '');
+      (isset($destinatario['Domicilio']['Municipio']) ? $domicilio['Municipio']           = $destinatario['Domicilio']['Municipio'] : '');
+      (isset($destinatario['Domicilio']['Estado']) ? $domicilio['Estado']                 = $destinatario['Domicilio']['Estado'] : '');
+      (isset($destinatario['Domicilio']['Pais']) ? $domicilio['Pais']                     = $destinatario['Domicilio']['Pais'] : '');
+      (isset($destinatario['Domicilio']['CodigoPostal']) ? $domicilio['CodigoPostal']     = $destinatario['Domicilio']['CodigoPostal'] : '');
+
+      $destinatario['Domicilio'] = $domicilio;
+    }
+    $response['Destinatario'] = $destinatario;
+
+
+    $mercancias = [];
+    if (isset($data['comercioExterior']['Mercancias']) && count($data['comercioExterior']['Mercancias']) > 0)
+    {
+      $cont = 0;
+      foreach ($data['comercioExterior']['Mercancias']['NoIdentificacion'] as $key => $value) {
+        if ( isset($data['comercioExterior']['Mercancias']['NoIdentificacion'][$key]{0}) )
+          $mercancias[$cont]['NoIdentificacion'] = $data['comercioExterior']['Mercancias']['NoIdentificacion'][$key];
+        if ( isset($data['comercioExterior']['Mercancias']['FraccionArancelaria'][$key]{0}) )
+          $mercancias[$cont]['FraccionArancelaria'] = $data['comercioExterior']['Mercancias']['FraccionArancelaria'][$key];
+        if ( isset($data['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0}) )
+          $mercancias[$cont]['CantidadAduana'] = $data['comercioExterior']['Mercancias']['CantidadAduana'][$key];
+        if ( isset($data['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) )
+          $mercancias[$cont]['UnidadAduana'] = $data['comercioExterior']['Mercancias']['UnidadAduana'][$key];
+        if ( isset($data['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0}) )
+          $mercancias[$cont]['ValorUnitarioAduana'] = $data['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key];
+        if ( isset($data['comercioExterior']['Mercancias']['ValorDolares'][$key]{0}) )
+          $mercancias[$cont]['ValorDolares'] = number_format($data['comercioExterior']['Mercancias']['ValorDolares'][$key], 2, '.', '');
+
+
+        if ( isset($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]) && is_array($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key])) {
+          foreach ($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'] as $key2 => $value2) {
+            if ( isset($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2]{0}) )
+              $mercancias[$cont]['DescripcionesEspecificas'][$key2]['Marca'] = $data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2];
+            if ( isset($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2]{0}) )
+              $mercancias[$cont]['DescripcionesEspecificas'][$key2]['Modelo'] = $data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2];
+            if ( isset($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2]{0}) )
+              $mercancias[$cont]['DescripcionesEspecificas'][$key2]['SubModelo'] = $data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2];
+            if ( isset($data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2]{0}) )
+              $mercancias[$cont]['DescripcionesEspecificas'][$key2]['NumeroSerie'] = $data['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2];
+          }
+        }
+
+        ++$cont;
+      }
+    }
+    $response['Mercancias'] = $mercancias;
+
+
+    if (!isset($response['ClaveDePedimento']) || $response['ClaveDePedimento'] == '')
+      unset($response['ClaveDePedimento']);
+
+    if (!isset($response['CertificadoOrigen']) || $response['CertificadoOrigen'] == '')
+      unset($response['CertificadoOrigen']);
+
+    if (!isset($response['NumCertificadoOrigen']) || $response['NumCertificadoOrigen'] == '')
+      unset($response['NumCertificadoOrigen']);
+
+    if (!isset($response['NumeroExportadorConfiable']) || $response['NumeroExportadorConfiable'] == '')
+      unset($response['NumeroExportadorConfiable']);
+
+    if (!isset($response['Incoterm']) || $response['Incoterm'] == '')
+      unset($response['Incoterm']);
+
+    if (!isset($response['Subdivision']) || $response['Subdivision'] == '')
+      unset($response['Subdivision']);
+
+    if (!isset($response['Observaciones']) || $response['Observaciones'] == '')
+      unset($response['Observaciones']);
+
+    if (!isset($response['TipoCambioUSD']) || $response['TipoCambioUSD'] == '')
+      unset($response['TipoCambioUSD']);
+
+    if (!isset($response['TotalUSD']) || $response['TotalUSD'] == '')
+      unset($response['TotalUSD']);
+    else
+      $response['TotalUSD'] = number_format($data['comercioExterior']['total_USD'], 2, '.', '');
+
+    if (count($response['Emisor']) == 0)
+      unset($response['Emisor']);
+
+    if (count($response['Receptor']) == 0)
+      unset($response['Receptor']);
+
+    if (count($response['Destinatario']) == 0)
+      unset($response['Destinatario']);
+
+    if (count($response['Mercancias']) == 0)
+      unset($response['Mercancias']);
+
+    return $response;
   }
 
 
