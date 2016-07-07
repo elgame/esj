@@ -1,9 +1,14 @@
+☐ Reporte de cuentas por pagar en proveedor UNION GENERAL poner el numero de certificado que se pone en los datos de la factura (certificado de origian)
+☐ En supervisor de carga en facturacion agregar un campo para capturar numero de operacion y ponerlo en el reporte de cuentas por pagar
+☐ En filtrosanitario agregar el numero de operacion y capturar 2 veses esos datos para que pongan los 2 proveedores y certificados
+☐ En notas de venta no carga los datos de metodo de pago y digitos de cuentas al seleccionar el cliente
+☐ En bascula no pone bien la fecha de bruto y tara
 
- ☐ Agregar el complemento de comercio exterior en facturacion
- ✔ 0.66h En bascula poner privilegio para que puedan editar o no los kilos @done (16-07-04 12:13)
- ✔ 0.33h Poner fecha y usuario de creacion en caja chica @done (16-07-03 11:09)
- ✔ 0.16h que se puedan imprimir las demas cajas chicas @done (16-07-01 13:21)
- ☐ poner en las facturas y remisiones lo de capturar la huella
+☐ Agregar el complemento de comercio exterior en facturacion
+✔ 0.66h En bascula poner privilegio para que puedan editar o no los kilos @done (16-07-04 12:13)
+✔ 0.33h Poner fecha y usuario de creacion en caja chica @done (16-07-03 11:09)
+✔ 0.16h que se puedan imprimir las demas cajas chicas @done (16-07-01 13:21)
+☐ poner en las facturas y remisiones lo de capturar la huella
 ✔ 1.3h Crear reporte de ordenes de flete dentro de cuentas x pagar @done (16-06-01 16:36)
 ✔ 1.5h En remisiones ligar un numero de boleta de bascula y al imprimir la remision que imprima los archivos adjuntos de la ife y licencia conducir @done (16-05-18 14:15)
 ✔ 1.1 Acomodar los datos del pagare y manifiesto de chofer en remisiones y facturas como indico la señora @done (16-05-18 16:27)
