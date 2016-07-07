@@ -390,10 +390,48 @@ class cfdi{
     // echo "</pre>";exit;
 
     // ----------> COMERCIO EXTERIOR
-    $datos['nomina'] = array('datos_cadena' => array());
-    if ($isNomina)
+    $comercioExterior = [];
+    if (isset($data['comercioExterior']))
     {
-      $datos['nomina'] = $this->nodoNomina($empleado, $data);
+      $datos['comercioExterior'] = $this->comercioExterior($data);
+
+      if (isset($datos['comercioExterior']) && count($datos['comercioExterior']) > 0)
+      {
+        foreach ($datos['comercioExterior'] as $key => $item) {
+          if (!is_array($item))
+            $comercioExterior[] = $item;
+          else {
+            switch ($key) {
+              case 'Emisor':
+              case 'Receptor':
+                $comercioExterior = array_merge($comercioExterior, array_values($item));
+                break;
+              case 'Destinatario':
+                foreach ($item as $key2 => $item2) {
+                  if (!is_array($item2))
+                    $comercioExterior[] = $item2;
+                  elseif (is_array($item2) && $key2 == 'Domicilio') {
+                    $comercioExterior = array_merge($comercioExterior, array_values($item2));
+                  }
+                }
+                break;
+              case 'Mercancias':
+                foreach ($item as $key2 => $item2) {
+                  foreach ($item2 as $key3 => $item3) {
+                    if (!is_array($item3))
+                      $comercioExterior[] = $item3;
+                    elseif (is_array($item3) && $key3 == 'DescripcionesEspecificas') {
+                      foreach ($item3 as $key4 => $item4) {
+                        $comercioExterior = array_merge($comercioExterior, array_values($item4));
+                      }
+                    }
+                  }
+                }
+                break;
+            }
+          }
+        }
+      }
     }
 
     $mergeDatos = array_merge(
@@ -407,12 +445,13 @@ class cfdi{
       array_values($datos['concepto']),
       array_values($datos['retencion']),
       array_values($datos['traslado']),
-      array_values($datos['nomina']['datos_cadena'])
+      array_values($datos['nomina']['datos_cadena']),
+      $comercioExterior
     );
 
-    // echo "<pre>";
-    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))));
-    // echo "</pre>";exit;
+    echo "<pre>";
+      var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))));
+    echo "</pre>";exit;
 
     return array(
       'cadenaOriginal' => ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))),
@@ -1153,6 +1192,9 @@ class cfdi{
             $concepto['idClasificacion'] != '53')
         {
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
+          if (isset($concepto['datos']['noIdentificacion']{0})) {
+            $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noIdentificacion="'.$concepto['noIdentificacion'].'" ';
+          }
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';
@@ -1257,6 +1299,11 @@ class cfdi{
 
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina:Nomina>';
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Complemento>';
+    } elseif (isset($data['comercioExterior'])) {
+      // complemento Comercio Exterior
+      $xml .= '¬¬¬¬</cfdi:Complemento>';
+      $xml .= $this->xmlComplementoComercioExterior($data);
+      $xml .= '¬¬¬¬</cfdi:Complemento>';
     }
 
 		$xml .= '</cfdi:Comprobante>';
@@ -1269,6 +1316,221 @@ class cfdi{
 
 		return $xml;
 	}
+
+  public function xmlComplementoComercioExterior($data)
+  {
+    $xml = '';
+    if (isset($data['comercioExterior']) && count($data['comercioExterior']) > 0)
+    {
+      $comercioExtVersionAttr       = 'Version="'.$data['comercioExterior']['Version'].'" ';
+      $comercioExtTipoOperacionAttr = 'TipoOperacion="'.$data['comercioExterior']['TipoOperacion'].'" ';
+
+      $comercioExtClaveDePedimentoAttr = '';
+      if (isset($data['comercioExterior']['ClaveDePedimento']) && $data['comercioExterior']['ClaveDePedimento'] !== '')
+        $comercioExtClaveDePedimentoAttr = 'ClaveDePedimento="'.$data['comercioExterior']['ClaveDePedimento'].'" ';
+
+      $comercioExtCertificadoOrigenAttr = '';
+      if (isset($data['comercioExterior']['CertificadoOrigen']) && $data['comercioExterior']['CertificadoOrigen'] !== '')
+        $comercioExtCertificadoOrigenAttr = 'CertificadoOrigen="'.$data['comercioExterior']['CertificadoOrigen'].'" ';
+
+      $comercioExtNumCertificadoOrigenAttr = '';
+      if (isset($data['comercioExterior']['NumCertificadoOrigen']) && $data['comercioExterior']['NumCertificadoOrigen'] !== '')
+        $comercioExtNumCertificadoOrigenAttr = 'NumCertificadoOrigen="'.$data['comercioExterior']['NumCertificadoOrigen'].'" ';
+
+      $comercioExtNumeroExportadorConfiableAttr = '';
+      if (isset($data['comercioExterior']['NumeroExportadorConfiable']) && $data['comercioExterior']['NumeroExportadorConfiable'] !== '')
+        $comercioExtNumeroExportadorConfiableAttr = 'NumeroExportadorConfiable="'.$data['comercioExterior']['NumeroExportadorConfiable'].'" ';
+
+      $comercioExtIncotermAttr = '';
+      if (isset($data['comercioExterior']['Incoterm']) && $data['comercioExterior']['Incoterm'] !== '')
+        $comercioExtIncotermAttr = 'Incoterm="'.$data['comercioExterior']['Incoterm'].'" ';
+
+      $comercioExtSubdivisionAttr = '';
+      if (isset($data['comercioExterior']['Subdivision']) && $data['comercioExterior']['Subdivision'] !== '')
+        $comercioExtSubdivisionAttr = 'Subdivision="'.$data['comercioExterior']['Subdivision'].'" ';
+
+      $comercioExtObservacionesAttr = '';
+      if (isset($data['comercioExterior']['Observaciones']) && $data['comercioExterior']['Observaciones'] !== '')
+        $comercioExtObservacionesAttr = 'Observaciones="'.$data['comercioExterior']['Observaciones'].'" ';
+
+      $comercioExtTipoCambioUSDAttr = '';
+      if (isset($data['comercioExterior']['TipoCambioUSD']) && $data['comercioExterior']['TipoCambioUSD'] !== '')
+        $comercioExtTipoCambioUSDAttr = 'TipoCambioUSD="'.$data['comercioExterior']['TipoCambioUSD'].'" ';
+
+      $comercioExtTotalUSDAttr = '';
+      if (isset($data['comercioExterior']['TotalUSD']) && $data['comercioExterior']['TotalUSD'] !== '')
+        $comercioExtTotalUSDAttr = 'TotalUSD="'.$data['comercioExterior']['TotalUSD'].'" ';
+
+      // xmlns:cce="http://www.sat.gob.mx/ComercioExterior"
+      $xml .= '¬¬¬¬<cce:ComercioExterior '.$comercioExtVersionAttr.
+                        $comercioExtTipoOperacionAttr.
+                        $comercioExtClaveDePedimentoAttr.
+                        $comercioExtCertificadoOrigenAttr.
+                        $comercioExtNumCertificadoOrigenAttr.
+                        $comercioExtNumeroExportadorConfiableAttr.
+                        $comercioExtIncotermAttr.
+                        $comercioExtSubdivisionAttr.
+                        $comercioExtObservacionesAttr.
+                        $comercioExtTipoCambioUSDAttr.
+                        $comercioExtTotalUSDAttr.
+                    '>';
+
+      // Emisor.
+      if(isset($data['comercioExterior']['Emisor']) && count($data['comercioExterior']['Emisor']) > 0)
+      {
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬<cce:Emisor Curp="'.$data['comercioExterior']['Emisor']['Curp'].'" />';
+      }
+
+      // Receptor.
+      if(isset($data['comercioExterior']['Receptor']) && count($data['comercioExterior']['Receptor']) > 0)
+      {
+        $curpAttr = '';
+        if (isset($data['comercioExterior']['Receptor']['Curp']) && $data['comercioExterior']['Receptor']['Curp'] != '')
+          $curpAttr = 'Curp="'.$data['comercioExterior']['Receptor']['Curp'].'" ';
+
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬<cce:Receptor '.$curpAttr.'NumRegIdTrib="'.$data['comercioExterior']['Receptor']['NumRegIdTrib'].'" />';
+      }
+
+      // Destinatario.
+      if(isset($data['comercioExterior']['Destinatario']) && count($data['comercioExterior']['Destinatario']) > 0)
+      {
+        $NumRegIdTribAttr = '';
+        if (isset($data['comercioExterior']['Destinatario']['NumRegIdTrib']) && $data['comercioExterior']['Destinatario']['NumRegIdTrib'] != '')
+          $NumRegIdTribAttr = 'NumRegIdTrib="'.$data['comercioExterior']['Destinatario']['NumRegIdTrib'].'" ';
+
+        $RfcAttr = '';
+        if (isset($data['comercioExterior']['Destinatario']['Rfc']) && $data['comercioExterior']['Destinatario']['Rfc'] != '')
+          $RfcAttr = 'Rfc="'.$data['comercioExterior']['Destinatario']['Rfc'].'" ';
+
+        $curpAttr = '';
+        if (isset($data['comercioExterior']['Destinatario']['Curp']) && $data['comercioExterior']['Destinatario']['Curp'] != '')
+          $curpAttr = 'Curp="'.$data['comercioExterior']['Destinatario']['Curp'].'" ';
+
+        $NombreAttr = '';
+        if (isset($data['comercioExterior']['Destinatario']['Nombre']) && $data['comercioExterior']['Destinatario']['Nombre'] != '')
+          $NombreAttr = 'Nombre="'.$data['comercioExterior']['Destinatario']['Nombre'].'" ';
+
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬<cce:Destinatario '.$NumRegIdTribAttr.
+                              $RfcAttr.
+                              $curpAttr.
+                              $NombreAttr.
+                              '>';
+        // Domicilio.
+        if(isset($data['comercioExterior']['Destinatario']['Domicilio']) && count($data['comercioExterior']['Destinatario']['Domicilio']) > 0)
+        {
+          $CalleAttr        = 'Calle="'.$data['comercioExterior']['Destinatario']['Domicilio']['Calle'].'" ';
+          $EstadoAttr       = 'Estado="'.$data['comercioExterior']['Destinatario']['Domicilio']['Estado'].'" ';
+          $PaisAttr         = 'Pais="'.$data['comercioExterior']['Destinatario']['Domicilio']['Pais'].'" ';
+          $CodigoPostalAttr = 'CodigoPostal="'.$data['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal'].'" ';
+
+          $NumeroExteriorAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['NumeroExterior']) && $data['comercioExterior']['Destinatario']['Domicilio']['NumeroExterior'] != '')
+            $NumeroExteriorAttr = 'NumeroExterior="'.$data['comercioExterior']['Destinatario']['Domicilio']['NumeroExterior'].'" ';
+
+          $NumeroInteriorAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['NumeroInterior']) && $data['comercioExterior']['Destinatario']['Domicilio']['NumeroInterior'] != '')
+            $NumeroInteriorAttr = 'NumeroInterior="'.$data['comercioExterior']['Destinatario']['Domicilio']['NumeroInterior'].'" ';
+
+          $ColoniaAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['Colonia']) && $data['comercioExterior']['Destinatario']['Domicilio']['Colonia'] != '')
+            $ColoniaAttr = 'Colonia="'.$data['comercioExterior']['Destinatario']['Domicilio']['Colonia'].'" ';
+
+          $LocalidadAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['Localidad']) && $data['comercioExterior']['Destinatario']['Domicilio']['Localidad'] != '')
+            $LocalidadAttr = 'Localidad="'.$data['comercioExterior']['Destinatario']['Domicilio']['Localidad'].'" ';
+
+          $ReferenciaAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['Referencia']) && $data['comercioExterior']['Destinatario']['Domicilio']['Referencia'] != '')
+            $ReferenciaAttr = 'Referencia="'.$data['comercioExterior']['Destinatario']['Domicilio']['Referencia'].'" ';
+
+          $MunicipioAttr = '';
+          if (isset($data['comercioExterior']['Destinatario']['Domicilio']['Municipio']) && $data['comercioExterior']['Destinatario']['Domicilio']['Municipio'] != '')
+            $MunicipioAttr = 'Municipio="'.$data['comercioExterior']['Destinatario']['Domicilio']['Municipio'].'" ';
+
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cce:Domicilio '.$CalleAttr.
+                                    $EstadoAttr.
+                                    $PaisAttr.
+                                    $CodigoPostalAttr.
+                                    $NumeroExteriorAttr.
+                                    $NumeroInteriorAttr.
+                                    $ColoniaAttr.
+                                    $LocalidadAttr.
+                                    $ReferenciaAttr.
+                                    $MunicipioAttr.
+                                    '/>';
+        }
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬</cce:Destinatario>';
+      }
+
+      // Mercancias.
+      if(isset($data['comercioExterior']['Mercancias']) && count($data['comercioExterior']['Mercancias']) > 0)
+      {
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬<cce:Mercancias>';
+        // Mercancia.
+        foreach ($data['comercioExterior']['Mercancias'] as $mercancia)
+        {
+          $NoIdentificacionAttr = 'NoIdentificacion="'.$mercancia['NoIdentificacion'].'" ';
+          $ValorDolaresAttr     = 'ValorDolares="'.$mercancia['ValorDolares'].'" ';
+
+          $FraccionArancelariaAttr = '';
+          if (isset($mercancia['FraccionArancelaria']) && $mercancia['FraccionArancelaria'] != '')
+            $FraccionArancelariaAttr = 'FraccionArancelaria="'.$mercancia['FraccionArancelaria'].'" ';
+
+          $CantidadAduanaAttr = '';
+          if (isset($mercancia['CantidadAduana']) && $mercancia['CantidadAduana'] != '')
+            $CantidadAduanaAttr = 'CantidadAduana="'.$mercancia['CantidadAduana'].'" ';
+
+          $UnidadAduanaAttr = '';
+          if (isset($mercancia['UnidadAduana']) && $mercancia['UnidadAduana'] != '')
+            $UnidadAduanaAttr = 'UnidadAduana="'.$mercancia['UnidadAduana'].'" ';
+
+          $ValorUnitarioAduanaAttr = '';
+          if (isset($mercancia['ValorUnitarioAduana']) && $mercancia['ValorUnitarioAduana'] != '')
+            $ValorUnitarioAduanaAttr = 'ValorUnitarioAduana="'.$mercancia['ValorUnitarioAduana'].'" ';
+
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cce:Mercancia '.$NoIdentificacionAttr.
+                                    $ValorDolaresAttr.
+                                    $FraccionArancelariaAttr.
+                                    $CantidadAduanaAttr.
+                                    $UnidadAduanaAttr.
+                                    $ValorUnitarioAduanaAttr.
+                                    '>';
+          if(isset($mercancia['DescripcionesEspecificas']) && count($mercancia['DescripcionesEspecificas']) > 0)
+          {
+            foreach ($mercancia['DescripcionesEspecificas'] as $desc_espe) {
+              $MarcaAttr = 'Marca="'.$desc_espe['Marca'].'" ';
+
+              $ModeloAttr = '';
+              if (isset($desc_espe['Modelo']) && $desc_espe['Modelo'] != '')
+                $ModeloAttr = 'Modelo="'.$desc_espe['Modelo'].'" ';
+
+              $SubModeloAttr = '';
+              if (isset($desc_espe['SubModelo']) && $desc_espe['SubModelo'] != '')
+                $SubModeloAttr = 'SubModelo="'.$desc_espe['SubModelo'].'" ';
+
+              $NumeroSerieAttr = '';
+              if (isset($desc_espe['NumeroSerie']) && $desc_espe['NumeroSerie'] != '')
+                $NumeroSerieAttr = 'NumeroSerie="'.$desc_espe['NumeroSerie'].'" ';
+
+              $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cce:DescripcionesEspecificas '.$MarcaAttr.
+                                              $ModeloAttr.
+                                              $SubModeloAttr.
+                                              $NumeroSerieAttr.
+                                              '/>';
+            }
+          }
+
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</cce:Mercancia>';
+        }
+
+        $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬</cce:Mercancias>';
+      }
+
+      $xml .= '¬¬¬¬</cce:ComercioExterior>';
+    }
+
+    return $xml;
+  }
 
   /*
    |------------------------------------------------------------------------

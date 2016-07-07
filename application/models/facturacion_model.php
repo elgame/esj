@@ -357,6 +357,13 @@ class facturacion_model extends privilegios_model{
           'totalImpuestosTrasladados' => 0
         );
 
+        if (isset($this->input->post('comercioExterior')['clave_pedimento']) ||
+            isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+            isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+            isset($this->input->post('comercioExterior')['incoterm']) ) {
+          $data['comercioExterior'] = $this->input->post('comercioExterior');
+        }
+
         return $data;
     }
 

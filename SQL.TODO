@@ -1,4 +1,115 @@
 
+ ☐ Comercio exterior
+   ALTER TABLE public.facturacion_productos ADD COLUMN no_identificacion character varying(50);
+   CREATE TABLE public.facturacion_ce
+      (
+        id bigserial NOT NULL,
+        id_factura bigint NOT NULL,
+        version character varying(5) NOT NULL,
+        tipo_operacion character varying(5) NOT NULL,
+        clave_pedimento character varying(5),
+        certificado_origen character varying(5),
+        num_certificado_origen character varying(40),
+        numero_exportador_confiable character varying(50),
+        incoterm character varying(5),
+        subdivision character varying(5),
+        observaciones character varying(300),
+        "tipocambio_USD" double precision NOT NULL DEFAULT (0)::double precision,
+        "total_USD" double precision NOT NULL DEFAULT (0)::double precision,
+        emisor_curp character varying(18),
+        receptor_numregidtrib character varying(40),
+        receptor_curp character varying(18),
+        created_at timestamp without time zone NOT NULL,
+        updated_at timestamp without time zone NOT NULL,
+        CONSTRAINT facturacion_ce_pkey PRIMARY KEY (id),
+        CONSTRAINT facturacion_ce_factura_id_foreign FOREIGN KEY (id_factura)
+            REFERENCES public.facturacion (id_factura) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.facturacion_ce
+        OWNER TO programa;
+      GRANT ALL ON TABLE public.facturacion_ce TO programa;
+
+      CREATE TABLE public.facturacion_ce_destinatario
+      (
+        comercio_exterior_id bigint NOT NULL,
+        numregidtrib character varying(40),
+        rfc character varying(15),
+        curp character varying(18),
+        nombre character varying(300),
+        calle character varying(100) NOT NULL,
+        numero_exterior character varying(55),
+        numero_interior character varying(55),
+        colonia character varying(120),
+        localidad character varying(120),
+        referencia character varying(250) NOT NULL DEFAULT '0'::character varying,
+        municipio character varying(120) NOT NULL DEFAULT '0'::character varying,
+        estado character varying(30) NOT NULL,
+        pais character varying(10),
+        codigo_postal character varying(12),
+        created_at timestamp without time zone NOT NULL,
+        updated_at timestamp without time zone NOT NULL,
+        CONSTRAINT facturacion_ce_destinatario_pkey PRIMARY KEY (comercio_exterior_id),
+        CONSTRAINT facturacion_ce_id_foreign FOREIGN KEY (comercio_exterior_id)
+            REFERENCES public.facturacion_ce (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.facturacion_ce_destinatario
+        OWNER TO programa;
+      GRANT ALL ON TABLE public.facturacion_ce_destinatario TO programa;
+
+      CREATE TABLE public.facturacion_ce_mercancias
+      (
+        comercio_exterior_id bigint NOT NULL,
+        "row" integer NOT NULL,
+        noidentificacion character varying(100) NOT NULL,
+        fraccionar_ancelaria character varying(20),
+        cantidad_aduana double precision,
+        unidad_aduana character varying(10),
+        valor_unitario_aduana double precision,
+        valor_dolares double precision NOT NULL,
+        created_at timestamp without time zone NOT NULL,
+        updated_at timestamp without time zone NOT NULL,
+        CONSTRAINT facturacion_ce_mercancias_pkey PRIMARY KEY (comercio_exterior_id, "row"),
+        CONSTRAINT facturacion_ce_id_foreign FOREIGN KEY (comercio_exterior_id)
+            REFERENCES public.facturacion_ce (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.facturacion_ce_mercancias
+        OWNER TO programa;
+      GRANT ALL ON TABLE public.facturacion_ce_mercancias TO programa;
+
+      CREATE TABLE public.facturacion_ce_mercancias_esp
+      (
+        comercio_exterior_id bigint NOT NULL,
+        "row" integer NOT NULL,
+        row2 integer NOT NULL,
+        marca character varying(35) NOT NULL,
+        modelo character varying(80),
+        submodelo double precision,
+        numeroserie character varying(40),
+        created_at timestamp without time zone NOT NULL,
+        updated_at timestamp without time zone NOT NULL,
+        CONSTRAINT facturacion_ce_mercancias_esp_pkey PRIMARY KEY (comercio_exterior_id, "row", row2),
+        CONSTRAINT facturacion_ce_id_foreign FOREIGN KEY (comercio_exterior_id)
+            REFERENCES public.facturacion_ce (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      )
+      WITH (
+        OIDS=FALSE
+      );
+      ALTER TABLE public.facturacion_ce_mercancias_esp
+        OWNER TO programa;
+
  ☐ Privilegio modificar kilos
   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar kilos bruto y tara',70,FALSE,'bascula/modificar_kilosbt/','pencil',FALSE);
 
