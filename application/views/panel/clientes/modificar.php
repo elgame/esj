@@ -88,18 +88,20 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="festado">Estado </label>
+                    <label class="control-label" for="dpais">Pais </label>
                     <div class="controls">
-                      <input type="text" name="festado" id="festado" class="span10" value="<?php echo isset($data->estado)?$data->estado:''; ?>"
-                        maxlength="45" placeholder="Colima, Jalisco">
+                      <input type="text" name="fpais" id="dpais" class="span10" value="<?php echo isset($data->pais)?$data->pais:''; ?>"
+                        maxlength="45" placeholder="MEXICO">
+                      <span class="dpais help-block nomarg" style="color:#bd362f"><?php echo (isset($data->pais)? cpais_model::getPaisKey($data->pais): '') ?></span>
                     </div>
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="fpais">Pais </label>
+                    <label class="control-label" for="destado">Estado </label>
                     <div class="controls">
-                      <input type="text" name="fpais" id="fpais" class="span10" value="<?php echo isset($data->pais)?$data->pais:''; ?>"
-                        maxlength="45" placeholder="MEXICO">
+                      <input type="text" name="festado" id="destado" class="span10" value="<?php echo isset($data->estado)?$data->estado:''; ?>"
+                        maxlength="45" placeholder="Colima, Jalisco">
+                      <span class="destado help-block nomarg" style="color:#bd362f"><?php echo (isset($data->estado)? cestado_model::getEstadoKey($data->estado, $data->pais): '') ?></span>
                     </div>
                   </div>
 

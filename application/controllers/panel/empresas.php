@@ -59,7 +59,7 @@ class empresas extends MY_Controller {
 		$this->carabiner->js(array(
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.numeric.js'),
-			array('panel/clientes/frm_addmod.js')
+			array('panel/clientes/agregar.js')
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -101,7 +101,7 @@ class empresas extends MY_Controller {
 			array('libs/jquery.uniform.min.js'),
 			array('libs/jquery.numeric.js'),
 			array('general/msgbox.js'),
-			array('panel/clientes/frm_addmod.js')
+			array('panel/clientes/agregar.js')
 		));
 
 		$params['info_empleado'] = $this->info_empleado['info']; //info empleado

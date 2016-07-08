@@ -1177,37 +1177,38 @@
                             </thead>
                             <tbody>
                               <?php $keyindex = 0;
-                              if (count($this->input->post("comercioExterior")['Mercancias']['NoIdentificacion']) > 0) {
+                              if (isset($this->input->post("comercioExterior")['Mercancias']) && count($this->input->post("comercioExterior")['Mercancias']['NoIdentificacion']) > 0) {
                                 foreach ($this->input->post("comercioExterior")['Mercancias']['NoIdentificacion'] as $key => $NoIdentificacion) {
                               ?>
                                 <?php $keyindex = $key; ?>
                                   <tr>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][NoIdentificacion][]" value="<?php $_POST['comercioExterior']['Mercancias']['NoIdentificacion'][$key] ?>" class="span12 sikey" maxlength="100"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][FraccionArancelaria][]" value="<?php $_POST['comercioExterior']['Mercancias']['FraccionArancelaria'][$key] ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][CantidadAduana][]" value="<?php $_POST['comercioExterior']['Mercancias']['CantidadAduana'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][NoIdentificacion][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['NoIdentificacion'][$key] ?>" class="span12 sikey" maxlength="100"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][FraccionArancelaria][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['FraccionArancelaria'][$key] ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][CantidadAduana][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['CantidadAduana'][$key] ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
                                       <select name="comercioExterior[Mercancias][UnidadAduana][]" class="span12 sikey">
                                         <option value=""></option>
                                       <?php foreach ($unidad_medidas as $clave => $unidad) { ?>
-                                        <option value="<?php echo $clave; ?>" <?php echo set_select('comercioExterior[Mercancias][UnidadAduana]', $clave); ?>><?php echo $unidad; ?></option>
+                                        <option value="<?php echo $clave; ?>" <?php echo $_POST['comercioExterior']['Mercancias']['UnidadAduana'][$key] == $clave? 'selected': '' ?>><?php echo $unidad; ?></option>
                                       <?php } ?>
                                       </select>
                                     </td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorUnitarioAduana][]" value="<?php $_POST['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key] ?>" class="span12 sikey vpositive"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorDolares][]" value="<?php $_POST['comercioExterior']['Mercancias']['ValorDolares'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorUnitarioAduana][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorDolares][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['ValorDolares'][$key] ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
                                       <button type="button" class="btn btn-danger btn-del-mercancias" data-index="<?php $key ?>"><i class="icon-remove"></i></button>
                                       <button type="button" class="btn btn-success btn-add-desc-especifica" data-index="<?php $key ?>"><i class="icon-plus"></i></button>
                                     </td>
                                   </tr>
                                   <?php
-                                  if (count($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas'][$key]['Marca']) > 0) {
+                                  if (isset($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas']) &&
+                                      count($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas'][$key]['Marca']) > 0) {
                                     foreach ($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas'][$key]['Marca'] as $key2 => $descEsp) { ?>
                                       <tr class="<?php $key ?>">
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][Marca][]" value="<?php $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2] ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][Modelo][]" value="<?php $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2] ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][SubModelo][]" value="<?php $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2] ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][NumeroSerie][]" value="<?php $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2] ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][Marca][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2] ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][Modelo][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2] ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][SubModelo][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2] ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php $key ?>][NumeroSerie][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2] ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
                                         <td class="center">
                                           <button type="button" class="btn btn-danger btn-del-mercancias"><i class="icon-remove"></i></button>
                                         </td>

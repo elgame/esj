@@ -38,4 +38,20 @@ class cestado_model extends CI_Model {
     return $response;
   }
 
+  public static function getEstadoKey($key, $c_pais)
+  {
+    $obj = get_instance();
+    $res = $obj->db->query(" SELECT id, c_pais, c_estado, nombre
+        FROM otros.c_estados
+        WHERE c_estado = '{$key}' AND c_pais = '{$c_pais}'
+        LIMIT 1");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row()->nombre;
+    }
+
+    return $response;
+  }
+
 }

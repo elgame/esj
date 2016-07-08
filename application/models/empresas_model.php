@@ -169,6 +169,7 @@ class empresas_model extends CI_Model{
 			'key_path'       => $dkey_path,
 			'pass'           => $this->input->post('dpass'),
 			'cfdi_version'   => $this->input->post('dcfdi_version'),
+			'pais'           => $this->input->post('dpais'),
 		);
 		if($cer_caduca != '')
 			$data['cer_caduca'] = $cer_caduca;
@@ -257,6 +258,7 @@ class empresas_model extends CI_Model{
 			'key_path'       => $dkey_path,
 			'pass'           => $this->input->post('dpass'),
 			'cfdi_version'   => $this->input->post('dcfdi_version'),
+			'pais'           => $this->input->post('dpais'),
 		);
 		if($cer_caduca != '')
 			$data['cer_caduca'] = $cer_caduca;

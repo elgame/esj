@@ -38,4 +38,20 @@ class ccolonias_model extends CI_Model {
     return $response;
   }
 
+  public static function getColoniaKey($key, $c_cp)
+  {
+    $obj = get_instance();
+    $res = $obj->db->query(" SELECT id, c_cp, c_colonia, nombre
+        FROM otros.c_colonias
+        WHERE c_colonia = '{$key}' AND c_cp = '{$c_cp}'
+        LIMIT 1");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row()->nombre;
+    }
+
+    return $response;
+  }
+
 }

@@ -64,23 +64,10 @@
 										</div>
 
 										<div class="control-group">
-											<label class="control-label" for="dcolonia">Colonia:</label>
+											<label class="control-label" for="dpais">País:</label>
 											<div class="controls">
-												<input type="text" name="dcolonia" id="dcolonia" class="span12" value="<?php echo set_value('dcolonia'); ?>" maxlength="60">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="dlocalidad">Localidad:</label>
-											<div class="controls">
-												<input type="text" name="dlocalidad" id="dlocalidad" class="span12" value="<?php echo set_value('dlocalidad'); ?>" maxlength="45">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="dmunicipio">Municipio / Delegación:</label>
-											<div class="controls">
-												<input type="text" name="dmunicipio" id="dmunicipio" class="span12" value="<?php echo set_value('dmunicipio'); ?>" maxlength="45">
+												<input type="text" name="dpais" id="dpais" class="span12" value="<?php echo set_value('dpais'); ?>" maxlength="60" required>
+												<span class="dpais help-block nomarg" style="color:#bd362f"></span>
 											</div>
 										</div>
 
@@ -88,6 +75,23 @@
 											<label class="control-label" for="destado">Estado:</label>
 											<div class="controls">
 												<input type="text" name="destado" id="destado" class="span12" value="<?php echo set_value('destado'); ?>" maxlength="45">
+												<span class="destado help-block nomarg" style="color:#bd362f"></span>
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dmunicipio">Municipio / Delegación:</label>
+											<div class="controls">
+												<input type="text" name="dmunicipio" id="dmunicipio" class="span12" value="<?php echo set_value('dmunicipio'); ?>" maxlength="45">
+												<span class="dmunicipio help-block nomarg" style="color:#bd362f"></span>
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dlocalidad">Localidad:</label>
+											<div class="controls">
+												<input type="text" name="dlocalidad" id="dlocalidad" class="span12" value="<?php echo set_value('dlocalidad'); ?>" maxlength="45">
+												<span class="dlocalidad help-block nomarg" style="color:#bd362f"></span>
 											</div>
 										</div>
 
@@ -95,6 +99,15 @@
 											<label class="control-label" for="dcp">CP:</label>
 											<div class="controls">
 												<input type="text" name="dcp" id="dcp" class="span12" value="<?php echo set_value('dcp'); ?>" maxlength="10">
+												<span class="dcp help-block nomarg" style="color:#bd362f"></span>
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="dcolonia">Colonia:</label>
+											<div class="controls">
+												<input type="text" name="dcolonia" id="dcolonia" class="span12" value="<?php echo set_value('dcolonia'); ?>" maxlength="60">
+												<span class="dcolonia help-block nomarg" style="color:#bd362f"></span>
 											</div>
 										</div>
 
@@ -160,7 +173,7 @@
 										<div class="control-group">
 											<label class="control-label" for="dpass">Clave:</label>
 											<div class="controls">
-												<input type="password" name="dpass" id="dpass" class="span12" 
+												<input type="password" name="dpass" id="dpass" class="span12"
 													value="<?php echo set_value('dpass'); ?>" maxlength="20">
 											</div>
 										</div>
@@ -168,7 +181,7 @@
 										<div class="control-group">
 											<label class="control-label" for="dcfdi_version">Version CFDI:</label>
 											<div class="controls">
-												<input type="text" name="dcfdi_version" id="dcfdi_version" class="span12" 
+												<input type="text" name="dcfdi_version" id="dcfdi_version" class="span12"
 													value="<?php echo set_value('dcfdi_version'); ?>" maxlength="6">
 											</div>
 										</div>

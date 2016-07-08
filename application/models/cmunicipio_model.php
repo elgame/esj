@@ -38,4 +38,20 @@ class cmunicipio_model extends CI_Model {
     return $response;
   }
 
+  public static function getMunicipioKey($key, $c_estado)
+  {
+    $obj = get_instance();
+    $res = $obj->db->query(" SELECT id, c_estado, c_municipio, nombre
+        FROM otros.c_municipios
+        WHERE c_municipio = '{$key}' AND c_estado = '{$c_estado}'
+        LIMIT 1");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row()->nombre;
+    }
+
+    return $response;
+  }
+
 }

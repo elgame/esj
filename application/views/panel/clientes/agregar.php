@@ -85,18 +85,18 @@
 									</div>
 
 									<div class="control-group">
-									  <label class="control-label" for="festado">Estado </label>
+									  <label class="control-label" for="dpais">Pais </label>
 									  <div class="controls">
-											<input type="text" name="festado" id="festado" class="span10" value="<?php echo set_value('festado'); ?>"
-												maxlength="45" placeholder="Colima, Jalisco">
+											<input type="text" name="fpais" id="dpais" class="span10" value="<?php echo set_value('fpais'); ?>"
+												maxlength="45" placeholder="MEXICO">
 									  </div>
 									</div>
 
 									<div class="control-group">
-									  <label class="control-label" for="fpais">Pais </label>
+									  <label class="control-label" for="destado">Estado </label>
 									  <div class="controls">
-											<input type="text" name="fpais" id="fpais" class="span10" value="<?php echo set_value('fpais'); ?>"
-												maxlength="45" placeholder="MEXICO">
+											<input type="text" name="festado" id="destado" class="span10" value="<?php echo set_value('festado'); ?>"
+												maxlength="45" placeholder="Colima, Jalisco">
 									  </div>
 									</div>
 

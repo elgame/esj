@@ -231,7 +231,7 @@ public function fecha($fecha)
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('libs/jquery.treeview.js'),
-				array('panel/usuarios/add_mod_frm.js')
+				array('panel/clientes/agregar.js')
 			));
 
       $this->load->model('clientes_model');

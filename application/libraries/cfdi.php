@@ -336,7 +336,7 @@ class cfdi{
         {
           $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
           $datos['concepto'][] = $producto['unidad'];
-          $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] :;
+          $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] : '';
           $datos['concepto'][] = $producto['descripcion'];
           $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
           $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -346,7 +346,7 @@ class cfdi{
       {
         $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
         $datos['concepto'][] = $producto['unidad'];
-        $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] :;
+        $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] : '';
         $datos['concepto'][] = $producto['descripcion'];
         $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
         $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -449,9 +449,9 @@ class cfdi{
       $comercioExterior
     );
 
-    echo "<pre>";
-      var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))));
-    echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump(ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))));
+    // echo "</pre>";exit;
 
     return array(
       'cadenaOriginal' => ltrim(rtrim(preg_replace('/\s+/', ' ', '||'.implode('|', $mergeDatos).'||'))),
@@ -705,8 +705,8 @@ class cfdi{
     else
       $response['TotalUSD'] = number_format($data['comercioExterior']['total_USD'], 2, '.', '');
 
-    if (count($response['Emisor']) == 0)
-      unset($response['Emisor']);
+    // if (count($response['Emisor']) == 0)
+    //   unset($response['Emisor']);
 
     if (count($response['Receptor']) == 0)
       unset($response['Receptor']);
@@ -1088,9 +1088,16 @@ class cfdi{
    */
 	public function generarXML3_2($data = array(), $isNomina = false)
   {
+    $namespace = '';
+    $schemna   = '';
+    if (isset($data['comercioExterior'])) {
+      $namespace = ' xmlns:cce="http://www.sat.gob.mx/ComercioExterior"';
+      $schemna   = ' http://www.sat.gob.mx/ComercioExterior http://www.sat.gob.mx/sitio_internet/cfd/ComercioExterior/ComercioExterior10.xsd';
+    }
+
 		$xml = '';
 		$xml .= '<?xml version="1.0" encoding="UTF-8"?> ';
-		$xml .= '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:nomina="http://www.sat.gob.mx/nomina" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd http://www.sat.gob.mx/nomina http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina11.xsd" ';
+		$xml .= '<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:nomina="http://www.sat.gob.mx/nomina"'.$namespace.' xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd http://www.sat.gob.mx/nomina http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina11.xsd'.$schemna.'" ';
 		$xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬version="'.$this->replaceSpecialChars($data['comprobante']['version']).'" ';
 
     if(isset($data['comprobante']['serie']) && $data['comprobante']['serie'] !== '')

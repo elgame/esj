@@ -857,8 +857,8 @@ class facturacion extends MY_Controller {
       array_push($rules,
           array(
             'field'   => 'comercioExterior[tipo_operacion]',
-            'label'   => '',
-            'rules'   => 'callback_comercio_exterior_check'
+            'label'   => 'Tipo de operacion',
+            'rules'   => 'required|callback_comercio_exterior_check'
           ),
           array(
             'field'   => 'comercioExterior[clave_pedimento]',
@@ -912,8 +912,8 @@ class facturacion extends MY_Controller {
           ),
           array(
             'field'   => 'comercioExterior[Receptor][NumRegIdTrib]',
-            'label'   => '',
-            'rules'   => ''
+            'label'   => 'Receptor NumRegIdTrib',
+            'rules'   => 'required|min_length[6]|max_length[40]'
           ),
           array(
             'field'   => 'comercioExterior[Receptor][Curp]',
@@ -942,8 +942,8 @@ class facturacion extends MY_Controller {
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][Calle]',
-            'label'   => '',
-            'rules'   => ''
+            'label'   => 'Destinatario Calle',
+            'rules'   => 'required|max_length[100]'
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][NumeroExterior]',
@@ -962,13 +962,13 @@ class facturacion extends MY_Controller {
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][Pais]',
-            'label'   => '',
-            'rules'   => ''
+            'label'   => 'Destinatario Pais',
+            'rules'   => 'required'
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][Estado]',
-            'label'   => '',
-            'rules'   => ''
+            'label'   => 'Destinatario Estado',
+            'rules'   => 'required|max_length[30]'
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][Municipio]',
@@ -982,8 +982,8 @@ class facturacion extends MY_Controller {
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][CodigoPostal]',
-            'label'   => '',
-            'rules'   => ''
+            'label'   => 'Destinatario CodigoPostal',
+            'rules'   => 'required|max_length[12]'
           ),
           array(
             'field'   => 'comercioExterior[Destinatario][Domicilio][Colonia]',
@@ -1208,6 +1208,31 @@ class facturacion extends MY_Controller {
     $cliente = $this->clientes_model->getClienteInfo($inputs['did_cliente'], true);
     $empresa = isset($empresa['info']) ? $empresa['info'] : null;
     $cliente = isset($cliente['info']) ? $cliente['info'] : null;
+
+    if (!$this->validateTImporte($inputs['comercioExterior']['tipocambio_USD'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Cambio USD no es valido, maximo 6 decimales.");
+      return false;
+    }
+    if (!$this->validateTImporte($inputs['comercioExterior']['total_USD'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "El Total USD no es valido, maximo 6 decimales.");
+      return false;
+    }
+    if (!$this->validateTCurpLite($inputs['comercioExterior']['Emisor']['Curp'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "La CURP del Emisor no es valida.");
+      return false;
+    }
+    if (!$this->validateTCurpLite($inputs['comercioExterior']['Receptor']['Curp'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "La CURP del Receptor no es valida.");
+      return false;
+    }
+    if (!$this->validateTCurpLite($inputs['comercioExterior']['Destinatario']['Curp'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "La CURP del Destinatario no es valida.");
+      return false;
+    }
+    if (!$this->validateTRfcLite($inputs['comercioExterior']['Destinatario']['Rfc'])) {
+      $this->form_validation->set_message('comercio_exterior_check', "El RFC del Destinatario no es valido.");
+      return false;
+    }
 
     if (!isset($monedas[$inputs['moneda']])) { // cfdi:Comprobante:Moneda
       $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Moneda no es valido, selecciona un valor diferente a '{$inputs['moneda']}'.");
@@ -1562,6 +1587,48 @@ class facturacion extends MY_Controller {
     }
 
     return $response;
+  }
+  public function validateTNumCertificadoOrigen($value)
+  {
+    if (trim($value) !== '')
+      return preg_match("/[a-f0-9A-F]{8}-[a-f0-9A-F]{4}-[a-f0-9A-F]{4}-[a-f0-9A-F]{4}-[a-f0-9A-F]{12}|[A-Za-z0-9,#,+,%,(&) ]{6,40}/u", $value);
+    return true;
+  }
+
+  public function validateTImporte($value)
+  {
+    if (trim($value) !== '') {
+      $decimales = strlen(substr(strrchr($value, "."), 1));
+      if ($decimales <= 6)
+        return true;
+      return false;
+    }
+    return true;
+  }
+  // Valida la estructura de los rfc en base al tipo definido en el
+  // anexo 20.
+  public function validateTRfcLite($rfc)
+  {
+    // Determina la cantidad de caracteres a validar al inicio ya que para
+    // personas fisicas son 4 y morales 3.
+    if (trim($rfc) !== '')
+    {
+      $x = mb_strlen($rfc, 'UTF-8') === 12 ? '3' : '4';
+      if (preg_match("/^[A-Z,Ñ,&]{{$x}}[0-9]{2}[0-1][0-9][0-3][0-9][A-Z,0-9][A-Z,0-9][0-9,A-Z]/u", $rfc))
+        return true;
+      else
+        return false;
+    }
+    return true;
+  }
+  public function validateTCurpLite($value)
+  {
+    if (trim($value) !== '')
+    {
+      return preg_match("/[A-Z][A,E,I,O,U,X][A-Z]{2}[0-9]{2}[0-1][0-9][0-3][0-9][M,H][A-Z]{2}[B,C,D,F,G,H,J,K,L,M,N,Ñ,P,Q,R,S,T,V,W,X,Y,Z]{3}[0-9,A-Z][0-9]/u", $value);
+    }
+
+    return true;
   }
 
    /*

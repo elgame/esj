@@ -38,4 +38,20 @@ class clocalidad_model extends CI_Model {
     return $response;
   }
 
+  public static function getLocalidadKey($key, $c_estado)
+  {
+    $obj = get_instance();
+    $res = $obj->db->query(" SELECT id, c_estado, c_localidad, nombre
+        FROM otros.c_localidades
+        WHERE c_localidad = '{$key}' AND c_estado = '{$c_estado}'
+        LIMIT 1");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row()->nombre;
+    }
+
+    return $response;
+  }
+
 }

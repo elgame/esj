@@ -35,4 +35,20 @@ class cpais_model extends CI_Model {
     return $response;
   }
 
+  public static function getPaisKey($key)
+  {
+    $obj = get_instance();
+    $res = $obj->db->query(" SELECT id, c_pais, nombre
+        FROM otros.c_paises
+        WHERE c_pais = '{$key}'
+        LIMIT 1");
+
+    $response = null;
+    if($res->num_rows() > 0){
+      $response = $res->row()->nombre;
+    }
+
+    return $response;
+  }
+
 }
