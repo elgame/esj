@@ -1308,7 +1308,7 @@ class cfdi{
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Complemento>';
     } elseif (isset($data['comercioExterior'])) {
       // complemento Comercio Exterior
-      $xml .= '¬¬¬¬</cfdi:Complemento>';
+      $xml .= '¬¬¬¬<cfdi:Complemento>';
       $xml .= $this->xmlComplementoComercioExterior($data);
       $xml .= '¬¬¬¬</cfdi:Complemento>';
     }
