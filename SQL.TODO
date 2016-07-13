@@ -1,3 +1,8 @@
+ ☐ Productos especiales en facturacion y reporte de cuentas x pagar
+   ALTER TABLE facturacion_seg_cert ADD COLUMN num_operacion character varying(30);
+   ALTER TABLE facturacion_seg_cert ADD COLUMN nrow integer NOT NULL DEFAULT 0;
+   ALTER TABLE facturacion_seg_cert DROP CONSTRAINT facturacion_seg_cert_pkey;
+   ALTER TABLE facturacion_seg_cert ADD CONSTRAINT facturacion_seg_cert_pkey PRIMARY KEY(id_factura, id_clasificacion, nrow);
 
  ☐ Comercio exterior
    ALTER TABLE public.facturacion_productos ADD COLUMN no_identificacion character varying(50);
