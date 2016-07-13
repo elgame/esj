@@ -336,7 +336,7 @@ class cfdi{
         {
           $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
           $datos['concepto'][] = $producto['unidad'];
-          $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] : '';
+          isset($producto['noIdentificacion']{0})? $datos['concepto'][] = $producto['noIdentificacion'] : '';
           $datos['concepto'][] = $producto['descripcion'];
           $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
           $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -346,7 +346,7 @@ class cfdi{
       {
         $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
         $datos['concepto'][] = $producto['unidad'];
-        $producto['noIdentificacion']!=''? $datos['concepto'][] = $producto['noIdentificacion'] : '';
+        isset($producto['noIdentificacion']{0})? $datos['concepto'][] = $producto['noIdentificacion'] : '';
         $datos['concepto'][] = $producto['descripcion'];
         $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
         $datos['concepto'][] = (float)$this->numero($producto['importe']);
@@ -1199,7 +1199,7 @@ class cfdi{
             $concepto['idClasificacion'] != '53')
         {
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
-          if (isset($concepto['datos']['noIdentificacion']{0})) {
+          if (isset($concepto['noIdentificacion']{0})) {
             $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noIdentificacion="'.$concepto['noIdentificacion'].'" ';
           }
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
@@ -1214,6 +1214,9 @@ class cfdi{
       else
       {
         $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<cfdi:Concepto ';
+        if (isset($concepto['noIdentificacion']{0})) {
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬noIdentificacion="'.$concepto['noIdentificacion'].'" ';
+        }
         $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬cantidad="'.(float)$concepto['cantidad'].'" ';
         $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬unidad="'.$concepto['unidad'].'" ';
         $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬descripcion="'.$this->replaceSpecialChars($concepto['descripcion']).'" ';

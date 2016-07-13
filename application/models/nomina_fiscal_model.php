@@ -1436,6 +1436,13 @@ class nomina_fiscal_model extends CI_Model {
       ($empleado['info'][0]->apellido_paterno? ' '.$empleado['info'][0]->apellido_paterno :'').
       ($empleado['info'][0]->apellido_materno? ' '.$empleado['info'][0]->apellido_materno:'');
 
+      $metodoDePago = String::getMetodoPago('', 'Efectivo');
+      $NumCtaPago = 'No identificado';
+      if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '') {
+        $metodoDePago = String::getMetodoPago('', 'Transferencia');
+        $NumCtaPago = $empleado['info'][0]->cuenta_banco;
+      }
+
     // Array con los datos necesarios para generar la cadena original.
     $data = array(
       'id'                => $empresa['info']->id_empresa,
@@ -1453,8 +1460,8 @@ class nomina_fiscal_model extends CI_Model {
       'subTotal'          => 0, //total_importe
       'descuento'         => 0, //descuento
       'total'             => 0,
-      'metodoDePago'      => 'No identificado', // Tansferencia
-      'NumCtaPago'        => 'No identificado',
+      'metodoDePago'      => $metodoDePago, // Tansferencia
+      'NumCtaPago'        => $NumCtaPago,
 
       'rfc'               => $empleado['info'][0]->rfc,
       'nombre'            => $nombreEmpleado,
@@ -5936,7 +5943,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(86, $pdf->GetY()+5);
-      $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 0);
+      $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
       $cuenta_banco = substr($empleado->cuenta_banco, -4);
       $pdf->SetFont('helvetica','B', 9);
@@ -6350,7 +6357,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(86, $pdf->GetY()+5);
-      $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 0);
+      $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
       $cuenta_banco = substr($finiquitos->cuenta_banco, -4);
       $pdf->SetFont('helvetica','B', 9);
@@ -7765,7 +7772,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(86, $pdf->GetY()+5);
-      $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 0);
+      $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
       $cuenta_banco = substr($empleado->cuenta_banco, -4);
       $pdf->SetFont('helvetica','B', 9);
@@ -9223,7 +9230,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(86, $pdf->GetY()+5);
-      $pdf->Cell(78, 4, "Metodo de Pago: {$xml[0]['metodoDePago']}", 0, 0, 'L', 0);
+      $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
       $cuenta_banco = substr($empleado->cuenta_banco, -4);
       $pdf->SetFont('helvetica','B', 9);

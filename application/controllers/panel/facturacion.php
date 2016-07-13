@@ -1391,8 +1391,11 @@ class facturacion extends MY_Controller {
     }
 
     // cce:ComercioExterior:Receptor:NumRegIdTrib
-    if ($pais->patron_rfc != '' && isset($inputs['comercioExterior']['Receptor']['NumRegIdTrib']{0})) {
-      if (preg_match("/^{$pais->patron_rfc}$/u", $inputs['comercioExterior']['Receptor']['NumRegIdTrib']) !== 1) {
+    $patron_rfc = $pais->patron_rfc;
+    if ($patron_rfc == '')
+      $patron_rfc = '.{6,40}';
+    if ($patron_rfc != '' && isset($inputs['comercioExterior']['Receptor']['NumRegIdTrib']{0})) {
+      if (preg_match("/^{$patron_rfc}$/u", $inputs['comercioExterior']['Receptor']['NumRegIdTrib']) !== 1) {
         $this->form_validation->set_message('comercio_exterior_check', "El Num Reg Id Trib del receptor no es valido el formato.");
         return false;
       }
@@ -1402,13 +1405,6 @@ class facturacion extends MY_Controller {
     if (!isset($inputs['comercioExterior']['Destinatario']['NumRegIdTrib']{0}) && !isset($inputs['comercioExterior']['Destinatario']['Rfc']{0})) {
       $this->form_validation->set_message('comercio_exterior_check', "Debe existir el atributo Num Reg Id Trib o RFC del Destinatario.");
       return false;
-    }
-    // cce:ComercioExterior:Destinatario:NumRegIdTrib
-    if ($pais->patron_rfc != '' && isset($inputs['comercioExterior']['Destinatario']['NumRegIdTrib']{0})) {
-      if (preg_match("/^{$pais->patron_rfc}$/u", $inputs['comercioExterior']['Destinatario']['NumRegIdTrib']) !== 1) {
-        $this->form_validation->set_message('comercio_exterior_check', "El Num Reg Id Trib del destinatario no es valido el formato.");
-        return false;
-      }
     }
     // cce:ComercioExterior:Destinatario:Rfc
     if (isset($inputs['comercioExterior']['Destinatario']['Rfc']{0}) && $inputs['comercioExterior']['Destinatario']['Rfc'] != 'XAXX010101000'
@@ -1422,6 +1418,17 @@ class facturacion extends MY_Controller {
       if (!isset($pais->c_pais)) {
         $this->form_validation->set_message('comercio_exterior_check', "El campo país del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el país.");
         return false;
+      }
+
+      // cce:ComercioExterior:Destinatario:NumRegIdTrib
+      $patron_rfc = $pais->patron_rfc;
+      if ($patron_rfc == '')
+        $patron_rfc = '.{6,40}';
+      if ($patron_rfc != '' && isset($inputs['comercioExterior']['Destinatario']['NumRegIdTrib']{0})) {
+        if (preg_match("/^{$patron_rfc}$/u", $inputs['comercioExterior']['Destinatario']['NumRegIdTrib']) !== 1) {
+          $this->form_validation->set_message('comercio_exterior_check', "El Num Reg Id Trib del destinatario no es valido el formato.");
+          return false;
+        }
       }
 
       $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$pais->c_pais}'")->result();
@@ -1459,8 +1466,11 @@ class facturacion extends MY_Controller {
             $this->form_validation->set_message('comercio_exterior_check', "El campo codigo postal del destinatario tiene que ser un valor del catalogo, selecciona del catalogo el codigo postal.");
             return false;
           }
-        } elseif ($pais->c_pais != 'MEX' && $pais->patron_cp != '') {
-          if (preg_match("/^{$pais->patron_cp}$/u", $inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal']) !== 1) {
+        } elseif ($pais->c_pais != 'MEX') {
+          $patron_cp = $pais->patron_cp;
+          if ($patron_cp == '')
+            $patron_cp = '.{1,12}';
+          if (preg_match("/^{$patron_cp}$/u", $inputs['comercioExterior']['Destinatario']['Domicilio']['CodigoPostal']) !== 1) {
             $this->form_validation->set_message('comercio_exterior_check', "El formato del campo codigo postal del destinatario no es valido.");
             return false;
           }
@@ -1541,12 +1551,12 @@ class facturacion extends MY_Controller {
               $count_mercancias++;
             }
           }
-          if (isset($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) && $inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key] != 99) {
-            if (isset($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0}) && floatval($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]) > 0) {
-              $response = ['status' => false, 'msg' => "El Valor Unitario Aduana de la mercancia '{$no_ident}' no puede ser mayor que 0, ya que la Unidad Aduana es diferente de servicio."];
-              break;
-            }
-          }
+          // if (isset($inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key]{0}) && $inputs['comercioExterior']['Mercancias']['UnidadAduana'][$key] != 99) {
+          //   if (isset($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]{0}) && floatval($inputs['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key]) > 0) {
+          //     $response = ['status' => false, 'msg' => "El Valor Unitario Aduana de la mercancia '{$no_ident}' no puede ser mayor que 0, ya que la Unidad Aduana es diferente de servicio."];
+          //     break;
+          //   }
+          // }
 
           if (isset($inputs['comercioExterior']['Mercancias']['CantidadAduana'][$key]{0}))
           {
@@ -1594,7 +1604,6 @@ class facturacion extends MY_Controller {
       return preg_match("/[a-f0-9A-F]{8}-[a-f0-9A-F]{4}-[a-f0-9A-F]{4}-[a-f0-9A-F]{4}-[a-f0-9A-F]{12}|[A-Za-z0-9,#,+,%,(&) ]{6,40}/u", $value);
     return true;
   }
-
   public function validateTImporte($value)
   {
     if (trim($value) !== '') {

@@ -2,9 +2,10 @@
 
 class String{
 
-	public static function getMetodoPago($codigo)
+	public static function getMetodoPago($codigo='', $nombre='')
 	{
 		$codigo = (string)$codigo;
+		$nombre = (string)$nombre;
 		$metodosPagos = [
 	    '01' => 'Efectivo',
 	    '02' => 'Cheque',
@@ -27,7 +28,12 @@ class String{
 	    '99' => 'Otros'
 	  ];
 
-	  return isset($metodosPagos[$codigo])? $codigo.' - '.$metodosPagos[$codigo]: $codigo;
+	  if (isset($codigo{0})) {
+	  	return isset($metodosPagos[$codigo])? $codigo.' - '.$metodosPagos[$codigo]: $codigo;
+	  } elseif (isset($nombre{0})) {
+	  	$codigo = array_search($nombre, $metodosPagos);
+	  	return $codigo === false? $nombre: $codigo;
+	  }
 	}
 
 	/**

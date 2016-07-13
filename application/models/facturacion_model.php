@@ -124,7 +124,7 @@ class facturacion_model extends privilegios_model{
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
-                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2')
+                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', "u.nombre = fp.unidad and u.status = 't'", 'left')
@@ -215,6 +215,35 @@ class facturacion_model extends privilegios_model{
         }else
         { // Certificados 51 o 52
           $response['certificado'.$tipo->id_clasificacion] = $tipo;
+        }
+      }
+
+      // Comercio exterior
+      $comercioe = $this->db->query(
+        "SELECT id, id_factura, version, tipo_operacion, clave_pedimento, certificado_origen, num_certificado_origen,
+          numero_exportador_confiable, incoterm, subdivision, observaciones, \"tipocambio_USD\", \"total_USD\", emisor_curp,
+          receptor_numregidtrib, receptor_curp
+         FROM facturacion_ce
+         WHERE id_factura = {$idFactura}");
+      if ($comercioe->num_rows() > 0) {
+        $response['ce'] = $comercioe->row();
+
+        $response['ce']->destinatario = $this->db->query(
+          "SELECT numregidtrib, rfc, curp, nombre, calle, numero_exterior, numero_interior, colonia,
+            localidad, referencia, municipio, estado, pais, codigo_postal
+           FROM facturacion_ce_destinatario
+           WHERE comercio_exterior_id = {$response['ce']->id}")->row();
+
+        $response['ce']->mercancias = $this->db->query(
+          "SELECT row, noidentificacion, fraccionar_ancelaria, cantidad_aduana, unidad_aduana, valor_unitario_aduana, valor_dolares
+           FROM facturacion_ce_mercancias
+           WHERE comercio_exterior_id = {$response['ce']->id}")->result();
+
+        foreach ($response['ce']->mercancias as $key => $mercancia) {
+          $response['ce']->mercancias[$key]->esp = $this->db->query(
+            "SELECT row, row2, marca, modelo, submodelo, numeroserie
+             FROM facturacion_ce_mercancias_esp
+             WHERE comercio_exterior_id = {$response['ce']->id} AND row = {$mercancia->row}")->result();
         }
       }
 
@@ -440,8 +469,8 @@ class facturacion_model extends privilegios_model{
         'tipocambio_USD'              => isset($inputce['tipocambio_USD'])? floatval($inputce['tipocambio_USD']) : 0,
         'total_USD'                   => isset($inputce['total_USD'])? floatval($inputce['total_USD']) : 0,
         'emisor_curp'                 => isset($inputce['Emisor']['Curp'])? $inputce['Emisor']['Curp'] : '',
-        'receptor_numregidtrib'       => isset($inputce['Receptor']['Curp'])? $inputce['Receptor']['Curp'] : '',
-        'receptor_curp'               => isset($inputce['Receptor']['NumRegIdTrib'])? $inputce['Receptor']['NumRegIdTrib'] : '',
+        'receptor_curp'               => isset($inputce['Receptor']['Curp'])? $inputce['Receptor']['Curp'] : '',
+        'receptor_numregidtrib'       => isset($inputce['Receptor']['NumRegIdTrib'])? $inputce['Receptor']['NumRegIdTrib'] : '',
         'created_at'                  => date("Y-m-d H:i:s"),
         'updated_at'                  => date("Y-m-d H:i:s")
         );
@@ -3638,6 +3667,164 @@ class facturacion_model extends privilegios_model{
     }else
       $pdf->SetXY(10, $pdf->GetY() + 5);
 
+
+    ////////////////////////
+    // Comercio Exterior //
+    ///////////////////////
+    if (isset($factura['ce'])) {
+      $pdf->SetFillColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 4, "Comercio Exterior:", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','', 8);
+
+      $pdf->SetXY(0, $pdf->GetY()+4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(35, 73, 35, 73));
+      $pdf->Row(array(
+            'Tipo Operacion', $factura['ce']->tipo_operacion,
+            'Incoterm', $factura['ce']->incoterm
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Clave de pedimento', $factura['ce']->clave_pedimento,
+            'Subdivision', $factura['ce']->subdivision
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Cer de origen', $factura['ce']->certificado_origen,
+            'Observaciones', $factura['ce']->observaciones
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            '# cer de origen', $factura['ce']->num_certificado_origen,
+            'Tipo Cambio USD', $factura['ce']->tipocambio_USD
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            '# Expt confiable', $factura['ce']->numero_exportador_confiable,
+            'Total USD', $factura['ce']->total_USD
+          ), false, true, null, 2, 1);
+
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Emisor CURP', $factura['ce']->emisor_curp,
+            'Receptor Num Id Trib ', $factura['ce']->receptor_numregidtrib
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            '', '',
+            'Receptor CURP', $factura['ce']->receptor_curp
+          ), false, true, null, 2, 1);
+
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->Cell(216, 4, "Destinatario", 0, 0, 'L', 1);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 27, 10, 27, 10, 31, 17, 77));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Num Id Trib', $factura['ce']->destinatario->numregidtrib,
+            'RFC', $factura['ce']->destinatario->rfc,
+            'CURP', $factura['ce']->destinatario->curp,
+            'Nombre', $factura['ce']->destinatario->nombre,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Calle', $factura['ce']->destinatario->calle,
+            'No. Exterior', $factura['ce']->destinatario->numero_exterior,
+            'No. Interior', $factura['ce']->destinatario->numero_interior,
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Colonia', $factura['ce']->destinatario->colonia,
+            'Localidad', $factura['ce']->destinatario->localidad,
+            'Codigo Postal', $factura['ce']->destinatario->codigo_postal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Municipio', $factura['ce']->destinatario->municipio,
+            'Estado', $factura['ce']->destinatario->estado,
+            'Pais', $factura['ce']->destinatario->pais,
+            'Referencia', $factura['ce']->destinatario->referencia,
+          ), false, true, null, 2, 1);
+
+      $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
+      $aligns2 = array('C', 'C', 'L', 'C', 'R', 'R');
+      $aligns3 = array('L', 'L', 'L', 'L');
+      $widths = array(36, 36, 36, 36, 36, 36);
+      $widths3 = array(50, 50, 50, 50);
+      $header = array('No Ident', 'Frac Aran', 'Cantidad', 'Unidad', 'Valor Unitario', 'Valor Dolares');
+      $pdf->setY($pdf->GetY() + 1);
+      $hay_prod_certificados = false;
+      foreach($factura['ce']->mercancias as $key => $item)
+      {
+        $band_head = false;
+
+        if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+        {
+          if($key > 0) $pdf->AddPage();
+
+          $pdf->SetFont('Arial', 'B', 8);
+          $pdf->SetTextColor(0, 0, 0);
+          $pdf->SetFillColor(242, 242, 242);
+          $pdf->SetX(0);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true, true, null, 2, 1);
+        }
+
+        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetX(0);
+        $pdf->SetAligns($aligns2);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+          $item->noidentificacion,
+          $item->fraccionar_ancelaria,
+          $item->cantidad_aduana,
+          $item->unidad_aduana,
+          String::formatoNumero($item->valor_unitario_aduana, 2, '$', false),
+          String::formatoNumero($item->valor_dolares, 2, '$', false),
+        ), false, true, null, 2, 1);
+
+        if (count($item->esp) > 0) {
+          foreach($item->esp as $key2 => $esp)
+          {
+            if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+            {
+              $pdf->AddPage();
+            }
+
+            $pdf->SetFont('Arial', '', 8);
+            $pdf->SetTextColor(0,0,0);
+
+            $pdf->SetX(0);
+            $pdf->SetAligns($aligns3);
+            $pdf->SetWidths($widths3);
+            $pdf->Row(array(
+              'Marca: '.$esp->marca,
+              'Modelo: '.$esp->modelo,
+              'Sub Modelo: '.$esp->submodelo,
+              'Numero Serie: '.$esp->numeroserie,
+            ), false, true, null, 2, 1);
+          }
+        }
+      }
+    }
 
 
     ////////////////////
