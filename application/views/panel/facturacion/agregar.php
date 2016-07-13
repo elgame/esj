@@ -272,26 +272,9 @@
                         <?php
                           $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
                          ?>
-
-                        <option value="98" <?php echo set_select('dmetodo_pago', '98', $metodo === '98' ? true : false); ?>>NA</option>
-                        <option value="01" <?php echo set_select('dmetodo_pago', '01', $metodo === '01' ? true : false); ?>>Efectivo</option>
-                        <option value="02" <?php echo set_select('dmetodo_pago', '02', $metodo === '02' ? true : false); ?>>Cheque</option>
-                        <option value="03" <?php echo set_select('dmetodo_pago', '03', $metodo === '03' ? true : false); ?>>Transferencia</option>
-                        <option value="04" <?php echo set_select('dmetodo_pago', '04', $metodo === '04' ? true : false); ?>>Tarjetas de crédito</option>
-                        <option value="05" <?php echo set_select('dmetodo_pago', '05', $metodo === '05' ? true : false); ?>>Monederos electrónicos</option>
-                        <option value="06" <?php echo set_select('dmetodo_pago', '06', $metodo === '06' ? true : false); ?>>Dinero electrónico</option>
-                        <option value="07" <?php echo set_select('dmetodo_pago', '07', $metodo === '07' ? true : false); ?>>Tarjetas digitales</option>
-                        <option value="08" <?php echo set_select('dmetodo_pago', '08', $metodo === '08' ? true : false); ?>>Vales de despensa</option>
-                        <option value="09" <?php echo set_select('dmetodo_pago', '09', $metodo === '09' ? true : false); ?>>Bienes</option>
-                        <option value="10" <?php echo set_select('dmetodo_pago', '10', $metodo === '10' ? true : false); ?>>Servicio</option>
-                        <option value="11" <?php echo set_select('dmetodo_pago', '11', $metodo === '11' ? true : false); ?>>Por cuenta de tercero</option>
-                        <option value="12" <?php echo set_select('dmetodo_pago', '12', $metodo === '12' ? true : false); ?>>Dación en pago</option>
-                        <option value="13" <?php echo set_select('dmetodo_pago', '13', $metodo === '13' ? true : false); ?>>Pago por subrogación</option>
-                        <option value="14" <?php echo set_select('dmetodo_pago', '14', $metodo === '14' ? true : false); ?>>Pago por consignación</option>
-                        <option value="15" <?php echo set_select('dmetodo_pago', '15', $metodo === '15' ? true : false); ?>>Condonación</option>
-                        <option value="16" <?php echo set_select('dmetodo_pago', '16', $metodo === '16' ? true : false); ?>>Cancelación</option>
-                        <option value="17" <?php echo set_select('dmetodo_pago', '17', $metodo === '17' ? true : false); ?>>Compensación</option>
-                        <option value="99" <?php echo set_select('dmetodo_pago', '99', $metodo === '99' ? true : false); ?>>Otro</option>
+                         <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
+                          <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $mtp ?></option>
+                        <?php } ?>
                       </select>
                     </div>
                   </div>

@@ -197,13 +197,23 @@ class bascula_model extends CI_Model {
         $data2['id_productor'] = empty($_POST['pid_productor']) ? null : $_POST['pid_productor'];
 
         $info_boleta = $this->getBasculaInfo($idb);
-        if($info_boleta['info'][0]->fecha_tara != '' && strtotime(substr($info_boleta['info'][0]->fecha_tara, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
-          $data2['fecha_bruto'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_bruto, 11, 8);
-          $data2['fecha_tara'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_tara, 11, 8);
-          // $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
-          // $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
-        }else
-          $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+        if ($_POST['ptipo'] === 'en')
+        {
+          if($info_boleta['info'][0]->fecha_tara != '' && strtotime(substr($info_boleta['info'][0]->fecha_tara, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
+            $data2['fecha_bruto'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_bruto, 11, 8);
+            $data2['fecha_tara'] = substr($_POST['pfecha'], 0, 10).' '.substr($info_boleta['info'][0]->fecha_tara, 11, 8);
+            // $data2['fecha_bruto'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+            // $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+          }else
+            $data2['fecha_tara'] = str_replace('T', ' ', $_POST['pfecha'].':'.date('s'));
+        } else
+        {
+          if(strtotime(substr($info_boleta['info'][0]->fecha_bruto, 0, 16)) != strtotime(str_replace('T', ' ', $_POST['pfecha'])) ){
+            $data2['fecha_bruto'] = $_POST['pfecha'].':'.date('s');
+            $data2['fecha_tara'] = $_POST['pfecha'].':'.date('s');
+          } else
+            $data2['fecha_bruto'] = $_POST['pfecha'].':'.date('s');
+        }
 
         $data2['kilos_bruto'] = $this->input->post('pkilos_brutos');
         $data2['kilos_tara'] = $this->input->post('pkilos_tara');

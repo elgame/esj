@@ -271,12 +271,16 @@ class bascula extends MY_Controller {
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
 
         $params['next_folio'] = $info['info'][0]->folio;
-        if($info['info'][0]->fecha_tara != '')
-          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
-        if($info['info'][0]->fecha_bruto != '')
-          $params['fecha']      =  substr($info['info'][0]->fecha_bruto, 0, 10).'T'.date("H:i");
-        else
-          $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i"), 0, 16));
+        if ($info['info'][0]->tipo == 'en') {
+          if($info['info'][0]->fecha_tara != '')
+            $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_tara, 0, 16));
+          if($info['info'][0]->fecha_bruto != '')
+            $params['fecha']      =  substr($info['info'][0]->fecha_bruto, 0, 10).'T'.date("H:i");
+          else
+            $params['fecha']      =  str_replace(' ', 'T', substr(date("Y-m-d H:i"), 0, 16));
+        } else {
+          $params['fecha']      =  str_replace(' ', 'T', substr($info['info'][0]->fecha_bruto, 0, 16));
+        }
 
         $params['fecha_pago']   = str_replace(' ', 'T', substr($info['info'][0]->fecha_pago, 0, 16) );
 

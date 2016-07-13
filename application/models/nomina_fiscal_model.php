@@ -1439,7 +1439,7 @@ class nomina_fiscal_model extends CI_Model {
       $metodoDePago = String::getMetodoPago('', 'Efectivo');
       $NumCtaPago = 'No identificado';
       if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '') {
-        $metodoDePago = String::getMetodoPago('', 'Transferencia');
+        $metodoDePago = String::getMetodoPago('', 'Transferencia electrónica de fondos');
         $NumCtaPago = $empleado['info'][0]->cuenta_banco;
       }
 

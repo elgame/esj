@@ -179,25 +179,9 @@
                     <label class="control-label" for="fmetodo_pago">Metodo de Pago </label>
                     <div class="controls">
                       <select name="fmetodo_pago" class="span9" id="fmetodo_pago">
-                      	<option value="98">NA</option>
-		                    <option value="01">Efectivo</option>
-		                    <option value="02">Cheque</option>
-		                    <option value="03">Transferencia</option>
-		                    <option value="04">Tarjetas de crédito</option>
-		                    <option value="05">Monederos electrónicos</option>
-		                    <option value="06">Dinero electrónico</option>
-		                    <option value="07">Tarjetas digitales</option>
-		                    <option value="08">Vales de despensa</option>
-		                    <option value="09">Bienes</option>
-		                    <option value="10">Servicio</option>
-		                    <option value="11">Por cuenta de tercero</option>
-		                    <option value="12">Dación en pago</option>
-		                    <option value="13">Pago por subrogación</option>
-		                    <option value="14">Pago por consignación</option>
-		                    <option value="15">Condonación</option>
-		                    <option value="16">Cancelación</option>
-		                    <option value="17">Compensación</option>
-		                    <option value="99">Otro</option>
+                      <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
+                      	<option value="<?php echo $key ?>"><?php echo $mtp ?></option>
+                      <?php } ?>
                       </select>
                     </div>
                   </div>

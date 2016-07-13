@@ -54,6 +54,9 @@ $(function(){
         $("#dcliente").css("background-color", "#B0FFB0");
 
         $('#dplazo_credito').val(ui.item.item.dias_credito);
+
+        $('#dmetodo_pago').val(ui.item.item.metodo_pago);
+        $('#dmetodo_pago_digitos').val(ui.item.item.ultimos_digitos);
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){

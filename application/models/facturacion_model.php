@@ -4041,7 +4041,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetY($yaux1);
     }
 
-    if($pdf->GetY() + 40 >= $pdf->limiteY) //salta de pagina si exede el max
+    if($pdf->GetY() + 50 >= $pdf->limiteY) //salta de pagina si exede el max
       $pdf->AddPage();
     $pdf->SetY($pdf->GetY()+3);
     $pdf->SetAligns(array('C'));
@@ -4051,6 +4051,12 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFounts(array($pdf->fount_txt), array(-1));
     $pdf->Row2(array('COMO CHOFER DEL CAMION ARRIBA DESCRITO, MANIFIESTO EN EL PRESENTE DOCUMENTO, QUE EL (LOS) PRODUCTO(S) TRASPORTADO FUE CARGADO EN MI PRESENCIA Y VERIFIQUE QUE VA LIBRE DE CUALQUIER TIPO DE ESTUPEFACIENTE (DROGAS) POR LO QUE EXIMO DE TODA RESPONSABILIDAD AL (LOS) CONTRATANTE(S) '.$factura['info']->empresa->nombre_fiscal.', Y AL (LOS) DESTINATARIO(S) DE CUALQUIER MERCANCIA NO DESCRITA EN EL PRESENTE EMBARQUE, FACTURA O PEDIDO., TENIENDO PROHIBIDO LLEVAR Y/O TRASPORTAR OTRA MERCANCIA Y SI POR ALGUNA CIRCUNSTANCIA LO HAGO, ASUMO LAS CONSECUENCIAS DERIVADAS DE LA VIOLACION A ESTAS DISPOSICIONES.'."\n".
                       'ACEPTO TENER REPERCUCIONES EN EL PAGO DEL FLETE SI NO ENTREGO LA MERCANCIA CONFORME FECHA Y HORA DE ENTREGA Y TAMBIEN SI NO CUMPLO CON LA TEMPERATURA INDICADA, POR MOTIVOS QUE SE RELACIONEN DIRECTAMENTE CON EL MAL ESTADO MECANICO DE MI UNIDAD (CAMION ARRIBA DESCRITO), SE  ME  DESCONTARA  UN  20%  (VEINTE PORCIENTO) DEL  VALOR  DEL  FLETE,  ASI  COMO  CUALQUIER DIFERENCIA O ANORMALIDAD EN LA ENTREGA DE LA MERCANCIA TRASPORTADA.'), false, false, 30);
+    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-2.3);
+    $pdf->Rect($pdf->GetX()+20, $pdf->GetY()-2, 23, 28, 'D');
+    $pdf->Text($pdf->GetX()+21, $pdf->GetY()+0.5, 'HUELLA DEL CHOFER');
+
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+    $pdf->SetY($pdf->GetY()+3);
     $pdf->SetAligns(array('C'));
     $pdf->Row2(array('______________________________________________'), false, false);
     $pdf->Row2(array( (isset($data_chofer->nombre{0}) ? $data_chofer->nombre : 'FIRMA') ), false, false);
