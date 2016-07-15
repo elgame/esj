@@ -16,6 +16,7 @@ $(function(){
   autocompleteCalidadLive();
   autocompleteTamanioLive();
   closeGroupMoreOut();
+  extrasProductosEspeciales();
 
   // ComercioExterior
   // Mercancias
@@ -96,6 +97,89 @@ function autocompleteTamanioLive () {
     });
   });
 
+
+}
+
+/****** Supervisor, certificados, etc  ********/
+function extrasProductosEspeciales() {
+
+  $("#btn_supcarga_add").click(function(event) {
+    var $this = $(this),
+      $modal = $this.parents("#modal-supcarga"),
+      grup = $modal.find('.modal-body .grup_datos:first').clone();
+
+    var prov = grup.find('label[for="pproveedor_supcarga"]');
+    prov.append('<i class="icon-remove"></i> ');
+    grup.find('#pproveedor_supcarga').val('').css("background-color", "inherit").one('focus', setAutocompleteProveedores);
+    grup.find('#supcarga_id_proveedor').val('');
+    grup.find('#supcarga_numero').val('');
+    grup.find('#supcarga_bultos').val('');
+    grup.find('#supcarga_num_operacion').val('');
+
+    $modal.find('.modal-body').append(grup);
+
+    prov.find('i.icon-remove').click(function(event) {
+      grup.remove();
+    });
+  });
+
+  $("#btn_seguro_add").click(function(event) {
+    var $this = $(this),
+      $modal = $this.parents("#modal-seguro"),
+      grup = $modal.find('.modal-body .grup_datos:first').clone();
+
+    var prov = grup.find('label[for="pproveedor_seguro"]');
+    prov.append('<i class="icon-remove"></i> ');
+    grup.find('#pproveedor_seguro').val('').css("background-color", "inherit").one('focus', setAutocompleteProveedores);
+    grup.find('#seg_id_proveedor').val('');
+    grup.find('#seg_poliza').val('');
+
+    $modal.find('.modal-body').append(grup);
+
+    prov.find('i.icon-remove').click(function(event) {
+      grup.remove();
+    });
+  });
+
+  $("#btn_certificado51_add").click(function(event) {
+    var $this = $(this),
+      $modal = $this.parents("#modal-certificado51"),
+      grup = $modal.find('.modal-body .grup_datos:first').clone();
+
+    var prov = grup.find('label[for="pproveedor_certificado51"]');
+    prov.append('<i class="icon-remove"></i> ');
+    grup.find('#pproveedor_certificado51').val('').css("background-color", "inherit").one('focus', setAutocompleteProveedores);
+    grup.find('#cert_id_proveedor51').val('');
+    grup.find('#cert_certificado51').val('');
+    grup.find('#cert_bultos51').val('');
+    grup.find('#cert_num_operacion51').val('');
+
+    $modal.find('.modal-body').append(grup);
+
+    prov.find('i.icon-remove').click(function(event) {
+      grup.remove();
+    });
+  });
+
+  $("#btn_certificado52_add").click(function(event) {
+    var $this = $(this),
+      $modal = $this.parents("#modal-certificado52"),
+      grup = $modal.find('.modal-body .grup_datos:first').clone();
+
+    var prov = grup.find('label[for="pproveedor_certificado52"]');
+    prov.append('<i class="icon-remove"></i> ');
+    grup.find('#pproveedor_certificado52').val('').css("background-color", "inherit").one('focus', setAutocompleteProveedores);
+    grup.find('#cert_id_proveedor52').val('');
+    grup.find('#cert_certificado52').val('');
+    grup.find('#cert_bultos52').val('');
+    grup.find('#cert_num_operacion52').val('');
+
+    $modal.find('.modal-body').append(grup);
+
+    prov.find('i.icon-remove').click(function(event) {
+      grup.remove();
+    });
+  });
 
 }
 

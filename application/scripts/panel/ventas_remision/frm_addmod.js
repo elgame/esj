@@ -1101,7 +1101,21 @@ var loadModalSegCert = function (idClasificacion) {
 
 // Autocomplete Proveedor
 var autocompleteProveedores = function () {
-  $("#pproveedor_seguro, #pproveedor_certificado51, #pproveedor_certificado52, #pproveedor_supcarga").autocomplete({
+  $('#form input.pproveedor_seguro').each(function () {
+    $(this).one('focus', setAutocompleteProveedores);
+  })
+  $('#form input.pproveedor_certificado51').each(function () {
+    $(this).one('focus', setAutocompleteProveedores);
+  })
+  $('#form input.pproveedor_certificado52').each(function () {
+    $(this).one('focus', setAutocompleteProveedores);
+  })
+  $('#form input.pproveedor_supcarga').each(function () {
+    $(this).one('focus', setAutocompleteProveedores);
+  })
+};
+var setAutocompleteProveedores = function (event) {
+  $(this).autocomplete({
     source: function(request, response) {
       var params = {term : request.term};
       if(parseInt($("#did_empresa").val(), 10) > 0)
@@ -1119,28 +1133,30 @@ var autocompleteProveedores = function () {
     selectFirst: true,
     select: function( event, ui ) {
       var $this = $(this);
-      $this.val(ui.item.label).css({'background-color': '#99FF99'});
+      $this.val(ui.item.label).css({'background-color': '#99FF99'}),
+      grup_datos = $this.parents('.grup_datos');
 
       if ($this[0].id === 'pproveedor_seguro') {
-        $("#seg_id_proveedor").val(ui.item.id).trigger('keyup');
+        grup_datos.find("#seg_id_proveedor").val(ui.item.id).trigger('keyup');
       }else if ($this[0].id === 'pproveedor_supcarga') {
-        $("#supcarga_id_proveedor").val(ui.item.id).trigger('keyup');
+        grup_datos.find("#supcarga_id_proveedor").val(ui.item.id).trigger('keyup');
       } else {
-        $('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val(ui.item.id).trigger('keyup');
+        grup_datos.find('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val(ui.item.id).trigger('keyup');
       }
     }
   }).keydown(function(e){
     if (e.which === 8) {
-      var $this = $(this);
+      var $this = $(this),
+      grup_datos = $this.parents('.grup_datos');
 
       $this.css({'background-color': '#FFD9B3'});
 
       if ($this[0].id === 'pproveedor_seguro') {
-        $('#seg_id_proveedor').val('');
+        grup_datos.find('#seg_id_proveedor').val('');
       }else if ($this[0].id === 'pproveedor_supcarga') {
-        $("#supcarga_id_proveedor").val(ui.item.id).trigger('keyup');
+        grup_datos.find("#supcarga_id_proveedor").val(ui.item.id).trigger('keyup');
       } else {
-        $('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val('');
+        grup_datos.find('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val('');
       }
     }
   });

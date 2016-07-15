@@ -141,6 +141,9 @@ $(function(){
 
       if (priv_modif_kilosbt == 'true') {
         $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", '');
+      } else {
+        $('#pkilos_brutos').prop("readonly", '');
         $('#pkilos_tara').prop("readonly", 'readonly');
       }
     } else {
@@ -150,6 +153,9 @@ $(function(){
       $("#pproductor").attr('data-next2', 'pkilos_tara');
 
       if (priv_modif_kilosbt == 'true') {
+        $('#pkilos_brutos').prop("readonly", '');
+        $('#pkilos_tara').prop("readonly", '');
+      } else {
         $('#pkilos_brutos').prop("readonly", 'readonly');
         $('#pkilos_tara').prop("readonly", '');
       }
