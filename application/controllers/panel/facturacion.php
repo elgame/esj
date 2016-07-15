@@ -850,10 +850,10 @@ class facturacion extends MY_Controller {
       'rules'   => ''
     );
 
-    if (isset($this->input->post('comercioExterior')['clave_pedimento']) ||
-      isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-      isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-      isset($this->input->post('comercioExterior')['incoterm']) ) {
+    if (!empty($this->input->post('comercioExterior')['clave_pedimento']) ||
+      !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+      !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+      !empty($this->input->post('comercioExterior')['incoterm']) ) {
       array_push($rules,
           array(
             'field'   => 'comercioExterior[tipo_operacion]',
