@@ -386,10 +386,10 @@ class facturacion_model extends privilegios_model{
           'totalImpuestosTrasladados' => 0
         );
 
-        if (isset($this->input->post('comercioExterior')['clave_pedimento']) ||
-            isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-            isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-            isset($this->input->post('comercioExterior')['incoterm']) ) {
+        if (!empty($this->input->post('comercioExterior')['clave_pedimento']) ||
+            !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+            !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+            !empty($this->input->post('comercioExterior')['incoterm']) ) {
           $data['comercioExterior'] = $this->input->post('comercioExterior');
         }
 
@@ -803,10 +803,10 @@ class facturacion_model extends privilegios_model{
       $this->db->insert('facturacion_remision_hist', array('id_remision' => $_POST['id_nr'], 'id_factura' => $idFactura));
     }
 
-    if (isset($this->input->post('comercioExterior')['clave_pedimento']) ||
-        isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-        isset($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-        isset($this->input->post('comercioExterior')['incoterm']) ) {
+    if (!empty($this->input->post('comercioExterior')['clave_pedimento']) ||
+        !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+        !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
+        !empty($this->input->post('comercioExterior')['incoterm']) ) {
       $this->addComercioExterior($idFactura, $borrador);
     }
 
