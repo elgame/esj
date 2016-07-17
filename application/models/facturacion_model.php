@@ -208,13 +208,13 @@ class facturacion_model extends privilegios_model{
       {
         if ($tipo->id_clasificacion == 49)
         {
-          $response['seguro'] = $tipo;
+          $response['seguro'][] = $tipo;
         } elseif ($tipo->id_clasificacion == 53)
         {
-          $response['supcarga'] = $tipo;
+          $response['supcarga'][] = $tipo;
         }else
         { // Certificados 51 o 52
-          $response['certificado'.$tipo->id_clasificacion] = $tipo;
+          $response['certificado'.$tipo->id_clasificacion][] = $tipo;
         }
       }
 
@@ -642,6 +642,8 @@ class facturacion_model extends privilegios_model{
     $traslado16 = 0; // Total de traslado 16%
 
     $dataSeguroCerti = array();
+    $nrow_seg_cer = 0;
+    $seg_cer_entro = array();
     $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
 
     // Ciclo para obtener los impuestos traslados, tambien construye
@@ -708,43 +710,61 @@ class facturacion_model extends privilegios_model{
           'no_identificacion'     => $_POST['no_identificacion'][$key],
         );
 
-        if ($_POST['prod_did_prod'][$key] === '49')
+        if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
         {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['seg_id_proveedor'],
-            'pol_seg'          => $_POST['seg_poliza'],
-            'folio'            => $serieFolio,
-            'bultos'           => 0,
-            'certificado'      => null,
-          );
+          foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idFactura,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'nrow'             => $nrow_seg_cer,
+              'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
+              'pol_seg'          => $_POST['seg_poliza'][$keysecer],
+              'folio'            => $serieFolio,
+              'bultos'           => 0,
+              'certificado'      => null,
+              'num_operacion'    => null,
+            );
+            ++$nrow_seg_cer;
+          }
+          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
 
-        if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+        if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
         {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
-            'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
-            'folio'            => $serieFolio,
-            'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
-            'pol_seg'          => null,
-          );
+          foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idFactura,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'nrow'             => $nrow_seg_cer,
+              'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
+              'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+              'folio'            => $serieFolio,
+              'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
+              'pol_seg'          => null,
+              'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
+            );
+            ++$nrow_seg_cer;
+          }
+          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
 
-        if ($_POST['prod_did_prod'][$key] === '53')
+        if ($_POST['prod_did_prod'][$key] === '53' && !isset($seg_cer_entro['53']))
         {
-          $dataSeguroCerti[] = array(
-            'id_factura'       => $idFactura,
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'id_proveedor'     => $_POST['supcarga_id_proveedor'],
-            'certificado'      => $_POST['supcarga_numero'],
-            'folio'            => $serieFolio,
-            'bultos'           => $_POST['supcarga_bultos'],
-            'pol_seg'          => null,
-          );
+          foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
+            $dataSeguroCerti[] = array(
+              'id_factura'       => $idFactura,
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'nrow'             => $nrow_seg_cer,
+              'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
+              'certificado'      => $_POST['supcarga_numero'][$keysecer],
+              'folio'            => $serieFolio,
+              'bultos'           => $_POST['supcarga_bultos'][$keysecer],
+              'pol_seg'          => null,
+              'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+            );
+            ++$nrow_seg_cer;
+          }
+          $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
         }
       }
     }
@@ -1641,6 +1661,8 @@ class facturacion_model extends privilegios_model{
       $lastPalletId = 0;
 
       $dataSeguroCerti = array();
+      $nrow_seg_cer = 0;
+      $seg_cer_entro = array();
       $serieFolio = $datosFactura['serie'].$datosFactura['folio'];
 
       foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
@@ -1672,43 +1694,61 @@ class facturacion_model extends privilegios_model{
             'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
           );
 
-          if ($_POST['prod_did_prod'][$key] === '49')
+          if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
           {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idBorrador,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'id_proveedor'     => $_POST['seg_id_proveedor'],
-              'pol_seg'          => $_POST['seg_poliza'],
-              'folio'            => $serieFolio,
-              'bultos'           => 0,
-              'certificado'      => null,
-            );
+            foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idBorrador,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['seg_id_proveedor'][$keysecer],
+                'pol_seg'          => $_POST['seg_poliza'][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => 0,
+                'certificado'      => null,
+                'num_operacion'    => null,
+              );
+              ++$nrow_seg_cer;
+            }
+            $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
 
-          if ($_POST['prod_did_prod'][$key] === '51' || $_POST['prod_did_prod'][$key] === '52')
+          if (($_POST['prod_did_prod'][$key] === '51' && !isset($seg_cer_entro['51'])) || ($_POST['prod_did_prod'][$key] === '52' && !isset($seg_cer_entro['52'])))
           {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idBorrador,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]],
-              'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]],
-              'folio'            => $serieFolio,
-              'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]],
-              'pol_seg'          => null,
-            );
+            foreach ($_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]] as $keysecer => $data_secer) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idBorrador,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['cert_id_proveedor'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'certificado'      => $_POST['cert_certificado'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => $_POST['cert_bultos'.$_POST['prod_did_prod'][$key]][$keysecer],
+                'pol_seg'          => null,
+                'num_operacion'    => $_POST['cert_num_operacion'.$_POST['prod_did_prod'][$key]][$keysecer],
+              );
+              ++$nrow_seg_cer;
+            }
+            $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
 
-          if ($_POST['prod_did_prod'][$key] === '53')
+          if ($_POST['prod_did_prod'][$key] === '53' && !isset($seg_cer_entro['53']))
           {
-            $dataSeguroCerti[] = array(
-              'id_factura'       => $idBorrador,
-              'id_clasificacion' => $_POST['prod_did_prod'][$key],
-              'id_proveedor'     => $_POST['supcarga_id_proveedor'],
-              'certificado'      => $_POST['supcarga_numero'],
-              'folio'            => $serieFolio,
-              'bultos'           => $_POST['supcarga_bultos'],
-              'pol_seg'          => null,
-            );
+            foreach ($_POST['seg_id_proveedor'] as $keysecer => $data_secer) {
+              $dataSeguroCerti[] = array(
+                'id_factura'       => $idBorrador,
+                'id_clasificacion' => $_POST['prod_did_prod'][$key],
+                'nrow'             => $nrow_seg_cer,
+                'id_proveedor'     => $_POST['supcarga_id_proveedor'][$keysecer],
+                'certificado'      => $_POST['supcarga_numero'][$keysecer],
+                'folio'            => $serieFolio,
+                'bultos'           => $_POST['supcarga_bultos'][$keysecer],
+                'pol_seg'          => null,
+                'num_operacion'    => $_POST['supcarga_num_operacion'][$keysecer],
+              );
+              ++$nrow_seg_cer;
+            }
+            $seg_cer_entro[$_POST['prod_did_prod'][$key]] = true;
           }
         }
       }

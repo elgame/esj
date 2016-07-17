@@ -1,7 +1,8 @@
 ☐
-☐ Reporte de cuentas por pagar en proveedor UNION GENERAL poner el numero de certificado que se pone en los datos de la factura (certificado de origian)
-☐ En supervisor de carga en facturacion agregar un campo para capturar numero de operacion y ponerlo en el reporte de cuentas por pagar
-☐ En filtrosanitario agregar el numero de operacion y capturar 2 veses esos datos para que pongan los 2 proveedores y certificados
+✔ .51h Reporte de cuentas por pagar en los productos facturados poner el numero de certificado o poliza de seguro @done (16-07-17 13:51)
+  que se pone en los datos de la factura y el numero de operacion
+✔ 2.16h En supervisor de carga en facturacion y notas de venta agregar un campo para capturar numero de operacion y  @done (16-07-17 12:39)
+  en filtrosanitario agregar el numero de operacion y capturar 2 veses esos datos para que pongan los 2 proveedores y certificados
 ✔ En notas de venta no carga los datos de metodo de pago y digitos de cuentas al seleccionar el cliente @done (16-07-13 17:57)
 ✔ En bascula no pone bien la fecha de bruto y tara de salida @done (16-07-13 15:21)
 

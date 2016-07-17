@@ -590,10 +590,10 @@ class cuentas_pagar_model extends privilegios_model{
 	      $pdf->SetAligns(array('L'));
 	      $pdf->SetWidths(array(205));
 	      $pdf->Row(array('Productos Facturados'), false, false);
-	      $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-	      $pdf->SetWidths(array(23, 23, 120, 30));
+	      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'R'));
+	      $pdf->SetWidths(array(18, 23, 80, 25, 25, 25));
 	      $pdf->SetFont('Arial','B', 8);
-	      $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Importe'), false);
+	      $pdf->Row(array('Fecha', 'Folio', 'Cliente', 'Pol/Cer', '# operacion', 'Importe'), false);
 
 	      $pdf->SetFont('Arial','', 8);
 	      $aux_clasif = 0;
@@ -604,7 +604,7 @@ class cuentas_pagar_model extends privilegios_model{
 	        {
 	          if($key > 0){
 	            $pdf->SetAligns(array('R', 'R'));
-	            $pdf->SetWidths(array(166, 30));
+	            $pdf->SetWidths(array(171, 25));
 	            $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
 	          }
 
@@ -614,12 +614,26 @@ class cuentas_pagar_model extends privilegios_model{
 	          $aux_clasif = $value->id_clasificacion;
 	          $total_producto = 0;
 	        }
-	        $pdf->SetAligns(array('L', 'L', 'L', 'R'));
-	        $pdf->SetWidths(array(23, 23, 120, 30));
+
+	        $otro_dato = '';
+	        if($value->id_clasificacion == '49'){
+	          $otro_dato = $value->pol_seg;
+	        }
+	        elseif(($value->id_clasificacion == '51' || $value->id_clasificacion == '52')){
+	          $otro_dato = $value->certificado;
+	        }
+	        elseif($value->id_clasificacion == '53'){
+	          $otro_dato = $value->certificado;
+	        }
+
+	        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'R'));
+	        $pdf->SetWidths(array(18, 23, 80, 25, 25, 25));
 	        $pdf->Row(array(
 	          $value->fecha,
 	          $value->serie.$value->folio,
 	          $value->cliente,
+	          $otro_dato,
+	          $value->num_operacion,
 	          String::formatoNumero($value->importe, 2, '$', false),
 	          ), false);
 	        $total_producto += $value->importe;
@@ -627,7 +641,7 @@ class cuentas_pagar_model extends privilegios_model{
 	        $iva_general += $value->iva;
 	      }
 	      $pdf->SetAligns(array('R', 'R'));
-	      $pdf->SetWidths(array(166, 30));
+	      $pdf->SetWidths(array(171, 25));
 	      $pdf->Row(array('Total', String::formatoNumero($total_producto, 2, '$', false)), false);
 
 	      $total_producto = 0;

@@ -1154,7 +1154,7 @@ var setAutocompleteProveedores = function (event) {
       if ($this[0].id === 'pproveedor_seguro') {
         grup_datos.find('#seg_id_proveedor').val('');
       }else if ($this[0].id === 'pproveedor_supcarga') {
-        grup_datos.find("#supcarga_id_proveedor").val(ui.item.id).trigger('keyup');
+        grup_datos.find("#supcarga_id_proveedor").val('').trigger('keyup');
       } else {
         grup_datos.find('#cert_id_proveedor'+$this.attr('id').replace('pproveedor_certificado', '')).val('');
       }

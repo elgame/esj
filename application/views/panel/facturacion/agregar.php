@@ -732,21 +732,54 @@
                 <div class="modal-header">
                   <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
                   <h3 id="myModalLabel">Informacion Seguro</h3>
+                  <button type="button" class="btn pull-right" id="btn_seguro_add"><i class="icon-plus"></i></button>
                 </div>
                 <div class="modal-body">
-                  <div class="control-group">
-                    <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="pproveedor_seguro" value="<?php echo set_value('pproveedor_seguro', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->proveedor : '') ?>" id="pproveedor_seguro" class="span12 sikey field-check" placeholder="Proveedor" data-next="seg_poliza">
-                      <input type="hidden" name="seg_id_proveedor" value="<?php echo set_value('seg_id_proveedor', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->id_proveedor : '') ?>" id="seg_id_proveedor" class="field-check">
+                <?php
+                if (isset($borrador) && isset($borrador['seguro'])){
+                  foreach ($borrador['seguro'] as $sp => $prodesp) {
+                    $_POST['pproveedor_seguro'][] = $prodesp->proveedor;
+                    $_POST['seg_id_proveedor'][]  = $prodesp->id_proveedor;
+                    $_POST['seg_poliza'][]        = $prodesp->pol_seg;
+                  }
+                }
+
+                if (isset($_POST['seg_id_proveedor']) && count($_POST['seg_id_proveedor']) > 0) {
+                  foreach ($_POST['seg_id_proveedor'] as $key => $value) {
+                ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_seguro[]" value="<?php echo $_POST['pproveedor_seguro'][$key] ?>" id="pproveedor_seguro" class="span12 sikey field-check pproveedor_seguro" placeholder="Proveedor" data-next="seg_poliza">
+                        <input type="hidden" name="seg_id_proveedor[]" value="<?php echo $_POST['seg_id_proveedor'][$key] ?>" id="seg_id_proveedor" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="seg_poliza[]" class="span12 sikey field-check" id="seg_poliza" value="<?php echo $_POST['seg_poliza'][$key] ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="seg_poliza" class="span12 sikey field-check" id="seg_poliza" value="<?php echo set_value('seg_poliza', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->pol_seg : ''); ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
+                <?php }
+                } else { ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_seguro" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_seguro[]" value="<?php echo set_value('pproveedor_seguro[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->proveedor : '') ?>" id="pproveedor_seguro" class="span12 sikey field-check pproveedor_seguro" placeholder="Proveedor" data-next="seg_poliza">
+                        <input type="hidden" name="seg_id_proveedor[]" value="<?php echo set_value('seg_id_proveedor[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->id_proveedor : '') ?>" id="seg_id_proveedor" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="seg_poliza" style="width: auto;">POL/SEG</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="seg_poliza[]" class="span12 sikey field-check" id="seg_poliza" value="<?php echo set_value('seg_poliza[]', isset($borrador) && isset($borrador['seguro']) ? $borrador['seguro']->pol_seg : ''); ?>" maxlength="30" placeholder="Poliza/Seguro" data-next="pproveedor_seguro">
+                      </div>
                     </div>
                   </div>
+                <?php } ?>
                 </div>
                 <div class="modal-footer">
                   <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['seguro']) ? '' : 'disabled' ?>>Cerrar</button>
@@ -758,27 +791,80 @@
                 <div class="modal-header">
                   <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
                   <h3 id="myModalLabel">Informacion Certificado</h3>
+                  <button type="button" class="btn pull-right" id="btn_certificado51_add"><i class="icon-plus"></i></button>
                 </div>
                 <div class="modal-body">
-                  <div class="control-group">
-                    <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="pproveedor_certificado51" value="<?php echo set_value('pproveedor_certificado51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->proveedor : '') ?>" id="pproveedor_certificado51" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado51">
-                      <input type="hidden" name="cert_id_proveedor51" value="<?php echo set_value('cert_id_proveedor51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_proveedor : '') ?>" id="cert_id_proveedor51" class="field-check">
+                  <?php
+                  if (isset($borrador) && isset($borrador['certificado51'])){
+                    foreach ($borrador['certificado51'] as $sp => $prodesp) {
+                      $_POST['pproveedor_certificado51'][] = $prodesp->proveedor;
+                      $_POST['cert_id_proveedor51'][]      = $prodesp->id_proveedor;
+                      $_POST['cert_certificado51'][]       = $prodesp->certificado;
+                      $_POST['cert_bultos51'][]            = $prodesp->bultos;
+                      $_POST['cert_num_operacion51'][]     = $prodesp->num_operacion;
+                    }
+                  }
+
+                  if (isset($_POST['cert_id_proveedor51']) && count($_POST['cert_id_proveedor51']) > 0) {
+                    foreach ($_POST['cert_id_proveedor51'] as $key => $value) {
+                  ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_certificado51[]" value="<?php echo $_POST['pproveedor_certificado51'][$key]; ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
+                        <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo $_POST['cert_id_proveedor51'][$key]; ?>" id="cert_id_proveedor51" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo $_POST['cert_certificado51'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo $_POST['cert_bultos51'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion51">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo $_POST['cert_num_operacion51'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="cert_certificado51" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
+                <?php }
+                } else { ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_certificado51[]" value="<?php echo set_value('pproveedor_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->proveedor : '') ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
+                        <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo set_value('cert_id_proveedor51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->id_proveedor : '') ?>" id="cert_id_proveedor51" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo set_value('cert_bultos51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->bultos : ''); ?>" placeholder="Bultos" data-next="cert_num_operacion51">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="cert_bultos51" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo set_value('cert_bultos51', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado51">
-                    </div>
-                  </div>
+                <?php } ?>
                 </div>
                 <div class="modal-footer">
                   <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado51']) ? '' : 'disabled' ?>>Cerrar</button>
@@ -788,27 +874,80 @@
                 <div class="modal-header">
                   <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
                   <h3 id="myModalLabel">Informacion Certificado</h3>
+                  <button type="button" class="btn pull-right" id="btn_certificado52_add"><i class="icon-plus"></i></button>
                 </div>
                 <div class="modal-body">
-                  <div class="control-group">
-                    <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="pproveedor_certificado52" value="<?php echo set_value('pproveedor_certificado52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->proveedor : '') ?>" id="pproveedor_certificado52" class="span12 sikey field-check" placeholder="Proveedor" data-next="cert_certificado52">
-                      <input type="hidden" name="cert_id_proveedor52" value="<?php echo set_value('cert_id_proveedor52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_proveedor : '') ?>" id="cert_id_proveedor52" class="field-check">
+                <?php
+                if (isset($borrador) && isset($borrador['certificado52'])){
+                  foreach ($borrador['certificado52'] as $sp => $prodesp) {
+                    $_POST['pproveedor_certificado52'][] = $prodesp->proveedor;
+                    $_POST['cert_id_proveedor52'][]      = $prodesp->id_proveedor;
+                    $_POST['cert_certificado52'][]       = $prodesp->certificado;
+                    $_POST['cert_bultos52'][]            = $prodesp->bultos;
+                    $_POST['cert_num_operacion52'][]     = $prodesp->num_operacion;
+                  }
+                }
+
+                if (isset($_POST['cert_id_proveedor52']) && count($_POST['cert_id_proveedor52']) > 0) {
+                  foreach ($_POST['cert_id_proveedor52'] as $key => $value) {
+                ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_certificado52[]" value="<?php echo $_POST['pproveedor_certificado52'][$key]; ?>" id="pproveedor_certificado52" class="span12 sikey field-check pproveedor_certificado52" placeholder="Proveedor" data-next="cert_certificado52">
+                        <input type="hidden" name="cert_id_proveedor52[]" value="<?php echo $_POST['cert_id_proveedor52'][$key]; ?>" id="cert_id_proveedor52" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo $_POST['cert_certificado52'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_bultos52[]" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo $_POST['cert_bultos52'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion52">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo $_POST['cert_num_operacion52'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="cert_certificado52" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
+                <?php }
+                } else { ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_certificado52" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_certificado52[]" value="<?php echo set_value('pproveedor_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->proveedor : '') ?>" id="pproveedor_certificado52" class="span12 sikey field-check pproveedor_certificado52" placeholder="Proveedor" data-next="cert_certificado52">
+                        <input type="hidden" name="cert_id_proveedor52[]" value="<?php echo set_value('cert_id_proveedor52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->id_proveedor : '') ?>" id="cert_id_proveedor52" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_bultos52[]" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo set_value('cert_bultos52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->bultos : ''); ?>" placeholder="Bultos" data-next="cert_num_operacion52">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="cert_num_operacion52" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="cert_num_operacion52[]" class="span12 sikey field-check" id="cert_num_operacion52" value="<?php echo set_value('cert_num_operacion52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado52">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="cert_bultos52" style="width: auto;">BULTOS</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="cert_bultos52" class="span12 vpositive sikey field-check" id="cert_bultos52" value="<?php echo set_value('cert_bultos52', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_certificado52">
-                    </div>
-                  </div>
+                <?php } ?>
                 </div>
                 <div class="modal-footer">
                   <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['certificado52']) ? '' : 'disabled' ?>>Cerrar</button>
@@ -820,27 +959,80 @@
                 <div class="modal-header">
                   <!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button> -->
                   <h3 id="myModalLabel">Informacion Supervisor de carga</h3>
+                  <button type="button" class="btn pull-right" id="btn_supcarga_add"><i class="icon-plus"></i></button>
                 </div>
                 <div class="modal-body">
-                  <div class="control-group">
-                    <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="pproveedor_supcarga" value="<?php echo set_value('pproveedor_supcarga', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->proveedor : '') ?>" id="pproveedor_supcarga" class="span12 sikey field-check" placeholder="Proveedor" data-next="supcarga_numero">
-                      <input type="hidden" name="supcarga_id_proveedor" value="<?php echo set_value('supcarga_id_proveedor', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->id_proveedor : '') ?>" id="supcarga_id_proveedor" class="field-check">
+                <?php
+                if (isset($borrador) && isset($borrador['supcarga'])){
+                  foreach ($borrador['supcarga'] as $sp => $prodesp) {
+                    $_POST['pproveedor_supcarga'][]    = $prodesp->proveedor;
+                    $_POST['supcarga_id_proveedor'][]  = $prodesp->id_proveedor;
+                    $_POST['supcarga_numero'][]        = $prodesp->certificado;
+                    $_POST['supcarga_bultos'][]        = $prodesp->bultos;
+                    $_POST['supcarga_num_operacion'][] = $prodesp->num_operacion;
+                  }
+                }
+
+                if (isset($_POST['supcarga_id_proveedor']) && count($_POST['supcarga_id_proveedor']) > 0) {
+                  foreach ($_POST['supcarga_id_proveedor'] as $key => $value) {
+                ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_supcarga[]" value="<?php echo $_POST['pproveedor_supcarga'][$key] ?>" id="pproveedor_supcarga" class="span12 sikey field-check pproveedor_supcarga" placeholder="Proveedor" data-next="supcarga_numero">
+                        <input type="hidden" name="supcarga_id_proveedor[]" value="<?php echo $_POST['supcarga_id_proveedor'][$key] ?>" id="supcarga_id_proveedor" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_numero[]" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo $_POST['supcarga_numero'][$key] ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_bultos[]" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo $_POST['supcarga_bultos'][$key] ?>" placeholder="Bultos" data-next="supcarga_num_operacion">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_num_operacion" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_num_operacion[]" class="span12 sikey field-check" id="supcarga_num_operacion" value="<?php echo $_POST['supcarga_num_operacion'][$key] ?>" placeholder="Num Operacion" data-next="pproveedor_supcarga">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="supcarga_numero" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo set_value('supcarga_numero', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->certificado : ''); ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
+                <?php }
+                } else { ?>
+                  <div class="grup_datos" style="border-bottom: 2px solid #aaa;">
+                    <div class="control-group">
+                      <label class="control-label" for="pproveedor_supcarga" style="width: auto;">PROVEEDOR</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="pproveedor_supcarga[]" value="<?php echo set_value('pproveedor_supcarga[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->proveedor : '') ?>" id="pproveedor_supcarga" class="span12 sikey field-check pproveedor_supcarga" placeholder="Proveedor" data-next="supcarga_numero">
+                        <input type="hidden" name="supcarga_id_proveedor[]" value="<?php echo set_value('supcarga_id_proveedor[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->id_proveedor : '') ?>" id="supcarga_id_proveedor" class="field-check">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_numero" style="width: auto;">Numero</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_numero[]" class="span12 sikey field-check" id="supcarga_numero" value="<?php echo set_value('supcarga_numero[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->certificado : ''); ?>" maxlength="30" placeholder="Numero" data-next="supcarga_bultos">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_bultos[]" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo set_value('supcarga_bultos[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->bultos : ''); ?>" placeholder="Bultos" data-next="supcarga_num_operacion">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label class="control-label" for="supcarga_num_operacion" style="width: auto;">Num Operacion</label>
+                      <div class="controls" style="margin-left: 0">
+                        <input type="text" name="supcarga_num_operacion[]" class="span12 sikey field-check" id="supcarga_num_operacion" value="<?php echo set_value('supcarga_num_operacion[]', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_supcarga">
+                      </div>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label" for="supcarga_bultos" style="width: auto;">BULTOS</label>
-                    <div class="controls" style="margin-left: 0">
-                      <input type="text" name="supcarga_bultos" class="span12 vpositive sikey field-check" id="supcarga_bultos" value="<?php echo set_value('supcarga_bultos', isset($borrador) && isset($borrador['supcarga']) ? $borrador['supcarga']->bultos : ''); ?>" placeholder="Bultos" data-next="pproveedor_supcarga">
-                    </div>
-                  </div>
+                <?php } ?>
                 </div>
                 <div class="modal-footer">
                   <button class="btn" data-dismiss="modal" aria-hidden="true" id="btnClose" <?php echo isset($borrador) && isset($borrador['supcarga']) ? '' : 'disabled' ?>>Cerrar</button>

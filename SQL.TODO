@@ -4,7 +4,7 @@
    ALTER TABLE facturacion_seg_cert DROP CONSTRAINT facturacion_seg_cert_pkey;
    ALTER TABLE facturacion_seg_cert ADD CONSTRAINT facturacion_seg_cert_pkey PRIMARY KEY(id_factura, id_clasificacion, nrow);
 
- ☐ Comercio exterior
+ ✔ Comercio exterior @done (16-07-17 10:45)
    ALTER TABLE public.facturacion_productos ADD COLUMN no_identificacion character varying(50);
    CREATE TABLE public.facturacion_ce
       (
@@ -115,7 +115,7 @@
       ALTER TABLE public.facturacion_ce_mercancias_esp
         OWNER TO programa;
 
- ☐ Privilegio modificar kilos
+ ✔ Privilegio modificar kilos @done (16-07-17 10:45)
   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar kilos bruto y tara',70,FALSE,'bascula/modificar_kilosbt/','pencil',FALSE);
 
  ✔ Usuario y fecha de creacion en los gastos y abonos de cajas chica @done (16-07-04 16:05)

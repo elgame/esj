@@ -655,6 +655,7 @@
                   $_POST['cert_id_proveedor51'][]      = $prodesp->id_proveedor;
                   $_POST['cert_certificado51'][]       = $prodesp->certificado;
                   $_POST['cert_bultos51'][]            = $prodesp->bultos;
+                  $_POST['cert_num_operacion51'][]     = $prodesp->num_operacion;
                 }
               }
 
@@ -665,20 +666,20 @@
                 <div class="control-group">
                   <label class="control-label" for="pproveedor_certificado51" style="width: auto;">PROVEEDOR</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="pproveedor_certificado51[]" value="<?php echo $_POST['pproveedor_certificado52'][$key]; ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
-                    <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo $_POST['cert_id_proveedor52'][$key]; ?>" id="cert_id_proveedor51" class="field-check">
+                    <input type="text" name="pproveedor_certificado51[]" value="<?php echo $_POST['pproveedor_certificado51'][$key]; ?>" id="pproveedor_certificado51" class="span12 sikey field-check pproveedor_certificado51" placeholder="Proveedor" data-next="cert_certificado51">
+                    <input type="hidden" name="cert_id_proveedor51[]" value="<?php echo $_POST['cert_id_proveedor51'][$key]; ?>" id="cert_id_proveedor51" class="field-check">
                   </div>
                 </div>
                 <div class="control-group">
                   <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo $_POST['cert_certificado52'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo $_POST['cert_certificado51'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
                   </div>
                 </div>
                 <div class="control-group">
                   <label class="control-label" for="cert_bultos51" style="width: auto;">BULTOS</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo $_POST['cert_bultos52'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion51">
+                    <input type="text" name="cert_bultos51[]" class="span12 vpositive sikey field-check" id="cert_bultos51" value="<?php echo $_POST['cert_bultos51'][$key]; ?>" placeholder="Bultos" data-next="cert_num_operacion51">
                   </div>
                 </div>
                 <div class="control-group">
@@ -701,7 +702,7 @@
                 <div class="control-group">
                   <label class="control-label" for="cert_certificado51" style="width: auto;">CERTIFICADO</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                    <input type="text" name="cert_certificado51[]" class="span12 sikey field-check" id="cert_certificado51" value="<?php echo set_value('cert_certificado51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos51">
                   </div>
                 </div>
                 <div class="control-group">
@@ -713,7 +714,7 @@
                 <div class="control-group">
                   <label class="control-label" for="cert_num_operacion51" style="width: auto;">Num Operacion</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
+                    <input type="text" name="cert_num_operacion51[]" class="span12 sikey field-check" id="cert_num_operacion51" value="<?php echo set_value('cert_num_operacion51[]', isset($borrador) && isset($borrador['certificado51']) ? $borrador['certificado51']->num_operacion : ''); ?>" placeholder="Num Operacion" data-next="pproveedor_certificado51">
                   </div>
                 </div>
               </div>
@@ -755,7 +756,7 @@
                 <div class="control-group">
                   <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo $_POST['cert_certificado52'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo $_POST['cert_certificado52'][$key]; ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
                   </div>
                 </div>
                 <div class="control-group">
@@ -784,7 +785,7 @@
                 <div class="control-group">
                   <label class="control-label" for="cert_certificado52" style="width: auto;">CERTIFICADO</label>
                   <div class="controls" style="margin-left: 0">
-                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos">
+                    <input type="text" name="cert_certificado52[]" class="span12 sikey field-check" id="cert_certificado52" value="<?php echo set_value('cert_certificado52[]', isset($borrador) && isset($borrador['certificado52']) ? $borrador['certificado52']->certificado : ''); ?>" maxlength="30" placeholder="Certificado" data-next="cert_bultos52">
                   </div>
                 </div>
                 <div class="control-group">
