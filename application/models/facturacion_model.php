@@ -3670,7 +3670,7 @@ class facturacion_model extends privilegios_model{
 
     if ( ! empty($factura['info']->observaciones))
     {
-        $pdf->SetX(0);
+        $pdf->SetXY(0, $pdf->GetY() + 5);
         $pdf->SetFont('helvetica','B', 10);
         $pdf->SetAligns(array('L'));
         $pdf->SetWidths(array(216));
