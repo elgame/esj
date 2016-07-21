@@ -1,4 +1,4 @@
- ☐ Productos especiales en facturacion y reporte de cuentas x pagar
+ ✔ Productos especiales en facturacion y reporte de cuentas x pagar @done (16-07-21 14:06)
    ALTER TABLE facturacion_seg_cert ADD COLUMN num_operacion character varying(30);
    ALTER TABLE facturacion_seg_cert ADD COLUMN nrow integer NOT NULL DEFAULT 0;
    ALTER TABLE facturacion_seg_cert DROP CONSTRAINT facturacion_seg_cert_pkey;
