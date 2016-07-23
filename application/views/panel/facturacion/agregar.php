@@ -273,7 +273,7 @@
                           $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
                          ?>
                          <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
-                          <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $mtp ?></option>
+                          <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $key.' - '.$mtp ?></option>
                         <?php } ?>
                       </select>
                     </div>

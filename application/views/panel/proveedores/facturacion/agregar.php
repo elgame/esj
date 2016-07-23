@@ -182,15 +182,11 @@
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
 
                     <?php
-                      $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
-                     ?>
-
-                    <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado', $metodo === 'no identificado' ? true : false); ?>>No identificado</option>
-                    <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo', $metodo === 'efectivo' ? true : false); ?>>Efectivo</option>
-                    <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque', $metodo === 'cheque' ? true : false); ?>>Cheque</option>
-                    <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', $metodo === 'tarjeta' ? true : false); ?>>Tarjeta</option>
-                    <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', $metodo === 'transferencia' ? true : false); ?>>Transferencia</option>
-                    <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', $metodo === 'deposito' ? true : false); ?>>Deposito</option>
+                    $metodo = isset($borrador) ? $borrador['info']->metodo_pago : '';
+                    ?>
+                    <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
+                      <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $key.' - '.$mtp ?></option>
+                    <?php } ?>
                   </select>
                 </div>
               </div>

@@ -183,13 +183,12 @@
                 <label class="control-label" for="dmetodo_pago">Metodo de pago</label>
                 <div class="controls">
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago" readonly>
-                    <option value="no identificado" <?php echo set_select('dmetodo_pago', 'no identificado', false, $factura['info']->metodo_pago); ?>>No identificado</option>
-                    <option value="efectivo" <?php echo set_select('dmetodo_pago', 'efectivo', false, $factura['info']->metodo_pago); ?>>Efectivo</option>
-                    <option value="cheque" <?php echo set_select('dmetodo_pago', 'cheque', false, $factura['info']->metodo_pago); ?>>Cheque</option>
-                    <option value="tarjeta" <?php echo set_select('dmetodo_pago', 'tarjeta', false, $factura['info']->metodo_pago); ?>>Tarjeta</option>
-                    <option value="transferencia" <?php echo set_select('dmetodo_pago', 'transferencia', false, $factura['info']->metodo_pago); ?>>Transferencia</option>
-                    <option value="deposito" <?php echo set_select('dmetodo_pago', 'deposito', false, $factura['info']->metodo_pago); ?>>Deposito</option>
-                    <option value="trasferencia y/o cheque" <?php echo set_select('dmetodo_pago', 'trasferencia y/o cheque', false, $factura['info']->metodo_pago); ?>>Trasferencia y/o cheque</option>
+                    <?php
+                    $metodo = isset($factura) ? $factura['info']->metodo_pago : '';
+                    ?>
+                    <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
+                      <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $key.' - '.$mtp ?></option>
+                    <?php } ?>
                   </select>
                 </div>
               </div>
