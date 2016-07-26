@@ -595,8 +595,11 @@
                                       $totalGastos += floatval($_POST['gasto_importe'][$key]); ?>
                                         <tr>
                                           <td style="width: 60px;">
+                                            <input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">
+                                            <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                             <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                             <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
+                                            <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
                                             <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
                                           </td>
                                           <td style="width: 100px;">
@@ -623,9 +626,14 @@
                                   ?>
                                   <tr>
                                     <td style="width: 60px;">
+                                      <input type="hidden" name="gasto_id_gasto[]" value="<?php echo $gasto->id_gasto ?>" id="gasto_id_gasto">
+                                      <input type="hidden" name="gasto_del[]" value="" id="gasto_del">
                                       <input type="text" name="codigoArea[]" value="<?php echo $gasto->nombre_codigo ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                       <input type="hidden" name="codigoAreaId[]" value="<?php echo $gasto->id_area ?>" id="codigoAreaId" class="span12" required>
+                                      <input type="hidden" name="codigoCampo[]" value="<?php echo $gasto->campo ?>" id="codigoCampo" class="span12">
                                       <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                                      <a href="<?php echo base_url('panel/bodega_guadalajara/print_vale/?id='.$gasto->id_gasto)?>" target="_blank" title="Imprimir VALE">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
                                     </td>
                                     <td style="width: 100px;">
                                       <input type="text" name="gasto_empresa[]" value="<?php echo $gasto->empresa ?>" class="span12 gasto-cargo" required <?php echo $readonly ?>>

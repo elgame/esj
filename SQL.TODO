@@ -1,3 +1,10 @@
+ ☐ Caja bodega guadalajara
+   ALTER TABLE otros.bodega_gastos ADD COLUMN id_usuario bigint;
+   ALTER TABLE otros.bodega_gastos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
+   ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_usuario_fkey FOREIGN KEY (id_usuario)
+      REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   ALTER TABLE otros.bodega_gastos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+
  ✔ Productos especiales en facturacion y reporte de cuentas x pagar @done (16-07-21 14:06)
    ALTER TABLE facturacion_seg_cert ADD COLUMN num_operacion character varying(30);
    ALTER TABLE facturacion_seg_cert ADD COLUMN nrow integer NOT NULL DEFAULT 0;

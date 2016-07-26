@@ -196,7 +196,8 @@ class bodega_guadalajara_model extends CI_Model {
     // gastos
     $gastos = $this->db->query(
       "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa,
-          cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, ca.id_area, ca.nombre AS nombre_codigo, ca.codigo_fin,
+          'id_area' AS campo
        FROM otros.bodega_gastos cg
          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
@@ -363,25 +364,66 @@ class bodega_guadalajara_model extends CI_Model {
     $this->db->insert('otros.bodega_efectivo', $efectivo);
 
     // Gastos del dia
-    $this->db->delete('otros.bodega_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    // $this->db->delete('otros.bodega_gastos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['gasto_concepto']))
     {
-      $gastos = array();
+      $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
       foreach ($data['gasto_concepto'] as $key => $gasto)
       {
-        $gastos[] = array(
-          'id_categoria'    => $data['gasto_empresa_id'][$key],
-          'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
-          'folio'           => $data['gasto_folio'][$key],
-          'concepto'        => $gasto,
-          'monto'           => $data['gasto_importe'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'no_caja'         => $data['fno_caja'],
-          'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
-        );
+        if (isset($data['gasto_del'][$key]) && $data['gasto_del'][$key] == 'true' &&
+          isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_ids['delets'][] = $this->getDataGasto($data['gasto_id_gasto'][$key]);
+
+          $this->db->delete('otros.bodega_gastos', "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } elseif (isset($data['gasto_id_gasto'][$key]) && floatval($data['gasto_id_gasto'][$key]) > 0) {
+          $gastos_udt = array(
+            'id_categoria'    => $data['gasto_empresa_id'][$key],
+            'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
+            'folio'           => $data['gasto_folio'][$key],
+            'concepto'        => $gasto,
+            'monto'           => $data['gasto_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+          );
+
+          $this->db->update('otros.bodega_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
+        } else {
+          $gastos = array(
+            'id_categoria'    => $data['gasto_empresa_id'][$key],
+            'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
+            'folio'           => $data['gasto_folio'][$key],
+            'concepto'        => $gasto,
+            'monto'           => $data['gasto_importe'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'no_caja'         => $data['fno_caja'],
+            'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('otros.bodega_gastos', $gastos);
+          $gastos_ids['adds'][] = $this->db->insert_id();
+        }
       }
 
-      $this->db->insert_batch('otros.bodega_gastos', $gastos);
+
+      // $gastos = array();
+      // foreach ($data['gasto_concepto'] as $key => $gasto)
+      // {
+      //   $gastos[] = array(
+      //     'id_categoria'    => $data['gasto_empresa_id'][$key],
+      //     'id_nomenclatura' => $data['gasto_nomenclatura'][$key],
+      //     'folio'           => $data['gasto_folio'][$key],
+      //     'concepto'        => $gasto,
+      //     'monto'           => $data['gasto_importe'][$key],
+      //     'fecha'           => $data['fecha_caja_chica'],
+      //     'no_caja'         => $data['fno_caja'],
+      //     'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
+      //     'id_usuario'      => $this->session->userdata('id_usuario'),
+      //   );
+      // }
+
+      // $this->db->insert_batch('otros.bodega_gastos', $gastos);
     }
 
     return true;
@@ -1242,6 +1284,117 @@ class bodega_guadalajara_model extends CI_Model {
         ORDER BY nomenclatura ASC");
 
     return $res->result();
+  }
+
+  public function getDataGasto($id_gasto)
+  {
+    $gastos = $this->db->query(
+      "SELECT cg.id_gasto, cg.concepto, cg.fecha, cg.monto, cc.id_categoria, cc.abreviatura as empresa, cc.nombre as empresal,
+          cg.folio, cg.id_nomenclatura, cn.nomenclatura, COALESCE(ca.id_area) AS id_area,
+          COALESCE(ca.nombre) AS nombre_codigo,
+          COALESCE(ca.codigo_fin) AS codigo_fin,
+          'id_area' AS campo, cg.no_caja, cg.no_impresiones, cg.fecha_creacion,
+          (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+       FROM otros.bodega_gastos cg
+         INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+         INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+         LEFT JOIN bodega_catalogo ca ON ca.id_area = cg.id_area
+         LEFT JOIN usuarios AS u ON u.id = cg.id_usuario
+       WHERE cg.id_gasto = '{$id_gasto}'
+       ORDER BY cg.id_gasto ASC"
+    )->row();
+
+    return $gastos;
+  }
+
+  public function printVale($id_gasto)
+  {
+    $this->load->model('bodega_catalogo_model');
+
+    $gastos = $this->getDataGasto($id_gasto);
+
+    // echo "<pre>";
+    //   var_dump($gastos);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array($gastos->empresal), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()+4);
+    $pdf->Row(array('VALE PROVISIONAL'), false, false);
+
+    $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-6);
+    $pdf->Row(array('Folio: '.$gastos->id_gasto), false, false);
+
+    $pdf->SetWidths(array(25, 38));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: BODEGA '.$gastos->no_caja, String::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('CANTIDAD:'), false, false);
+    $pdf->SetX(0);
+    $pdf->Row(array(String::num2letras($gastos->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    // $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->Row(array('COD. AREA:'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $cod_sof = $gastos->codigo_fin.' '.$this->bodega_catalogo_model->getDescripCodigo($gastos->id_area);
+    $pdf->Row(array($cod_sof), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($gastos->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($gastos->no_impresiones==0? 'ORIGINAL': 'COPIA '.$gastos->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', $gastos->fecha), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', $gastos->fecha_creacion), false, false);
+
+    $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('otros.bodega_gastos');
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_gastos.pdf', 'I');
   }
 
 

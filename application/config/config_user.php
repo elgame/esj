@@ -15,6 +15,6 @@
 |http://localhost/sanjorge/   http://sanjorge.dev/
 */
 
-$config['jsv']  = '1.56';
+$config['jsv']  = '1.57';
 $config['snapshot_cam1']  = 'http://admin:12345@192.168.1.241/Streaming/channels/1/picture';
 $config['snapshot_cam2']  = 'http://admin:12345@192.168.1.242/Streaming/channels/1/picture';

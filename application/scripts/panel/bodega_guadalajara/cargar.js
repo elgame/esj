@@ -391,8 +391,11 @@
     var $table = $('#table-gastos').find('tbody .row-total'),
         tr =  '<tr>' +
                 '<td style="width: 60px;">'+
+                  '<input type="hidden" name="gasto_id_gasto[]" value="" id="gasto_id_gasto">'+
+                  '<input type="hidden" name="gasto_del[]" value="" id="gasto_del">'+
                   '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
                   '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                  '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12" required>'+
                   '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
                 '</td>'+
                 '<td style="width: 100px;">' +
@@ -421,9 +424,16 @@
       var $tr = $(this).parents('tr'),
           id = $tr.find('.gasto-cargo-id').val(),
           $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
+          $gasto_id_gasto = $tr.find('#gasto_id_gasto'),
+          $gasto_del = $tr.find('#gasto_del'),
           total = 0;
 
-      $tr.remove();
+      if ($gasto_id_gasto.val() != '') {
+        $gasto_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
 
       $('input[value="'+id+'"]').each(function(index, el) {
         var $parent = $(this).parents('tr');
