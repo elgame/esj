@@ -1,4 +1,4 @@
- ☐ Caja bodega guadalajara
+ ✔ Caja bodega guadalajara @done (16-07-26 09:53)
    ALTER TABLE otros.bodega_gastos ADD COLUMN id_usuario bigint;
    ALTER TABLE otros.bodega_gastos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
    ALTER TABLE otros.bodega_gastos ADD CONSTRAINT bodega_gastos_id_usuario_fkey FOREIGN KEY (id_usuario)
