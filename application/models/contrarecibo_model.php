@@ -43,7 +43,7 @@ class contrarecibo_model extends CI_Model {
 					INNER JOIN empresas e ON e.id_empresa = c.id_empresa
 					INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
 				{$sql}
-				ORDER BY c.fecha ASC, c.folio ASC", $params, true);
+				ORDER BY c.fecha DESC, c.folio DESC", $params, true);
 		$res = $this->db->query($query['query']);
 
 		$response = array(
