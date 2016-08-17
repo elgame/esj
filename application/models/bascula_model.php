@@ -659,7 +659,16 @@ class bascula_model extends CI_Model {
     $pdf->SetAligns(array('C'));
     $pdf->Row(array('REG. ESJ97052763A0620061646'), false, false);
 
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('COPIA '.($data->no_imp_recepcion==0? 'ORIGINAL': 'No '.$data->no_imp_recepcion)), false, false);
+
     // $pdf->Rect(0.5, 0.5, 62, $pdf->GetY());
+
+    //Actualiza el control de impresiones, se le suma 1
+    //al valor de la BD para la siguiente impresion
+    $this->db->where('id_bascula', $id_boleta)->set('no_imp_recepcion', 'no_imp_recepcion+1', false)
+        ->update('bascula');
 
     $pdf->AutoPrint(true);
     $pdf->Output();
@@ -1105,7 +1114,9 @@ class bascula_model extends CI_Model {
           "SELECT bc.id_bascula,
             bc.id_calidad,
             bc.cajas,
-            bc.kilos,
+            b.total_cajas,
+            bc.kilos AS kilos,
+            b.kilos_neto,
             bc.promedio,
             bc.precio,
             bc.importe,
@@ -1118,7 +1129,7 @@ class bascula_model extends CI_Model {
           {$table_ms}
           WHERE b.status = true AND b.id_area = {$varea->id_area}
                 {$sql}
-          ORDER BY (b.folio, bc.id_calidad) ASC
+          ORDER BY b.folio ASC, bc.id_calidad DESC
           "
         );
 
@@ -1128,6 +1139,27 @@ class bascula_model extends CI_Model {
         $rde = array();
         if ($query->num_rows() > 0)
         {
+          if (isset($_GET['ftkilos']{0}) && $_GET['ftkilos'] == 'kb') {
+            // Recalcula usando los kilos de la bascula no los promediados
+            $idbascaux = 0;
+            $kilos_aux = 0;
+            $cajas_aux = 0;
+            foreach ($query->result() as $key => $calidad)
+            {
+              if ($idbascaux != $calidad->id_bascula) {
+                $idbascaux = $calidad->id_bascula;
+                $kilos_aux = $calidad->kilos_neto;
+                $cajas_aux = $calidad->total_cajas;
+              }
+              if ($calidad->id_calidad == 4 || $calidad->id_calidad == 3) {
+                $kilos_aux -= $calidad->kilos;
+                $cajas_aux -= $calidad->cajas;
+              } elseif($calidad->id_calidad == 2) {
+                $calidad->kilos = round($calidad->cajas*$kilos_aux/($cajas_aux>0?$cajas_aux:1));
+                $calidad->promedio = round($calidad->kilos/($calidad->cajas>0?$calidad->cajas:1), 2);
+              }
+            }
+          }
           // echo "<pre>";
           //   var_dump($area);
           // echo "</pre>";exit;
@@ -1205,6 +1237,7 @@ class bascula_model extends CI_Model {
       $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
       $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
       $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
+      $pdf->titulo3 .= $_GET['ftkilos']=='kb'?' Kilos de la bascula': ' Kilos calculados';
 
       $pdf->AliasNbPages();
       $pdf->AddPage();

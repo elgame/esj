@@ -2,8 +2,8 @@
  ☐ En cuentas de proveedores agregar bancos de inbursa, bajio, bancopel
  ✔ 0.3h En cajas chicas reportes de gastos e ingresos meter filtros de concepto (para buscar proveedor y cliente) y filtro de caja @done (16-08-17 15:40)
  ✔ En contrarecivos ordenarlo por folio decendente @done (16-08-04 12:37)
- ☐ En reporte diario de entrada agregar filtro para que cargue el reporte con los kilos de bascula si es limon industrial o suelo que use los quilos pagados y la diferencia los mande a limun fruta y si no que promedio por cajas
- ☐ boleta de recepcion que diga si es original o copias
+ ✔ 0.25h En reporte diario de entrada agregar filtro para que cargue el reporte con los kilos de bascula si es limon industrial o suelo que use los quilos pagados y la diferencia los mande a limun fruta y si no que promedio por cajas @done (16-08-17 18:29)
+ ✔ 0.13h boleta de recepcion que diga si es original o copias @done (16-08-17 18:43)
  ☐ Ver el programa de cheques (compras a cheques), en cheques de reposicion ver donde se inserta y que la poliza de cheques solo tenga un movimiento en bancos que no registre por proveedor y tambien que cargue los cheques cancelados
 
 ********************************************

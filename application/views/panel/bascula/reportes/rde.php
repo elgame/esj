@@ -88,6 +88,16 @@
                   </div>
                 </div>
 
+                <div class="control-group">
+                  <label class="control-label" for="ftkilos">Tipo de kilos</label>
+                  <div class="controls">
+                    <select name="ftkilos" id="ftkilos" class="getjsval">
+                      <option value="kc">Kilos calculados</option>
+                      <option value="kb">Kilos de la bascula</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary btn-large span12">Enviar</button>
                 </div>

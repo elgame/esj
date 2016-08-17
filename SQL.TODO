@@ -1,3 +1,7 @@
+
+ ☐ No impreciones boleta recepcion
+   ALTER TABLE public.bascula ADD COLUMN no_imp_recepcion smallint NOT NULL DEFAULT 0;
+
  ✔ Caja bodega guadalajara @done (16-07-26 09:53)
    ALTER TABLE otros.bodega_gastos ADD COLUMN id_usuario bigint;
    ALTER TABLE otros.bodega_gastos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
