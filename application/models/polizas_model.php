@@ -225,6 +225,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $cuenta=""; //Raul jorge
     elseif($this->empresaId==3) $cuenta = '50007000'; //Gomez gudiño
     elseif($this->empresaId==5) $cuenta=""; //vianey rocio
+    elseif($this->empresaId==12) $cuenta="50000100"; //plasticos
     else{
       $cuenta = '50000100';
     }

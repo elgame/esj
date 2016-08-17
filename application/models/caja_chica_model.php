@@ -1417,6 +1417,14 @@ class caja_chica_model extends CI_Model {
     if ($this->input->get('fnomenclatura') != '')
       $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
 
+    if ($this->input->get('fno_caja') != '') {
+      $sql .= " AND cg.no_caja = ".$this->input->get('fno_caja');
+    }
+
+    if ($this->input->get('dprov_clien') != '') {
+      $sql .= " AND cg.concepto LIKE '%".$this->input->get('dprov_clien')."%'";
+    }
+
     $response = array();
     $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
@@ -1702,7 +1710,7 @@ class caja_chica_model extends CI_Model {
    */
   public function getRptIngresosData()
   {
-    $sql = $sql2 = '';
+    $sql3 = $sql = $sql2 = '';
       $idsproveedores = '';
 
     //Filtros para buscar
@@ -1716,6 +1724,16 @@ class caja_chica_model extends CI_Model {
 
     if ($this->input->get('fnomenclatura') != '')
       $sql2 .= " AND cn.id = ".$this->input->get('fnomenclatura');
+
+    if ($this->input->get('fno_caja') != '') {
+      $sql2 .= " AND ci.no_caja = ".$this->input->get('fno_caja');
+      $sql3 .= " AND cr.no_caja = ".$this->input->get('fno_caja');
+    }
+
+    if ($this->input->get('dprov_clien') != '') {
+      $sql2 .= " AND ci.concepto LIKE '%".$this->input->get('dprov_clien')."%'";
+      $sql3 .= " AND cr.observacion LIKE '%".$this->input->get('fno_caja')."%'";
+    }
 
     $response = array('movimientos' => array(), 'remisiones' => array());
 
@@ -1736,7 +1754,7 @@ class caja_chica_model extends CI_Model {
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
           INNER JOIN facturacion f ON f.id_factura = cr.id_remision
         WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql}
+          {$sql} {$sql3}
         ORDER BY id_categoria ASC, fecha ASC");
     $response['remisiones'] = $remisiones->result();
 

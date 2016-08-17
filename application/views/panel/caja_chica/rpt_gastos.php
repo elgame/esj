@@ -29,6 +29,26 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="dprov_clien">Concepto</label>
+                  <div class="controls">
+                    <input type="text" name="dprov_clien" value="" id="dprov_clien" class="span12" placeholder="Nombre">
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="fno_caja">Caja</label>
+                  <div class="controls">
+                    <select name="fno_caja" id="fno_caja">
+                      <option value=""></option>
+                      <option value="1">Caja 1</option>
+                      <option value="2">Caja 2</option>
+                      <option value="3">Caja 3</option>
+                      <!-- <option value="prest1">Caja prestamos</option> -->
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="fnomenclatura">Nomenclaturas</label>
                   <div class="controls">
                     <select name="fnomenclatura" id="fnomenclatura">
