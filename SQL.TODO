@@ -1,6 +1,12 @@
 
  ☐ No impreciones boleta recepcion
    ALTER TABLE public.bascula ADD COLUMN no_imp_recepcion smallint NOT NULL DEFAULT 0;
+   INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('BanCoppel','ac','137');
+   INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Inbursa','ac','36');
+   INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Bajio','ac','30');
+   INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Afirme','ac','62');
+   INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Azteca','ac','127');
+
 
  ✔ Caja bodega guadalajara @done (16-07-26 09:53)
    ALTER TABLE otros.bodega_gastos ADD COLUMN id_usuario bigint;
