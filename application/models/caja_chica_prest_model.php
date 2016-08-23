@@ -37,7 +37,7 @@ class caja_chica_prest_model extends CI_Model {
         WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
         UNION
         SELECT cp.id_prestamo AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, null AS id_categoria,
-          null AS id_nomenclatura, null AS concepto, Date(np.fecha) AS fecha,
+          null AS id_nomenclatura, ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno) AS concepto, Date(np.fecha) AS fecha,
           np.prestado AS monto, null AS categoria, null AS nomenclatura
         FROM nomina_prestamos np
         INNER JOIN usuarios u ON u.id = np.id_usuario
