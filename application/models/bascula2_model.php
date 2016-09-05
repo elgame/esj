@@ -607,6 +607,6 @@ class bascula2_model extends bascula_model {
     $xls->workbook->close();
   }
 
-
+}
 /* End of file bascula_model.php */
 /* Location: ./application/models/bascula_model.php */
