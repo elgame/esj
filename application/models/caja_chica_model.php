@@ -658,9 +658,9 @@ class caja_chica_model extends CI_Model {
         // Datos del Receptor //
         ////////////////////////
 
-        $correoDestino = array('gamameso@gmail.com');
+        $correoDestino = array('ili-loren-gud@hotmail.com');
 
-        $nombreDestino = 'Gamaliel';
+        $nombreDestino = 'Coco';
         $datosEmail = array(
             'correoEmisorEm' => $correoEmisorEm,
             'correoEmisor'   => $correoEmisor,

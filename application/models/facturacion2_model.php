@@ -93,15 +93,15 @@ class facturacion2_model extends privilegios_model{
             "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, c.nombre_fiscal as cliente,
                     SUM(fp.cantidad) as cantidad, fp.precio_unitario,
                     SUM(fp.importe) as importe, COALESCE(fc.pol_seg, fc.certificado) AS poliza,
-                    u.nombre AS unidad, COALESCE(u.cantidad, 1) AS unidad_cantidad,
-                    (SUM(fp.cantidad)*COALESCE(u.cantidad, 1)) AS kilos
+                    u.nombre AS unidad, u.codigo AS unidadc, COALESCE(fp.unidad_c, u.cantidad, 1) AS unidad_cantidad,
+                    (SUM(fp.cantidad)*COALESCE(fp.unidad_c, u.cantidad, 1)) AS kilos
             FROM facturacion f
             INNER JOIN facturacion_productos fp ON fp.id_factura = f.id_factura
             INNER JOIN clientes c ON c.id_cliente= f.id_cliente
             LEFT JOIN unidades u ON u.id_unidad = fp.id_unidad
             LEFT JOIN facturacion_seg_cert fc ON f.id_factura = fc.id_factura AND fp.id_clasificacion = fc.id_clasificacion
             {$sql}
-            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fc.pol_seg, fc.certificado, u.id_unidad
+            GROUP BY f.id_factura, f.fecha, f.serie, f.folio, c.nombre_fiscal, fp.precio_unitario, fp.unidad_c, fc.pol_seg, fc.certificado, u.id_unidad
             ORDER BY f.fecha ASC");
 
         if (is_numeric($prod)) {
@@ -149,9 +149,9 @@ class facturacion2_model extends privilegios_model{
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
         $pdf->SetY(30);
-        $aligns = array('C', 'C', 'L', 'L', 'R', 'R', 'R', 'R');
-        $widths = array(18, 17, 70, 22, 13, 19, 20, 25);
-        $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Poliza', 'Cantidad', 'Kgs', 'Precio', 'Importe');
+        $aligns = array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R');
+        $widths = array(15, 17, 65, 20, 13, 13, 19, 18, 22);
+        $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Poliza', 'Cantidad', 'UM', 'Kgs', 'Precio', 'Importe');
 
         $cantidad = 0;
         $importe = 0;
@@ -169,7 +169,7 @@ class facturacion2_model extends privilegios_model{
           {
               $pdf->AddPage();
 
-              $pdf->SetFont('Arial','B',8);
+              $pdf->SetFont('Arial','B',7);
               $pdf->SetTextColor(255,255,255);
               $pdf->SetFillColor(160,160,160);
               $pdf->SetX(6);
@@ -177,7 +177,7 @@ class facturacion2_model extends privilegios_model{
               $pdf->SetWidths($widths);
               $pdf->Row($header, true);
           }
-          $pdf->SetFont('Arial','B',8);
+          $pdf->SetFont('Arial','B',7);
           $pdf->SetTextColor(0,0,0);
           $pdf->SetX(6);
           $pdf->SetAligns(array('L'));
@@ -191,7 +191,7 @@ class facturacion2_model extends privilegios_model{
             {
                 $pdf->AddPage();
 
-                $pdf->SetFont('Arial','B',8);
+                $pdf->SetFont('Arial','B',7);
                 $pdf->SetTextColor(255,255,255);
                 $pdf->SetFillColor(160,160,160);
                 $pdf->SetX(6);
@@ -200,7 +200,7 @@ class facturacion2_model extends privilegios_model{
                 $pdf->Row($header, true);
             }
 
-            $pdf->SetFont('Arial','',8);
+            $pdf->SetFont('Arial','',7);
             $pdf->SetTextColor(0,0,0);
 
             $datos = array(
@@ -209,8 +209,9 @@ class facturacion2_model extends privilegios_model{
               $item->cliente,
               $item->poliza,
               $item->cantidad,
-              $item->kilos,
-              String::formatoNumero($item->precio_unitario, 2, '$', false),
+              $item->unidadc,
+              String::formatoNumero($item->kilos, 2, '', false),
+              String::formatoNumero($item->precio_unitario/($item->unidad_cantidad>0?$item->unidad_cantidad:1), 3, '$', false),
               String::formatoNumero($item->importe, 2, '$', false)
             );
 
@@ -232,12 +233,13 @@ class facturacion2_model extends privilegios_model{
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
 
-          $pdf->SetFont('Arial','B',8);
+          $pdf->SetFont('Arial','B',7);
           $pdf->SetTextColor(255,255,255);
           $pdf->Row(array('', '', '', '',
               $cantidad,
-              $kilos,
-              $cantidad == 0 ? 0 : String::formatoNumero($importe/$cantidad, 2, '$', false),
+              '',
+              String::formatoNumero($kilos, 2, '', false),
+              $cantidad == 0 ? 0 : String::formatoNumero($importe/($kilos>0?$kilos:1), 2, '$', false),
               String::formatoNumero($importe, 2, '$', false) ), true);
         }
 
@@ -245,12 +247,13 @@ class facturacion2_model extends privilegios_model{
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
 
-        $pdf->SetFont('Arial','B',8);
+        $pdf->SetFont('Arial','B',7);
         $pdf->SetTextColor(255,255,255);
         $pdf->Row(array('', '', '', '',
             $cantidadt,
-            $kilost,
-            $cantidadt == 0 ? 0 : String::formatoNumero($importet/$cantidadt, 2, '$', false),
+            '',
+            String::formatoNumero($kilost, 2, '', false),
+            $cantidadt == 0 ? 0 : String::formatoNumero($importet/($kilost>0?$kilost:1), 2, '$', false),
             String::formatoNumero($importet, 2, '$', false) ), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');

@@ -963,7 +963,7 @@ function autocompleteClasifi () {
       // $tr.find('#prod_dpreciou').val(ui.item.item.precio);
 
       $tr.find('#prod_dmedida').find('[data-id="'+ui.item.item.id_unidad+'"]').attr('selected', 'selected');
-      $tr.find('#prod_dmedida_id').val(ui.item.item.id_unidad);
+      // $tr.find('#prod_dmedida_id').val(ui.item.item.id_unidad);
       $tr.find('#diva').val(ui.item.item.iva).trigger('change');
 
       loadModalSegCert(ui.item.item.id_clasificacion);

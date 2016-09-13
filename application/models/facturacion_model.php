@@ -681,6 +681,13 @@ class facturacion_model extends privilegios_model{
         else
           $traslado0 = true;
 
+        $did_unidad = (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL);
+        $dunidad_c = NULL;
+        if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
+          $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
+          $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+        }
+
         $productosFactura[] = array(
           'id_factura'            => $idFactura,
           'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -703,7 +710,8 @@ class facturacion_model extends privilegios_model{
           'clase'                 => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : '',
           'peso'                  => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : 0,
           'certificado'           => (isset($_POST['isCert'][$key])? ($_POST['isCert'][$key]=== '1' ? 't' : 'f'): 'f'),
-          'id_unidad'             => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+          'id_unidad'             => $did_unidad,
+          'unidad_c'              => $dunidad_c,
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
@@ -1669,6 +1677,13 @@ class facturacion_model extends privilegios_model{
       {
         if ($_POST['prod_importe'][$key] != 0)
         {
+          $did_unidad = (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL);
+          $dunidad_c = NULL;
+          if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
+            $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
+            $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+          }
+
           $productosFactura[] = array(
             'id_factura'       => $idBorrador,
             'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -1691,7 +1706,8 @@ class facturacion_model extends privilegios_model{
             'clase' => isset($_POST['prod_dclase'][$key]) ? $_POST['prod_dclase'][$key] : null,
             'peso' => isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '' ? $_POST['prod_dpeso'][$key] : null,
             'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
-            'id_unidad'   => (isset($_POST['prod_dmedida_id'][$key])? $_POST['prod_dmedida_id'][$key]: NULL),
+            'id_unidad'   => $did_unidad,
+            'unidad_c'   => $dunidad_c,
           );
 
           if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))

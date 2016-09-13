@@ -19,6 +19,22 @@ $(function(){
   });
 
   // Autocomplete Chofer
+  $("#fchofer").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_choferes/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#fid_chofer").val(ui.item.id);
+      $("#fchofer").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#fid_chofer').val('');
+    }
+  });
+
+  // Autocomplete productor
   $("#fproductor").autocomplete({
     source: function(request, response) {
       var params = {term : request.term};

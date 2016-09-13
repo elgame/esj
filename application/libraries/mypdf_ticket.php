@@ -101,6 +101,7 @@ class mypdf_ticket extends FPDF {
               // $this->SetAligns(array('L'));
               $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num,$this->fount_num,$this->fount_num),
                          array(.5,-1,.5,.5,.5,.5));
+            $total_kilos = 0;
             foreach ($data_info as $prod){
               $this->SetY($this->GetY()-3);
               $this->Row(array($prod->cajas,
@@ -109,10 +110,20 @@ class mypdf_ticket extends FPDF {
                                $prod->promedio,
                                String::formatoNumero($prod->precio, 2, ''),
                                String::formatoNumero($prod->importe, 2, '', false)), false, false);
+              $total_kilos += $prod->kilos;
             }
+
+            $this->SetFont($this->fount_txt, '', $this->font_size);
+            $this->SetY($this->GetY()-4);
+            $this->SetWidths(array(19, 31));
+            $this->SetAligns(array('L', 'L'));
+            $this->SetFounts(array($this->fount_txt, $this->fount_num),
+                             array(0, 0));
+            $this->Row(array( 'Total Kilos', String::formatoNumero($total_kilos, 2, '', false)), false, false, 3);
         }
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
+        $this->SetY($this->GetY()+2);
         $this->CheckPageBreak(4);
         $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 

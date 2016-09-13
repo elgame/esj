@@ -1100,6 +1100,10 @@ class bascula_model extends CI_Model {
         $campos = "CONCAT(ch.nombre_fiscal || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
         $table_ms .= ' INNER JOIN otros.productor ch ON ch.id_productor = b.id_productor';
         $sql .= " AND ch.id_productor = {$_GET['fid_productor']}";
+      } elseif ($this->input->get('fid_chofer') > 0) {
+        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
+        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
       }
 
       $this->load->model('areas_model');
@@ -1237,7 +1241,7 @@ class bascula_model extends CI_Model {
       $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
       $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
       $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
-      $pdf->titulo3 .= $_GET['ftkilos']=='kb'?' Kilos de la bascula': ' Kilos calculados';
+      $pdf->titulo3 .= (isset($_GET['ftkilos']{0}) && $_GET['ftkilos']=='kb')?' Kilos de la bascula': ' Kilos calculados';
 
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -2185,6 +2189,10 @@ class bascula_model extends CI_Model {
         $campos = "CONCAT(ch.nombre_fiscal || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
         $table_ms .= ' INNER JOIN otros.productor ch ON ch.id_productor = b.id_productor';
         $sql .= " AND ch.id_productor = {$_GET['fid_productor']}";
+      } elseif ($this->input->get('fid_chofer') > 0) {
+        $campos = "CONCAT(ch.nombre || '(' || p.nombre_fiscal || ')') AS proveedor, p.cuenta_cpi, ";
+        $table_ms .= ' INNER JOIN choferes ch ON ch.id_chofer = b.id_chofer';
+        $sql .= " AND ch.id_chofer = {$_GET['fid_chofer']}";
       }
 
       $query = $this->db->query(

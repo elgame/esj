@@ -6,6 +6,8 @@
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Bajio','ac','30');
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Afirme','ac','62');
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Azteca','ac','127');
+   ALTER TABLE public.facturacion_productos ADD COLUMN unidad_c real;
+   update facturacion_productos AS fp set unidad_c = sq.cantidad FROM (SELECT id_unidad, cantidad FROM unidades where cantidad > 0) AS sq WHERE fp.id_unidad = sq.id_unidad
 
 
  ✔ Caja bodega guadalajara @done (16-07-26 09:53)

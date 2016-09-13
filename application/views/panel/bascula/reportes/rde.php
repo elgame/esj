@@ -68,6 +68,15 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="fchofer">Chofer</label>
+                  <div class="controls">
+                    <input type="text" name="fchofer" class="span12 getjsval" id="fchofer"
+                      value="<?php echo set_value('fchofer', $this->input->post('fchofer')) ?>" placeholder="Productor que es Chofer">
+                    <input type="hidden" name="fid_chofer" value="<?php echo set_value('fid_chofer', $this->input->post('fid_chofer')) ?>" id="fid_chofer">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="fproductor">Productor</label>
                   <div class="controls">
                     <input type="text" name="fproductor" class="span12 getjsval" id="fproductor"
