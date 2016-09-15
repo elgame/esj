@@ -33,32 +33,32 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Agregamos la existencia anterior
     foreach ($info['existencia_ant'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
-      {
+      // if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+      //     $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+      //     $value->id_clasificacion != '53')
+      // {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
-      }
+      // }
     }
 
     // Agregamos los ingresos del dia
     foreach ($info['remisiones'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53')
-      {
+      // if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+      //     $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+      //     $value->id_clasificacion != '53')
+      // {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
-      }
+      // }
     }
 
     // sumamos o restamos los prestamos de ese dia
     foreach ($info['prestamos'] as $key => $value) {
-      if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
-          $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53' AND $value->tipo == 't')
-      {
+      // if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
+      //     $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
+      //     $value->id_clasificacion != '53' AND $value->tipo == 't')
+      // {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
-      }
+      // }
     }
     foreach ($info['prestamos'] as $key => $value) {
       if ($value->tipo == 'f')
@@ -435,7 +435,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     $remisiones = $this->db->query(
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
-        fp.descripcion, fp.cantidad, fp.precio_unitario, fp.importe, u.nombre AS unidad, cl.id_clasificacion,
+        fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad
       FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
@@ -475,7 +475,7 @@ class bodega_guadalajara_model extends CI_Model {
 
     $ventas = $this->db->query(
       "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
-        fp.descripcion, fp.cantidad, fp.precio_unitario, fp.importe, u.nombre AS unidad, cl.id_clasificacion,
+        fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad
       FROM facturacion f
         INNER JOIN clientes c ON c.id_cliente = f.id_cliente
