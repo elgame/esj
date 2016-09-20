@@ -51,6 +51,7 @@ class labores_codigo_model extends CI_Model {
     $insertData = array(
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
+      'costo' => floatval($data['costo']),
     );
 
     $this->db->insert('compras_salidas_labores', $insertData);
@@ -61,7 +62,7 @@ class labores_codigo_model extends CI_Model {
   public function info($id_labor)
   {
     $query = $this->db->query(
-      "SELECT id_labor, codigo, nombre, status
+      "SELECT id_labor, codigo, nombre, costo, status
         FROM compras_salidas_labores
         WHERE id_labor = {$id_labor}");
 
@@ -79,6 +80,7 @@ class labores_codigo_model extends CI_Model {
     $updateData = array(
       'nombre' => $data['nombre'],
       'codigo' => strtoupper($data['codigo']),
+      'costo' => floatval($data['costo']),
     );
 
     $this->db->update('compras_salidas_labores', $updateData, array('id_labor' => $id_labor));

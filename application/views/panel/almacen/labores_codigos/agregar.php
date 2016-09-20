@@ -45,6 +45,15 @@
                 </div>
               </div><!--/control-group -->
 
+              <div class="control-group">
+                <label class="control-label" for="costo">Costo x hr </label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <input type="text" name="costo" class="span11" id="costo" value="<?php echo set_value('costo') ?>" maxlength="20" required>
+                  </div>
+                </div>
+              </div><!--/control-group -->
+
             </div>
 
             <div class="span6">

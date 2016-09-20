@@ -763,7 +763,7 @@ var calculaKilosNeto = function () {
       kilos_netos = Math.abs(parseFloat($inputBruto.val() || 0) - parseFloat($inputTara.val() || 0)) - (parseFloat($inputCajasP.val() || 0) * 2);
 
   if ( parseFloat($inputNeto2.val() || 0) > 0) {
-    $inputNeto.val( parseFloat($inputNeto2.val() || 0) - (parseFloat($inputCajasP.val() || 0) * 2) );
+    $inputNeto.val( parseFloat($inputNeto2.val() || 0) ); // - (parseFloat($inputCajasP.val() || 0) * 2)
     $("#info_kilos_netos").text(kilos_netos);
   } else {
     $inputNeto.val( kilos_netos );
