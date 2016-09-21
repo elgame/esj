@@ -443,7 +443,7 @@ class bodega_guadalajara_model extends CI_Model {
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
-      WHERE f.is_factura = 'f' AND f.serie = 'R' AND c.nombre_fiscal = 'BODEGA DE GUADALAJARA'
+      WHERE f.status <> 'ca' AND f.is_factura = 'f' AND f.serie = 'R' AND c.nombre_fiscal = 'BODEGA DE GUADALAJARA'
         AND Date(f.fecha + interval '1 day') = '{$fecha}' AND f.folio <> 4487
       ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC"
     );
@@ -483,7 +483,7 @@ class bodega_guadalajara_model extends CI_Model {
         INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
         INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
-      WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+      WHERE f.status <> 'ca' AND f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
         AND Date(f.fecha) = '{$fecha}'
       ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC
     ");

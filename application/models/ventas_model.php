@@ -1959,7 +1959,7 @@ class Ventas_model extends privilegios_model{
         ((isset($factura['info']->empresa->colonia)) ? ' Col. '.$factura['info']->empresa->colonia : '').
         ((isset($factura['info']->empresa->estado)) ? ', '.$factura['info']->empresa->estado : '').
         ((isset($factura['info']->empresa->pais)) ? ', '.$factura['info']->empresa->pais : '')
-      ), false, false, 5);
+      ), false, false, 7);
 
     $pdf->SetXY(0, $pdf->GetY()+2);
     $pdf->SetFont($pdf->fount_txt, '', 8);
