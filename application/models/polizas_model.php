@@ -106,6 +106,34 @@ class polizas_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaIvaRetXPagar100($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //sanjorge
+    elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '100% RETENCION IVA X PAGAR'"; //francis -
+    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA X PAGAR'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //plasticos
+    else{
+      $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
+  public function getCuentaIvaRetPagado100($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //sanjorge
+    elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '100% RETENCION IVA PAGADO'"; //francis -
+    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA PAGADO'"; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //plasticos
+    else{
+      $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaIvaRetXPagar($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //sanjorge
@@ -2076,7 +2104,11 @@ class polizas_model extends CI_Model {
 
           $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagar();
           $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagado();
-          if($ret_iva_pos > 4.5)
+          if($ret_iva_pos > 15)
+          { // Asigana las cuentas de retencion al 100%
+            $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagar100();
+            $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagado100();
+          }elseif($ret_iva_pos > 4.5)
           { // Asigana las cuentas de honorarios
             $impuestos['iva_retener']['cuenta_cpi']    = $this->getCuentaIvaRetXPagarHono();
             $impuestos['iva_retenido']['cuenta_cpi']   = $this->getCuentaIvaRetPagadoHono();

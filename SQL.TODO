@@ -1,5 +1,5 @@
 
- ☐ No impreciones boleta recepcion
+ ✔ No impreciones boleta recepcion @done (16-09-22 11:05)
    ALTER TABLE public.bascula ADD COLUMN no_imp_recepcion smallint NOT NULL DEFAULT 0;
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('BanCoppel','ac','137');
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('Inbursa','ac','36');

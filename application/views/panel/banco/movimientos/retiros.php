@@ -161,7 +161,7 @@
 										<div class="control-group">
 										  <label class="control-label" for="fcuenta_destino">Cuenta </label>
 										  <div class="controls">
-												<select name="fcuenta_destino" id="fcuenta_destino" required>
+												<select name="fcuenta_destino" id="fcuenta_destino">
 										<?php
 										foreach ($cuentas['cuentas'] as $key => $value) {
 											$select = set_select('fcuenta_destino', $value->id_cuenta);
