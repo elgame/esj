@@ -130,7 +130,7 @@
                     <div class="row-fluid">
                       <div class="span12">
                         <!-- <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button> -->
-                        <a href="#modalPagos" class="btn btn-success span3 pull-right" role="button" data-toggle="modal">Pagar</a>
+                        <a href="#modalPagos" class="btn btn-success span3 pull-right <?php echo ($_GET['fid_proveedor']>0? '': 'hidden') ?>" role="button" data-toggle="modal">Pagar</a>
                         <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
                       </div>
                     </div>

@@ -81,9 +81,12 @@
       else
         $tipo = "SALIDAS";
 		$titulo2 = "MOVIMIENTOS DE CUENTA - {$tipo} <".$area['info']->nombre."> DEL DIA " . $fechaini->format('d/m/Y') . " AL " . $fechaend->format('d/m/Y');
-    $titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") <br> FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
 
-		$pdf = new mypdf_ticket();
+	$titulo3 = '';
+    if (isset($proveedor['info']->nombre_fiscal))
+    	$titulo3 = strtoupper($proveedor['info']->nombre_fiscal) . " (CTA: " .$proveedor['info']->cuenta_cpi . ") <br> FECHA/HORA DEL REPORTE: " . date('d/m/Y H:i:s');
+
+	$pdf = new mypdf_ticket();
 	?>
 	<h2><?php echo $pdf->titulo1; ?></h2>
 	<h3><?php echo $titulo2; ?></h3>

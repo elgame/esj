@@ -1,10 +1,10 @@
 $(function(){
   $("#frmcombus").submit(function(event) {
-    if($("#fid_vehiculo").val() != '')
-      return true;
-    else
-      noty({"text":"El vehivulo es requerido", "layout":"topRight", "type":"error"});
-      return false;
+    // if($("#fid_vehiculo").val() != '')
+    //   return true;
+    // else
+    //   noty({"text":"El vehivulo es requerido", "layout":"topRight", "type":"error"});
+    //   return false;
   });
 	// Autocomplete para los Vehiculos.
     $("#fvehiculo").autocomplete({

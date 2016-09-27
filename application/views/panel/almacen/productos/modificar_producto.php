@@ -58,6 +58,18 @@
 
               <div class="span6">
                 <div class="control-group">
+                  <label class="control-label" for="ffamilia">Familia </label>
+                  <div class="controls">
+                    <select name="ffamilia" id="ffamilia" class="span12" required>
+                  <?php foreach ($familias['familias'] as $key => $value)
+                  { ?>
+                      <option value="<?php echo $value->id_familia; ?>" <?php echo set_select('ffamilia', $value->id_familia, false, (isset($data['info']->id_familia)? $data['info']->id_familia: '')); ?>><?php echo $value->nombre; ?></option>
+                  <?php } ?>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="fcodigo">Codigo </label>
                   <div class="controls">
                     <input type="text" name="fcodigo" value="<?php echo set_value('fcodigo', (isset($data['info']->codigo)? $data['info']->codigo: '')) ?>" id="fcodigo" class="span12" axlength="25" placeholder="Codigo" required autofocus>
@@ -68,7 +80,7 @@
                   <label class="control-label" for="fnombre">Nombre </label>
                   <div class="controls">
                     <input type="text" name="fnombre" id="fnombre" class="span12" maxlength="90"
-                    value="<?php echo set_value('fcodigo', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
+                    value="<?php echo set_value('fnombre', (isset($data['info']->nombre)? $data['info']->nombre: '')) ?>" required placeholder="Nombre del producto">
                   </div>
                 </div>
 

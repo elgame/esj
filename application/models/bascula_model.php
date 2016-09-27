@@ -713,8 +713,8 @@ class bascula_model extends CI_Model {
         'no_pagados'  => 0,
       );
 
-    if (isset($_GET['fid_proveedor']))
-    {
+    // if (isset($_GET['fid_proveedor']))
+    // {
       $sql = '';
 
       $_GET['fechaini'] = $this->input->get('fechaini') != '' ? $_GET['fechaini'] : date('Y-m-01');
@@ -841,7 +841,7 @@ class bascula_model extends CI_Model {
         $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
 
       $data['movimientos'] = $movimientos;
-    }
+    // }
 
     return $data;
   }

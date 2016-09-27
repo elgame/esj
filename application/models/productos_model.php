@@ -265,7 +265,7 @@ class productos_model extends CI_Model {
 	{
 		if ($data==NULL)
 		{
-			$familia = $this->getFamiliaInfo($this->input->get('fid_familia'));
+			$familia = $this->getFamiliaInfo($this->input->post('ffamilia')); // fid_familia
 			$data = array(
 				'id_empresa' => $familia['empresa']->id_empresa,
 				'id_familia' => $familia['info']->id_familia,
@@ -273,7 +273,7 @@ class productos_model extends CI_Model {
 				'codigo'     => $this->input->post('fcodigo'),
 				'nombre'     => $this->input->post('fnombre'),
 				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-        'ubicacion'  => $this->input->post('ubicacion'),
+        		'ubicacion'  => $this->input->post('ubicacion'),
 				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
 				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
 				);

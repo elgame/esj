@@ -14,6 +14,28 @@ var cuentas = (function($){
 		$("#tableCuentas").on('click', '.delProd', onClickDeleteCuenta);
 		$("#tableCuentas").on('keypress', '.prod_cantidad', onKeypressAddRow);
 
+    // busca la boleta.
+    $("#fboleta").on("change", function(event) {
+      $.ajax({
+          url: base_url + 'panel/bascula/ajax_load_folio/',
+          dataType: "json",
+          data: {
+                folio: (parseInt($("#fboleta").val())||0),
+                tipo: 'en',
+                area: $("#fid_area").val(),
+              },
+          success: function(data) {
+            if (parseFloat(data) > 0) {
+              $("#fid_bascula").val(data);
+              $("#fboleta").css("background-color", "#A1F57A");
+            } else {
+              $("#fid_bascula").val('');
+              $("#fboleta").css("background-color", "#FFD071");
+            }
+          }
+      });
+    });
+
 		// Autocomplete para los Vehiculos.
     $("#fvehiculo").autocomplete({
       source: base_url + 'panel/vehiculos/ajax_get_vehiculos/',
@@ -88,6 +110,32 @@ var cuentas = (function($){
 	      $('#fencargadoId').val('');
 	    }
 	  });
+
+    $("#frecibe").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        params.empleados = 'true';
+        $.ajax({
+            url: base_url + 'panel/usuarios/ajax_get_usuarios/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#frecibeId").val(ui.item.id);
+        $("#frecibe").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+       $(this).css({'background-color': '#FFD9B3'});
+        $('#frecibeId').val('');
+      }
+    });
 
 	  $('#tableCuentas').on('focus', 'input#prod_ddescripcion:not(.ui-autocomplete-input)', function(event) {
 	    $(this).autocomplete({

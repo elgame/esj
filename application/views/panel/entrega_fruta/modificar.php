@@ -46,6 +46,15 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="fboleta"># Boleta </label>
+                    <div class="controls">
+                      <input type="number" name="fboleta" id="fboleta" class="span10" value="<?php echo isset($data->basc_boleta)?$data->basc_boleta:''; ?>" required>
+                      <input type="hidden" name="fid_bascula" id="fid_bascula" class="span10" value="<?php echo isset($data->id_bascula)?$data->id_bascula:''; ?>">
+                      <input type="hidden" name="fid_area" id="fid_area" class="span10" value="<?php echo isset($data->id_area)?$data->id_area:''; ?>">
+                    </div>
+                  </div>
+
                   <div class="control-group tipo3" id="productos">
                     <label class="control-label" for="codigoArea">Rancho </label>
                     <div class="controls">
@@ -81,9 +90,10 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="fno"># (Melga/Seccion) </label>
+                    <label class="control-label" for="frecibe">Recibe </label>
                     <div class="controls">
-                      <input type="number" name="fno" id="fno" class="span10" value="<?php echo isset($data->no)?$data->no:''; ?>" required>
+                      <input type="text" name="frecibe" id="frecibe" class="span10" value="<?php echo isset($data->recibe[0]->id)?$data->recibe[0]->nombre.' '.$data->recibe[0]->apellido_paterno:''; ?>" required>
+                      <input type="hidden" name="frecibeId" id="frecibeId" class="span10" value="<?php echo isset($data->recibe[0]->id)?$data->recibe[0]->id:''; ?>">
                     </div>
                   </div>
 
@@ -96,8 +106,8 @@
                         <th>Clasf</th>
                         <th># Piso</th>
                         <th>Estibas</th>
-                        <th>Altura</th>
-                        <th>Cantidad</th>
+                        <th>Melga</th>
+                        <th>Piezas</th>
                         <th>OPC</th>
                       </tr>
                     </thead>

@@ -1,4 +1,9 @@
 
+
+ ☐ Entrega de fruta
+   ALTER TABLE otros.entrega_fruta ADD COLUMN id_bascula bigint;
+   ALTER TABLE otros.entrega_fruta ADD COLUMN id_recibe bigint;
+
  ✔ No impreciones boleta recepcion @done (16-09-22 11:05)
    ALTER TABLE public.bascula ADD COLUMN no_imp_recepcion smallint NOT NULL DEFAULT 0;
    INSERT INTO banco_bancos(nombre, status, codigo) VALUES ('BanCoppel','ac','137');

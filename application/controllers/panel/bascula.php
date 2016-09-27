@@ -793,9 +793,9 @@ class bascula extends MY_Controller {
    */
   public function movimientos()
   {
-    if (isset($_GET['fid_proveedor']))
-      if ($_GET['fid_proveedor'] == '')
-        redirect(base_url('panel/bascula/movimientos/?msg=13'));
+    // if (isset($_GET['fid_proveedor']))
+    //   if ($_GET['fid_proveedor'] == '')
+    //     redirect(base_url('panel/bascula/movimientos/?msg=13'));
 
     $this->carabiner->js(array(
       array('general/msgbox.js'),

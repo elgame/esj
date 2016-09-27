@@ -276,7 +276,7 @@ class productos extends MY_Controller {
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('general/msgbox.js'),
-        array('libs/jquery.numeric.js'),
+        		array('libs/jquery.numeric.js'),
 				array('panel/almacen/agregar_familias.js'),
 			));
 
@@ -303,6 +303,7 @@ class productos extends MY_Controller {
 
 			$params['unidades'] = $this->productos_model->getUnidades(false);
 			$params['data']     = $this->productos_model->getProductoInfo($_GET['id']);
+			$params['familias'] = $this->productos_model->getFamilias(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -416,9 +417,9 @@ class productos extends MY_Controller {
 			array('field' => 'ubicacion',
 						'label' => 'Ubicacion',
 						'rules' => 'max_length[70]'),
-      array('field' => 'fieps',
-            'label' => 'IEPS',
-            'rules' => 'numeric'),
+	      array('field' => 'fieps',
+			            'label' => 'IEPS',
+			            'rules' => 'numeric'),
 			array('field' => 'cuenta_contpaq',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'max_length[12]'),
@@ -431,10 +432,12 @@ class productos extends MY_Controller {
 						'rules' => ''),
 		);
 
-		// if ($accion == 'modificar')
-		// {
-		// 	$rules[0]['rules'] = 'required|max_length[25]|callback_val_codigo['.$accion.']';
-		// }
+		if ($accion == 'modificar')
+		{
+			$rules[] = array('field' => 'ffamilia',
+			            'label' => 'Familia',
+			            'rules' => 'numeric|callback_val_familia');
+		}
 
 		$this->form_validation->set_rules($rules);
 	}
@@ -442,17 +445,40 @@ class productos extends MY_Controller {
 	public function val_codigo($str, $tipo)
 	{
 		$sql = '';
-		if($tipo == 'modificar')
+		$id_familia = $this->input->get('fid_familia');
+		if($tipo == 'modificar') {
 			$sql = " AND id_producto <> ".$this->input->get('id')."";
+			$id_familia = $this->input->post('ffamilia');
+		}
 
 		$res = $this->db->select('Count(id_producto) AS num')
 			->from('productos')
-			->where("status <> 'e' AND id_familia = ".$this->input->get('fid_familia')." AND codigo = '".$str."'".$sql)->get()->row();
+			->where("status <> 'e' AND id_familia = ".$id_familia." AND codigo = '".$str."'".$sql)->get()->row();
 		if($res->num == '0')
 			return true;
 
 		$this->form_validation->set_message('val_codigo', 'El codigo ya esta utilizado.');
 		return false;
+	}
+
+	public function val_familia($str)
+	{
+		$sql = '';
+		if ($str != $this->input->get('fid_familia')) {
+			$res1 = $this->db->select('*')->from('productos_familias')->where("id_familia = ".$this->input->get('fid_familia'))->get()->row();
+			$res2 = $this->db->select('*')->from('productos_familias')->where("id_familia = ".$str)->get()->row();
+			if($res1->tipo != $res2->tipo) {
+				$tipo = '';
+				switch ($res1->tipo) {
+					case 'p': $tipo = 'Producto'; break;
+					case 'd': $tipo = 'Servicio'; break;
+					case 'f': $tipo = 'Flete'; break;
+				}
+				$this->form_validation->set_message('val_familia', 'La familia a la que quiere trasladar no es del Tipo '.$tipo.'.');
+				return false;
+			}
+		}
+		return true;
 	}
 
 

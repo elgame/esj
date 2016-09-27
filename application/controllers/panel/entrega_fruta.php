@@ -184,6 +184,8 @@ class entrega_fruta extends MY_Controller {
 	    $pdf->SetAutoPageBreak(false);
 	    $pdf->AddPage();
 	    $x = $y = 5;
+      $this->entrega_fruta_model->printRecibo( $_GET['id'], $pdf, $x, $y );
+      $x = 109;
 			$this->entrega_fruta_model->printRecibo( $_GET['id'], $pdf, $x, $y );
 			$pdf->Output('Reporte.pdf', 'I');
 		}
@@ -232,9 +234,15 @@ class entrega_fruta extends MY_Controller {
 				array('field' => 'fencargadoId',
 							'label' => 'Encargado',
 							'rules' => 'required'),
-				array('field' => 'fno',
-							'label' => '#',
-							'rules' => 'required'),
+        array('field' => 'frecibeId',
+              'label' => 'Recibe',
+              'rules' => 'required'),
+				array('field' => 'fboleta',
+							'label' => '# Boleta',
+							'rules' => 'required|numeric'),
+        array('field' => 'fid_bascula',
+              'label' => '# Boleta',
+              'rules' => 'required|numeric'),
 
 				array('field'	=> 'prod_did_prod[]',
 						'label'	=> 'Clasf',

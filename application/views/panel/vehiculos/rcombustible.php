@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/vehiculos/combustible_pdf/'); ?>" method="GET" id="frmcombus" class="form-search" target="frame_reporte">
+            <form action="<?php echo base_url('panel/vehiculos/combustible_general_pdf/'); ?>" method="GET" id="frmcombus" class="form-search" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -33,8 +33,8 @@
                   <label class="control-label" for="fvehiculo">Vehiculo</label>
                   <div class="controls">
                     <input type="text" name="fvehiculo"
-                      value="<?php echo set_value_get('fvehiculo', $this->input->get('fvehiculo')) ?>" id="fvehiculo" class="span12" placeholder="Nombre" required>
-                    <input type="hidden" name="fid_vehiculo" value="<?php echo set_value_get('fid_vehiculo', $this->input->get('fid_vehiculo')) ?>" id="fid_vehiculo" required>
+                      value="<?php echo set_value_get('fvehiculo', $this->input->get('fvehiculo')) ?>" id="fvehiculo" class="span12" placeholder="Nombre">
+                    <input type="hidden" name="fid_vehiculo" value="<?php echo set_value_get('fid_vehiculo', $this->input->get('fid_vehiculo')) ?>" id="fid_vehiculo">
                   </div>
                 </div>
 
@@ -53,7 +53,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/vehiculos/combustible_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
+      <iframe id="frame_reporte" name="frame_reporte" src="<?php echo base_url('panel/vehiculos/combustible_general_pdf/'); ?>" style="width: 100%;height: 475px;"></iframe>
 
     </div><!--/#content.span9-->
 

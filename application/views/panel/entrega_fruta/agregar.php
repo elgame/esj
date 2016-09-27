@@ -46,7 +46,7 @@
 									  <div class="controls">
 											<input type="number" name="fno_formatos" id="fno_formatos" class="span12" value="<?php echo set_value('fno_formatos'); ?>"
 												maxlength="7" placeholder="102" required>
-											<p class="help-block">Cada hoja tiene 4 formatos</p>
+											<p class="help-block"></p>
 									  </div>
 									</div>
 

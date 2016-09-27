@@ -68,7 +68,7 @@ class entrega_fruta_model extends CI_Model {
  	 */
 	public function addEntradas($data)
 	{
-		$data['fno_formatos'] = $data['fno_formatos']>0? $data['fno_formatos']*4: 0;
+		$data['fno_formatos'] = $data['fno_formatos']>0? $data['fno_formatos']*1: 0;
 		$response = '';
 		for ($i=0; $i < $data['fno_formatos']; $i++) {
 			$datos = [
@@ -99,7 +99,9 @@ class entrega_fruta_model extends CI_Model {
 						'id_vehiculo'         => $this->input->post('vehiculoId'),
 						'id_usuario'          => $this->input->post('fchoferId'),
 						'id_encargado'        => $this->input->post('fencargadoId'),
-						'no'                  => $this->input->post('fno'),
+            'no'                  => '',
+            'id_bascula'          => $this->input->post('fid_bascula'),
+						'id_recibe'           => $this->input->post('frecibeId'),
 						'total'               => 0,
 						);
 		}
@@ -131,15 +133,19 @@ class entrega_fruta_model extends CI_Model {
 	{
 		$id_entrega = $id_entrega ? $id_entrega : (isset($_GET['id'])? $_GET['id']: 0) ;
 
-		$sql_res = $this->db->query("SELECT id_entrega_fruta, id_area, folio, COALESCE(fecha_captura, fecha_registro) AS fecha, id_cat_codigos_rnch,
-																	id_vehiculo, id_usuario, no, id_encargado, total
-		                           FROM otros.entrega_fruta
-		                           WHERE id_entrega_fruta = ".$id_entrega);
+		$sql_res = $this->db->query("SELECT ef.id_entrega_fruta, ef.id_area, ef.folio, COALESCE(ef.fecha_captura, ef.fecha_registro) AS fecha, ef.id_cat_codigos_rnch,
+																	ef.id_vehiculo, ef.id_usuario, ef.no, ef.id_encargado, ef.total, ef.id_recibe,
+                                  b.id_bascula, b.folio AS basc_boleta, b.kilos_neto, b.kilos_neto2
+		                           FROM otros.entrega_fruta ef LEFT JOIN bascula b ON b.id_bascula = ef.id_bascula
+		                           WHERE ef.id_entrega_fruta = ".$id_entrega);
 		$data['info'] = array();
 
 		if ($sql_res->num_rows() > 0)
 		{
 			$data['info']	= $sql_res->row();
+
+      if ($data['info']->kilos_neto <= 0)
+        $data['info']->kilos_neto = $data['info']->kilos_neto2;
 
 			if ($basic_info == false) {
 				$datares = $this->db->query("SELECT ef.row, ef.id_clasificacion, ef.piso, ef.estibas, ef.altura, ef.cantidad,
@@ -169,6 +175,10 @@ class entrega_fruta_model extends CI_Model {
 					$this->load->model('usuarios_model');
 					$data['info']->encargado = $this->usuarios_model->get_usuario_info($data['info']->id_encargado, true)['info'];
 				}
+        if (isset($data['info']->id_recibe)) {
+          $this->load->model('usuarios_model');
+          $data['info']->recibe = $this->usuarios_model->get_usuario_info($data['info']->id_recibe, true)['info'];
+        }
 			}
 		}
 		$sql_res->free_result();
@@ -305,20 +315,16 @@ class entrega_fruta_model extends CI_Model {
     $pdf->SetMargins(0, 0, 0);
     $pdf->SetAutoPageBreak(false);
 
-    $x = $y = 0;
+    $x = $y = 5;
     $no_rec = 1;
     foreach ($hojas as $key => $value) {
-    	if ($key % 4 == 0) {
+    	if ($key % 1 == 0) {
     		$pdf->AddPage();
-    		$x = $y = 0;
+    		$x = $y = 5;
     		$no_rec = 1;
     	}
-    	if ($no_rec === 2 || $no_rec === 4)
-    		$x = 107.5;
-    	elseif ($no_rec === 3){
-    		$x = 0;
-    		$y = 137.5;
-    	}
+      $this->printRecibo($value, $pdf, $x, $y);
+      $x = 109;
     	$this->printRecibo($value, $pdf, $x, $y);
     	$no_rec++;
     }
@@ -335,12 +341,12 @@ class entrega_fruta_model extends CI_Model {
 
   	$pdf->SetXY($x, $y+8);
     $pdf->SetAligns(['L', 'R']);
-    $pdf->SetWidths([53.5, 53.5]);
+    $pdf->SetWidths([49, 53]);
     $pdf->Row(['Entrada de Fruta a Empaque', (isset($data->area->nombre)? $data->area->nombre: '')], false, false);
 
   	$pdf->SetFont('Arial', 'B', 8);
     $pdf->SetAligns(['R', 'L']);
-    $pdf->SetWidths([30, 77]);
+    $pdf->SetWidths([25, 77]);
     $pdf->SetX($x);
     $pdf->Row(['Folio', (isset($data->folio)? $data->folio: '')], false, true);
     $pdf->SetFont('Arial', '', 7);
@@ -354,20 +360,22 @@ class entrega_fruta_model extends CI_Model {
     $pdf->Row(['Placas', (isset($data->vehiculo)? $data->vehiculo->placa: '')], false, true);
     $pdf->SetX($x);
     $pdf->Row(['Chofer', (isset($data->chofer[0])? $data->chofer[0]->nombre.' '.$data->chofer[0]->apellido_paterno: '')], false, true);
+    $pdf->SetAligns(['R', 'L', 'R', 'L']);
+    $pdf->SetWidths([25, 35, 15, 27]);
     $pdf->SetX($x);
-    $pdf->Row(['# Melga', (isset($data->no)? $data->no: '')], false, true);
+    $pdf->Row(['# Boleta', $data->basc_boleta, 'Kgs Neto', $data->kilos_neto], false, true);
 
     $pdf->SetX($x);
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetAligns(['C']);
-    $pdf->SetWidths([107]);
+    $pdf->SetWidths([102]);
     $pdf->Row(['Cantidad de fruta'], false, true);
 
     $pdf->SetFont('Arial', '', 7);
     $pdf->SetAligns(['C', 'C', 'C', 'C', 'C']);
-    $pdf->SetWidths([21.4, 21.4, 21.4, 21.4, 21.4]);
+    $pdf->SetWidths([21.4, 20.15, 20.15, 20.15, 20.15]);
     $pdf->SetX($x);
-    $pdf->Row(['Clasf', '# Piso', 'Estibas', 'Altura', 'Cantidad'], false, true);
+    $pdf->Row(['Clasf', '# Piso', 'Estibas', 'Melga', 'Piezas'], false, true);
     $total_cantidad = 0;
     if (isset($data->fruta) && count($data->fruta) > 0) {
     	foreach ($data->fruta as $key => $value) {
@@ -376,20 +384,24 @@ class entrega_fruta_model extends CI_Model {
 		    $total_cantidad += $value->cantidad;
     	}
     } else {
-	    for ($i=0; $i < 7; $i++) {
+	    for ($i=0; $i < 23; $i++) {
 		    $pdf->SetX($x);
 		    $pdf->Row(['', '', '', '', ''], false, true);
 	    }
 	  }
 	  $pdf->SetAligns(['R', 'L']);
-    $pdf->SetWidths([85.6, 21.4]);
+    $pdf->SetWidths([81.85, 20.15]);
 	  $pdf->SetX($x);
 		$pdf->Row(['Total', $total_cantidad], false, true);
 
     $pdf->SetAligns(['R', 'L']);
-    $pdf->SetWidths([30, 77]);
+    $pdf->SetWidths([25, 77]);
     $pdf->SetX($x);
     $pdf->Row(['Encargado', (isset($data->encargado[0])? $data->encargado[0]->nombre.' '.$data->encargado[0]->apellido_paterno: '')], false, true);
+    $pdf->SetX($x);
+    $pdf->Row(['Firma', ''], false, true);
+    $pdf->SetX($x);
+    $pdf->Row(['Recibe', (isset($data->recibe[0])? $data->recibe[0]->nombre.' '.$data->recibe[0]->apellido_paterno: '')], false, true);
     $pdf->SetX($x);
     $pdf->Row(['Firma', ''], false, true);
   }

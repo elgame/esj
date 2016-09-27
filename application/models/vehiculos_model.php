@@ -161,6 +161,201 @@ class vehiculos_model extends CI_Model {
 	}
 
 
+  /**
+   * Reporte de existencias por costo
+   * @return [type] [description]
+   */
+  public function getRCombustibleGeneralData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+    $sqlf1 = " AND Date(c.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+    $sqlf2 = " AND Date(c.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'";
+
+    if($this->input->get('fid_vehiculo') == '') $_GET['fid_vehiculo'] = 0;
+    if ($_GET['fid_vehiculo'] > 0)
+      $sql .= " AND id_vehiculo = ".$this->input->get('fid_vehiculo');
+
+    // $this->load->model('empresas_model');
+    // $client_default = $this->empresas_model->getDefaultEmpresa();
+    // $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    // $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+      // if($this->input->get('did_empresa') != ''){
+      //   $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+      // }
+
+    $vehiculos = $this->db->query("SELECT * FROM compras_vehiculos WHERE status = 't' {$sql} ORDER BY (placa || ' ' || modelo || ' ' || marca) ASC")->result();
+
+    $res_vehiculo = array();
+    foreach ($vehiculos as $key => $vehiculo) {
+      //Gasolina
+      $res = $this->db->query(
+        "(
+          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='g' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          ORDER BY c.fecha_creacion ASC
+          LIMIT 1
+        )
+        UNION
+        (
+          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='g' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          ORDER BY c.fecha_creacion DESC
+          LIMIT 1
+        )
+        UNION
+        (
+          SELECT cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
+            0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='g' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          GROUP BY cv.id_vehiculo
+        )
+        ")->result();
+      if (count($res) == 3) {
+        $res[2]->nombre     = $res[0]->nombre;
+        $res[2]->kilometros = $res[1]->kilometros-$res[0]->kilometros;
+        $res[2]->litros     = $res[2]->litros-$res[0]->litros;
+        $res[2]->km_litro     = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
+        $res[2]->id_empresa = $res[0]->id_empresa;
+        $res_vehiculo[] = $res[2];
+      }
+
+      //Disel
+      $res = $this->db->query(
+        "(
+          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          ORDER BY c.fecha_creacion ASC
+          LIMIT 1
+        )
+        UNION
+        (
+          SELECT cv.id_vehiculo, (placa || ' ' || modelo || ' ' || marca) AS nombre, cvg.kilometros, cvg.litros, cvg.precio, Date(c.fecha_creacion) AS fecha,
+            (cvg.litros * cvg.precio) AS total, c.id_empresa, c.folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          ORDER BY c.fecha_creacion DESC
+          LIMIT 1
+        )
+        UNION
+        (
+          SELECT cv.id_vehiculo, ''::text AS nombre, 0 AS kilometros, Sum(cvg.litros) AS litros, 0 AS precio, null AS fecha,
+            0 AS total, 0 AS id_empresa, 0 AS folio, 'Gasolina' AS tipo
+          FROM compras_ordenes AS c
+            INNER JOIN compras_vehiculos_gasolina AS cvg ON c.id_orden = cvg.id_orden
+            INNER JOIN compras_vehiculos AS cv ON cv.id_vehiculo = c.id_vehiculo
+          WHERE c.status<>'ca' AND c.tipo_vehiculo='d' AND cv.id_vehiculo = {$vehiculo->id_vehiculo} {$sqlf1}
+          GROUP BY cv.id_vehiculo
+        )
+        ")->result();
+      if (count($res) == 3) {
+        $res[2]->nombre     = $res[0]->nombre;
+        $res[2]->kilometros = $res[1]->kilometros-$res[0]->kilometros;
+        $res[2]->litros     = $res[2]->litros-$res[0]->litros;
+        $res[2]->km_litro     = $res[2]->kilometros/($res[2]->litros>0 ? $res[2]->litros : 1);
+        $res[2]->id_empresa = $res[0]->id_empresa;
+        $res_vehiculo[] = $res[2];
+      }
+    }
+
+    // echo "<pre>";
+    //   var_dump($res_vehiculo);
+    // echo "</pre>";exit;
+
+    return $res_vehiculo;
+  }
+  /**
+   * Reporte rendimiento de combustible general pdf
+   */
+  public function getRCombustibleGeneralPdf()
+  {
+    $this->load->model('empresas_model');
+    $vehiculos = $this->getRCombustibleGeneralData();
+
+    $id_empresa = isset($vehiculos->id_empresa)?$vehiculos->id_empresa:0;
+    $empresa22 = $this->empresas_model->getInfoEmpresa($id_empresa);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    if(isset($empresa22['info']->nombre_fiscal)){
+      $pdf->titulo1 = $empresa22['info']->nombre_fiscal;
+      $pdf->logo = $empresa22['info']->logo;
+    }
+    $pdf->titulo2 = 'Reporte de Vehiculo';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'R', 'R', 'R', 'R');
+    $widths = array(76, 15, 41, 35, 35);
+    $header = array('Vehiculo', 'Tipo', 'Km/Recorridos', 'Litros', 'Km/L');
+
+    foreach($vehiculos as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        if ($key == 0)
+        {
+          $pdf->SetFont('Arial','B',11);
+          $pdf->SetX(6);
+          $pdf->SetAligns(array('L'));
+          $pdf->SetWidths(array(120));
+          $pdf->Row(array('Bitácora de Rendimiento de Combustible'), false, false);
+        }
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+      }
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array($item->nombre,
+        $item->tipo,
+        String::formatoNumero($item->kilometros, 2, ''),
+        String::formatoNumero($item->litros, 2, ''),
+        String::formatoNumero($item->km_litro, 2, '')
+        );
+
+      $pdf->SetX(6);
+      $_GET['fid_vehiculo'] = $item->id_vehiculo;
+      $pdf->SetMyLinks(array(base_url('panel/vehiculos/combustible_pdf/?'.String::getVarsLink(array('msg'))), '', '', '', ''));
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false);
+    }
+
+    $pdf->Output('vehiculo.pdf', 'I');
+  }
+
 	/**
 	 * Reporte de existencias por costo
 	 * @return [type] [description]
