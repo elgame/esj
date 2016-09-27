@@ -590,7 +590,8 @@ class vehiculos_model extends CI_Model {
 					);
 				if ($key > 0)
 				{
-					$rendimiento = ($item->kilometros - $res['disel'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
+          $rendimiento = ($item->kilometros - $res['disel'][$key-1]->kilometros)/($item->litros>0? $item->litros: 1);
+					$rendimiento = $rendimiento==0? 1 : $rendimiento;
           $datos[2] = String::formatoNumero($item->kilometros - $res['disel'][$key-1]->kilometros, 2, '');
 
 					$datos[4] = String::formatoNumero( $rendimiento , 2, '');
