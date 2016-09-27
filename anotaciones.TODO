@@ -1,9 +1,10 @@
 
+ ☐ Bodega guadalajara en los tickets poner lo de original y copias, Al agregar remision si seleccionan bodega cargar folio automatico y cursor en clientes, poner boton de imprimir ticket y guardar la remision
 
  ✔ En productos agregar para poder cambiar los productos de familia @done (16-09-26 13:16)
  ✔ En el apartado entrada de fruta cambiar el formato como la hoja (agregar mas renglones, poner copia aun lado, agregar boleta y q ponga los kilos, agregar campos extas) @done (16-09-26 17:55)
  ✔ En bascula reporte de movimientos poner opcional el seleccionar el cliente o proveedor @done (16-09-26 10:24)
- ☐ Agregar a reporte de combustible reporte concentrado y unir con el desglosado como esta ahorita
+ ✔ 2h Agregar a reporte de combustible reporte concentrado y unir con el desglosado como esta ahorita @done (16-09-27 10:37)
  ✔ En cuentas de proveedores agregar bancos de inbursa, bajio, bancopel @done (16-08-19 08:29)
  ✔ 0.3h En cajas chicas reportes de gastos e ingresos meter filtros de concepto (para buscar proveedor y cliente) y filtro de caja @done (16-08-17 15:40)
  ✔ En contrarecivos ordenarlo por folio decendente @done (16-08-04 12:37)
@@ -11,7 +12,7 @@
  ✔ 0.13h boleta de recepcion que diga si es original o copias @done (16-08-17 18:43)
  ☐ Ver el programa de cheques (compras a cheques), en cheques de reposicion ver donde se inserta y que la poliza de cheques solo tenga un movimiento en bancos que no registre por proveedor y tambien que cargue los cheques cancelados
 
-********************************************
+******************************************** Facturado
 
 ✔ .51h Reporte de cuentas por pagar en los productos facturados poner el numero de certificado o poliza de seguro @done (16-07-17 13:51)
   que se pone en los datos de la factura y el numero de operacion
