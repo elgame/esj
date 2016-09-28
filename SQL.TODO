@@ -1,5 +1,7 @@
 
-
+ ☐ Bodega gdl
+   ALTER TABLE public.facturacion_series_folios ADD COLUMN default_serie boolean NOT NULL DEFAULT false;
+   ALTER TABLE public.facturacion ADD COLUMN no_impresiones_tk integer NOT NULL DEFAULT 0;
  ☐ Entrega de fruta
    ALTER TABLE otros.entrega_fruta ADD COLUMN id_bascula bigint;
    ALTER TABLE otros.entrega_fruta ADD COLUMN id_recibe bigint;

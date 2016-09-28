@@ -138,6 +138,8 @@ class ventas extends MY_Controller {
       {
         if(isset($_POST['id_nrc']{0}))
           redirect(base_url('panel/ventas/?msg=10'));
+        elseif(isset($_POST['guardar_imp']))
+          redirect(base_url('panel/ventas/agregar/?msg=11&imprimir_tk='.$respons['id_venta']));
         else
           redirect(base_url('panel/documentos/agregar/?msg=3&id='.$respons['id_venta']));
       }
@@ -703,7 +705,13 @@ class ventas extends MY_Controller {
     if(isset($_GET['id']{0}))
     {
       $this->load->model('ventas_model');
-      $this->ventas_model->ticketNotaRemisionPdf($_GET['id']);
+      if($this->input->get('p') == 'true')
+        $this->ventas_model->ticketNotaRemisionPdf($_GET['id']);
+      else {
+        $params['url'] = 'panel/ventas/imprimir_tk/?id='.$_GET['id'].'&p=true';
+        $params['autoclose'] = true;
+        $this->load->view('panel/facturacion/print_view', $params);
+      }
     }
     else
       redirect(base_url('panel/ventas/?msg=1'));
@@ -874,6 +882,10 @@ class ventas extends MY_Controller {
         break;
       case 10:
         $txt = 'La Nota de credito se agrego correctamente.';
+        $icono = 'success';
+        break;
+      case 11:
+        $txt = 'La Remision se agrego correctamente.';
         $icono = 'success';
         break;
     }

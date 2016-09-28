@@ -310,7 +310,7 @@ class facturacion_model extends privilegios_model{
           $this->db->where($sqlX);
 
         $query = $this->db
-          ->select('id_serie_folio, id_empresa, serie, leyenda')
+          ->select('id_serie_folio, id_empresa, serie, leyenda, default_serie')
           ->from('facturacion_series_folios')
           ->where("id_empresa = ".$id_empresa."")
           ->order_by('serie', 'ASC')

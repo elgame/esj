@@ -2154,6 +2154,10 @@ class Ventas_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY()-1);
     $pdf->Row2(array("TOTAL", String::formatoNumero($factura['info']->total, 2, '', true) ), false, false, 5);
 
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->SetFont($pdf->fount_txt, '', 9);
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->Row( array(($factura['info']->no_impresiones_tk==0? 'ORIGINAL': 'COPIA #'.$factura['info']->no_impresiones_tk), ''), false, false );
     $pdf->SetXY(0, $pdf->GetY()+2);
     $pdf->SetFont($pdf->fount_txt, '', 8);
     $pdf->MultiCell($pdf->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
@@ -2210,93 +2214,15 @@ class Ventas_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY()+1.5);
     $pdf->MultiCell($pdf->pag_size[0], 2, 'FIRMA', 0, 'C');
 
-
-    // if($hay_prod_certificados)
-    // {
-    //   if($pdf->GetY() + 12 >= $pdf->limiteY) //salta de pagina si exede el max
-    //       $pdf->AddPage();
-
-    //   $pdf->SetFont('helvetica', 'B', 8);
-    //   $pdf->SetXY(10, $pdf->GetY());
-    //   $pdf->SetAligns(array('L'));
-    //   $pdf->SetWidths(array(196));
-    //   $pdf->Row(array('GGN4052852866927 PRODUCTO CERTIFICADO'), false, 0);
-    // }
-
-    // ////////////////////
-    // // historial      //
-    // ////////////////////
-
-    // if($pdf->GetY() + 15 >= $pdf->limiteY) //salta de pagina si exede el max
-    //     $pdf->AddPage();
-
-    // $yaux = $pdf->GetY()+5;
-    // if (count($hist['facturas']) > 0) {
-    //   $pdf->SetFont('helvetica', 'B', 8);
-    //   $pdf->SetXY(5, $pdf->GetY()+5);
-    //   $pdf->SetAligns(array('L'));
-    //   $pdf->SetWidths(array(19, 20, 30));
-    //   $pdf->Row(array('Fecha', 'Folio', 'Status'), false, true);
-    //   $pdf->SetFont('helvetica', '', 7.5);
-    //   $pdf->SetXY(5, $pdf->GetY()-1);
-    //   foreach ($hist['facturas'] as $key => $value) {
-    //     $status = 'Pendiente';
-    //     if ($value->status == 'pa')
-    //       $status = 'Pagada';
-    //     elseif($value->status == 'ca')
-    //       $status = 'Cancelada';
-    //     elseif($value->status == 'b')
-    //       $status = 'Borrador';
-    //     $pdf->Row(array($value->fecha, $value->serie.$value->folio, $status), false, false);
-    //     $pdf->SetXY(5, $pdf->GetY()-2);
-    //   }
-    // }
-
-    // if (count($hist['abonos_remision']['abonos']) > 0 || count($hist['abonos_factura']['abonos']) > 0) {
-    //   $pdf->SetFont('helvetica', 'B', 8);
-    //   $pdf->SetXY(75, $yaux);
-    //   $pdf->SetAligns(array('L'));
-    //   $pdf->SetWidths(array(19, 20, 70, 25));
-    //   $pdf->Row(array('Fecha', 'Folio', 'Concepto', 'Abono'), false, true);
-    //   $pdf->SetFont('helvetica', '', 7.5);
-    //   $pdf->SetXY(75, $pdf->GetY()-1);
-    //   $total_abanos = 0;
-    //   if (count($hist['abonos_remision']['abonos']) > 0)
-    //     foreach($hist['abonos_remision']['abonos'] as $key => $value) {
-    //       $pdf->Row(array(
-    //           $value->fecha,
-    //           $hist['abonos_remision']['cobro'][0]->serie.$hist['abonos_remision']['cobro'][0]->folio,
-    //           $value->concepto,
-    //           String::formatoNumero($value->abono, 2, '$', false)), false, false);
-    //       $total_abanos += $value->abono;
-    //       $pdf->SetXY(75, $pdf->GetY()-2);
-    //     }
-    //   if (count($hist['abonos_factura']['abonos']) > 0)
-    //     foreach ($hist['abonos_factura']['abonos'] as $key => $value) {
-    //       $pdf->Row(array(
-    //           $value->fecha,
-    //           $hist['abonos_factura']['cobro'][0]->serie.$hist['abonos_factura']['cobro'][0]->folio,
-    //           $value->concepto,
-    //           String::formatoNumero($value->abono, 2, '$', false)), false, false);
-    //       $total_abanos += $value->abono;
-    //       $pdf->SetXY(75, $pdf->GetY()-2);
-    //     }
-    //   $pdf->SetFont('helvetica', 'B', 8);
-    //   $pdf->SetX(184);
-    //   $pdf->SetWidths(array(19, 20, 70, 25));
-    //   $pdf->Row(array(String::formatoNumero($total_abanos, 2, '$', false)), false, false);
-    // }
-
-    // //------------ IMAGEN CANDELADO --------------------
-
-    // if($factura['info']->status === 'ca'){
-    //   $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
-    // }
+    // Actualiza el # de impresion
+    $this->db->update('facturacion', ['no_impresiones_tk' => $factura['info']->no_impresiones_tk+1], "id_factura = ".$factura['info']->id_factura);
 
     if ($path)
       $pdf->Output($path.'Venta_Remision.pdf', 'F');
-    else
+    else {
+      $pdf->AutoPrint(true);
       $pdf->Output('Venta_Remision', 'I');
+    }
   }
 
   public function imprimir_salidaticket($salidaID, $path = null)

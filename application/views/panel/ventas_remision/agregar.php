@@ -56,7 +56,7 @@
                             <?php // echo $ser->serie.($ser->leyenda!=''? '-'.$ser->leyenda: ''); ?></option>
                       <?php // } ?>
                   </select>
-                  <input type="hidden" id="serie-selected" value="<?php echo set_value('dserie', isset($borrador) ? $borrador['info']->serie : 'R') ?>">
+                  <input type="hidden" id="serie-selected" value="<?php echo set_value('dserie', isset($borrador) ? $borrador['info']->serie : '') ?>">
                 </div>
               </div>
 
@@ -267,7 +267,14 @@
                 <div class="controls">
                   <div class="well span9">
                       <!-- <button type="submit" name="borrador" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button><br><br> -->
-                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;" id="">Guardar</button>
+                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;" name="guardar">Guardar</button>
+
+                      <?php
+                      $show_imprimir = 'none';
+                      if (isset($borrador['info']->empresa->nombre_fiscal) && preg_match("/bodega/i", $borrador['info']->empresa->nombre_fiscal))
+                        $show_imprimir = 'block';
+                      ?>
+                      <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;display:<?php echo $show_imprimir ?>;" name="guardar_imp" id="guardar_imp">Guardar e Imprimir</button>
                   </div>
                 </div>
               </div>
@@ -971,14 +978,23 @@
 </div>
 
 <!-- Bloque de alertas -->
+<script type="text/javascript" charset="UTF-8">
+<?php if (isset($_GET['imprimir_tk']{0})) {
+?>
+var win = window.open(base_url+'panel/ventas/imprimir_tk/?id=<?php echo $_GET['imprimir_tk']; ?>', '_blank');
+if (win)
+  win.focus();
+else
+  noty({"text":"Activa las ventanas emergentes (pop-ups) para este sitio", "layout":"topRight", "type":"error"});
+<?php
+} ?>
 <?php if(isset($frm_errors)){
   if($frm_errors['msg'] != ''){
 ?>
-<script type="text/javascript" charset="UTF-8">
   $(document).ready(function(){
     noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
   });
-</script>
 <?php }
 }?>
+</script>
 <!-- Bloque de alertas -->

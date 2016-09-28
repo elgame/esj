@@ -81,7 +81,12 @@ $(function(){
 
         $('#dno_certificado').val(ui.item.item.no_certificado);
 
-        loadSerieFolio(ui.item.id, true);
+        loadSerieFolio(ui.item.id, true, ui.item);
+
+        // si es bodega boton imprimir
+        $("#guardar_imp").hide();
+        if (/bodega/i.test(ui.item.label))
+          $("#guardar_imp").show();
 
         $("#modal-produc-marcar .mpromarcsel").removeAttr('checked');
         if (ui.item.id == '2' || ui.item.id == '7') {
@@ -865,16 +870,23 @@ function loadSerieFolio (ide, forceLoad) {
 
           for (var i in res.data){
             selected = '';
-            if ($('#serie-selected').val() !== 'void') {
+            if ($('#serie-selected').val() !== '') {
               if (res.data[i].serie === $('#serie-selected').val()) {
                 selected = 'selected';
                 serieSelected = res.data[i].serie;
+                $("#dcliente").focus();
               }
             } else {
-              if (res.data[i].serie === 'R') {
+              if (res.data[i].default_serie === 't') {
                 loadDefault = true;
                 selected = 'selected';
                 serieSelected = res.data[i].serie;
+                $("#dcliente").focus();
+              } else if (res.data[i].serie === 'R') {
+                loadDefault = true;
+                selected = 'selected';
+                serieSelected = res.data[i].serie;
+                $("#dcliente").focus();
               }
             }
 
