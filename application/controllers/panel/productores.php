@@ -332,6 +332,19 @@ public function fecha($fecha)
       array('field' => 'did_empresa',
             'label' => 'Empresa',
             'rules' => ''),
+
+      array('field' => 'no_coeplim',
+            'label' => '# Coeplim',
+            'rules' => 'max_length[55]'),
+      array('field' => 'hectareas',
+            'label' => '# Hectareas',
+            'rules' => 'numeric|max_length[15]'),
+      array('field' => 'pequena_propiedad',
+            'label' => 'Pequeña propiedad',
+            'rules' => 'max_length[55]'),
+      array('field' => 'propietario',
+            'label' => 'Propietario',
+            'rules' => 'max_length[150]'),
 		);
 
 		$this->form_validation->set_rules($rules);

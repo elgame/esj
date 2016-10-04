@@ -164,13 +164,37 @@
                     </div>
                   </div>
 
-                  <!-- <div class="control-group">
-                    <label class="control-label" for="fcuenta_cpi" style="font-weight: bold;">Cuenta ContpaqI </label>
+                  <div class="control-group">
+                    <label class="control-label" for="no_coeplim"># Coeplim </label>
                     <div class="controls">
-                      <input type="text" name="fcuenta_cpi" id="fcuenta_cpi" class="span12" value="<?php //echo isset($data->cuenta_cpi)?$data->cuenta_cpi:''; ?>"
-                        maxlength="12" placeholder="12312, 312322">
+                      <input type="text" name="no_coeplim" id="no_coeplim" class="span12" value="<?php echo isset($data->no_coeplim)?$data->no_coeplim:''; ?>"
+                        maxlength="55" placeholder="12312, 312322">
                     </div>
-                  </div> -->
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="hectareas"># Hectareas </label>
+                    <div class="controls">
+                      <input type="text" name="hectareas" id="hectareas" class="span12" value="<?php echo isset($data->hectareas)?$data->hectareas:''; ?>"
+                        maxlength="15" placeholder="4">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="pequena_propiedad">Pequeña propiedad </label>
+                    <div class="controls">
+                      <input type="text" name="pequena_propiedad" id="pequena_propiedad" class="span12" value="<?php echo isset($data->pequena_propiedad)?$data->pequena_propiedad:''; ?>"
+                        maxlength="55" placeholder="rentada">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="propietario">Si es rentada (Propietario) </label>
+                    <div class="controls">
+                      <input type="text" name="propietario" id="propietario" class="span12" value="<?php echo isset($data->propietario)?$data->propietario:''; ?>"
+                        maxlength="150" placeholder="">
+                    </div>
+                  </div>
 
                   <div class="control-group">
                     <label class="control-label" for="ftipo">Tipo </label>

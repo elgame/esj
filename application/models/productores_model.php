@@ -85,24 +85,28 @@ class productores_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-            'id_empresa'    => $this->input->post('did_empresa'),
-            'nombre_fiscal' => $this->input->post('fnombre_fiscal'),
-            'calle'         => $this->input->post('fcalle'),
-            'no_exterior'   => $this->input->post('fno_exterior'),
-            'no_interior'   => $this->input->post('fno_interior'),
-            'colonia'       => $this->input->post('fcolonia'),
-            'localidad'     => $this->input->post('flocalidad'),
-            'municipio'     => $this->input->post('fmunicipio'),
-            'estado'        => $this->input->post('festado'),
-            'cp'            => $this->input->post('fcp'),
-            'telefono'      => $this->input->post('ftelefono'),
-            'celular'       => $this->input->post('fcelular'),
-            'email'         => $this->input->post('femail'),
-            // 'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
-            'parcela'       => $this->input->post('fparcela'),
-            'ejido_parcela' => $this->input->post('fejido_parcela'),
-            'pais'          => $this->input->post('fpais'),
-            'tipo'          => $this->input->post('ftipo'),
+            'id_empresa'        => $this->input->post('did_empresa'),
+            'nombre_fiscal'     => $this->input->post('fnombre_fiscal'),
+            'calle'             => $this->input->post('fcalle'),
+            'no_exterior'       => $this->input->post('fno_exterior'),
+            'no_interior'       => $this->input->post('fno_interior'),
+            'colonia'           => $this->input->post('fcolonia'),
+            'localidad'         => $this->input->post('flocalidad'),
+            'municipio'         => $this->input->post('fmunicipio'),
+            'estado'            => $this->input->post('festado'),
+            'cp'                => $this->input->post('fcp'),
+            'telefono'          => $this->input->post('ftelefono'),
+            'celular'           => $this->input->post('fcelular'),
+            'email'             => $this->input->post('femail'),
+            // 'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
+            'parcela'           => $this->input->post('fparcela'),
+            'ejido_parcela'     => $this->input->post('fejido_parcela'),
+            'pais'              => $this->input->post('fpais'),
+            'tipo'              => $this->input->post('ftipo'),
+            'no_coeplim'        => $this->input->post('no_coeplim'),
+            'hectareas'         => $this->input->post('hectareas'),
+            'pequena_propiedad' => $this->input->post('pequena_propiedad'),
+            'propietario'       => $this->input->post('propietario'),
 						);
 		}
 
@@ -131,24 +135,28 @@ class productores_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'id_empresa'    => $this->input->post('did_empresa'),
-            'nombre_fiscal' => $this->input->post('fnombre_fiscal'),
-            'calle'         => $this->input->post('fcalle'),
-            'no_exterior'   => $this->input->post('fno_exterior'),
-            'no_interior'   => $this->input->post('fno_interior'),
-            'colonia'       => $this->input->post('fcolonia'),
-            'localidad'     => $this->input->post('flocalidad'),
-            'municipio'     => $this->input->post('fmunicipio'),
-            'estado'        => $this->input->post('festado'),
-            'cp'            => $this->input->post('fcp'),
-            'telefono'      => $this->input->post('ftelefono'),
-            'celular'       => $this->input->post('fcelular'),
-            'email'         => $this->input->post('femail'),
-            // 'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
-            'parcela'       => $this->input->post('fparcela'),
-            'ejido_parcela' => $this->input->post('fejido_parcela'),
-            'pais'          => $this->input->post('fpais'),
-            'tipo'          => $this->input->post('ftipo'),
+            'id_empresa'        => $this->input->post('did_empresa'),
+            'nombre_fiscal'     => $this->input->post('fnombre_fiscal'),
+            'calle'             => $this->input->post('fcalle'),
+            'no_exterior'       => $this->input->post('fno_exterior'),
+            'no_interior'       => $this->input->post('fno_interior'),
+            'colonia'           => $this->input->post('fcolonia'),
+            'localidad'         => $this->input->post('flocalidad'),
+            'municipio'         => $this->input->post('fmunicipio'),
+            'estado'            => $this->input->post('festado'),
+            'cp'                => $this->input->post('fcp'),
+            'telefono'          => $this->input->post('ftelefono'),
+            'celular'           => $this->input->post('fcelular'),
+            'email'             => $this->input->post('femail'),
+            // 'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
+            'parcela'           => $this->input->post('fparcela'),
+            'ejido_parcela'     => $this->input->post('fejido_parcela'),
+            'pais'              => $this->input->post('fpais'),
+            'tipo'              => $this->input->post('ftipo'),
+            'no_coeplim'        => $this->input->post('no_coeplim'),
+            'hectareas'         => $this->input->post('hectareas'),
+            'pequena_propiedad' => $this->input->post('pequena_propiedad'),
+            'propietario'       => $this->input->post('propietario'),
 						);
 			// Bitacora
 	    $id_bitacora = $this->bitacora_model->_update('otros.productor', $id_productor, $data,
@@ -188,7 +196,8 @@ class productores_model extends CI_Model {
 		$id_productor = $id_productor? $id_productor: (isset($_GET['id'])? $_GET['id']: 0);
 
 		$sql_res = $this->db->select("id_productor, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
-														estado, cp, telefono, celular, email, parcela, ejido_parcela, status, tipo, pais, id_empresa" )
+														estado, cp, telefono, celular, email, parcela, ejido_parcela, status, tipo, pais, id_empresa,
+                            no_coeplim, hectareas, pequena_propiedad, propietario" )
 												->from("otros.productor")
 												->where("id_productor", $id_productor)
 												->get();
