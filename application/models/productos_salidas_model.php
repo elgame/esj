@@ -426,18 +426,25 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS', 0, 'C');
 
+    $pdf->SetWidths(array(12, 30));
+    $pdf->SetAligns(array('L','L'));
+    $pdf->SetFounts(array($pdf->fount_txt));
+    $pdf->SetX(0);
+    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio), false, false, 5);
+
+    $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
-    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size);
+    $pdf->SetFont($pdf->fount_txt, '', $pdf->font_size-1);
 
-    $pdf->SetWidths(array(12, 27, 13, 14));
+    $pdf->SetWidths(array(10, 28, 11, 14));
     $pdf->SetAligns(array('L','L','R','R'));
-    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-1,-1,-1));
+    $pdf->SetFounts(array($pdf->fount_txt), array(-1,-2,-2,-2));
     $pdf->SetX(0);
-    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'PRECIO', 'IMPORTE'), false, true, 5);
+    $pdf->Row2(array('CANT.', 'DESCRIPCION', 'P.U.', 'IMPORTE'), false, true, 5);
 
     $pdf->SetFounts(array($pdf->fount_num,$pdf->fount_txt,$pdf->fount_num,$pdf->fount_num),
-                   array(.5,-1,-1,-1));
+                   array(0,-1.5,-1.3,-1.2));
     $subtotal = $iva = $total = $retencion = $ieps = 0;
     $tipoCambio = 0;
     $codigoAreas = array();

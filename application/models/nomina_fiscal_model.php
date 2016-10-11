@@ -1438,7 +1438,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $metodoDePago = String::getMetodoPago('', 'Efectivo');
       $NumCtaPago = 'No identificado';
-      if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '') {
+      if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '' && $empleado['info'][0]->banco != 'efectivo') {
         $metodoDePago = String::getMetodoPago('', 'Transferencia electrónica de fondos');
         $NumCtaPago = $empleado['info'][0]->cuenta_banco;
       }
@@ -2645,7 +2645,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 18, 'I', true);
           $contadorSantr++;
           $total_nominaSantr += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
-        } else {
+        } elseif($empleado->banco == 'bancr') {
           $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
                       $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
                       $this->formatoBanco('99', ' ', 2, 'I') .
@@ -2675,7 +2675,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->nomina_fiscal_total_neto, '0', 18, 'I', true);
           $contadorSantr++;
           $total_nominaSantr += number_format($empleado->nomina_fiscal_total_neto, 2, '.', '');
-        } else {
+        } elseif($empleado->banco == 'bancr') {
           $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
                       $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
                       $this->formatoBanco('99', ' ', 2, 'I') .
@@ -8692,7 +8692,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->nomina_fiscal_ptu_total_neto, '0', 18, 'I', true);
           $contadorSantr++;
           $total_nominaSantr += number_format($empleado->nomina_fiscal_ptu_total_neto, 2, '.', '');
-        } else {
+        } elseif($empleado->banco == 'bancr') {
           $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
                       $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
                       $this->formatoBanco('99', ' ', 2, 'I') .
@@ -10118,7 +10118,7 @@ class nomina_fiscal_model extends CI_Model {
                       $this->formatoBanco($empleado->nomina_fiscal_aguinaldo_total_neto, '0', 18, 'I', true);
           $contadorSantr++;
           $total_nominaSantr += number_format($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '.', '');
-        } else {
+        } elseif($empleado->banco == 'bancr') {
           $content[] = $this->formatoBanco($contador, '0', 9, 'I') .
                       $this->formatoBanco(substr($empleado->rfc, 0, 10), ' ', 16, 'D') .
                       $this->formatoBanco('99', ' ', 2, 'I') .

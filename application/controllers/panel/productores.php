@@ -338,7 +338,7 @@ public function fecha($fecha)
             'rules' => 'max_length[55]'),
       array('field' => 'hectareas',
             'label' => '# Hectareas',
-            'rules' => 'numeric|max_length[15]'),
+            'rules' => 'is_natural|max_length[15]'),
       array('field' => 'pequena_propiedad',
             'label' => 'Pequeña propiedad',
             'rules' => 'max_length[55]'),

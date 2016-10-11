@@ -3286,9 +3286,9 @@ class facturacion_model extends privilegios_model{
     $pdf->SetWidths(array(19, 83, 19, 83));
     $pdf->SetX(0);
     $pdf->Row(array('COLONIA:', $xml->Emisor->DomicilioFiscal[0]['colonia'], 'LOCALIDAD:', $xml->Emisor->DomicilioFiscal[0]['localidad']), false, false, null, 2, 1);
-    $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
+    $pdf->SetWidths(array(19, 46, 19, 40, 11, 46, 11, 30));
     $pdf->SetX(0);
-    $pdf->Row(array('ESTADO:', $xml->Emisor->DomicilioFiscal[0]['estado'], 'PAIS:', $xml->Emisor->DomicilioFiscal[0]['pais'], 'CP:', $xml->Emisor->DomicilioFiscal[0]['codigoPostal']), false, false, null, 2, 1);
+    $pdf->Row(array('MUNICIPIO:', $xml->Emisor->DomicilioFiscal[0]['municipio'], 'ESTADO:', $xml->Emisor->DomicilioFiscal[0]['estado'], 'PAIS:', $xml->Emisor->DomicilioFiscal[0]['pais'], 'CP:', $xml->Emisor->DomicilioFiscal[0]['codigoPostal']), false, false, null, 2, 1);
 
     $end_y = $pdf->GetY();
 
