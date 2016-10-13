@@ -796,7 +796,6 @@ class bascula extends MY_Controller {
     // if (isset($_GET['fid_proveedor']))
     //   if ($_GET['fid_proveedor'] == '')
     //     redirect(base_url('panel/bascula/movimientos/?msg=13'));
-
     $this->carabiner->js(array(
       array('general/msgbox.js'),
       array('general/supermodal.js'),
@@ -812,8 +811,9 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->load->model('areas_model');
 
-    $params['movimientos'] = $this->bascula_model->getMovimientos();
     $params['areas'] = $this->areas_model->getAreas();
+    $_GET['farea'] = $params['areas']['areas'][0]->id_area;
+    $params['movimientos'] = $this->bascula_model->getMovimientos();
 
     // echo "<pre>";
     //   var_dump($params['movimientos']);

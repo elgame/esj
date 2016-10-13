@@ -1,4 +1,11 @@
 
+✔ Catalogo de productores @done (16-10-13 12:15) san|cpt|cpl
+  ALTER TABLE otros.productor ADD COLUMN no_coeplim character varying(55);
+  ALTER TABLE otros.productor ADD COLUMN hectareas double precision DEFAULT 0;
+  ALTER TABLE otros.productor ADD COLUMN pequena_propiedad character varying(55);
+  ALTER TABLE otros.productor ADD COLUMN propietario character varying(150);
+  ALTER TABLE public.usuarios ALTER COLUMN banco TYPE character varying(15);
+
  ✔ Bodega gdl @done (16-09-30 11:33)
    ALTER TABLE public.facturacion_series_folios ADD COLUMN default_serie boolean NOT NULL DEFAULT false;
    ALTER TABLE public.facturacion ADD COLUMN no_impresiones_tk integer NOT NULL DEFAULT 0;

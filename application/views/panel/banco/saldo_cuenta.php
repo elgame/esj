@@ -131,12 +131,12 @@
               	<tr>
               		<td><?php
                     $opc_html = '';
-              			if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
+              			// if(count($status) > 0 && $movimiento->metodo_pago == 'cheque')
+                    if(count($status) > 0)
+                    {
               				$opc_html .= '<li><input type="checkbox" class="transit_chekrs" id="transit'.$movimiento->id_movimiento.'"
               					value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
               					data-status="'.$status[0].'" '.($status[0]=='Trans'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Transito</li>';
-                    if(count($status) > 0)
-                    {
                       $opc_html .= '<li><input type="checkbox" class="sbc_chekrs" id="sbc'.$movimiento->id_movimiento.'"
                         value="'.'id_movimiento='.$movimiento->id_movimiento.'&mstatus='.$status[0].'&'.String::getVarsLink(array('id_movimiento', 'mstatus', 'fstatus', 'msg')).'"
                         data-status="'.$movimiento->salvo_buen_cobro.'" '.($movimiento->salvo_buen_cobro=='t'? 'checked' : '').' data-id="'.$movimiento->id_movimiento.'"> Salvo buen cobro</li>';

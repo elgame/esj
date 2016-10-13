@@ -426,11 +426,11 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS', 0, 'C');
 
-    $pdf->SetWidths(array(12, 30));
-    $pdf->SetAligns(array('L','L'));
+    $pdf->SetWidths(array(10, 20, 11, 20));
+    $pdf->SetAligns(array('L','L', 'R', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio), false, false, 5);
+    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', substr($orden['info'][0]->fecha, 0, 10)), false, false, 5);
 
     $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
@@ -495,6 +495,9 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row2(array('Se asigno a: '.strtoupper($orden['info'][0]->trabajador)), false, false);
     }
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Expedido el: '.date("Y-m-d")), false, false);
 
     $pdf->AutoPrint(true);
     $pdf->Output();

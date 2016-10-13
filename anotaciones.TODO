@@ -1,10 +1,11 @@
 
+ ☐ Entrega de fruta cargar los datos de la boleta
+ ☐ En las remisiones cuando sea a contado que agregue el abono para que se pague automaticamente
+ ☐ Revisar reporte de compras por proveedor que no carge las ordenes canceladas
+ ✔ En bancos en las trasnferencias poder cambiar el movimiento transito @done (16-10-13 16:22)
+ ✔ En catalogo de productores en tipo agregar "con factura pago bancario" @done (16-10-13 16:00)
+ ✔ Ticket de salida de productos agregar folio y fechas @done (16-10-13 13:55)
  ✔ 0.23h Catalogo de productores agregar campos extras (Coeplim, hectareas, etc) @done (16-10-04 15:46)
-   ✔ ALTER TABLE otros.productor ADD COLUMN no_coeplim character varying(55); @done (16-10-07 12:14) san|cpt
-     ALTER TABLE otros.productor ADD COLUMN hectareas double precision DEFAULT 0;
-     ALTER TABLE otros.productor ADD COLUMN pequena_propiedad character varying(55);
-     ALTER TABLE otros.productor ADD COLUMN propietario character varying(150);
-     ALTER TABLE public.usuarios ALTER COLUMN banco TYPE character varying(15);
  ✔ 1.16h Bodega guadalajara en los tickets poner lo de original y copias, Al agregar remision si seleccionan bodega cargar folio automatico y cursor en clientes, poner boton de imprimir ticket y guardar la remision @done (16-09-28 14:41)
 
  ✔ En productos agregar para poder cambiar los productos de familia @done (16-09-26 13:16)

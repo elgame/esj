@@ -200,6 +200,7 @@
                         <option value="SIN FACTURA PAGO EN EFECTIVO">SIN FACTURA PAGO EN EFECTIVO</option>
                         <option value="CON FACTURA PAGO EN EFECTIVO">CON FACTURA PAGO EN EFECTIVO</option>
                         <option value="FACTURADOR EMPAQUE SAN JORGE">FACTURADOR EMPAQUE SAN JORGE</option>
+                        <option value="CON FACTURA PAGO BANCARIO">CON FACTURA PAGO BANCARIO</option>
                       </select>
                     </div>
                   </div>

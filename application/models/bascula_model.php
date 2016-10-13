@@ -835,10 +835,12 @@ class bascula_model extends CI_Model {
       $data['area'] = $this->areas_model->getAreaInfo($_GET['farea']);
 
       // Obtiene la informacion del proveedor filtrado.
-      if($this->input->get('ftipop') == 'sa') {
-        $data['proveedor'] = $this->clientes_model->getClienteInfo($_GET['fid_proveedor']);
-      }else
-        $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
+      if ($this->input->get('fid_proveedor') > 0) {
+        if($this->input->get('ftipop') == 'sa') {
+          $data['proveedor'] = $this->clientes_model->getClienteInfo($_GET['fid_proveedor']);
+        }else
+          $data['proveedor'] = $this->proveedores_model->getProveedorInfo($_GET['fid_proveedor']);
+      }
 
       $data['movimientos'] = $movimientos;
     // }

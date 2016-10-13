@@ -286,7 +286,8 @@ class banco_cuentas_model extends banco_model {
 			foreach ($res->result() as $key => $item)
 			{
 				//estado de los cheques
-				if ($item->entransito == 't' && $item->metodo_pago == 'cheque')
+				if ($item->entransito == 't' && $item->tipo == 'f' &&
+						($item->metodo_pago == 'cheque' || $item->metodo_pago == 'transferencia'))
 					$item->entransito = 'Trans';
 				else
 					$item->entransito = 'Aplic';
