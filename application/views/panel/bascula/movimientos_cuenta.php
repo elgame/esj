@@ -25,7 +25,7 @@
                   <div class="controls">
                     <select name="farea" class="span12">
                       <?php foreach ($areas['areas'] as $area) { ?>
-                        <option value="<?php echo $area->id_area ?>" <?php echo set_select('farea', $area->id_area, false, $this->input->get('farea')) ?>><?php echo $area->nombre ?></option>
+                        <option value="<?php echo $area->id_area ?>" <?php echo set_select_get('farea', $area->id_area) ?>><?php echo $area->nombre ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -35,8 +35,8 @@
                   <label class="control-label" for="ftipop">Tipo</label>
                   <div class="controls">
                     <select name="ftipop" id="ftipop">
-                      <option value="en" <?php echo set_select('ftipop', 'en', false, $this->input->get('ftipop')) ?>>ENTRADAS</option>
-                      <option value="sa" <?php echo set_select('ftipop', 'sa', false, $this->input->get('ftipop')) ?>>SALIDAS</option>
+                      <option value="en" <?php echo set_select_get('ftipop', 'en') ?>>ENTRADAS</option>
+                      <option value="sa" <?php echo set_select_get('ftipop', 'sa') ?>>SALIDAS</option>
                     </select>
                   </div>
                 </div>
@@ -63,9 +63,9 @@
                   <label class="control-label" for="fstatusp">Status</label>
                   <div class="controls">
                     <select name="fstatusp">
-                      <option value="" <?php echo set_select('fstatusp', '', false, $this->input->get('fstatusp')) ?>>TODOS</option>
-                      <option value="1" <?php echo set_select('fstatusp', '1', false, $this->input->get('fstatusp')) ?>>PAGADOS</option>
-                      <option value="2" <?php echo set_select('fstatusp', '2', false, $this->input->get('fstatusp')) ?>>NO PAGADOS</option>
+                      <option value="" <?php echo set_select_get('fstatusp', '') ?>>TODOS</option>
+                      <option value="1" <?php echo set_select_get('fstatusp', '1') ?>>PAGADOS</option>
+                      <option value="2" <?php echo set_select_get('fstatusp', '2') ?>>NO PAGADOS</option>
                     </select>
                   </div>
                 </div>

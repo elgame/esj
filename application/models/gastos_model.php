@@ -233,17 +233,45 @@ class gastos_model extends privilegios_model{
   {
     $sql = $multiple? "cf.id_compra IN(".implode(',', $params['idc']).")": "cf.id_compra = {$params['idc']}";
     $result = $this->db->query("SELECT cf.id_compra, f.id_empresa, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
-            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva, c.id_cliente,
-            string_agg(fsc.pol_seg, ', ') AS pol_seg, string_agg(fsc.certificado, ', ') AS certificado, string_agg(fsc.num_operacion, ', ') AS num_operacion
-          FROM compras_facturacion_prodc AS cf
-            INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
-            INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
-            INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
-            INNER JOIN facturacion_productos AS ffp ON f.id_factura = ffp.id_factura AND fp.id_clasificacion = ffp.id_clasificacion
-            INNER JOIN facturacion_seg_cert AS fsc ON (cf.id_clasificacion = fsc.id_clasificacion AND f.id_factura = fsc.id_factura)
-          WHERE {$sql}
-          GROUP BY cf.id_compra, f.id_factura, fp.id_clasificacion, c.id_cliente, ffp.id_factura, ffp.num_row
-          ORDER BY fp.id_clasificacion ASC");
+            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, c.id_cliente, Sum(ffp.importe) AS importe, Sum(ffp.iva) AS iva,
+            ffp.pol_seg, ffp.certificado, ffp.num_operacion
+            FROM compras_facturacion_prodc AS cf
+              INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
+              INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
+              INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
+              INNER JOIN (
+                SELECT fsc.id_factura, fsc.id_clasificacion, fsc.folio, Sum(ffp.importe) AS importe, Sum(iva) AS iva, string_agg(fsc.id_proveedor::text, ', ') AS id_proveedor,
+                  string_agg(fsc.pol_seg, ', ') AS pol_seg, string_agg(fsc.certificado, ', ') AS certificado,
+                  string_agg(fsc.bultos::text, ', ') AS bultos, string_agg(fsc.num_operacion, ', ') AS num_operacion
+                FROM (
+                  SELECT id_factura, id_clasificacion, folio, string_agg(id_proveedor::text, ', ') AS id_proveedor,
+                  string_agg(pol_seg, ', ') AS pol_seg, string_agg(certificado, ', ') AS certificado,
+                  string_agg(bultos::text, ', ') AS bultos, string_agg(num_operacion, ', ') AS num_operacion
+                  FROM facturacion_seg_cert
+                  GROUP BY id_factura, id_clasificacion, folio
+                ) fsc
+                INNER JOIN (
+                  SELECT id_factura, id_clasificacion, Sum(importe) AS importe, Sum(iva) AS iva
+                  FROM facturacion_productos
+                  GROUP BY id_factura, id_clasificacion
+                ) AS ffp ON (ffp.id_factura = fsc.id_factura AND ffp.id_clasificacion = fsc.id_clasificacion)
+                GROUP BY fsc.id_factura, fsc.id_clasificacion, fsc.folio
+              ) AS ffp ON cf.id_factura = ffp.id_factura AND cf.id_clasificacion = ffp.id_clasificacion
+            WHERE {$sql}
+            GROUP BY cf.id_compra, f.id_factura, fp.id_clasificacion, c.id_cliente, ffp.pol_seg, ffp.certificado, ffp.num_operacion
+            ORDER BY fp.id_clasificacion ASC");
+    // $result = $this->db->query("SELECT cf.id_compra, f.id_empresa, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
+    //         c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva, c.id_cliente,
+    //         string_agg(fsc.pol_seg, ', ') AS pol_seg, string_agg(fsc.certificado, ', ') AS certificado, string_agg(fsc.num_operacion, ', ') AS num_operacion
+    //       FROM compras_facturacion_prodc AS cf
+    //         INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
+    //         INNER JOIN clasificaciones AS fp ON cf.id_clasificacion = fp.id_clasificacion
+    //         INNER JOIN clientes AS c ON f.id_cliente = c.id_cliente
+    //         INNER JOIN facturacion_productos AS ffp ON f.id_factura = ffp.id_factura AND fp.id_clasificacion = ffp.id_clasificacion
+    //         INNER JOIN facturacion_seg_cert AS fsc ON (cf.id_clasificacion = fsc.id_clasificacion AND f.id_factura = fsc.id_factura)
+    //       WHERE {$sql}
+    //       GROUP BY cf.id_compra, f.id_factura, fp.id_clasificacion, c.id_cliente, ffp.id_factura, ffp.num_row
+    //       ORDER BY fp.id_clasificacion ASC");
     $response = array('ligadas' => array(), 'canceladas' => array());
     if($result->num_rows() > 0)
       $response['ligadas'] = $result->result();

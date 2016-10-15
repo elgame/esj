@@ -812,7 +812,7 @@ class bascula extends MY_Controller {
     $this->load->model('areas_model');
 
     $params['areas'] = $this->areas_model->getAreas();
-    $_GET['farea'] = $params['areas']['areas'][0]->id_area;
+    $_GET['farea'] = empty($_GET['farea'])? $params['areas']['areas'][0]->id_area: $_GET['farea'];
     $params['movimientos'] = $this->bascula_model->getMovimientos();
 
     // echo "<pre>";
