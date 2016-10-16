@@ -233,7 +233,7 @@ class gastos_model extends privilegios_model{
   {
     $sql = $multiple? "cf.id_compra IN(".implode(',', $params['idc']).")": "cf.id_compra = {$params['idc']}";
     $result = $this->db->query("SELECT cf.id_compra, f.id_empresa, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
-            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, c.id_cliente, Sum(ffp.importe) AS importe, Sum(ffp.iva) AS iva,
+            c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, c.id_cliente, ffp.importe AS importe, ffp.iva AS iva,
             ffp.pol_seg, ffp.certificado, ffp.num_operacion
             FROM compras_facturacion_prodc AS cf
               INNER JOIN facturacion AS f ON f.id_factura = cf.id_factura
@@ -258,7 +258,8 @@ class gastos_model extends privilegios_model{
                 GROUP BY fsc.id_factura, fsc.id_clasificacion, fsc.folio
               ) AS ffp ON cf.id_factura = ffp.id_factura AND cf.id_clasificacion = ffp.id_clasificacion
             WHERE {$sql}
-            GROUP BY cf.id_compra, f.id_factura, fp.id_clasificacion, c.id_cliente, ffp.pol_seg, ffp.certificado, ffp.num_operacion
+            GROUP BY cf.id_compra, f.id_factura, fp.id_clasificacion, c.id_cliente, ffp.pol_seg,
+              ffp.certificado, ffp.num_operacion, ffp.importe, ffp.iva
             ORDER BY fp.id_clasificacion ASC");
     // $result = $this->db->query("SELECT cf.id_compra, f.id_empresa, f.id_factura, f.serie, f.folio, Date(f.fecha) AS fecha,
     //         c.nombre_fiscal AS cliente, fp.id_clasificacion, fp.nombre, ffp.importe, ffp.iva, c.id_cliente,
