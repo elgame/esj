@@ -55,7 +55,7 @@
                     </div>
                   </div>
 
-                  <div class="control-group tipo3" id="productos">
+                  <!-- <div class="control-group tipo3" id="productos">
                     <label class="control-label" for="codigoArea">Rancho </label>
                     <div class="controls">
                       <input type="text" name="codigoArea" value="<?php echo isset($data->rancho->id_cat_codigos)?$data->rancho->nombre_full:''; ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
@@ -79,7 +79,7 @@
                       <input type="text" name="fchofer" id="fchofer" class="span10" value="<?php echo isset($data->chofer[0]->id)?$data->chofer[0]->nombre.' '.$data->chofer[0]->apellido_paterno:''; ?>" required>
                       <input type="hidden" name="fchoferId" id="fchoferId" class="span10" value="<?php echo isset($data->chofer[0]->id)?$data->chofer[0]->id:''; ?>">
                     </div>
-                  </div>
+                  </div> -->
 
                   <div class="control-group">
                     <label class="control-label" for="fencargado">Encargado </label>

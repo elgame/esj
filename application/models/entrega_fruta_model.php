@@ -95,9 +95,9 @@ class entrega_fruta_model extends CI_Model {
 		{
 			$data = array(
 						'fecha_captura'       => $this->input->post('ffecha'),
-						'id_cat_codigos_rnch' => $this->input->post('codigoAreaId'),
-						'id_vehiculo'         => $this->input->post('vehiculoId'),
-						'id_usuario'          => $this->input->post('fchoferId'),
+						// 'id_cat_codigos_rnch' => $this->input->post('codigoAreaId'),
+						// 'id_vehiculo'         => $this->input->post('vehiculoId'),
+						// 'id_usuario'          => $this->input->post('fchoferId'),
 						'id_encargado'        => $this->input->post('fencargadoId'),
             'no'                  => '',
             'id_bascula'          => $this->input->post('fid_bascula'),
@@ -133,10 +133,13 @@ class entrega_fruta_model extends CI_Model {
 	{
 		$id_entrega = $id_entrega ? $id_entrega : (isset($_GET['id'])? $_GET['id']: 0) ;
 
-		$sql_res = $this->db->query("SELECT ef.id_entrega_fruta, ef.id_area, ef.folio, COALESCE(ef.fecha_captura, ef.fecha_registro) AS fecha, ef.id_cat_codigos_rnch,
-																	ef.id_vehiculo, ef.id_usuario, ef.no, ef.id_encargado, ef.total, ef.id_recibe,
-                                  b.id_bascula, b.folio AS basc_boleta, b.kilos_neto, b.kilos_neto2
+		$sql_res = $this->db->query("SELECT ef.id_entrega_fruta, ef.id_area, ef.folio, COALESCE(ef.fecha_captura, ef.fecha_registro) AS fecha,
+																	ef.id_usuario, ef.no, ef.id_encargado, ef.total, ef.id_recibe,
+                                  b.id_bascula, b.folio AS basc_boleta, b.kilos_neto, b.kilos_neto2, b.id_camion, (ca.marca || ' ' || ca.modelo) AS camion,
+                                  ca.placa AS camion_placas, b.rancho, ch.nombre AS chofer
 		                           FROM otros.entrega_fruta ef LEFT JOIN bascula b ON b.id_bascula = ef.id_bascula
+                                  LEFT JOIN camiones ca ON ca.id_camion = b.id_camion
+                                  LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
 		                           WHERE ef.id_entrega_fruta = ".$id_entrega);
 		$data['info'] = array();
 
@@ -155,22 +158,22 @@ class entrega_fruta_model extends CI_Model {
 		                           WHERE ef.id_entrega_fruta = ".$id_entrega)->result();
 				$data['info']->fruta = $datares;
 
-				if (isset($data['info']->id_cat_codigos_rnch)) {
-					$this->load->model('catalogos_sft_model');
-					$data['info']->rancho = $this->catalogos_sft_model->getInfoCatCodigos($data['info']->id_cat_codigos_rnch);
-				}
+				// if (isset($data['info']->id_cat_codigos_rnch)) {
+				// 	$this->load->model('catalogos_sft_model');
+				// 	$data['info']->rancho = $this->catalogos_sft_model->getInfoCatCodigos($data['info']->id_cat_codigos_rnch);
+				// }
 				if (isset($data['info']->id_area)) {
 					$this->load->model('areas_model');
 					$data['info']->area = $this->areas_model->getAreaInfo($data['info']->id_area, true)['info'];
 				}
-				if (isset($data['info']->id_vehiculo)) {
-					$this->load->model('vehiculos_model');
-					$data['info']->vehiculo = $this->vehiculos_model->getVehiculoInfo($data['info']->id_vehiculo, true)['info'];
-				}
-				if (isset($data['info']->id_usuario)) {
-					$this->load->model('usuarios_model');
-					$data['info']->chofer = $this->usuarios_model->get_usuario_info($data['info']->id_usuario, true)['info'];
-				}
+				// if (isset($data['info']->id_vehiculo)) {
+				// 	$this->load->model('vehiculos_model');
+				// 	$data['info']->vehiculo = $this->vehiculos_model->getVehiculoInfo($data['info']->id_vehiculo, true)['info'];
+				// }
+				// if (isset($data['info']->id_usuario)) {
+				// 	$this->load->model('usuarios_model');
+				// 	$data['info']->chofer = $this->usuarios_model->get_usuario_info($data['info']->id_usuario, true)['info'];
+				// }
 				if (isset($data['info']->id_encargado)) {
 					$this->load->model('usuarios_model');
 					$data['info']->encargado = $this->usuarios_model->get_usuario_info($data['info']->id_encargado, true)['info'];
@@ -353,13 +356,13 @@ class entrega_fruta_model extends CI_Model {
     $pdf->SetX($x);
     $pdf->Row(['Fecha', (isset($data->no)? $data->fecha: '')], false, true);
     $pdf->SetX($x);
-    $pdf->Row(['Rancho', (isset($data->rancho)? $data->rancho->nombre: '')], false, true);
+    $pdf->Row(['Rancho', (isset($data->rancho)? $data->rancho: '')], false, true);
     $pdf->SetX($x);
-    $pdf->Row(['Transporte', (isset($data->vehiculo)? $data->vehiculo->marca.' '.$data->vehiculo->modelo: '')], false, true);
+    $pdf->Row(['Transporte', (isset($data->camion)? $data->camion: '')], false, true);
     $pdf->SetX($x);
-    $pdf->Row(['Placas', (isset($data->vehiculo)? $data->vehiculo->placa: '')], false, true);
+    $pdf->Row(['Placas', (isset($data->camion_placas)? $data->camion_placas: '')], false, true);
     $pdf->SetX($x);
-    $pdf->Row(['Chofer', (isset($data->chofer[0])? $data->chofer[0]->nombre.' '.$data->chofer[0]->apellido_paterno: '')], false, true);
+    $pdf->Row(['Chofer', (isset($data->chofer)? $data->chofer: '')], false, true);
     $pdf->SetAligns(['R', 'L', 'R', 'L']);
     $pdf->SetWidths([25, 35, 15, 27]);
     $pdf->SetX($x);

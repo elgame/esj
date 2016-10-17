@@ -504,6 +504,24 @@ class Ventas_model extends privilegios_model{
       }
     }
 
+    // Si es al contado y es la bodega de guadalajara Paga la factura automaticamente
+    if ($this->input->post('dcondicion_pago') == 'co' && preg_match("/bodega/i", $this->input->post('dempresa')) === 1 ) {
+      $this->load->model('cuentas_cobrar_model');
+      $this->load->model('banco_cuentas_model');
+
+      $cuentas = $this->db->query("SELECT * FROM banco_cuentas
+                                 WHERE status = 'ac' AND id_empresa = ".$this->input->post('did_empresa'))->row();
+
+      $_GET['tipo'] = 'v';
+      $data = array('fecha'  => substr($_POST['dfecha'], 0, 10),
+            'concepto'       => 'Pago de contado '.$this->input->post('dserie').$this->input->post('dfolio'),
+            'total'          => $this->input->post('total_totfac'), //$total,
+            'id_cuenta'      => $cuentas->id_cuenta,
+            'ref_movimiento' => $this->input->post('dserie').$this->input->post('dfolio'),
+            'saldar'         => 'no' );
+      $resa = $this->cuentas_cobrar_model->addAbono($data, $id_venta);
+    }
+
     $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
