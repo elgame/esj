@@ -603,6 +603,7 @@ class polizas_model extends CI_Model {
           {
             $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
             $cuenta_cpi = $cuenta_cpi==''? '41040000': $cuenta_cpi;
+            $cuenta_cpi = $inf_factura['info']->id_empresa==12? '41010000' : $cuenta_cpi;
             $response['data'] .= $this->setEspacios('M',2).
                               $this->setEspacios($cuenta_cpi,30).
                               $this->setEspacios($inf_factura['info']->serie.$inf_factura['info']->folio,10).
