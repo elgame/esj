@@ -160,6 +160,7 @@ class mypdf_ticket extends FPDF {
         $this->MultiCell($this->pag_size[0], 3, 'CHOFER: ' . strtoupper($data->chofer), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'CAMION: ' . strtoupper($data->camion), 0, 'L');
         $this->MultiCell($this->pag_size[0], 3, 'PLACAS: ' . strtoupper($data->camion_placas), 0, 'L');
+        $this->MultiCell($this->pag_size[0], 3, 'PRODUCTOR: ' . strtoupper($data->productor), 0, 'L');
 
         if ($data->certificado == 't')
         {
