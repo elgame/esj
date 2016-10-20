@@ -267,7 +267,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%SUELDOS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
@@ -282,7 +283,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%VACACIONES%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
@@ -297,7 +299,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%PRIMA VACACIONAL%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
@@ -312,7 +315,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%AGUINALDO%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
@@ -327,7 +331,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND nombre like '%COMPENSACION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
@@ -343,7 +348,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12) $sql=" AND UPPER(nombre) like '%ASISTENCIA%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
