@@ -2175,8 +2175,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%sueldo%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2198,8 +2198,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%horas extras%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2221,8 +2221,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%vacaciones%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2244,8 +2244,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%prima vacacional%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2267,8 +2267,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%aguinaldos%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2290,8 +2290,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%indemnizaciones%' AND id_padre = '1296'"; //tests carga las de sanjorge
     }
@@ -2313,8 +2313,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
@@ -2336,8 +2336,8 @@ class nomina_fiscal_model extends CI_Model {
     elseif($id_empresa==4) $sql=""; //Raul jorge
     elseif($id_empresa==3) $sql=""; //Gomez gudiño
     elseif($id_empresa==5) $sql=""; //vianey rocio
-    elseif($id_empresa==12 && $departamento == 19) $sql=" AND UPPER(nombre) like '%VALES DE DESPENSA VENTAS%'"; //plasticos
-    elseif($id_empresa==12 && $departamento != 19) $sql=" AND UPPER(nombre) like '%VALES DE DESPENSA PRODUCCION%'"; //plasticos
+    elseif($id_empresa==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%VALES DE DESPENSA VENTAS%'"; //plasticos
+    elseif($id_empresa==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%VALES DE DESPENSA PRODUCCION%'"; //plasticos
     else{
       $id_empresa = 2; $sql=" AND LOWER(nombre) LIKE '%ispt antes%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }

@@ -301,8 +301,9 @@
                                       <tr>
                                         <th>BOLETA</th>
                                         <th>FECHA</th>
-                                        <th>FOLIO</th>
-                                        <th>FACTURADOR Y/O PRODUCTOR</th>
+                                        <!-- <th>FOLIO</th> -->
+                                        <th>FACTURADOR</th>
+                                        <th>PRODUCTOR</th>
                                         <th>IMPORTE</th>
                                       </tr>
                                     </thead>
@@ -318,8 +319,9 @@
                                             <input type="hidden" name="boletas_id[]" value="<?php echo $boleta->id_bascula ?>">
                                           </td>
                                           <td><?php echo $boleta->fecha ?></td>
-                                          <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td>
+                                          <!-- <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td> -->
                                           <td><?php echo $boleta->proveedor ?></td>
+                                          <td><?php echo $boleta->productor ?></td>
                                           <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>

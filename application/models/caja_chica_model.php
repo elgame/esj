@@ -80,12 +80,14 @@ class caja_chica_model extends CI_Model {
         $sql = " AND b.id_area = 7";
       }
       $boletas = $this->db->query(
-        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor, b.importe, cb.folio as folio_caja_chica
-         FROM bascula b
-         INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-         LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
-         WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'{$sql}
-         ORDER BY (b.folio) ASC"
+        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor,
+          b.importe, cb.folio as folio_caja_chica, p.nombre_fiscal as productor
+        FROM bascula b
+        INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+        LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
+        LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
+        WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'{$sql}
+        ORDER BY (b.folio) ASC"
       );
 
       if ($boletas->num_rows() > 0)
@@ -318,7 +320,7 @@ class caja_chica_model extends CI_Model {
           'fecha'      => $data['fecha_caja_chica'],
           'id_bascula' => $idBoleta,
           'row'        => $key,
-          'folio'      => empty($data['boletas_folio'][$key]) ? null : $data['boletas_folio'][$key],
+          'folio'      => null, //empty($data['boletas_folio'][$key]) ? null : $data['boletas_folio'][$key],
           'no_caja'    => $data['fno_caja'],
         );
       }
@@ -989,12 +991,12 @@ class caja_chica_model extends CI_Model {
     $pdf->SetFont('Arial','', 6);
     $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 15, 15, 39, 20));
-    $pdf->Row(array('BOLETA', 'FECHA', 'FOLIO', 'FACTURADOR Y/O PRODUTOR', 'IMPORTE'), true, true);
+    $pdf->SetWidths(array(15, 15, 27, 27, 20));
+    $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'PRODUTOR', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-    $pdf->SetWidths(array(15, 15, 15, 39, 20));
+    $pdf->SetWidths(array(15, 15, 27, 27, 20));
 
     // $caja['boletas'] = array_merge($caja['boletas'], $caja['boletas']);
 
@@ -1010,10 +1012,10 @@ class caja_chica_model extends CI_Model {
         // nomenclatura
         $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-        $pdf->SetWidths(array(15, 15, 15, 39, 20));
+        $pdf->SetWidths(array(15, 15, 27, 27, 20));
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('BOLETA', 'FECHA', 'FOLIO', 'FACTURADOR Y/O PRODUTOR', 'IMPORTE'), true, true);
+        $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'PRODUTOR', 'IMPORTE'), true, true);
 
         $boletasY = $pdf->GetY();
       }
@@ -1025,8 +1027,8 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array(
         $boleta->boleta,
         $boleta->fecha,
-        $boleta->folio_caja_chica,
         $boleta->proveedor,
+        $boleta->productor,
         String::formatoNumero($boleta->importe, 2, '', false)), false, true);
 
       $totalBoletas += floatval($boleta->importe);

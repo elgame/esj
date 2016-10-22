@@ -183,7 +183,8 @@ class productos_salidas_model extends CI_Model {
               cs.id_empleado, (u.nombre || ' ' || u.apellido_paterno) AS empleado,
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
               cs.status, cs.concepto, cs.solicito, cs.recibio,
-              cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador
+              cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
+              cs.no_impresiones, cs.no_impresiones_tk
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
@@ -382,6 +383,10 @@ class productos_salidas_model extends CI_Model {
 
     $y_compras = $pdf->GetY();
 
+    $pdf->SetX(6);
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones)), false, false);
+
     //Totales
     $pdf->SetFont('Arial','',8);
     $pdf->SetXY(160, $yy);
@@ -389,6 +394,8 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(25, 25));
     $pdf->SetX(160);
     $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+
+    $this->db->update('compras_salidas', ['no_impresiones' => $orden['info'][0]->no_impresiones+1], "id_salida = ".$orden['info'][0]->id_salida);
 
     if ($path)
     {
@@ -498,6 +505,12 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Expedido el: '.date("Y-m-d")), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $this->db->update('compras_salidas', ['no_impresiones_tk' => $orden['info'][0]->no_impresiones_tk+1], "id_salida = ".$orden['info'][0]->id_salida);
 
     $pdf->AutoPrint(true);
     $pdf->Output();

@@ -267,8 +267,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
@@ -283,8 +283,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
@@ -299,8 +299,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
@@ -315,8 +315,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
@@ -331,8 +331,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
@@ -348,8 +348,8 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==4) $sql=""; //Raul jorge
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
-    elseif($this->empresaId==12 && $departamento == 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
-    elseif($this->empresaId==12 && $departamento != 19) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
     else{
       $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
@@ -1173,8 +1173,10 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
           f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
-          u.id_departamente, f.pasistencia
-       FROM nomina_fiscal AS f INNER JOIN usuarios AS u ON u.id = f.id_empleado
+          u.id_departamente, f.pasistencia, ud.nombre AS departamento
+      FROM nomina_fiscal AS f
+        INNER JOIN usuarios AS u ON u.id = f.id_empleado
+        INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
       WHERE f.esta_asegurado = 't'
          {$sql}
       ORDER BY f.id_empleado ASC, f.id_empresa ASC, f.semana ASC
@@ -1185,7 +1187,7 @@ class polizas_model extends CI_Model {
     {
       if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
       {
-        if ($value->id_departamente == 1) {
+        if ($value->departamento == "ADMINISTRACION") {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal1   += $value->sueldo_semanal;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones1       += $value->vacaciones;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->prima_vacacional1 += $value->prima_vacacional;
@@ -1210,7 +1212,7 @@ class polizas_model extends CI_Model {
         $value->fecha_inicio1    = $value->fecha_final;
         $value->fecha_inicio     = str_replace('-', '/', $value->fecha_inicio);
         $value->fecha_final      = str_replace('-', '/', $value->fecha_final);
-        if ($value->id_departamente == 1) {
+        if ($value->departamento == "ADMINISTRACION") {
           $value->sueldo_semanal1   = $value->sueldo_semanal;
           $value->vacaciones1       = $value->vacaciones;
           $value->prima_vacacional1 = $value->prima_vacacional;
