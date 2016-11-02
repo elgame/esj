@@ -893,7 +893,7 @@ class bascula_model extends CI_Model {
           'concepto'            => $datos['descrip'],
           'monto'               => $datos['dmonto'],
           'tipo'                => 'f',
-          'entransito'          => 't',
+          'entransito'          => 'f',
           'metodo_pago'         => $datos['fmetodo_pago'],
           'id_proveedor'        => $inf_factura['info'][0]->id_proveedor,
           'a_nombre_de'         => $inf_factura['info'][0]->proveedor,
