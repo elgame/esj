@@ -1,4 +1,8 @@
 
+ ✔ Salidas productos original y copia @done (16-10-31 12:54) pct|san
+   ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones smallint DEFAULT 0;
+   ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
+
 ✔ Catalogo de productores @done (16-10-13 12:15) san|cpt|cpl|cpc
   ALTER TABLE otros.productor ADD COLUMN no_coeplim character varying(55);
   ALTER TABLE otros.productor ADD COLUMN hectareas double precision DEFAULT 0;
