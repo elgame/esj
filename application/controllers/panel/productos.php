@@ -301,9 +301,10 @@ class productos extends MY_Controller {
 				$params['frm_errors'] = $this->showMsgs('9');
 			}
 
-			$params['unidades'] = $this->productos_model->getUnidades(false);
-			$params['data']     = $this->productos_model->getProductoInfo($_GET['id']);
-			$params['familias'] = $this->productos_model->getFamilias(false);
+      $params['unidades']  = $this->productos_model->getUnidades(false);
+      $params['data']      = $this->productos_model->getProductoInfo($_GET['id']);
+      $_GET['fid_empresa'] = $params['data']['info']->id_empresa;
+      $params['familias']  = $this->productos_model->getFamilias(false);
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
