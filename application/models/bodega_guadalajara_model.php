@@ -595,7 +595,7 @@ class bodega_guadalajara_model extends CI_Model {
               AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
       ) t
-      WHERE tipo = '1' OR (tipo = '2' AND saldo = 0)
+      WHERE (tipo = '1' OR (tipo = '2' AND saldo = 0)) AND saldo > 0
       ORDER BY (fecha, serie, folio) DESC
     ");
 

@@ -43,7 +43,21 @@
 
   var btnDelIngreso = function () {
     $('#table-ingresos').on('click', '.btn-del-ingreso', function(event) {
-      $(this).parents('tr').remove();
+      var $tr = $(this).parents('tr'),
+          $ingreso_id_ingresos = $tr.find('#ingreso_id_ingresos'),
+          $ingreso_del = $tr.find('#ingreso_del'),
+
+          id = $tr.find('.gasto-cargo-id').val(),
+          $totalRepo = $('#repo-'+id).find('.reposicion-importe'),
+          total = 0;
+
+      if ($ingreso_id_ingresos.val() != '') {
+        $ingreso_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        $tr.remove();
+      }
+
       calculaTotalIngresos();
     });
   };
@@ -61,6 +75,8 @@
     var $table = $('#table-ingresos').find('tbody'),
         tr =  '<tr>' +
                 '<td style="width: 100px;">' +
+                  '<input type="hidden" name="ingreso_id_ingresos[]" value="" id="ingreso_id_ingresos">'+
+                  '<input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">'+
                   '<input type="text" name="ingreso_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
                   '<input type="hidden" name="ingreso_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
                 '</td>' +
@@ -93,11 +109,11 @@
       var $tr = $(this).parents('tr');
       if ($tr.find('.remision_row').val() == '') {
         $tr.remove();
-        calculaTotalIngresos();
       } else {
         $tr.find('#remision_del').val('true');
         $tr.hide();
       }
+      calculaTotalIngresos();
     });
   };
 
@@ -140,7 +156,8 @@
   var calculaTotalIngresos = function () {
     var total = 0;
     $('.ingreso-monto').each(function(index, el) {
-      total += parseFloat($(this).val() || 0);
+      if ($(this).parents("tr").css('display') != 'none')
+        total += parseFloat($(this).val() || 0);
     });
 
     // $('.otros-monto').each(function(index, el) {
@@ -148,7 +165,8 @@
     // });
 
     $('.remision-importe').each(function(index, el) {
-      total += parseFloat($(this).val() || 0);
+      if ($(this).parents("tr").css('display') != 'none')
+        total += parseFloat($(this).val() || 0);
     });
 
     total = parseFloat(total.toFixed(2));

@@ -1,4 +1,12 @@
 
+ ✔ Caja chica ticket ingresos @done (16-12-12 10:59) pct|
+   ALTER TABLE public.cajachica_ingresos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+   ALTER TABLE public.cajachica_ingresos ADD COLUMN id_usuario bigint;
+   ALTER TABLE public.cajachica_ingresos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();
+   ALTER TABLE public.cajachica_ingresos ADD CONSTRAINT cajachica_ingresos_id_usuario_fkey
+     FOREIGN KEY (id_usuario) REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de ingresos/gastos',247,TRUE,'caja_chica/rpt_ingresos_gastos/','print',TRUE);
+
  ✔ Salidas productos original y copia @done (16-10-31 12:54) pct|san
    ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones smallint DEFAULT 0;
    ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones_tk smallint DEFAULT 0;

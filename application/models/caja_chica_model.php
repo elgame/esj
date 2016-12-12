@@ -225,17 +225,41 @@ class caja_chica_model extends CI_Model {
     if (isset($data['ingreso_concepto']) && is_array($data['ingreso_concepto'])) {
       foreach ($data['ingreso_concepto'] as $key => $ingreso)
       {
-        $ingresos[] = array(
-          'concepto'        => $ingreso,
-          'monto'           => $data['ingreso_monto'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
-          'otro'            => 'f',
-          'id_categoria'    => $data['ingreso_empresa_id'][$key],
-          'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
-          'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
-          'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
-          'no_caja'         => $data['fno_caja'],
-        );
+        if (isset($data['ingreso_del'][$key]) && $data['ingreso_del'][$key] == 'true' &&
+          isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
+
+          $this->db->delete('cajachica_ingresos', "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
+        } elseif (isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
+          $ingreso_udt = array(
+            'concepto'        => $ingreso,
+            'monto'           => $data['ingreso_monto'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'otro'            => 'f',
+            'id_categoria'    => $data['ingreso_empresa_id'][$key],
+            'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
+            'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
+            'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
+            'no_caja'         => $data['fno_caja'],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+
+          $this->db->update('cajachica_ingresos', $ingreso_udt, "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
+        } else {
+          $ingresos = array(
+            'concepto'        => $ingreso,
+            'monto'           => $data['ingreso_monto'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'otro'            => 'f',
+            'id_categoria'    => $data['ingreso_empresa_id'][$key],
+            'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
+            'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
+            'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
+            'no_caja'         => $data['fno_caja'],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+
+          $this->db->insert('cajachica_ingresos', $ingresos);
+        }
       }
     }
 
@@ -253,11 +277,11 @@ class caja_chica_model extends CI_Model {
     //   }
     // }
 
-    $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
-    if (count($ingresos) > 0)
-    {
-      $this->db->insert_batch('cajachica_ingresos', $ingresos);
-    }
+    // $this->db->delete('cajachica_ingresos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
+    // if (count($ingresos) > 0)
+    // {
+    //   $this->db->insert_batch('cajachica_ingresos', $ingresos);
+    // }
 
     // Remisiones
     //Elimina los movimientos de banco y cuentas por cobrar si ya se cerro el corte
@@ -443,7 +467,7 @@ class caja_chica_model extends CI_Model {
        LEFT JOIN proveedores p ON p.id_proveedor = bm.id_proveedor
        INNER JOIN banco_bancos as ba ON ba.id_banco = bm.id_banco
        LEFT JOIN cajachica_ingresos ci ON ci.id_movimiento = bm.id_movimiento
-       WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0 AND DATE(bm.fecha) > (Now() - interval '4 months')
+       WHERE bm.tipo = 'f' AND COALESCE(ci.id_ingresos, 0) = 0 AND DATE(bm.fecha) > (Now() - interval '24 months')
        ORDER BY bm.fecha ASC, ci.id_ingresos ASC
     ");
 
@@ -1392,6 +1416,102 @@ class caja_chica_model extends CI_Model {
     $pdf->Output('vale_remision.pdf', 'I');
   }
 
+  public function getDataValeIngresos($id_ingresos, $noCaja)
+  {
+    $ingreso = $this->db->query(
+      "SELECT ci.*, cc.abreviatura as abr_empresa, cc.nombre AS empresa, cn.nomenclatura,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+       FROM cajachica_ingresos ci
+       INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+       INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+       LEFT JOIN banco_movimientos bm ON bm.id_movimiento = ci.id_movimiento
+       LEFT JOIN usuarios u ON u.id = ci.id_usuario
+       WHERE ci.id_ingresos = {$id_ingresos} AND ci.no_caja = {$noCaja}"
+    )->row();
+
+    return $ingreso;
+  }
+
+  public function printValeIngresos($id_ingresos, $noCaja)
+  {
+
+    $ingreso = $this->getDataValeIngresos($id_ingresos, $noCaja);
+
+    // echo "<pre>";
+    //   var_dump($ingreso);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array($ingreso->empresa), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()+4);
+    $pdf->Row(array('INGRESOS'), false, false);
+
+    $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-6);
+    $pdf->Row(array('Folio: '.$ingreso->id_ingresos), false, false);
+
+    $pdf->SetWidths(array(20, 43));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: '.$ingreso->no_caja, '' ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('CANTIDAD:', String::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(String::num2letras($ingreso->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($ingreso->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($ingreso->no_impresiones==0? 'ORIGINAL': 'COPIA '.$ingreso->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', $ingreso->fecha), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', $ingreso->fecha_creacion), false, false);
+
+    $this->db->update('cajachica_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
+        "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_ingreso.pdf', 'I');
+  }
+
 
   /**
    * Reporte gastos caja chica
@@ -1856,6 +1976,244 @@ class caja_chica_model extends CI_Model {
   }
 
   public function getRptIngresosXls(){
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=ingresos_caja.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $res = $this->getRptIngresosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = 'Reporte de Ingresos';
+    $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $aux_proveedor_total = $proveedor_total = 0;
+    foreach($res['movimientos'] as $key => $producto){
+
+      if($key==0 || $aux_categoria != $producto->id_categoria) {
+        if($aux_categoria != $producto->id_categoria && $key > 0)
+        {
+          $aux_proveedor_total = $proveedor_total;
+          $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+          $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+        }elseif($key == 0)
+          $aux_categoria = $producto->id_categoria;
+
+        $html .= '<tr style="font-weight:bold">
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="6" style="background-color: #cccccc;">'.$producto->categoria.'</td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Nomenclatura</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Poliza</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Concepto</td>
+          <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+      }
+
+      $html .= '<tr style="">
+          <td style="border:1px solid #000;">'.$producto->fecha.'</td>
+          <td style="border:1px solid #000;">'.$producto->nomenclatura.'</td>
+          <td style="border:1px solid #000;">'.$producto->poliza.'</td>
+          <td style="border:1px solid #000;">'.$producto->concepto.'</td>
+          <td style="border:1px solid #000;">'.$producto->monto.'</td>
+        </tr>';
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+    {
+      $aux_proveedor_total = $proveedor_total;
+      $html .= $this->getRptMovimientosTotalesXls($proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+      $html .= $this->getRptRemisionesTotalesXls($res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+  /**
+   * Reporte ingresos/gastos caja chica
+   *
+   * @return
+   */
+  public function getRptIngresosGastosData()
+  {
+    $sql3 = $sql = $sql2 = '';
+      $idsproveedores = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha2']: $_GET['ffecha1'];
+
+    if($this->input->get('did_empresa') != ''){
+      $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('fnomenclatura') != '')
+      $sql2 .= " AND cn.id = ".$this->input->get('fnomenclatura');
+
+    if ($this->input->get('fno_caja') != '') {
+      $sql2 .= " AND ci.no_caja = ".$this->input->get('fno_caja');
+      $sql3 .= " AND cr.no_caja = ".$this->input->get('fno_caja');
+    }
+
+    if ($this->input->get('dprov_clien') != '') {
+      $sql2 .= " AND ci.concepto LIKE '%".$this->input->get('dprov_clien')."%'";
+      $sql3 .= " AND cr.observacion LIKE '%".$this->input->get('fno_caja')."%'";
+    }
+
+    $response = array('movimientos' => array(), 'remisiones' => array());
+
+    $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria,
+          cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
+          cn.id AS id_nomenclatura
+        FROM cajachica_ingresos ci
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+          INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+        WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql} {$sql2}
+        ORDER BY id_categoria ASC, fecha ASC");
+    $response['movimientos'] = $movimientos->result();
+
+    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria,
+          f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
+        FROM cajachica_remisiones cr
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+          INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+        WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+          {$sql} {$sql3}
+        ORDER BY id_categoria ASC, fecha ASC");
+    $response['remisiones'] = $remisiones->result();
+
+    return $response;
+  }
+
+  public function getRptIngresosGastosPdf(){
+    $res = $this->getRptIngresosGastosData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Reporte de Ingresos';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'L', 'L', 'R');
+    $widths = array(20, 22, 45, 80, 35);
+    $header = array('Fecha', 'Nomenclatura', 'Poliza', 'Concepto', 'Importe');
+
+    $aux_categoria = '';
+    $total_nomenclatura = array();
+    $aux_proveedor_total = $proveedor_total = 0;
+    foreach($res['movimientos'] as $key => $producto){
+      if($pdf->GetY() >= $pdf->limiteY || $key==0 || $aux_categoria != $producto->id_categoria){ //salta de pagina si exede el max
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        if($aux_categoria != $producto->id_categoria && $key > 0)
+        {
+          $aux_proveedor_total = $proveedor_total;
+          $this->getRptMovimientosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+          $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+        }elseif($key == 0)
+          $aux_categoria = $producto->id_categoria;
+
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFont('Arial','B',12);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->SetAligns(array('L'));
+        $pdf->SetWidths(array(150));
+        $pdf->Row(array($producto->categoria), false, false);
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $pdf->SetY($pdf->GetY()+2);
+      }
+
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetFont('Arial','',8);
+      $datos = array($producto->fecha,
+        $producto->nomenclatura,
+        $producto->poliza,
+        $producto->concepto,
+        String::formatoNumero($producto->monto, 2, '', false),
+        );
+      $pdf->SetXY(6, $pdf->GetY()-2);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row($datos, false, false);
+
+      if(array_key_exists($producto->id_nomenclatura, $total_nomenclatura))
+        $total_nomenclatura[$producto->id_nomenclatura][0] += $producto->monto;
+      else
+        $total_nomenclatura[$producto->id_nomenclatura] = array($producto->monto, $producto->nombre_nomen, $producto->nomenclatura);
+
+      $proveedor_total += $producto->monto;
+    }
+
+    if(isset($producto))
+    {
+      $aux_proveedor_total = $proveedor_total;
+      $this->getRptMovimientosTotales($pdf, $proveedor_total, $total_nomenclatura, $aux_categoria, $producto);
+
+      $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
+    }
+
+    $pdf->Output('ingresos_caja.pdf', 'I');
+  }
+
+  public function getRptIngresosGastosXls(){
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
     header("Content-Disposition: attachment; filename=ingresos_caja.xls");
     header("Pragma: no-cache");

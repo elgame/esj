@@ -17,6 +17,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_ingresos_xls/',
     'caja_chica/print_vale/',
     'caja_chica/print_vale_rm/',
+    'caja_chica/print_vale_ipr/',
   );
 
   public function _remap($method)
@@ -213,6 +214,38 @@ class caja_chica extends MY_Controller {
   public function rpt_ingresos_xls(){
     $this->load->model('caja_chica_model');
     $this->caja_chica_model->getRptIngresosXls();
+  }
+
+  public function rpt_ingresos_gastos()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/caja_chica/rpt_gastos.js'),
+    ));
+
+    // $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de ingresos/gastos');
+
+    $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/rpt_ingresos_gastos',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function rpt_ingresos_gastos_pdf(){
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->getRptIngresosGastosPdf();
+  }
+  public function rpt_ingresos_gastos_xls(){
+    $this->load->model('caja_chica_model');
+    $this->caja_chica_model->getRptIngresosGastosXls();
   }
 
   public function rpt_cajas()
@@ -687,6 +720,17 @@ class caja_chica extends MY_Controller {
       $this->caja_chica_model->printValeRemision($_GET['fecha'], $_GET['id_remision'], $_GET['row'], $_GET['noCaja']);
     else{
       $params['url'] = 'panel/caja_chica/print_vale_rm/?fecha='.$_GET['fecha'].'&id_remision='.$_GET['id_remision'].'&row='.$_GET['row'].'&noCaja='.$_GET['noCaja'].'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_ipr()
+  {
+    $this->load->model('caja_chica_model');
+    if($this->input->get('p') == 'true')
+      $this->caja_chica_model->printValeIngresos($_GET['id_ingresos'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/caja_chica/print_vale_ipr/?id_ingresos='.$_GET['id_ingresos'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }
