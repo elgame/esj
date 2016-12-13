@@ -18,6 +18,9 @@ class caja_chica extends MY_Controller {
     'caja_chica/print_vale/',
     'caja_chica/print_vale_rm/',
     'caja_chica/print_vale_ipr/',
+    'caja_chica/rpt_ingresos_gastos_pdf/',
+    'caja_chica/rpt_ingresos_gastos_xls/',
+    'caja_chica/ajax_get_remisiones/',
   );
 
   public function _remap($method)
@@ -134,7 +137,7 @@ class caja_chica extends MY_Controller {
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
-    $params['remisiones'] = $this->caja_chica_model->getRemisiones();
+    // $params['remisiones'] = $this->caja_chica_model->getRemisiones();
     $params['movimientos'] = $this->caja_chica_model->getMovimientos();
     $params['nomenclaturas'] = $this->caja_chica_model->nomenclaturas();
 
@@ -229,7 +232,7 @@ class caja_chica extends MY_Controller {
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Reporte de ingresos/gastos');
 
-    $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
+    // $params['nomenclatura'] = $this->caja_chica_model->getNomenclaturas();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -541,6 +544,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     echo json_encode($this->caja_chica_model->ajaxCategorias());
+  }
+
+  public function ajax_get_remisiones()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->getRemisiones());
   }
 
 

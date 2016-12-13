@@ -1,9 +1,9 @@
 
  ✔ .66h En cajas chicas imprimir recibo en ingresos por reposicion, y poner titulo en los tickets "Ingresos" @done (16-12-12 14:55)
  ✔ Reporte de bodega guadalajara, en cuentas por pagar si el saldo es 0 que no salga @done (16-12-12 15:04)
- ☐ En cajas chicas crear reporte de gastos e ingresos juntos como estado de cuenta
+ ✔ 1.33h En cajas chicas crear reporte de gastos e ingresos juntos como estado de cuenta @done (16-12-12 22:45)
  ☐ Crear nueva caja chica "Ventas de contado", poner titulo a cada caja chica
- ☐ En caja chica no salen las remisiones que se hacen ese dia hasta el dia siguiente
+ ✔ En caja chica no salen las remisiones que se hacen ese dia hasta el dia siguiente @done (16-12-12 23:37)
 
  ✔ 0.26h Reporte de caja chica, quitar la columna de folio y agregar otra para poner el productor @done (16-10-21 15:24)
  ✔ 0.2h En ticket de salida poner lo de original y copia @done (16-10-21 19:12)

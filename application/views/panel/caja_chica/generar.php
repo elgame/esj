@@ -617,15 +617,6 @@
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($remisiones as $remision) { ?>
-            <tr>
-              <td><input type="checkbox" class="chk-remision" data-id="<?php echo $remision->id_factura ?>" data-numremision="<?php echo $remision->folio ?>" data-total="<?php echo $remision->saldo ?>" data-foliofactura="<?php echo $remision->folio_factura ?>" data-concepto="<?php echo $remision->cliente ?>"></td>
-              <td style="width: 66px;"><?php echo $remision->fecha ?></td>
-              <td><?php echo ($remision->serie ? $remision->serie.'-':'').$remision->folio ?></td>
-              <td><?php echo $remision->cliente ?></td>
-              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($remision->saldo), 2, '$') ?></td>
-            </tr>
-          <?php } ?>
         </tbody>
       </table>
     </div>

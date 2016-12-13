@@ -15,6 +15,7 @@
     cargaRemisiones();
     btnDelRemision();
     onChangeTotalRemisiones();
+    obtenRemisionesAjax();
 
     onChanceDenominacionNum();
     onChanceTotalDenominacion();
@@ -492,4 +493,25 @@
       });
     });
   };
+
+  var obtenRemisionesAjax = function () {
+    $('#modal-remisiones').on('show', function () {
+      $.getJSON(base_url+'panel/caja_chica/ajax_get_remisiones', function(json, textStatus) {
+        var html = '';
+        for (var key in json) {
+          html += '<tr>'+
+              '<td><input type="checkbox" class="chk-remision" data-id="'+json[key].id_factura+'" data-numremision="'+json[key].folio+'" data-total="'+json[key].saldo+'" data-foliofactura="'+(json[key].folio_factura||'')+'" data-concepto="'+json[key].cliente+'"></td>'+
+              '<td style="width: 66px;">'+json[key].fecha+'</td>'+
+              '<td>'+json[key].serie+json[key].folio+'</td>'+
+              '<td>'+json[key].cliente+'</td>'+
+              '<td style="text-align: right;">'+json[key].saldo+'</td>'+
+            '</tr>';
+        }
+
+        $('#modal-remisiones #lista_remisiones_modal tbody').append(html);
+        $("#lista_remisiones_modal").filterTable();
+      });
+    });
+  };
+
 });
