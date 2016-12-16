@@ -43,6 +43,7 @@
                       <option value="1">Caja 1</option>
                       <option value="2">Caja 2</option>
                       <option value="3">Caja 3</option>
+                      <option value="4">Caja Venta de Contado</option>
                       <!-- <option value="prest1">Caja prestamos</option> -->
                     </select>
                   </div>

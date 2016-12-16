@@ -44,11 +44,13 @@ class caja_chica extends MY_Controller {
     //   array('')
     // ));
 
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/', true);
+
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Caja chica');
+    $params['seo']        = array('titulo' => $privilegio->nombre);
     $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
     $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
@@ -66,8 +68,10 @@ class caja_chica extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
 
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja2/', true);
+
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Caja chica 2');
+    $params['seo']        = array('titulo' => $privilegio->nombre);
     $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
     $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
@@ -85,8 +89,10 @@ class caja_chica extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
 
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja3/', true);
+
     $params['info_empleado']  = $this->info_empleado['info'];
-    $params['seo']        = array('titulo' => 'Caja chica 3');
+    $params['seo']        = array('titulo' => $privilegio->nombre);
     $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
     $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
@@ -96,6 +102,27 @@ class caja_chica extends MY_Controller {
 
     $this->load->view('panel/header',$params);
     $this->load->view('panel/caja_chica/index3',$params);
+    $this->load->view('panel/footer',$params);
+  }
+
+  public function caja4()
+  {
+    $this->load->library('pagination');
+    $this->load->model('caja_chica_model');
+
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/caja4/', true);
+
+    $params['info_empleado'] = $this->info_empleado['info'];
+    $params['seo']           = array('titulo' => $privilegio->nombre);
+    $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
+
+    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/caja_chica/index4',$params);
     $this->load->view('panel/footer',$params);
   }
 

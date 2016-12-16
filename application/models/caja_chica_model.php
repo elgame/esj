@@ -857,6 +857,8 @@ class caja_chica_model extends CI_Model {
     $this->load->model('compras_areas_model');
     $this->load->model('catalogos_sft_model');
 
+    $privilegio = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/'.($noCajas==1? '': "caja{$noCajas}/"), true);
+
     $caja = $this->get($fecha, $noCajas);
     $nomenclaturas = $this->nomenclaturas();
 
@@ -885,7 +887,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('REPORTE CAJA CHICA'), true, true, null, 3);
+    $pdf->Row(array(mb_strtoupper($privilegio->nombre, 'UTF-8')), true, true, null, 3);
 
     $pdf->Image(APPPATH.(str_replace(APPPATH, '', '/images/logo.png')), 6, 15, 50);
     $pdf->Ln(20);
