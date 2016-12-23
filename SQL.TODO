@@ -1,5 +1,5 @@
 
- ✔ Caja chica ticket ingresos @done (16-12-12 10:59) pct|pcc|
+ ✔ Caja chica ticket ingresos @done (16-12-12 10:59) pct|pcc|san
    ALTER TABLE public.cajachica_ingresos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
    ALTER TABLE public.cajachica_ingresos ADD COLUMN id_usuario bigint;
    ALTER TABLE public.cajachica_ingresos ADD COLUMN fecha_creacion timestamp without time zone DEFAULT now();

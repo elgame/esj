@@ -552,7 +552,7 @@ class nomina_fiscal_model extends CI_Model {
           true;
         elseif( $diaUltimoDeLaSemana >= $empleado->en_vacaciones  )
           true;
-        elseif($empleado->dias_trabajados == 0)
+        elseif($empleado->dias_trabajados == 0 && $tipo !== 'ag' && $tipo !== 'ptu')
           unset($empleados[$keye]);
 
       }
