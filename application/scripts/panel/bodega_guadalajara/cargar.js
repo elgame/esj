@@ -3,9 +3,9 @@
 })(function ($, window) {
   $(function () {
 
-    // btnAddIngreso();
+    btnAddIngreso();
     // btnAddMovimientos();
-    // btnDelIngreso();
+    btnDelIngreso();
 
     // btnAddOtros();
     // btnDelOtros();
@@ -34,58 +34,58 @@
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
-    cargaMovimientos();
+    // cargaMovimientos();
     searchModalMovimientos();
 
     $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
   });
 
-  // var btnAddIngreso = function () {
-  //   $('#btn-add-ingreso').on('click', function(event) {
-  //     agregarIngreso();
-  //   });
-  // };
+  var btnAddIngreso = function () {
+    $('#btn-add-ingreso').on('click', function(event) {
+      agregarIngreso();
+    });
+  };
 
-  // var btnDelIngreso = function () {
-  //   $('#table-ingresos').on('click', '.btn-del-ingreso', function(event) {
-  //     $(this).parents('tr').remove();
-  //     calculaTotalIngresos();
-  //   });
-  // };
+  var btnDelIngreso = function () {
+    $('#table-ingresos').on('click', '.btn-del-ingreso', function(event) {
+      $(this).parents('tr').remove();
+      calculaTotalIngresos();
+    });
+  };
 
-  // var agregarIngreso = function (movimiento) {
+  var agregarIngreso = function (movimiento) {
 
-  //   var poliza = '', concepto = '', id = '', abono = '0';
-  //   if (movimiento) {
-  //     poliza   = movimiento.poliza;
-  //     concepto = movimiento.proveedor;
-  //     id       = movimiento.id;
-  //     abono    = movimiento.total;
-  //   }
+    var poliza = '', concepto = '', id = '', abono = '0';
+    if (movimiento) {
+      poliza   = movimiento.poliza;
+      concepto = movimiento.proveedor;
+      id       = movimiento.id;
+      abono    = movimiento.total;
+    }
 
-  //   var $table = $('#table-ingresos').find('tbody'),
-  //       tr =  '<tr>' +
-  //               '<td style="width: 100px;">' +
-  //                 '<input type="text" name="ingreso_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
-  //                 '<input type="hidden" name="ingreso_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
-  //               '</td>' +
-  //               '<td style="width: 40px;">' +
-  //                 '<select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
-  //                   $('#nomeclaturas_base').html() +
-  //                 '</select>' +
-  //               '</td>' +
-  //               '<td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;"></td>' +
-  //               '<td>' +
-  //                 '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
-  //                 '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
-  //               '</td>' +
-  //               '<td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
-  //               '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
-  //             '</tr>';
+    var $table = $('#table-ingresos').find('tbody'),
+        tr =  '<tr>' +
+                '<td style="width: 100px;">' +
+                  '<input type="text" name="ingreso_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>' +
+                  '<input type="hidden" name="ingreso_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">' +
+                '</td>' +
+                '<td style="width: 40px;">' +
+                  '<select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;">' +
+                    $('#nomeclaturas_base').html() +
+                  '</select>' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="'+poliza+'" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;"></td>' +
+                '<td>' +
+                  '<input type="text" name="ingreso_concepto[]" value="'+concepto+'" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required>' +
+                  '<input type="hidden" name="ingreso_concepto_id[]" value="'+id+'" class="ingreso_concepto_id span12" placeholder="Concepto">' +
+                '</td>' +
+                '<td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="'+abono+'" class="ingreso-monto vpositive input-small" placeholder="Monto" required></td>' +
+                '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>' +
+              '</tr>';
 
-  //   $(tr).appendTo($table);
-  //   $(".vpositive").numeric({ negative: false }); //Numero positivo
-  // };
+    $(tr).appendTo($table);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
+  };
 
   // var btnAddOtros = function () {
   //   $('#btn-add-otros').on('click', function(event) {
@@ -527,27 +527,27 @@
     $("#ttotal-corte1").text(util.darFormatoNum(total.toFixed(2)));
   };
 
-  var cargaMovimientos = function () {
-    $('#carga-movimientos').on('click', function(event) {
-      var $table = $('#table-modal-movimientos'),
-          html = '',
-          $this;
+  // var cargaMovimientos = function () {
+  //   $('#carga-movimientos').on('click', function(event) {
+  //     var $table = $('#table-modal-movimientos'),
+  //         html = '',
+  //         $this;
 
-      if ($('.chk-movimiento:checked').length > 0) {
-        $('.chk-movimiento:checked').each(function(index, el) {
-          $this = $(this);
+  //     if ($('.chk-movimiento:checked').length > 0) {
+  //       $('.chk-movimiento:checked').each(function(index, el) {
+  //         $this = $(this);
 
-          agregarIngreso({id: $this.attr('data-id'), total: $this.attr('data-total'), proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza')});
-        });
+  //         agregarIngreso({id: $this.attr('data-id'), total: $this.attr('data-total'), proveedor: $this.attr('data-proveedor'), poliza: $this.attr('data-poliza')});
+  //       });
 
-        calculaTotalIngresos();
+  //       calculaTotalIngresos();
 
-        $('#modal-movimientos').modal('hide');
-      } else {
-        noty({"text": 'Seleccione al menos un movimiento.', "layout":"topRight", "type": 'error'});
-      }
-    });
-  };
+  //       $('#modal-movimientos').modal('hide');
+  //     } else {
+  //       noty({"text": 'Seleccione al menos un movimiento.', "layout":"topRight", "type": 'error'});
+  //     }
+  //   });
+  // };
 
   var searchModalMovimientos = function () {
     $("#search-movimientos").on("keyup", function() {

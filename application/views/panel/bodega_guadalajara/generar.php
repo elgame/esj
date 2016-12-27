@@ -160,6 +160,96 @@
                     </div>
                     <!--/ Cuentas x cobrar -->
 
+                    <!-- Ingresos por Reposicion-->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
+                          <thead>
+                            <tr>
+                              <th colspan="4">INGRESOS POR REPOSICION
+                                <button type="button" class="btn btn-success" id="btn-add-ingreso" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
+                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
+                              </th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>EMPRESA</th>
+                              <th>NOM</th>
+                              <th>POLIZA</th>
+                              <th>NOMBRE Y/O CONCEPTO</th>
+                              <th>ABONO</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                              if (isset($_POST['ingreso_concepto'])) {
+                                foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
+                                    $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
+                                  ?>
+                                  <tr>
+                                    <td style="width: 100px;">
+                                      <input type="hidden" name="ingreso_id_ingresos[]" value="" id="ingreso_id_ingresos">
+                                      <input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">
+                                      <input type="text" name="ingreso_empresa[]" value="<?php echo $_POST['ingreso_empresa'][$key] ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                      <input type="hidden" name="ingreso_empresa_id[]" value="<?php echo $_POST['ingreso_empresa_id'][$key] ?>" class="input-small vpositive gasto-cargo-id">
+                                    </td>
+                                    <td style="width: 40px;">
+                                      <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
+                                        <?php foreach ($nomenclaturas as $n) { ?>
+                                          <option value="<?php echo $n->id ?>" <?php echo $_POST['ingreso_nomenclatura'][$key] == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                        <?php } ?>
+                                      </select>
+                                    </td>
+                                    <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $_POST['ingreso_poliza'][$key] ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly ?>></td>
+                                    <td>
+                                      <input type="text" name="ingreso_concepto[]" value="<?php echo $concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
+                                      <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $_POST['ingreso_concepto_id'][$key] ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
+                                    </td>
+                                    <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $_POST['ingreso_monto'][$key] ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
+                                    <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                  </tr>
+                            <?php }} else {
+                                  foreach ($caja['ingresos'] as $ingreso) {
+                                      $totalIngresos += floatval($ingreso->monto);
+                                    ?>
+                                    <tr>
+                                      <td style="width: 100px;">
+                                        <input type="hidden" name="ingreso_id_ingresos[]" value="<?php echo $ingreso->id_ingresos ?>" id="ingreso_id_ingresos">
+                                        <input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">
+                                        <input type="text" name="ingreso_empresa[]" value="<?php echo $ingreso->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
+                                        <input type="hidden" name="ingreso_empresa_id[]" value="<?php echo $ingreso->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
+                                        <a href="<?php echo base_url('panel/caja_chica/print_vale_ipr/?id_ingresos='.$ingreso->id_ingresos.'&noCaja='.$ingreso->no_caja)?>" target="_blank" title="Imprimir Ingreso por reposicion">
+                                          <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                      </td>
+                                      <td style="width: 40px;">
+                                        <select name="ingreso_nomenclatura[]" class="ingreso_nomenclatura" style="width: 70px;" <?php echo $readonly ?>>
+                                          <?php foreach ($nomenclaturas as $n) { ?>
+                                            <option value="<?php echo $n->id ?>" <?php echo $ingreso->nomenclatura == $n->id ? 'selected' : '' ?>><?php echo $n->nomenclatura ?></option>
+                                          <?php } ?>
+                                        </select>
+                                      </td>
+                                      <td style="width: 100px;"><input type="text" name="ingreso_poliza[]" value="<?php echo $ingreso->poliza ?>" class="ingreso_poliza span12" maxlength="100" placeholder="Poliza" style="width: 100px;" <?php echo $readonly ?>></td>
+                                      <td>
+                                        <input type="text" name="ingreso_concepto[]" value="<?php echo $ingreso->concepto ?>" class="ingreso-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
+                                        <input type="hidden" name="ingreso_concepto_id[]" value="<?php echo $ingreso->id_movimiento ?>" class="ingreso_concepto_id span12" placeholder="Concepto">
+                                      </td>
+                                      <td style="width: 100px;"><input type="text" name="ingreso_monto[]" value="<?php echo $ingreso->monto ?>" class="ingreso-monto vpositive input-small" placeholder="Monto" required <?php echo $readonly ?>></td>
+                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                    </tr>
+                            <?php }} ?>
+
+                            <tr class='row-total'>
+                              <td colspan="4"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos_ext" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos-ext" maxlength="500" readonly style="text-align: right;"></td>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Ingresos por Reposicion-->
+
                     <!-- Existencia anterior -->
                     <div class="row-fluid">
                       <!-- <div class="span2" style="font-weight: bold; text-align: center;margin-top: 1px;">OTROS <button type="button" class="btn btn-success" id="btn-add-otros" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button></div> -->

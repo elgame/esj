@@ -6,6 +6,7 @@ class bodega_guadalajara_model extends CI_Model {
   {
     $info = array(
       'cts_cobrar'     => $this->bodega_guadalajara_model->getAbonosVentasPasadas($fecha),
+      'ingresos'       => array(),
       'remisiones'     => $this->bodega_guadalajara_model->getRemisiones($fecha),
       'ventas'         => $this->bodega_guadalajara_model->getVentas($fecha),
       'prestamos'      => $this->bodega_guadalajara_model->getPrestamos($fecha),
@@ -15,6 +16,20 @@ class bodega_guadalajara_model extends CI_Model {
       'gastos'         => array(),
       'categorias'     => array(),
     );
+
+    $ingresos = $this->db->query(
+      "SELECT ci.*, cc.abreviatura as categoria, cn.nomenclatura
+       FROM otros.bodega_ingresos ci
+       INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+       INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+       WHERE ci.fecha = '{$fecha}' AND ci.otro = 'f' AND ci.no_caja = {$noCaja}
+       ORDER BY ci.id_ingresos ASC"
+    );
+
+    if ($ingresos->num_rows() > 0)
+    {
+      $info['ingresos'] = $ingresos->result();
+    }
 
     // Exsistencia anterior
     $info['existencia_ant'] = $this->db->query(
