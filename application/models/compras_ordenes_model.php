@@ -598,7 +598,8 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem
+              co.ids_facrem,
+              co.no_impresiones_tk
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -1482,6 +1483,277 @@ class compras_ordenes_model extends CI_Model {
         $pdf->Output('ORDEN_COMPRA_'.date('Y-m-d').'.pdf', 'I');
       }
    }
+
+  public function print_orden_compra_ticket($ordenId, $path = null)
+  {
+    $this->load->model('compras_areas_model');
+    $this->load->model('catalogos_sft_model');
+
+    $orden = $this->info($ordenId, true);
+
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    // $pdf->show_head = true;
+    // $pdf->titulo1 = $orden['info'][0]->empresa;
+    $tipo_orden = 'ORDEN DE COMPRA';
+    if($orden['info'][0]->tipo_orden == 'd')
+      $tipo_orden = 'ORDEN DE SERVICIO';
+    elseif($orden['info'][0]->tipo_orden == 'f')
+      $tipo_orden = 'ORDEN DE FLETE';
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, -1);
+    $pdf->Row(array($orden['info'][0]->empresa), false, false);
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($tipo_orden), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('No '.String::formatoNumero($orden['info'][0]->folio, 2, ''), String::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
+
+    $pdf->SetFont('helvetica','', 7);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Proveedor: ' . $orden['info'][0]->proveedor), false, false);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('____________________________________________'), false, false);
+
+
+    // $aligns = array('C', 'C', 'L', 'R', 'R');
+    // $widths = array(25, 35, 76, 18, 25, 25);
+    // $header = array('CANT.', 'CODIGO', 'DESCRIPCION', 'F COMPRA', 'PRECIO', 'IMPORTE');
+
+    $subtotal = $iva = $total = $retencion = $ieps = 0;
+
+    $tipoCambio = 0;
+    $codigoAreas = array();
+
+    foreach ($orden['info'][0]->productos as $key => $prod)
+    {
+      $tipoCambio = 1;
+      if ($prod->tipo_cambio != 0)
+      {
+        $tipoCambio = $prod->tipo_cambio;
+      }
+
+      // $band_head = false;
+      // if($pdf->GetY() >= $pdf->limiteY || $key==0) { //salta de pagina si exede el max
+      //   if($pdf->GetY()+5 >= $pdf->limiteY)
+      //     $pdf->AddPage();
+
+      //   $pdf->SetFont('Arial','B',8);
+      //   $pdf->SetTextColor(255,255,255);
+      //   $pdf->SetFillColor(160,160,160);
+      //   $pdf->SetX(6);
+      //   $pdf->SetAligns($aligns);
+      //   $pdf->SetWidths($widths);
+      //   $pdf->Row($header, true);
+      // }
+
+      $pdf->SetFont('Arial','',7);
+      $pdf->SetTextColor(0,0,0);
+      $datos = array(
+        $prod->cantidad.' '.$prod->abreviatura,
+        $prod->codigo.'/'.$prod->codigo_fin,
+        $prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": ''),
+        $this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo),
+        String::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
+        String::formatoNumero($prod->importe/$tipoCambio, 2, '$', false),
+      );
+
+      // $pdf->SetFont('helvetica','', 8);
+      $pdf->SetWidths(array(20, 43));
+      $pdf->SetAligns(array('L', 'L'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array($this->getFechaUltimaCompra($prod->id_producto, $prod->id_area, $prod->campo), $prod->codigo.'/'.$prod->codigo_fin), false, false);
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array($prod->descripcion.($prod->observacion!=''? " ({$prod->observacion})": '')), false, false);
+      $pdf->SetWidths(array(20, 20, 23));
+      $pdf->SetAligns(array('R', 'R', 'R'));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array($prod->cantidad.' '.$prod->abreviatura,
+                    String::formatoNumero($prod->precio_unitario/$tipoCambio, 2, '$', false),
+                    String::formatoNumero($prod->importe/$tipoCambio, 2, '$', false)), false, false);
+
+      $pdf->SetWidths(array(63));
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array('____________________________________________'), false, false);
+
+      $subtotal  += floatval($prod->importe/$tipoCambio);
+      $iva       += floatval($prod->iva/$tipoCambio);
+      $total     += floatval($prod->total/$tipoCambio);
+      $retencion += floatval($prod->retencion_iva/$tipoCambio);
+      $ieps      += floatval($prod->ieps/$tipoCambio);
+
+      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
+        $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
+    }
+
+    $pdf->SetWidths(array(20, 20, 23));
+    $pdf->SetAligns(array('L', 'R', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array(($tipoCambio>1 ? "TC: " . $tipoCambio : ''), 'SUB-TOTAL', String::formatoNumero($subtotal, 2, '$', false)), false, false);
+    $pdf->SetWidths(array(20, 23));
+    $pdf->SetAligns(array('R', 'R'));
+    $pdf->SetXY(20, $pdf->GetY()-2);
+    $pdf->Row(array('IVA', String::formatoNumero($iva, 2, '$', false)), false, false);
+    if ($ieps > 0)
+    {
+      $pdf->SetXY(20, $pdf->GetY()-2);
+      $pdf->Row(array('IEPS', String::formatoNumero($ieps, 2, '$', false)), false, false);
+    }
+    if ($retencion > 0)
+    {
+      $pdf->SetXY(20, $pdf->GetY()-2);
+      $pdf->Row(array('Ret. IVA', String::formatoNumero($retencion, 2, '$', false)), false, false);
+    }
+    $pdf->SetXY(20, $pdf->GetY()-2);
+    $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, false);
+
+    //Otros datos
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    if($orden['info'][0]->tipo_orden == 'f'){
+      $this->load->model('facturacion_model');
+      $this->load->model('documentos_model');
+      $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+      $info_bascula = false;
+      if (count($facturasss) > 0)
+      {
+        $clientessss = $facturassss = '';
+        array_pop($facturasss);
+        foreach ($facturasss as $key => $value)
+        {
+          $facturaa = explode(':', $value);
+          $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
+          $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
+          $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
+
+          if($info_bascula === false)
+          {
+            $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
+            if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+              $info_bascula = false;
+          }
+        }
+        $pdf->SetXY(0, $pdf->GetY()-1);
+        $pdf->Row(array('FOLIO: '.substr($facturassss, 1) ), false, false);
+      }
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('CLIENTE: '.$orden['info'][0]->cliente), false, false);
+      $pdf->SetAligns(array('C'));
+      $pdf->SetXY(0, $pdf->GetY()+6);
+      $pdf->Row(array('____________________________________________'), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('CHOFER: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+    }else
+    {
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado) ), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
+    }
+
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()+3);
+    $pdf->Row(array('____________________________________________'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('AUTORIZA: '.strtoupper($orden['info'][0]->autorizo)), false, false);
+
+    $pdf->SetAligns(array('L'));
+    if(count($codigoAreas) > 0){
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    }
+
+    $pdf->SetXY(0, $pdf->GetY());
+    if (strlen($orden['info'][0]->descripcion) > 0) {
+      $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
+    }
+    if($orden['info'][0]->tipo_orden == 'f'){
+      $pdf->SetX(0);
+      $pdf->Row(array(substr($clientessss, 2)), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-3);
+      $pdf->Row(array('____________________________________________'), false, false);
+    }
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO.'), false, false);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
+
+    $this->db->where('id_orden', $orden['info'][0]->id_orden)->set('no_impresiones_tk', 'no_impresiones_tk+1', false)->update('compras_ordenes');
+
+    $pdf->Output('orden.pdf', 'I');
+
+    // //a si es flete
+    // if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){
+    //   $info_bascula = json_decode($info_bascula[0]->data);
+    //   if(isset($info_bascula->no_ticket{0}))
+    //   {
+    //     $this->load->model('bascula_model');
+    //     $id_bascula = $this->bascula_model->getIdfolio($info_bascula->no_ticket, 'sa', $info_bascula->area_id);
+    //     $data_bascula = $this->bascula_model->getBasculaInfo($id_bascula);
+
+    //     $pdf->SetX(160);
+    //     $pdf->Row(array('Ticket No', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
+    //     $pdf->SetX(160);
+    //     $pdf->Row(array('Bruto', String::formatoNumero($data_bascula['info'][0]->kilos_bruto, 2, '', false)), false, false);
+    //     $pdf->SetX(160);
+    //     $pdf->Row(array('Tara', String::formatoNumero($data_bascula['info'][0]->kilos_tara, 2, '', false)), false, false);
+    //     $pdf->SetX(160);
+    //     $pdf->Row(array('Neto', String::formatoNumero($data_bascula['info'][0]->kilos_neto, 2, '', false)), false, false);
+    //   }
+    // }
+
+    // $pdf->SetWidths(array(154));
+
+    // if($orden['info'][0]->status == 'f'){
+    //   $pdf->SetAligns(array('C'));
+    //   $pdf->SetY($y_compras);
+    //   foreach ($orden['info'][0]->compras as $key => $value)
+    //    {
+    //      $query = $this->db->query("SELECT c.id_compra, c.serie, c.folio, c.total, Date(ca.fecha) AS fecha_pago, ca.ref_movimiento, bc.alias, Sum(ca.total) AS pagado
+    //         FROM compras c
+    //           LEFT JOIN compras_abonos ca ON c.id_compra = ca.id_compra
+    //           LEFT JOIN banco_cuentas bc ON ca.id_cuenta = bc.id_cuenta
+    //         WHERE c.id_compra = {$value->id_compra}
+    //         GROUP BY c.id_compra, c.serie, c.folio, Date(ca.fecha), ca.ref_movimiento, bc.alias");
+    //      $total_compra = $pagado_compra = 0;
+    //      foreach ($query->result() as $keyd => $compra1)
+    //      {
+    //       $pagado_compra += $compra1->pagado;
+    //       $total_compra = $compra1;
+    //      }
+    //      $query->free_result();
+    //      if ($total_compra->total > 0) {
+    //       $pdf->SetX(20);
+    //       $pdf->Row(array(
+    //         ($pagado_compra == $total_compra->total? 'PAGADO ':'PENDIENTE ').String::fechaATexto($total_compra->fecha_pago, '/c').' '.
+    //         $total_compra->ref_movimiento.' '.$total_compra->alias.' ('.$total_compra->serie.$total_compra->folio.')'), false);
+    //      }
+    //    }
+    // }
+  }
 
    public function getFechaUltimaCompra($id_producto, $id_codigo, $campo)
    {

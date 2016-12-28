@@ -64,7 +64,7 @@
         </select>
 
         <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica">
-          <?php $totalIngresos = 0; $totalSaldoIngresos = 0; ?>
+          <?php $totalIngresosExt = 0; $totalIngresos = 0; $totalSaldoIngresos = 0; ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
             <div class="row-fluid">
@@ -185,7 +185,7 @@
                             <?php
                               if (isset($_POST['ingreso_concepto'])) {
                                 foreach ($_POST['ingreso_concepto'] as $key => $concepto) {
-                                    $totalIngresos += floatval($_POST['ingreso_monto'][$key]);
+                                    $totalIngresosExt += floatval($_POST['ingreso_monto'][$key]);
                                   ?>
                                   <tr>
                                     <td style="width: 100px;">
@@ -211,7 +211,7 @@
                                   </tr>
                             <?php }} else {
                                   foreach ($caja['ingresos'] as $ingreso) {
-                                      $totalIngresos += floatval($ingreso->monto);
+                                      $totalIngresosExt += floatval($ingreso->monto);
                                     ?>
                                     <tr>
                                       <td style="width: 100px;">
@@ -219,7 +219,7 @@
                                         <input type="hidden" name="ingreso_del[]" value="" id="ingreso_del">
                                         <input type="text" name="ingreso_empresa[]" value="<?php echo $ingreso->categoria ?>" class="input-small gasto-cargo" style="width: 150px;" required <?php echo $readonly ?>>
                                         <input type="hidden" name="ingreso_empresa_id[]" value="<?php echo $ingreso->id_categoria ?>" class="input-small vpositive gasto-cargo-id">
-                                        <a href="<?php echo base_url('panel/caja_chica/print_vale_ipr/?id_ingresos='.$ingreso->id_ingresos.'&noCaja='.$ingreso->no_caja)?>" target="_blank" title="Imprimir Ingreso por reposicion">
+                                        <a href="<?php echo base_url('panel/bodega_guadalajara/print_vale_ipr/?id_ingresos='.$ingreso->id_ingresos.'&noCaja='.$ingreso->no_caja)?>" target="_blank" title="Imprimir Ingreso por reposicion">
                                           <i class="ico icon-print" style="cursor:pointer"></i></a>
                                       </td>
                                       <td style="width: 40px;">
@@ -238,13 +238,14 @@
                                       <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-ingreso" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
                                     </tr>
                             <?php }} ?>
-
+                          </tbody>
+                          <tfoot>
                             <tr class='row-total'>
                               <td colspan="4"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos_ext" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos-ext" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos_ext" value="<?php echo String::float(String::formatoNumero($totalIngresosExt, 2, '')) ?>" class="span12" id="total-ingresos-ext" maxlength="500" readonly style="text-align: right;"></td>
                               <td></td>
                             </tr>
-                          </tbody>
+                          </tfoot>
                         </table>
                       </div>
                     </div>
@@ -763,9 +764,9 @@
               <!-- Tabulacion -->
               <div class="row-fluid">
                 <div class="span12">
-                  <div class="span12" style="font-weight: bold; min-height: 25px;">
-                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($totalCont+$abonoshVentas-$totalGastos, 2, '$') ?></span>
-                    <input type="hidden" name="ttotal-corte" value="<?php echo $totalCont+$abonoshVentas-$totalGastos ?>" id="ttotal-corte">
+                  <div class="span12" style="font-weight: bold; min-height: 25px;"><?php echo $totalIngresosExt ?>
+                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos, 2, '$') ?></span>
+                    <input type="hidden" name="ttotal-corte" value="<?php echo $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos ?>" id="ttotal-corte">
                   </div>
                 </div>
               </div>

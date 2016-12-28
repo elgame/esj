@@ -1,5 +1,8 @@
 
- ✔ Bodega ingresos @done (16-12-27 08:29) pct|
+ ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san
+   ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
+
+ ✔ Bodega ingresos @done (16-12-27 08:29) pct|sang|san
    CREATE TABLE otros.bodega_ingresos
     (
       id_ingresos bigserial NOT NULL,
@@ -40,7 +43,7 @@
      FOREIGN KEY (id_usuario) REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de ingresos/gastos',247,TRUE,'caja_chica/rpt_ingresos_gastos/','print',TRUE);
 
- ✔ Salidas productos original y copia @done (16-10-31 12:54) pct|san
+ ✔ Salidas productos original y copia @done (16-10-31 12:54) pct|san|pcc
    ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones smallint DEFAULT 0;
    ALTER TABLE public.compras_salidas ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
 

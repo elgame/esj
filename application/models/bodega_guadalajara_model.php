@@ -248,6 +248,50 @@ class bodega_guadalajara_model extends CI_Model {
 
   public function guardar($data)
   {
+    $ingresos = array();
+
+    // ingresos
+    if (isset($data['ingreso_concepto']) && is_array($data['ingreso_concepto'])) {
+      foreach ($data['ingreso_concepto'] as $key => $ingreso)
+      {
+        if (isset($data['ingreso_del'][$key]) && $data['ingreso_del'][$key] == 'true' &&
+          isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
+
+          $this->db->delete('otros.bodega_ingresos', "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
+        } elseif (isset($data['ingreso_id_ingresos'][$key]) && floatval($data['ingreso_id_ingresos'][$key]) > 0) {
+          $ingreso_udt = array(
+            'concepto'        => $ingreso,
+            'monto'           => $data['ingreso_monto'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'otro'            => 'f',
+            'id_categoria'    => $data['ingreso_empresa_id'][$key],
+            'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
+            'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
+            'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
+            'no_caja'         => $data['fno_caja'],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+
+          $this->db->update('otros.bodega_ingresos', $ingreso_udt, "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
+        } else {
+          $ingresos = array(
+            'concepto'        => $ingreso,
+            'monto'           => $data['ingreso_monto'][$key],
+            'fecha'           => $data['fecha_caja_chica'],
+            'otro'            => 'f',
+            'id_categoria'    => $data['ingreso_empresa_id'][$key],
+            'id_nomenclatura' => $data['ingreso_nomenclatura'][$key],
+            'poliza'          => empty($data['ingreso_poliza'][$key]) ? null : $data['ingreso_poliza'][$key],
+            'id_movimiento'   => is_numeric($data['ingreso_concepto_id'][$key]) ? $data['ingreso_concepto_id'][$key] : null,
+            'no_caja'         => $data['fno_caja'],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+
+          $this->db->insert('otros.bodega_ingresos', $ingresos);
+        }
+      }
+    }
+
     // prestamos
     $this->db->delete('otros.bodega_prestamos', array('fecha' => $data['fecha_caja_chica'], 'no_caja' => $data['fno_caja']));
     if (isset($data['prestamo_id_prod']))
@@ -989,6 +1033,45 @@ class bodega_guadalajara_model extends CI_Model {
       String::formatoNumero($totalCont, 2, '', false),
       String::formatoNumero($totalSal, 2, '', false)), false, true);
 
+    // Ingresos por reposicion
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(165, 30));
+    $pdf->Row(array('INGRESOS POR REPOSICION', 'IMPORTE'), true, true);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(40, 25, 30, 70, 30));
+    $pdf->Row(array('EMPRESA', 'NOM', 'POLIZA', 'NOMBRE Y/O CONCEPTO', 'ABONO'), true, true);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
+    $pdf->SetWidths(array(40, 25, 30, 70, 30));
+
+    $totalIngresosExt = 0;
+    foreach ($caja['ingresos'] as $key => $ingreso)
+    {
+      $pdf->SetX(6);
+
+      $pdf->Row(array(
+        $ingreso->categoria,
+        $ingreso->nomenclatura,
+        $ingreso->poliza,
+        $ingreso->concepto,
+        String::formatoNumero($ingreso->monto, 2, '', false)), false, true);
+
+      $totalIngresosExt += floatval($ingreso->monto);
+    }
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->Row(array('', '', '','',
+      String::formatoNumero($totalIngresosExt, 2, '', false)), false, true);
+
     // EXISTENCIA ANTERIOR
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -1454,6 +1537,102 @@ class bodega_guadalajara_model extends CI_Model {
 
     // $pdf->AutoPrint(true);
     $pdf->Output('vale_gastos.pdf', 'I');
+  }
+
+  public function getDataValeIngresos($id_ingresos, $noCaja)
+  {
+    $ingreso = $this->db->query(
+      "SELECT ci.*, cc.abreviatura as abr_empresa, cc.nombre AS empresa, cn.nomenclatura,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+       FROM otros.bodega_ingresos ci
+       INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+       INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+       LEFT JOIN banco_movimientos bm ON bm.id_movimiento = ci.id_movimiento
+       LEFT JOIN usuarios u ON u.id = ci.id_usuario
+       WHERE ci.id_ingresos = {$id_ingresos} AND ci.no_caja = {$noCaja}"
+    )->row();
+
+    return $ingreso;
+  }
+
+  public function printValeIngresos($id_ingresos, $noCaja)
+  {
+
+    $ingreso = $this->getDataValeIngresos($id_ingresos, $noCaja);
+
+    // echo "<pre>";
+    //   var_dump($ingreso);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->limiteY = 50;
+    $pdf->SetMargins(0, 0, 0);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->show_head = false;
+
+    $pdf->SetFont('helvetica','B', 8);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array($ingreso->empresa), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()+4);
+    $pdf->Row(array('INGRESOS'), false, false);
+
+    $pdf->SetAligns(array('L'));
+    // $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-6);
+    $pdf->Row(array('Folio: '.$ingreso->id_ingresos), false, false);
+
+    $pdf->SetWidths(array(20, 43));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: '.$ingreso->no_caja, '' ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array('CANTIDAD:', String::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetX(0);
+    $pdf->Row(array(String::num2letras($ingreso->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->Row(array($ingreso->concepto), false, false);
+
+    $pdf->SetX(0);
+    $pdf->Row(array( 'Impresión '.($ingreso->no_impresiones==0? 'ORIGINAL': 'COPIA '.$ingreso->no_impresiones)), false, false);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('C', 'C', 'C'));
+    $pdf->SetWidths(array(21, 21, 21));
+    $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('', '', $ingreso->fecha), false, false);
+    $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
+    $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
+    $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
+
+    $pdf->SetXY(0, $pdf->GetY()+5);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(21, 42));
+    $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array('Creado:', $ingreso->fecha_creacion), false, false);
+
+    $this->db->update('otros.bodega_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
+        "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");
+
+    // $pdf->AutoPrint(true);
+    $pdf->Output('vale_ingreso.pdf', 'I');
   }
 
 

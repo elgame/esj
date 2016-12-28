@@ -12,6 +12,7 @@ class bodega_guadalajara extends MY_Controller {
     'bodega_guadalajara/cerrar_caja/',
     'bodega_guadalajara/print_caja/',
     'bodega_guadalajara/print_vale/',
+    'bodega_guadalajara/print_vale_ipr/',
     'bodega_guadalajara/rpt_gastos_pdf/',
     'bodega_guadalajara/rpt_gastos_xls/',
     'bodega_guadalajara/rpt_ingresos_pdf/',
@@ -629,6 +630,17 @@ class bodega_guadalajara extends MY_Controller {
       $this->bodega_guadalajara_model->printVale($_GET['id']);
     else{
       $params['url'] = 'panel/bodega_guadalajara/print_vale/?id='.$this->input->get('id').'&p=true';
+      $this->load->view('panel/caja_chica/print_ticket', $params);
+    }
+  }
+
+  public function print_vale_ipr()
+  {
+    $this->load->model('bodega_guadalajara_model');
+    if($this->input->get('p') == 'true')
+      $this->bodega_guadalajara_model->printValeIngresos($_GET['id_ingresos'], $_GET['noCaja']);
+    else{
+      $params['url'] = 'panel/bodega_guadalajara/print_vale_ipr/?id_ingresos='.$_GET['id_ingresos'].'&noCaja='.$_GET['noCaja'].'&p=true';
       $this->load->view('panel/caja_chica/print_ticket', $params);
     }
   }

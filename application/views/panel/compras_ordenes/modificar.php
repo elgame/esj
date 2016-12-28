@@ -241,9 +241,11 @@
                       <div class="well span9">
                           <button type="submit" class="btn btn-success btn-large btn-block" style="width:100%;"><?php echo $txtButton ?></button><br><br>
                           <?php if($orden['info'][0]->status == 'a' && isset($orden['info'][0]->entrada_almacen->folio_almacen)){ ?>
-                            <a href="#modal-imprimir" role="button" class="btn btn-primary" data-toggle="modal">Imprimir (entrada almacen)</a>
+                            <!-- <a href="#modal-imprimir" role="button" class="btn btn-primary" data-toggle="modal">Imprimir (entrada almacen)</a> -->
                             <!-- <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$orden['info'][0]->entrada_almacen->folio_almacen.'&ide='.$orden['info'][0]->id_empresa); ?>"
                               onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir (entrada almacen)</a> -->
+                              <a href="<?php echo base_url('panel/compras_ordenes/ticket/?id='.$orden['info'][0]->id_orden); ?>"
+                              onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir (entrada almacen)</a>
                           <?php } ?>
                           <?php if ($this->usuarios_model->tienePrivilegioDe("", "compras_ordenes/autorizar/") && isset($_GET['mod'])) { ?>
                             <label style="font-weight: bold;"><input type="checkbox" name="autorizar" value="1"> AUTORIZAR ENTRADA</label>
@@ -825,7 +827,7 @@
   <?php } ?>
   <script>
     $('#modalIngresoAlmacen').modal('show');
-    var win=window.open(<?php echo "'".base_url('panel/compras_ordenes/imprimir/?id=' . $_GET['id'].'&p=true'."'") ?>, '_blank');
+    var win=window.open(<?php echo "'".base_url('panel/compras_ordenes/ticket/?id=' . $_GET['id'].'&p=true'."'") ?>, '_blank');
     win.focus();
   </script>
 <?php } ?>

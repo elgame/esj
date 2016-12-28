@@ -10,7 +10,7 @@
     // btnAddOtros();
     // btnDelOtros();
 
-    // onChanceIngresos();
+    onChanceIngresos();
 
     // cargaRemisiones();
     // btnDelRemision();
@@ -132,45 +132,45 @@
   //   $(".vpositive").numeric({ negative: false }); //Numero positivo
   // };
 
-  // var calculaTotalIngresos = function () {
-  //   var total = 0;
-  //   $('.ingreso-monto').each(function(index, el) {
-  //     total += parseFloat($(this).val() || 0);
-  //   });
+  var calculaTotalIngresos = function () {
+    var total = 0;
+    $('.ingreso-monto').each(function(index, el) {
+      total += parseFloat($(this).val() || 0);
+    });
 
-  //   // $('.otros-monto').each(function(index, el) {
-  //   //   total += parseFloat($(this).val() || 0);
-  //   // });
+    // $('.otros-monto').each(function(index, el) {
+    //   total += parseFloat($(this).val() || 0);
+    // });
 
-  //   $('.remision-importe').each(function(index, el) {
-  //     total += parseFloat($(this).val() || 0);
-  //   });
+    // $('.remision-importe').each(function(index, el) {
+    //   total += parseFloat($(this).val() || 0);
+    // });
 
-  //   total = parseFloat(total.toFixed(2));
+    total = parseFloat(total.toFixed(2));
 
-  //   $('#total-ingresos').val(total);
+    $('#total-ingresos-ext').val(total);
 
-  //   var saldo_inicial = parseFloat($('#saldo_inicial').val()),
-  //       totalSaldoIngresos =  saldo_inicial + total; //saldo_inicial +
+    // var saldo_inicial = parseFloat($('#saldo_inicial').val()),
+    //     totalSaldoIngresos =  saldo_inicial + total; //saldo_inicial +
 
-  //   $('input#total-saldo-ingresos.span12').val(totalSaldoIngresos.toFixed(2));
-  //   $('input#total-saldo-ingresos.vpositive').val((totalSaldoIngresos - saldo_inicial).toFixed(2));
+    // $('input#total-saldo-ingresos.span12').val(totalSaldoIngresos.toFixed(2));
+    // $('input#total-saldo-ingresos.vpositive').val((totalSaldoIngresos - saldo_inicial).toFixed(2));
 
-  //   calculaCorte();
-  // };
+    calculaCorte();
+  };
 
-  // var onChanceIngresos = function () {
-  //   // $('#table-ingresos, #table-otros').on('keyup', '.ingreso-monto, .otros-monto', function(e) {
-  //   $('#table-ingresos').on('keyup', '.ingreso-monto', function(e) {
-  //     var key = e.which,
-  //         $this = $(this),
-  //         $tr = $this.parent().parent();
+  var onChanceIngresos = function () {
+    // $('#table-ingresos, #table-otros').on('keyup', '.ingreso-monto, .otros-monto', function(e) {
+    $('#table-ingresos').on('keyup', '.ingreso-monto', function(e) {
+      var key = e.which,
+          $this = $(this),
+          $tr = $this.parent().parent();
 
-  //     if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
-  //       calculaTotalIngresos();
-  //     }
-  //   });
-  // };
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+        calculaTotalIngresos();
+      }
+    });
+  };
 
   // var cargaRemisiones = function () {
   //   $('#carga-remisiones').on('click', function(event) {
@@ -522,7 +522,8 @@
   var calculaCorte = function () {
     var total = 0;
 
-    total = parseFloat($('#totalCont').val() || 0) + parseFloat($('#abonoshVentas').val() || 0) - parseFloat($('#ttotal-gastos').val() || 0);
+    total = parseFloat($('#totalCont').val() || 0) + (parseFloat($('#total-ingresos-ext').val()) || 0) +
+            parseFloat($('#abonoshVentas').val() || 0) - parseFloat($('#ttotal-gastos').val() || 0);
     $('#ttotal-corte').val(total.toFixed(2));
     $("#ttotal-corte1").text(util.darFormatoNum(total.toFixed(2)));
   };

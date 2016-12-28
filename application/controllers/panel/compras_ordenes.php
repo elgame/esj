@@ -16,6 +16,7 @@ class compras_ordenes extends MY_Controller {
     'compras_ordenes/imprimir_recibo_faltantes/',
     'compras_ordenes/ajaxGetFactRem/',
     'compras_ordenes/imprimir_entrada/',
+    'compras_ordenes/ticket/',
     'compras_ordenes/ajax_imprimir_recibo/',
     'compras_ordenes/ajax_cambia_area/',
 
@@ -431,6 +432,20 @@ class compras_ordenes extends MY_Controller {
     else
     {
       $this->load->view('panel/compras_ordenes/print_orden_compra');
+    }
+  }
+
+  public function ticket()
+  {
+    $this->load->model('compras_ordenes_model');
+
+    if (isset($_GET['p']))
+    {
+      $this->compras_ordenes_model->print_orden_compra_ticket($_GET['id']);
+    }
+    else
+    {
+      $this->load->view('panel/compras_ordenes/print_orden_compra_ticket');
     }
   }
 
