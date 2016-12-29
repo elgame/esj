@@ -764,9 +764,10 @@
               <!-- Tabulacion -->
               <div class="row-fluid">
                 <div class="span12">
-                  <div class="span12" style="font-weight: bold; min-height: 25px;"><?php echo $totalIngresosExt ?>
-                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos, 2, '$') ?></span>
-                    <input type="hidden" name="ttotal-corte" value="<?php echo $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos ?>" id="ttotal-corte">
+                  <div class="span12" style="font-weight: bold; min-height: 25px;">
+                    <?php $total_saldo_corte = $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos; ?>
+                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($total_saldo_corte, 2, '$') ?></span>
+                    <input type="hidden" name="ttotal-corte" value="<?php echo $total_saldo_corte ?>" id="ttotal-corte">
                   </div>
                 </div>
               </div>
@@ -825,8 +826,8 @@
                           </tr>
                           <tr>
                             <td colspan="2">TOTAL DIFERENCIA
-                            <input type="hidden" name="total_diferencia" value="<?php echo ($totalCont+$abonoshVentas-$totalGastos)-$totalEfectivo ?>" id="ttotal-diferencia"></td>
-                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero(($totalCont+$abonoshVentas-$totalGastos)-$totalEfectivo, 2, '$') ?></td>
+                            <input type="hidden" name="total_diferencia" value="<?php echo $total_saldo_corte-$totalEfectivo ?>" id="ttotal-diferencia"></td>
+                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_saldo_corte-$totalEfectivo, 2, '$') ?></td>
                           </tr>
                         </tbody>
                       </table>

@@ -597,37 +597,37 @@ class bodega_guadalajara_model extends CI_Model {
   {
     $this->load->model('cuentas_cobrar_model');
 
-    // $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
-    //  AND bc.id_empresa = {$defaultEmpresa->id_empresa}
+    // // $defaultEmpresa = $this->empresas_model->getDefaultEmpresa();
+    // //  AND bc.id_empresa = {$defaultEmpresa->id_empresa}
 
-    // INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
-    // AND Date(fa.fecha) = '{$fecha}'
-    $ventas = $this->db->query(
-      "SELECT id_factura, nombre_fiscal, fecha, serie, folio, total, cliente
-      FROM (
-        SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
-           f.status, (f.total-Coalesce(Sum(fa.total),0)) AS saldo
-            FROM facturacion f
-              INNER JOIN clientes c ON c.id_cliente = f.id_cliente
-              INNER JOIN empresas e ON e.id_empresa = f.id_empresa
-              LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) <= '{$fecha}')
-            WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
-              AND Date(f.fecha) < '{$fecha}'
-            GROUP BY f.id_factura, e.id_empresa, c.id_cliente
-            HAVING f.status = 'p' OR (f.status='pa' AND (f.total-Coalesce(Sum(fa.total),0)) > 0)
-        union
-        SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
-        f.status, 0 AS saldo
-            FROM facturacion f
-              INNER JOIN clientes c ON c.id_cliente = f.id_cliente
-              INNER JOIN empresas e ON e.id_empresa = f.id_empresa
-              LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) = '{$fecha}')
-            WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
-              AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
-            GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
-      ) t
-      ORDER BY (fecha, serie, folio) DESC
-    ");
+    // // INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+    // // AND Date(fa.fecha) = '{$fecha}'
+    // $ventas = $this->db->query(
+    //   "SELECT id_factura, nombre_fiscal, fecha, serie, folio, total, cliente
+    //   FROM (
+    //     SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
+    //        f.status, (f.total-Coalesce(Sum(fa.total),0)) AS saldo
+    //         FROM facturacion f
+    //           INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+    //           INNER JOIN empresas e ON e.id_empresa = f.id_empresa
+    //           LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) <= '{$fecha}')
+    //         WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+    //           AND Date(f.fecha) < '{$fecha}'
+    //         GROUP BY f.id_factura, e.id_empresa, c.id_cliente
+    //         HAVING f.status = 'p' OR (f.status='pa' AND (f.total-Coalesce(Sum(fa.total),0)) > 0)
+    //     union
+    //     SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
+    //     f.status, 0 AS saldo
+    //         FROM facturacion f
+    //           INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+    //           INNER JOIN empresas e ON e.id_empresa = f.id_empresa
+    //           LEFT JOIN facturacion_abonos fa ON (f.id_factura = fa.id_factura AND Date(fa.fecha) = '{$fecha}')
+    //         WHERE f.is_factura = 'f' AND f.serie = 'RB' AND e.nombre_fiscal = 'ESJ BODEGA'
+    //           AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
+    //         GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
+    //   ) t
+    //   ORDER BY (fecha, serie, folio) DESC
+    // ");
 
     $ventas = $this->db->query(
       "SELECT id_factura, nombre_fiscal, fecha, serie, folio, total, cliente
@@ -654,7 +654,7 @@ class bodega_guadalajara_model extends CI_Model {
               AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
       ) t
-      WHERE (tipo = '1' OR (tipo = '2' AND saldo = 0)) AND saldo > 0
+      WHERE (tipo = '1' OR (tipo = '2' AND saldo = 0))
       ORDER BY (fecha, serie, folio) DESC
     ");
 
@@ -671,6 +671,10 @@ class bodega_guadalajara_model extends CI_Model {
       }
       $value->saldo_ant = $value->abonos_hoy+$inf_factura['saldo'];
       $value->saldo = $inf_factura['saldo'];
+
+      if ($value->saldo_ant == 0 && $value->saldo == 0 && $value->abonos_hoy == 0) {
+        unset($response[$key]);
+      }
 
       $aux = $value->id_factura;
 
