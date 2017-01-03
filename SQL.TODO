@@ -1,4 +1,22 @@
 
+ ✔ Almacenes @done (17-01-02 19:58) pcc
+   CREATE TABLE public.compras_almacenes
+    (
+      id_almacen integer NOT NULL DEFAULT nextval('compras_almacenes_id_almacen_seq'::regclass),
+      nombre character varying(60) NOT NULL,
+      status boolean NOT NULL DEFAULT true,
+      CONSTRAINT compras_almacenes_pkey PRIMARY KEY (id_almacen)
+    ) WITH ( OIDS=FALSE );
+    ALTER TABLE public.compras_almacenes OWNER TO programa;
+    INSERT INTO public.compras_almacenes(nombre) VALUES ('Matriz');
+    ALTER TABLE public.compras_salidas ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
+    ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_almacen_fkey FOREIGN KEY (id_almacen)
+      REFERENCES public.compras_almacenes (id_almacen) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE public.compras_ordenes ADD COLUMN id_almacen integer;
+    ALTER TABLE public.compras_ordenes ALTER COLUMN id_almacen SET NOT NULL DEFAULT 1;
+    ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_almacen_fkey FOREIGN KEY (id_almacen)
+      REFERENCES public.compras_almacenes (id_almacen) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+
  ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
 
