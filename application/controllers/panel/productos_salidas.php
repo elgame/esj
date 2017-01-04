@@ -78,6 +78,7 @@ class productos_salidas extends MY_Controller {
       array('panel/compras_ordenes/areas_requisicion.js'),
     ));
 
+    $this->load->model('almacenes_model');
     $this->load->model('productos_salidas_model');
     $this->load->model('compras_areas_model');
     $this->load->model('empresas_model');
@@ -103,8 +104,9 @@ class productos_salidas extends MY_Controller {
       }
     }
 
-    $params['next_folio']    = $this->productos_salidas_model->folio();
-    $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['next_folio'] = $this->productos_salidas_model->folio();
+    $params['fecha']      = str_replace(' ', 'T', date("Y-m-d H:i"));
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
@@ -268,6 +270,9 @@ class productos_salidas extends MY_Controller {
             'label' => '',
             'rules' => ''),
 
+      array('field' => 'id_almacen',
+            'label' => 'Almacen',
+            'rules' => 'required'),
       array('field' => 'solicito',
             'label' => 'Solicito',
             'rules' => 'required|max_length[130]'),
@@ -325,12 +330,14 @@ class productos_salidas extends MY_Controller {
   {
     $this->load->model('inventario_model');
     $productos = array();
-    foreach ($_POST['productoId'] as $key => $value) {
-      if ($_POST['tipoProducto'][$key] == 'p') {
-        $item = $this->inventario_model->getEPUData($value);
-        $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-        if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
-          $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
+    if (isset($_POST['productoId'])) {
+      foreach ($_POST['productoId'] as $key => $value) {
+        if ($_POST['tipoProducto'][$key] == 'p') {
+          $item = $this->inventario_model->getEPUData($value);
+          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+            $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
+          }
         }
       }
     }

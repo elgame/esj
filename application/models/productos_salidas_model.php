@@ -97,7 +97,8 @@ class productos_salidas_model extends CI_Model {
         // 'concepto'    => '', //$_POST['conceptoSalida']
         'status'         => 's',
         'solicito'       => $_POST['solicito'],
-        'recibio'       => $_POST['recibio'],
+        'recibio'        => $_POST['recibio'],
+        'id_almacen'     => $_POST['id_almacen'],
       );
 
       if (isset($_POST['fid_trabajador']{0})) {
@@ -145,6 +146,51 @@ class productos_salidas_model extends CI_Model {
     }
 
     $this->db->insert_batch('compras_salidas_productos', $productos);
+
+    // si es transferencia de almacenes
+    if ($this->input->post('tid_almacen') > 0) {
+      $this->load->model('compras_ordenes_model');
+
+      $rows_compras = 0;
+      $proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
+      $departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
+      $data = array(
+        'id_empresa'         => $_GET['empresaId'],
+        'id_proveedor'       => $proveedor->id_proveedor,
+        'id_departamento'    => $departamento->id_departamento,
+        'id_empleado'        => $this->session->userdata('id_usuario'),
+        'folio'              => $this->compras_ordenes_model->folio('t'),
+        'tipo_orden'         => 't',
+        'status'             => 'n',
+        'autorizado'         => 't',
+        'fecha_autorizacion' => $fecha,
+        'fecha_aceptacion'   => $fecha,
+        'fecha_creacion'     => $fecha,
+        'id_almacen'         => $this->input->post('tid_almacen')
+      );
+
+      $res = $this->compras_ordenes_model->agregarData($data);
+      $id_orden = $res['id_orden'];
+      $compra = array();
+      foreach ($productos as $key => $produto)
+      {
+        $presenta = $this->db->query("SELECT id_presentacion FROM productos_presentaciones WHERE status = 'ac' AND id_producto = {$produto['id_producto']} AND cantidad = 1 LIMIT 1")->row();
+        $compra[] = array(
+          'id_orden'         => $id_orden,
+          'num_row'          => $rows_compras,
+          'id_producto'      => $produto['id_producto'],
+          'id_presentacion'  => (count($presenta)>0? $presenta->id_presentacion: NULL),
+          'descripcion'      => $_POST['descripcion'][$key],
+          'cantidad'         => abs($produto['cantidad']),
+          'precio_unitario'  => $_POST['precio_producto'][$key],
+          'importe'          => (abs($_POST['diferencia'][$key])*$_POST['precio_producto'][$key]),
+          'status'           => 'a',
+          'fecha_aceptacion' => $fecha,
+        );
+        $rows_compras++;
+      }
+      $this->compras_ordenes_model->agregarProductosData($compra);
+    }
 
     return array('passes' => true, 'msg' => 3);
   }
