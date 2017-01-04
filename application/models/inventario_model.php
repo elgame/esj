@@ -1033,7 +1033,7 @@ class inventario_model extends privilegios_model{
    *
    * @return
 	 */
-	public function getEPUData($id_producto=null)
+	public function getEPUData($id_producto=null, $id_almacen=null)
   {
 		$sql_com = $sql_sal = $sql = '';
 
@@ -1066,6 +1066,12 @@ class inventario_model extends privilegios_model{
       $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
     }
 
+    $id_almacen = $id_almacen>0? $id_almacen: $this->input->get('did_almacen');
+    if ($id_almacen > 0) {
+      $sql_com .= " AND co.id_almacen = ".$id_almacen;
+      $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
+    }
+
 		$res = $this->db->query(
 			"SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura,
         COALESCE(co.cantidad, 0) AS entradas, COALESCE(sa.cantidad, 0) AS salidas,
@@ -1078,7 +1084,7 @@ class inventario_model extends privilegios_model{
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a'
+				WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
           AND Date(cp.fecha_aceptacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql_com}
 				GROUP BY cp.id_producto
@@ -1098,7 +1104,7 @@ class inventario_model extends privilegios_model{
 				SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
-				WHERE co.status <> 'ca' AND co.tipo_orden = 'p' AND cp.status = 'a'
+				WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
           AND Date(cp.fecha_aceptacion) < '{$fecha}'
           {$sql_com}
 				GROUP BY cp.id_producto
@@ -1130,7 +1136,9 @@ class inventario_model extends privilegios_model{
 		$res = $this->getEPUData();
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
@@ -1139,9 +1147,10 @@ class inventario_model extends privilegios_model{
 	    if ($empresa['info']->logo !== '')
 	      $pdf->logo = $empresa['info']->logo;
 
-	    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Existencia por unidades';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
@@ -1271,11 +1280,14 @@ class inventario_model extends privilegios_model{
 		$res = $this->getEPUData();
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Existencia por unidades';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 
     $html = '<table>
       <tbody>
@@ -1414,8 +1426,15 @@ class inventario_model extends privilegios_model{
    * @param  [type] $fecha2      [description]
    * @return [type]              [description]
    */
-  public function uepsData($id_producto, $fecha1, $fecha2)
+  public function uepsData($id_producto, $fecha1, $fecha2, $id_almacen=null)
   {
+    $sql_com = '';
+    $sql_sal = '';
+    if ($id_almacen > 0) {
+      $sql_com .= " AND co.id_almacen = ".$id_almacen;
+      $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
+    }
+
     $res = $this->db->query(
     "SELECT id_producto, Date(fecha) AS fecha, Date(fecha_reg) AS fecha_reg, cantidad, precio_unitario, importe, tipo
     FROM
@@ -1426,7 +1445,8 @@ class inventario_model extends privilegios_model{
         FROM compras_ordenes AS co
         INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
         WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
-          AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
+          AND co.tipo_orden in('p', 't') AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
+          {$sql_com}
         )
         UNION ALL
         (
@@ -1436,6 +1456,7 @@ class inventario_model extends privilegios_model{
         INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
         WHERE sp.id_producto = {$id_producto} AND sp.tipo_orden = 'p' AND sa.status <> 'ca'
           AND Date(sa.fecha_registro) <= '{$fecha2}'
+          {$sql_sal}
         )
       ) AS t
     ORDER BY fecha_reg ASC");
@@ -1584,6 +1605,8 @@ class inventario_model extends privilegios_model{
         $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
       }
 
+    $id_almacen = $this->input->get('did_almacen')>0? $this->input->get('did_almacen'): 0;
+
     $res = $this->db->query(
       "SELECT pf.id_familia, pf.nombre, p.id_producto, p.nombre AS nombre_producto, pu.abreviatura
       FROM productos AS p
@@ -1599,7 +1622,7 @@ class inventario_model extends privilegios_model{
       $response = $res->result();
       foreach ($response as $key => $value)
       {
-        $data = $this->uepsData($value->id_producto, $_GET['ffecha1'], $fecha);
+        $data = $this->uepsData($value->id_producto, $_GET['ffecha1'], $fecha, $id_almacen);
         $value->data       = array_pop($data);
         $value->data_saldo = array_shift($data);
         $response[$key]    = $value;
@@ -1618,7 +1641,9 @@ class inventario_model extends privilegios_model{
     $res = $this->getUEPSData();
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
@@ -1631,6 +1656,7 @@ class inventario_model extends privilegios_model{
 
     $pdf->titulo2 = 'Existencia por costos UEPS';
     $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -1726,7 +1752,7 @@ class inventario_model extends privilegios_model{
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->SetMyLinks(array(base_url('panel/inventario/pueps_pdf?id_producto='.$item->id_producto.'&id_empresa='.$empresa['info']->id_empresa.
-                  '&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
+                  '&did_almacen='.$this->input->get('did_almacen').'&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
         $pdf->Row($datos, false);
       }
 
@@ -1764,11 +1790,14 @@ class inventario_model extends privilegios_model{
     $res = $this->getUEPSData();
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Existencia por costos UEPS';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 
 
     $html = '<table>
@@ -1886,11 +1915,14 @@ class inventario_model extends privilegios_model{
     $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
     $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
     $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+    $id_almacen = $this->input->get('did_almacen')>0? $this->input->get('did_almacen'): 0;
 
-    $res = $this->uepsData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2']);
+    $res = $this->uepsData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2'], $id_almacen);
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('id_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
 
     $this->load->library('mypdf');
@@ -1903,6 +1935,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Reporte de inventario costo UEPS';
     $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -2001,13 +2034,14 @@ class inventario_model extends privilegios_model{
 			ORDER BY nombre, nombre_producto ASC
 			");
 
+    $id_almacen = isset($_GET['did_almacen'])? $_GET['did_almacen']: 0;
 		$response = array();
 		if($res->num_rows() > 0)
 		{
 			$response = $res->result();
 			foreach ($response as $key => $value)
 			{
-				$data = $this->promedioData($value->id_producto, $_GET['ffecha1'], $fecha);
+				$data = $this->promedioData($value->id_producto, $_GET['ffecha1'], $fecha, $id_almacen);
 				$value->data       = array_pop($data);
 				$value->data_saldo = array_shift($data);
 				$response[$key]    = $value;
@@ -2024,7 +2058,9 @@ class inventario_model extends privilegios_model{
 		$res = $this->getEPCData();
 
 		$this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
 		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
 		$this->load->library('mypdf');
 		// Creación del objeto de la clase heredada
@@ -2037,6 +2073,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo2 = 'Existencia por costos';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
@@ -2132,7 +2169,7 @@ class inventario_model extends privilegios_model{
 				$pdf->SetAligns($aligns);
 				$pdf->SetWidths($widths);
 				$pdf->SetMyLinks(array(base_url('panel/inventario/promedio_pdf?id_producto='.$item->id_producto.'&id_empresa='.$empresa['info']->id_empresa.
-									'&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
+									'&did_almacen='.$this->input->get('did_almacen').'&ffecha1='.$this->input->get('ffecha1').'&ffecha2='.$this->input->get('ffecha2'))));
 				$pdf->Row($datos, false);
 			}
 
@@ -2170,11 +2207,14 @@ class inventario_model extends privilegios_model{
     $res = $this->getEPCData();
 
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = 'Existencia por costos';
     $titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 
     $html = '<table>
       <tbody>
@@ -2499,13 +2539,18 @@ class inventario_model extends privilegios_model{
 	 * @param  [type] $fecha2      [description]
 	 * @return [type]              [description]
 	 */
-	public function promedioData($id_producto, $fecha1, $fecha2)
+	public function promedioData($id_producto, $fecha1, $fecha2, $id_almacen=null)
 	{
     $sql_com = $sql_sal = '';
     $prod = $this->db->query("SELECT id_empresa FROM productos WHERE id_producto = {$id_producto}")->row();
     if (isset($prod->id_empresa) && $prod->id_empresa == 3) { // gomez gudiño
       $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
       $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
+
+    if ($id_almacen > 0) {
+      $sql_com .= " AND co.id_almacen = ".$id_almacen;
+      $sql_sal .= " AND sa.id_almacen = ".$id_almacen;
     }
 
 		$res = $this->db->query(
@@ -2518,7 +2563,7 @@ class inventario_model extends privilegios_model{
 				FROM compras_ordenes AS co
 				INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
 				WHERE cp.id_producto = {$id_producto} AND co.status <> 'ca' AND cp.status = 'a'
-					AND co.tipo_orden = 'p' AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
+					AND co.tipo_orden in('p', 't') AND Date(cp.fecha_aceptacion) <= '{$fecha2}'
           {$sql_com}
 				)
 				UNION ALL
@@ -2622,10 +2667,13 @@ class inventario_model extends privilegios_model{
 		$_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
 		$fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
 
-		$res = $this->promedioData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2']);
+    $id_almacen = isset($_GET['did_almacen'])? $_GET['did_almacen']: 0;
+		$res = $this->promedioData($_GET['id_producto'], $_GET['ffecha1'], $_GET['ffecha2'], $id_almacen);
 
 		$this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
 		$empresa = $this->empresas_model->getInfoEmpresa($this->input->get('id_empresa'));
+    $almacen = $this->almacenes_model->getAlmacenInfo(intval($this->input->get('did_almacen')));
 
 
 		$this->load->library('mypdf');
@@ -2638,6 +2686,7 @@ class inventario_model extends privilegios_model{
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de inventario costo promedio';
 		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);

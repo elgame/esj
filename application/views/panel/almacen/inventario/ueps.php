@@ -30,6 +30,21 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="did_almacen">Almacen</label>
+                  <div class="controls">
+                    <div class="input-append span12">
+                      <select name="did_almacen" id="did_almacen" class="span11">
+                        <option value=""></option>
+                      <?php $default = '';
+                      foreach ($almacenes['almacenes'] as $key => $value) { ?>
+                        <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('did_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
+                      <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label" for="fproducto">Familias</label>
                   <div class="controls" style="height:150px;overflow-y: scroll;background-color:#eee;">
                     <ul id="lista_familias" style="list-style: none;">

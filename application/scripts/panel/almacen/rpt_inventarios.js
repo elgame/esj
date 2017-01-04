@@ -109,6 +109,7 @@ $(function(){
           ffecha1: $("#ffecha1").val(),
           ffecha2: $("#ffecha2").val(),
           did_empresa: $("#did_empresa").val(),
+          did_almacen: $("#did_almacen").val(),
           fid_producto: $("#fid_producto").val(),
           con_existencia: $("#con_existencia").is(':checked')? 'si': '',
           con_movimiento: $("#con_movimiento").is(':checked')? 'si': '',

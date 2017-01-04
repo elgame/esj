@@ -178,10 +178,12 @@ class inventario extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Existencia por unidades');
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['data'] = $this->productos_model->getFamilias(false, 'p');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
@@ -196,7 +198,6 @@ class inventario extends MY_Controller {
   public function epu_pdf(){
     $this->load->model('inventario_model');
     $this->inventario_model->getEPUPdf();
-
   }
   public function epu_xls(){
     $this->load->model('inventario_model');
@@ -221,10 +222,12 @@ class inventario extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Existencia por costos');
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['data'] = $this->productos_model->getFamilias(false, 'p');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
@@ -267,10 +270,12 @@ class inventario extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('productos_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Existencia por costos UEPS');
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['data'] = $this->productos_model->getFamilias(false, 'p');
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();

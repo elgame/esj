@@ -273,6 +273,10 @@ class productos_salidas extends MY_Controller {
       array('field' => 'id_almacen',
             'label' => 'Almacen',
             'rules' => 'required'),
+      array('field' => 'id_almacen',
+            'label' => 'Transferir',
+            'rules' => ''),
+
       array('field' => 'solicito',
             'label' => 'Solicito',
             'rules' => 'required|max_length[130]'),
@@ -333,7 +337,8 @@ class productos_salidas extends MY_Controller {
     if (isset($_POST['productoId'])) {
       foreach ($_POST['productoId'] as $key => $value) {
         if ($_POST['tipoProducto'][$key] == 'p') {
-          $item = $this->inventario_model->getEPUData($value);
+          // id_almacen
+          $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
           $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
           if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';

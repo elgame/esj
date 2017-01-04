@@ -151,11 +151,12 @@ class productos_salidas_model extends CI_Model {
     if ($this->input->post('tid_almacen') > 0) {
       $this->load->model('compras_ordenes_model');
 
+      $fecha = date("Y-m-d H:i:s");
       $rows_compras = 0;
       $proveedor = $this->db->query("SELECT id_proveedor FROM proveedores WHERE UPPER(nombre_fiscal)='FICTICIO' LIMIT 1")->row();
       $departamento = $this->db->query("SELECT id_departamento FROM compras_departamentos WHERE UPPER(nombre)='FICTICIO' LIMIT 1")->row();
       $data = array(
-        'id_empresa'         => $_GET['empresaId'],
+        'id_empresa'         => $_POST['empresaId'],
         'id_proveedor'       => $proveedor->id_proveedor,
         'id_departamento'    => $departamento->id_departamento,
         'id_empleado'        => $this->session->userdata('id_usuario'),
@@ -174,22 +175,30 @@ class productos_salidas_model extends CI_Model {
       $compra = array();
       foreach ($productos as $key => $produto)
       {
-        $presenta = $this->db->query("SELECT id_presentacion FROM productos_presentaciones WHERE status = 'ac' AND id_producto = {$produto['id_producto']} AND cantidad = 1 LIMIT 1")->row();
+        $ultima_compra = $this->compras_ordenes_model->getUltimaCompra($produto['id_producto']);
+        $precio_unitario = (isset($ultima_compra->precio_unitario)? $ultima_compra->precio_unitario: 0);
+        $presenta = $this->db->query("SELECT p.nombre, pp.id_presentacion
+            FROM productos p LEFT JOIN (
+              SELECT * FROM productos_presentaciones WHERE status = 'ac' AND cantidad = 1
+            ) pp ON p.id_producto = pp.id_producto
+            WHERE p.id_producto = {$produto['id_producto']}")->row();
         $compra[] = array(
           'id_orden'         => $id_orden,
           'num_row'          => $rows_compras,
           'id_producto'      => $produto['id_producto'],
-          'id_presentacion'  => (count($presenta)>0? $presenta->id_presentacion: NULL),
-          'descripcion'      => $_POST['descripcion'][$key],
+          'id_presentacion'  => ($presenta->id_presentacion>0? $presenta->id_presentacion: NULL),
+          'descripcion'      => $presenta->nombre,
           'cantidad'         => abs($produto['cantidad']),
-          'precio_unitario'  => $_POST['precio_producto'][$key],
-          'importe'          => (abs($_POST['diferencia'][$key])*$_POST['precio_producto'][$key]),
+          'precio_unitario'  => $precio_unitario,
+          'importe'          => (abs($produto['cantidad'])*$precio_unitario),
           'status'           => 'a',
           'fecha_aceptacion' => $fecha,
         );
         $rows_compras++;
       }
       $this->compras_ordenes_model->agregarProductosData($compra);
+
+      $this->db->insert('compras_transferencias', array('id_salida' => $idSalida, 'id_orden' => $id_orden));
     }
 
     return array('passes' => true, 'msg' => 3);
@@ -217,6 +226,9 @@ class productos_salidas_model extends CI_Model {
   public function cancelar($idOrden)
   {
     $this->db->update('compras_salidas', array('status' => 'ca'), array('id_salida' => $idOrden));
+
+    $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
+    $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
 
     return array('passes' => true);
   }

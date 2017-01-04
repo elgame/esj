@@ -821,7 +821,8 @@
     </div>
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
-      <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$_GET['entrada'].'&ide='.$orden['info'][0]->id_empresa); ?>" onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir</a>
+      <!-- <a href="<?php echo base_url('panel/compras_ordenes/imprimir_entrada/?folio='.$_GET['entrada'].'&ide='.$orden['info'][0]->id_empresa); ?>" onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir</a> -->
+      <a href="<?php echo base_url('panel/compras_ordenes/ticket/?id='.$_GET['id'].'&p=true'); ?>" onclick="$('#modalIngresoAlmacen').modal('hide');" target="_blank" class="btn btn-primary">Imprimir</a>
     </div>
   </div>
   <?php } ?>
