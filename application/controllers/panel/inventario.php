@@ -382,6 +382,7 @@ class inventario extends MY_Controller {
     $this->load->model('productos_model');
     $this->load->model('inventario_model');
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Existencia de Clasificaciones');
@@ -401,6 +402,7 @@ class inventario extends MY_Controller {
       }
     }
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['empresa']   = $this->empresas_model->getDefaultEmpresa();
     $_GET['did_empresa'] = (isset($_GET['fid_empresa'])?$_GET['fid_empresa']: $params['empresa']->id_empresa);
     $_GET['fempresa'] = isset($_GET['dempresa'])?$_GET['dempresa']:$params['empresa']->nombre_fiscal;
@@ -408,7 +410,7 @@ class inventario extends MY_Controller {
     $params['familias'] = $this->productos_model->getFamilias(false, 'p');
 
     $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);
-    $params['data'] = $this->inventario_model->getNivelarData($id_familia);
+    $params['data'] = $this->inventario_model->getNivelarData($id_familia, null);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

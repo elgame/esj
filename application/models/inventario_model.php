@@ -2700,7 +2700,7 @@ class inventario_model extends privilegios_model{
 	}
 
 
-	public function getNivelarData($id_familia, $id_producto=NULL)
+	public function getNivelarData($id_familia, $id_producto=NULL, $id_almacen=NULL)
 	{
 		$this->load->library('pagination');
 		$params = array(
@@ -2746,7 +2746,7 @@ class inventario_model extends privilegios_model{
 
 			foreach ($response['productos'] as $key => $value)
 			{
-				$data = $this->promedioData($value->id_producto, $fecha, $fecha);
+				$data = $this->promedioData($value->id_producto, $fecha, $fecha, $id_almacen);
 				array_pop($data); array_pop($data);
 				$value->data = array_pop($data)['saldo'];
 				$response[$key] = $value;

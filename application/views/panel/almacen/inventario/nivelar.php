@@ -20,6 +20,14 @@
               ?>
               </select>
 
+              <label class="control-label" for="id_almacen">Almacenes</label>
+              <select name="id_almacen" id="id_almacen">
+              <?php $default = ($this->input->get('id_almacen')>0? $this->input->get('id_almacen'): '1');
+              foreach ($almacenes['almacenes'] as $key => $value) { ?>
+                <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
+              <?php } ?>
+              </select>
+
               <label class="control-label" for="dfecha">Fecha Nivelación</label><input type="date" name="dfecha" value="<?php echo (isset($_GET['dfecha'])? $_GET['dfecha']: date('Y-m-d')) ?>" class="input-large">
 
               <button type="submit" class="btn">Enviar</button>
