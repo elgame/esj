@@ -1765,6 +1765,17 @@ class compras_ordenes_model extends CI_Model {
     return isset($query->fecha)? $query->fecha: '';
    }
 
+  public function getUltimaCompra($id_producto)
+  {
+    $query = null;
+    if ($id_producto > 0) {
+      $query = $this->db->query("SELECT *
+                                 FROM compras_productos
+                                 WHERE id_producto = {$id_producto}")->row();
+    }
+    return $query;
+  }
+
   public function getInfoEntrada($folio, $empresa, $id_orden=null)
   {
     $sql = $id_orden? " AND cea.id_orden = {$id_orden} ": " AND cea.folio = {$folio} AND cea.id_empresa = {$empresa} ";

@@ -1,8 +1,8 @@
 
- ✔ Almacenes @done (17-01-02 19:58) pcc
+ ✔ Almacenes @done (17-01-02 19:58) pcc|pct
    CREATE TABLE public.compras_almacenes
     (
-      id_almacen integer NOT NULL DEFAULT nextval('compras_almacenes_id_almacen_seq'::regclass),
+      id_almacen serial NOT NULL,
       nombre character varying(60) NOT NULL,
       status boolean NOT NULL DEFAULT true,
       CONSTRAINT compras_almacenes_pkey PRIMARY KEY (id_almacen)
@@ -12,8 +12,7 @@
     ALTER TABLE public.compras_salidas ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
     ALTER TABLE public.compras_salidas ADD CONSTRAINT compras_salidas_id_almacen_fkey FOREIGN KEY (id_almacen)
       REFERENCES public.compras_almacenes (id_almacen) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
-    ALTER TABLE public.compras_ordenes ADD COLUMN id_almacen integer;
-    ALTER TABLE public.compras_ordenes ALTER COLUMN id_almacen SET NOT NULL DEFAULT 1;
+    ALTER TABLE public.compras_ordenes ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
     ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_almacen_fkey FOREIGN KEY (id_almacen)
       REFERENCES public.compras_almacenes (id_almacen) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     CREATE TABLE public.compras_transferencias
@@ -35,7 +34,7 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',445,FALSE,'almacenes/eliminar/','remove',FALSE);
 
 
- ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san
+ ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san|pct
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
 
  ✔ Bodega ingresos @done (16-12-27 08:29) pct|sang|san
