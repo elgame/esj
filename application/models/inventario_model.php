@@ -2856,7 +2856,8 @@ class inventario_model extends privilegios_model{
 			}else
 			{
 				$res = $this->productos_salidas_model->agregar(array(
-						'id_empresa'      => $_GET['did_empresa'],
+            'id_empresa'      => $_GET['did_empresa'],
+						'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
 						'id_empleado'     => $this->session->userdata('id_usuario'),
 						'folio'           => 0,
 						'concepto'        => 'Nivelacion de inventario',
@@ -2898,6 +2899,7 @@ class inventario_model extends privilegios_model{
 					'id_proveedor'    => $proveedor->id_proveedor,
 					'id_departamento' => $departamento->id_departamento,
 					'id_empleado'     => $this->session->userdata('id_usuario'),
+          'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
 					'folio'           => 0,
 					'status'          => 'n',
 					'autorizado'      => 't',

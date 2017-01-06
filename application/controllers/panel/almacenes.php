@@ -8,7 +8,8 @@ class almacenes extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array('vehiculos/ajax_get_vehiculos/',
 		'vehiculos/combustible_pdf/',
-    'vehiculos/combustible_general_pdf/');
+    'vehiculos/combustible_general_pdf/',
+    'almacenes/historial_pdf/');
 
 	public function _remap($method){
 
@@ -184,6 +185,40 @@ class almacenes extends MY_Controller {
 
 		echo json_encode($params);
 	}
+
+  /**
+   * Reporte de costos
+   * @return [type] [description]
+   */
+  public function historial()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/almacen/rpt_inventarios.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Historial de traspasos');
+
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header',$params);
+    $this->load->view('panel/almacenes/historial',$params);
+    $this->load->view('panel/footer',$params);
+  }
+  public function historial_pdf(){
+    $this->load->model('almacenes_model');
+    $this->almacenes_model->getHistorialPdf();
+
+  }
 
 
   /*

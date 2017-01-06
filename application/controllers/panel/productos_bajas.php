@@ -76,6 +76,7 @@ class productos_bajas extends MY_Controller {
 
     $this->load->model('productos_bajas_model');
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -97,6 +98,7 @@ class productos_bajas extends MY_Controller {
       }
     }
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['next_folio']    = $this->productos_bajas_model->folio();
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
 
@@ -135,6 +137,7 @@ class productos_bajas extends MY_Controller {
     ));
 
     $this->load->model('productos_bajas_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -156,6 +159,7 @@ class productos_bajas extends MY_Controller {
       }
     }
 
+    $params['almacenes']  = $this->almacenes_model->getAlmacenes(false);
     $params['salida'] = $this->productos_bajas_model->info($_GET['id'], true);
     $params['modificar'] = $this->usuarios_model->tienePrivilegioDe('', 'productos_bajas/modificar/');
 

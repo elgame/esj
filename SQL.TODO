@@ -1,5 +1,5 @@
 
- ✔ Almacenes @done (17-01-02 19:58) pcc|pct
+ ✔ Almacenes @done (17-01-02 19:58) pcc|pct|san
    CREATE TABLE public.compras_almacenes
     (
       id_almacen serial NOT NULL,
@@ -28,10 +28,11 @@
           ON UPDATE CASCADE ON DELETE CASCADE
     ) WITH ( OIDS=FALSE ); ALTER TABLE public.compras_transferencias OWNER TO programa;
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Almacenes',128,TRUE,'almacenes/','barcode',FALSE);
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar almacen',445,TRUE,'almacenes/agregar/','plus',FALSE);
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',445,FALSE,'almacenes/modificar/','edit',FALSE);
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',445,FALSE,'almacenes/activar/','ok',FALSE);
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',445,FALSE,'almacenes/eliminar/','remove',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar almacen',444,TRUE,'almacenes/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',444,FALSE,'almacenes/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Activar',444,FALSE,'almacenes/activar/','ok',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',444,FALSE,'almacenes/eliminar/','remove',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Historial de traspasos',444,TRUE,'almacenes/historial/','time',FALSE);
 
 
  ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san|pct

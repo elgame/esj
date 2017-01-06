@@ -415,7 +415,8 @@ class inventario extends MY_Controller {
     $params['familias'] = $this->productos_model->getFamilias(false, 'p');
 
     $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);
-    $params['data'] = $this->inventario_model->getNivelarData($id_familia, null);
+    $id_almacen = isset($_GET['id_almacen'])? $_GET['id_almacen']: 1;
+    $params['data'] = $this->inventario_model->getNivelarData($id_familia, null, $id_almacen);
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

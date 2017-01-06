@@ -43,6 +43,7 @@
 
       <form action="<?php echo base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('fstatus'))); ?>" method="post">
         <input type="submit" class="btn btn-primary pull-right" name="guardar" value="Nivelar">
+        <input type="hidden" name="id_almacen" value="<?php echo $default ?>">
 
         <table class="table table-striped table-bordered bootstrap-datatable">
           <thead>

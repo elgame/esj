@@ -123,6 +123,145 @@ class almacenes_model extends CI_Model {
 	}
 
 
+  /**
+   * Reporte de existencias por costo
+   * @return [type] [description]
+   */
+  public function getHistorialData()
+  {
+    $sql = '';
+
+    //Filtros para buscar
+    $_GET['ffecha1'] = $this->input->get('ffecha1')==''? date("Y-m-").'01': $this->input->get('ffecha1');
+    $_GET['ffecha2'] = $this->input->get('ffecha2')==''? date("Y-m-d"): $this->input->get('ffecha2');
+    $fecha = $_GET['ffecha1'] > $_GET['ffecha2']? $_GET['ffecha1']: $_GET['ffecha2'];
+
+    if($this->input->get('id_almacen') != ''){
+      $sql .= " AND cs.id_almacen = ".$this->input->get('id_almacen');
+    }
+    $this->load->model('empresas_model');
+    $client_default = $this->empresas_model->getDefaultEmpresa();
+    $_GET['did_empresa'] = (isset($_GET['did_empresa']) ? $_GET['did_empresa'] : $client_default->id_empresa);
+    $_GET['dempresa']    = (isset($_GET['dempresa']) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
+    // if($this->input->get('did_empresa') != ''){
+    //   $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    // }
+
+    $res = $this->db->query(
+      "SELECT cs.id_salida, cs.folio AS folio_salida, Date(cs.fecha_creacion) AS fecha, co.folio AS folio_orden, e.nombre_fiscal,
+          aas.nombre AS almacens, aao.nombre AS almaceno
+        FROM compras_salidas cs
+          INNER JOIN compras_transferencias ct ON cs.id_salida = ct.id_salida
+          INNER JOIN compras_ordenes co ON co.id_orden = ct.id_orden
+          INNER JOIN empresas e ON e.id_empresa = cs.id_empresa
+          INNER JOIN compras_almacenes aas ON aas.id_almacen = cs.id_almacen
+          INNER JOIN compras_almacenes aao ON aao.id_almacen = co.id_almacen
+        WHERE cs.status = 's' AND ct.id_salida IS NOT NULL {$sql} AND
+          Date(cs.fecha_creacion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'");
+
+    $response = array();
+    if($res->num_rows() > 0)
+    {
+      $response = $res->result();
+      foreach ($response as $key => $value)
+      {
+        $res_cosa = $this->db->query("SELECT csp.cantidad, csp.precio_unitario, p.nombre,
+            (csp.cantidad*csp.precio_unitario) AS importe, pu.nombre AS unidad
+          FROM compras_salidas_productos csp
+            INNER JOIN productos p ON p.id_producto = csp.id_producto
+            INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+          WHERE csp.id_salida = 8614");
+        $value->productos = $res_cosa->result();
+        $res_cosa->free_result();
+
+        if(count($value->productos) === 0)
+          unset($response[$key]);
+      }
+    }
+
+    return $response;
+  }
+  /**
+   * Reporte existencias por costo pdf
+   */
+  public function getHistorialPdf()
+  {
+    $res = $this->getHistorialData();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+
+    $pdf->titulo2 = 'Historial de transferencias';
+    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->AliasNbPages();
+    //$pdf->AddPage();
+    $pdf->SetFont('Arial','',8);
+
+    $aligns = array('L', 'L', 'C', 'L', 'C', 'L');
+    $widths = array(20, 60, 25, 37, 25, 37);
+    $header = array('Fecha', 'Empresa', 'Folio', 'Almacen', 'Folio', 'Almacen');
+
+    $familia = '';
+    $totaltes = array('familia' => array(0,0,0,0), 'general' => array(0,0,0,0));
+    $total_cargos = $total_abonos = $total_saldo = 0;
+    foreach($res as $key => $item){
+      $band_head = false;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0){ //salta de pagina si exede el max
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',9);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+
+        $pdf->SetX(86);
+        $pdf->SetAligns(array('C', 'C'));
+        $pdf->SetWidths(array(62, 62));
+        $pdf->Row(array('Salida', 'Orden'), true, true);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true, true);
+        $pdf->SetTextColor(0,0,0);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array($item->fecha, $item->nombre_fiscal, $item->folio_salida,
+                      $item->almacens, $item->folio_orden, $item->almaceno), false, false);
+
+      $pdf->SetFont('Arial','',8);
+      $pdf->SetTextColor(0,0,0);
+
+      foreach ($item->productos as $key2 => $prod)
+      {
+        $datos = array($prod->nombre,
+          $prod->unidad,
+          $prod->cantidad,
+          $prod->precio_unitario,
+          $prod->importe,
+          );
+
+        $pdf->SetX(6);
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R'));
+        $pdf->SetWidths(array(65, 25, 30, 30, 35));
+        $pdf->Row($datos, false);
+      }
+    }
+
+    $pdf->Output('epc.pdf', 'I');
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

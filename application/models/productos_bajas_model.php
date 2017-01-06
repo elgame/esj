@@ -89,6 +89,7 @@ class productos_bajas_model extends CI_Model {
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
       'id_empleado'     => $this->session->userdata('id_usuario'),
+      'id_almacen'      => ($this->input->post('id_almacen')>0? $this->input->post('id_almacen'): 1),
       'folio'           => $_POST['folio'],
       'fecha_creacion'  => str_replace('T', ' ', $_POST['fecha']),
       'fecha_registro'  => date("Y-m-d H:i:s"),
