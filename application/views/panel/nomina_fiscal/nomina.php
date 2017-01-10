@@ -224,7 +224,7 @@
                         $disabled = '';
                         $generarNomina = '1';
 
-                        $subsidioEmpleado = $e->nomina->percepciones['subsidio']['total'];
+                        $subsidioEmpleado = $e->nomina->otrosPagos['subsidio']['total'];
                         $isrEmpleado = $e->nomina->deducciones['isr']['total'];
                         // $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
                         $ptuEmpleado = 0;

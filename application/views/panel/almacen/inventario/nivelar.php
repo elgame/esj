@@ -76,7 +76,7 @@
       <?php
       //Paginacion
       $this->pagination->initialize(array(
-          'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+          'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag', 'fstatus')).'&',
           'total_rows'    => $data['total_rows'],
           'per_page'      => $data['items_per_page'],
           'cur_page'      => $data['result_page']*$data['items_per_page'],

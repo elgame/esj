@@ -118,7 +118,12 @@ class Usuarios_model extends privilegios_model {
             'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
 
             // 'no_empleado' => $noEmpleado,
-            'no_empleado'    => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+            'no_empleado'   => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+
+            'tipo_contrato' => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
+            // 'tipo_regimen'  => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
+            'tipo_jornada'  => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
+            'riesgo_puesto' => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
 					);
 			if($this->input->post('ffecha_salida') != '')
 				$data['fecha_salida']    = $this->input->post('ffecha_salida');
@@ -188,12 +193,17 @@ class Usuarios_model extends privilegios_model {
 						'regimen_contratacion' => $this->input->post('fregimen_contratacion'),
 						'rfc'                  => mb_strtoupper($this->input->post('frfc'), 'utf-8'),
 
-						'cuenta_banco'      => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
-            'no_seguro'         => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
-            'user_nomina'       => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
-            'id_departamente'   => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
-            'de_rancho'         => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
-            'no_empleado'       => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+            'cuenta_banco'    => trim($this->input->post('dcuenta_banco'))?$this->input->post('dcuenta_banco'): '',
+            'no_seguro'       => trim($this->input->post('dno_seguro'))?$this->input->post('dno_seguro'): '',
+            'user_nomina'     => trim($this->input->post('duser_nomina'))?$this->input->post('duser_nomina'): 'f',
+            'id_departamente' => $this->input->post('fdepartamente')!==false? $this->input->post('fdepartamente'): NULL,
+            'de_rancho'       => trim($this->input->post('de_rancho'))?$this->input->post('de_rancho'): 'n',
+            'no_empleado'     => trim($this->input->post('dno_trabajador'))? intval($this->input->post('dno_trabajador')): 0,
+
+            'tipo_contrato'   => trim($this->input->post('tipo_contrato'))? $this->input->post('tipo_contrato'): NULL,
+            // 'tipo_regimen'    => trim($this->input->post('tipo_regimen'))? $this->input->post('tipo_regimen'): NULL,
+            'tipo_jornada'    => trim($this->input->post('tipo_jornada'))? $this->input->post('tipo_jornada'): NULL,
+            'riesgo_puesto'   => trim($this->input->post('riesgo_puesto'))? $this->input->post('riesgo_puesto'): NULL,
 					);
       if($this->input->post('fbanco') != '')
         $data['banco'] = $this->input->post('fbanco');
@@ -246,7 +256,8 @@ class Usuarios_model extends privilegios_model {
 						Date(u.fecha_salida) AS fecha_salida, u.nacionalidad, u.estado_civil, u.sexo, u.cuenta_cpi,
 						e.id_empresa, e.nombre_fiscal, u.id_puesto, u.salario_diario, u.infonavit, u.fondo_ahorro, u.fondo_ahorro_cpi, u.salario_diario_real,
 						u.esta_asegurado, u.regimen_contratacion, u.curp, u.rfc, u.cuenta_banco, u.banco, u.user_nomina, u.no_seguro,
-						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto" )
+						u.id_departamente, e.dia_inicia_semana, DATE(u.fecha_imss) as fecha_imss, ep.nombre AS puesto,
+            u.tipo_contrato, u.tipo_jornada, u.riesgo_puesto" )
  												->from("usuarios u")
  												->join("empresas e", "e.id_empresa = u.id_empresa", "left")
  												->join("usuarios_puestos ep", "ep.id_puesto = u.id_puesto", "left")

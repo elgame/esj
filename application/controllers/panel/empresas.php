@@ -81,6 +81,9 @@ class empresas extends MY_Controller {
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
 		}
 
+    $this->load->model('nomina_catalogos_model');
+    $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -125,6 +128,9 @@ class empresas extends MY_Controller {
 			$params['info'] = $this->empresas_model->getInfoEmpresa($_GET['id']);
 		}else
 			$params['frm_errors'] = $this->showMsgs(1);
+
+    $this->load->model('nomina_catalogos_model');
+    $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
 
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);

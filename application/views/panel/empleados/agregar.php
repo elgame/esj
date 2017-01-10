@@ -281,17 +281,6 @@
                     </div>
                   </div>
 
-									<div class="control-group">
-									  <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
-									  <div class="controls">
-										<select name="fregimen_contratacion" id="fregimen_contratacion">
-											<option value="2" <?php echo set_select('fregimen_contratacion', '2', false, $this->input->post('fregimen_contratacion')); ?>>Sueldos y salarios</option>
-											<option value="3" <?php echo set_select('fregimen_contratacion', '3', false, $this->input->post('fregimen_contratacion')); ?>>Jubilados</option>
-											<option value="4" <?php echo set_select('fregimen_contratacion', '4', false, $this->input->post('fregimen_contratacion')); ?>>Pensionados</option>
-										</select>
-									  </div>
-									</div>
-
                   <div class="control-group">
                     <label class="control-label" for="fbanco">Banco </label>
                     <div class="controls">
@@ -322,6 +311,66 @@
 											<input type="text" name="dno_trabajador" id="dno_trabajador" class="span12" value="<?php echo set_value('dno_trabajador'); ?>" maxlength="8" placeholder="# Trabajador">
 									  </div>
 									</div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="tipo_contrato">Tipo Contrato </label>
+                    <div class="controls">
+                    <select name="tipo_contrato" id="tipo_contrato">
+                    <?php foreach ($tipo_contratos as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->clave ?>"
+                        <?php echo set_select('tipo_contrato', $value->clave, false, $this->input->post('tipo_contrato')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fregimen_contratacion">Regimen contratacion </label>
+                    <div class="controls">
+                    <select name="fregimen_contratacion" id="fregimen_contratacion">
+                      <?php foreach ($tipo_regimens as $key => $value)
+                      {
+                      ?>
+                        <option value="<?php echo $value->clave ?>"
+                          <?php echo set_select('fregimen_contratacion', $value->clave, false, $this->input->post('fregimen_contratacion')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                      <?php
+                      } ?>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="tipo_jornada">Tipo Jornada </label>
+                    <div class="controls">
+                    <select name="tipo_jornada" id="tipo_jornada">
+                    <?php foreach ($tipo_jornadas as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->clave ?>"
+                        <?php echo set_select('tipo_jornada', $value->clave, false, $this->input->post('tipo_jornada')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="riesgo_puesto">Riesgo Puesto </label>
+                    <div class="controls">
+                    <select name="riesgo_puesto" id="riesgo_puesto">
+                    <?php foreach ($riesgo_puestos as $key => $value)
+                    {
+                    ?>
+                      <option value="<?php echo $value->clave ?>"
+                        <?php echo set_select('riesgo_puesto', $value->clave, false, $this->input->post('riesgo_puesto')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                    <?php
+                    } ?>
+                    </select>
+                    </div>
+                  </div>
 
 									<input type="hidden" name="duser_nomina" value="t">
 

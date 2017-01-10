@@ -114,12 +114,26 @@
 									</div> <!--/span-->
 
 									<div class="span6 mquit">
-										<div class="control-group">
+										<!-- <div class="control-group">
 											<label class="control-label" for="dregimen_fiscal">Régimen fiscal:</label>
 											<div class="controls">
 												<input type="text" name="dregimen_fiscal" id="dregimen_fiscal" class="span12" value="<?php echo set_value('dregimen_fiscal'); ?>" maxlength="200">
 											</div>
-										</div>
+										</div> -->
+                    <div class="control-group">
+                      <label class="control-label" for="dregimen_fiscal">Régimen fiscal </label>
+                      <div class="controls">
+                      <select name="dregimen_fiscal" id="dregimen_fiscal" class="span12">
+                      <?php foreach ($regimen_fiscales as $key => $value)
+                      {
+                      ?>
+                        <option value="<?php echo $value->clave ?>"
+                          <?php echo set_select('dregimen_fiscal', $value->clave, false, $this->input->post('dregimen_fiscal')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                      <?php
+                      } ?>
+                      </select>
+                      </div>
+                    </div>
 
 										<div class="control-group">
 											<label class="control-label" for="dtelefono">Teléfono:</label>

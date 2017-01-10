@@ -412,6 +412,7 @@ class inventario extends MY_Controller {
     $_GET['did_empresa'] = (isset($_GET['fid_empresa'])?$_GET['fid_empresa']: $params['empresa']->id_empresa);
     $_GET['fempresa'] = isset($_GET['dempresa'])?$_GET['dempresa']:$params['empresa']->nombre_fiscal;
 
+    $_GET['fstatus'] = 'ac';
     $params['familias'] = $this->productos_model->getFamilias(false, 'p');
 
     $id_familia = isset($_GET['dfamilias'])? $_GET['dfamilias']: (isset($params['familias']['familias'][0])? $params['familias']['familias'][0]->id_familia: 0);

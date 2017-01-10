@@ -93,10 +93,17 @@ class empleados extends MY_Controller {
 		$this->load->model('usuarios_puestos_model');
 		$this->load->model('usuarios_departamentos_model');
 		$this->load->model('empresas_model');
+    $this->load->model('nomina_catalogos_model');
+
 		$params['empresa']       = $this->empresas_model->getDefaultEmpresa();
 		$_GET['did_empresa']     = $params['empresa']->id_empresa;
 		$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false);
 		$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false);
+
+    $params['tipo_contratos'] = $this->nomina_catalogos_model->tipo('tc');
+    $params['tipo_regimens']  = $this->nomina_catalogos_model->tipo('rc');
+    $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
+    $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -145,12 +152,18 @@ class empleados extends MY_Controller {
 			}
 
 			$this->load->model('usuarios_puestos_model');
-			$this->load->model('usuarios_departamentos_model');
+      $this->load->model('usuarios_departamentos_model');
+			$this->load->model('nomina_catalogos_model');
 
 			$params['data'] = $this->usuarios_model->get_usuario_info();
 			$_GET['did_empresa']     = $params['data']['info'][0]->id_empresa;
 			$params['puestos']       = $this->usuarios_puestos_model->getPuestos(false);
-			$params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false);
+      $params['departamentos'] = $this->usuarios_departamentos_model->getPuestos(false);
+
+      $params['tipo_contratos'] = $this->nomina_catalogos_model->tipo('tc');
+      $params['tipo_regimens']  = $this->nomina_catalogos_model->tipo('rc');
+      $params['tipo_jornadas']  = $this->nomina_catalogos_model->tipo('tj');
+      $params['riesgo_puestos'] = $this->nomina_catalogos_model->tipo('rp');
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);

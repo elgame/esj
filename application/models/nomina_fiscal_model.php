@@ -145,6 +145,10 @@ class nomina_fiscal_model extends CI_Model {
                 nf.infonavit,
                 nf.fondo_ahorro,
                 u.regimen_contratacion,
+                'COL' AS estado,
+                u.tipo_contrato,
+                u.tipo_jornada,
+                u.riesgo_puesto,
                 upp.nombre as puesto,
                 COALESCE(nf.dias_trabajados, -1) as dias_trabajados,
                 extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
@@ -223,6 +227,10 @@ class nomina_fiscal_model extends CI_Model {
                 u.infonavit,
                 u.fondo_ahorro,
                 u.regimen_contratacion,
+                'COL' AS estado,
+                u.tipo_contrato,
+                u.tipo_jornada,
+                u.riesgo_puesto,
                 COALESCE(upp.nombre, up.nombre) as puesto,
                 COALESCE(nf.dias_trabajados, -1) as dias_trabajados,
                 extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
@@ -301,6 +309,10 @@ class nomina_fiscal_model extends CI_Model {
             u.infonavit,
             u.fondo_ahorro,
             u.regimen_contratacion,
+            'COL' AS estado,
+            u.tipo_contrato,
+            u.tipo_jornada,
+            u.riesgo_puesto,
             COALESCE(upp.nombre, up.nombre) as puesto,
             -1 as dias_trabajados,
             extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
@@ -575,13 +587,26 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
     }
+
+    $this->load->model('empresas_model');
+    if (isset($filtros['empresaId']) && $filtros['empresaId'] > 0) {
+      $empresaa = $this->empresas_model->getInfoEmpresa($filtros['empresaId']);
+    }
     foreach ($empleados as $key => $empleado)
     {
       if ($nm_tipo == 'pt') { // es ptu
         $empleado->ptu_dias_trabajados_empleados = $total_dias_trabajados;
       }
+      if (!isset($empresaa)) {
+        $empresaa = $this->empresas_model->getInfoEmpresa($filtros['empresaId']);
+      }
+      $empleado->tipo_nomina = 'O';
+      if ($nm_tipo != 'se') {
+        $empleado->tipo_nomina = 'E';
+      }
       $nomina = $this->nomina
         ->setEmpleado($empleado)
+        ->setEmpresa($empresaa['info'])
         ->setEmpresaConfig($configuraciones['nomina'][0])
         ->setVacacionesConfig($configuraciones['vacaciones'])
         ->setSalariosZonas($configuraciones['salarios_zonas'][0])
@@ -681,6 +706,9 @@ class nomina_fiscal_model extends CI_Model {
           $datos['utilidad_empresa'],
           $datos['descuento_otros']
         );
+        echo "<pre>";
+          var_dump($empleadoNomina);
+        echo "</pre>";exit;
         // unset($empleadoNomina[0]->nomina->percepciones['subsidio']);
         // unset($empleadoNomina[0]->nomina->percepciones['ptu']);
         // unset($empleadoNomina[0]->nomina->deducciones['isr']);
@@ -755,8 +783,8 @@ class nomina_fiscal_model extends CI_Model {
           // Concepto de la nomina.
           $concepto = array(array(
             'cantidad'         => 1,
-            'unidad'           => 'Servicio',
-            'descripcion'      => 'Pago de nomina',
+            'unidad'           => 'ACT',
+            'descripcion'      => 'Pago de nómina',
             'valorUnitario'    => round($valorUnitario, 4),
             'importe'          => round($valorUnitario, 4),
             'idClasificacion' => null,
@@ -1134,6 +1162,10 @@ class nomina_fiscal_model extends CI_Model {
               u.id_puesto,
               u.salario_diario,
               u.regimen_contratacion,
+              'COL' AS estado,
+              u.tipo_contrato,
+              u.tipo_jornada,
+              u.riesgo_puesto,
               up.nombre as puesto,
               {$diasTranscurridos} as dias_transcurridos,
               (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
@@ -1456,12 +1488,12 @@ class nomina_fiscal_model extends CI_Model {
       // 'anoAprobacion'     => $anoAprobacion[0],
       'tipoDeComprobante' => 'egreso',
       'formaDePago'       => 'Pago en una sola exhibicion',
-      'condicionesDePago' => 'co',
+      'condicionesDePago' => '',
       'subTotal'          => 0, //total_importe
       'descuento'         => 0, //descuento
       'total'             => 0,
-      'metodoDePago'      => $metodoDePago, // Tansferencia
-      'NumCtaPago'        => $NumCtaPago,
+      'metodoDePago'      => 'NA', //$metodoDePago, // Tansferencia
+      'NumCtaPago'        => '', //$NumCtaPago,
 
       'rfc'               => $empleado['info'][0]->rfc,
       'nombre'            => $nombreEmpleado,
@@ -1474,6 +1506,8 @@ class nomina_fiscal_model extends CI_Model {
       'estado'            => $empleado['info'][0]->estado,
       'pais'              => 'MEXICO',
       'codigoPostal'      => $empleado['info'][0]->cp,
+      'Moneda'            => 'MXN',
+      'TipoCambio'        => 1,
 
       'concepto' => array(),
 
