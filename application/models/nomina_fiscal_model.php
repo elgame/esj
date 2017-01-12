@@ -510,9 +510,9 @@ class nomina_fiscal_model extends CI_Model {
                 // el descuento es multiplicado por el salario_diario que es el salario con el que
                 // se hara el timbrado.
                 $empleado->incapacidades[] = array(
-                  'diasIncapacidad' => $diasIncapacidad,
-                  'tipoIncapacidad' => $fi->sat_clave,
-                  'descuento' => floatval($diasIncapacidad) * floatval($empleado->salario_diario)
+                  'DiasIncapacidad' => $diasIncapacidad,
+                  'TipoIncapacidad' => $fi->sat_clave,
+                  'ImporteMonetario' => floatval($diasIncapacidad) * floatval($empleado->salario_diario)
                 );
               }
             }
@@ -607,6 +607,7 @@ class nomina_fiscal_model extends CI_Model {
       $nomina = $this->nomina
         ->setEmpleado($empleado)
         ->setEmpresa($empresaa['info'])
+        ->setFiltros($filtros)
         ->setEmpresaConfig($configuraciones['nomina'][0])
         ->setVacacionesConfig($configuraciones['vacaciones'])
         ->setSalariosZonas($configuraciones['salarios_zonas'][0])
@@ -697,7 +698,10 @@ class nomina_fiscal_model extends CI_Model {
 
         $empleadoNomina = $this->nomina(
           $configuraciones,
-          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'], 'dia_inicia_semana' => $empresa['info']->dia_inicia_semana ),
+          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
+                'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+                'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
+                ),
           $empleadoId,
           $datos['horas_extras'],
           $datos['descuento_playeras'],
@@ -706,91 +710,31 @@ class nomina_fiscal_model extends CI_Model {
           $datos['utilidad_empresa'],
           $datos['descuento_otros']
         );
-        echo "<pre>";
-          var_dump($empleadoNomina);
-        echo "</pre>";exit;
-        // unset($empleadoNomina[0]->nomina->percepciones['subsidio']);
-        // unset($empleadoNomina[0]->nomina->percepciones['ptu']);
-        // unset($empleadoNomina[0]->nomina->deducciones['isr']);
-
-        $valorUnitario = 0; // Total de las Percepciones.
-
-        // Recorre las percepciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
-        {
-          // Si activaron las vacaciones entonces suma las vacaciones y la prima vacacional.
-          if ($tipoPercepcion === 'vacaciones' || $tipoPercepcion === 'prima_vacacional')
-          {
-            if ($datos['con_vacaciones'] === '1' && $empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total'] != 0)
-            {
-              $valorUnitario += $percepcion['total'];
-              unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-            }
-            else
-              unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-          }
-          // Si el tipo de percepcion es aguinaldo
-          else if ($tipoPercepcion === 'aguinaldo')
-          {
-            // Si activarion el aguinaldo entonces lo suma.
-            if ($datos['con_aguinaldo'] === '1')
-            {
-              $valorUnitario += $percepcion['total'];
-              unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-            }
-            else
-              unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-          }
-          // Si es el sueldo u horas extras los suma directo.
-          else
-          {
-            $valorUnitario += $percepcion['total'];
-            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-          }
-        }
-
-        $isr = 0; // retenciones
-        $descuento = 0; // Total de las deducciones(gravado + excento) excepto el ISR.
-        // Recorre las deducciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->deducciones as $tipoDeduccion => $deduccion)
-        {
-          if ($tipoDeduccion !== 'isr')
-          {
-            $descuento += $deduccion['total'];
-          }
-          else
-          {
-            $isr = $deduccion['total'];
-          }
-          unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]['total']);
-        }
-
-        // Le suma al imss el rcv, para tener solamente la deduccion imss.
-        $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'] += $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteExcento'];
-        unset($empleadoNomina[0]->nomina->deducciones['rcv']);
 
         $result = array('xml' => '', 'uuid' => '');
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
           $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-          $datosCadenaOriginal['subTotal'] = $valorUnitario;
-          $datosCadenaOriginal['descuento'] = $descuento;
-          $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
-          $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-          $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
+          $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
+          $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
+          // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
+          // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
+          $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
+          $datosCadenaOriginal['total'] = $total;
 
           // Concepto de la nomina.
           $concepto = array(array(
-            'cantidad'         => 1,
-            'unidad'           => 'ACT',
-            'descripcion'      => 'Pago de nómina',
-            'valorUnitario'    => round($valorUnitario, 4),
-            'importe'          => round($valorUnitario, 4),
+            'cantidad'        => 1,
+            'unidad'          => 'ACT',
+            'descripcion'     => 'Pago de nómina',
+            'valorUnitario'   => $datosCadenaOriginal['subTotal'],
+            'importe'         => $datosCadenaOriginal['subTotal'],
             'idClasificacion' => null,
           ));
 
           $datosCadenaOriginal['concepto'] = $concepto;
+
 
           // Obtiene la cadena original para la nomina.
           $cadenaOriginal = $this->cfdi->obtenCadenaOriginal($datosCadenaOriginal, true, $empleadoNomina);
@@ -800,7 +744,7 @@ class nomina_fiscal_model extends CI_Model {
 
           // Construye los datos para el xml.
           $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-          $datosXML['concepto'] = $concepto;
+          // $datosXML['concepto'] = $concepto;
 
           $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana);
 
@@ -917,15 +861,15 @@ class nomina_fiscal_model extends CI_Model {
               'aguinaldo_grabable' => $aguinaldoGravable,
               'aguinaldo_exento' => $aguinaldoExcento,
               'aguinaldo' => $aguinaldo,
-              'total_percepcion' => $valorUnitario,
+              'total_percepcion' => $empleadoNomina[0]->nomina->subtotal,
               'imss' => $imss,
               'vejez' => 0,
-              'isr' => $datos['isr'],
+              'isr' => $empleadoNomina[0]->nomina->isr,
               'infonavit' => $infonavit,
               'subsidio_cobrado' => 0,
               'prestamos' => $totalPrestamos,
-              'total_deduccion' => $descuento + $isr,
-              'total_neto' => $valorUnitario - $descuento - $isr,
+              'total_deduccion' => $empleadoNomina[0]->nomina->TotalDeducciones,
+              'total_neto' => $total,
               'id_empleado_creador' => $this->session->userdata('id_usuario'),
               'ptu_exento' => $ptuExcento,
               'ptu_grabable' => $ptuGravado,
@@ -1166,6 +1110,7 @@ class nomina_fiscal_model extends CI_Model {
               u.tipo_contrato,
               u.tipo_jornada,
               u.riesgo_puesto,
+              u.no_seguro,
               up.nombre as puesto,
               {$diasTranscurridos} as dias_transcurridos,
               (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
@@ -1257,9 +1202,13 @@ class nomina_fiscal_model extends CI_Model {
       $empleado[0]->prestamos += $value->prestado-$value->pagado;
     }
 
+    $empleado[0]->tipo_nomina = 'E';
+
     $finiquito = $this->finiquito
       ->setEmpleado($empleado[0])
       ->setEmpresaConfig($configNomina[0])
+      ->setEmpresa($empresa['info'])
+      ->setFiltros([ 'tipo_nomina' => ['tipo' => 'fin', 'con_vacaciones' => '1', 'con_aguinaldo' => '1'] ])
       ->setVacacionesConfig($vacacionesAnios)
       ->setSalariosZonas($salariosZonas[0])
       ->setClavesPatron($cuentasContpaq)
@@ -1297,37 +1246,38 @@ class nomina_fiscal_model extends CI_Model {
       ->get()->row()->cer
     );
 
-    $valorUnitario = 0;
-    // Recorre las percepciones del empleado para sacar el valor unitario.
-    foreach ($empleadoFiniquito[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
-    {
-      $valorUnitario += $percepcion['total'];
-      unset($empleadoFiniquito[0]->nomina->percepciones[$tipoPercepcion]['total']);
-    }
-    $valorUnitario = str_replace(',', '', (String::formatoNumero($valorUnitario, 4, '')));
+    // $valorUnitario = 0;
+    // // Recorre las percepciones del empleado para sacar el valor unitario.
+    // foreach ($empleadoFiniquito[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
+    // {
+    //   $valorUnitario += $percepcion['total'];
+    //   unset($empleadoFiniquito[0]->nomina->percepciones[$tipoPercepcion]['total']);
+    // }
+    // $valorUnitario = str_replace(',', '', (String::formatoNumero($valorUnitario, 4, '')));
 
-    // Descuento seria 0 pq no hay otra deducciones aparte del isr.
-    $descuento = 0;
-    $isr = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['isr']['total'], 4, '')) );
-    $otros = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['otros']['total'], 4, '')) );
-    unset($empleadoFiniquito[0]->nomina->deducciones['isr']['total']);
-    unset($empleadoFiniquito[0]->nomina->deducciones['otros']['total']);
+    // // Descuento seria 0 pq no hay otra deducciones aparte del isr.
+    // $descuento = 0;
+    // $isr = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['isr']['total'], 4, '')) );
+    // $otros = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['otros']['total'], 4, '')) );
+    // unset($empleadoFiniquito[0]->nomina->deducciones['isr']['total']);
+    // unset($empleadoFiniquito[0]->nomina->deducciones['otros']['total']);
 
     // Obtiene los datos para la cadena original.
     $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-    $datosCadenaOriginal['subTotal'] = $valorUnitario;
-    $datosCadenaOriginal['descuento'] = $descuento;
-    $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
-    $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-    $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr - $otros, 4);
+    $datosCadenaOriginal['subTotal'] = $empleadoFiniquito[0]->nomina->subtotal;
+    $datosCadenaOriginal['descuento'] = $empleadoFiniquito[0]->nomina->descuento;
+    // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoFiniquito[0]->nomina->isr;
+    // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoFiniquito[0]->nomina->isr;
+    $total = $empleadoFiniquito[0]->nomina->subtotal - $empleadoFiniquito[0]->nomina->descuento;
+    $datosCadenaOriginal['total'] = $total;
 
     // Concepto de la nomina.
     $concepto = array(array(
-      'cantidad'         => 1,
-      'unidad'           => 'Servicio',
-      'descripcion'      => 'Finiquito',
-      'valorUnitario'    => $valorUnitario,
-      'importe'          => $valorUnitario,
+      'cantidad'        => 1,
+      'unidad'          => 'ACT',
+      'descripcion'     => 'Pago de nómina',
+      'valorUnitario'   => $datosCadenaOriginal['subTotal'],
+      'importe'         => $datosCadenaOriginal['subTotal'],
       'idClasificacion' => null,
     ));
 
@@ -1341,7 +1291,7 @@ class nomina_fiscal_model extends CI_Model {
 
     // Construye los datos para el xml.
     $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-    $datosXML['concepto'] = $concepto;
+    // $datosXML['concepto'] = $concepto;
 
     $archivo = $this->cfdi->generaArchivos($datosXML, false, null, 'media/cfdi/FiniquitosXML/');
     $result = $this->timbrar($archivo['pathXML']);
@@ -1368,11 +1318,11 @@ class nomina_fiscal_model extends CI_Model {
                             $empleadoFiniquito[0]->nomina->percepciones['indemnizaciones']['ImporteExcento'];
       }
 
-      $subsidio = $empleadoFiniquito[0]->nomina->percepciones['subsidio']['ImporteGravado'] +
-                   $empleadoFiniquito[0]->nomina->percepciones['subsidio']['ImporteExcento'];
+      $subsidio = $empleadoFiniquito[0]->nomina->otrosPagos['subsidio']['ImporteGravado'] +
+                   $empleadoFiniquito[0]->nomina->otrosPagos['subsidio']['ImporteExcento'];
 
-      $totalPercepciones = $sueldoSemana + $empleadoFiniquito[0]->nomina->vacaciones + $primaVacacional + $aguinaldo + $subsidio + $indemnizaciones;
-      $totalDeducciones = $descuento + $isr + $otros;
+      $totalPercepciones = $empleadoFiniquito[0]->nomina->subtotal;
+      $totalDeducciones = $empleadoFiniquito[0]->nomina->TotalDeducciones;
 
       // Compara que halla prestamos.
       if (floatval($empleadoFiniquito[0]->prestamos) > 0)
@@ -1427,7 +1377,7 @@ class nomina_fiscal_model extends CI_Model {
         'xml'                       => $result['xml'],
         'uuid'                      => $result['uuid'],
         'subsidio'                  => $subsidio,
-        'deduccion_otros'           => $otros,
+        'deduccion_otros'           => (isset($empleadoFiniquito[0]->nomina->deducciones['otros']['total'])? $empleadoFiniquito[0]->nomina->deducciones['otros']['total']: 0),
       );
       if ($despido2) {
         $data['indemnizaciones']          = $indemnizaciones;
@@ -1543,33 +1493,33 @@ class nomina_fiscal_model extends CI_Model {
     $datosXML['comprobante']['sello']         = $sello;
     $datosXML['comprobante']['noCertificado'] = $noCertificado;
     $datosXML['comprobante']['certificado']   = $certificado;
-    $datosXML['concepto']                     = array();
+    // $datosXML['concepto']                     = array();
 
-    $datosXML['domicilio']['calle']        = $empleado['info'][0]->calle;
-    $datosXML['domicilio']['noExterior']   = $empleado['info'][0]->numero;
-    $datosXML['domicilio']['noInterior']   = '';
-    $datosXML['domicilio']['colonia']      = $empleado['info'][0]->colonia;
-    $datosXML['domicilio']['localidad']    = '';
-    $datosXML['domicilio']['municipio']    = $empleado['info'][0]->municipio;
-    $datosXML['domicilio']['estado']       = $empleado['info'][0]->estado;
-    $datosXML['domicilio']['pais']         = 'MEXICO';
-    $datosXML['domicilio']['codigoPostal'] = $empleado['info'][0]->cp;
+    // $datosXML['domicilio']['calle']        = $empleado['info'][0]->calle;
+    // $datosXML['domicilio']['noExterior']   = $empleado['info'][0]->numero;
+    // $datosXML['domicilio']['noInterior']   = '';
+    // $datosXML['domicilio']['colonia']      = $empleado['info'][0]->colonia;
+    // $datosXML['domicilio']['localidad']    = '';
+    // $datosXML['domicilio']['municipio']    = $empleado['info'][0]->municipio;
+    // $datosXML['domicilio']['estado']       = $empleado['info'][0]->estado;
+    // $datosXML['domicilio']['pais']         = 'MEXICO';
+    // $datosXML['domicilio']['codigoPostal'] = $empleado['info'][0]->cp;
 
-    $datosXML['totalImpuestosRetenidos']   = $datosCadenaOriginal['retencion'][2];
-    // $datosXML['totalImpuestosRetenidos']   = 0;
-    $datosXML['totalImpuestosTrasladados'] = 0;
+    // $datosXML['totalImpuestosRetenidos']   = $datosCadenaOriginal['retencion'][2];
+    // // $datosXML['totalImpuestosRetenidos']   = 0;
+    // $datosXML['totalImpuestosTrasladados'] = 0;
 
-    $datosXML['retencion'] = array(
-      'impuesto' => 'ISR',
-      'importe'  => $datosCadenaOriginal['retencion'][2],
-      // 'importe'  => '0',
-    );
+    // $datosXML['retencion'] = array(
+    //   'impuesto' => 'ISR',
+    //   'importe'  => $datosCadenaOriginal['retencion'][2],
+    //   // 'importe'  => '0',
+    // );
 
-    $datosXML['traslado']  = array(array(
-      'Impuesto' => 'IVA',
-      'tasa'     => '0',
-      'importe'  => '0',
-    ));
+    // $datosXML['traslado']  = array(array(
+    //   'Impuesto' => 'IVA',
+    //   'tasa'     => '0',
+    //   'importe'  => '0',
+    // ));
 
     return $datosXML;
   }
@@ -8861,7 +8811,10 @@ class nomina_fiscal_model extends CI_Model {
 
         $empleadoNomina = $this->nomina(
           $configuraciones,
-          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'], 'dia_inicia_semana' => $empresa['info']->dia_inicia_semana ),
+          array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
+                'dia_inicia_semana' => $empresa['info']->dia_inicia_semana,
+                'tipo_nomina' => ['tipo' => 'ag', 'con_vacaciones' => $datos['con_vacaciones'], 'con_aguinaldo' => $datos['con_aguinaldo']]
+                ),
           $empleadoId,
           null,
           null,
@@ -8872,57 +8825,25 @@ class nomina_fiscal_model extends CI_Model {
           'ag'
         );
 
-        $valorUnitario = 0; // Total de las Percepciones.
-
-        // Recorre las percepciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
-        {
-          // Si activaron las vacaciones entonces suma las vacaciones y la prima vacacional.
-          if ($tipoPercepcion === 'aguinaldo')
-          {
-            $valorUnitario += $percepcion['total'];
-            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-          }
-          else
-          {
-            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-          }
-        }
-
-        $isr = 0; // retenciones
-        $descuento = 0; // Total de las deducciones(gravado + excento) excepto el ISR.
-        // Recorre las deducciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->deducciones as $tipoDeduccion => $deduccion)
-        {
-          if ($tipoDeduccion === 'isr')
-          {
-            $isr = $deduccion['total'];
-            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]['total']);
-          }
-          else
-          {
-            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]);
-          }
-        }
-
         $result = array('xml' => '', 'uuid' => '');
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
           $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-          $datosCadenaOriginal['subTotal'] = $valorUnitario;
-          $datosCadenaOriginal['descuento'] = $descuento;
-          $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
-          $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-          $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
+          $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
+          $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
+          // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
+          // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
+          $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
+          $datosCadenaOriginal['total'] = $total;
 
           // Concepto de la nomina.
           $concepto = array(array(
             'cantidad'         => 1,
-            'unidad'           => 'Servicio',
-            'descripcion'      => 'Aguinaldo',
-            'valorUnitario'    => $valorUnitario,
-            'importe'          => $valorUnitario,
+            'unidad'           => 'ACT',
+            'descripcion'      => 'Pago de nómina',
+            'valorUnitario'    => $datosCadenaOriginal['subTotal'],
+            'importe'          => $datosCadenaOriginal['subTotal'],
             'idClasificacion' => null,
           ));
 
@@ -8936,7 +8857,7 @@ class nomina_fiscal_model extends CI_Model {
 
           // Construye los datos para el xml.
           $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-          $datosXML['concepto'] = $concepto;
+          // $datosXML['concepto'] = $concepto;
 
           $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana, null, ' - Aguinaldo');
 
@@ -8972,10 +8893,10 @@ class nomina_fiscal_model extends CI_Model {
               'aguinaldo_grabable' => $aguinaldoGravado,
               'aguinaldo_exento' => $aguinaldoExcento,
               'aguinaldo' => $aguinaldo,
-              'total_percepcion' => $valorUnitario,
+              'total_percepcion' => $empleadoNomina[0]->nomina->subtotal,
               'isr' => $datos['isr'],
-              'total_deduccion' => $descuento + $isr,
-              'total_neto' => $valorUnitario - $descuento - $isr,
+              'total_deduccion' => $empleadoNomina[0]->nomina->TotalDeducciones,
+              'total_neto' => $total,
               'id_empleado_creador' => $this->session->userdata('id_usuario'),
               'id_puesto' => $empleadoNomina[0]->id_puesto,
               'xml' => $result['xml'],

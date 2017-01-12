@@ -19,6 +19,8 @@ class nomina
 
   public $empresa;
 
+  public $nominaFiltros;
+
   /**
    * Almacena la informacion de los dias de vacaciones a dar segun los años
    * trabajados del empleado.
@@ -101,6 +103,12 @@ class nomina
   public function setEmpresaConfig(stdclass $config)
   {
     $this->empresaConfig = $config;
+    return $this;
+  }
+
+  public function setFiltros($filtros)
+  {
+    $this->nominaFiltros = $filtros;
     return $this;
   }
 
@@ -210,27 +218,12 @@ class nomina
 
     $this->datosNomina();
 
-    // Percepciones
-    $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
-    // $this->empleado->nomina->percepciones['premio_puntualidad'] = $this->pPremioPuntualidad();
-    $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
-    // $this->empleado->nomina->percepciones['despensa'] = $this->pDespensa();
-    $this->empleado->nomina->percepciones['horas_extras'] = $this->pHorasExtras();
-    $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
-    $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
-    $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
-    $this->empleado->nomina->percepciones['ptu'] = $this->pPtu();
+    $this->confPercepciones();
 
     // Otros
     $this->empleado->nomina->otrosPagos = array();
 
-    // Deducciones
-    $this->empleado->nomina->deducciones = array();
-    $this->empleado->nomina->deducciones['imss'] = $this->dImss();
-    $this->empleado->nomina->deducciones['rcv'] = $this->dRcv();
-    $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
-    $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
-    $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
+    $this->confDeducciones();
 
     // Totales Percepciones
     $totalSueldosClaves = array('022', '023', '025', '039', '044');
@@ -303,9 +296,9 @@ class nomina
         $this->empleado->nomina->deduccionesTotales['TotalOtrasDeducciones']   += $deducc['total'];
     }
     // Si es cualquier deduccion menos el isr entonces el importe se lo suma al descuento.
-    $this->empleado->nomina->descuento        = $this->empleado->nomina->deduccionesTotales['TotalOtrasDeducciones'];
     // Si la deduccion es el ISR  no se lo suma al descuento ya que el isr ira en la parte de retenciones.
     $this->empleado->nomina->TotalDeducciones = $this->empleado->nomina->deduccionesTotales['TotalOtrasDeducciones'] + $this->empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'];
+    $this->empleado->nomina->descuento        = $this->empleado->nomina->TotalDeducciones;
     $this->empleado->nomina->isr              = $this->empleado->nomina->deduccionesTotales['TotalImpuestosRetenidos'];
 
     $this->emisor();
@@ -392,7 +385,8 @@ class nomina
     {
       $this->empleado->nomina->receptor['RiesgoPuesto'] = $this->empleado->riesgo_puesto;
     }
-    $this->empleado->nomina->receptor['PeriodicidadPago'] = '02';
+    // 02:semanal, 99:otra
+    $this->empleado->nomina->receptor['PeriodicidadPago'] = (isset($this->nominaFiltros['tipo_nomina']) && $this->nominaFiltros['tipo_nomina']['tipo'] != 'se'? '99': '02');
     // Si existe la inforcionmacion del banco la agrega.
     // if (isset($this->empleado->cuenta_banorte) && isset($this->empleado->banco))
     // {
@@ -403,6 +397,61 @@ class nomina
       $this->empleado->nomina->receptor['SalarioDiarioIntegrado'] = $this->empleado->nomina->salario_diario_integrado;
     }
     $this->empleado->nomina->receptor['ClaveEntFed'] = $this->empleado->estado;
+  }
+
+  public function confPercepciones()
+  {
+    if (isset($this->nominaFiltros['tipo_nomina'])) {
+      if ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se') {
+        $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
+        // $this->empleado->nomina->percepciones['premio_puntualidad'] = $this->pPremioPuntualidad();
+        $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
+        // $this->empleado->nomina->percepciones['despensa'] = $this->pDespensa();
+        $this->empleado->nomina->percepciones['horas_extras'] = $this->pHorasExtras();
+      }
+
+      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1') ||
+         ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ag' && $this->nominaFiltros['tipo_nomina']['con_aguinaldo'] == '1'))
+        $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
+
+      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se' && $this->nominaFiltros['tipo_nomina']['con_vacaciones'] == '1') ) {
+        $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
+        $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
+      }
+
+      if ( ($this->nominaFiltros['tipo_nomina']['tipo'] == 'ptu') )
+        $this->empleado->nomina->percepciones['ptu'] = $this->pPtu();
+    } else {
+      $this->empleado->nomina->percepciones['sueldo'] = $this->pSueldo();
+      // $this->empleado->nomina->percepciones['premio_puntualidad'] = $this->pPremioPuntualidad();
+      $this->empleado->nomina->percepciones['premio_asistencia'] = $this->pPremioAsistencia();
+      // $this->empleado->nomina->percepciones['despensa'] = $this->pDespensa();
+      $this->empleado->nomina->percepciones['horas_extras'] = $this->pHorasExtras();
+      $this->empleado->nomina->percepciones['aguinaldo'] = $this->pAguinaldo();
+      $this->empleado->nomina->percepciones['vacaciones'] = $this->pVacaciones();
+      $this->empleado->nomina->percepciones['prima_vacacional'] = $this->pPrimaVacacional();
+      $this->empleado->nomina->percepciones['ptu'] = $this->pPtu();
+    }
+  }
+
+  public function confDeducciones()
+  {
+    if (isset($this->nominaFiltros['tipo_nomina'])) {
+      if ($this->nominaFiltros['tipo_nomina']['tipo'] == 'se') {
+        $this->empleado->nomina->deducciones['imss'] = $this->dImss();
+        $this->empleado->nomina->deducciones['rcv'] = $this->dRcv();
+        $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
+      }
+
+      $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
+      $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
+    } else {
+      $this->empleado->nomina->deducciones['imss'] = $this->dImss();
+      $this->empleado->nomina->deducciones['rcv'] = $this->dRcv();
+      $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
+      $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
+      $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
+    }
   }
 
   /*
@@ -499,9 +548,9 @@ class nomina
       'TipoPercepcion' => '001',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'sueldo1': 'sueldo2')],
       'Concepto'       => 'Sueldos, Salarios Rayas y Jornales',
-      'ImporteGravado' => (float)$this->empleado->nomina->sueldo,
+      'ImporteGravado' => round($this->empleado->nomina->sueldo, 2),
       'ImporteExcento' => 0,
-      'total'          => (float)$this->empleado->nomina->sueldo + 0,
+      'total'          => round($this->empleado->nomina->sueldo + 0, 2),
     );
   }
 
@@ -518,9 +567,9 @@ class nomina
       'TipoPercepcion' => '010',
       'Clave'          => $this->clavesPatron['premio_puntualidad'],
       'Concepto'       => 'Premios por puntualidad',
-      'ImporteGravado' => (float)$premioPuntualidad,
+      'ImporteGravado' => round($premioPuntualidad, 2),
       'ImporteExcento' => 0,
-      'total'          => (float)$premioPuntualidad + 0,
+      'total'          => round($premioPuntualidad + 0, 2),
     );
   }
 
@@ -537,9 +586,9 @@ class nomina
       'TipoPercepcion' => '049',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'premio_asistencia1': 'premio_asistencia2')],
       'Concepto'       => 'Premios por asistencia',
-      'ImporteGravado' => (float)$premioAsistencia,
+      'ImporteGravado' => round($premioAsistencia, 2),
       'ImporteExcento' => 0,
-      'total'          => (float)$premioAsistencia + 0,
+      'total'          => round($premioAsistencia + 0, 2),
     );
   }
 
@@ -557,8 +606,8 @@ class nomina
       'Clave'          => $this->clavesPatron['despensa'],
       'Concepto'       => 'Vales de despensa',
       'ImporteGravado' => 0,
-      'ImporteExcento' => (float)$despensa,
-      'total'          => (float)$despensa + 0,
+      'ImporteExcento' => round($despensa, 2),
+      'total'          => round($despensa + 0, 2),
     );
   }
 
@@ -591,9 +640,9 @@ class nomina
       'TipoPercepcion' => '019',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'horas_extras1': 'horas_extras2')],
       'Concepto'       => 'Horas extra',
-      'ImporteGravado' => $gravado,
-      'ImporteExcento' => (float)$excento,
-      'total'          => floatval($gravado) + floatval($excento),
+      'ImporteGravado' => round($gravado, 2),
+      'ImporteExcento' => round($excento, 2),
+      'total'          => round($gravado, 2) + round($excento, 2),
     );
   }
 
@@ -622,9 +671,9 @@ class nomina
       'TipoPercepcion' => '002',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'aguinaldo1': 'aguinaldo2')],
       'Concepto'       => 'Gratificación Anual Aguinaldo',
-      'ImporteGravado' => $gravado,
-      'ImporteExcento' => (float)$excento,
-      'total'          => floatval($gravado) + floatval($excento),
+      'ImporteGravado' => round($gravado, 2),
+      'ImporteExcento' => round($excento, 2),
+      'total'          => round($gravado, 2) + round($excento, 2),
     );
   }
 
@@ -636,12 +685,12 @@ class nomina
   public function pVacaciones()
   {
     return array(
-      'TipoPercepcion' => '016',
+      'TipoPercepcion' => '038',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'vacaciones1': 'vacaciones2')],
       'Concepto'       => 'Vacaciones',
-      'ImporteGravado' => (float)$this->empleado->nomina->vacaciones,
+      'ImporteGravado' => round($this->empleado->nomina->vacaciones, 2),
       'ImporteExcento' => 0,
-      'total'          => floatval($this->empleado->nomina->vacaciones) + 0,
+      'total'          => round($this->empleado->nomina->vacaciones, 2) + 0,
     );
   }
 
@@ -670,9 +719,9 @@ class nomina
       'TipoPercepcion' => '021',
       'Clave'          => $this->clavesPatron[($this->empleado->id_departamente==1? 'prima_vacacional1': 'prima_vacacional2')],
       'Concepto'       => 'Prima vacacional',
-      'ImporteGravado' => $gravado,
-      'ImporteExcento' => (float)$excento,
-      'total'          => floatval($gravado) + floatval($excento),
+      'ImporteGravado' => round($gravado, 2),
+      'ImporteExcento' => round($excento, 2),
+      'total'          => round($gravado, 2) + round($excento, 2),
     );
   }
 
@@ -722,9 +771,9 @@ class nomina
       'TipoPercepcion' => '003',
       'Clave'          => $this->clavesPatron['ptu'],
       'Concepto'       => 'PTU',
-      'ImporteGravado' => (float)$gravado,
-      'ImporteExcento' => (float)$excento,
-      'total'          => floatval($gravado) + floatval($excento),
+      'ImporteGravado' => round($gravado, 2),
+      'ImporteExcento' => round($excento, 2),
+      'total'          => round($gravado, 2) + round($excento, 2),
     );
   }
 
@@ -769,8 +818,8 @@ class nomina
       'Clave'          => $this->clavesPatron['imss'],
       'Concepto'       => 'Seguridad social',
       'ImporteGravado' => 0,
-      'ImporteExcento' => (float)$totalImss,
-      'total'          => floatval($totalImss) + 0,
+      'ImporteExcento' => round($totalImss, 2),
+      'total'          => round($totalImss, 2) + 0,
     );
   }
 
@@ -799,8 +848,8 @@ class nomina
       'Clave'          => $this->clavesPatron['rcv'],
       'Concepto'       => 'Aportaciones a retiro, cesantía en edad avanzada y vejez',
       'ImporteGravado' => 0,
-      'ImporteExcento' => (float)$rcv,
-      'total'          => floatval($rcv) + 0,
+      'ImporteExcento' => round($rcv, 2),
+      'total'          => round($rcv, 2) + 0,
     );
   }
 
@@ -822,8 +871,8 @@ class nomina
       'Clave'          => $this->clavesPatron['infonavit'],
       'Concepto'       => 'Pago por crédito de vivienda',
       'ImporteGravado' => 0,
-      'ImporteExcento' => (float)$infonavit,
-      'total'          => floatval($infonavit) + 0,
+      'ImporteExcento' => round($infonavit, 2),
+      'total'          => round($infonavit, 2) + 0,
     );
   }
 
@@ -837,12 +886,13 @@ class nomina
     if ($this->subsidio !== null && $this->isr !== null)
     {
       $this->empleado->nomina->otrosPagos['subsidio'] = array(
-        'TipoOtroPago'   => '002',
-        'Clave'          => $this->clavesPatron['subsidio'],
-        'Concepto'       => 'Subsidio para el empleo',
-        'ImporteGravado' => 0,
-        'ImporteExcento' => (float)$this->subsidio,
-        'total'          => floatval($this->subsidio) + 0,
+        'TipoOtroPago'     => '002',
+        'Clave'            => $this->clavesPatron['subsidio'],
+        'Concepto'         => 'Subsidio para el empleo',
+        'ImporteGravado'   => 0,
+        'ImporteExcento'   => round($this->subsidio, 2),
+        'total'            => round($this->subsidio, 2) + 0,
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
       );
 
       return array(
@@ -850,8 +900,8 @@ class nomina
         'Clave'          => $this->clavesPatron['isr'],
         'Concepto'       => 'ISR',
         'ImporteGravado' => 0,
-        'ImporteExcento' => (float)$this->isr,
-        'total'          => floatval($this->isr) + 0,
+        'ImporteExcento' => round($this->isr, 2),
+        'total'          => round($this->isr, 2) + 0,
       );
     }
     else
@@ -868,11 +918,12 @@ class nomina
       $sumaImporteGravadosDiariosSinOtros = 0;
 
       // Agrega a la suma de de los importes gravados el sueldo.
-      $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['sueldo']['ImporteGravado']);
+      if (isset($this->empleado->nomina->percepciones['sueldo']))
+        $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['sueldo']['ImporteGravado']);
 
       // Si el importe gravado del premio de asistencia es mayor a 0.
       $premioAsistenciaGravadoDiario = 0;
-      if ($this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado'] > 0)
+      if (isset($this->empleado->nomina->percepciones['premio_asistencia']) && $this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado'] > 0)
       {
         $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['premio_asistencia']['ImporteGravado']);
 
@@ -881,7 +932,7 @@ class nomina
 
       // Si se tomara en cuenta la percepcion horas extras la suma.
       $horasExtrasGravadoDiario = 0;
-      if (isset($_POST['horas_extras']) && $_POST['horas_extras'] != 0)
+      if (isset($this->empleado->nomina->percepciones['horas_extras']) && isset($_POST['horas_extras']) && $_POST['horas_extras'] != 0)
       {
         $sumaImporteGravados += floatval($this->empleado->nomina->percepciones['horas_extras']['ImporteGravado']);
 
@@ -897,14 +948,14 @@ class nomina
 
       // Si se tomara en cuenta la percepcion aguinaldo.
       $aguinaldoGravadoDiario = 0;
-      if (isset($_POST['con_aguinaldo']) && $_POST['con_aguinaldo'] === '1')
+      if (isset($_POST['con_aguinaldo']) && $_POST['con_aguinaldo'] === '1' && isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'se')
       {
         $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 365, 4);
       }
 
       // Si el importe gravado del ptu es mayor a 0.
       $ptuGravadoDiario = 0;
-      if ($this->empleado->nomina->percepciones['ptu']['ImporteGravado'] > 0)
+      if (isset($this->empleado->nomina->percepciones['ptu']) && $this->empleado->nomina->percepciones['ptu']['ImporteGravado'] > 0)
       {
         $ptuGravadoDiario = round(floatval($this->empleado->nomina->percepciones['ptu']['ImporteGravado']) / 365, 4);
       }
@@ -935,13 +986,32 @@ class nomina
 
       // Agrega la percepcion subsidio a la nomina.
       $this->empleado->nomina->otrosPagos['subsidio'] = array(
-        'TipoOtroPago'   => '002',
-        'Clave'          => $this->clavesPatron['subsidio'],
-        'Concepto'       => 'Subsidio para el empleo',
-        'ImporteGravado' => 0,
-        'ImporteExcento' => (float)$rango->subsidio,
-        'total'          => floatval($rango->subsidio) + 0,
+        'TipoOtroPago'     => '002',
+        'Clave'            => $this->clavesPatron['subsidio'],
+        'Concepto'         => 'Subsidio para el empleo',
+        'ImporteGravado'   => 0,
+        'ImporteExcento'   => round($rango->subsidio, 2),
+        'total'            => round($rango->subsidio, 2) + 0,
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
       );
+
+      // Si es el puro aguinaldo saca la tabla de diarios
+      $isrAguinaldo = 0;
+      if (isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'ag') {
+        $aguinaldoGravadoDiario = round(floatval($this->empleado->nomina->percepciones['aguinaldo']['ImporteGravado']) / 365, 4);
+        $isrAuxConOtros = 0;
+        $isrAuxSinOtros = 0;
+        foreach ($this->tablasIsr['diaria']['art113'] as $rango)
+        {
+          if ($aguinaldoGravadoDiario >= floatval($rango->lim_inferior) && $aguinaldoGravadoDiario <= floatval($rango->lim_superior))
+          {
+            $isrAguinaldo = round((($aguinaldoGravadoDiario - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 4);
+            break;
+          }
+        }
+        $isrAguinaldo = round($isrAguinaldo * 365, 2);
+      }
+
 
       // Suma todos los gravados diarios con aguinaldo, prima vacacional y ptu.
       $sumaImporteGravadosDiariosConOtros = $this->empleado->salario_diario + $horasExtrasGravadoDiario + $premioAsistenciaGravadoDiario + $aguinaldoGravadoDiario + $ptuGravadoDiario;
@@ -956,19 +1026,20 @@ class nomina
       // y ptu.
       $isrAuxConOtros = 0;
       $isrAuxSinOtros = 0;
-      foreach ($this->tablasIsr['diaria']['art113'] as $rango)
-      {
-        if ($sumaImporteGravadosDiariosConOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosConOtros <= floatval($rango->lim_superior))
+      if (isset($this->nominaFiltros['tipo_nomina']['tipo']) && $this->nominaFiltros['tipo_nomina']['tipo'] == 'ptu') {
+        foreach ($this->tablasIsr['diaria']['art113'] as $rango)
         {
-          $isrAuxConOtros = round((($sumaImporteGravadosDiariosConOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
-        }
+          if ($sumaImporteGravadosDiariosConOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosConOtros <= floatval($rango->lim_superior))
+          {
+            $isrAuxConOtros = round((($sumaImporteGravadosDiariosConOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
+          }
 
-        if ($sumaImporteGravadosDiariosSinOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosSinOtros <= floatval($rango->lim_superior))
-        {
-          $isrAuxSinOtros = round((($sumaImporteGravadosDiariosSinOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
+          if ($sumaImporteGravadosDiariosSinOtros >= floatval($rango->lim_inferior) && $sumaImporteGravadosDiariosSinOtros <= floatval($rango->lim_superior))
+          {
+            $isrAuxSinOtros = round((($sumaImporteGravadosDiariosSinOtros - floatval($rango->lim_inferior)) * (floatval($rango->porcentaje) / 100.00)) + floatval($rango->cuota_fija), 2);
+          }
         }
       }
-
       $isrAguinaldoPrimaPtu = round(($isrAuxConOtros - $isrAuxSinOtros) * 365, 2);
 
       return array(
@@ -976,8 +1047,8 @@ class nomina
         'Clave'          => $this->clavesPatron['isr'],
         'Concepto'       => 'ISR',
         'ImporteGravado' => 0,
-        'ImporteExcento' => (float)$isr + $isrAguinaldoPrimaPtu,
-        'total'          => floatval($isr + $isrAguinaldoPrimaPtu) + 0,
+        'ImporteExcento' => round($isr + $isrAguinaldoPrimaPtu + $isrAguinaldo, 2),
+        'total'          => round($isr + $isrAguinaldoPrimaPtu + $isrAguinaldo, 2) + 0,
       );
     }
   }
@@ -1007,8 +1078,8 @@ class nomina
       'Clave'          => $this->clavesPatron['otros'],
       'Concepto'       => 'Otros',
       'ImporteGravado' => 0,
-      'ImporteExcento' => (float)$otros,
-      'total'          => floatval($otros) + 0,
+      'ImporteExcento' => round($otros, 2),
+      'total'          => round($otros, 2) + 0,
     );
   }
 

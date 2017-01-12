@@ -7,6 +7,10 @@
    ALTER TABLE public.usuarios ADD COLUMN regimen_contratacion character varying(40) NOT NULL DEFAULT '02';
    ALTER TABLE public.usuarios ADD COLUMN tipo_jornada character varying(30);
    ALTER TABLE public.usuarios ADD COLUMN riesgo_puesto character varying(30);
+   UPDATE public.nomina_sat_claves SET clave='01' WHERE tipo='in' and clave='1';
+   UPDATE public.nomina_sat_claves SET clave='02' WHERE tipo='in' and clave='2';
+   UPDATE public.nomina_sat_claves SET clave='03' WHERE tipo='in' and clave='3';
+
 
  ✔ Almacenes @done (17-01-02 19:58) pcc|pct|san
    CREATE TABLE public.compras_almacenes
