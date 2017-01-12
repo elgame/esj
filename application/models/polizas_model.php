@@ -1977,6 +1977,26 @@ class polizas_model extends CI_Model {
         UNION
         (
           SELECT
+            fa.id_pago AS id_movimiento, COALESCE(bm.numero_ref, '') AS ref_movimiento, 'CANCELADO' AS concepto, fa.monto AS total_abono, 0 AS retencion_isr,
+            bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
+            0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
+            fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
+            'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio
+          FROM bascula_pagos AS fa
+            INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
+            INNER JOIN bascula_pagos_basculas AS bpb ON bpb.id_pago = fa.id_pago
+            INNER JOIN bascula AS f ON f.id_bascula = bpb.id_bascula
+            INNER JOIN proveedores AS p ON p.id_proveedor = f.id_proveedor
+            LEFT JOIN banco_movimientos_bascula AS bmb ON bmb.id_bascula_pago = fa.id_pago
+            LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = bmb.id_movimiento
+          WHERE fa.status = 'f' AND fa.poliza_egreso = 'f' AND fa.tipo_pago = 'cheque'
+             {$sql}
+          GROUP BY fa.id_pago, fa.concepto, fa.monto, bc.cuenta_cpi, p.nombre_fiscal, p.cuenta_cpi, bm.numero_ref
+          ORDER BY fa.id_pago ASC
+        )
+        UNION
+        (
+          SELECT
             bm.id_movimiento, bm.numero_ref AS ref_movimiento, 'CANCELADO' AS concepto, bm.monto AS total_abono, 0 AS retencion_isr,
             bc.cuenta_cpi, bm.monto AS subtotal, 0 AS total, 0 AS importe_iva, 0 AS retencion_iva, 0 AS importe_ieps,
             COALESCE(bc.alias, 'CUENTA CUADRE') AS nombre_fiscal,

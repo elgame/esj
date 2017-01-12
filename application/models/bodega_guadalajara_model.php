@@ -1388,13 +1388,13 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'R'));
     $pdf->SetWidths(array(31, 25));
-    $pdf->Row(array('SALDO AL CORTE', String::formatoNumero( ($totalCont+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO AL CORTE', String::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos) , 2, '$', false)), false, false);
 
     $pdf->SetX(6);
     $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$', false)), false, false);
 
     $pdf->SetX(6);
-    $pdf->Row(array('DIFERENCIA', String::formatoNumero( ($totalCont+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', String::formatoNumero( ($totalCont+$totalIngresosExt+$abonoshVentas-$totalGastos)-$totalEfectivo , 2, '$', false)), false, false);
 
     // $pdf->SetFont('Arial', 'B', 6);
     // $pdf->SetXY(168, $pdf->GetY() - 32);

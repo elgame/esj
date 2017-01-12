@@ -1,18 +1,19 @@
 
  ☐ Nomina 1.2
-   ALTER TABLE public.empresas ADD COLUMN curp character varying(50);
-   ALTER TABLE public.empresas ADD COLUMN registro_patronal character varying(20);
-   ALTER TABLE public.usuarios ADD COLUMN tipo_contrato character varying(80);
-   ALTER TABLE public.usuarios DROP COLUMN regimen_contratacion;
-   ALTER TABLE public.usuarios ADD COLUMN regimen_contratacion character varying(40) NOT NULL DEFAULT '02';
-   ALTER TABLE public.usuarios ADD COLUMN tipo_jornada character varying(30);
-   ALTER TABLE public.usuarios ADD COLUMN riesgo_puesto character varying(30);
-   UPDATE public.nomina_sat_claves SET clave='01' WHERE tipo='in' and clave='1';
-   UPDATE public.nomina_sat_claves SET clave='02' WHERE tipo='in' and clave='2';
-   UPDATE public.nomina_sat_claves SET clave='03' WHERE tipo='in' and clave='3';
+   ✔ @done (17-01-12 14:53) pcc|lap
+     ALTER TABLE public.empresas ADD COLUMN curp character varying(50);
+     ALTER TABLE public.empresas ADD COLUMN registro_patronal character varying(20);
+     ALTER TABLE public.usuarios ADD COLUMN tipo_contrato character varying(80);
+     ALTER TABLE public.usuarios DROP COLUMN regimen_contratacion;
+     ALTER TABLE public.usuarios ADD COLUMN regimen_contratacion character varying(40) NOT NULL DEFAULT '02';
+     ALTER TABLE public.usuarios ADD COLUMN tipo_jornada character varying(30);
+     ALTER TABLE public.usuarios ADD COLUMN riesgo_puesto character varying(30);
+     UPDATE public.nomina_sat_claves SET clave='01' WHERE tipo='in' and clave='1';
+     UPDATE public.nomina_sat_claves SET clave='02' WHERE tipo='in' and clave='2';
+     UPDATE public.nomina_sat_claves SET clave='03' WHERE tipo='in' and clave='3';
 
 
- ✔ Almacenes @done (17-01-02 19:58) pcc|pct|san
+ ✔ Almacenes @done (17-01-02 19:58) pcc|pct|san|lap
    CREATE TABLE public.compras_almacenes
     (
       id_almacen serial NOT NULL,
@@ -47,10 +48,10 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Eliminar',444,FALSE,'almacenes/eliminar/','remove',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Historial de traspasos',444,TRUE,'almacenes/historial/','time',FALSE);
 
- ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san|pct
+ ✔ Imprimir ticket orden de compra entrada @done (16-12-27 19:37) pcc|san|pct|lap
    ALTER TABLE public.compras_ordenes ADD COLUMN no_impresiones_tk smallint DEFAULT 0;
 
- ✔ Bodega ingresos @done (16-12-27 08:29) pct|sang|san
+ ✔ Bodega ingresos @done (16-12-27 08:29) pct|sang|san|lap
    CREATE TABLE otros.bodega_ingresos
     (
       id_ingresos bigserial NOT NULL,
