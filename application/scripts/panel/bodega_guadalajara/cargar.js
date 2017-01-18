@@ -526,6 +526,11 @@
             parseFloat($('#abonoshVentas').val() || 0) - parseFloat($('#ttotal-gastos').val() || 0);
     $('#ttotal-corte').val(total.toFixed(2));
     $("#ttotal-corte1").text(util.darFormatoNum(total.toFixed(2)));
+
+    var costo_venta = (parseFloat($("#total_exis_ant").val()) || 0) + (parseFloat($("#total_ingresos_mercan").val()) || 0) - (parseFloat($("#ttotal-prestamos").val()) || 0) - (parseFloat($("#total-boletas_exis").val()) || 0);
+    $("#costo_venta").val(costo_venta);
+    var utilidad = (parseFloat($("#total-ingresos-ext").val()) || 0) + (parseFloat($("#total-boletas").val()) || 0) - costo_venta - (parseFloat($("#ttotal-gastos").val()) || 0);
+    $("#utilidad").val(utilidad);
   };
 
   // var cargaMovimientos = function () {

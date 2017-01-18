@@ -7358,7 +7358,9 @@ class nomina_fiscal_model extends CI_Model {
         $empleadoNomina = $this->nomina(
           $configuraciones,
           array('semana' => $datos['numSemana'], 'empresaId' => $empresaId, 'anio' => $datos['anio'],
-            'dia_inicia_semana' => $empresa['info']->dia_inicia_semana, 'asegurado'  => true, 'puestoId'  => '' ),
+            'dia_inicia_semana' => $empresa['info']->dia_inicia_semana, 'asegurado'  => true, 'puestoId'  => '',
+            'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
+            ),
           $empleadoId,
           null,
           null,
@@ -7369,58 +7371,26 @@ class nomina_fiscal_model extends CI_Model {
           'ptu'
         );
 
-        $valorUnitario = 0; // Total de las Percepciones.
-
-        // Recorre las percepciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->percepciones as $tipoPercepcion => $percepcion)
-        {
-          // Si activaron las vacaciones entonces suma las vacaciones y la prima vacacional.
-          if ($tipoPercepcion === 'ptu')
-          {
-            $valorUnitario += $percepcion['total'];
-            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]['total']);
-          }
-          else
-          {
-            unset($empleadoNomina[0]->nomina->percepciones[$tipoPercepcion]);
-          }
-        }
-
-        $isr = 0; // retenciones
-        $descuento = 0; // Total de las deducciones(gravado + excento) excepto el ISR.
-        // Recorre las deducciones del empleado.
-        foreach ($empleadoNomina[0]->nomina->deducciones as $tipoDeduccion => $deduccion)
-        {
-          if ($tipoDeduccion === 'isr')
-          {
-            $isr = $deduccion['total'];
-            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]['total']);
-          }
-          else
-          {
-            unset($empleadoNomina[0]->nomina->deducciones[$tipoDeduccion]);
-          }
-        }
-
         $result = array('xml' => '', 'uuid' => '');
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
           $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-          $datosCadenaOriginal['subTotal'] = $valorUnitario;
-          $datosCadenaOriginal['descuento'] = $descuento;
-          $datosCadenaOriginal['retencion'][0]['importe'] = $isr;
-          $datosCadenaOriginal['totalImpuestosRetenidos'] = $isr;
-          $datosCadenaOriginal['total'] = round($valorUnitario - $descuento - $isr, 4);
+          $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
+          $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
+          // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
+          // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
+          $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
+          $datosCadenaOriginal['total'] = $total;
           $datosCadenaOriginal['is_ptu'] = "ptu";
 
           // Concepto de la nomina.
           $concepto = array(array(
-            'cantidad'         => 1,
-            'unidad'           => 'Servicio',
-            'descripcion'      => 'PTU Reparto de Utilidades',
-            'valorUnitario'    => $valorUnitario,
-            'importe'          => $valorUnitario,
+            'cantidad'        => 1,
+            'unidad'          => 'ACT',
+            'descripcion'     => 'Pago de nómina',
+            'valorUnitario'   => $datosCadenaOriginal['subTotal'],
+            'importe'         => $datosCadenaOriginal['subTotal'],
             'idClasificacion' => null,
           ));
 
@@ -7434,7 +7404,7 @@ class nomina_fiscal_model extends CI_Model {
 
           // Construye los datos para el xml.
           $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
-          $datosXML['concepto'] = $concepto;
+          // $datosXML['concepto'] = $concepto;
 
           $archivo = $this->cfdi->generaArchivos($datosXML, true, $fechasSemana, null, ' - PTU');
 
@@ -7479,15 +7449,15 @@ class nomina_fiscal_model extends CI_Model {
               // 'aguinaldo_grabable' => $aguinaldoGravable,
               // 'aguinaldo_exento' => $aguinaldoExcento,
               // 'aguinaldo' => $aguinaldo,
-              'total_percepcion' => $valorUnitario,
+              'total_percepcion' => $empleadoNomina[0]->nomina->subtotal,
               // 'imss' => $imss,
               // 'vejez' => 0,
-              'isr' => $datos['isr'],
+              'isr' => $empleadoNomina[0]->nomina->isr,
               // 'infonavit' => $infonavit,
               // 'subsidio_cobrado' => 0,
               // 'prestamos' => $totalPrestamos,
-              'total_deduccion' => $descuento + $isr,
-              'total_neto' => $valorUnitario - $descuento - $isr,
+              'total_deduccion' => $empleadoNomina[0]->nomina->TotalDeducciones,
+              'total_neto' => $total,
               'id_empleado_creador' => $this->session->userdata('id_usuario'),
               'ptu_exento' => $ptuExcento,
               'ptu_grabable' => $ptuGravado,

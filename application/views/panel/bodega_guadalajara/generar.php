@@ -120,25 +120,26 @@
                               </th>
                             </tr>
                             <tr>
-                              <th>FECHA</th>
                               <th>CLIENTE</th>
+                              <th>FECHA</th>
                               <th>REM No.</th>
-                              <th>S/ANTERIOR.</th>
-                              <th>CONTADO</th>
-                              <th>S/ACTUAL</th>
+                              <th>S/INICIAL</th>
+                              <th>INGRESOS</th>
+                              <th>S/FINAL</th>
                             </tr>
                           </thead>
                           <tbody>
                             <?php
                                   $totalSalAnt = $totalCont = $totalSal = 0;
+                                  $aux_client = 0;
                                   foreach ($caja['cts_cobrar'] as $ct_cobrar) {
                                     $totalSalAnt += floatval($ct_cobrar->saldo_ant);
                                     $totalCont += floatval($ct_cobrar->abonos_hoy);
                                     $totalSal += floatval($ct_cobrar->saldo);
                                   ?>
                                     <tr>
+                                      <td style="width: 120px;"><?php echo ($ct_cobrar->id_cliente != $aux_client ? $ct_cobrar->cliente: '') ?></td>
                                       <td style="width: 50px;"><?php echo $ct_cobrar->fecha ?></td>
-                                      <td style="width: 120px;"><?php echo $ct_cobrar->cliente ?></td>
                                       <td style="width: 70px;"><?php echo $ct_cobrar->serie.$ct_cobrar->folio ?></td>
                                       <td style="width: 100px;"><?php echo $ct_cobrar->saldo_ant ?></td>
                                       <td style="width: 100px;"><?php echo $ct_cobrar->abonos_hoy ?></td>
@@ -146,7 +147,9 @@
                                       <td style="width: 100px;text-align: right;" class="<?php echo $ct_cobrar->cliente!=''?'sel_abonom':''; ?>"
                                         data-id="<?php echo $ct_cobrar->id_factura; ?>" data-tipo="f"><?php echo $ct_cobrar->saldo ?></td>
                                     </tr>
-                            <?php } ?>
+                            <?php
+                                    $aux_client = $ct_cobrar->id_cliente != $aux_client ? $ct_cobrar->id_cliente: $aux_client;
+                                  } ?>
 
                             <tr class='row-total'>
                               <td colspan="3"></td>
@@ -298,7 +301,7 @@
                               <td colspan="3"></td>
                               <td><input type="text" name="bultos_exis_ant" value="<?php echo String::float(String::formatoNumero($bultosExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
                               <td><input type="text" name="pu_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td style="width: 100px;"><input type="text" name="total_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt, 2, '')) ?>" class="span12" id="total_exis_ant" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -357,7 +360,7 @@
                               <td colspan="3"></td>
                               <td><input type="text" name="bultos_ingresos" value="<?php echo String::float(String::formatoNumero($bultosIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
                               <td><input type="text" name="pu_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total_ingresos_mercan" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -425,7 +428,7 @@
                                                 </td>
                                                 <td style="width: 50px;">
                                                   <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
-                                                    <option value="t" <?php echo $_POST['prestamo_tipo'][$k] == 't' ? 'selected' : '' ?>>Prestamo</option>
+                                                    <!-- <option value="t" <?php echo $_POST['prestamo_tipo'][$k] == 't' ? 'selected' : '' ?>>Prestamo</option> -->
                                                     <option value="f" <?php echo $_POST['prestamo_tipo'][$k] == 'f' ? 'selected' : '' ?>>Pago</option>
                                                   </select>
                                                 </td>
@@ -462,7 +465,7 @@
                                             </td>
                                             <td style="width: 50px;">
                                               <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
-                                                <option value="t" <?php echo $prestamo->tipo == 't' ? 'selected' : '' ?>>Prestamo</option>
+                                                <!-- <option value="t" <?php echo $prestamo->tipo == 't' ? 'selected' : '' ?>>Prestamo</option> -->
                                                 <option value="f" <?php echo $prestamo->tipo == 'f' ? 'selected' : '' ?>>Pago</option>
                                               </select>
                                             </td>
@@ -630,7 +633,7 @@
                                     </tbody>
                                     <tbody>
                                       <tr>
-                                        <td colspan="3"><input type="hidden" value="<?php echo $totalExisD ?>" id="total-boletas"></td>
+                                        <td colspan="3"><input type="hidden" value="<?php echo $totalExisD ?>" id="total-boletas_exis"></td>
                                         <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($bultosExisD, 2, '') ?></td>
                                         <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '') ?></td>
                                         <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD, 2, '$') ?></td>
@@ -829,6 +832,12 @@
                             <input type="hidden" name="total_diferencia" value="<?php echo $total_saldo_corte-$totalEfectivo ?>" id="ttotal-diferencia"></td>
                             <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_saldo_corte-$totalEfectivo, 2, '$') ?></td>
                           </tr>
+
+                          <input type="hidden" name="costo_venta" value="<?php echo ($caja['costo_venta']!=0? $caja['costo_venta']: ($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD)) ?>" id="costo_venta" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="utilidad" value="<?php echo ($caja['utilidad']!=0? $caja['utilidad']: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD))) ?>" id="utilidad" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="a_gastos" value="<?php echo $caja['a_gastos'] ?>" id="a_gastos" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="a_bultos_vendidos" value="<?php echo $caja['a_bultos_vendidos'] ?>" id="a_bultos_vendidos" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="a_utilidad" value="<?php echo $caja['a_utilidad']+($caja['utilidad']!=0? 0: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD)) ) ?>" id="a_utilidad" class="input-small" <?php echo $readonly ?>>
                         </tbody>
                       </table>
                     </div>

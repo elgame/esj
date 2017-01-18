@@ -1,6 +1,15 @@
 
+ ✔ Bodega @done (17-01-17 21:40) pcc|san
+    ALTER TABLE public.facturacion_abonos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN a_bultos_vendidos double precision NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN a_kilos_vendidos double precision NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN a_gastos double precision NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN a_utilidad double precision NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN costo_venta double precision NOT NULL DEFAULT 0;
+    ALTER TABLE otros.bodega_efectivo ADD COLUMN utilidad double precision NOT NULL DEFAULT 0;
+
  ☐ Nomina 1.2
-   ✔ @done (17-01-12 14:53) pcc|lap
+   ✔ @done (17-01-12 14:53) pcc|lap|san
      ALTER TABLE public.empresas ADD COLUMN curp character varying(50);
      ALTER TABLE public.empresas ADD COLUMN registro_patronal character varying(20);
      ALTER TABLE public.usuarios ADD COLUMN tipo_contrato character varying(80);

@@ -29,10 +29,10 @@ class MYpdf extends FPDF {
 	function __construct($orientation='P', $unit='mm', $size='Letter'){
 		parent::__construct($orientation, $unit, $size);
 
-        $this->pag_size = $size;
+    $this->pag_size = $size;
 
-        if(!is_array($size))
-		  $this->hheader = 'header'.$size.$orientation;
+    if(!is_array($size))
+      $this->hheader = 'header'.$size.$orientation;
 
 	}
 

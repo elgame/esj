@@ -193,7 +193,7 @@
                         {
                           //Se obtienen lo que se preguardo en hrs_ext y descuentos para q se carguen de nuevo
                           $prenomina = $this->nomina_fiscal_model->getPreNomina($e->id, $_GET['empresaId'], $_GET['anio'], $_GET['semana']);
-                          $e->nomina->percepciones['horas_extras']['total'] = $e->nomina->percepciones['horas_extras']['total']==0?$prenomina['horas_extras']: $e->nomina->percepciones['horas_extras']['total'];
+                          $e->nomina->percepciones['horas_extras']['total'] = 0; // $e->nomina->percepciones['horas_extras']['total']==0?$prenomina['horas_extras']: $e->nomina->percepciones['horas_extras']['total'];
                           $e->horas_extras_dinero = $e->nomina->percepciones['horas_extras']['total'];
                           $e->descuento_playeras  = $prenomina['desc_playeras'];
                           $e->descuento_otros     = $prenomina['desc_otros'];
@@ -224,7 +224,7 @@
                           $disabled = '';
                           $generarNomina = '1';
 
-                          $subsidioEmpleado = $e->nomina->percepciones['subsidio']['total'];
+                          $subsidioEmpleado = 0; // $e->nomina->percepciones['subsidio']['total'];
                           $isrEmpleado = $e->nomina->deducciones['isr']['total'];
                           $ptuEmpleado = $e->nomina->percepciones['ptu']['total'];
                           // Si ya hay nominas generadas y la de este empleado tambien se genero.
@@ -449,7 +449,7 @@
                                                   $e->otros +
                                                   $e->domingo -
                                                   ( $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado)) ) -
-                                                  ($e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total']) -
+                                                  ($e->esta_asegurado=='f'?0:0 /*$e->nomina->deducciones['infonavit']['total']*/) -
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
                                                   $e->descuento_otros;
@@ -463,7 +463,7 @@
                       $totalSalarios           += $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario;
                       $totalSdi                += $e->esta_asegurado=='f'?0:$e->nomina->salario_diario_integrado;
                       $totalDiasTrabajados     += $e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados;
-                      $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado:$e->nomina->percepciones['sueldo']['total'];
+                      $totalSueldos            += $e->esta_asegurado=='f'?$totalComplementoEmpleado: 0; // $e->nomina->percepciones['sueldo']['total'];
                       $totalVacaciones         += $e->esta_asegurado=='f'?0:$e->nomina->vacaciones;
                       $totalPrimasVacacionales += $e->esta_asegurado=='f'?0:$e->nomina->prima_vacacional;
                       $totalHorasExtras        += $e->horas_extras_dinero;
@@ -471,8 +471,8 @@
                       $totalSubsidios          += $e->esta_asegurado=='f'?0:$subsidioEmpleado;
                       $totalPtu                += $e->esta_asegurado=='f'?0:$ptuEmpleado;
                       $totalPercepciones       += $e->esta_asegurado=='f'?0:$totalPercepcionesEmpleado;
-                      $totalInfonavit          += $e->esta_asegurado=='f'?0:$e->nomina->deducciones['infonavit']['total'];
-                      $totalImss               += $e->esta_asegurado=='f'?0:($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
+                      $totalInfonavit          += $e->esta_asegurado=='f'?0: 0; // $e->nomina->deducciones['infonavit']['total'];
+                      $totalImss               += $e->esta_asegurado=='f'?0: 0; // ($e->nomina->deducciones['imss']['total'] + $e->nomina->deducciones['rcv']['total']);
                       $totalPrestamos          += $totalPrestamosEmpleado;
                       $totalDescuentoPlayeras  += $e->descuento_playeras;
                       $totalDescuentoOtros     += $e->descuento_otros;

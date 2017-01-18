@@ -201,6 +201,7 @@ class nomina_fiscal extends MY_Controller {
       'empresaId' => isset($_GET['empresaId']) ? $_GET['empresaId'] : $params['empresaDefault']->id_empresa,
       'puestoId'  => isset($_GET['puestoId']) ? $_GET['puestoId'] : '',
       'asegurado'  => true,
+      'tipo_nomina' => ['tipo' => 'ptu', 'con_vacaciones' => '0', 'con_aguinaldo' => '0']
     );
     if ($filtros['empresaId'] !== '')
     {
