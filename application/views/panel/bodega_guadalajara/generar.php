@@ -396,9 +396,12 @@
                                     </thead>
                                     <tbody>
                                       <?php
-                                        $totalPrestamos = $totalPrestamosBultos = 0;
+                                        $totalPrestamos = $totalPrestamosRestas = $totalPrestamosBultos = 0;
                                         if (isset($_POST['prestamo_descripcion'])) {
                                           foreach ($_POST['prestamo_descripcion'] as $key => $concepto) {
+                                            if ($_POST['prestamo_tipo'][$k] == 'dev' || $_POST['prestamo_tipo'][$k] == 'true') {
+                                              $totalPrestamosRestas += floatval($_POST['prestamo_importe'][$key]);
+                                            }
                                             $totalPrestamos       += floatval($_POST['prestamo_importe'][$key]);
                                             $totalPrestamosBultos += floatval($_POST['prestamo_cantidad'][$key]);
                                           ?>
@@ -428,14 +431,18 @@
                                                 </td>
                                                 <td style="width: 50px;">
                                                   <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
-                                                    <!-- <option value="t" <?php echo $_POST['prestamo_tipo'][$k] == 't' ? 'selected' : '' ?>>Prestamo</option> -->
-                                                    <option value="f" <?php echo $_POST['prestamo_tipo'][$k] == 'f' ? 'selected' : '' ?>>Pago</option>
+                                                    <option value="dev" <?php echo $_POST['prestamo_tipo'][$k] == 'dev' ? 'selected' : '' ?>>Devolucion (-)</option>
+                                                    <option value="true" <?php echo $_POST['prestamo_tipo'][$k] == 'true' ? 'selected' : '' ?>>Prestamo (-)</option>
+                                                    <option value="false" <?php echo $_POST['prestamo_tipo'][$k] == 'false' ? 'selected' : '' ?>>Pago (+)</option>
                                                   </select>
                                                 </td>
                                                 <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
                                               </tr>
                                       <?php }} else {
                                         foreach ($caja['prestamos'] as $prestamo) {
+                                          if ($prestamo->tipo == 'dev' || $prestamo->tipo == 'true') {
+                                            $totalPrestamosRestas += floatval($prestamo->importe);
+                                          }
                                           $totalPrestamos += floatval($prestamo->importe);
                                           $totalPrestamosBultos += floatval($prestamo->cantidad);
                                         ?>
@@ -465,8 +472,9 @@
                                             </td>
                                             <td style="width: 50px;">
                                               <select name="prestamo_tipo[]" id="prestamo_tipo" class="span12">
-                                                <!-- <option value="t" <?php echo $prestamo->tipo == 't' ? 'selected' : '' ?>>Prestamo</option> -->
-                                                <option value="f" <?php echo $prestamo->tipo == 'f' ? 'selected' : '' ?>>Pago</option>
+                                                <option value="dev" <?php echo $prestamo->tipo == 'dev' ? 'selected' : '' ?>>Devolucion (-)</option>
+                                                <option value="true" <?php echo $prestamo->tipo == 'true' ? 'selected' : '' ?>>Prestamo (-)</option>
+                                                <option value="false" <?php echo $prestamo->tipo == 'false' ? 'selected' : '' ?>>Pago (+)</option>
                                               </select>
                                             </td>
                                             <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
@@ -476,8 +484,9 @@
                                         <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
                                         <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamosBultos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-bultos" style="text-align: right;" readonly></td>
                                         <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero(($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1)) , 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-precio" style="text-align: right;" readonly></td>
-                                        <td colspan="2"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly></td>
-                                        <td></td>
+                                        <td colspan="3"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly>
+                                          <input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamosRestas, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-restas" style="text-align: right;" readonly>
+                                        </td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -833,11 +842,11 @@
                             <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_saldo_corte-$totalEfectivo, 2, '$') ?></td>
                           </tr>
 
-                          <input type="hidden" name="costo_venta" value="<?php echo ($caja['costo_venta']!=0? $caja['costo_venta']: ($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD)) ?>" id="costo_venta" class="input-small" <?php echo $readonly ?>>
-                          <input type="hidden" name="utilidad" value="<?php echo ($caja['utilidad']!=0? $caja['utilidad']: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD))) ?>" id="utilidad" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="costo_venta" value="<?php echo ($caja['costo_venta']!=0? $caja['costo_venta']: ($totalExisAnt+$totalIngresos-$totalPrestamosRestas-$totalExisD)) ?>" id="costo_venta" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="utilidad" value="<?php echo ($caja['utilidad']!=0? $caja['utilidad']: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamosRestas-$totalExisD))) ?>" id="utilidad" class="input-small" <?php echo $readonly ?>>
                           <input type="hidden" name="a_gastos" value="<?php echo $caja['a_gastos'] ?>" id="a_gastos" class="input-small" <?php echo $readonly ?>>
                           <input type="hidden" name="a_bultos_vendidos" value="<?php echo $caja['a_bultos_vendidos'] ?>" id="a_bultos_vendidos" class="input-small" <?php echo $readonly ?>>
-                          <input type="hidden" name="a_utilidad" value="<?php echo $caja['a_utilidad']+($caja['utilidad']!=0? 0: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamos-$totalExisD)) ) ?>" id="a_utilidad" class="input-small" <?php echo $readonly ?>>
+                          <input type="hidden" name="a_utilidad" value="<?php echo $caja['a_utilidad']+($caja['utilidad']!=0? 0: ($totalIngresosExt+$totalVentas-$totalGastos-($totalExisAnt+$totalIngresos-$totalPrestamosRestas-$totalExisD)) ) ?>" id="a_utilidad" class="input-small" <?php echo $readonly ?>>
                         </tbody>
                       </table>
                     </div>

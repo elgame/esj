@@ -366,12 +366,12 @@ class cfdi{
     {
       foreach ($data['retencion'] as $key => $retencion)
       {
-        if ($retencion['impuesto'] > 0) {
+        if ($retencion['impuesto'] > 0 || !$isNomina) {
           $datos['retencion'][] = $retencion['impuesto'];
           $datos['retencion'][] = (float)$this->numero($retencion['importe']);
         }
       }
-      if ($data['totalImpuestosRetenidos'] > 0)
+      if ($data['totalImpuestosRetenidos'] > 0 || !$isNomina)
         $datos['retencion'][] = (float)$this->numero($data['totalImpuestosRetenidos']);
     }
 

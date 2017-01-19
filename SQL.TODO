@@ -1,4 +1,11 @@
 
+ ✔ Bodega y  @done (17-01-18 14:02) pcc
+    alter table otros.bodega_prestamos alter column tipo type character varying(5) using tipo::character varying;
+    COMMENT ON COLUMN otros.bodega_prestamos.tipo IS 'true: prestamo (resta la existencia), false: pago del prestamo (incremente la existencia), dev: devolucion (resta la existencia)';
+    ALTER TABLE otros.bodega_prestamos ALTER COLUMN tipo SET DEFAULT 'true';
+    ALTER TABLE public.nomina_prestamos ADD COLUMN tipo character varying(4) NOT NULL DEFAULT 'fi'::character varying;
+    COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja)';
+
  ✔ Bodega @done (17-01-17 21:40) pcc|san
     ALTER TABLE public.facturacion_abonos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
     ALTER TABLE otros.bodega_efectivo ADD COLUMN a_bultos_vendidos double precision NOT NULL DEFAULT 0;

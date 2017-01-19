@@ -17,6 +17,8 @@
     autocompleteCategorias();
     autocompleteCategoriasLive();
 
+    quitarAdeudosEmpleados();
+
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
@@ -265,6 +267,25 @@
     total_efectivco = parseFloat(util.quitarFormatoNum($("#total-efectivo-den").text()) || 0) - parseFloat(total.toFixed(2) || 0);
     $('#ttotal-diferencia').val(total_efectivco.toFixed(2));
     $('#total-efectivo-diferencia').text(util.darFormatoNum(total_efectivco.toFixed(2)));
+  };
+
+
+  var quitarAdeudosEmpleados = function () {
+    $("#table-empsaldo").on('click', '.btn-del-empsaldo', function(event) {
+      var $tr = $(this).parent().parent();
+      var r = confirm("Estas seguro de saldar los adeudos del empleado?");
+      if (r) {
+        $.getJSON(base_url+'panel/caja_chica_prest/ajax_saldar_adeudos/', {
+          empleadoId: $tr.find('.empsaldo_empleado_id').val(),
+          fecha: $("#fecha_caja").val() }, function(json, textStatus) {
+            console.log(json);
+            noty({"text":"Se saldaron los prestamos correctamiente", "layout":"topRight", "type":"success"});
+            setTimeout(function(){
+              window.location.href = window.location.href;
+            }, 200);
+        });
+      }
+    });
   };
 
 });

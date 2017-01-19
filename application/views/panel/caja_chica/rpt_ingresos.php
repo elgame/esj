@@ -40,11 +40,11 @@
                   <div class="controls">
                     <select name="fno_caja" id="fno_caja">
                       <option value=""></option>
-                      <option value="1">Caja 1</option>
-                      <option value="2">Caja 2</option>
-                      <option value="3">Caja 3</option>
+                      <option value="1">Caja Limon</option>
+                      <option value="2">Caja Gastos</option>
+                      <option value="3">Caja Coco</option>
                       <option value="4">Caja Venta de Contado</option>
-                      <!-- <option value="prest1">Caja prestamos</option> -->
+                      <option value="prest1">Caja prestamos</option>
                     </select>
                   </div>
                 </div>

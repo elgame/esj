@@ -164,6 +164,54 @@
                     </div>
                     <!--/ Prestamos-->
 
+                    <!-- Saldo empleados -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-empsaldo">
+                          <thead>
+                            <tr>
+                              <th colspan="3">SALDO EMPLEADOS</th>
+                              <th colspan="2">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>NOMBRE</th>
+                              <th>PRESTADO</th>
+                              <th>PAGADO</th>
+                              <th>SALDO</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                              <?php
+                                $totalempsaldos = 0;
+                                foreach ($caja['saldos_empleados'] as $empsaldo) {
+                                    $totalempsaldos += floatval($empsaldo->saldo);
+                                  ?>
+                                    <tr>
+                                      <td><?php echo $empsaldo->nombre ?>
+                                        <input type="hidden" name="empsaldo_empleado_id[]" value="<?php echo $empsaldo->id ?>" class="input-small vpositive empsaldo_empleado_id">
+                                      </td>
+                                      <td>
+                                        <input type="text" name="empsaldo_prestado[]" value="<?php echo $empsaldo->prestado ?>" class="empsaldo_prestado span12" maxlength="500" placeholder="Prestado" required readonly>
+                                      </td>
+                                      <td>
+                                        <input type="text" name="empsaldo_pagado[]" value="<?php echo $empsaldo->pagado ?>" class="empsaldo_pagado span12" maxlength="500" placeholder="Pagado" required readonly>
+                                      </td>
+                                      <td><input type="text" name="empsaldo_saldo[]" value="<?php echo $empsaldo->saldo ?>" class="empsaldo_saldo vpositive input-small" placeholder="Saldo" required readonly></td>
+                                      <td style="width: 30px;">
+                                        <a href="javascript:void()" class="btn btn-danger btn-del-empsaldo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></a></td>
+                                    </tr>
+                            <?php } ?>
+                                  <tr class="row-total">
+                                    <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
+                                    <td><input type="text" value="<?php echo $totalempsaldos ?>" class="input-small vpositive" id="ttotal-empsaldo" style="text-align: right;" readonly></td>
+                                    <td></td>
+                                  </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Saldo empleados-->
                 </div>
               </div>
             </div>

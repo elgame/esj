@@ -5,11 +5,12 @@ class caja_chica_prest_model extends CI_Model {
   public function get($fecha, $noCaja)
   {
     $info = array(
-      'saldo_inicial' => 0,
-      'prestamos'      => array(),
-      'pagos'         => array(),
-      'denominaciones' => array(),
-      'categorias'    => array(),
+      'saldo_inicial'    => 0,
+      'prestamos'        => array(),
+      'pagos'            => array(),
+      'denominaciones'   => array(),
+      'categorias'       => array(),
+      'saldos_empleados' => array(),
     );
 
     // Obtiene el saldo incial.
@@ -42,7 +43,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_prestamos np
         INNER JOIN usuarios u ON u.id = np.id_usuario
         LEFT JOIN otros.cajaprestamo_prestamos cp ON np.id_prestamo = cp.id_prestamo_nom
-        WHERE u.esta_asegurado = 'f' AND np.fecha = '{$fecha}' AND cp.id_prestamo IS NULL
+        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha = '{$fecha}' AND cp.id_prestamo IS NULL
       ) AS t
       ORDER BY id_prestamo_nom ASC"
     );
@@ -66,9 +67,10 @@ class caja_chica_prest_model extends CI_Model {
           (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || '; Sem ' || np.semana) AS concepto,
           np.monto, np.fecha, cp.id_nomenclatura, null AS categoria, null AS nomenclatura
         FROM nomina_fiscal_prestamos np
+        INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
         INNER JOIN usuarios u ON u.id = np.id_empleado
         LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
-        WHERE u.esta_asegurado = 'f' AND np.fecha = '{$fecha}' AND cp.id_pago IS NULL
+        WHERE (npp.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha = '{$fecha}' AND cp.id_pago IS NULL
       ) AS t
       ORDER BY id_pago ASC"
     );
@@ -76,6 +78,32 @@ class caja_chica_prest_model extends CI_Model {
     if ($pagos->num_rows() > 0)
     {
       $info['pagos'] = $pagos->result();
+    }
+
+    $saldos = $this->db->query("SELECT u.id, (u.nombre || ' ' || u.apellido_paterno || '' || u.apellido_materno) AS nombre,
+        COALESCE(p.prestado, 0) AS prestado, COALESCE(pa.pagado, 0) AS pagado,
+        (COALESCE(p.prestado, 0) - COALESCE(pa.pagado, 0)) AS saldo
+      FROM usuarios u
+      LEFT JOIN (
+        SELECT np.id_usuario, Sum(np.prestado) AS prestado
+        FROM nomina_prestamos np
+          INNER JOIN usuarios u ON u.id = np.id_usuario
+        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND Date(np.fecha) <= '{$fecha}'
+        GROUP BY np.id_usuario
+      ) p ON u.id = p.id_usuario
+      LEFT JOIN (
+        SELECT nfp.id_empleado, Sum(nfp.monto) AS pagado
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+          INNER JOIN usuarios u ON u.id = np.id_usuario
+        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND (Date(nfp.fecha) <= '{$fecha}' OR Date(nfp.fecha) IS NULL)
+        GROUP BY nfp.id_empleado
+      ) pa ON u.id = pa.id_empleado
+      WHERE (COALESCE(p.prestado, 0) - COALESCE(pa.pagado, 0)) > 0");
+
+    if ($saldos->num_rows() > 0)
+    {
+      $info['saldos_empleados'] = $saldos->result();
     }
 
     // denominaciones
@@ -283,6 +311,36 @@ class caja_chica_prest_model extends CI_Model {
     return true;
   }
 
+  public function saldarPrestamosEmpleado($empleadoId, $fecha)
+  {
+    $prestamos = $this->db->query("SELECT np.id_prestamo, u.id_empresa, np.id_usuario, np.prestado,
+        COALESCE(Sum(nfp.monto), 0) AS pagado, (np.prestado-COALESCE(Sum(nfp.monto), 0)) AS saldo
+      FROM nomina_prestamos np
+        INNER JOIN usuarios u ON u.id = np.id_usuario
+        LEFT JOIN nomina_fiscal_prestamos nfp ON np.id_prestamo = nfp.id_prestamo
+      WHERE np.id_usuario = {$empleadoId} AND (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND Date(np.fecha) <= '{$fecha}'
+      GROUP BY np.id_prestamo, u.id
+      HAVING (np.prestado-COALESCE(Sum(nfp.monto), 0)) > 0")->result();
+
+    $semana = String::obtenerSemanaDeFecha($fecha);
+
+    $prestamosEmpleados = array();
+    foreach ($prestamos as $key => $value) {
+      $prestamosEmpleados[] = array(
+              'id_empleado' => $empleadoId,
+              'id_empresa'  => $value->id_empresa,
+              'anio'        => $semana['anio'],
+              'semana'      => $semana['semana'],
+              'id_prestamo' => $value->id_prestamo,
+              'monto'       => $value->saldo,
+              'fecha'       => $fecha,
+            );
+      $this->db->update('nomina_prestamos', array('status' => 'f'), "id_prestamo = {$value->id_prestamo}");
+    }
+    if (count($prestamosEmpleados) > 0)
+      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+  }
+
   public function printCajaNomenclatura(&$pdf, $nomenclaturas)
   {
     // nomenclatura
@@ -459,11 +517,51 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R', 'L', 'R'));
     $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($total_pagos, 2, '$', false)), true, true);
 
+    // Saldos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, $pdf->auxy + 5);
+    $pdf->SetAligns(array('L', 'C'));
+    $pdf->SetWidths(array(79, 25));
+    $pdf->Row(array('SALDO EMPLEADOS', 'IMPORTE'), true, true);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(44, 20, 20, 20));
+    $pdf->Row(array('NOMBRE', 'PRESTADO', 'PAGADO', 'SALDO'), true, true);
+
+    $pdf->SetFont('Arial','', 6);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(44, 20, 20, 20));
+
+    $totalempsaldos = 0;
+    foreach ($caja['saldos_empleados'] as $key => $empsaldo)
+    {
+      $pdf->SetX(6);
+
+      $pdf->Row(array(
+        $empsaldo->nombre,
+        String::formatoNumero($empsaldo->prestado, 2, '', false),
+        String::formatoNumero($empsaldo->pagado, 2, '', false),
+        String::formatoNumero($empsaldo->saldo, 2, '', false)), false, true);
+
+      $totalempsaldos += floatval($empsaldo->saldo);
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(6);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('L', 'R', 'L', 'R'));
+    $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalempsaldos, 2, '$', false)), true, true);
+
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(210, 210, 210);
-    $pdf->SetXY(6, $pdf->auxy + 5);
+    $pdf->SetXY(6, $pdf->GetY() + 5);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(56));
     $pdf->Row(array('TABULACION DE EFECTIVO'), true, true);

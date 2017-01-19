@@ -127,6 +127,12 @@
                     '<option value="f">Activo</option>' +
                     '<option value="t">Pausado</option>' +
                   '</select></td>' +
+                '<td style="width: 50px;">'+
+                  '<select name="tipo_efectico[]" required style="width: 50px;">'+
+                    '<option value="fi">Fiscal</option>'+
+                    '<option value="ef">Efectivo</option>'+
+                  '</select>'+
+                '</td>'+
                 '<td>' +
                   '<button type="button" class="btn btn-danger btn-del-item-prestamo"><i class="icon-trash"></i></button>' +
                 '</td>' +
@@ -202,7 +208,7 @@
     $('#table-vacaciones').on('click', '.btn-del-item-vacacion', function(event) {
       var $parent = $(this).parents('tr'),
       f = new Date($parent.find('#vfechadefault').val());
-      
+
       $parent.find('.vfecha').val(f.toJSON().substr(0, 10));
       $parent.find('.vfecha1').val(f.toJSON().substr(0, 10));
       $parent.find('.vdias').val('0');

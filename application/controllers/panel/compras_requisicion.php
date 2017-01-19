@@ -11,6 +11,7 @@ class compras_requisicion extends MY_Controller {
     'compras_requisicion/ajax_producto/',
     'compras_requisicion/ajax_get_folio/',
     'compras_requisicion/ajax_get_producto_all/',
+    'compras_requisicion/ajax_get_tipo_cambio/',
 
     'compras_requisicion/ligar/',
     'compras_requisicion/imprimir_recibo_faltantes/',
@@ -499,6 +500,13 @@ class compras_requisicion extends MY_Controller {
     $productos = $this->compras_requisicion_model->getFactRem($_GET);
 
     echo json_encode($productos);
+  }
+
+  public function ajax_get_tipo_cambio()
+  {
+    $xml_string = file_get_contents("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es");
+    preg_match('/<cb:value frequency(.+)>(\d+.?\d+)<\/cb:value>/', $xml_string, $coincidencias);
+    echo (is_numeric($coincidencias[0])? $coincidencias[0]: $coincidencias[2]);
   }
 
   /*

@@ -38,15 +38,16 @@ class bodega_guadalajara_model extends CI_Model {
 
     // Exsistencia anterior
     $info['existencia_ant'] = $this->db->query(
-      "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
+      "SELECT be.id_factura, COALESCE(e.nombre_fiscal, 'Pago prestamo') AS nombre_fiscal, DATE(f.fecha) as fecha,
+        COALESCE(f.serie, 'PP') AS serie, COALESCE(f.folio, 0) AS folio, total, COALESCE(c.nombre_fiscal, '') as cliente,
         be.descripcion, be.cantidad, be.precio_unitario, be.importe, u.nombre AS unidad, cl.id_clasificacion,
         (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad
       FROM otros.bodega_existencia be
-        INNER JOIN facturacion f ON be.id_factura = f.id_factura
-        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
-        INNER JOIN empresas e ON e.id_empresa = f.id_empresa
         INNER JOIN unidades u ON u.id_unidad = be.id_unidad
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = be.id_clasificacion
+        LEFT JOIN facturacion f ON be.id_factura = f.id_factura
+        LEFT JOIN clientes c ON c.id_cliente = f.id_cliente
+        LEFT JOIN empresas e ON e.id_empresa = f.id_empresa
       WHERE Date(be.fecha) = Date(date '{$fecha}' - interval '1 day')
       ORDER BY (f.fecha, f.serie, f.folio, be.descripcion) ASC"
     )->result();
@@ -72,16 +73,19 @@ class bodega_guadalajara_model extends CI_Model {
     }
 
     // sumamos o restamos los prestamos de ese dia
+    // echo "<pre>";
+    //   var_dump($info['prestamos']);
+    // echo "</pre>";exit;
     foreach ($info['prestamos'] as $key => $value) {
       if ($value->id_clasificacion != '49' AND $value->id_clasificacion != '50' AND
           $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
-          $value->id_clasificacion != '53' AND $value->tipo == 't')
+          $value->id_clasificacion != '53' AND $value->tipo == 'false')
       {
         $info['existencia_dia'][$value->id_factura.'-'.$value->id_clasificacion.'-'.$value->id_unidad.'-'.$key] = clone $value;
       }
     }
     foreach ($info['prestamos'] as $key => $value) {
-      if ($value->tipo == 'f')
+      if ($value->tipo == 'true' || $value->tipo == 'dev')
       {
         $keys = preg_grep( '/^[0-9]+-'.$value->id_clasificacion.'-'.$value->id_unidad.'-[0-9]+/i', array_keys( $info['existencia_dia'] ) );
         $cantidad = $value->cantidad;
@@ -377,7 +381,6 @@ class bodega_guadalajara_model extends CI_Model {
     if (count($caja['existencia_dia']) > 0)
     {
       $existencia_dia = array();
-
       $key = 0;
       foreach ($caja['existencia_dia'] as $exk => $exist) {
         $existencia_dia[] = array(
@@ -648,7 +651,8 @@ class bodega_guadalajara_model extends CI_Model {
     // Obtener los prestamos de otras bodegas
     $prestamos = $this->db->query(
       "SELECT DATE(bp.fecha) as fecha, bp.descripcion, bp.cantidad, bp.precio_unitario, bp.importe, u.nombre AS unidad, cl.id_clasificacion,
-        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, bp.concepto, bp.tipo, 0 AS id_factura
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, bp.concepto, bp.tipo, 0 AS id_factura,
+        'PP' AS serie, '' AS folio, 'Pago prestamo' AS nombre_fiscal
       FROM otros.bodega_prestamos bp
         INNER JOIN unidades u ON u.id_unidad = bp.id_unidad
         INNER JOIN clasificaciones cl ON cl.id_clasificacion = bp.id_clasificacion
@@ -1108,7 +1112,8 @@ class bodega_guadalajara_model extends CI_Model {
           $ct_cobrar->serie.$ct_cobrar->folio,
           String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
           String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
-          String::formatoNumero($ct_cobrar->saldo, 2, '', false)
+          String::formatoNumero($ct_cobrar->saldo, 2, '', false),
+          $ct_cobrar->tickets_hoy
         ), false, true);
         $aux_client = $ct_cobrar->id_cliente;
       } else {
@@ -1120,7 +1125,8 @@ class bodega_guadalajara_model extends CI_Model {
           $ct_cobrar->serie.$ct_cobrar->folio,
           String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
           String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
-          String::formatoNumero($ct_cobrar->saldo, 2, '', false)
+          String::formatoNumero($ct_cobrar->saldo, 2, '', false),
+          $ct_cobrar->tickets_hoy
         ), false, true);
       }
     }
@@ -1369,8 +1375,10 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->Row(array('CONCEPTO', 'CLASIF', 'BULTOS', 'PRECIO', 'IMPORTE', 'TIPO'), false, true);
     $pdf->SetFont('Arial','', 6);
 
-    $totalPrestamos = $totalPrestamosBultos = 0;
+    $totalPrestamos = $totalPrestamosRestas = $totalPrestamosBultos = 0;
     foreach ($caja['prestamos'] as $prestamo) {
+      if ($prestamo->tipo=='true' || $prestamo->tipo=='dev')
+        $totalPrestamosRestas += floatval($prestamo->importe);
       $totalPrestamos += floatval($prestamo->importe);
       $totalPrestamosBultos += floatval($prestamo->cantidad);
 
@@ -1381,7 +1389,7 @@ class bodega_guadalajara_model extends CI_Model {
         String::formatoNumero($prestamo->cantidad, 2, '', false),
         String::formatoNumero($prestamo->precio_unitario, 2, '', false),
         String::formatoNumero($prestamo->importe, 2, '', false),
-        ($prestamo->tipo=='t'? 'Prestamo': 'Pago')
+        ($prestamo->tipo=='true'? 'Prestamo': ($prestamo->tipo=='false'? 'Pago': 'Devolucion'))
       ), false, true);
     }
     $pdf->SetAligns(array('L', 'R', 'R', 'R', 'L'));
@@ -1391,7 +1399,8 @@ class bodega_guadalajara_model extends CI_Model {
     $pdf->Row(array('SUMAS:',
       String::formatoNumero($totalPrestamosBultos, 2, '', false),
       String::formatoNumero($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1), 2, '', false),
-      String::formatoNumero($totalPrestamos, 2, '', false)), false, false);
+      String::formatoNumero($totalPrestamos, 2, '', false),
+      String::formatoNumero($totalPrestamosRestas, 2, '', false)), false, false);
 
     // EXISTENCIA DEL DIA
     $pdf->SetFont('Arial','B', 7);

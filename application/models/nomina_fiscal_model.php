@@ -1954,7 +1954,8 @@ class nomina_fiscal_model extends CI_Model {
           'pago_semana' => $datos['pago_semana'][$key],
           'fecha'       => $datos['fecha'][$key],
           'inicio_pago' => $datos['fecha_inicia_pagar'][$key],
-          'pausado' => $datos['pausarp'][$key],
+          'pausado'     => $datos['pausarp'][$key],
+          'tipo'        => $datos['tipo_efectico'][$key],
         ), "id_prestamo = {$datos['id_prestamo'][$key]}");
       }else{
         $insertData[] = array(
@@ -1964,6 +1965,7 @@ class nomina_fiscal_model extends CI_Model {
           'fecha'       => $datos['fecha'][$key],
           'inicio_pago' => $datos['fecha_inicia_pagar'][$key],
           'pausado'     => $datos['pausarp'][$key],
+          'tipo'        => $datos['tipo_efectico'][$key],
         );
       }
     }
@@ -2076,7 +2078,7 @@ class nomina_fiscal_model extends CI_Model {
   {
     $anio = $anio==null?date("Y"):$anio;
     $semana = $this->fechasDeUnaSemana($numSemana, $anio, $diaComienza);
-    $query = $this->db->query("SELECT id_prestamo, prestado, pago_semana, status, DATE(fecha) as fecha, DATE(inicio_pago) as inicio_pago, pausado
+    $query = $this->db->query("SELECT id_prestamo, prestado, pago_semana, status, DATE(fecha) as fecha, DATE(inicio_pago) as inicio_pago, pausado, tipo
                                FROM nomina_prestamos
                                WHERE id_usuario = {$empleadoId} AND DATE(fecha) >= '{$semana['fecha_inicio']}' AND DATE(fecha) <= '{$semana['fecha_final']}'
                                ORDER BY DATE(fecha) ASC");

@@ -481,15 +481,11 @@
       // Se obtiene el tipo de cambio de Banxico
       if ($(this).val() == 'dolar') {
         $.ajax({
-          url      : document.location.protocol + '//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=10&callback=?&q=' +
-                      encodeURIComponent("http://www.banxico.org.mx/rsscb/rss?BMXC_canal=fix&BMXC_idioma=es"),
+          url      : base_url+"panel/compras_requisicion/ajax_get_tipo_cambio/",
           dataType : 'json',
           success  : function (data) {
-            if (data.responseData.feed && data.responseData.feed.entries) {
-              $.each(data.responseData.feed.entries, function (i, e) {
-                $("#ftipo_cambio").val(parseFloat(e.title.substr(3, 9)));
-              });
-            }
+            console.log(data);
+            $("#ftipo_cambio").val(parseFloat(data));
           }
         });
       }else

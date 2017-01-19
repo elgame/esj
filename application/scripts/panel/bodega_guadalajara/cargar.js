@@ -321,10 +321,11 @@
     });
   };
   var calculaTotalPrestamos = function () {
-    var total_bultos = 0, total_importe = 0;
+    var total_bultos = 0, total_importe = 0, total_importe_restas = 0;
     $('#table-prestamos .prestamo_importe').each(function(index, el) {
       var $this = $(this),
           $tr = $this.parent().parent(),
+          tipo = $tr.find('#prestamo_tipo').val(),
           cantidad = parseFloat( $tr.find('.prestamo_cantidad').val()||0 ),
           precio = parseFloat( $tr.find('.prestamo_precio').val()||0 ),
           importe = parseFloat( (cantidad*precio).toFixed(2) );
@@ -332,10 +333,14 @@
       $tr.find('.prestamo_importe').val( importe );
       total_bultos += cantidad;
       total_importe += importe;
+      if (tipo == 'true' || tipo == 'dev') {
+        total_importe_restas += importe;
+      }
     });
     $("#ttotal-prestamos-bultos").val(total_bultos.toFixed(2));
     $("#ttotal-prestamos-precio").val( (total_importe/(total_bultos>0? total_bultos: 1)).toFixed(2) );
     $("#ttotal-prestamos").val(total_importe.toFixed(2));
+    $("#ttotal-prestamos-restas").val(total_importe_restas.toFixed(2));
   };
 
 
@@ -527,7 +532,7 @@
     $('#ttotal-corte').val(total.toFixed(2));
     $("#ttotal-corte1").text(util.darFormatoNum(total.toFixed(2)));
 
-    var costo_venta = (parseFloat($("#total_exis_ant").val()) || 0) + (parseFloat($("#total_ingresos_mercan").val()) || 0) - (parseFloat($("#ttotal-prestamos").val()) || 0) - (parseFloat($("#total-boletas_exis").val()) || 0);
+    var costo_venta = (parseFloat($("#total_exis_ant").val()) || 0) + (parseFloat($("#total_ingresos_mercan").val()) || 0) - (parseFloat($("#ttotal-prestamos-restas").val()) || 0) - (parseFloat($("#total-boletas_exis").val()) || 0);
     $("#costo_venta").val(costo_venta);
     var utilidad = (parseFloat($("#total-ingresos-ext").val()) || 0) + (parseFloat($("#total-boletas").val()) || 0) - costo_venta - (parseFloat($("#ttotal-gastos").val()) || 0);
     $("#utilidad").val(utilidad);

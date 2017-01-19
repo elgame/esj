@@ -75,10 +75,10 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <?php foreach ($bonosOtros as $key => $item) { 
-                          if($item->bono > 0) $cantidad = $item->bono; 
-                          elseif($item->otro > 0) $cantidad = $item->otro; 
-                          else $cantidad = $item->domingo; 
+                        <?php foreach ($bonosOtros as $key => $item) {
+                          if($item->bono > 0) $cantidad = $item->bono;
+                          elseif($item->otro > 0) $cantidad = $item->otro;
+                          else $cantidad = $item->domingo;
                         ?>
                           <tr>
                             <td style="width: 200px;"><input type="text" name="fecha[]" value="<?php echo $item->fecha ?>" class="span12" readonly> </td>
@@ -132,6 +132,7 @@
                           <th>Pago semana</th>
                           <th>Fecha inicio pagos</th>
                           <th>Pausar</th>
+                          <th>Tipo</th>
                           <th>Eliminar</th>
                         </tr>
                       </thead>
@@ -147,7 +148,14 @@
                               <select name="pausarp[]" required style="width: 100px;">
                                 <option value="f" <?php echo set_select('pausarp', 'f', false, $prestamo->pausado); ?>>Activo</option>
                                 <option value="t" <?php echo set_select('pausarp', 't', false, $prestamo->pausado); ?>>Pausado</option>
-                              </select></td>
+                              </select>
+                            </td>
+                            <td style="width: 50px;">
+                              <select name="tipo_efectico[]" required style="width: 50px;">
+                                <option value="fi" <?php echo set_select('tipo_efectico', 'fi', false, $prestamo->tipo); ?>>Fiscal</option>
+                                <option value="ef" <?php echo set_select('tipo_efectico', 'ef', false, $prestamo->tipo); ?>>Efectivo</option>
+                              </select>
+                            </td>
                             <td>
                               <input type="checkbox" name="eliminar_prestamo[]" value="<?php echo $prestamo->id_prestamo; ?>">
                             </td>

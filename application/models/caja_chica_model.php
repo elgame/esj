@@ -1524,7 +1524,7 @@ class caja_chica_model extends CI_Model {
    */
   public function getRptGastosData()
   {
-    $sql = '';
+    $sqlprs = $sqlprs1 = $sql = '';
       $idsproveedores = '';
 
     //Filtros para buscar
@@ -1538,10 +1538,13 @@ class caja_chica_model extends CI_Model {
     // $_GET['dempresa']    = (isset($_GET['dempresa']{0}) ? $_GET['dempresa'] : $client_default->nombre_fiscal);
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+      $sqlprs1 .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
-    if ($this->input->get('fnomenclatura') != '')
+    if ($this->input->get('fnomenclatura') != '') {
       $sql .= " AND cn.id = ".$this->input->get('fnomenclatura');
+      $sqlprs1 .= " AND cn.id = ".$this->input->get('fnomenclatura');
+    }
 
     if ($this->input->get('fno_caja') != '') {
       $sql .= " AND cg.no_caja = ".$this->input->get('fno_caja');
@@ -1549,10 +1552,35 @@ class caja_chica_model extends CI_Model {
 
     if ($this->input->get('dprov_clien') != '') {
       $sql .= " AND cg.concepto LIKE '%".$this->input->get('dprov_clien')."%'";
+      $sqlprs .= " AND concepto LIKE '%".$this->input->get('dprov_clien')."%'";
     }
 
     $response = array();
-    $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
+    if ($this->input->get('fno_caja') == 'prest1') {
+      $gastos = $this->db->query(
+        "SELECT id_prestamo, id_prestamo_nom, id_empleado, id_categoria, id_nomenclatura, concepto, fecha, monto, categoria, nombre_nomen, nomenclatura,
+          null AS folio, null AS id_area, null AS codigo_fin, null AS campo, null AS reposicion
+        FROM (
+          SELECT cp.id_prestamo, cp.id_prestamo_nom, cp.id_empleado, cp.id_categoria, cp.id_nomenclatura, cp.concepto, cp.fecha, cp.monto,
+            cc.abreviatura as categoria, cn.nombre AS nombre_nomen, cn.nomenclatura
+          FROM otros.cajaprestamo_prestamos cp
+          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
+          WHERE cp.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.no_caja = 1 {$sqlprs1}
+          UNION
+          SELECT cp.id_prestamo AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, null AS id_categoria,
+            null AS id_nomenclatura, ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno) AS concepto, Date(np.fecha) AS fecha,
+            np.prestado AS monto, null AS categoria, null AS nombre_nomen, null AS nomenclatura
+          FROM nomina_prestamos np
+          INNER JOIN usuarios u ON u.id = np.id_usuario
+          LEFT JOIN otros.cajaprestamo_prestamos cp ON np.id_prestamo = cp.id_prestamo_nom
+          WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_prestamo IS NULL
+        ) AS t
+        WHERE 1 = 1 {$sqlprs}
+        ORDER BY id_prestamo_nom ASC"
+      );
+    } else {
+      $gastos = $this->db->query("SELECT cg.id_gasto, cc.id_categoria, cc.nombre AS categoria,
           cn.nombre AS nombre_nomen, cn.nomenclatura, cg.concepto, cg.monto, cg.fecha, cg.folio,
           cn.id AS id_nomenclatura, COALESCE(cca.id_cat_codigos, ca.id_area) AS id_area,
           COALESCE((CASE WHEN cca.codigo <> '' THEN cca.codigo ELSE cca.nombre END), ca.codigo_fin) AS codigo_fin,
@@ -1566,6 +1594,7 @@ class caja_chica_model extends CI_Model {
         WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql}
         ORDER BY id_categoria ASC, fecha ASC");
+    }
     $response = $gastos->result();
 
     return $response;
@@ -1837,6 +1866,7 @@ class caja_chica_model extends CI_Model {
   public function getRptIngresosData()
   {
     $sql3 = $sql = $sql2 = '';
+    $sqlpres1 = $sqlpres = '';
       $idsproveedores = '';
 
     //Filtros para buscar
@@ -1846,10 +1876,13 @@ class caja_chica_model extends CI_Model {
 
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+      $sqlpres .= " AND id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
-    if ($this->input->get('fnomenclatura') != '')
+    if ($this->input->get('fnomenclatura') != '') {
       $sql2 .= " AND cn.id = ".$this->input->get('fnomenclatura');
+      $sqlpres1 .= " AND cn.id = ".$this->input->get('fnomenclatura');
+    }
 
     if ($this->input->get('fno_caja') != '') {
       $sql2 .= " AND ci.no_caja = ".$this->input->get('fno_caja');
@@ -1857,32 +1890,60 @@ class caja_chica_model extends CI_Model {
     }
 
     if ($this->input->get('dprov_clien') != '') {
-      $sql2 .= " AND ci.concepto LIKE '%".$this->input->get('dprov_clien')."%'";
-      $sql3 .= " AND cr.observacion LIKE '%".$this->input->get('fno_caja')."%'";
+      $sql2 .= " AND Lower(ci.concepto) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%'";
+      $sql3 .= " AND Lower(cr.observacion) LIKE '%".mb_strtolower($this->input->get('fno_caja'))."%'";
+      $sqlpres .= " AND Lower(concepto) LIKE '%".mb_strtolower($this->input->get('dprov_clien'))."%'";
     }
 
     $response = array('movimientos' => array(), 'remisiones' => array());
 
-    $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria,
-          cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
-          cn.id AS id_nomenclatura
-        FROM cajachica_ingresos ci
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
-          INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
-        WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql} {$sql2}
-        ORDER BY id_categoria ASC, fecha ASC");
-    $response['movimientos'] = $movimientos->result();
+    if ($this->input->get('fno_caja') == 'prest1') {
+      $movimientos = $this->db->query(
+        "SELECT id_pago, id_empleado, id_empresa, anio, semana, id_prestamo, id_categoria, concepto, monto, fecha, id_nomenclatura, categoria,
+          nombre_nomen, nomenclatura, null AS poliza
+        FROM (
+          SELECT cp.id_pago, cp.id_empleado, cp.id_empresa, cp.anio, cp.semana, cp.id_prestamo, cp.id_categoria, cp.concepto, cp.monto, cp.fecha,
+            cp.id_nomenclatura, cc.abreviatura as categoria, cn.nombre AS nombre_nomen, cn.nomenclatura
+          FROM otros.cajaprestamo_pagos cp
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+            INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
+          WHERE cp.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.no_caja = 1 {$sqlpres1}
+          UNION
+          SELECT cp.id_pago, np.id_empleado, np.id_empresa, np.anio, np.semana, np.id_prestamo, cp.id_categoria,
+            (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || '; Sem ' || np.semana) AS concepto,
+            np.monto, np.fecha, cp.id_nomenclatura, null AS categoria, null AS nombre_nomen, null AS nomenclatura
+          FROM nomina_fiscal_prestamos np
+            INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
+            INNER JOIN usuarios u ON u.id = np.id_empleado
+            LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
+          WHERE (npp.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
+        ) AS t
+        WHERE 1 = 1 {$sqlpres}
+        ORDER BY id_pago ASC"
+      );
+      $response['movimientos'] = $movimientos->result();
+    } else {
+      $movimientos = $this->db->query("SELECT ci.id_ingresos, cc.id_categoria, cc.nombre AS categoria,
+            cn.nombre AS nombre_nomen, cn.nomenclatura, ci.concepto, ci.monto, ci.fecha, ci.poliza,
+            cn.id AS id_nomenclatura
+          FROM cajachica_ingresos ci
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+            INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+          WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            {$sql} {$sql2}
+          ORDER BY id_categoria ASC, fecha ASC");
+      $response['movimientos'] = $movimientos->result();
 
-    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria,
-          f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
-        FROM cajachica_remisiones cr
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
-          INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-        WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql} {$sql3}
-        ORDER BY id_categoria ASC, fecha ASC");
-    $response['remisiones'] = $remisiones->result();
+      $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria,
+            f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
+          FROM cajachica_remisiones cr
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+            INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+          WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+            {$sql} {$sql3}
+          ORDER BY id_categoria ASC, fecha ASC");
+      $response['remisiones'] = $remisiones->result();
+    }
 
     return $response;
   }
@@ -2076,7 +2137,7 @@ class caja_chica_model extends CI_Model {
    */
   public function getRptIngresosGastosData()
   {
-    $sql = $sql1 = $sql3 = $sql2 = '';
+    $sqlpres = $sql = $sql1 = $sql3 = $sql2 = '';
       $idsproveedores = '';
 
     //Filtros para buscar
@@ -2086,6 +2147,7 @@ class caja_chica_model extends CI_Model {
 
     if($this->input->get('did_empresa') != ''){
       $sql .= " AND cc.id_categoria = '".$this->input->get('did_empresa')."'";
+      $sqlpres .= " AND id_categoria = '".$this->input->get('did_empresa')."'";
     }
 
     // if ($this->input->get('fnomenclatura') != '')
@@ -2101,38 +2163,86 @@ class caja_chica_model extends CI_Model {
       $sql1 .= " AND Upper(ci.concepto) LIKE '%".mb_strtoupper($this->input->get('dprov_clien'), 'UTF-8')."%'";
       $sql2 .= " AND Upper(cr.observacion) LIKE '%".mb_strtoupper($this->input->get('dprov_clien'), 'UTF-8')."%'";
       $sql3 .= " AND Upper(cg.concepto) LIKE '%".mb_strtoupper($this->input->get('fno_caja'), 'UTF-8')."%'";
+      $sqlpres .= " AND Upper(observacion) LIKE '%".mb_strtoupper($this->input->get('dprov_clien'), 'UTF-8')."%'";
     }
 
     $response = array();
 
-    $movimientos = $this->db->query("SELECT * FROM (
-        SELECT ci.id_ingresos AS id, cc.id_categoria, cc.nombre AS categoria, 'ingreso' AS tipo,
-          cn.nombre AS otro, ci.concepto AS observacion, ci.monto, ci.fecha, ci.poliza AS folio2,
-          1 AS ingreso, ci.no_caja
-        FROM cajachica_ingresos ci
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
-          INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
-        WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql1}
-        UNION
-        SELECT cr.id_remision AS id, cc.id_categoria, cc.nombre AS categoria, 'remision' AS tipo,
-          (f.folio || f.serie) AS otro, cr.observacion, cr.monto, cr.fecha, cr.folio_factura AS folio2,
-          1 AS ingreso, cr.no_caja
-        FROM cajachica_remisiones cr
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
-          INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-        WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql2}
-        UNION
-        SELECT cg.id_gasto AS id, cc.id_categoria, cc.nombre AS categoria, 'gasto' AS tipo,
-          cn.nombre AS otro, cg.concepto AS observacion, cg.monto, cg.fecha, cg.folio AS folio2,
-          0 AS ingreso, cg.no_caja
-        FROM cajachica_gastos cg
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
-          INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
-          LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
-          LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
-        WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql3}
-      ) AS t
-      ORDER BY fecha ASC, ingreso DESC");
+    if ($this->input->get('fno_caja') == 'prest1') {
+      $movimientos = $this->db->query(
+        "SELECT * FROM (
+          SELECT id_pago AS id, id_categoria, categoria, 'ingreso' AS tipo, otro, concepto AS observacion, monto, fecha, null AS folio2,
+            1 AS ingreso, 1 AS no_caja
+          FROM (
+            SELECT cp.id_pago, cp.id_empleado, cp.id_empresa, cp.anio, cp.semana, cp.id_prestamo, cp.id_categoria, cp.concepto, cp.monto, cp.fecha,
+              cp.id_nomenclatura, cc.nombre as categoria, cn.nombre AS otro, cn.nomenclatura
+            FROM otros.cajaprestamo_pagos cp
+              INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+              INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
+            WHERE cp.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.no_caja = 1
+            UNION
+            SELECT cp.id_pago, np.id_empleado, np.id_empresa, np.anio, np.semana, np.id_prestamo, cp.id_categoria,
+              (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno || '; Sem ' || np.semana) AS concepto,
+              np.monto, np.fecha, cp.id_nomenclatura, null AS categoria, null AS otro, null AS nomenclatura
+            FROM nomina_fiscal_prestamos np
+              INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
+              INNER JOIN usuarios u ON u.id = np.id_empleado
+              LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
+            WHERE (npp.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
+          ) AS t
+          WHERE 1 = 1 {$sqlpres}
+          UNION
+          SELECT id_prestamo AS id, id_categoria, categoria, 'gasto' AS tipo, otro, concepto AS observacion, monto, fecha, null AS folio2,
+            1 AS ingreso, 1 AS no_caja
+          FROM (
+            SELECT cp.id_prestamo, cp.id_prestamo_nom, cp.id_empleado, cp.id_categoria, cp.id_nomenclatura, cp.concepto, cp.fecha, cp.monto,
+              cc.nombre as categoria, cn.nombre AS otro, cn.nomenclatura
+            FROM otros.cajaprestamo_prestamos cp
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+            INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
+            WHERE cp.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.no_caja = 1 {$sqlprs1}
+            UNION
+            SELECT cp.id_prestamo AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, null AS id_categoria,
+              null AS id_nomenclatura, ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno) AS concepto, Date(np.fecha) AS fecha,
+              np.prestado AS monto, null AS categoria, null AS otro, null AS nomenclatura
+            FROM nomina_prestamos np
+            INNER JOIN usuarios u ON u.id = np.id_usuario
+            LEFT JOIN otros.cajaprestamo_prestamos cp ON np.id_prestamo = cp.id_prestamo_nom
+            WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_prestamo IS NULL
+          ) AS t
+          WHERE 1 = 1 {$sqlprs}
+        ) AS t"
+      );
+    } else {
+      $movimientos = $this->db->query("SELECT * FROM (
+          SELECT ci.id_ingresos AS id, cc.id_categoria, cc.nombre AS categoria, 'ingreso' AS tipo,
+            cn.nombre AS otro, ci.concepto AS observacion, ci.monto, ci.fecha, ci.poliza AS folio2,
+            1 AS ingreso, ci.no_caja
+          FROM cajachica_ingresos ci
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+            INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+          WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql1}
+          UNION
+          SELECT cr.id_remision AS id, cc.id_categoria, cc.nombre AS categoria, 'remision' AS tipo,
+            (f.folio || f.serie) AS otro, cr.observacion, cr.monto, cr.fecha, cr.folio_factura AS folio2,
+            1 AS ingreso, cr.no_caja
+          FROM cajachica_remisiones cr
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+            INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+          WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql2}
+          UNION
+          SELECT cg.id_gasto AS id, cc.id_categoria, cc.nombre AS categoria, 'gasto' AS tipo,
+            cn.nombre AS otro, cg.concepto AS observacion, cg.monto, cg.fecha, cg.folio AS folio2,
+            0 AS ingreso, cg.no_caja
+          FROM cajachica_gastos cg
+            INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+            INNER JOIN cajachica_nomenclaturas cn ON cn.id = cg.id_nomenclatura
+            LEFT JOIN compras_areas ca ON ca.id_area = cg.id_area
+            LEFT JOIN otros.cat_codigos AS cca ON cca.id_cat_codigos = cg.id_cat_codigos
+          WHERE fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql} {$sql3}
+        ) AS t
+        ORDER BY fecha ASC, ingreso DESC");
+    }
     $response = $movimientos->result();
 
     return $response;

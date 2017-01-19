@@ -236,6 +236,13 @@
                                       <td>
                                         <input type="text" name="prod_ddescripcion[]" class="span12" value="<?php echo $_POST['prod_ddescripcion'][$k]?>" id="prod_ddescripcion">
                                         <input type="hidden" name="prod_did_prod[]" class="span12" value="<?php echo $v ?>" id="prod_did_prod">
+
+                                        <input type="hidden" name="no_identificacion[]" value="<?php echo $_POST['no_identificacion'][$k]?>" id="no_identificacion" class="span9 pull-right">
+                                        <input type="hidden" name="prod_dcalidad[]" value="<?php echo $_POST['prod_dcalidad'][$k]?>" id="prod_dcalidad" class="span9 pull-right">
+                                        <input type="hidden" name="prod_dtamanio[]" value="<?php echo $_POST['prod_dtamanio'][$k]?>" id="prod_dtamanio" class="span9 pull-right">
+                                        <input type="hidden" name="prod_ddescripcion2[]" value="<?php echo $_POST['prod_ddescripcion2'][$k]?>" id="prod_ddescripcion2" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_calidad[]" value="<?php echo $_POST['prod_did_calidad'][$k]?>" id="prod_did_calidad" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_tamanio[]" value="<?php echo $_POST['prod_did_tamanio'][$k]?>" id="prod_did_tamanio" class="span9 pull-right">
                                       </td>
                                       <td>
                                         <input type="text" name="prod_dmedida[]" class="span12" value="<?php echo $_POST['prod_dmedida'][$k]?>" id="prod_dmedida">
@@ -279,6 +286,13 @@
                                       <td>
                                         <input type="text" name="prod_ddescripcion[]" value="<?php echo "Nota de credito de la factura {$factura['info']->serie}{$factura['info']->folio}" ?>" id="prod_ddescripcion" class="span12">
                                         <input type="hidden" name="prod_did_prod[]" value="" id="prod_did_prod" class="span12">
+
+                                        <input type="hidden" name="no_identificacion[]" value="" id="no_identificacion" class="span9 pull-right">
+                                        <input type="hidden" name="prod_dcalidad[]" value="" id="prod_dcalidad" class="span9 pull-right">
+                                        <input type="hidden" name="prod_dtamanio[]" value="" id="prod_dtamanio" class="span9 pull-right">
+                                        <input type="hidden" name="prod_ddescripcion2[]" value="" id="prod_ddescripcion2" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span9 pull-right">
+                                        <input type="hidden" name="prod_did_tamanio[]" value="" id="prod_did_tamanio" class="span9 pull-right">
                                       </td>
                                       <td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"></td>
                                       <td>

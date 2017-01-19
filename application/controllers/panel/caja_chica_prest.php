@@ -16,6 +16,7 @@ class caja_chica_prest extends MY_Controller {
     'caja_chica_prest/rpt_ingresos_pdf/',
     'caja_chica_prest/rpt_ingresos_xls/',
     'caja_chica_prest/print_vale/',
+    'caja_chica_prest/ajax_saldar_adeudos/',
   );
 
   public function _remap($method)
@@ -127,7 +128,13 @@ class caja_chica_prest extends MY_Controller {
     $this->load->view('panel/caja_chica/generar_prestamos', $params);
   }
 
+  public function ajax_saldar_adeudos()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->saldarPrestamosEmpleado($this->input->get('empleadoId'), $this->input->get('fecha'));
 
+    echo json_encode(true);
+  }
 
 
   // /**
