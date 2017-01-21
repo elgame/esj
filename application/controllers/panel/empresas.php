@@ -225,6 +225,13 @@ class empresas extends MY_Controller {
 						'label'	=> 'Pag Web',
 						'rules'	=> 'max_length[80]'),
 
+        array('field' => 'dcurp',
+            'label' => 'Régimen fiscal',
+            'rules' => 'max_length[50]'),
+        array('field' => 'dregistro_patronal',
+            'label' => 'Régimen fiscal',
+            'rules' => 'max_length[20]'),
+
 				array('field'	=> 'dpass',
 						'label'	=> 'Clave',
 						'rules'	=> 'max_length[20]'),

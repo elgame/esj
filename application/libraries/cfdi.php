@@ -1765,6 +1765,19 @@ class cfdi{
           }
           $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina12:OtrosPagos>';
         }
+
+      // Incapacidades.
+        if (isset($data['nomina']['nomina']['Incapacidades']) && count($data['nomina']['nomina']['Incapacidades']) > 0) {
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina12:Incapacidades>';
+
+          foreach ($data['nomina']['nomina']['Incapacidades'] as $incapasidad)
+          {
+            $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬<nomina12:Incapacidad DiasIncapacidad="'.$incapasidad['DiasIncapacidad'].'" '.
+                                                                'TipoIncapacidad="'.$incapasidad['TipoIncapacidad'].'" '.
+                                                                'ImporteMonetario="'.$incapasidad['ImporteMonetario'].'" />';
+          }
+          $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina12:Incapacidades>';
+        }
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬</nomina12:Nomina>';
 
       $xml .= '¬¬¬¬¬¬¬¬¬¬¬¬¬</cfdi:Complemento>';

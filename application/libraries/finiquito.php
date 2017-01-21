@@ -317,7 +317,7 @@ class finiquito
     $this->empleado->nomina->FechaPago         = substr($this->empleado->fecha_final_pago, 0, 10);
     $this->empleado->nomina->FechaInicialPago  = substr($this->empleado->fecha_inicial_pago, 0, 10);
     $this->empleado->nomina->FechaFinalPago    = substr($this->empleado->fecha_final_pago, 0, 10);
-    $this->empleado->nomina->NumDiasPagados    = $this->empleado->dias_trabajados;
+    $this->empleado->nomina->NumDiasPagados    = ceil($this->empleado->dias_trabajados);
     $this->empleado->nomina->TotalPercepciones = 0;
     $this->empleado->nomina->TotalDeducciones  = 0;
     $this->empleado->nomina->TotalOtrosPagos   = 0;
@@ -988,12 +988,13 @@ class finiquito
 
     $this->empleado->nomina->subsidio = $subsidio;
     $this->empleado->nomina->otrosPagos['subsidio'] = array(
-      'TipoPercepcion' => '017',
-      'Clave'          => $this->clavesPatron['subsidio'],
-      'Concepto'       => 'Subsidio para el empleo',
-      'ImporteGravado' => 0,
-      'ImporteExcento' => round($subsidio, 2),
-      'total'          => round($subsidio, 2) + 0,
+      'TipoOtroPago'     => '002',
+      'Clave'            => $this->clavesPatron['subsidio'],
+      'Concepto'         => 'Subsidio para el empleo',
+      'ImporteGravado'   => 0,
+      'ImporteExcento'   => round($this->subsidio, 2),
+      'total'            => round($this->subsidio, 2) + 0,
+      'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
     );
 
     return array(

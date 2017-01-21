@@ -314,7 +314,7 @@ class nomina
     $this->empleado->nomina->FechaPago         = substr($this->empleado->fecha_final_pago, 0, 10);
     $this->empleado->nomina->FechaInicialPago  = substr($this->empleado->fecha_inicial_pago, 0, 10);
     $this->empleado->nomina->FechaFinalPago    = substr($this->empleado->fecha_final_pago, 0, 10);
-    $this->empleado->nomina->NumDiasPagados    = $this->empleado->dias_trabajados;
+    $this->empleado->nomina->NumDiasPagados    = ceil($this->empleado->dias_trabajados);
     $this->empleado->nomina->TotalPercepciones = 0;
     $this->empleado->nomina->TotalDeducciones  = 0;
     $this->empleado->nomina->TotalOtrosPagos   = 0;

@@ -615,6 +615,12 @@ class nomina_fiscal_model extends CI_Model {
         ->setTablasIsr($configuraciones['tablas_isr'])
         ->setSubsidioIsr($subsidio, $isr)
         ->procesar();
+
+      if (floatval($empleado->nomina->TotalPercepciones) == 0 &&
+          floatval($empleado->nomina->TotalDeducciones) == 0 &&
+          floatval($empleado->nomina->TotalOtrosPagos) == 0) {
+        unset($empleados[$key]);
+      }
     }
     if ($nm_tipo == 'pt' && $empleadoId > 0) { // es ptu
       $empleados = array_pop($empleados);
@@ -741,6 +747,7 @@ class nomina_fiscal_model extends CI_Model {
 
           // Genera el sello en base a la cadena original.
           $sello = $this->cfdi->obtenSello($cadenaOriginal['cadenaOriginal']);
+          log_message('error', $cadenaOriginal['cadenaOriginal']);
 
           // Construye los datos para el xml.
           $datosXML = $this->datosXml($cadenaOriginal['datos'], $empresa, $empleado, $sello, $certificado);
