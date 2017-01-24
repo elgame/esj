@@ -2150,20 +2150,29 @@ class bodega_guadalajara_model extends CI_Model {
         FROM otros.bodega_ingresos ci
           INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
           INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
-        WHERE ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
+        WHERE ci.no_caja = 1 AND ci.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
           {$sql} {$sql2}
         ORDER BY id_categoria ASC, fecha ASC");
     $response['movimientos'] = $movimientos->result();
 
-    $remisiones = $this->db->query("SELECT cr.id_remision, cc.id_categoria, cc.nombre AS categoria,
-          f.folio, f.serie, cr.observacion, cr.monto, cr.fecha, cr.folio_factura
-        FROM otros.bodega_remisiones cr
-          INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
-          INNER JOIN facturacion f ON f.id_factura = cr.id_remision
-        WHERE cr.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}'
-          {$sql}
-        ORDER BY id_categoria ASC, fecha ASC");
-    $response['remisiones'] = $remisiones->result();
+    $ventas = $this->db->query(
+      "SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, total, c.nombre_fiscal as cliente,
+        fp.descripcion, fp.cantidad, fp.precio_unitario, (fp.importe+fp.iva) AS importe, u.nombre AS unidad, cl.id_clasificacion,
+        (cl.codigo || '-' || u.codigo) AS codigo, u.cantidad AS cantidadu, u.id_unidad, cc.id_categoria, cc.nombre AS categoria
+      FROM facturacion f
+        INNER JOIN otros.bodega_ventas bv ON f.id_factura = bv.id_remision
+        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+        INNER JOIN empresas e ON e.id_empresa = f.id_empresa
+        INNER JOIN facturacion_productos fp ON f.id_factura = fp.id_factura
+        INNER JOIN clasificaciones cl ON cl.id_clasificacion = fp.id_clasificacion
+        INNER JOIN unidades u ON u.id_unidad = fp.id_unidad
+        INNER JOIN cajachica_categorias cc ON cc.id_empresa = f.id_empresa
+      WHERE bv.no_caja = 1 AND Date(f.fecha) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sql}
+      GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fp.descripcion, fp.cantidad, fp.precio_unitario,
+        fp.importe, fp.iva, u.id_unidad, cl.id_clasificacion, cc.id_categoria
+      ORDER BY (f.fecha, f.serie, f.folio, fp.descripcion) ASC
+    ");
+    $response['remisiones'] = $ventas->result();
 
     return $response;
   }
@@ -2257,12 +2266,12 @@ class bodega_guadalajara_model extends CI_Model {
       $this->getRptRemisionesTotales($pdf, $res['remisiones'], $aux_proveedor_total, $producto->id_categoria);
     }
 
-    $pdf->Output('ingresos_caja.pdf', 'I');
+    $pdf->Output('ingresos_bodega.pdf', 'I');
   }
 
   public function getRptIngresosXls(){
     header('Content-type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename=ingresos_caja.xls");
+    header("Content-Disposition: attachment; filename=ingresos_bodega.xls");
     header("Pragma: no-cache");
     header("Expires: 0");
 
@@ -2401,13 +2410,13 @@ class bodega_guadalajara_model extends CI_Model {
   {
     $pdf->SetFont('Arial','',8);
 
-    $aligns = array('L', 'L', 'L', 'L', 'R');
-    $widths = array(20, 25, 96, 25, 35);
-    $header = array('Fecha', 'Remision', 'Nombre', 'Folio', 'Importe');
-
+    $aligns = array('L', 'L', 'L', 'L', 'R', 'R', 'R');
+    $widths = array(18, 20, 65, 15, 25, 30, 30);
+    $header = array('Fecha', 'Rem No.', 'Cliente', 'Clasif', 'Bultos', 'Precio', 'Importe');
     $entro = false;
     $total_nomenclatura = array();
     $remisiones_total = 0;
+    $factu_aux = 0;
     foreach($remisiones as $key => $producto){
       if($producto->id_categoria == $id_categoria)
       {
@@ -2426,20 +2435,30 @@ class bodega_guadalajara_model extends CI_Model {
           $entro = true;
         }
 
+        if ($producto->id_factura == $factu_aux) {
+          $producto->fecha = '';
+          $producto->serie = '';
+          $producto->folio = '';
+          $producto->cliente = '';
+        } else
+          $factu_aux = $producto->id_factura;
+
         $pdf->SetTextColor(0,0,0);
         $pdf->SetFont('Arial','',8);
         $datos = array($producto->fecha,
           $producto->serie.$producto->folio,
-          $producto->observacion,
-          $producto->folio_factura,
-          String::formatoNumero($producto->monto, 2, '', false),
+          $producto->cliente,
+          $producto->codigo,
+          String::formatoNumero($producto->cantidad, 2, '', false),
+          String::formatoNumero($producto->precio_unitario, 2, '', false),
+          String::formatoNumero($producto->importe, 2, '', false),
           );
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row($datos, false, false);
 
-        $remisiones_total += $producto->monto;
+        $remisiones_total += $producto->importe;
 
         unset($remisiones[$key]);
       }
@@ -2512,9 +2531,11 @@ class bodega_guadalajara_model extends CI_Model {
     $html = '
     <tr style="font-weight:bold">
       <td style="border:1px solid #000;background-color: #cccccc;">Fecha</td>
-      <td style="border:1px solid #000;background-color: #cccccc;">Remision</td>
-      <td style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
-      <td style="border:1px solid #000;background-color: #cccccc;">Folio</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Rem No.</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Cliente</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Clasif</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Bultos</td>
+      <td style="border:1px solid #000;background-color: #cccccc;">Precio</td>
       <td style="border:1px solid #000;background-color: #cccccc;">Importe</td>
     </tr>
     ';
@@ -2527,12 +2548,14 @@ class bodega_guadalajara_model extends CI_Model {
       $html .= '<tr style="font-weight:bold">
         <td style="border:1px solid #000;">'.$producto->fecha.'</td>
         <td style="border:1px solid #000;">'.$producto->serie.$producto->folio.'</td>
-        <td style="border:1px solid #000;">'.$producto->observacion.'</td>
-        <td style="border:1px solid #000;">'.$producto->folio_factura.'</td>
-        <td style="border:1px solid #000;">'.$producto->monto.'</td>
+        <td style="border:1px solid #000;">'.$producto->cliente.'</td>
+        <td style="border:1px solid #000;">'.$producto->codigo.'</td>
+        <td style="border:1px solid #000;">'.$producto->cantidad.'</td>
+        <td style="border:1px solid #000;">'.$producto->precio_unitario.'</td>
+        <td style="border:1px solid #000;">'.$producto->importe.'</td>
       </tr>';
 
-      $remisiones_total += $producto->monto;
+      $remisiones_total += $producto->importe;
       unset($remisiones[$key]);
     }
 

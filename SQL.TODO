@@ -1,5 +1,5 @@
 
- ✔ Bodega y  @done (17-01-18 14:02) pcc|pct
+ ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san
     alter table otros.bodega_prestamos alter column tipo type character varying(5) using tipo::character varying;
     COMMENT ON COLUMN otros.bodega_prestamos.tipo IS 'true: prestamo (resta la existencia), false: pago del prestamo (incremente la existencia), dev: devolucion (resta la existencia)';
     ALTER TABLE otros.bodega_prestamos ALTER COLUMN tipo SET DEFAULT 'true';

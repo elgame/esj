@@ -2,10 +2,11 @@
  ✔ 3h En bodega guadalajara acomodar el formato como la hoja de la señora, agregar calculos de acumulados @done (17-01-17 21:39)
  ✔ .88h En reportes de caja incruir la caja de prestamos, prestamos = gastos y pagos = ingresos @done (17-01-18 19:07)
  ✔ 1.7h En cada de prestamos poner el saldo por trabajador, opcion para poder saldar los prestamos de un trabajador @done (17-01-18 22:01)
- ☐
+ ✔ .66H En caja poner las boletas que se pagaron en efectivo y aun no se recupera el dinero a la caja @done (17-01-23 13:56)
+ ✔ 1h Crear reportes de gastos y ventas en Bodega @done (17-01-23 16:27)
 
- ☐ 10h Nomina 1.2
-   ☐ Ejecutar backup catalogos
+ ✔ 10h Nomina 1.2 @done (17-01-23 14:20)
+   ✔ Ejecutar backup catalogos @done (17-01-23 14:20)
  ✔ 4.20h Agregar a ordenes, salidas y reportes multiple inventario, hacer traspaso de mercancia @done (17-01-05 20:55)
  ✔ 1.41h En entrada de almacen (ordenes de requisicion) que imprima en formato ticket @done (16-12-27 19:51)
  ✔ .56h En bodega guadalajara agregar apartado de ingresos como en caja chica @done (16-12-27 18:13)

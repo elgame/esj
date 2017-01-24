@@ -1978,7 +1978,7 @@ class polizas_model extends CI_Model {
         (
           SELECT
             fa.id_pago AS id_movimiento, COALESCE(bm.numero_ref, '') AS ref_movimiento, 'CANCELADO' AS concepto, fa.monto AS total_abono, 0 AS retencion_isr,
-            bc.cuenta_cpi, fa.monto AS subtotal, fa.monto AS total, 0 AS importe_iva,
+            bc.cuenta_cpi, fa.monto AS subtotal, 0 AS total, 0 AS importe_iva,
             0 AS retencion_iva, 0 AS importe_ieps, COALESCE(p.nombre_fiscal, 'CUENTA CUADRE') AS nombre_fiscal, COALESCE(p.cuenta_cpi, '{$cuenta_cuadre}') AS cuenta_cpi_proveedor,
             fa.tipo_pago AS metodo_pago, Date(fa.fecha) AS fecha, 0 AS es_compra, 0 AS es_traspaso,
             'banco-chc'::character varying AS tipoo, 'f' AS desglosar_iva, '' as banco_cuenta_contpaq, 0 AS tcambio
