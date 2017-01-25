@@ -334,6 +334,7 @@ class caja_chica_prest_model extends CI_Model {
               'id_prestamo' => $value->id_prestamo,
               'monto'       => $value->saldo,
               'fecha'       => $fecha,
+              'saldado'     => 't',
             );
       $this->db->update('nomina_prestamos', array('status' => 'f'), "id_prestamo = {$value->id_prestamo}");
     }
