@@ -43,7 +43,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_prestamos np
         INNER JOIN usuarios u ON u.id = np.id_usuario
         LEFT JOIN otros.cajaprestamo_prestamos cp ON np.id_prestamo = cp.id_prestamo_nom
-        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha = '{$fecha}' AND cp.id_prestamo IS NULL
+        WHERE (np.tipo = 'ef') AND np.fecha = '{$fecha}' AND cp.id_prestamo IS NULL
       ) AS t
       ORDER BY id_prestamo_nom ASC"
     );
@@ -70,7 +70,7 @@ class caja_chica_prest_model extends CI_Model {
         INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
         INNER JOIN usuarios u ON u.id = np.id_empleado
         LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
-        WHERE (npp.tipo = 'ef' OR u.esta_asegurado = 'f') AND np.fecha = '{$fecha}' AND cp.id_pago IS NULL
+        WHERE (npp.tipo = 'ef') AND np.fecha = '{$fecha}' AND cp.id_pago IS NULL
       ) AS t
       ORDER BY id_pago ASC"
     );
@@ -88,7 +88,7 @@ class caja_chica_prest_model extends CI_Model {
         SELECT np.id_usuario, Sum(np.prestado) AS prestado
         FROM nomina_prestamos np
           INNER JOIN usuarios u ON u.id = np.id_usuario
-        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND Date(np.fecha) <= '{$fecha}'
+        WHERE (np.tipo = 'ef') AND Date(np.fecha) <= '{$fecha}'
         GROUP BY np.id_usuario
       ) p ON u.id = p.id_usuario
       LEFT JOIN (
@@ -96,7 +96,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_fiscal_prestamos nfp
           INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
           INNER JOIN usuarios u ON u.id = np.id_usuario
-        WHERE (np.tipo = 'ef' OR u.esta_asegurado = 'f') AND (Date(nfp.fecha) <= '{$fecha}' OR Date(nfp.fecha) IS NULL)
+        WHERE (np.tipo = 'ef') AND (Date(nfp.fecha) <= '{$fecha}' OR Date(nfp.fecha) IS NULL)
         GROUP BY nfp.id_empleado
       ) pa ON u.id = pa.id_empleado
       WHERE (COALESCE(p.prestado, 0) - COALESCE(pa.pagado, 0)) > 0");
