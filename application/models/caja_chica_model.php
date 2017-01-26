@@ -1991,7 +1991,7 @@ class caja_chica_model extends CI_Model {
             INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
             INNER JOIN usuarios u ON u.id = np.id_empleado
             LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
-          WHERE (npp.tipo = 'ef') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
+          WHERE np.saldado = 'f' AND (npp.tipo = 'ef') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
         ) AS t
         WHERE 1 = 1 {$sqlpres}
         ORDER BY id_pago ASC"
@@ -2263,7 +2263,7 @@ class caja_chica_model extends CI_Model {
               INNER JOIN nomina_prestamos npp ON npp.id_prestamo = np.id_prestamo
               INNER JOIN usuarios u ON u.id = np.id_empleado
               LEFT JOIN otros.cajaprestamo_pagos cp ON (cp.id_empleado = cp.id_empleado AND np.id_empresa = cp.id_empresa AND np.anio = cp.anio AND np.semana = cp.semana AND np.id_prestamo = cp.id_prestamo)
-            WHERE (npp.tipo = 'ef') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
+            WHERE np.saldado = 'f' AND (npp.tipo = 'ef') AND np.fecha BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' AND cp.id_pago IS NULL
           ) AS t
           WHERE 1 = 1 {$sqlpres}
           UNION
