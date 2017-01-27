@@ -1,5 +1,5 @@
 
- ✔ nomina prestamos @done (17-01-24 20:53) pcc|san
+ ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct
    ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN saldado boolean NOT NULL DEFAULT false;
  ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san
     alter table otros.bodega_prestamos alter column tipo type character varying(5) using tipo::character varying;

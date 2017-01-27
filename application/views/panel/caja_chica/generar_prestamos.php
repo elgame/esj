@@ -375,6 +375,13 @@
                               <td><input type="text" name="saldo_corte" value="<?php echo $caja['saldo_inicial'] - $totalprestamos + $totalpagos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                               <input type="hidden" name="total_diferencia" value="<?php echo ($totalEfectivo - ($caja['saldo_inicial'] - $totalprestamos + $totalpagos)) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
+                            <tr>
+                              <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                              <td>FONDO DE CAJA:</td>
+                              <td><input type="text" name="fondo_caja" value="<?php echo $caja['saldo_inicial'] - $totalprestamos + $totalpagos + $totalempsaldos; ?>" class="input-small vpositive" id="ttotal-fondo_caja" style="text-align: right;" readonly></td>
+                            </tr>
                           </tbody>
                         </table>
 

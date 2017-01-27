@@ -620,6 +620,9 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetX(63);
     $pdf->Row(array('SALDO DEL CORTE', String::formatoNumero($caja['saldo_inicial'] - $total_prestamos + $total_pagos, 2, '$', false)), false, false);
 
+    $pdf->SetX(63);
+    $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($caja['saldo_inicial'] - $total_prestamos + $total_pagos + $totalempsaldos, 2, '$', false)), false, false);
+
     // if(count($codigoAreas) > 0){
     //   $pdf->SetFont('Arial', '', 6);
     //   $pdf->SetXY(6, $pdf->GetY()+7);
