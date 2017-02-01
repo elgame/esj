@@ -1,4 +1,45 @@
 
+ ✔ Produccion y regresar productos @done (17-01-31 20:38) pcc
+    CREATE TABLE otros.produccion_historial
+    (
+      id bigserial NOT NULL,
+      id_clasificacion integer NOT NULL,
+      id_empresa integer NOT NULL,
+      id_empleado bigint NOT NULL,
+      fecha timestamp with time zone NOT NULL DEFAULT now(),
+      fecha_produccion timestamp with time zone NOT NULL,
+      cantidad double precision NOT NULL DEFAULT 0,
+      costo_materiap double precision NOT NULL DEFAULT 0,
+      costo_adicional double precision NOT NULL DEFAULT 0,
+      costo double precision NOT NULL DEFAULT 0,
+      precio_venta real NOT NULL DEFAULT 0,
+      status boolean NOT NULL DEFAULT true, -- true: activo, false: cancelado
+      tipo boolean NOT NULL DEFAULT true, -- true: produccion (entrada), false: venta (salida)
+      id_salida bigint,
+      id_factura bigint,
+      CONSTRAINT produccion_historial_pkey PRIMARY KEY (id),
+      CONSTRAINT produccion_historial_id_clasificacion_fkey FOREIGN KEY (id_clasificacion)
+          REFERENCES public.clasificaciones (id_clasificacion) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT produccion_historial_id_empleado_fkey FOREIGN KEY (id_empleado)
+          REFERENCES public.usuarios (id) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT produccion_historial_id_empresa_fkey FOREIGN KEY (id_empresa)
+          REFERENCES public.empresas (id_empresa) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
+      CONSTRAINT produccion_historial_id_factura_fkey FOREIGN KEY (id_factura)
+          REFERENCES public.facturacion (id_factura) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT produccion_historial_id_salida_fkey FOREIGN KEY (id_salida)
+          REFERENCES public.compras_salidas (id_salida) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    )
+    WITH ( OIDS=FALSE );
+    ALTER TABLE otros.produccion_historial OWNER TO programa;
+    COMMENT ON COLUMN otros.produccion_historial.status IS 'true: activo, false: cancelado';
+    COMMENT ON COLUMN otros.produccion_historial.tipo IS 'true: produccion (entrada), false: venta (salida)';
+    ALTER TABLE public.clasificaciones ADD COLUMN inventario boolean NOT NULL DEFAULT false;
+    ALTER TABLE public.compras_ordenes ADD COLUMN regresa_product boolean NOT NULL DEFAULT false;
  ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct
    ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN saldado boolean NOT NULL DEFAULT false;
  ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san

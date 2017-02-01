@@ -68,6 +68,13 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                <label class="control-label" for="dinventario">Inventario </label>
+                <div class="controls">
+                  <input type="checkbox" name="dinventario" id="dinventario" value="t" <?php echo set_checkbox('dinventario', 't', ($data['info']->inventario=='t'?true:false)); ?>>
+                </div>
+              </div>
+
               <!-- <div class="control-group">
                 <label class="control-label" for="fprecio_venta">Precio de venta </label>
                 <div class="controls">

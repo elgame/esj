@@ -61,7 +61,7 @@ class productos_salidas_model extends CI_Model {
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
-        WHERE 1 = 1 AND cs.concepto is null {$sql}
+        WHERE 1 = 1 {$sql}
         ORDER BY (cs.fecha_creacion, cs.folio) DESC
         ", $params, true);
 
@@ -536,6 +536,14 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(30);
     $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+
+    if ($orden['info'][0]->concepto != '') {
+      $pdf->SetFounts(array($pdf->fount_txt), array(-1));
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(66));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array($orden['info'][0]->concepto), false, false);
+    }
 
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetAligns(array('L', 'R'));

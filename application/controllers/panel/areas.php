@@ -652,9 +652,10 @@ class areas extends MY_Controller {
 						'label' => 'Cuenta contpaq 2 (Orov)',
 						'rules' => 'numeric|max_length[40]'),
 
-			// array('field' => 'fprecio_venta',
-			// 			'label' => 'Precio venta',
-			// 			'rules' => 'numeric|max_length[11]'),
+			array('field' => 'dinventario',
+						'label' => 'Inventario',
+						'rules' => ''),
+
 			array('field' => 'farea',
 						'label' => 'Area',
 						'rules' => 'required|numeric|max_length[11]'),

@@ -254,6 +254,7 @@ class Ventas_model extends privilegios_model{
 	public function addNotaVenta()
   {
     $this->load->model('clientes_model');
+    $this->load->model('clasificaciones_model');
 
     $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
@@ -348,6 +349,7 @@ class Ventas_model extends privilegios_model{
 
     // Productos
     $productosFactura   = array();
+    $produccionFactura  = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
     {
       if ($_POST['prod_dcantidad'][$key] > 0)
@@ -357,6 +359,21 @@ class Ventas_model extends privilegios_model{
         if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
           $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
           $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+        }
+
+        // Para descontar del inventario de productos de produccion
+        $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
+        if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
+          $produccionFactura[] = array(
+            'id_factura'       => $id_venta,
+            'id_empresa'       => $datosFactura['id_empresa'],
+            'id_empleado'      => $this->session->userdata('id_usuario'),
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'cantidad'         => $_POST['prod_dcantidad'][$key],
+            'fecha_produccion' => $datosFactura['fecha'],
+            'precio_venta'     => $_POST['prod_dpreciou'][$key],
+            'tipo'             => 'f',
+          );
         }
 
         $productosFactura[] = array(
@@ -447,6 +464,9 @@ class Ventas_model extends privilegios_model{
     if(count($productosFactura) > 0)
       $this->db->insert_batch('facturacion_productos', $productosFactura);
 
+    if(count($produccionFactura) > 0)
+      $this->db->insert_batch('otros.produccion_historial', $produccionFactura);
+
     if (count($dataSeguroCerti) > 0)
     {
       $this->db->delete('facturacion_seg_cert', array('id_factura' => $id_venta));
@@ -535,6 +555,7 @@ class Ventas_model extends privilegios_model{
   public function updateNotaVenta($id_venta)
   {
     $this->load->model('clientes_model');
+    $this->load->model('clasificaciones_model');
 
     $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
@@ -618,6 +639,7 @@ class Ventas_model extends privilegios_model{
 
     // Productos
     $productosFactura   = array();
+    $produccionFactura   = array();
     $nrow_seg_cer = 0;
     $seg_cer_entro = array();
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
@@ -629,6 +651,21 @@ class Ventas_model extends privilegios_model{
         if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
           $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
           $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+        }
+
+        // Para descontar del inventario de productos de produccion
+        $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
+        if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
+          $produccionFactura[] = array(
+            'id_factura'       => $id_venta,
+            'id_empresa'       => $datosFactura['id_empresa'],
+            'id_empleado'      => $this->session->userdata('id_usuario'),
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'cantidad'         => $_POST['prod_dcantidad'][$key],
+            'fecha_produccion' => $datosFactura['fecha'],
+            'precio_venta'     => $_POST['prod_dpreciou'][$key],
+            'tipo'             => 'f',
+          );
         }
 
         $productosFactura[] = array(
@@ -723,6 +760,10 @@ class Ventas_model extends privilegios_model{
     $this->db->delete('facturacion_productos', "id_factura = {$id_venta}");
     if(count($productosFactura) > 0)
       $this->db->insert_batch('facturacion_productos', $productosFactura);
+
+    $this->db->delete('otros.produccion_historial', "id_factura = {$id_venta}");
+    if(count($produccionFactura) > 0)
+      $this->db->insert_batch('otros.produccion_historial', $produccionFactura);
 
     if (count($dataSeguroCerti) > 0)
     {
@@ -860,6 +901,9 @@ class Ventas_model extends privilegios_model{
 
     $this->db->update('facturacion', array('status' => 'ca'), "id_factura = '{$id_venta}'");
     $remision = $this->getInfoVenta($id_venta);
+
+    // Cancela los productos de produccion historial
+    $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$id_venta}'");
 
     // Quita la asignacion de la factura a la venta del dia
     $this->load->model('ventas_dia_model');

@@ -635,6 +635,7 @@ class facturacion_model extends privilegios_model{
     // Productos e Impuestos
     $productosCadOri    = array(); // Productos para la CadOriginal
     $productosFactura   = array(); // Productos para la Factura
+    $produccionFactura  = array(); // inventario de produccion
 
     $impuestosTraslados = array(); // Traslados
     $traslado0  = false; // Total de traslado 0%
@@ -686,6 +687,21 @@ class facturacion_model extends privilegios_model{
         if ($did_unidad > 0) { // obtenemos la cantidad de la unidad
           $data_unidad = $this->db->query("SELECT cantidad FROM unidades WHERE id_unidad = {$did_unidad}")->row();
           $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
+        }
+
+        // Para descontar del inventario de productos de produccion
+        $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
+        if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
+          $produccionFactura[] = array(
+            'id_factura'       => $id_venta,
+            'id_empresa'       => $datosFactura['id_empresa'],
+            'id_empleado'      => $this->session->userdata('id_usuario'),
+            'id_clasificacion' => $_POST['prod_did_prod'][$key],
+            'cantidad'         => $_POST['prod_dcantidad'][$key],
+            'fecha_produccion' => $datosFactura['fecha'],
+            'precio_venta'     => $_POST['prod_dpreciou'][$key],
+            'tipo'             => 'f',
+          );
         }
 
         $productosFactura[] = array(
@@ -785,6 +801,20 @@ class facturacion_model extends privilegios_model{
       }
 
       $this->db->insert_batch('facturacion_productos', $productosFactura);
+    }
+
+    if(count($produccionFactura) > 0) {
+      if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
+        // Cancela los productos de produccion historial
+        $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$_POST['id_nr']}'");
+      }
+
+      if ((isset($_GET['idb']) && ! $borrador) || $borrador)
+      {
+        $this->db->delete('otros.produccion_historial', array('id_factura' => $idFactura));
+      }
+
+      $this->db->insert_batch('otros.produccion_historial', $produccionFactura);
     }
 
     // Inserta los pallests y las remisiones a la factura
@@ -1304,6 +1334,9 @@ class facturacion_model extends privilegios_model{
 
         // Elimina la salida de productos q se dio si se ligaron pallets
         $this->db->delete('compras_salidas', array('id_factura' => $idFactura));
+
+        // Cancela los productos de produccion historial
+        $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$idFactura}'");
 
         $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
 
