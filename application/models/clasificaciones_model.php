@@ -68,14 +68,15 @@ class clasificaciones_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'id_area'      => $this->input->post('farea'),
-            'nombre'       => $this->input->post('fnombre'),
-            'iva'          => $this->input->post('diva'),
-						'id_unidad'    => $this->input->post('dunidad'),
-						// 'precio_venta' => $this->input->post('fprecio_venta'),
-            'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
-            'cuenta_cpi2'   => $this->input->post('fcuenta_cpi2'),
-            'codigo'   => $this->input->post('fcodigo'),
+            'id_area'         => $this->input->post('farea'),
+            'nombre'          => $this->input->post('fnombre'),
+            'iva'             => $this->input->post('diva'),
+            'id_unidad'       => $this->input->post('dunidad'),
+            // 'precio_venta' => $this->input->post('fprecio_venta'),
+            'cuenta_cpi'      => $this->input->post('fcuenta_cpi'),
+            'cuenta_cpi2'     => $this->input->post('fcuenta_cpi2'),
+            'codigo'          => $this->input->post('fcodigo'),
+            'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
 						);
 		}
 
@@ -109,14 +110,15 @@ class clasificaciones_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'nombre'       => $this->input->post('fnombre'),
-						'precio_venta' => $this->input->post('fprecio_venta'),
-						'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
-						'id_area'      => $this->input->post('farea'),
+            'nombre'       => $this->input->post('fnombre'),
+            'precio_venta' => $this->input->post('fprecio_venta'),
+            'cuenta_cpi'   => $this->input->post('fcuenta_cpi'),
+            'id_area'      => $this->input->post('farea'),
             'iva'          => $this->input->post('diva'),
             'id_unidad'    => $this->input->post('dunidad'),
-            'cuenta_cpi2'   => $this->input->post('fcuenta_cpi2'),
-            'codigo'   => $this->input->post('fcodigo'),
+            'cuenta_cpi2'  => $this->input->post('fcuenta_cpi2'),
+            'codigo'       => $this->input->post('fcodigo'),
+            'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
 						);
 
       // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
@@ -150,7 +152,7 @@ class clasificaciones_model extends CI_Model {
 		$id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
 
 		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad,
-                                  cuenta_cpi2, codigo" )
+                                  cuenta_cpi2, codigo, inventario" )
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
@@ -192,6 +194,8 @@ class clasificaciones_model extends CI_Model {
 			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		if($this->input->get('type') !== false)
 			$sql .= " AND id_area = {$this->input->get('type')}";
+    if($this->input->get('inventario') !== false)
+      $sql .= " AND inventario = 't'";
 		$res = $this->db->query(" SELECT id_clasificacion, id_area, nombre, status, iva, id_unidad
 				FROM clasificaciones
 				WHERE status = true {$sql}

@@ -13,7 +13,7 @@ class compras_ordenes_model extends CI_Model {
    *
    * @return
    */
-  public function getOrdenes($perpage = '100', $autorizadas = true)
+  public function getOrdenes($perpage = '100', $autorizadas = true, $regresa_product = false)
   {
     $sql = '';
     //paginacion
@@ -56,6 +56,8 @@ class compras_ordenes_model extends CI_Model {
 
     $sql .= $autorizadas ? " AND co.autorizado = 't'" : " AND co.autorizado = 'f'";
 
+    $sql .= $regresa_product ? " AND co.regresa_product = 't'" : " AND co.status <> 'n'";
+
     $query = BDUtil::pagination(
         "SELECT co.id_orden,
                 co.id_empresa, e.nombre_fiscal AS empresa,
@@ -78,7 +80,7 @@ class compras_ordenes_model extends CI_Model {
         INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
         INNER JOIN usuarios AS u ON u.id = co.id_empleado
         LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
-        WHERE co.status <> 'n'  {$sql}
+        WHERE 1 = 1  {$sql}
         ORDER BY (co.fecha_creacion, co.folio) DESC
         ", $params, true);
 
@@ -599,7 +601,8 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
-              co.no_impresiones_tk
+              co.no_impresiones_tk,
+              co.regresa_product
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -690,11 +693,12 @@ class compras_ordenes_model extends CI_Model {
     return $data;
   }
 
-  public function folio($tipo = 'p')
+  public function folio($tipo = 'p', $regresa_product=false)
   {
     $res = $this->db->select('folio')
       ->from('compras_ordenes')
       ->where('tipo_orden', $tipo)
+      ->where('regresa_product', ($regresa_product?'t':'f'))
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
@@ -1499,7 +1503,7 @@ class compras_ordenes_model extends CI_Model {
 
     // $pdf->show_head = true;
     // $pdf->titulo1 = $orden['info'][0]->empresa;
-    $tipo_orden = 'ORDEN DE COMPRA';
+    $tipo_orden = $orden['info'][0]->regresa_product=='f'?'ORDEN DE COMPRA' : 'PRODUCTOS REGRESADOS';
     if($orden['info'][0]->tipo_orden == 'd')
       $tipo_orden = 'ORDEN DE SERVICIO';
     elseif($orden['info'][0]->tipo_orden == 'f')
