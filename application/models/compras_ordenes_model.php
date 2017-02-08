@@ -1509,6 +1509,8 @@ class compras_ordenes_model extends CI_Model {
     elseif($orden['info'][0]->tipo_orden == 'f')
       $tipo_orden = 'ORDEN DE FLETE';
 
+    $entrada_almacen = 'Entrada';
+
     $pdf->SetFont('helvetica','B', 8);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(63));
@@ -1517,6 +1519,8 @@ class compras_ordenes_model extends CI_Model {
 
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array($tipo_orden), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($entrada_almacen), false, false);
 
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetWidths(array(30, 33));

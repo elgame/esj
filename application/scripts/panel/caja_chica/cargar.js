@@ -508,7 +508,7 @@
             '</tr>';
         }
 
-        $('#modal-remisiones #lista_remisiones_modal tbody').append(html);
+        $('#modal-remisiones #lista_remisiones_modal tbody').html(html);
         $("#lista_remisiones_modal").filterTable();
       });
     });

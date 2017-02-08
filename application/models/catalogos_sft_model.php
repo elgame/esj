@@ -1166,4 +1166,292 @@ class catalogos_sft_model extends CI_Model{
     echo $html;
   }
 
+  public function getDataCodigosCuentasSalidas()
+  {
+    // $this->load->model('compras_areas_model');
+    $sql_salida = $sql_caja = $sql = $sql2 = '';
+    $sql_nom_dia = $sql_nom_hre = '';
+
+    //Filtro de fecha.
+    if($this->input->get('ffecha1') != '' && $this->input->get('ffecha2') != '') {
+      $sql_salida .= " AND Date(co.fecha_creacion) BETWEEN '".$this->input->get('ffecha1')."' AND '".$this->input->get('ffecha2')."'";
+    }
+    elseif($this->input->get('ffecha1') != '') {
+      $sql_salida .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha1')."'";
+    }
+    elseif($this->input->get('ffecha2') != ''){
+      $sql_salida .= " AND Date(co.fecha_creacion) = '".$this->input->get('ffecha2')."'";
+    }
+
+    if ($this->input->get('did_empresa') != '') {
+      $sql_salida .= " AND co.id_empresa = ".$this->input->get('did_empresa')."";
+    }
+
+    $sql2 = $sql;
+
+    // vehiculos
+
+    $response = array();
+
+
+    if (isset($_GET['dareas']) && count($_GET['dareas']) > 0)
+    {
+      foreach ($_GET['dareas'] as $key => $value) {
+        $ids_hijos = $value.$this->getHijos($value);
+        $result = $this->db->query("SELECT ca.nombre, (
+            SELECT Sum(importe) importe
+            FROM (
+              SELECT Sum(cp.cantidad*cp.precio_unitario) importe
+              FROM compras_salidas_productos cp INNER JOIN compras_salidas co ON co.id_salida = cp.id_salida
+              WHERE cp.id_cat_codigos In({$ids_hijos}) {$sql_salida} AND co.status <> 'ca' AND co.status <> 'n'
+            ) t
+          ) importe
+          FROM otros.cat_codigos ca
+          WHERE ca.id_cat_codigos = {$value}");
+        $response[] = $result->row();
+        $result->free_result();
+
+
+        if (isset($_GET['dmovimientos']{0}) && $_GET['dmovimientos'] == '1' && $response[count($response)-1]->importe == 0)
+          array_pop($response);
+        else {
+          if (isset($_GET['ddesglosado']{0}) && $_GET['ddesglosado'] == '1') {
+            $response[count($response)-1]->detalle = $this->db->query(
+            "SELECT *
+              FROM (
+                SELECT
+                  ca.id_cat_codigos AS id_area, ca.nombre, Date(co.fecha_creacion) fecha_orden, co.folio::text folio_orden,
+                  p.nombre producto, co.solicito, (cp.cantidad*cp.precio_unitario) importe
+                FROM compras_salidas co
+                  INNER JOIN compras_salidas_productos cp ON co.id_salida = cp.id_salida
+                  INNER JOIN otros.cat_codigos ca ON ca.id_cat_codigos = cp.id_cat_codigos
+                  INNER JOIN productos p ON p.id_producto = cp.id_producto
+                WHERE ca.id_cat_codigos In({$ids_hijos}) {$sql_salida}
+                  AND co.status <> 'ca' AND co.status <> 'n'
+              ) t
+              ORDER BY fecha_orden ASC")->result();
+
+          }
+        }
+
+      }
+    }
+
+    return $response;
+  }
+
+  public function rpt_codigos_cuentas_salidas_pdf()
+  {
+    $combustible = $this->getDataCodigosCuentasSalidas();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte de Salidas";
+
+    $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('L', 'R');
+    $widths = array(170, 35);
+    $header = array('Nombre', 'Importe');
+    $aligns2 = array('L', 'L', 'L', 'L', 'L', 'R');
+    $widths2 = array(18, 18, 36, 60, 45, 29);
+    $header2 = array('Fecha S', 'Folio S', 'Solicito', 'C Costo', 'Producto', 'Importe');
+
+    $lts_combustible = 0;
+    $horas_totales = 0;
+
+    $entro = false;
+    foreach($combustible as $key => $vehiculo)
+    {
+      $cantidad = 0;
+      $importe = 0;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+        $pdf->AddPage();
+
+        $pdf->SetFont('Arial','B',8);
+        $pdf->SetTextColor(255,255,255);
+        $pdf->SetFillColor(160,160,160);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+
+        if (isset($vehiculo->detalle)) {
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row($header2, true);
+        }
+      }
+      $pdf->SetFont('Arial','B',8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+      $pdf->Row(array(
+        $vehiculo->nombre,
+        String::formatoNumero($vehiculo->importe, 2, '', false),
+      ), false, false);
+
+      $lts_combustible += floatval($vehiculo->importe);
+
+      if (isset($vehiculo->detalle)) {
+        foreach ($vehiculo->detalle as $key2 => $item)
+        {
+          $band_head = false;
+          if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+          {
+            $pdf->AddPage();
+
+            $pdf->SetFont('Arial','B',8);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns2);
+            $pdf->SetWidths($widths2);
+            $pdf->Row($header2, true);
+          }
+
+          $pdf->SetFont('Arial','',8);
+          $pdf->SetTextColor(0,0,0);
+
+          $datos = array(
+            $item->fecha_orden,
+            $item->folio_orden,
+            $item->solicito,
+            $item->nombre,
+            $item->producto,
+            String::formatoNumero($item->importe, 2, '', false),
+          );
+
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns2);
+          $pdf->SetWidths($widths2);
+          $pdf->Row($datos, false, false);
+        }
+      }
+
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B',9);
+    $pdf->SetTextColor(0,0,0);
+    $pdf->Row(array('TOTALES',
+        String::formatoNumero($lts_combustible, 2, '', false) ),
+    true, false);
+
+    $pdf->Output('reporte_gasto_salidas.pdf', 'I');
+  }
+
+  public function rpt_codigos_cuentas_salidas_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=reporte_gasto_salidas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $combustible = $this->getDataCodigosCuentasSalidas();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa(2);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Reporte de Salidas";
+    $titulo3 = "";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="7" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="7" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="7"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">Nombre</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+    if (isset($combustible[0]->detalle)) {
+      $html .= '<tr style="font-weight:bold">
+        <td></td>
+        <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Fecha S</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Folio S</td>
+        <td style="width:300px;border:1px solid #000;background-color: #cccccc;">Solicito</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">C Costo</td>
+        <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Producto</td>
+        <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+      </tr>';
+    }
+    $lts_combustible = $horas_totales = 0;
+    foreach ($combustible as $key => $vehiculo)
+    {
+      $lts_combustible += floatval($vehiculo->importe);
+
+      $html .= '<tr style="font-weight:bold">
+          <td colspan="5" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->nombre.'</td>
+          <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$vehiculo->importe.'</td>
+        </tr>';
+      if (isset($vehiculo->detalle)) {
+        foreach ($vehiculo->detalle as $key2 => $item)
+        {
+          $html .= '<tr>
+              <td></td>
+              <td style="width:100px;border:1px solid #000;background-color: #cccccc;">'.$item->fecha_orden.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->folio_orden.'</td>
+              <td style="width:300px;border:1px solid #000;background-color: #cccccc;">'.$item->solicito.'</td>
+              <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->nombre.'</td>
+              <td style="width:400px;border:1px solid #000;background-color: #cccccc;">'.$item->producto.'</td>
+              <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$item->importe.'</td>
+            </tr>';
+        }
+      }
+
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="5">TOTALES</td>
+          <td colspan="2" style="border:1px solid #000;">'.$lts_combustible.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }

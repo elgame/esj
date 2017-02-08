@@ -1,5 +1,62 @@
 
- ✔ Produccion y regresar productos @done (17-01-31 20:38) pcc
+ ✔ Caja chica remisiones @done (17-02-07 21:50) pcc|san
+    DROP MATERIALIZED VIEW public.saldos_facturas_remisiones;
+    CREATE MATERIALIZED VIEW public.saldos_facturas_remisiones AS
+     SELECT f.id_factura,
+        f.serie,
+        f.folio,
+        c.id_cliente,
+        c.nombre_fiscal,
+        e.id_empresa,
+        e.nombre_fiscal AS empresa,
+        f.total,
+        f.importe_iva AS iva,
+        COALESCE(faa.abonos, 0::double precision) AS abonos,
+        COALESCE(f.total - COALESCE(faa.abonos, 0::double precision), 0::double precision)::numeric(12,2) AS saldo,
+        'f'::text AS tipo,
+        f.is_factura,
+        date(f.fecha) AS fecha,
+        COALESCE(fp.cantidad_productos, 0::real) AS cantidad_productos,
+        f.subtotal
+       FROM clientes c
+         JOIN facturacion f ON c.id_cliente = f.id_cliente
+         JOIN empresas e ON e.id_empresa = f.id_empresa
+         LEFT JOIN ( SELECT d.id_cliente,
+                d.id_factura,
+                d.id_empresa,
+                sum(d.abonos) AS abonos
+               FROM ( SELECT f_1.id_cliente,
+                        f_1.id_factura,
+                        f_1.id_empresa,
+                        sum(fa.total) AS abonos
+                       FROM facturacion f_1
+                         JOIN facturacion_abonos fa ON f_1.id_factura = fa.id_factura
+                      WHERE f_1.status::text <> 'ca'::text AND f_1.status::text <> 'b'::text AND f_1.id_abono_factura IS NULL AND date(fa.fecha) <= date(now())
+                      GROUP BY f_1.id_cliente, f_1.id_factura, f_1.id_empresa
+                    UNION
+                     SELECT f_1.id_cliente,
+                        f_1.id_nc AS id_factura,
+                        f_1.id_empresa,
+                        sum(f_1.total) AS abonos
+                       FROM facturacion f_1
+                      WHERE f_1.status::text <> 'ca'::text AND f_1.status::text <> 'b'::text AND f_1.id_nc IS NOT NULL AND f_1.id_abono_factura IS NULL AND date(f_1.fecha) <= date(now())
+                      GROUP BY f_1.id_cliente, f_1.id_factura, f_1.id_empresa) d
+              GROUP BY d.id_cliente, d.id_factura, d.id_empresa) faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+         LEFT JOIN ( SELECT remisiones_historial.id_remision,
+                remisiones_historial.id_factura,
+                remisiones_historial.status
+               FROM remisiones_historial
+              WHERE remisiones_historial.status::text <> 'ca'::text AND remisiones_historial.status::text <> 'b'::text) fh ON f.id_factura = fh.id_remision
+         LEFT JOIN ( SELECT facturacion_productos.id_factura,
+                sum(facturacion_productos.cantidad) AS cantidad_productos
+               FROM facturacion_productos
+              GROUP BY facturacion_productos.id_factura) fp ON f.id_factura = fp.id_factura
+      WHERE f.status::text <> 'ca'::text AND f.status::text <> 'b'::text AND f.id_abono_factura IS NULL AND f.id_nc IS NULL AND date(f.fecha) <= date(now()) AND COALESCE(fh.id_remision, 0::bigint) = 0
+      ORDER BY f.id_factura
+    WITH DATA;
+    ALTER TABLE public.saldos_facturas_remisiones OWNER TO programa;
+
+ ✔ Produccion y regresar productos @done (17-01-31 20:38) pcc|gdl|san
     CREATE TABLE otros.produccion_historial
     (
       id bigserial NOT NULL,
@@ -40,16 +97,27 @@
     COMMENT ON COLUMN otros.produccion_historial.tipo IS 'true: produccion (entrada), false: venta (salida)';
     ALTER TABLE public.clasificaciones ADD COLUMN inventario boolean NOT NULL DEFAULT false;
     ALTER TABLE public.compras_ordenes ADD COLUMN regresa_product boolean NOT NULL DEFAULT false;
- ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Regresar productos almacen',128,TRUE,'productos_regreso/','repeat',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',451,TRUE,'productos_regreso/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',451,FALSE,'productos_regreso/cancelar/','ban-circle',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Imprimir',451,FALSE,'productos_regreso/imprimir/','print',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar',451,FALSE,'productos_regreso/modificar/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Ver',451,FALSE,'productos_regreso/ver/','eye-open',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Produccion',0,TRUE,'produccion/','briefcase',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Agregar',457,TRUE,'produccion/agregar/','plus',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',457,FALSE,'produccion/cancelar/','ban-circle',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte inventario',457,TRUE,'produccion/inventario/','print',TRUE);
+
+ ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct|gdl
    ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN saldado boolean NOT NULL DEFAULT false;
- ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san
+ ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san|gdl
     alter table otros.bodega_prestamos alter column tipo type character varying(5) using tipo::character varying;
     COMMENT ON COLUMN otros.bodega_prestamos.tipo IS 'true: prestamo (resta la existencia), false: pago del prestamo (incremente la existencia), dev: devolucion (resta la existencia)';
     ALTER TABLE otros.bodega_prestamos ALTER COLUMN tipo SET DEFAULT 'true';
     ALTER TABLE public.nomina_prestamos ADD COLUMN tipo character varying(4) NOT NULL DEFAULT 'fi'::character varying;
     COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja)';
 
- ✔ Bodega @done (17-01-17 21:40) pcc|san|pct
+ ✔ Bodega @done (17-01-17 21:40) pcc|san|pct|gdl
     ALTER TABLE public.facturacion_abonos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
     ALTER TABLE otros.bodega_efectivo ADD COLUMN a_bultos_vendidos double precision NOT NULL DEFAULT 0;
     ALTER TABLE otros.bodega_efectivo ADD COLUMN a_kilos_vendidos double precision NOT NULL DEFAULT 0;
@@ -59,7 +127,7 @@
     ALTER TABLE otros.bodega_efectivo ADD COLUMN utilidad double precision NOT NULL DEFAULT 0;
 
  ☐ Nomina 1.2
-   ✔ @done (17-01-12 14:53) pcc|lap|san|pct
+   ✔ @done (17-01-12 14:53) pcc|lap|san|pct|gdl
      ALTER TABLE public.empresas ADD COLUMN curp character varying(50);
      ALTER TABLE public.empresas ADD COLUMN registro_patronal character varying(20);
      ALTER TABLE public.usuarios ADD COLUMN tipo_contrato character varying(80);

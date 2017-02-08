@@ -1319,7 +1319,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos) , 2, '$', false)), false, false);
 
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(168, $pdf->GetY() - 32);
+    $pdf->SetXY(168, $pdf->GetY() - 38);
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(25, 19));
     $pdf->Row(array('SALDO INICIAL', String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
@@ -1332,6 +1332,8 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
+    $pdf->SetX(168);
+    $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
 
     if(count($codigoAreas) > 0){
       $pdf->SetFont('Arial', '', 6);
