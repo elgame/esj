@@ -549,6 +549,7 @@ class facturacion_model extends privilegios_model{
   {
     $this->load->library('cfdi');
     $this->load->model('clientes_model');
+    $this->load->model('clasificaciones_model');
 
     $anoAprobacion = explode('-', $_POST['dano_aprobacion']);
 
@@ -690,18 +691,20 @@ class facturacion_model extends privilegios_model{
         }
 
         // Para descontar del inventario de productos de produccion
-        $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
-        if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
-          $produccionFactura[] = array(
-            'id_factura'       => $id_venta,
-            'id_empresa'       => $datosFactura['id_empresa'],
-            'id_empleado'      => $this->session->userdata('id_usuario'),
-            'id_clasificacion' => $_POST['prod_did_prod'][$key],
-            'cantidad'         => $_POST['prod_dcantidad'][$key],
-            'fecha_produccion' => $datosFactura['fecha'],
-            'precio_venta'     => $_POST['prod_dpreciou'][$key],
-            'tipo'             => 'f',
-          );
+        if (isset($_POST['prod_did_prod'][$key]{0})) {
+          $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true);
+          if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '') {
+            $produccionFactura[] = array(
+              'id_factura'       => $id_venta,
+              'id_empresa'       => $datosFactura['id_empresa'],
+              'id_empleado'      => $this->session->userdata('id_usuario'),
+              'id_clasificacion' => $_POST['prod_did_prod'][$key],
+              'cantidad'         => $_POST['prod_dcantidad'][$key],
+              'fecha_produccion' => $datosFactura['fecha'],
+              'precio_venta'     => $_POST['prod_dpreciou'][$key],
+              'tipo'             => 'f',
+            );
+          }
         }
 
         $productosFactura[] = array(
