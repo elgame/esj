@@ -888,7 +888,7 @@ class nomina_fiscal extends MY_Controller {
   public function ajax_get_empleado()
   {
     $filtros = array('semana' => $_POST['semana'],
-                    'anio'        => date("Y"),
+                    'anio'        => $_POST['anio'],
                     'empresaId'   => $_POST['empresa_id'],
                     'tipo_nomina' => ['tipo' => 'se', 'con_vacaciones' => $_POST['con_vacaciones'], 'con_aguinaldo' => $_POST['con_aguinaldo']]);
     if ($filtros['empresaId'] !== '')

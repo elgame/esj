@@ -55,6 +55,7 @@
       ORDER BY f.id_factura
     WITH DATA;
     ALTER TABLE public.saldos_facturas_remisiones OWNER TO programa;
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Codigos Salidas',405,TRUE,'catalogos_sft/rpt_codigos_cuentas_salidas/','print',TRUE);
 
  ✔ Produccion y regresar productos @done (17-01-31 20:38) pcc|gdl|san
     CREATE TABLE otros.produccion_historial

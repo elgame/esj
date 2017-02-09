@@ -447,6 +447,7 @@
         empleado_id: $tr.find('.empleado-id').val(),
         empresa_id: $('#empresaId').val(),
         semana: $('#semanas').find('option:selected').val(),
+        anio: $('#anio').val(),
         con_aguinaldo: $('#con-aguinaldo').val(),
         con_vacaciones: $tr.find('.con-vacaciones').val(),
         horas_extras: $tr.find('.horas-extras').val(),
