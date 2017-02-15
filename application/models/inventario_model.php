@@ -2812,6 +2812,7 @@ class inventario_model extends privilegios_model{
 	public function nivelar()
 	{
     $fecha = isset($_GET['dfecha']{0})? $_GET['dfecha']: date("Y-m-d");
+    $id_almacen = ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1);
 		$compra = array();
 		$salida = array();
 		foreach ($_POST['idproducto'] as $key => $produto)
@@ -2846,7 +2847,7 @@ class inventario_model extends privilegios_model{
 			$res_salidas = $this->db->query("SELECT cs.id_salida, Count(csp.id_salida)
           FROM compras_salidas AS cs
             LEFT JOIN compras_salidas_productos AS csp ON cs.id_salida = csp.id_salida
-          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' GROUP BY cs.id_salida")->row();
+          WHERE status = 'n' AND Date(fecha_creacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_salida")->row();
 
 			$rows_salidas = 0;
 			if (isset($res_salidas->count)) //ya existe una salida nivelacion en el dia
@@ -2857,7 +2858,7 @@ class inventario_model extends privilegios_model{
 			{
 				$res = $this->productos_salidas_model->agregar(array(
             'id_empresa'      => $_GET['did_empresa'],
-						'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
+						'id_almacen'      => $id_almacen,
 						'id_empleado'     => $this->session->userdata('id_usuario'),
 						'folio'           => 0,
 						'concepto'        => 'Nivelacion de inventario',
@@ -2883,7 +2884,7 @@ class inventario_model extends privilegios_model{
 			$res_compra = $this->db->query("SELECT cs.id_orden, Count(csp.id_orden)
         FROM compras_ordenes AS cs
 				  LEFT JOIN compras_productos AS csp ON cs.id_orden = csp.id_orden
-				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}' GROUP BY cs.id_orden")->row();
+				WHERE cs.status = 'n' AND Date(cs.fecha_aceptacion) = '{$fecha}' AND cs.id_almacen = {$id_almacen} GROUP BY cs.id_orden")->row();
 			$rows_compras = 0;
 
 			if (isset($res_compra->count)) //ya existe una salida nivelacion en el dia
@@ -2899,9 +2900,10 @@ class inventario_model extends privilegios_model{
 					'id_proveedor'    => $proveedor->id_proveedor,
 					'id_departamento' => $departamento->id_departamento,
 					'id_empleado'     => $this->session->userdata('id_usuario'),
-          'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
+          'id_almacen'      => $id_almacen,
 					'folio'           => 0,
-					'status'          => 'n',
+          'status'          => 'n',
+					'tipo_orden'      => 'p',
 					'autorizado'      => 't',
           'fecha_autorizacion' => $fecha,
           'fecha_aceptacion' => $fecha,
@@ -2919,6 +2921,7 @@ class inventario_model extends privilegios_model{
 			}
 			$this->compras_ordenes_model->agregarProductosData($compra);
 		}
+
 		return array('passes' => true, 'msg' => 3);
 	}
 
