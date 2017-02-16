@@ -99,6 +99,7 @@ class productos_salidas_model extends CI_Model {
         'solicito'       => $_POST['solicito'],
         'recibio'        => $_POST['recibio'],
         'id_almacen'     => $_POST['id_almacen'],
+        // 'id_traspaso'    => intval($this->input->post('tid_almacen')),
       );
 
       if (isset($_POST['fid_trabajador']{0})) {
@@ -198,6 +199,11 @@ class productos_salidas_model extends CI_Model {
       }
       $this->compras_ordenes_model->agregarProductosData($compra);
 
+      // actualiza el campo traspaso, de la salida
+      $this->db->update('compras_salidas',
+        array('id_traspaso' => $id_orden),
+        array('id_salida' => $idSalida));
+
       $this->db->insert('compras_transferencias', array('id_salida' => $idSalida, 'id_orden' => $id_orden));
     }
 
@@ -242,10 +248,11 @@ class productos_salidas_model extends CI_Model {
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
               cs.status, cs.concepto, cs.solicito, cs.recibio,
               cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
-              cs.no_impresiones, cs.no_impresiones_tk
+              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
+        INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
         LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
         WHERE cs.id_salida = {$idSalida}");
 
@@ -442,8 +449,9 @@ class productos_salidas_model extends CI_Model {
     $y_compras = $pdf->GetY();
 
     $pdf->SetX(6);
-    $pdf->SetWidths(array(100));
-    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones)), false, false);
+    $pdf->SetWidths(array(100, 100));
+    $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones),
+                    'Almacen: '.$orden['info'][0]->almacen.($orden['info'][0]->id_traspaso>0? ' | Traspaso de almacen': '') ), false, false);
 
     //Totales
     $pdf->SetFont('Arial','',8);
@@ -496,6 +504,11 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
     $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', substr($orden['info'][0]->fecha, 0, 10)), false, false, 5);
+
+    $pdf->SetWidths(array(48, 15));
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetX(0);
+    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, ($orden['info'][0]->id_traspaso>0? 'Traspaso': '') ), false, false, 5);
 
     $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
