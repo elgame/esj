@@ -1,5 +1,5 @@
 
- ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc
+ ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc|san
    ALTER TABLE public.compras_salidas ADD COLUMN id_traspaso bigint;
  ✔ Caja chica remisiones @done (17-02-07 21:50) pcc|san
     DROP MATERIALIZED VIEW public.saldos_facturas_remisiones;
