@@ -117,14 +117,15 @@ class caja_chica_model extends CI_Model {
 
       // Cheques de bletas en transito
       $boletas = $this->db->query(
-        "SELECT Date(bm.fecha) AS fecha, bm.numero_ref, bm.monto, p.nombre_fiscal, string_agg(b.folio::text, ', ') as boleta
+        "SELECT bm.id_movimiento, Date(bm.fecha) AS fecha, bm.numero_ref, bm.monto, p.nombre_fiscal, string_agg(b.folio::text, ', ') as boleta
         FROM banco_movimientos AS bm
           INNER JOIN banco_movimientos_bascula AS bmb ON bm.id_movimiento = bmb.id_movimiento
           INNER JOIN proveedores AS p ON p.id_proveedor = bm.id_proveedor
           INNER JOIN bascula_pagos AS bp ON bp.id_pago = bmb.id_bascula_pago
           INNER JOIN bascula_pagos_basculas bpb ON bp.id_pago = bpb.id_pago
           INNER JOIN bascula b ON b.id_bascula = bpb.id_bascula
-        WHERE Date(bm.fecha) <= '{$fecha}' AND bm.entransito = 't' AND bm.metodo_pago = 'cheque' AND bm.status = 't'
+        WHERE Date(bm.fecha) <= '{$fecha}' AND bm.entransito = 't' AND bm.metodo_pago = 'cheque'
+          AND bm.status = 't' AND b.accion = 'p'
         GROUP BY bm.id_movimiento, p.id_proveedor"
       );
 
@@ -878,15 +879,20 @@ class caja_chica_model extends CI_Model {
     $pdf->SetFont('Arial','', 6);
     $pdf->SetXY(111, 9);
     $pdf->SetAligns(array('C'));
-    $pdf->SetWidths(array(30));
+    $pdf->SetWidths(array(20));
     $pdf->Row(array('NOMENCLATURA INGRESOS'), false, false);
 
-    $pdf->SetXY(150, 9);
+    $pdf->SetXY(133, 5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(30));
-    foreach ($nomenclaturas as $n)
+    $xx = 133;
+    foreach ($nomenclaturas as $key => $n)
     {
-      $pdf->SetX(150);
+      if ($key % 7 == 0 && $key !== 0) {
+        $xx += 30;
+        $pdf->SetY(5);
+      }
+      $pdf->SetX($xx);
       $pdf->Row(array($n->nomenclatura.' '.$n->nombre), false, false, null, 1, 1);
     }
   }
@@ -899,6 +905,10 @@ class caja_chica_model extends CI_Model {
 
     $caja = $this->get($fecha, $noCajas);
     $nomenclaturas = $this->nomenclaturas();
+
+    $subtitulo = '';
+    if ($noCajas == 1)
+      $subtitulo = ' LIMON';
 
     // echo "<pre>";
     //   var_dump($caja);
@@ -925,7 +935,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->SetAligns(array('C'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array(mb_strtoupper($privilegio->nombre, 'UTF-8')), true, true, null, 3);
+    $pdf->Row(array(mb_strtoupper($privilegio->nombre.$subtitulo, 'UTF-8')), true, true, null, 3);
 
     $pdf->Image(APPPATH.(str_replace(APPPATH, '', '/images/logo.png')), 6, 15, 50);
     $pdf->Ln(20);
@@ -1077,8 +1087,8 @@ class caja_chica_model extends CI_Model {
       if($pdf->GetY() >= $pdf->limiteY) {
 
         $pdf->AddPage();
-        // nomenclatura
-        $this->printCajaNomenclatura($pdf, $nomenclaturas);
+        // // nomenclatura
+        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
         $pdf->SetWidths(array(15, 15, 27, 27, 20));
         $pdf->SetFont('Helvetica','B', 7);
@@ -1107,6 +1117,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalBoletas, 2, '$', false)), false, true);
 
     // Gastos del Dia
+    $pag_aux2 = $pdf->page;
     $pdf->page = $pag_aux;
     $pdf->SetY($pag_yaux);
     $pdf->SetFillColor(230, 230, 230);
@@ -1131,9 +1142,13 @@ class caja_chica_model extends CI_Model {
     {
       if ($pdf->GetY() >= $pdf->limiteY)
       {
-        $pdf->AddPage();
-        // nomenclatura
-        $this->printCajaNomenclatura($pdf, $nomenclaturas);
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(111, 10);
+        } else
+          $pdf->AddPage();
+        // // nomenclatura
+        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(111, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
@@ -1186,9 +1201,13 @@ class caja_chica_model extends CI_Model {
     {
       if($pdf->GetY() >= $pdf->limiteY) {
 
-        $pdf->AddPage();
-        // nomenclatura
-        $this->printCajaNomenclatura($pdf, $nomenclaturas);
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(111, 10);
+        } else
+          $pdf->AddPage();
+        // // nomenclatura
+        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(111, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
@@ -1238,9 +1257,13 @@ class caja_chica_model extends CI_Model {
     {
       if($pdf->GetY() >= $pdf->limiteY) {
 
-        $pdf->AddPage();
-        // nomenclatura
-        $this->printCajaNomenclatura($pdf, $nomenclaturas);
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(111, 10);
+        } else
+          $pdf->AddPage();
+        // // nomenclatura
+        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(111, $pdf->GetY());
         $pdf->SetAligns(array('C', 'C', 'C', 'C'));
@@ -1286,17 +1309,21 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(15, 16, 25));
     $pdf->Row(array('NUMERO', 'DENOMIN.', 'TOTAL'), true, true);
 
+    $page_aux = $pdf->page;
+    $y_aux = $pdf->GetY();
+
     $pdf->SetAligns(array('R', 'R', 'R'));
     $pdf->SetFont('Arial','', 7);
     $totalEfectivo = 0;
     foreach ($caja['denominaciones'] as $key => $denominacion)
     {
-      // if($pdf->GetY() >= $pdf->limiteY){
-      //   $pdf->AddPage();
-      //   $pdf->SetFont('Helvetica','B', 7);
-      //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->Row(array('BOLETA', 'PRODUCTOR', 'IMPORTE', ''), true, true);
-      // }
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(111, 10);
+        } else
+          $pdf->AddPage();
+      }
 
       // $pdf->SetFont('Helvetica','', 7);
       $pdf->SetX(111);
@@ -1318,8 +1345,14 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(111);
     $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos) , 2, '$', false)), false, false);
 
+    // ajuste de pagina para imprimir los totales
+    if ( $pdf->GetY()-$y_aux < 0 ) {
+      $pdf->page = $page_aux;
+    }
+    $pdf->SetY($y_aux);
+
     $pdf->SetFont('Arial', 'B', 6);
-    $pdf->SetXY(168, $pdf->GetY() - 38);
+    $pdf->SetXY(168, $pdf->GetY() );
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(25, 19));
     $pdf->Row(array('SALDO INICIAL', String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
@@ -1333,7 +1366,16 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
+
+    $page_aux = $pdf->page;
+    $pdf->page = 1;
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetXY(110, 26.5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array('FONDO DE CAJA '.String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
+    $pdf->page = $page_aux>$pag_aux2? $page_aux: $pag_aux2;
 
     if(count($codigoAreas) > 0){
       $pdf->SetFont('Arial', '', 6);

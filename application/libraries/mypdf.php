@@ -240,14 +240,21 @@ class MYpdf extends FPDF {
     		$this->CheckPageBreak($h);
     		for($i=0;$i<count($data);$i++){
 	    		$w=$this->widths[$i];
-	    		$a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+          $a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+	    		$bord=0;
 	    		$x=$this->GetX();
 	    		$y=$this->GetY();
 
-	    		if($header && $bordes)
+	    		if($header===true && $bordes===true)
 	    			$this->Rect($x,$y,$w,$h,'DF');
-	    		elseif($bordes)
+	    		elseif($bordes===true)
 	    			$this->Rect($x,$y,$w,$h);
+          else {
+            switch ($bordes) {
+              case 'B': $this->Line($x,$y+$h,$x+$w,$y+$h); break;
+            }
+            // $bord=$bordes;
+          }
 
 	    		if($header)
 	    			$this->SetXY($x,$y+$positionY);
@@ -260,10 +267,10 @@ class MYpdf extends FPDF {
 
 	    		if(isset($this->links[$i]{0}) && $header==false){
 	    			$this->SetTextColor(35, 95, 185);
-	    			$this->Cell($w, $this->FontSize, $data[$i], 0, strlen($data[$i]), $a, false, $this->links[$i]);
+	    			$this->Cell($w, $this->FontSize, $data[$i], $bord, strlen($data[$i]), $a, false, $this->links[$i]);
 	    			$this->SetTextColor(0,0,0);
 	    		}else
-    				$this->MultiCell($w,$this->FontSize, $data[$i],0,$a);
+    				$this->MultiCell($w,$this->FontSize, $data[$i],$bord,$a);
 
     			$this->SetXY($x+$w,$y);
     		}
@@ -282,15 +289,22 @@ class MYpdf extends FPDF {
             for($i=0;$i<count($data);$i++){
                 $w=$this->widths[$i];
                 $a=isset($this->aligns[$i]) ? $this->aligns[$i] : 'L';
+                $bord=0;
                 $x=$this->GetX();
                 $y=$this->GetY();
 
                 $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), '', ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
 
-                if($header && $bordes)
-                    $this->Rect($x,$y,$w,$h,'DF');
-                elseif($bordes)
-                    $this->Rect($x,$y,$w,$h);
+                if($header===true && $bordes===true)
+                  $this->Rect($x,$y,$w,$h,'DF');
+                elseif($bordes===true)
+                  $this->Rect($x,$y,$w,$h);
+                else {
+                  switch ($bordes) {
+                    case 'B': $this->Line($x,$y+$h,$x+$w,$y+$h); break;
+                  }
+                  // $bord=$bordes;
+                }
 
                 if($header)
                     $this->SetXY($x,$y+3);
@@ -299,10 +313,10 @@ class MYpdf extends FPDF {
 
                 if(isset($this->links[$i]{0}) && $header==false){
                     $this->SetTextColor(35, 95, 185);
-                    $this->Cell($w, $this->FontSize, $data[$i], 0, strlen($data[$i]), $a, false, $this->links[$i]);
+                    $this->Cell($w, $this->FontSize, $data[$i], $bord, strlen($data[$i]), $a, false, $this->links[$i]);
                     $this->SetTextColor(0,0,0);
                 }else
-                    $this->MultiCell($w,$this->FontSize, $data[$i],0,$a);
+                    $this->MultiCell($w,$this->FontSize, $data[$i],$bord,$a);
 
                 $this->SetXY($x+$w,$y);
             }

@@ -1,4 +1,6 @@
 
+ ✔ Privilegio reporte bodega @done (17-02-22 10:36) pcc|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Mostrar totales en corte',379,FALSE,'bodega_guadalajara/show_totales_c/','copy',FALSE);
  ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc|san
    ALTER TABLE public.compras_salidas ADD COLUMN id_traspaso bigint;
  ✔ Caja chica remisiones @done (17-02-07 21:50) pcc|san

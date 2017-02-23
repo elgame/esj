@@ -1421,7 +1421,7 @@ class banco_cuentas_model extends banco_model {
   * Reporte de rendimientos de fruta
   * @return void
   */
- public function rie_pdf()
+  public function rie_pdf()
  {
     // Obtiene los datos del reporte.
     $data = $this->rie_data();
@@ -1532,9 +1532,9 @@ class banco_cuentas_model extends banco_model {
 
 
     $pdf->Output('reporte_banco.pdf', 'I');
- }
+  }
 
- public function rie_xls(){
+  public function rie_xls(){
     $data = $this->rie_data();
 
     header('Content-type: application/vnd.ms-excel; charset=utf-8');

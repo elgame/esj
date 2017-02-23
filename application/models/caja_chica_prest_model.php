@@ -437,6 +437,9 @@ class caja_chica_prest_model extends CI_Model {
     //   $ttotalGastos += floatval($gasto->monto);
     // }
 
+    $pdf->auxy = $pdf->GetY();
+    $page_aux = $pdf->page;
+
     // Prestamos
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
@@ -476,32 +479,31 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetAligns(array('L', 'R', 'L', 'R'));
     $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($total_prestamos, 2, '$', false)), true, true);
-    $pdf->auxy = $pdf->GetY();
 
     // Pagos
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(111, 32);
+    $pdf->SetXY(6, $pdf->GetY()+3);
     $pdf->SetAligns(array('L', 'C'));
     $pdf->SetWidths(array(79, 25));
     $pdf->Row(array('PAGOS DEL DIA', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetX(111);
+    $pdf->SetX(6);
     $pdf->SetAligns(array('C', 'C', 'C', 'C'));
     $pdf->SetWidths(array(20, 15, 44, 25));
     $pdf->Row(array('EMPRESA', 'NOM', 'NOMBRE Y/O CONCEPTO', 'ABONO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetXY(111, $pdf->GetY());
+    $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R', 'L', 'R'));
     $pdf->SetWidths(array(20, 15, 44, 25));
 
     $total_pagos = 0;
     foreach ($caja['pagos'] as $key => $ingreso)
     {
-      $pdf->SetX(111);
+      $pdf->SetX(6);
 
       $pdf->Row(array(
         $ingreso->categoria,
@@ -513,35 +515,46 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetX(111);
+    $pdf->SetX(6);
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetAligns(array('L', 'R', 'L', 'R'));
     $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($total_pagos, 2, '$', false)), true, true);
+    $page_aux2 = $pdf->page;
+    $y_aux2 = $pdf->GetY();
 
+    $pdf->page = $page_aux;
     // Saldos
     $pdf->SetFont('Arial','B', 7);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(6, $pdf->auxy + 5);
+    $pdf->SetXY(111, $pdf->auxy);
     $pdf->SetAligns(array('L', 'C'));
     $pdf->SetWidths(array(79, 25));
     $pdf->Row(array('SALDO EMPLEADOS', 'IMPORTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetX(6);
+    $pdf->SetX(111);
     $pdf->SetAligns(array('C', 'C', 'C', 'C'));
     $pdf->SetWidths(array(44, 20, 20, 20));
     $pdf->Row(array('NOMBRE', 'PRESTADO', 'PAGADO', 'SALDO'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetXY(111, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R', 'R', 'R'));
     $pdf->SetWidths(array(44, 20, 20, 20));
 
     $totalempsaldos = 0;
     foreach ($caja['saldos_empleados'] as $key => $empsaldo)
     {
-      $pdf->SetX(6);
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(111, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $pdf->SetX(111);
 
       $pdf->Row(array(
         $empsaldo->nombre,
@@ -553,11 +566,13 @@ class caja_chica_prest_model extends CI_Model {
     }
 
     $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetX(6);
+    $pdf->SetX(111);
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetAligns(array('L', 'R', 'L', 'R'));
     $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalempsaldos, 2, '$', false)), true, true);
 
+    $pdf->page = $page_aux2;
+    $pdf->SetY($y_aux2);
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);
     $pdf->SetTextColor(0, 0, 0);
@@ -581,12 +596,13 @@ class caja_chica_prest_model extends CI_Model {
     $totalEfectivo = 0;
     foreach ($caja['denominaciones'] as $key => $denominacion)
     {
-      // if($pdf->GetY() >= $pdf->limiteY){
-      //   $pdf->AddPage();
-      //   $pdf->SetFont('Helvetica','B', 7);
-      //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->Row(array('BOLETA', 'PRODUCTOR', 'IMPORTE', ''), true, true);
-      // }
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
 
       // $pdf->SetFont('Helvetica','', 7);
       $pdf->SetX(6);
@@ -620,16 +636,14 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetX(63);
     $pdf->Row(array('SALDO DEL CORTE', String::formatoNumero($caja['saldo_inicial'] - $total_prestamos + $total_pagos, 2, '$', false)), false, false);
 
-    $pdf->SetX(63);
-    $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($caja['saldo_inicial'] - $total_prestamos + $total_pagos + $totalempsaldos, 2, '$', false)), false, false);
-
-    // if(count($codigoAreas) > 0){
-    //   $pdf->SetFont('Arial', '', 6);
-    //   $pdf->SetXY(6, $pdf->GetY()+7);
-    //   $pdf->SetWidths(array(205));
-    //   $pdf->SetAligns('L');
-    //   $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
-    // }
+    $page_aux = $pdf->page;
+    $pdf->page = 1;
+    $pdf->SetFont('Arial','B', 8);
+    $pdf->SetXY(110, 26.5);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(104));
+    $pdf->Row(array('FONDO DE CAJA '.String::formatoNumero($total_prestamos + $total_pagos + $totalEfectivo , 2, '$', false)), false, false);
+    $pdf->page = count($pdf->pages);
 
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }

@@ -1,10 +1,10 @@
 
- ☐ Caja chica de limon poner fondo de caja
- ☐ Caja chica de prestamo poner fondo de caja
+ ✔ .53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques entransito @done (17-02-21 16:06)
+ ✔ .31h Caja chica de prestamo poner fondo de caja @done (17-02-21 18:21)
  ☐ Reporte de saldos bancarios, saldo inicial, y al saldo final es quitando los cheques de transito, filtros de la hoja
  ☐ Reporte de bancos acumulado por empresas, como la hoja de ejemplo
  ☐ En todos los reportes cambiar la fecha a formato dia/mes/año
- ☐ En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios
+ ✔ 1.31h En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios, agregar privilegio para mostrar los totales @done (17-02-22 10:31)
  ☐ En ordenes poner seleccion de almacen para registrar la entrada
  ☐ En tickets de ordenes de compras acomodar como los ejemplos, (agregar autorizo, En cod area poner solo los ultimos 2, poner lo de almacen, Entrada mas grande, consecutivo por dia y fecha, ligar orden)
  ☐ En boleta de recepcion cuando sea de insumo material cambia los datos de abajo como ejemplo

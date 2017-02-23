@@ -17,6 +17,7 @@ class String{
       '28' => 'Tarjeta de débito',
       '29' => 'Tarjeta de servicio',
       '99' => 'Otros',
+      'NA' => 'No aplica',
 
       // '01' => 'Efectivo',
       // '02' => 'Cheque',
@@ -421,13 +422,17 @@ class String{
     return $meses[$num];
   }
 
+
+  public static function fechaAT($fecha) {
+    return self::fechaATexto($fecha, 'in');
+  }
   /**
    * fechaATexto()
    *
    * Devuelve la cadena de texto asociada a la fecha ingresada
    *
    * @param   string fecha (cadena con formato XXXX-XX-XX)
-   * @param   string formato (puede tomar los valores 'l', 'u', 'c')
+   * @param   string formato (puede tomar los valores 'l', 'u', 'c', '/c', 'in')
    * @return  string  fecha_en_formato_texto
    */
   public static function fechaATexto($fecha, $formato = 'c') {
@@ -440,6 +445,8 @@ class String{
       // $partes[3] contiene el número del día
       if($formato == '/c')
         return $partes[3] .'/'. self::mes($partes[2], 'c') .'/'. $partes[1];
+      elseif($formato == 'in')
+        return $partes[3] .'/'. $partes[2] .'/'. $partes[1];
       else{
         $mes = ' de ' . self::mes($partes[2]) . ' de '; // Corregido!
         if ($formato == 'u') {
