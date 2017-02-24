@@ -1160,7 +1160,7 @@ class banco_cuentas_model extends banco_model {
 	 */
 	public function getCuentas($paginados = true, $id_cuenta=null, $data=array())
 	{
-		$sql = '';
+		$sql = $sqlfecha = '';
 		$query['total_rows'] = $params['result_items_per_page'] = $params['result_page'] = '';
 		//paginacion
 		if($paginados)
@@ -1193,12 +1193,16 @@ class banco_cuentas_model extends banco_model {
 		if(isset($data['id_empresa']))
 			$sql .= ($sql==''? ' WHERE ': ' AND ')." e.id_empresa = {$data['id_empresa']}";
 
+    if (isset($params['hasta'])) {
+      $sqlfecha = " AND Date(fecha) <= '{$params['hasta']}'";
+    }
+
  		$query['query'] =
  						"SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco, e.nombre_fiscal,
  										c.numero, c.alias, c.cuenta_cpi, c.status,
  										(
-											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = c.id_cuenta) -
-											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = c.id_cuenta)
+											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = c.id_cuenta {$sqlfecha}) -
+											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = c.id_cuenta {$sqlfecha})
 										) AS saldo
 						FROM banco_cuentas AS c
 							INNER JOIN banco_bancos AS bb ON c.id_banco = bb.id_banco

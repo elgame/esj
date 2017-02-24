@@ -325,8 +325,13 @@ class MYpdf extends FPDF {
 
     function CheckPageBreak($h, $limit=0){
     	$limit = $limit==0? $this->PageBreakTrigger: $limit;
-    	if($this->GetY()+$h>$limit)
-    		$this->AddPage($this->CurOrientation);
+    	if($this->GetY()+$h>$limit) {
+        if (count($this->pages) > $this->page) {
+          $this->page++;
+          $this->SetXY(111, 10);
+        } else
+          $this->AddPage($this->CurOrientation);
+      }
     }
 
     function NbLines($w,$txt){

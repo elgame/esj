@@ -1368,22 +1368,22 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
 
-    $page_aux = $pdf->page;
+    // $page_aux = $pdf->page;
     $pdf->page = 1;
     $pdf->SetFont('Arial','B', 8);
     $pdf->SetXY(110, 26.5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
     $pdf->Row(array('FONDO DE CAJA '.String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
-    $pdf->page = $page_aux>$pag_aux2? $page_aux: $pag_aux2;
+    $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
 
-    if(count($codigoAreas) > 0){
-      $pdf->SetFont('Arial', '', 6);
-      $pdf->SetXY(6, $pdf->GetY()+7);
-      $pdf->SetWidths(array(205));
-      $pdf->SetAligns('L');
-      $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
-    }
+    // if(count($codigoAreas) > 0){
+    //   $pdf->SetFont('Arial', '', 6);
+    //   $pdf->SetXY(6, $pdf->GetY()+7);
+    //   $pdf->SetWidths(array(205));
+    //   $pdf->SetAligns('L');
+    //   $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
+    // }
 
     $pdf->Output('CAJA_CHICA.pdf', 'I');
   }

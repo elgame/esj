@@ -126,25 +126,69 @@ class banco_model extends CI_Model {
 
     $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date("Y-m").'-01';
     $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date("Y-m-d");
-    $sql .= " AND Date(bm.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."'";
+    $fecha = strtotime($_GET['ffecha1']) > strtotime($_GET['ffecha2'])? $_GET['ffecha1']: $_GET['ffecha2'];
+    $fecha1 = strtotime($_GET['ffecha1']) < strtotime($_GET['ffecha2'])? $_GET['ffecha1']: $_GET['ffecha2'];
+    $con_mov = isset($_GET['dcon_mov']) && $_GET['dcon_mov'] == 'si'? true: false;
+    $sin_mov = isset($_GET['dsin_mov']) && $_GET['dsin_mov'] == 'si'? true: false;
 
     if ($this->input->get('did_empresa') && count($this->input->get('did_empresa')) > 0) {
-
       foreach ($this->input->get('did_empresa') as $keye => $id_empresa) {
-        $cuentas = $this->banco_cuentas_model->getCuentas(false, null, ['id_empresa' => $id_empresa]);
-        echo "<pre>";
-          var_dump($cuentas);
-        echo "</pre>";exit;
+        $empresa = $this->db->query("SELECT id_empresa, nombre_fiscal FROM empresas WHERE id_empresa = {$id_empresa}")->row();
 
-        // // Se Obtiene el saldo anterior a fecha1
-        // $data_anterior = $this->db->query(
-        //     "SELECT deposito, retiro, (deposito - retiro) AS saldo
-        //     FROM (
-        //       SELECT
-        //         (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sqlsaldo}) AS deposito,
+        $cuentas = $this->banco_cuentas_model->getCuentas(false, null, ['id_empresa' => $id_empresa, 'hasta' => $fecha]);
+        if (count($cuentas['cuentas']) > 0) {
+          foreach ($cuentas['cuentas'] as $keyc => $cuenta) {
+            // Se Obtiene el saldo anterior a fecha1
+            $data_anterior = $this->db->query(
+                "SELECT deposito, retiro, (deposito - retiro) AS saldo
+                FROM (
+                  SELECT
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}') AS deposito,
 
-        //         (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$this->input->get('id_cuenta')} AND Date(fecha) < '{$fecha1}' {$sql_todos} {$sqlsaldo}) AS retiro
-        //       ) AS m")->row();
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}') AS retiro
+                  ) AS m")->row();
+            $cuenta->saldo_ini = $data_anterior->saldo;
+
+            //Saldo en el rango de fecha
+            $res = $this->db->query("SELECT
+                m.id_movimiento,
+                Date(m.fecha) AS fecha,
+                m.numero_ref,
+                m.concepto,
+                Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+                Coalesce(c.id_cliente, p.id_proveedor, 0) AS id_cli_pro,
+                m.monto,
+                '' AS retiro,
+                '' AS deposito,
+                0 AS saldo,
+                m.tipo,
+                m.status,
+                m.entransito,
+                m.salvo_buen_cobro,
+                m.metodo_pago,
+                m.id_cuenta_proveedor,
+                m.desglosar_iva
+              FROM banco_movimientos AS m
+                LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
+                LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
+              WHERE m.id_cuenta = {$cuenta->id_cuenta}
+                AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha}'
+                AND m.status = 't' AND (m.tipo = 't' OR (m.tipo = 'f'))
+              ORDER BY m.fecha ASC, m.id_movimiento ASC");
+            $cuenta->movimientos = $res->result();
+
+            if ($con_mov) {
+              if (count($cuenta->movimientos) === 0)
+                unset($cuentas['cuentas'][$keyc]);
+            } elseif ($sin_mov) {
+              if (count($cuenta->movimientos) > 0)
+                unset($cuentas['cuentas'][$keyc]);
+            }
+          }
+        }
+
+        $empresa->cuentas = $cuentas['cuentas'];
+        $response[] = $empresa;
       }
     }
 
@@ -155,9 +199,6 @@ class banco_model extends CI_Model {
   {
     // Obtiene los datos del reporte.
     $data = $this->rAcumuladoEmpresaData();
-    echo "<pre>";
-      var_dump($data);
-    echo "</pre>";exit;
 
     $fecha = new DateTime($_GET['ffecha1']);
     $fecha2 = new DateTime($_GET['ffecha2']);
@@ -166,7 +207,7 @@ class banco_model extends CI_Model {
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo2 = "REPORTE BANCOS ACUMULADO POR EMPRESA";
-    $pdf->titulo3 = ($_GET['ftipo']==='i'? 'INGRESOS': 'EGRESOS')." DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
+    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
     // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
     // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
 
@@ -178,72 +219,89 @@ class banco_model extends CI_Model {
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetY($pdf->GetY()+2);
 
-    $aligns = array('L', 'L', 'L', 'R', 'R', 'L', 'L');
-    $widths = array(18, 40, 15, 22, 22, 48, 40);
-    $header = array('Fecha', 'Cuenta', 'Tipo', 'Ingreso', 'Retiro', 'Beneficiario', 'Descripcion');
+    $aligns = array('L', 'L', 'R', 'R', 'L', 'L');
+    $widths = array(45, 18, 27, 27, 24, 63);
+    $header = array('Beneficiario', 'Tipo', 'Ingreso', 'Retiro', 'No. Poliza', 'Concepto');
 
     $total_importes_ingre = $total_importes_total_ingre = $total_importes_egre = $total_importes_total_egre = 0;
 
-    foreach($data as $key => $movimiento)
+    foreach($data as $key => $empresa)
     {
       $pdf->SetFont('helvetica','B',8);
       $pdf->SetX(6);
       $pdf->SetAligns(array('L'));
       $pdf->SetWidths(array(205));
       $pdf->Row(array(
-        $movimiento[0]->nombre_fiscal
+        $empresa->nombre_fiscal
       ), false, false);
 
       $total_importes_ingre = $total_importes_egre = 0;
-      foreach ($movimiento as $keym => $mov) {
-        if($pdf->GetY() >= $pdf->limiteY || $keym==0) //salta de pagina si exede el max
-        {
-          if($pdf->GetY() >= $pdf->limiteY)
-            $pdf->AddPage();
+      foreach ($empresa->cuentas as $keyc => $cuenta) {
+        if($pdf->GetY() >= $pdf->limiteY) {
+          $pdf->AddPage();
+        }
 
-          $pdf->SetFont('helvetica','B',8);
+        // cuenta
+        $pdf->SetFont('helvetica','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(200,200,200);
+        $pdf->SetX(6);
+        $aligns[5] = 'R';
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array($cuenta->alias, 'Saldo:', String::formatoNumero($cuenta->saldo_ini, 2, '$', false), '',
+                        'Saldo Final:', String::formatoNumero($cuenta->saldo, 2, '$', false)), true, true);
+        $aligns[5] = 'L';
+
+        if ($keyc == 0) {
+          // header
+          $pdf->SetFont('helvetica','',8);
           $pdf->SetTextColor(0,0,0);
-          $pdf->SetFillColor(200,200,200);
-          // $pdf->SetY($pdf->GetY()-2);
+          $pdf->SetFillColor(230,230,230);
+          $pdf->SetX(6);
+          $aligns[2] = 'L'; $aligns[3] = 'L';
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true, true);
+          $aligns[2] = 'R'; $aligns[3] = 'R';
+        }
+
+        $pdf->SetFont('helvetica','', 7);
+        $pdf->SetTextColor(0,0,0);
+
+        foreach ($cuenta->movimientos as $keym => $mov) {
+          if($pdf->GetY() >= $pdf->limiteY) {
+            $pdf->AddPage();
+          }
+
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
-        }
+          $pdf->Row(array(
+              $mov->cli_pro,
+              ucfirst(substr($mov->metodo_pago, 0, 5)),
+              $mov->tipo=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->tipo=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->numero_ref,
+              $mov->concepto,
+            ), false, 'B');
 
-        $pdf->SetFont('helvetica','', 8);
-        $pdf->SetTextColor(0,0,0);
-
-        // $pdf->SetY($pdf->GetY()-2);
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row(array(
-            $mov->fecha,
-            $mov->cuenta,
-            substr($mov->tipo, 0, 5),
-            $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
-            $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
-            ($mov->status=='f'? 'Cancelado': substr($mov->a_nombre_de, 0, 33)),
-            $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
-          ), false);
-
-        if ($mov->status == 't') {
-          if ($mov->tipomov=='t') {
-            $total_importes_ingre       += $mov->monto;
-            $total_importes_total_ingre += $mov->monto;
-          } else {
-            $total_importes_egre       += $mov->monto;
-            $total_importes_total_egre += $mov->monto;
-          }
+          if ($mov->tipo == 't')
+            $total_importes_ingre += $mov->monto;
+          else
+            $total_importes_egre += $mov->monto;
         }
       }
 
+      $total_importes_total_ingre += $total_importes_ingre;
+      $total_importes_total_egre += $total_importes_egre;
+
       //total
-      $pdf->SetX(71);
-      $pdf->SetAligns(array('R','R'));
-      $pdf->SetWidths(array(30, 30));
-      $pdf->Row(array(
+      $pdf->SetFont('helvetica','B',8);
+      $pdf->SetX(51);
+      $pdf->SetAligns(array('L', 'R','R'));
+      $pdf->SetWidths(array(18, 27, 27));
+      $pdf->Row(array('Suma:',
         String::formatoNumero($total_importes_ingre, 2, '$', false),
         String::formatoNumero($total_importes_egre, 2, '$', false)
       ), false);
@@ -252,13 +310,13 @@ class banco_model extends CI_Model {
     //total general
     $pdf->SetFont('helvetica','B',8);
     $pdf->SetTextColor(0 ,0 ,0 );
-    $pdf->SetX(71);
-    $pdf->SetAligns(array('R','R'));
-    $pdf->SetWidths(array(30, 30));
-    $pdf->Row(array(
+    $pdf->SetX(51);
+    $pdf->SetAligns(array('L', 'R','R'));
+    $pdf->SetWidths(array(18, 27, 27));
+    $pdf->Row(array('Total:',
       String::formatoNumero($total_importes_total_ingre, 2, '$', false),
       String::formatoNumero($total_importes_total_egre, 2, '$', false)
-    ), false);
+    ), false, 'B');
 
 
     $pdf->Output('reporte_banco.pdf', 'I');
