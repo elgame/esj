@@ -237,7 +237,7 @@ class almacenes_model extends CI_Model {
       $pdf->SetX(6);
       $pdf->SetAligns($aligns);
       $pdf->SetWidths($widths);
-      $pdf->Row(array($item->fecha, $item->nombre_fiscal, $item->folio_salida,
+      $pdf->Row(array(String::fechaAT($item->fecha), $item->nombre_fiscal, $item->folio_salida,
                       $item->almacens, $item->folio_orden, $item->almaceno), false, false);
 
       $pdf->SetFont('Arial','',8);

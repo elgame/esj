@@ -140,11 +140,11 @@ class facturacion2_model extends privilegios_model{
 
         // $pdf->titulo3 = "{$_GET['dproducto']} \n";
         if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
         elseif (!empty($_GET['ffecha1']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
         elseif (!empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
@@ -204,7 +204,7 @@ class facturacion2_model extends privilegios_model{
             $pdf->SetTextColor(0,0,0);
 
             $datos = array(
-              $item->fecha,
+              String::fechaAT($item->fecha),
               $item->serie.'-'.$item->folio,
               $item->cliente,
               $item->poliza,

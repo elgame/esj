@@ -3,7 +3,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-content">
-            <form action="<?php echo base_url('panel/banco/rpt_acumulado_empresa_pdf/'); ?>" method="GET" class="form-search" id="frmventclin" target="frame_reporte">
+            <form action="<?php echo base_url('panel/banco/rpt_acumulado_empresa_pdf/'); ?>" method="GET" class="form-search" id="frmventprovee" target="frame_reporte">
               <div class="form-actions form-filters">
 
                 <div class="control-group span6">
@@ -38,13 +38,13 @@
                   </div>
                 </div>
 
-                <!-- <div class="control-group">
-                  <label class="control-label" for="dcliente">Cliente</label>
+                <div class="control-group">
+                  <label class="control-label" for="dproveedor">Proveedor</label>
                   <div class="controls">
                     <div class="input-append span12">
-                      <input type="text" name="dcliente" value="" id="dcliente" class="span9" placeholder="Buscar">
+                      <input type="text" name="dproveedor" value="" id="dproveedor" class="span9" placeholder="Buscar">
                       <button class="btn" type="button" id="btnAddProveedor" style="margin-left:-3px;"><i class="icon-plus-sign"></i></button>
-                      <input type="hidden" name="did_cliente" value="" id="did_cliente">
+                      <input type="hidden" name="did_proveedor" value="" id="did_proveedor">
                     </div>
                     <div class="clearfix"></div>
                     <div style="height:130px;overflow-y: scroll;background-color:#eee;">
@@ -52,7 +52,19 @@
                       </ul>
                     </div>
                   </div>
-                </div> -->
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="dtipo_cuenta">Tipo </label>
+                  <div class="controls">
+                    <select name="dtipo_cuenta" id="dtipo_cuenta">
+                      <option value=""></option>
+                      <option value="M.N.">M.N.</option>
+                      <option value="USD">USD</option>
+                      <option value="EURO">EURO</option>
+                    </select>
+                  </div>
+                </div>
 
                 <div class="control-group clearfix">
                   <div class="span5">

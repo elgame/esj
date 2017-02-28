@@ -2089,11 +2089,11 @@ class compras_ordenes_model extends CI_Model {
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -2165,7 +2165,7 @@ class compras_ordenes_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            $item->fecha,
+            String::fechaAT($item->fecha),
             $item->folio,
             $item->nombre,
             $item->producto,
@@ -2391,7 +2391,7 @@ class compras_ordenes_model extends CI_Model {
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array(
-            $mov->fecha,
+            String::fechaAT($mov->fecha),
             $mov->folio,
             $mov->proveedor,
             String::formatoNumero($mov->total, 2, '$', true),

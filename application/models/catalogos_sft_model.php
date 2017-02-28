@@ -570,8 +570,8 @@ class catalogos_sft_model extends CI_Model{
 		if ($this->input->get('term') !== false)
 			$sql = " AND (lower(codigo) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
 				lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%')";
-		// if($this->input->get('type') !== false)
-		// 	$sql .= " AND id_area = {$this->input->get('type')}";
+		if($this->input->get('id_padre') > 0)
+			$sql .= " AND id_padre = {$this->input->get('id_padre')}";
 		$res = $this->db->query(" SELECT id_cat_codigos AS id_area, codigo, nombre, status, id_padre
 				FROM otros.cat_codigos
 				WHERE status = 't' {$sql}
@@ -969,11 +969,11 @@ class catalogos_sft_model extends CI_Model{
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -1045,9 +1045,9 @@ class catalogos_sft_model extends CI_Model{
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            $item->fecha_orden,
+            String::fechaAT($item->fecha_orden),
             $item->folio_orden,
-            $item->fecha_compra,
+            String::fechaAT($item->fecha_compra),
             $item->folio_compra,
             $item->nombre,
             $item->producto,
@@ -1260,11 +1260,11 @@ class catalogos_sft_model extends CI_Model{
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -1336,7 +1336,7 @@ class catalogos_sft_model extends CI_Model{
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            $item->fecha_orden,
+            String::fechaAT($item->fecha_orden),
             $item->folio_orden,
             $item->solicito,
             $item->nombre,

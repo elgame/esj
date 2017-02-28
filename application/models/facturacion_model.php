@@ -2340,11 +2340,11 @@ class facturacion_model extends privilegios_model{
 
 
         if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+            $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
         elseif (!empty($_GET['ffecha1']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+            $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
         elseif (!empty($_GET['ffecha2']))
-            $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+            $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
 
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
@@ -2375,7 +2375,7 @@ class facturacion_model extends privilegios_model{
 
             $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
             $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
-            $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
+            $datos = array(String::fechaAT($item->fecha), $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
             $total += floatval($item->total);
 
             $pdf->SetX(6);
@@ -2403,11 +2403,11 @@ class facturacion_model extends privilegios_model{
       $pdf->titulo2 = 'Reporte Ventas Productos';
 
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
       elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
       elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -2473,11 +2473,11 @@ class facturacion_model extends privilegios_model{
 
         // $pdf->titulo3 = "{$_GET['dproducto']} \n";
         if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
         elseif (!empty($_GET['ffecha1']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
         elseif (!empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
@@ -2761,7 +2761,7 @@ class facturacion_model extends privilegios_model{
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = 'Ventas por Cliente';
-      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -4415,7 +4415,7 @@ class facturacion_model extends privilegios_model{
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = $remisiones['titulo2'];
-    $pdf->titulo3 = 'Del: '.$filtros['ffecha1']." Al ".$filtros['ffecha2']."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($filtros['ffecha1'])." Al ".String::fechaAT($filtros['ffecha2'])."\n";
     // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
     $pdf->AliasNbPages();
     // $pdf->AddPage();

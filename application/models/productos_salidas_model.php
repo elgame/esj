@@ -89,17 +89,30 @@ class productos_salidas_model extends CI_Model {
     if ( ! $data)
     {
       $data = array(
-        'id_empresa'     => $_POST['empresaId'],
-        'id_empleado'    => $this->session->userdata('id_usuario'),
-        'folio'          => $_POST['folio'],
-        'fecha_creacion' => str_replace('T', ' ', $_POST['fecha']),
-        'fecha_registro' => date("Y-m-d H:i:s"),
-        // 'concepto'    => '', //$_POST['conceptoSalida']
-        'status'         => 's',
-        'solicito'       => $_POST['solicito'],
-        'recibio'        => $_POST['recibio'],
-        'id_almacen'     => $_POST['id_almacen'],
+        'id_empresa'        => $_POST['empresaId'],
+        'id_empleado'       => $this->session->userdata('id_usuario'),
+        'folio'             => $_POST['folio'],
+        'fecha_creacion'    => str_replace('T', ' ', $_POST['fecha']),
+        'fecha_registro'    => date("Y-m-d H:i:s"),
+        // 'concepto'       => '', //$_POST['conceptoSalida']
+        'status'            => 's',
+        'solicito'          => $_POST['solicito'],
+        'recibio'           => $_POST['recibio'],
+        'id_almacen'        => $_POST['id_almacen'],
         // 'id_traspaso'    => intval($this->input->post('tid_almacen')),
+        'no_receta'         => $this->input->post('no_receta')? $_POST['no_receta']: NULL,
+        'etapa'             => $this->input->post('etapa')? $_POST['etapa']: NULL,
+        'rancho'            => $this->input->post('rancho_id')? $_POST['rancho_id']: NULL,
+        'centro_costo'      => $this->input->post('centro_costo_id')? $_POST['centro_costo_id']: NULL,
+        'hectareas'         => $this->input->post('hectareas')? $_POST['hectareas']: NULL,
+        'grupo'             => $this->input->post('grupo')? $_POST['grupo']: NULL,
+        'no_secciones'      => $this->input->post('no_secciones')? $_POST['no_secciones']: NULL,
+        'dias_despues_de'   => $this->input->post('dias_despues_de')? $_POST['dias_despues_de']: NULL,
+        'metodo_aplicacion' => $this->input->post('metodo_aplicacion')? $_POST['metodo_aplicacion']: NULL,
+        'ciclo'             => $this->input->post('ciclo')? $_POST['ciclo']: NULL,
+        'tipo_aplicacion'   => $this->input->post('tipo_aplicacion')? $_POST['tipo_aplicacion']: NULL,
+        'observaciones'     => $this->input->post('observaciones')? $_POST['observaciones']: NULL,
+        'fecha_aplicacion'  => $this->input->post('fecha_aplicacion')? $_POST['fecha_aplicacion']: NULL,
       );
 
       if (isset($_POST['fid_trabajador']{0})) {
@@ -134,14 +147,15 @@ class productos_salidas_model extends CI_Model {
           $saldo = $_POST['precioUnit'][$key];
 
         $productos[] = array(
-          'id_salida'       => $idSalida,
-          'id_producto'     => $_POST['productoId'][$key],
-          'no_row'          => $key,
-          'cantidad'        => $_POST['cantidad'][$key],
-          'precio_unitario' => $saldo,
-          // 'id_area'         => $_POST['codigoAreaId'][$key],
-          $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
-          'tipo_orden'      => $_POST['tipoProducto'][$key],
+          'id_salida'                    => $idSalida,
+          'id_producto'                  => $_POST['productoId'][$key],
+          'no_row'                       => $key,
+          'cantidad'                     => $_POST['cantidad'][$key],
+          'precio_unitario'              => $saldo,
+          // 'id_area'                   => $_POST['codigoAreaId'][$key],
+          // $_POST['codigoCampo'][$key] => $_POST['codigoAreaId'][$key] !== '' ? $_POST['codigoAreaId'][$key] : null,
+          'id_cat_codigos'               => $this->input->post('centro_costo_id')? $_POST['centro_costo_id']: NULL,
+          'tipo_orden'                   => $_POST['tipoProducto'][$key],
         );
       }
     }
@@ -243,17 +257,23 @@ class productos_salidas_model extends CI_Model {
   {
     $query = $this->db->query(
       "SELECT cs.id_salida,
-              cs.id_empresa, e.nombre_fiscal AS empresa, e.logo,
+              cs.id_empresa, e.nombre_fiscal AS empresa, e.logo, e.dia_inicia_semana,
               cs.id_empleado, (u.nombre || ' ' || u.apellido_paterno) AS empleado,
               cs.folio, cs.fecha_creacion AS fecha, cs.fecha_registro,
               cs.status, cs.concepto, cs.solicito, cs.recibio,
               cs.id_usuario, (t.nombre || ' ' || t.apellido_paterno) AS trabajador,
-              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso
+              cs.no_impresiones, cs.no_impresiones_tk, ca.nombre AS almacen, cs.id_traspaso,
+              cs.no_receta, cs.etapa, cs.rancho, cs.centro_costo, cs.hectareas, cs.grupo,
+              cs.no_secciones, cs.dias_despues_de, cs.metodo_aplicacion, cs.ciclo,
+              cs.tipo_aplicacion, cs.observaciones, cs.fecha_aplicacion,
+              ccr.nombre AS rancho_n, ccc.nombre AS centro_c
         FROM compras_salidas AS cs
         INNER JOIN empresas AS e ON e.id_empresa = cs.id_empresa
         INNER JOIN usuarios AS u ON u.id = cs.id_empleado
         INNER JOIN compras_almacenes AS ca ON ca.id_almacen = cs.id_almacen
         LEFT JOIN usuarios AS t ON t.id = cs.id_usuario
+        LEFT JOIN otros.cat_codigos ccr ON ccr.id_cat_codigos = cs.rancho
+        LEFT JOIN otros.cat_codigos ccc ON ccc.id_cat_codigos = cs.centro_costo
         WHERE cs.id_salida = {$idSalida}");
 
     $data = array();
@@ -490,25 +510,43 @@ class productos_salidas_model extends CI_Model {
     $pdf->AddFont($pdf->fount_num, '');
 
     // Título
-    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetFont($pdf->fount_txt, 'B', 8.5);
     $pdf->SetXY(0, 3);
+    $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS'.($orden['info'][0]->id_traspaso>0? '(Traspaso)': ''), 0, 'C');
+    $pdf->SetFont($pdf->fount_txt, '', 8);
+    $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->titulo1, 0, 'C');
     $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
     $pdf->MultiCell($pdf->pag_size[0], 4, $pdf->reg_fed, 0, 'C');
-    $pdf->SetX(0);
-    $pdf->MultiCell($pdf->pag_size[0], 4, 'SALIDA DE PRODUCTOS', 0, 'C');
 
     $pdf->SetWidths(array(10, 20, 11, 20));
     $pdf->SetAligns(array('L','L', 'R', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', substr($orden['info'][0]->fecha, 0, 10)), false, false, 5);
+    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', String::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
 
-    $pdf->SetWidths(array(48, 15));
+    $semana = String::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
+
+    $pdf->SetWidths(array(32, 32));
     $pdf->SetAligns(array('L', 'L'));
-    $pdf->SetX(0);
-    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, ($orden['info'][0]->id_traspaso>0? 'Traspaso': '') ), false, false, 5);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('No Receta: '.$orden['info'][0]->no_receta, 'Semana: '.$semana['semana'] ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Etapa: '.$orden['info'][0]->etapa, 'Rancho: '.$orden['info'][0]->rancho_n ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('CC: '.$orden['info'][0]->centro_c, 'Hectareas: '.$orden['info'][0]->hectareas ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Grupo: '.$orden['info'][0]->grupo, 'No melgas: '.$orden['info'][0]->no_secciones ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('DD FS: '.$orden['info'][0]->dias_despues_de, 'Metodo A: '.$orden['info'][0]->metodo_aplicacion ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.String::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    $pdf->SetWidths(array(65));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
 
     $pdf->SetFont($pdf->fount_txt, '', 7);
     $pdf->SetX(0);
@@ -583,7 +621,7 @@ class productos_salidas_model extends CI_Model {
     }
 
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.date("Y-m-d")), false, false);
+    $pdf->Row2(array('Expedido el: '.String::fechaAT(date("Y-m-d"))), false, false);
 
     $pdf->SetX(0);
     $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
@@ -766,11 +804,11 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -842,9 +880,9 @@ class productos_salidas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            $item->fecha_orden,
+            String::fechaAT($item->fecha_orden),
             $item->folio_orden,
-            $item->fecha_compra,
+            String::fechaAT($item->fecha_compra),
             $item->folio_compra,
             $item->nombre,
             $item->producto,

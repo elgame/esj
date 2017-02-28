@@ -290,16 +290,20 @@ class proveedores_model extends CI_Model {
 	public function getProveedoresAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND lower(p.nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		if($this->input->get('did_empresa') != '')
-			$sql .= " AND id_empresa = '".$this->input->get('did_empresa')."'";
+			$sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+
+    $lbl = false;
+    if($this->input->get('lbempresa') != '')
+      $lbl = true;
 
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono,
-					condicion_pago, dias_credito
-				FROM proveedores
-				WHERE status = 'ac' ".$sql."
-				ORDER BY nombre_fiscal ASC
+				SELECT p.id_proveedor, p.nombre_fiscal, p.rfc, p.calle, p.no_exterior, p.no_interior, p.colonia, p.municipio, p.estado, p.cp, p.telefono,
+					p.condicion_pago, p.dias_credito, e.nombre_fiscal AS empresa
+				FROM proveedores p LEFT JOIN empresas e ON e.id_empresa = p.id_empresa
+				WHERE p.status = 'ac' ".$sql."
+				ORDER BY p.nombre_fiscal ASC
 				LIMIT 20");
 
 		$response = array();
@@ -307,8 +311,8 @@ class proveedores_model extends CI_Model {
 			foreach($res->result() as $itm){
 				$response[] = array(
 						'id'    => $itm->id_proveedor,
-						'label' => $itm->nombre_fiscal,
-						'value' => $itm->nombre_fiscal,
+						'label' => $itm->nombre_fiscal.($lbl? " (".substr($itm->empresa, 0, 8).")": ''),
+						'value' => $itm->nombre_fiscal.($lbl? " (".substr($itm->empresa, 0, 8).")": ''),
 						'item'  => $itm,
 				);
 			}
@@ -499,7 +503,7 @@ class proveedores_model extends CI_Model {
         $pdf->titulo2 = 'PROVEEDOR : ' . $proveedor['info']->nombre_fiscal;
       }
 
-      $pdf->titulo3 = 'PERIODO: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->titulo3 = 'PERIODO: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);

@@ -129,6 +129,164 @@
             </div>
           </div>
 
+          <div class="row-fluid tblproductos0" id="generalCodigo">  <!-- Box Otros datos -->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-barcode"></i> Otros datos de la salida</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content" style="display: block;">
+                <div class="span6">
+
+                  <div class="control-group">
+                    <label class="control-label" for="no_receta">No receta</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="no_receta" class="span11" id="no_receta" value="<?php echo set_value('no_receta') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="etapa">Etapa</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <select name="etapa" class="span11">
+                          <option value="" <?php echo set_select('etapa', '') ?>></option>
+                          <option value="Preparacion de terreno" <?php echo set_select('etapa', 'Preparacion de terreno') ?>>Preparacion de terreno</option>
+                          <option value="Seleccion de semillas" <?php echo set_select('etapa', 'Seleccion de semillas') ?>>Seleccion de semillas</option>
+                          <option value="Siembra" <?php echo set_select('etapa', 'Siembra') ?>>Siembra</option>
+                          <option value="Desarrollo de planta" <?php echo set_select('etapa', 'Desarrollo de planta') ?>>Desarrollo de planta</option>
+                          <option value="Desarrollo de fruta" <?php echo set_select('etapa', 'Desarrollo de fruta') ?>>Desarrollo de fruta</option>
+                          <option value="Cosecha" <?php echo set_select('etapa', 'Cosecha') ?>>Cosecha</option>
+                          <option value="Empaque" <?php echo set_select('etapa', 'Empaque') ?>>Empaque</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="rancho">Rancho</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="rancho" class="span11 showCodigoAreaAuto notr" id="rancho" data-ini="371" value="<?php echo set_value('rancho') ?>" placeholder="" required>
+                        <input type="hidden" name="rancho_id" value="" class="span12 showCodigoAreaAutoId" required>
+                        <i class="ico icon-list showCodigoArea notr" data-ini="371" style="cursor:pointer"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="centro_costo">Centro de costo</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="centro_costo" class="span11 showCodigoAreaAuto notr" id="centro_costo" value="<?php echo set_value('centro_costo') ?>" placeholder="" required>
+                        <input type="hidden" name="centro_costo_id" value="" class="span12 showCodigoAreaAutoId" required>
+                        <i class="ico icon-list showCodigoArea notr" style="cursor:pointer"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="hectareas">Hectareas</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="hectareas" class="span11" id="hectareas" value="<?php echo set_value('hectareas') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="grupo">Grupo</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="grupo" class="span11" id="grupo" value="<?php echo set_value('grupo') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="no_secciones">No melgas/seccion</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="no_secciones" class="span11" id="no_secciones" value="<?php echo set_value('no_secciones') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="span6">
+
+                  <div class="control-group">
+                    <label class="control-label" for="dias_despues_de">Dias despues de Forza/Siembra</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="dias_despues_de" class="span11" id="dias_despues_de" value="<?php echo set_value('dias_despues_de') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="metodo_aplicacion">Metodo de aplicacion</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <select name="metodo_aplicacion" class="span11">
+                          <option value="" <?php echo set_select('metodo_aplicacion', '') ?>></option>
+                          <option value="Spray boom" <?php echo set_select('metodo_aplicacion', 'Spray boom') ?>>Spray boom</option>
+                          <option value="Tambos" <?php echo set_select('metodo_aplicacion', 'Tambos') ?>>Tambos</option>
+                          <option value="Mochila" <?php echo set_select('metodo_aplicacion', 'Mochila') ?>>Mochila</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="ciclo">Ciclo</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="ciclo" class="span11" id="ciclo" value="<?php echo set_value('ciclo') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="tipo_aplicacion">Tipo de aplicacion</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <select name="tipo_aplicacion" class="span11">
+                          <option value="" <?php echo set_select('tipo_aplicacion', '') ?>></option>
+                          <option value="Foliar" <?php echo set_select('tipo_aplicacion', 'Foliar') ?>>Foliar</option>
+                          <option value="Drench" <?php echo set_select('tipo_aplicacion', 'Drench') ?>>Drench</option>
+                          <option value="Manual" <?php echo set_select('tipo_aplicacion', 'Manual') ?>>Manual</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="observaciones">Observaciones</label>
+                    <div class="controls">
+                      <div class="input-append span12">
+                        <input type="text" name="observaciones" class="span11" id="observaciones" value="<?php echo set_value('observaciones') ?>" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="fecha_aplicacion">Fecha de aplicacion</label>
+                    <div class="controls">
+                      <input type="datetime-local" name="fecha_aplicacion" class="span9" id="fecha_aplicacion" value="<?php echo set_value('fecha_aplicacion', $fecha); ?>">
+                    </div>
+                  </div>
+
+                </div>
+              </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">
               <div class="box-header well" data-original-title>
@@ -168,7 +326,7 @@
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-productos">
                       <thead>
                         <tr>
-                          <th>COD AREA <input type="checkbox" id="chkcopydatos"></th>
+                          <!-- <th>COD AREA <input type="checkbox" id="chkcopydatos"></th> -->
                           <th>CODIGO</th>
                           <th>PRODUCTO</th>
                           <th>CANT.</th>
@@ -180,15 +338,15 @@
                         <?php if (isset($_POST['concepto'])) {
                               foreach ($_POST['concepto'] as $key => $concepto) { ?>
                             <tr>
-                              <td style="width: 60px;">
+                              <!-- <td style="width: 60px;">
                                 <input type="text" name="codigoArea[]" value="<?php echo $_POST['codigoArea'][$key] ?>" id="codigoArea" class="span12 showCodigoAreaAuto" required>
                                 <input type="hidden" name="codigoAreaId[]" value="<?php echo $_POST['codigoAreaId'][$key] ?>" id="codigoAreaId" class="span12" required>
                                 <input type="hidden" name="codigoCampo[]" value="<?php echo $_POST['codigoCampo'][$key] ?>" id="codigoCampo" class="span12">
+                                <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
+                              </td> -->
+                              <td style="width: 70px;">
                                 <input type="hidden" name="tipoProducto[]" value="<?php echo $_POST['tipoProducto'][$key] ?>">
                                 <input type="hidden" name="precioUnit[]" value="<?php echo $_POST['precioUnit'][$key] ?>">
-                                <i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>
-                              </td>
-                              <td style="width: 70px;">
                                 <?php echo $_POST['codigo'][$key] ?>
                                 <input type="hidden" name="codigo[]" value="<?php echo $_POST['codigo'][$key] ?>" class="span12">
                               </td>

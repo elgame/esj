@@ -12,15 +12,21 @@
   });
 
   var autocompleteCodigos = function () {
-    $('#table-productos').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
+    $('#table-productos, .tblproductos0').on('focus', 'input.showCodigoAreaAuto:not(.ui-autocomplete-input)', function(event) {
+      var iniCat = 0;
+      if (parseInt($(this).attr('data-ini')) > 0)
+        iniCat = $(this).attr('data-ini');
       $(this).autocomplete({
-        source: base_url+'panel/catalogos_sft/ajax_get_codigosauto/',
+        source: base_url+'panel/catalogos_sft/ajax_get_codigosauto/?id_padre='+iniCat,
         // source: base_url+'panel/compras_areas/ajax_get_areasauto/',
         minLength: 1,
         selectFirst: true,
         select: function( event, ui ) {
           var $this = $(this),
               $tr = $this.parent().parent();
+          if ($this.is('.notr')) {
+            $tr = $this.parent();
+          }
 
           $this.css("background-color", "#B0FFB0");
           setTimeout(function(){
@@ -28,6 +34,7 @@
               $this.val(ui.item.item.codigo);
           },100)
 
+          $tr.find('.showCodigoAreaAutoId').val(ui.item.id);
           $tr.find('#codigoAreaId').val(ui.item.id);
           $tr.find('#codigoCampo').val('id_cat_codigos'); // campo del area new catalogo
 
@@ -39,6 +46,7 @@
           var $tr = $(this).parent().parent();
 
           $(this).css("background-color", "#FFD9B3");
+          $tr.find('.showCodigoAreaAutoId').val('');
           $tr.find('#codigoAreaId').val('');
         }
       });
@@ -47,10 +55,16 @@
 
   var showCodigoArea = function() {
     $("#productos, .tblproductos0").on('click', '.showCodigoArea', function(event) {
-      var $tr = $(this).parent().parent();
+      var $tr = $(this).parent().parent(),
+      iniCat = null;
+      if ($(this).is('.notr'))
+        $tr = $(this).parent();
+      if (parseInt($(this).attr('data-ini')) > 0)
+        iniCat = $(this).attr('data-ini');
+
       objCodigoArea = $tr.find('.showCodigoAreaAuto');
       $("div[id^=tblAreas]").hide();
-      getAjaxAreas(1, null);
+      getAjaxAreas(1, iniCat);
       $("#modalAreas").modal('show');
     });
 
@@ -73,6 +87,7 @@
 
       if (passes) {
         objCodigoArea.val(radioSel.attr('data-codfin'));
+        objCodigoArea.parent().find('.showCodigoAreaAutoId').val(radioSel.val());
         objCodigoArea.parent().find('#codigoAreaId').val(radioSel.val());
         objCodigoArea.parent().find('#codigoCampo').val('id_cat_codigos'); // campo del area new catalogo
 

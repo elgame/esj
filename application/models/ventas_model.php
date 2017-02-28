@@ -121,7 +121,7 @@ class Ventas_model extends privilegios_model{
       $res = $this->db
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
-                u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
+                u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
@@ -1452,8 +1452,8 @@ class Ventas_model extends privilegios_model{
     $pdf->SetXY(0, $pdf->GetY());
     $aligns = array('C', 'C', 'C', 'C', 'C','C');
     $aligns2 = array('C', 'C', 'C', 'C', 'R','R');
-    $widths = array(30, 35, 71, 20, 30, 30);
-    $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Cert.', 'Precio Unitario', 'Importe');
+    $widths = array(25, 35, 71, 25, 30, 30);
+    $header = array('Cantidad', 'Unidad de Medida', 'Descripcion', 'Kg.', 'Precio Unitario', 'Importe');
 
     $conceptos = $factura['productos'];
 
@@ -1540,7 +1540,8 @@ class Ventas_model extends privilegios_model{
           $item->cantidad,
           $item->unidad,
           $item->descripcion.$descripcion_ext,
-          $item->certificado === 't' ? 'Certificado' : '',
+          ($item->und_kg*$item->cantidad),
+          // $item->certificado === 't' ? 'Certificado' : '',
           String::formatoNumero( $item->precio_unitario, 2, '$', false),
           String::formatoNumero( $item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
@@ -1552,7 +1553,7 @@ class Ventas_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetX(0);
     $pdf->SetAligns($aligns);
-    $pdf->SetWidths(array(30));
+    $pdf->SetWidths(array(25));
     $pdf->Row(array($bultoss), true, true, null, 2, 1);
     $pdf->SetY($pdf->GetY()+2);
 
@@ -1878,7 +1879,7 @@ class Ventas_model extends privilegios_model{
           $status = 'Cancelada';
         elseif($value->status == 'b')
           $status = 'Borrador';
-        $pdf->Row(array($value->fecha, $value->serie.$value->folio, $status), false, false);
+        $pdf->Row(array(String::fechaAT($value->fecha), $value->serie.$value->folio, $status), false, false);
         $pdf->SetXY(5, $pdf->GetY()-2);
       }
     }
@@ -2489,7 +2490,7 @@ class Ventas_model extends privilegios_model{
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = $_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS';
-      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
@@ -2691,7 +2692,7 @@ class Ventas_model extends privilegios_model{
 
       // $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = 'Notas de credito';
-      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       $pdf->AddPage();
@@ -3018,7 +3019,7 @@ class Ventas_model extends privilegios_model{
 
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       $pdf->titulo2 = String::mes( intval(substr($this->input->get('ffecha1'), 5, 2)) );
-      $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+      $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
       // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
       $pdf->AliasNbPages();
       // $pdf->AddPage();
@@ -3291,11 +3292,11 @@ class Ventas_model extends privilegios_model{
 
 
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
       elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
       elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -3326,7 +3327,7 @@ class Ventas_model extends privilegios_model{
 
         $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
         $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
-        $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
+        $datos = array(String::fechaAT($item->fecha), $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
         $total += floatval($item->total);
 
         $pdf->SetX(6);
@@ -3354,11 +3355,11 @@ class Ventas_model extends privilegios_model{
       $pdf->titulo2 = 'Reporte Ventas Productos';
 
       if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
       elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha1'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha1']);
       elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 = "Del ".$_GET['ffecha2'];
+        $pdf->titulo3 = "Del ".String::fechaAT($_GET['ffecha2']);
 
       $pdf->AliasNbPages();
       // $links = array('', '', '', '');
@@ -3546,7 +3547,7 @@ class Ventas_model extends privilegios_model{
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = ($_GET['dtipo_factura']=='f'? 'REMISIONES': 'FACTURAS').' VENCIDAS';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     // $pdf->titulo3 .= ($this->input->get('ftipo') == 'pv'? 'Plazo vencido': 'Pendientes por cobrar');
     $pdf->AliasNbPages();
     // $pdf->AddPage();

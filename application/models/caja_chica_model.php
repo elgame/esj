@@ -948,7 +948,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY() - 20);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FECHA ' . $fecha), false, false);
+    $pdf->Row(array('FECHA ' . String::fechaAT($fecha)), false, false);
 
     // Saldo inicial
     $pdf->SetXY(6, $pdf->GetY() + 5);
@@ -1278,7 +1278,7 @@ class caja_chica_model extends CI_Model {
 
       $pdf->SetAligns(array('C', 'C', 'C', 'R'));
       $pdf->Row(array(
-        $boleta->fecha,
+        String::fechaAT($boleta->fecha),
         $boleta->numero_ref,
         $boleta->nombre_fiscal,
         String::formatoNumero($boleta->monto, 2, '', false)), false, true);
@@ -1493,7 +1493,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', $gastos->fecha), false, false);
+    $pdf->Row(array('', '', String::fechaAT($gastos->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1503,7 +1503,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', $gastos->fecha_creacion), false, false);
+    $pdf->Row(array('Creado:', String::fechaAT($gastos->fecha_creacion)), false, false);
 
     $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('cajachica_gastos');
 
@@ -1592,7 +1592,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', $remisiones->fecha), false, false);
+    $pdf->Row(array('', '', String::fechaAT($remisiones->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1602,7 +1602,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $remisiones->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', $remisiones->fecha_creacion), false, false);
+    $pdf->Row(array('Creado:', String::fechaAT($remisiones->fecha_creacion)), false, false);
 
     $this->db->update('cajachica_remisiones', ['no_impresiones' => $remisiones->no_impresiones+1],
         "fecha = '{$fecha}' AND id_remision = '{$id_remision}' AND row = {$row} AND no_caja = {$noCaja}");
@@ -1688,7 +1688,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', $ingreso->fecha), false, false);
+    $pdf->Row(array('', '', String::fechaAT($ingreso->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1698,7 +1698,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', $ingreso->fecha_creacion), false, false);
+    $pdf->Row(array('Creado:', String::fechaAT($ingreso->fecha_creacion)), false, false);
 
     $this->db->update('cajachica_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
         "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");

@@ -1,9 +1,10 @@
 
- ✔ .53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques entransito @done (17-02-21 16:06)
- ☐ .31h Caja chica de prestamo poner fondo de caja y dejarlo como el formato del archivo
+ ✔ 1.96h En salidas de almacen y tickets agregar los 15 datos que la señora me paso para @done (17-02-27 20:37)
+ ✔ 0.53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques entransito @done (17-02-21 16:06)
+ ☐ 0.31h Caja chica de prestamo poner fondo de caja y dejarlo como el formato del archivo
  ☐ Reporte de saldos bancarios, saldo inicial, y al saldo final es quitando los cheques de transito, filtros de la hoja
- ☐ Reporte de bancos acumulado por empresas, como la hoja de ejemplo
- ☐ En todos los reportes cambiar la fecha a formato dia/mes/año
+ ✔ 2.16h Reporte de bancos acumulado por empresas, como la hoja de ejemplo @done (17-02-25 12:58)
+ ✔ 0.81h En todos los reportes cambiar la fecha a formato dia/mes/año @done (17-02-28 00:23)
  ✔ 1.31h En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios, agregar privilegio para mostrar los totales @done (17-02-22 10:31)
  ☐ En ordenes de flete seleccionar el tipo de orden (de venta, de compra) en ventas es ligar factura o remision (ya lo tiene), en compra es ligar una boleta de tipo entrada
  ☐ En ordenes poner seleccion de almacen para registrar la entrada
@@ -11,11 +12,11 @@
  ☐ En boleta de recepcion cuando sea de insumo material cambia los datos de abajo como ejemplo
  ☐ En bascula poder capturar los datos de la boleta de reccion en el tipo de insumo material y ligar la orden de la entrada de material
 
- ✔ .68h Reporte de codigo de salidas @done (17-02-07 21:17)
- ✔ .1h En los tickets de la orden poner Entrada @done (17-02-07 21:22)
+ ✔ 0.68h Reporte de codigo de salidas @done (17-02-07 21:17)
+ ✔ 0.1h En los tickets de la orden poner Entrada @done (17-02-07 21:22)
 
  ✔ 3h En bodega guadalajara acomodar el formato como la hoja de la señora, agregar calculos de acumulados @done (17-01-17 21:39)
- ✔ .88h En reportes de caja incluir la caja de prestamos, prestamos = gastos y pagos = ingresos @done (17-01-18 19:07)
+ ✔ 0.88h En reportes de caja incluir la caja de prestamos, prestamos = gastos y pagos = ingresos @done (17-01-18 19:07)
  ✔ 1.9h En cada de prestamos poner el saldo por trabajador, opcion para poder saldar los prestamos de un trabajador @done (17-01-18 22:01)
  ✔ 1.86H En caja poner las boletas que se pagaron en efectivo y aun no se recupera el dinero a la caja, poner los cheques en transito @done (17-01-23 13:56)
  ✔ 1h Crear reportes de gastos y ventas en Bodega @done (17-01-23 16:27)

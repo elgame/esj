@@ -122,7 +122,7 @@ class banco_model extends CI_Model {
   {
     $this->load->model('banco_cuentas_model');
     $response = array();
-    $sql = '';
+    $sql1 = $sql2 = '';
 
     $_GET['ffecha1'] = isset($_GET['ffecha1'])? $_GET['ffecha1']: date("Y-m").'-01';
     $_GET['ffecha2'] = isset($_GET['ffecha2'])? $_GET['ffecha2']: date("Y-m-d");
@@ -130,12 +130,16 @@ class banco_model extends CI_Model {
     $fecha1 = strtotime($_GET['ffecha1']) < strtotime($_GET['ffecha2'])? $_GET['ffecha1']: $_GET['ffecha2'];
     $con_mov = isset($_GET['dcon_mov']) && $_GET['dcon_mov'] == 'si'? true: false;
     $sin_mov = isset($_GET['dsin_mov']) && $_GET['dsin_mov'] == 'si'? true: false;
+    if (isset($_GET['ids_proveedores']) && count($_GET['ids_proveedores']) > 0) {
+      $sql1 = " AND id_proveedor in(".implode(',', $_GET['ids_proveedores']).")";
+      $sql2 = " AND m.id_proveedor in(".implode(',', $_GET['ids_proveedores']).")";
+    }
 
     if ($this->input->get('did_empresa') && count($this->input->get('did_empresa')) > 0) {
       foreach ($this->input->get('did_empresa') as $keye => $id_empresa) {
         $empresa = $this->db->query("SELECT id_empresa, nombre_fiscal FROM empresas WHERE id_empresa = {$id_empresa}")->row();
 
-        $cuentas = $this->banco_cuentas_model->getCuentas(false, null, ['id_empresa' => $id_empresa, 'hasta' => $fecha]);
+        $cuentas = $this->banco_cuentas_model->getCuentas(false, null, ['id_empresa' => $id_empresa, 'hasta' => $fecha, 'tipo' => $this->input->get('dtipo_cuenta')]);
         if (count($cuentas['cuentas']) > 0) {
           foreach ($cuentas['cuentas'] as $keyc => $cuenta) {
             // Se Obtiene el saldo anterior a fecha1
@@ -143,9 +147,9 @@ class banco_model extends CI_Model {
                 "SELECT deposito, retiro, (deposito - retiro) AS saldo
                 FROM (
                   SELECT
-                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}') AS deposito,
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS deposito,
 
-                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}') AS retiro
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS retiro
                   ) AS m")->row();
             $cuenta->saldo_ini = $data_anterior->saldo;
 
@@ -174,6 +178,7 @@ class banco_model extends CI_Model {
               WHERE m.id_cuenta = {$cuenta->id_cuenta}
                 AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha}'
                 AND m.status = 't' AND (m.tipo = 't' OR (m.tipo = 'f'))
+                {$sql2}
               ORDER BY m.fecha ASC, m.id_movimiento ASC");
             $cuenta->movimientos = $res->result();
 
@@ -207,7 +212,8 @@ class banco_model extends CI_Model {
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo2 = "REPORTE BANCOS ACUMULADO POR EMPRESA";
-    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}\n";
+    $pdf->titulo3 = "DEL {$fecha->format('d/m/Y')} al {$fecha2->format('d/m/Y')}";
+    $pdf->titulo3 .= isset($_GET['dtipo_cuenta']) && $_GET['dtipo_cuenta']!=''? " ({$_GET['dtipo_cuenta']})": '';
     // $lote = isset($data['data'][count($data['data'])-1]->no_lote)? $data['data'][count($data['data'])-1]->no_lote: '1';
     // $pdf->titulo3 .= "Estado: 6 | Municipio: 9 | Semana {$fecha->format('W')} | NUMERADOR: 69{$fecha->format('Ww')}/1 Al ".$lote;
 

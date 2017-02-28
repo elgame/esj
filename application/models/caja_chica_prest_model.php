@@ -731,7 +731,7 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', $gastos->fecha), false, false);
+    $pdf->Row(array('', '', String::fechaAT($gastos->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);

@@ -304,7 +304,7 @@ class vehiculos_model extends CI_Model {
       $pdf->logo = $empresa22['info']->logo;
     }
     $pdf->titulo2 = 'Reporte de Vehiculo';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'));
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -466,7 +466,7 @@ class vehiculos_model extends CI_Model {
     }
 		$pdf->titulo2 = 'Reporte de Vehiculo';
 		$pdf->titulo3 = (isset($res['gasolina'][0]->nombre)? $res['gasolina'][0]->nombre: '')."\n";
-		$pdf->titulo3 .= 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2');
+		$pdf->titulo3 .= 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'));
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);
@@ -504,7 +504,7 @@ class vehiculos_model extends CI_Model {
 				$pdf->SetFont('Arial','',8);
 				$pdf->SetTextColor(0,0,0);
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
-				$datos = array($item->fecha,
+				$datos = array(String::fechaAT($item->fecha),
 					$item->folio,
 					String::formatoNumero($item->kilometros, 2, ''),
           '',
@@ -579,7 +579,7 @@ class vehiculos_model extends CI_Model {
 				$pdf->SetFont('Arial','',8);
 				$pdf->SetTextColor(0,0,0);
 				$precio = $item->total / ($item->litros>0? $item->litros: 1);
-				$datos = array($item->fecha,
+				$datos = array(String::fechaAT($item->fecha),
 					$item->folio,
 					String::formatoNumero($item->kilometros, 2, ''),
           '',
@@ -664,7 +664,7 @@ class vehiculos_model extends CI_Model {
 
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
-			$datos = array($item->fecha,
+			$datos = array(String::fechaAT($item->fecha),
 				$item->nombre,
 				$item->folio,
 				$item->concepto,

@@ -803,7 +803,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -1050,7 +1050,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras y Productos';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 

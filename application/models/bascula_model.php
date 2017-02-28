@@ -1341,7 +1341,7 @@ class bascula_model extends CI_Model {
               $totalNoPagado += $caja->importe;
 
             $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
-                           $caja->fecha,
+                           String::fechaAT($caja->fecha),
                            $caja->folio,
                            substr($caja->proveedor, 0, 28),
                            String::formatoNumero($caja->promedio, 2, '', false),
@@ -1853,7 +1853,7 @@ class bascula_model extends CI_Model {
           $totalNoPagado += $caja->importe;
 
         $datos = array(($caja->pagado === 'p' || $caja->pagado === 'b') ? ucfirst($caja->pagado) : '',
-                       $caja->fecha,
+                       String::fechaAT($caja->fecha),
                        $caja->folio,
                        substr($caja->proveedor, 0, 28),
                        String::formatoNumero($caja->promedio, 2, '', false),
@@ -2331,7 +2331,7 @@ class bascula_model extends CI_Model {
           $cajas    += $caja->total_cajas;
           $importe  += $caja->importe;
 
-          $datos = array($caja->fecha,
+          $datos = array(String::fechaAT($caja->fecha),
                          $caja->folio,
                          substr($caja->proveedor, 0, 28),
                          $caja->total_cajas,
@@ -2754,7 +2754,7 @@ class bascula_model extends CI_Model {
 
         $datos = array(($caja->id_bascula != $lastFolio) ? ($caja->status === 'p' ||  $caja->status === 'b' ? strtoupper($caja->status)  : '') : '',
                        ($caja->id_bascula != $lastFolio) ? $caja->folio : '',
-                       ($caja->id_bascula != $lastFolio) ? $caja->fecha : '',
+                       ($caja->id_bascula != $lastFolio) ? String::fechaAT($caja->fecha) : '',
                        substr($caja->calidad, 0, 9),
                        $caja->cajas,
                        $caja->promedio,
@@ -3290,7 +3290,7 @@ class bascula_model extends CI_Model {
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array(
-            $log->fecha_bascula,
+            String::fechaAT($log->fecha_bascula),
             $log->folio,
             $log->empresa,
             $log->area,

@@ -257,7 +257,7 @@ class btrabajo_agricola_model extends CI_Model {
     $pdf->SetX($x);
     $pdf->Row(['FECHA', 'VEHICULO', 'FOLIO'], false, true);
     $pdf->SetX($x);
-    $pdf->Row([(isset($data->fecha_captura)? $data->fecha_captura: ''),
+    $pdf->Row([(isset($data->fecha_captura)? String::fechaAT($data->fecha_captura): ''),
     						(isset($data->vehiculo->nombre)? $data->vehiculo->nombre: ''),
     						(isset($data->folio)? $data->folio: '')], false, true);
 

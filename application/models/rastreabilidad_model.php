@@ -1293,9 +1293,9 @@ class rastreabilidad_model extends CI_Model {
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array(
-            $boleta->fecha,
+            String::fechaAT($boleta->fecha),
             $boleta->folio,
-            $boleta->fecha_venta,
+            String::fechaAT($boleta->fecha_venta),
             $boleta->serie.$boleta->foliov,
             $boleta->nombre_fiscal,
           ), false);

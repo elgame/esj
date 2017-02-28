@@ -258,7 +258,7 @@ class contrarecibo_model extends CI_Model {
     $pdf->SetWidths(array(31, 31));
     $pdf->SetAligns(array('L','R'));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: '.$data['info']->folio, $data['info']->fecha), false, false, 5);
+    $pdf->Row2(array('Folio: '.$data['info']->folio, String::fechaAT($data['info']->fecha)), false, false, 5);
 
     $pdf->SetWidths(array(62));
     $pdf->SetAligns(array('L'));

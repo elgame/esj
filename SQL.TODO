@@ -1,4 +1,23 @@
 
+ ✔ Reporte de banco @done (17-02-25 12:33) pcc
+   ALTER TABLE public.banco_cuentas ADD COLUMN tipo character varying(10) NOT NULL DEFAULT 'M.N.'::character varying;
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Por Empresa 2',104,TRUE,'banco/rpt_acumulado_empresa/','print',TRUE);
+   ALTER TABLE public.compras_salidas ADD COLUMN no_receta character varying(20);
+   ALTER TABLE public.compras_salidas ADD COLUMN etapa character varying(30);
+   ALTER TABLE public.compras_salidas ADD COLUMN rancho bigint;
+    COMMENT ON COLUMN public.compras_salidas.rancho IS 'del catalogo de codigos los ranchos';
+   ALTER TABLE public.compras_salidas ADD COLUMN centro_costo bigint;
+    COMMENT ON COLUMN public.compras_salidas.centro_costo IS 'del catalogo de codigos, es el mismo que tiene los productos de la salida';
+   ALTER TABLE public.compras_salidas ADD COLUMN hectareas real;
+   ALTER TABLE public.compras_salidas ADD COLUMN grupo character varying(20);
+   ALTER TABLE public.compras_salidas ADD COLUMN no_secciones character varying(20);
+    COMMENT ON COLUMN public.compras_salidas.no_secciones IS 'secciones / melgas';
+   ALTER TABLE public.compras_salidas ADD COLUMN dias_despues_de real;
+   ALTER TABLE public.compras_salidas ADD COLUMN metodo_aplicacion character varying(30);
+   ALTER TABLE public.compras_salidas ADD COLUMN ciclo character varying(20);
+   ALTER TABLE public.compras_salidas ADD COLUMN tipo_aplicacion character varying(20);
+   ALTER TABLE public.compras_salidas ADD COLUMN observaciones character varying(220);
+   ALTER TABLE public.compras_salidas ADD COLUMN fecha_aplicacion date DEFAULT now();
  ✔ Privilegio reporte bodega @done (17-02-22 10:36) pcc|san|pct|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Mostrar totales en corte',379,FALSE,'bodega_guadalajara/show_totales_c/','copy',FALSE);
  ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc|san|pct|gdl

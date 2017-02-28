@@ -87,7 +87,7 @@ class inventario_model extends privilegios_model{
 
 	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Proveedor';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -337,7 +337,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -574,7 +574,7 @@ class inventario_model extends privilegios_model{
 
     $pdf->titulo2 = 'Reporte de seguimientos x Producto';
     // $pdf->titulo3 = (isset($res[0]->nombre)?'PRODUCTO: '.$res[0]->nombre:'')."\n";
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -621,7 +621,7 @@ class inventario_model extends privilegios_model{
 
           $pdf->SetTextColor(0,0,0);
           $pdf->SetFont('Arial','',8);
-          $datos = array($producto->fecha,
+          $datos = array(String::fechaAT($producto->fecha),
             $producto->serie.' '.$producto->folio,
             $producto->proveedor,
             $producto->cantidad.' '.$producto->abreviatura,
@@ -819,7 +819,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de Compras por Producto';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 
@@ -860,7 +860,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetAligns($aligns);
 			$pdf->SetWidths($widths);
 			$pdf->SetMyLinks(array());
-			$pdf->Row(array($producto->fechao,
+			$pdf->Row(array(String::fechaAT($producto->fechao),
 				'',
 				String::formatoNumero($producto->folioo, 0, '', false),
 				'Orden de Compra',
@@ -871,7 +871,7 @@ class inventario_model extends privilegios_model{
 			$pdf->SetXY(6, $pdf->GetY()-2);
 			$pdf->SetMyLinks(array('','','', base_url('panel/inventario/cseguimiento_pdf?id_compra='.$producto->id_compra.
 							'&id_orden='.$producto->id_orden.'&'.String::getVarsLink(array('id_orden', 'id_compra'))) ));
-			$pdf->Row(array($producto->fecha,
+			$pdf->Row(array(String::fechaAT($producto->fecha),
 				$producto->serie,
 				String::formatoNumero($producto->folio, 0, '', false),
 				'Compra',
@@ -947,7 +947,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte Seguimiento de Operaciones de Compra';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->AliasNbPages();
 		$pdf->SetFont('Arial','',8);
 		$pdf->AddPage();
@@ -1149,7 +1149,7 @@ class inventario_model extends privilegios_model{
 
 	  $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Existencia por unidades';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		$pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -1655,7 +1655,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Existencia por costos UEPS';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
@@ -1934,7 +1934,7 @@ class inventario_model extends privilegios_model{
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Reporte de inventario costo UEPS';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
     //$pdf->AddPage();
@@ -1973,7 +1973,7 @@ class inventario_model extends privilegios_model{
         $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
       $datos = array(
-        $item['fecha'],
+        String::fechaAT($item['fecha']),
 
         $item['entrada'][0]!=''? String::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
         $item['entrada'][1]!=''? String::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
@@ -2072,7 +2072,7 @@ class inventario_model extends privilegios_model{
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
 		$pdf->titulo2 = 'Existencia por costos';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -2459,7 +2459,7 @@ class inventario_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Historial de nivelaciones';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     //$pdf->AddPage();
     $pdf->SetFont('Arial','',8);
@@ -2489,7 +2489,7 @@ class inventario_model extends privilegios_model{
       $pdf->SetX(6);
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(30, 50));
-      $pdf->Row(array($item->fecha, $item->nombre), false, false);
+      $pdf->Row(array(String::fechaAT($item->fecha), $item->nombre), false, false);
 
       $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
@@ -2685,7 +2685,7 @@ class inventario_model extends privilegios_model{
 
 		$pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = 'Reporte de inventario costo promedio';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
@@ -2724,7 +2724,7 @@ class inventario_model extends privilegios_model{
 				$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 			$datos = array(
-				$item['fecha'],
+				String::fechaAT($item['fecha']),
 
 				$item['entrada'][0]!=''? String::formatoNumero($item['entrada'][0], 2, '', false): $item['entrada'][0],
 				$item['entrada'][1]!=''? String::formatoNumero($item['entrada'][1], 2, '$', false): $item['entrada'][1],
@@ -2997,7 +2997,7 @@ class inventario_model extends privilegios_model{
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Existencia de Clasificaciones';
-		$pdf->titulo3 = " Al ".$this->input->get('ffecha1')."\n";
+		$pdf->titulo3 = " Al ".String::fechaAT($this->input->get('ffecha1'))."\n";
 		$pdf->AliasNbPages();
 		//$pdf->AddPage();
 		$pdf->SetFont('Arial','',8);

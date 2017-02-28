@@ -279,15 +279,15 @@
       // htmlPresen += '</select>';
 
       $trHtml = $('<tr>' +
-                  '<td style="width: 60px;">'+
-                    '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
-                    '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
-                    '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12">'+
+                  // '<td style="width: 60px;">'+
+                    // '<input type="text" name="codigoArea[]" value="" id="codigoArea" class="span12 showCodigoAreaAuto" required>'+
+                    // '<input type="hidden" name="codigoAreaId[]" value="" id="codigoAreaId" class="span12" required>'+
+                    // '<input type="hidden" name="codigoCampo[]" value="id_cat_codigos" id="codigoCampo" class="span12">'+
+                    // '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
+                  // '</td>'+
+                  '<td style="width: 70px;">' +
                     '<input type="hidden" name="tipoProducto[]" value="'+producto.tipo_prod+'">'+
                     '<input type="hidden" name="precioUnit[]" value="'+(producto.precio_unitario||'0')+'">'+
-                    '<i class="ico icon-list showCodigoArea" style="cursor:pointer"></i>'+
-                  '</td>'+
-                  '<td style="width: 70px;">' +
                     producto.codigo +
                     '<input type="hidden" name="codigo[]" value="'+producto.codigo+'" class="span12">' +
                   '</td>' +

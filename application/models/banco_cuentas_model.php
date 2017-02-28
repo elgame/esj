@@ -72,7 +72,7 @@ class banco_cuentas_model extends banco_model {
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Saldos de Cuentas '.(isset($_GET['dempresa']{0})? '<'.$this->input->get('dempresa').'>': '');
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		if($this->input->get('vertodos') == 'tran')
 			$pdf->titulo3 .= 'Transito';
 		elseif($this->input->get('vertodos') == 'notran')
@@ -333,7 +333,7 @@ class banco_cuentas_model extends banco_model {
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Cuenta <'.$res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias.'>';
-		$pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
 		if($this->input->get('vertodos') == 'tran')
 			$pdf->titulo3 .= 'Transito';
 		elseif($this->input->get('vertodos') == 'notran')
@@ -369,7 +369,7 @@ class banco_cuentas_model extends banco_model {
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 
-			$datos = array($item->fecha,
+			$datos = array(String::fechaAT($item->fecha),
 							$item->numero_ref,
 							substr($item->cli_pro, 0, 35),
 							strip_tags($item->concepto),
@@ -1193,8 +1193,12 @@ class banco_cuentas_model extends banco_model {
 		if(isset($data['id_empresa']))
 			$sql .= ($sql==''? ' WHERE ': ' AND ')." e.id_empresa = {$data['id_empresa']}";
 
-    if (isset($params['hasta'])) {
-      $sqlfecha = " AND Date(fecha) <= '{$params['hasta']}'";
+    if (isset($data['hasta'])) {
+      $sqlfecha = " AND Date(fecha) <= '{$data['hasta']}'";
+    }
+
+    if (isset($data['tipo']{0})) {
+      $sql .= ($sql==''? ' WHERE ': ' AND ')." c.tipo = '{$data['tipo']}'";
     }
 
  		$query['query'] =
@@ -1237,12 +1241,13 @@ class banco_cuentas_model extends banco_model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'id_empresa' => $this->input->post('did_empresa'),
-						'id_banco'   => $this->input->post('fbanco'),
-						'numero'     => $this->input->post('fnumero'),
-						'alias'      => $this->input->post('falias'),
-						'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
-						'sucursal'   => $this->input->post('fsucursal'),
+            'id_empresa' => $this->input->post('did_empresa'),
+            'id_banco'   => $this->input->post('fbanco'),
+            'numero'     => $this->input->post('fnumero'),
+            'alias'      => $this->input->post('falias'),
+            'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
+            'sucursal'   => $this->input->post('fsucursal'),
+            'tipo'       => $this->input->post('ftipo'),
 						);
 		}
 
@@ -1264,13 +1269,14 @@ class banco_cuentas_model extends banco_model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'id_empresa' => $this->input->post('did_empresa'),
-						'id_banco'   => $this->input->post('fbanco'),
-						'numero'     => $this->input->post('fnumero'),
-						'alias'      => $this->input->post('falias'),
-						'cuenta_cpi' => $this->input->post('fcuenta_cpi'),
-						'sucursal'   => $this->input->post('fsucursal'),
-            'numero_cheque'   => $this->input->post('fnumero_cheque'),
+            'id_empresa'    => $this->input->post('did_empresa'),
+            'id_banco'      => $this->input->post('fbanco'),
+            'numero'        => $this->input->post('fnumero'),
+            'alias'         => $this->input->post('falias'),
+            'cuenta_cpi'    => $this->input->post('fcuenta_cpi'),
+            'sucursal'      => $this->input->post('fsucursal'),
+            'numero_cheque' => $this->input->post('fnumero_cheque'),
+            'tipo'          => $this->input->post('ftipo'),
 						);
 		}
 
@@ -1295,7 +1301,7 @@ class banco_cuentas_model extends banco_model {
 										(
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = bc.id_cuenta) -
 											(SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = bc.id_cuenta)
-										) AS saldo
+										) AS saldo, bc.tipo
                  FROM banco_cuentas AS bc
                  		INNER JOIN banco_bancos AS bb ON bc.id_banco = bb.id_banco
 										INNER JOIN empresas AS e ON bc.id_empresa = e.id_empresa
@@ -1493,7 +1499,7 @@ class banco_cuentas_model extends banco_model {
 	      $pdf->SetAligns($aligns);
 	      $pdf->SetWidths($widths);
 	      $pdf->Row(array(
-	          $mov->fecha,
+	          String::fechaAT($mov->fecha),
 	          $mov->cuenta,
 	          substr($mov->tipo, 0, 5),
 	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',

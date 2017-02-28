@@ -253,7 +253,7 @@ class produccion_model extends CI_Model {
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Inventario de produccion';
-    $pdf->titulo3 = 'Del: '.$this->input->get('ffecha1')." Al ".$this->input->get('ffecha2')."\n";
+    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= ($this->input->get('fproducto')? $this->input->get('fproducto'): '');
     // $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();

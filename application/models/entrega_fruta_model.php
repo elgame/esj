@@ -354,7 +354,7 @@ class entrega_fruta_model extends CI_Model {
     $pdf->Row(['Folio', (isset($data->folio)? $data->folio: '')], false, true);
     $pdf->SetFont('Arial', '', 7);
     $pdf->SetX($x);
-    $pdf->Row(['Fecha', (isset($data->no)? $data->fecha: '')], false, true);
+    $pdf->Row(['Fecha', (isset($data->no)? String::fechaAT($data->fecha): '')], false, true);
     $pdf->SetX($x);
     $pdf->Row(['Rancho', (isset($data->rancho)? $data->rancho: '')], false, true);
     $pdf->SetX($x);
