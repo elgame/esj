@@ -87,7 +87,7 @@ class produccion_model extends CI_Model {
 
     $res = $this->productos_salidas_model->agregar(array(
       'id_empresa'      => $this->input->post('empresaId'),
-      'id_almacen'      => 1, //($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
+      'id_almacen'      => ($this->input->post('id_almacen')>0?$this->input->post('id_almacen'):1),
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $this->productos_salidas_model->folio(),
       'concepto'        => 'Salida generada automaticamente en Produccion',

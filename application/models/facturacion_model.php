@@ -3192,6 +3192,7 @@ class facturacion_model extends privilegios_model{
 
   public function generaFacturaPdf($idFactura, $path = null)
   {
+    $this->load->library('cfdi');
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
 
     $factura = $this->getInfoFactura($idFactura);
@@ -3562,7 +3563,7 @@ class facturacion_model extends privilegios_model{
         $pdf->Row(array(
           String::formatoNumero($item->cantidad, 2, ''),
           $item->unidad,
-          $item->descripcion.$descripcion_ext,
+          $this->cfdi->replaceSpecialChars($item->descripcion.$descripcion_ext, true),
           $item->certificado === 't' ? 'Certificado' : '',
           String::formatoNumero( ($item->precio_unitario/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false),
           String::formatoNumero( ($item->importe/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false),

@@ -1,5 +1,5 @@
 
- ✔ Reporte de banco @done (17-02-25 12:33) pcc
+ ✔ Reporte de banco @done (17-02-25 12:33) pcc|san
    ALTER TABLE public.banco_cuentas ADD COLUMN tipo character varying(10) NOT NULL DEFAULT 'M.N.'::character varying;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Por Empresa 2',104,TRUE,'banco/rpt_acumulado_empresa/','print',TRUE);
    ALTER TABLE public.compras_salidas ADD COLUMN no_receta character varying(20);

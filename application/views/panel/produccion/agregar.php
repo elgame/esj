@@ -62,11 +62,11 @@
                 </div>
               </div>
 
-              <!-- <div class="control-group">
-                <label class="control-label" for="id_almacen">Almacen</label>
+              <div class="control-group">
+                <label class="control-label" for="id_almacen">Almacen (saldra la materia prima)</label>
                 <div class="controls">
                   <div class="input-append span12">
-                    <select name="id_almacen" class="span11">
+                    <select name="id_almacen" class="span11" id="id_almacen">
                     <?php $default = ($this->input->post('id_almacen')>0? $this->input->post('id_almacen'): '1');
                     foreach ($almacenes['almacenes'] as $key => $value) { ?>
                       <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
@@ -74,7 +74,7 @@
                     </select>
                   </div>
                 </div>
-              </div> -->
+              </div>
 
               <!--/control-group -->
             </div>

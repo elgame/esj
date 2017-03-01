@@ -23,6 +23,13 @@
       calculaTotal();
     });
 
+    $("#id_almacen").change(function(event) {
+      var $table = $('#table-productos');
+      $table.find('button#btnDelProd').each(function(index, el) {
+        $(this).click();
+      });
+    });
+
     // copyCodigoAll();
   });
 
@@ -105,6 +112,7 @@
             data: {
               term : request.term,
               ide: $('#empresaId').val(),
+              id_almacen: $('#id_almacen').val(),
               tipo: 'p'
             },
             success: function (data) {

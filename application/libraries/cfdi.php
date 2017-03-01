@@ -340,7 +340,7 @@ class cfdi{
           $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
           $datos['concepto'][] = $producto['unidad'];
           isset($producto['noIdentificacion']{0})? $datos['concepto'][] = $producto['noIdentificacion'] : '';
-          $datos['concepto'][] = $producto['descripcion'];
+          $datos['concepto'][] = $this->replaceSpecialChars($producto['descripcion'], true);
           $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
           $datos['concepto'][] = (float)$this->numero($producto['importe']);
         }
@@ -350,7 +350,7 @@ class cfdi{
         $datos['concepto'][] = (float)$this->numero($producto['cantidad']);
         $datos['concepto'][] = $producto['unidad'];
         isset($producto['noIdentificacion']{0})? $datos['concepto'][] = $producto['noIdentificacion'] : '';
-        $datos['concepto'][] = $producto['descripcion'];
+        $datos['concepto'][] = $this->replaceSpecialChars($producto['descripcion'], true);
         $datos['concepto'][] = (float)$this->numero($producto['valorUnitario']);
         $datos['concepto'][] = (float)$this->numero($producto['importe']);
       }
@@ -2032,10 +2032,14 @@ class cfdi{
    * @param  string $texto
    * @return string
    */
-  private function replaceSpecialChars($texto)
+  public function replaceSpecialChars($texto, $orig=false)
   {
-    $texto = preg_replace(array('/”/', '/’/'), array('"', '\''), $texto);
-    return preg_replace('/&#0*39;/', '&apos;', htmlspecialchars($texto, ENT_QUOTES));
+    if ($orig) {
+      return preg_replace(array('/”/', '/’/'), array('"', '\''), $texto);
+    } else {
+      $texto = preg_replace(array('/”/', '/’/'), array('"', '\''), $texto);
+      return preg_replace('/&#0*39;/', '&apos;', htmlspecialchars($texto, ENT_QUOTES));
+    }
 
     // $caracteres = array('/&/', '/</', '/>/', '/”/', '/"/', '/\'/', '/’/');
     // $reemplazo  =  array('&amp;', '&lt;', '&gt;', '&quot;', '&quot;', '&apos;', '&apos;');

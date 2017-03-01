@@ -1082,7 +1082,7 @@ class compras_ordenes_model extends CI_Model {
     return array();
   }
 
-  public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo'){
+  public function getProductoAjax($idEmpresa = null, $tipo, $term, $def = 'codigo', $id_almacen = 1){
     $sql = '';
 
     $this->load->model('inventario_model');
@@ -1120,8 +1120,8 @@ class compras_ordenes_model extends CI_Model {
       {
         if(isset($_GET['did_empresa']{0}))
         {
-          $_GET['fid_producto'] = $itm->id_producto;
-          $itm->inventario = $this->inventario_model->getEPUData();
+          // $_GET['fid_producto'] = $itm->id_producto;
+          $itm->inventario = $this->inventario_model->getEPUData($itm->id_producto, $id_almacen);
           $itm->inventario = isset($itm->inventario[0])? $itm->inventario[0]: false;
         }
 

@@ -250,10 +250,9 @@ class MYpdf extends FPDF {
 	    		elseif($bordes===true)
 	    			$this->Rect($x,$y,$w,$h);
           else {
-            switch ($bordes) {
-              case 'B': $this->Line($x,$y+$h,$x+$w,$y+$h); break;
+            if ($bordes === 'B') {
+              $this->Line($x,$y+$h,$x+$w,$y+$h);
             }
-            // $bord=$bordes;
           }
 
 	    		if($header)
@@ -300,10 +299,9 @@ class MYpdf extends FPDF {
                 elseif($bordes===true)
                   $this->Rect($x,$y,$w,$h);
                 else {
-                  switch ($bordes) {
-                    case 'B': $this->Line($x,$y+$h,$x+$w,$y+$h); break;
+                  if ($bordes === 'B') {
+                    $this->Line($x,$y+$h,$x+$w,$y+$h);
                   }
-                  // $bord=$bordes;
                 }
 
                 if($header)

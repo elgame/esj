@@ -574,7 +574,8 @@ class compras_ordenes extends MY_Controller {
   {
     $this->load->model('compras_ordenes_model');
 
-    $producto = $this->compras_ordenes_model->getProductoByCodigoAjax($_GET['ide'], $_GET['tipo'], $_GET['cod']);
+    $id_almacen = isset($_GET['id_almacen']{0}) && $_GET['id_almacen'] > 0? $_GET['id_almacen']: 1;
+    $producto = $this->compras_ordenes_model->getProductoByCodigoAjax($_GET['ide'], $_GET['tipo'], $_GET['cod'], $id_almacen);
 
     echo json_encode($producto);
   }
@@ -585,7 +586,8 @@ class compras_ordenes extends MY_Controller {
 
     $where = "lower(p.nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%' AND";
 
-    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where, 'nombre');
+    $id_almacen = isset($_GET['id_almacen']{0}) && $_GET['id_almacen'] > 0? $_GET['id_almacen']: 1;
+    $productos = $this->compras_ordenes_model->getProductoAjax($_GET['ide'], $_GET['tipo'], $where, 'nombre', $id_almacen);
 
     echo json_encode($productos);
   }
