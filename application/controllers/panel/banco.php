@@ -28,6 +28,8 @@ class banco extends MY_Controller {
 		'banco/rie_xls/',
     'banco/rpt_acumulado_empresa/',
     'banco/rpt_acumulado_empresa_pdf/',
+    'banco/rpt_saldos_bancarios_pdf/',
+    'banco/rpt_saldos_bancarios_xls/'
 		);
 
 	public function _remap($method){
@@ -844,12 +846,52 @@ class banco extends MY_Controller {
     $this->load->view('panel/footer', $params);
   }
   public function rpt_acumulado_empresa_pdf(){
-    $this->load->model('banco_cuentas_model');
-    $this->banco_cuentas_model->getRAcumuladoEmpresaPdf();
+    $this->load->model('banco_model');
+    $this->banco_model->getRAcumuladoEmpresaPdf();
   }
   public function rpt_acumulado_empresa_xls(){
-    $this->load->model('banco_cuentas_model');
-    $this->banco_cuentas_model->getRAcumuladoEmpresaXls();
+    $this->load->model('banco_model');
+    $this->banco_model->getRAcumuladoEmpresaXls();
+  }
+
+  public function rpt_saldos_bancarios()
+  {
+    $this->carabiner->js(array(
+      array('general/msgbox.js'),
+      array('panel/facturacion/rpt_ventas.js'),
+    ));
+
+    $this->load->library('pagination');
+    $this->load->model('empresas_model');
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['seo']        = array('titulo' => 'Reporte de saldos bancarios');
+
+    $params['empresa']  = $this->empresas_model->getDefaultEmpresa();
+    $params['empresas'] = $this->empresas_model->getEmpresas(100);
+    $empresas = ['empresas' => [], 'fisicas' => []];
+    foreach ($params['empresas']['empresas'] as $key => $value) {
+      if (strlen($value->rfc) == 12) {
+        $empresas['empresas'][] = $value;
+      } else
+        $empresas['fisicas'][] = $value;
+    }
+    $params['empresas'] = $empresas;
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/banco/rpt_sb', $params);
+    $this->load->view('panel/footer', $params);
+  }
+  public function rpt_saldos_bancarios_pdf(){
+    $this->load->model('banco_model');
+    $this->banco_model->getRptSaldosBancariosPdf();
+  }
+  public function rpt_saldos_bancarios_xls(){
+    $this->load->model('banco_model');
+    $this->banco_model->getRAcumuladoEmpresaXls();
   }
 
 }
