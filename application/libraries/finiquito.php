@@ -992,9 +992,9 @@ class finiquito
       'Clave'            => $this->clavesPatron['subsidio'],
       'Concepto'         => 'Subsidio para el empleo',
       'ImporteGravado'   => 0,
-      'ImporteExcento'   => round($this->subsidio, 2),
-      'total'            => round($this->subsidio, 2) + 0,
-      'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
+      'ImporteExcento'   => round($subsidio, 2),
+      'total'            => round($subsidio, 2) + 0,
+      'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($subsidio, 2) + 0) )
     );
 
     return array(

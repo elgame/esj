@@ -7,7 +7,7 @@
 
   var autocompleteEmpleados = function () {
     $("#empleado").autocomplete({
-      source: base_url+'panel/usuarios/ajax_get_usuarios/',
+      source: base_url+'panel/usuarios/ajax_get_usuarios/?empleados=true',
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
