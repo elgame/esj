@@ -1,5 +1,10 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+require FCPATH.'vendor/nesbot/carbon/src/Carbon/Carbon.php';
+// require FCPATH.'vendor/autoload.php';
+
+use Carbon\Carbon;
+
 class nomina
 {
 
@@ -358,8 +363,10 @@ class nomina
     {
       $this->empleado->nomina->receptor['FechaInicioRelLaboral'] = $this->empleado->fecha_entrada;
 
-      $fecha1 = new DateTime($this->empleado->nomina->receptor['FechaInicioRelLaboral']);
-      $fecha2 = new DateTime($this->empleado->nomina->FechaFinalPago);
+      // $fecha1 = new DateTime($this->empleado->nomina->receptor['FechaInicioRelLaboral']);
+      // $fecha2 = new DateTime($this->empleado->nomina->FechaFinalPago);
+      $fecha1 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->receptor['FechaInicioRelLaboral'], 'America/Mexico_City');
+      $fecha2 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->FechaFinalPago, 'America/Mexico_City');
       $finte = $fecha1->diff($fecha2);
       if ($finte->m == 0 && $finte->y > 0) {
         $this->empleado->nomina->receptor['Antigüedad'] = 'P'.(intval($finte->days/7)).'W';
