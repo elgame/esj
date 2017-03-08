@@ -101,7 +101,7 @@ class compras_requisicion_model extends CI_Model {
   {
     $data = array(
       'id_empresa'      => $_POST['empresaId'],
-      // 'id_proveedor'    => $_POST['proveedorId'],
+      // 'id_proveedor' => $_POST['proveedorId'],
       'id_departamento' => $_POST['departamento'],
       'id_empleado'     => $this->session->userdata('id_usuario'),
       'folio'           => $_POST['folio'],
@@ -111,6 +111,7 @@ class compras_requisicion_model extends CI_Model {
       'solicito'        => $_POST['solicito'],
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       'descripcion'     => $_POST['descripcion'],
+      'id_almacen'      => $_POST['id_almacen'],
     );
 
     //si se registra a un vehiculo
@@ -122,7 +123,8 @@ class compras_requisicion_model extends CI_Model {
     //si es flete
     if ($_POST['tipoOrden'] == 'f')
     {
-      $data['ids_facrem'] = $_POST['remfacs'];
+      $data['flete_de'] = $_POST['fleteDe'];
+      $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
     }
     $this->db->insert('compras_requisicion', $data);
     $ordenId = $this->db->insert_id();
@@ -264,6 +266,7 @@ class compras_requisicion_model extends CI_Model {
         'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
         'descripcion'     => $_POST['descripcion'],
         'id_autorizo'     => (is_numeric($_POST['autorizoId'])? $_POST['autorizoId']: NULL),
+        'id_almacen'      => $_POST['id_almacen'],
       );
 
       if (isset($_POST['txtBtnAutorizar']) && $_POST['txtBtnAutorizar'] == 'true')
@@ -296,7 +299,8 @@ class compras_requisicion_model extends CI_Model {
       //si es flete
       if ($_POST['tipoOrden'] == 'f')
       {
-        $data['ids_facrem'] = $_POST['remfacs'];
+        $data['flete_de'] = $_POST['fleteDe'];
+        $data['ids_facrem'] = $data['flete_de']==='v'? $_POST['remfacs'] : $_POST['boletas'];
       }
 
       // Bitacora
@@ -449,6 +453,7 @@ class compras_requisicion_model extends CI_Model {
           'id_cliente'         => (is_numeric($data->id_cliente)? $data->id_cliente: NULL),
           'descripcion'        => $data->descripcion,
           'id_autorizo'        => $data->id_autorizo,
+          'id_almacen'         => $data->id_almacen,
         );
         //si se registra a un vehiculo
         if (is_numeric($data->id_vehiculo))
@@ -460,6 +465,7 @@ class compras_requisicion_model extends CI_Model {
         if ($data->tipo_orden == 'f')
         {
           $dataOrden['ids_facrem'] = $data->ids_facrem;
+          $dataOrden['flete_de']   = $data->flete_de;
         }
 
         // si se registra a un vehiculo
@@ -707,7 +713,8 @@ class compras_requisicion_model extends CI_Model {
               COALESCE(cv.modelo, null) as modelo,
               COALESCE(cv.marca, null) as marca,
               COALESCE(cv.color, null) as color,
-              co.ids_facrem
+              co.ids_facrem,
+              co.flete_de, co.id_almacen
        FROM compras_requisicion AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
@@ -823,15 +830,29 @@ class compras_requisicion_model extends CI_Model {
 
         // facturas ligadas
         $data['info'][0]->facturasligadas = array();
-        $this->load->model('facturacion_model');
-        $facturasss = explode('|', $data['info'][0]->ids_facrem);
-        if (count($facturasss) > 0)
-        {
-          array_pop($facturasss);
-          foreach ($facturasss as $key => $value)
+        $data['info'][0]->boletasligadas = array();
+        if ($data['info'][0]->flete_de === 'v') { // facturas y remisiones
+          $this->load->model('facturacion_model');
+          $facturasss = explode('|', $data['info'][0]->ids_facrem);
+          if (count($facturasss) > 0)
           {
-            $facturaa = explode(':', $value);
-            $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1], true)['info'];
+            array_pop($facturasss);
+            foreach ($facturasss as $key => $value)
+            {
+              $facturaa = explode(':', $value);
+              $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1], true)['info'];
+            }
+          }
+        } else { // boletas
+          $this->load->model('bascula_model');
+          $boletasss = explode('|', $data['info'][0]->ids_facrem);
+          if (count($boletasss) > 0)
+          {
+            array_pop($boletasss);
+            foreach ($boletasss as $key => $value)
+            {
+              $data['info'][0]->boletasligadas[] = $this->bascula_model->getBasculaInfo($value, 0, true)['info'][0];
+            }
           }
         }
 

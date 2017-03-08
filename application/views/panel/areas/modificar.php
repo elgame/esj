@@ -179,7 +179,7 @@
             </fieldset>
 
             <fieldset class="span6">
-              <legend>Clasificaciones <?php echo $this->usuarios_model->getLinkPrivSm('areas_otros/agregar_tamano/', array(
+              <legend>Tamaños <?php echo $this->usuarios_model->getLinkPrivSm('areas_otros/agregar_tamano/', array(
                                           'params'   => 'id='.$this->input->get('id'),
                                           'btn_type' => 'btn-success pull-right')
                                       ); ?>

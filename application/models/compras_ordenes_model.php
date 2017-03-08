@@ -602,7 +602,8 @@ class compras_ordenes_model extends CI_Model {
               COALESCE(cv.color, null) as color,
               co.ids_facrem,
               co.no_impresiones_tk,
-              co.regresa_product
+              co.regresa_product, co.flete_de,
+              co.id_almacen, ca.nombre AS almacen
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -611,6 +612,7 @@ class compras_ordenes_model extends CI_Model {
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
+       LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
        WHERE co.id_orden = {$idOrden}");
 
     $data = array();
@@ -666,15 +668,29 @@ class compras_ordenes_model extends CI_Model {
 
         // facturas ligadas
         $data['info'][0]->facturasligadas = array();
-        $this->load->model('facturacion_model');
-        $facturasss = explode('|', $data['info'][0]->ids_facrem);
-        if (count($facturasss) > 0)
-        {
-          array_pop($facturasss);
-          foreach ($facturasss as $key => $value)
+        $data['info'][0]->boletasligadas = array();
+        if ($data['info'][0]->flete_de === 'v') { // facturas y remisiones
+          $this->load->model('facturacion_model');
+          $facturasss = explode('|', $data['info'][0]->ids_facrem);
+          if (count($facturasss) > 0)
           {
-            $facturaa = explode(':', $value);
-            $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1], true)['info'];
+            array_pop($facturasss);
+            foreach ($facturasss as $key => $value)
+            {
+              $facturaa = explode(':', $value);
+              $data['info'][0]->facturasligadas[] = $this->facturacion_model->getInfoFactura($facturaa[1])['info'];
+            }
+          }
+        } else { // boletas
+          $this->load->model('bascula_model');
+          $boletasss = explode('|', $data['info'][0]->ids_facrem);
+          if (count($boletasss) > 0)
+          {
+            array_pop($boletasss);
+            foreach ($boletasss as $key => $value)
+            {
+              $data['info'][0]->boletasligadas[] = $this->bascula_model->getBasculaInfo($value, 0, false, [], $value)['info'][0];
+            }
           }
         }
 
@@ -1216,6 +1232,38 @@ class compras_ordenes_model extends CI_Model {
     return $response;
   }
 
+  public function getBoletas($datos)
+  {
+    // $tipo = $datos['tipo'] == 'f'? 't': 'f';
+    $filtro = isset($datos['filtro']{0})? " AND b.folio = '{$datos['filtro']}'": '';
+    $query = $this->db->query("SELECT b.id_bascula,
+                b.folio,
+                b.tipo,
+                b.status,
+                e.nombre_fiscal AS empresa,
+                a.nombre AS area,
+                p.nombre_fiscal AS proveedor,
+                ch.nombre AS chofer,
+                (ca.marca || ' ' || ca.modelo) AS camion,
+                ca.placa AS placas,
+                Date(b.fecha_bruto) AS fecha,
+                b.id_bonificacion
+        FROM bascula AS b
+          INNER JOIN empresas AS e ON e.id_empresa = b.id_empresa
+          INNER JOIN areas AS a ON a.id_area = b.id_area
+          INNER JOIN proveedores AS p ON p.id_proveedor = b.id_proveedor
+          LEFT JOIN choferes AS ch ON ch.id_chofer = b.id_chofer
+          LEFT JOIN camiones AS ca ON ca.id_camion = b.id_camion
+        WHERE b.tipo = 'en' AND b.accion in('en', 'p', 'b') {$filtro}
+        ORDER BY b.folio DESC
+        LIMIT 100");
+    $response = array();
+    if($query->num_rows() > 0)
+      $response = $query->result();
+    $query->free_result();
+    return $response;
+  }
+
   /*
    |------------------------------------------------------------------------
    | PDF's
@@ -1239,6 +1287,8 @@ class compras_ordenes_model extends CI_Model {
       $pdf = new MYpdf('P', 'mm', 'Letter');
       // $pdf->show_head = true;
       $pdf->titulo1 = $orden['info'][0]->empresa;
+
+      $pdf->titulo3 = 'Almacen: '.$orden['info'][0]->almacen;
       $tipo_orden = 'ORDEN DE COMPRA';
       if($orden['info'][0]->tipo_orden == 'd')
         $tipo_orden = 'ORDEN DE SERVICIO';
@@ -1332,30 +1382,55 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(154));
       if($orden['info'][0]->tipo_orden == 'f'){
-        $this->load->model('facturacion_model');
+        // $this->load->model('facturacion_model');
         $this->load->model('documentos_model');
-        $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+        // $facturasss = explode('|', $orden['info'][0]->ids_facrem);
         $info_bascula = false;
-        if (count($facturasss) > 0)
+        if (count($orden['info'][0]->facturasligadas) > 0 || count($orden['info'][0]->boletasligadas) > 0)
         {
-          $clientessss = $facturassss = '';
-          array_pop($facturasss);
-          foreach ($facturasss as $key => $value)
-          {
-            $facturaa = explode(':', $value);
-            $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
-            $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
-            $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
-
-            if($info_bascula === false)
+          $tituloclientt = $clientessss = $facturassss = $tituloclient = '';
+          if ($orden['info'][0]->flete_de == 'v') {
+            foreach ($orden['info'][0]->facturasligadas as $key => $value)
             {
-              $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
-              if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
-                $info_bascula = false;
+              $facturassss .= ' / '.$value->serie.$value->folio.' '.$value->fechaT;
+              $clientessss .= ', '.$value->cliente->nombre_fiscal;
+
+              if($info_bascula === false)
+              {
+                $info_bascula = $this->documentos_model->getClienteDocs($value->id_factura, 1);
+                if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+                  $info_bascula = false;
+              }
             }
+            $tituloclient = 'FOLIO: ';
+            $tituloclientt = 'Clientes: ';
+          } else {
+            foreach ($orden['info'][0]->boletasligadas as $key => $value)
+            {
+              $facturassss .= ' / '.$value->folio.' '.substr($value->fecha_tara, 0, 10);
+              $clientessss .= ', '.$value->proveedor;
+            }
+            $tituloclient = 'BOLETAS: ';
+            $tituloclientt = 'Proveedores: ';
           }
+
+          // array_pop($facturasss);
+          // foreach ($facturasss as $key => $value)
+          // {
+          //   $facturaa = explode(':', $value);
+          //   $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
+          //   $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
+          //   $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
+
+          //   if($info_bascula === false)
+          //   {
+          //     $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
+          //     if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+          //       $info_bascula = false;
+          //   }
+          // }
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->Row(array('FOLIO: '.substr($facturassss, 1) ), false, false);
+          $pdf->Row(array($tituloclient.substr($facturassss, 3) ), false, false);
         }
         $pdf->SetX(6);
         $pdf->Row(array('CLIENTE: '.$orden['info'][0]->cliente), false, false);
@@ -1396,7 +1471,7 @@ class compras_ordenes_model extends CI_Model {
       if($orden['info'][0]->tipo_orden == 'f'){
         $pdf->SetWidths(array(205));
         $pdf->SetX(6);
-        $pdf->Row(array(substr($clientessss, 2)), false, false);
+        $pdf->Row(array($tituloclientt.substr($clientessss, 2)), false, false);
         $pdf->SetXY(6, $pdf->GetY()-3);
         $pdf->Row(array('_________________________________________________________________________________________________________________________________'), false, false);
       }
@@ -1509,7 +1584,7 @@ class compras_ordenes_model extends CI_Model {
     elseif($orden['info'][0]->tipo_orden == 'f')
       $tipo_orden = 'ORDEN DE FLETE';
 
-    $entrada_almacen = 'Entrada';
+    $entrada_almacen = 'ENTRADA';
 
     $pdf->SetFont('helvetica','B', 8);
     $pdf->SetAligns(array('C'));
@@ -1517,8 +1592,10 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetXY(0, -1);
     $pdf->Row(array($orden['info'][0]->empresa), false, false);
 
+    $pdf->SetFont('helvetica','B', 8);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array($tipo_orden), false, false);
+    $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array($entrada_almacen), false, false);
 
@@ -1534,8 +1611,11 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('Proveedor: ' . $orden['info'][0]->proveedor), false, false);
 
-    $pdf->SetAligns(array('C'));
     $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Almacen: ' . $orden['info'][0]->almacen), false, false);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()-3);
     $pdf->Row(array('____________________________________________'), false, false);
 
 
@@ -1638,30 +1718,39 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     if($orden['info'][0]->tipo_orden == 'f'){
-      $this->load->model('facturacion_model');
+      // $this->load->model('facturacion_model');
       $this->load->model('documentos_model');
-      $facturasss = explode('|', $orden['info'][0]->ids_facrem);
+      // $facturasss = explode('|', $orden['info'][0]->ids_facrem);
       $info_bascula = false;
-      if (count($facturasss) > 0)
+      if (count($orden['info'][0]->facturasligadas) > 0 || count($orden['info'][0]->boletasligadas) > 0)
       {
-        $clientessss = $facturassss = '';
-        array_pop($facturasss);
-        foreach ($facturasss as $key => $value)
-        {
-          $facturaa = explode(':', $value);
-          $facturaa = $this->facturacion_model->getInfoFactura($facturaa[1]);
-          $facturassss .= '/'.$facturaa['info']->serie.$facturaa['info']->folio.' '.$facturaa['info']->fechaT;
-          $clientessss .= ', '.$facturaa['info']->cliente->nombre_fiscal;
-
-          if($info_bascula === false)
+        $tituloclientt = $clientessss = $facturassss = $tituloclient = '';
+        if ($orden['info'][0]->flete_de == 'v') {
+          foreach ($orden['info'][0]->facturasligadas as $key => $value)
           {
-            $info_bascula = $this->documentos_model->getClienteDocs($facturaa['info']->id_factura, 1);
-            if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
-              $info_bascula = false;
+            $facturassss .= ' / '.$value->serie.$value->folio.' '.$value->fechaT;
+            $clientessss .= ', '.$value->cliente->nombre_fiscal;
+
+            if($info_bascula === false)
+            {
+              $info_bascula = $this->documentos_model->getClienteDocs($value->id_factura, 1);
+              if(!isset($info_bascula[0]) || $info_bascula[0]->data == 'NULL' )
+                $info_bascula = false;
+            }
           }
+          $tituloclient = 'FOLIO: ';
+          $tituloclientt = 'Clientes: ';
+        } else {
+          foreach ($orden['info'][0]->boletasligadas as $key => $value)
+          {
+            $facturassss .= ' / '.$value->folio.' '.substr($value->fecha_tara, 0, 10);
+            $clientessss .= ', '.$value->proveedor;
+          }
+          $tituloclient = 'BOLETAS: ';
+          $tituloclientt = 'Proveedores: ';
         }
-        $pdf->SetXY(0, $pdf->GetY()-1);
-        $pdf->Row(array('FOLIO: '.substr($facturassss, 1) ), false, false);
+        $pdf->SetXY(0, $pdf->GetY()-2);
+        $pdf->Row(array($tituloclient.substr($facturassss, 3) ), false, false);
       }
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row(array('CLIENTE: '.$orden['info'][0]->cliente), false, false);
@@ -1697,7 +1786,7 @@ class compras_ordenes_model extends CI_Model {
     }
     if($orden['info'][0]->tipo_orden == 'f'){
       $pdf->SetX(0);
-      $pdf->Row(array(substr($clientessss, 2)), false, false);
+      $pdf->Row(array($tituloclientt.substr($clientessss, 2)), false, false);
       $pdf->SetXY(0, $pdf->GetY()-3);
       $pdf->Row(array('____________________________________________'), false, false);
     }

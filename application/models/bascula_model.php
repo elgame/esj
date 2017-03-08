@@ -405,9 +405,12 @@ class bascula_model extends CI_Model {
    * @param  boolean $basic_info
    * @return array
    */
-  public function getBasculaInfo($id=false, $folio=0, $basic_info=false, $sql_ext=array())
+  public function getBasculaInfo($id=false, $folio=0, $basic_info=false, $sql_ext=array(), $idd=null)
   {
     $id = (isset($_GET['id']))? $_GET['id']: $id;
+    if ($idd != null) {
+      $id = $idd;
+    }
 
     if(count($sql_ext) > 0)
       $this->db->where($sql_ext);
@@ -602,6 +605,12 @@ class bascula_model extends CI_Model {
     $pdf->AddPage();
     $pdf->SetFont('helvetica','', 8);
     $pdf->SetXY(0, 1);
+    $pdf->SetFont('helvetica','', 7);
+    $pdf->SetWidths(array(63));
+    $pdf->SetAligns(array('C'));
+    $pdf->Row(array('REG. ESJ97052763A0620061646'), false, false);
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(20, 43));
     $pdf->Row(array(($data->tipo=='en'? 'ENTRADA': 'SALIDA'), $data->area ), false, false);
@@ -644,22 +653,26 @@ class bascula_model extends CI_Model {
     // $pdf->Row(array('ALIM', '________', '________'), false, false);
     // $pdf->SetXY(2, $pdf->GetY());
     // $pdf->Row(array('FRUTA', '________', '________'), false, false);
-    $pdf->SetXY(2, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L'));
-    $pdf->SetWidths(array(14, 44));
-    $pdf->Row(array('LOTE', '________________'), false, false);
-    $pdf->SetXY(2, $pdf->GetY());
-    $pdf->Row(array('OBSERV', '________________'), false, false);
-    $pdf->SetXY(0, $pdf->GetY()+4);
-    $pdf->SetAligns(array('L'));
-    $pdf->SetWidths(array(63));
-    $pdf->Row(array('RECIBI: '), false, false);
-    $pdf->SetFont('helvetica','', 7);
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->SetAligns(array('C'));
-    $pdf->Row(array('REG. ESJ97052763A0620061646'), false, false);
+    $pdf->SetWidths(array(16, 47));
+    if ($data->area == 'INSUMOS MT') {
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('ENTREGO', '____________________________'), false, false);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('RECIBI', '____________________________'), false, false);
+    } else {
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('LOTE', '____________________________'), false, false);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('OBSERV', '____________________________'), false, false);
+      $pdf->SetXY(0, $pdf->GetY());
+      // $pdf->SetAligns(array('L'));
+      // $pdf->SetWidths(array(63));
+      $pdf->Row(array('RECIBI', '____________________________'), false, false);
+    }
 
-    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()+2);
     $pdf->SetAligns(array('C'));
     $pdf->Row(array('COPIA '.($data->no_imp_recepcion==0? 'ORIGINAL': 'No '.$data->no_imp_recepcion)), false, false);
 

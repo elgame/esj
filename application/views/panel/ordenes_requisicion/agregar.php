@@ -107,6 +107,21 @@
                   </div>
                 </div>
               </div>
+
+              <div class="control-group">
+                <label class="control-label" for="id_almacen">Almacen</label>
+                <div class="controls">
+                  <div class="input-append span12">
+                    <select name="id_almacen" class="span11">
+                    <?php $default = ($this->input->post('id_almacen')>0? $this->input->post('id_almacen'): '1');
+                    foreach ($almacenes['almacenes'] as $key => $value) { ?>
+                      <option value="<?php echo $value->id_almacen ?>" <?php echo set_select('id_almacen', $value->id_almacen, false, $default) ?>><?php echo $value->nombre ?></option>
+                    <?php } ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="span6">
@@ -125,6 +140,16 @@
                     <option value="d" <?php echo set_select('tipoOrden', 'd'); ?>>Servicios</option>
                     <option value="oc" <?php echo set_select('tipoOrden', 'oc'); ?>>Orden de compra</option>
                     <option value="f" <?php echo set_select('tipoOrden', 'f'); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group" id="grpFleteDe" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?>>
+                <label class="control-label" for="fleteDe">Flete de</label>
+                <div class="controls">
+                  <select name="fleteDe" class="span9" id="fleteDe">
+                    <option value="v" <?php echo set_select('fleteDe', 'v'); ?>>Venta</option>
+                    <option value="c" <?php echo set_select('fleteDe', 'c'); ?>>Compra</option>
                   </select>
                 </div>
               </div>
@@ -155,6 +180,20 @@
                       echo $_POST['remfacs_folio'].' <input type="hidden" name="remfacs" value="'.$_POST['remfacs'].'"><input type="hidden" name="remfacs_folio" value="'.$_POST['remfacs_folio'].'">';
                     } else if (isset($ordenFlete) && $ordenFlete) {
                       echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="remfacs" value="t:'.$factura['info']->id_factura.'|"><input type="hidden" name="remfacs_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
+                    } ?>
+                  </span>
+                </div>
+              </div>
+
+              <div class="control-group" <?php echo (set_select('tipoOrden', 'f')==' selected="selected"' || (isset($ordenFlete) && $ordenFlete) ? '': 'style="display:none;"'); ?> id="fletesBoletas">
+                <label class="control-label" for="ligarBoleta">Ligar BOLETA</label>
+                <div class="controls">
+                  <button type="button" class="btn btn-info" id="show-boletas">Buscar</button>
+                  <span id="boletasLigada" style="cursor:pointer;">
+                    <?php if(isset($_POST['boletas'])){
+                      echo $_POST['boletas_folio'].' <input type="hidden" name="boletas" value="'.$_POST['boletas'].'"><input type="hidden" name="boletas_folio" value="'.$_POST['boletas_folio'].'">';
+                    } else if (isset($ordenFlete) && $ordenFlete) {
+                      echo $factura['info']->serie.$factura['info']->folio.' | <input type="hidden" name="boletas" value="t:'.$factura['info']->id_factura.'|"><input type="hidden" name="boletas_folio" value="'.$factura['info']->serie.$factura['info']->folio.' | ">';
                     } ?>
                   </span>
                 </div>
@@ -642,6 +681,45 @@
     <div class="modal-footer">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
       <button class="btn btn-primary" id="BtnAddFactura">Seleccionar</button>
+    </div>
+  </div><!--/modal pallets -->
+
+  <!-- Modal boletas -->
+  <div id="modal-boletas" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Boletas</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <input type="text" id="filBoleta" class="pull-left" placeholder="Folio"> <span class="pull-left"> | </span>
+        <!-- <label class="pull-left"><input type="radio" name="filTipoboletas" class="filTipoboletas" value="f" checked>boletas</label>
+        <label class="pull-left"><input type="radio" name="filTipoboletas" class="filTipoboletas" value="r">Remision</label> -->
+      </div>
+      <div class="row-fluid">
+        <table class="table table-hover table-condensed" id="table-boletas">
+          <thead>
+            <tr>
+              <th></th>
+              <th style="width:70px;">Fecha</th>
+              <th># Folio</th>
+              <th>Proveedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- <tr>
+              <tr><input type="checkbox" value="" class="" id=""><input type="hidden" value=""></tr>
+              <tr>2013-10-22</tr>
+              <tr>9</tr>
+              <tr>100</tr>
+            </tr> -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+      <button class="btn btn-primary" id="BtnAddBoleta">Seleccionar</button>
     </div>
   </div><!--/modal pallets -->
 

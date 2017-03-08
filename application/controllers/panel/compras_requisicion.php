@@ -127,6 +127,7 @@ class compras_requisicion extends MY_Controller {
     $this->load->model('compras_requisicion_model');
     $this->load->model('compras_areas_model');
     $this->load->model('empresas_model');
+    $this->load->model('almacenes_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
     $params['seo'] = array(
@@ -137,6 +138,7 @@ class compras_requisicion extends MY_Controller {
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_requisicion_model->departamentos();
     $params['unidades']      = $this->compras_requisicion_model->unidades();
+    $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
     $this->configAddOrden();
     if ($this->form_validation->run() == FALSE)
@@ -220,6 +222,7 @@ class compras_requisicion extends MY_Controller {
     ));
 
     $this->load->model('compras_requisicion_model');
+    $this->load->model('almacenes_model');
     $this->load->model('compras_areas_model');
 
     $params['info_empleado'] = $this->info_empleado['info']; //info empleado
@@ -230,6 +233,7 @@ class compras_requisicion extends MY_Controller {
     $params['fecha']         = str_replace(' ', 'T', date("Y-m-d H:i"));
     $params['departamentos'] = $this->compras_requisicion_model->departamentos();
     $params['unidades']      = $this->compras_requisicion_model->unidades();
+    $params['almacenes']     = $this->almacenes_model->getAlmacenes(false);
 
     // if ( ! isset($_GET['m']))
     // {
@@ -526,6 +530,9 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'empresa',
             'label' => '',
             'rules' => ''),
+      array('field' => 'id_almacen',
+            'label' => 'Almacen',
+            'rules' => 'required'),
 
       array('field' => 'proveedorId1',
             'label' => 'Proveedor',
@@ -780,12 +787,24 @@ class compras_requisicion extends MY_Controller {
 
     if($this->input->post('tipoOrden') == 'f')
     {
-      $rules[] = array('field' => 'remfacs',
-                    'label' => 'Factura/Remision',
+      $rules[] = array('field' => 'fleteDe',
+                    'label' => 'Flete de',
                     'rules' => 'required');
-      $rules[] = array('field' => 'remfacs_folio',
-                    'label' => 'Factura/Remision',
-                    'rules' => '');
+      if($this->input->post('fleteDe') === 'v') {
+        $rules[] = array('field' => 'remfacs',
+                      'label' => 'Factura/Remision',
+                      'rules' => 'required');
+        $rules[] = array('field' => 'remfacs_folio',
+                      'label' => 'Factura/Remision',
+                      'rules' => '');
+      } else {
+        $rules[] = array('field' => 'boletas',
+                      'label' => 'Boletas',
+                      'rules' => 'required');
+        $rules[] = array('field' => 'boletas_folio',
+                      'label' => 'Boletas',
+                      'rules' => '');
+      }
     }
 
     $this->form_validation->set_rules($rules);

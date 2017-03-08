@@ -1,4 +1,11 @@
 
+ ☐ Fletes de venta
+    ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
+    COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';
+    ALTER TABLE public.compras_ordenes ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
+    COMMENT ON COLUMN public.compras_ordenes.flete_de IS 'v: fletes de venta, c: Fletes de compra';
+    ALTER TABLE public.compras_requisicion ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
+    INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INSUMOS MT','in',TRUE,FALSE);
  ✔ Reporte de banco @done (17-02-25 12:33) pcc|san
    ALTER TABLE public.banco_cuentas ADD COLUMN tipo character varying(10) NOT NULL DEFAULT 'M.N.'::character varying;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Por Empresa 2',104,TRUE,'banco/rpt_acumulado_empresa/','print',TRUE);

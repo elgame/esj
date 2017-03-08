@@ -28,6 +28,7 @@
     eventTipoMonedaChange();
 
     eventLigarFacturas();
+    eventLigarBoletas();
 
     // Autocomplete para los Vehiculos.
     $("#vehiculo").autocomplete({
@@ -492,6 +493,62 @@
       });
     }else
       noty({"text": 'Selecciona un cliente', "layout":"topRight", "type": 'error'});
+  };
+
+  var eventLigarBoletas = function () {
+    $("#show-boletas").on('click', function(event) {
+      // $(".filTipoFacturas").removeAttr('checked');
+      // $(".filTipoFacturas:first").attr('checked', 'checked');
+      $("#filBoleta").val("");
+
+      getBoletas();
+      $("#modal-boletas").modal('show');
+    });
+
+    // $(".filTipoFacturas").on('change', function(event) {
+    //   getBoletas($(this).val());
+    // });
+    $("#filBoleta").on('change', function(event) {
+      getBoletas();
+    });
+    $("#BtnAddBoleta").on('click', function(event) {
+      var selected = $(".radioBoleta:checked"), facts = '', folios = '';
+      selected.each(function(index, el) {
+        var $this = $(this);
+        facts += $this.val()+'|';
+        folios += $this.attr("data-folio")+' | ';
+      });
+
+      $("#boletasLigada").html(folios+' <input type="hidden" name="boletas" value="'+facts+'"><input type="hidden" name="boletas_folio" value="'+folios+'">');
+      $("#modal-boletas").modal('hide');
+    });
+    $("#boletasLigada").on('click', function(event) {
+      $(this).html("");
+    });
+  };
+
+  var getBoletas = function(tipo){
+    var params = {
+      // clienteId: $("#clienteId").val(),
+      // tipo: (tipo? tipo: 'f'),
+      filtro: $("#filBoleta").val()
+    };
+    $.getJSON(base_url+"panel/compras_ordenes/ajaxGetBoletas/", params, function(json, textStatus) {
+      var html = '';
+      for (var i in json) {
+        html += '<tr>'+
+        '  <td><input type="checkbox" name="radioBoleta" value="'+json[i].id_bascula+'" class="radioBoleta" data-folio="'+json[i].folio+'"></td>'+
+        '  <td>'+json[i].fecha+'</td>'+
+        '  <td>'+json[i].folio+'</td>'+
+        '  <td>'+json[i].proveedor+'</td>'+
+        '</tr>';
+      }
+      $("#table-boletas tbody").html(html);
+    });
+    // if($("#clienteId").val() !== '')
+    // {
+    // }else
+    //   noty({"text": 'Selecciona un cliente', "layout":"topRight", "type": 'error'});
   };
 
   var eventBtnAddProducto = function () {
