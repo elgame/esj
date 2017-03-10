@@ -101,9 +101,62 @@
 
           <!-- Ingresos -->
           <div class="row-fluid">
-            <div class="span6">
+            <div class="span12">
               <div class="row-fluid">
                 <div class="span12">
+
+                    <!-- Deudores diversos -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-fondocajas">
+                          <thead>
+                            <tr>
+                              <th colspan="4">DEUDORES DIVERSOS
+                                <button type="button" class="btn btn-success" id="btn-add-fondocaja" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
+                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
+                              </th>
+                              <th colspan="5"></th>
+                            </tr>
+                            <tr>
+                              <th>EMPRESA</th>
+                              <th>FONDO DE CAJA</th>
+                              <th>FECHA</th>
+                              <th>REFERENCIA</th>
+                              <th>INGRESOS</th>
+                              <th>EGRESOS</th>
+                              <th>SALDOS</th>
+                              <th>TICKET</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody style="overflow-y: auto;max-height: 300px;">
+                            <?php
+                                  foreach ($caja['fondos_caja'] as $fondoc) {
+                                      $totalfondo += floatval($prestamo->monto);
+                                    ?>
+                                    <tr>
+                                      <td>
+                                        <input type="text" name="fondo_categoria[]" value="<?php echo $fondoc->categoria ?>" class="span11 gasto-cargo" id="fondo_categoria" required>
+                                        <input type="hidden" name="fondo_id_categoria[]" value="<?php echo $fondoc->id_categoria ?>" id="fondo_id_categoria" class="gasto-cargo-id">
+                                        <input type="hidden" name="fondo_id_fondo[]" value="<?php echo $fondoc->id_fondo ?>" id="fondo_id_fondo">
+                                        <input type="hidden" name="fondo_del[]" value="" id="fondo_del">
+                                      </td>
+                                      <td><?php echo $fondoc->empresa ?></td>
+                                      <td><input type="date" name="fondo_fecha[]" value="<?php echo $fondoc->fecha ?>" id="fondo_fecha" required></td>
+                                      <td> <input type="text" name="fondo_referencia[]" value="<?php echo $fondoc->referencia ?>" id="fondo_referencia" class="span11"> </td>
+                                      <td> <input type="number" name="fondo_ingreso[]" value="<?php echo ($fondoc->tipo_movimiento=='t'? $fondoc->monto: '') ?>" id="fondo_ingreso" class="span11 vpositive"></td>
+                                      <td> <input type="number" name="fondo_egreso[]" value="<?php echo ($fondoc->tipo_movimiento=='f'? $fondoc->monto: '') ?>" id="fondo_egreso" class="span11 vpositive"></td>
+                                      <td><?php echo $fondoc->saldo ?></td>
+                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_fondo/?id='.$fondoc->id_fondo)?>" target="_blank" title="Imprimir">
+                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $fondoc->id_fondo ?></a></td>
+                                      <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-fondo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
+                                    </tr>
+                            <?php } ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Deudores diversos -->
 
                     <!-- Prestamos-->
                     <div class="row-fluid">

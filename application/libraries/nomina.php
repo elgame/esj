@@ -1,10 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require FCPATH.'vendor/nesbot/carbon/src/Carbon/Carbon.php';
-// require FCPATH.'vendor/autoload.php';
-
-use Carbon\Carbon;
-
 class nomina
 {
 
@@ -365,13 +360,19 @@ class nomina
 
       // $fecha1 = new DateTime($this->empleado->nomina->receptor['FechaInicioRelLaboral']);
       // $fecha2 = new DateTime($this->empleado->nomina->FechaFinalPago);
-      $fecha1 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->receptor['FechaInicioRelLaboral'], 'America/Mexico_City');
-      $fecha2 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->FechaFinalPago, 'America/Mexico_City');
-      $finte = $fecha1->diff($fecha2);
-      if ($finte->m == 0 && $finte->y > 0) {
-        $this->empleado->nomina->receptor['Antigüedad'] = 'P'.(intval($finte->days/7)).'W';
-      } else
-        $this->empleado->nomina->receptor['Antigüedad'] = 'P'.($finte->y>0?$finte->y.'Y':'').($finte->m>0?$finte->m.'M':'').$finte->d.'D';
+      // $fecha1 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->receptor['FechaInicioRelLaboral'], 'America/Mexico_City');
+      // $fecha2 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->FechaFinalPago, 'America/Mexico_City');
+      // $finte = $fecha1->diff($fecha2);
+      $finte = String::diff2Dates($this->empleado->nomina->receptor['FechaInicioRelLaboral'], $this->empleado->nomina->FechaFinalPago);
+      if ($finte->semanas > 0) {
+        $this->empleado->nomina->receptor['Antigüedad'] = 'P'.$finte->semanas.'W';
+      } else {
+        $this->empleado->nomina->receptor['Antigüedad'] = 'P'.($finte->anios>0?$finte->anios.'Y':'').($finte->meses>0?$finte->meses.'M':'').$finte->dias.'D';
+      }
+      // if ($finte->m == 0 && $finte->y > 0) {
+      //   $this->empleado->nomina->receptor['Antigüedad'] = 'P'.(intval($finte->days/7)).'W';
+      // } else
+      //   $this->empleado->nomina->receptor['Antigüedad'] = 'P'.($finte->y>0?$finte->y.'Y':'').($finte->m>0?$finte->m.'M':'').$finte->d.'D';
     }
     $this->empleado->nomina->receptor['TipoContrato'] = $this->empleado->tipo_contrato;
     if (isset($this->empleado->tipo_jornada))

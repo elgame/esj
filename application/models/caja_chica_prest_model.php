@@ -6,6 +6,7 @@ class caja_chica_prest_model extends CI_Model {
   {
     $info = array(
       'saldo_inicial'    => 0,
+      'fondos_caja'      => array(),
       'prestamos'        => array(),
       'pagos'            => array(),
       'denominaciones'   => array(),

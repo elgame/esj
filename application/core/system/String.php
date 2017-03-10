@@ -1,4 +1,7 @@
 <?php
+require FCPATH.'vendor/nesbot/carbon/src/Carbon/Carbon.php';
+
+use Carbon\Carbon;
 
 class String{
 
@@ -420,6 +423,49 @@ class String{
     else
       $meses = array('DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO');
     return $meses[$num];
+  }
+
+  public static function diff2Dates($fch1, $fch2)
+  {
+    $response = new stdClass;
+
+    $fecha1 = Carbon::createFromFormat('Y-m-d H:i:s', $fch1.' 12:00:00', 'America/Mexico_City');
+    $fecha2 = Carbon::createFromFormat('Y-m-d H:i:s', $fch2.' 12:00:00', 'America/Mexico_City');
+    $interval = $fecha2->diff($fecha1);
+    $response->days = $interval->days;
+    $response->dias = $interval->d;
+    $response->meses = $interval->m;
+    $response->anios = $interval->y;
+
+    $fecha2->addDay();
+    $interval = $fecha2->diff($fecha1);
+    $response->semanas = intval($interval->days/7);
+    $response->days2 = $interval->days;
+    // $response->days = $fecha1->diffInDays($fecha2);
+    // $response->dias = $fecha1->diffInDays($fecha2);
+    // $response->comp = $fecha1->diffInDays($fecha2);
+
+    // $response->anios = intval($response->dias/365);
+    // $response->dias -= $response->anios*365;
+    // $response->comp .= "-".($response->anios*365);
+    // $response->meses = 0;
+    // $fecha1->addYears($response->anios);
+    // $response->comp .= "-".(($fecha1->daysInMonth-$fecha1->day)+1);
+    // $fecha1->addDays(($fecha1->daysInMonth-$fecha1->day)+1);
+    // while ($fecha1->lt($fecha2)) {
+    //   if ($response->dias > $fecha1->daysInMonth) {
+    //     $fecha1->addDays($fecha1->daysInMonth);
+    //     $response->dias -= $fecha1->daysInMonth;
+    //     $response->comp .= "-".$fecha1->daysInMonth;
+    //     ++$response->meses;
+    //   } else
+    //     break;
+    // }
+    // if ($response->meses > 0) {
+    //   --$response->dias;
+    //     $response->comp .= "-1";
+    // }
+    return $response;
   }
 
 

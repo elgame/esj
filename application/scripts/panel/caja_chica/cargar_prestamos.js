@@ -7,6 +7,10 @@
     btnDelPrestamo();
     onChancePrestamos();
 
+    btnAddFondoCaja();
+    btnDelFondoCaja();
+    agregarFondoCaja();
+
     onChanceDenominacionNum();
     onChanceTotalDenominacion();
 
@@ -23,6 +27,14 @@
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
   });
+
+  var onSubmit = function () {
+    $("#frmcajachica").submit(function(event) {
+      $("#table-fondocajas tbody tr").each(function(index, el) {
+        var tr = $(this);
+      });
+    });
+  };
 
   var btnAddPrestamo = function () {
     $('#btn-add-prestamo').on('click', function(event) {
@@ -98,6 +110,51 @@
         calculaTotalPrestamos();
       }
     });
+  };
+
+  var btnAddFondoCaja = function () {
+    $('#btn-add-fondocaja').on('click', function(event) {
+      agregarFondoCaja();
+    });
+  };
+
+  var btnDelFondoCaja = function () {
+    $('#table-fondocajas').on('click', '.btn-del-fondo', function(event) {
+      var $tr = $(this).parents('tr'),
+      $fondo_id_fondo = $tr.find('#fondo_id_fondo'),
+      $fondo_del = $tr.find('#fondo_del');
+
+      if ($fondo_id_fondo.val() != '') {
+        $fondo_del.val('true');
+        $tr.css('display', 'none');
+      } else {
+        // $tr.find('.gasto-cargo, .prestamo-concepto, .prestamo-monto').removeAttr('required');
+        $tr.remove();
+      }
+      // calculaTotalPrestamos();
+    });
+  };
+
+  var agregarFondoCaja = function () {
+    var $table = $('#table-fondocajas').find('tbody'),
+        tr =  '<tr>'+
+                '<td>'+
+                  '<input type="text" name="fondo_categoria[]" value="" class="span11 gasto-cargo" id="fondo_categoria" required>'+
+                  '<input type="hidden" name="fondo_id_categoria[]" value="" id="fondo_id_categoria" class="gasto-cargo-id">'+
+                  '<input type="hidden" name="fondo_id_fondo[]" value="" id="fondo_id_fondo">'+
+                  '<input type="hidden" name="fondo_del[]" value="" id="fondo_del">'+
+                '</td>'+
+                '<td id="fondo_empresa"></td>'+
+                '<td><input type="date" name="fondo_fecha[]" value="'+$("#fecha_caja").val()+'" id="fondo_fecha" required></td>'+
+                '<td> <input type="text" name="fondo_referencia[]" value="" id="fondo_referencia" class="span11"> </td>'+
+                '<td> <input type="number" name="fondo_ingreso[]" value="" id="fondo_ingreso" class="span11 vpositive"></td>'+
+                '<td> <input type="number" name="fondo_egreso[]" value="" id="fondo_egreso" class="span11 vpositive"></td>'+
+                '<td></td>'+
+                '<td></td>'+
+                '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-fondo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
+              '</tr>';
+    $table.append(tr);
+    $(".vpositive").numeric({ negative: false }); //Numero positivo
   };
 
   var onChanceDenominacionNum = function () {
