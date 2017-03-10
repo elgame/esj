@@ -1,5 +1,5 @@
 
- ☐ Fletes de venta
+ ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap
     ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';
     ALTER TABLE public.compras_ordenes ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;

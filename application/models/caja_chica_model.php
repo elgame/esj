@@ -12,6 +12,7 @@ class caja_chica_model extends CI_Model {
       'boletas'               => array(),
       'boletas_arecuperar'    => array(),
       'boletas_ch_entransito' => array(),
+      'saldo_clientes'        => array(),
       'denominaciones'        => array(),
       'gastos'                => array(),
       'categorias'            => array(),
@@ -133,6 +134,91 @@ class caja_chica_model extends CI_Model {
       {
         $info['boletas_ch_entransito'] = $boletas->result();
       }
+    }
+
+    if ($noCaja == '2') {
+      // saldo de clientes
+      $empresas = $this->db->query("SELECT id_empresa, nombre_fiscal
+        FROM empresas WHERE status = 't'
+        ORDER BY nombre_fiscal ASC");
+      $empresas = $empresas->result();
+      foreach ($empresas as $key => $empresa) {
+        $empresa->clientes = [];
+        $sql = " AND f.id_empresa = '".$empresa->id_empresa."'";
+        $sql .= " AND f.is_factura = 'f'";
+        $saldo_clientes = $this->db->query(
+          "SELECT
+            id_cliente,
+            nombre_fiscal as nombre,
+            Sum(total) AS total,
+            Sum(iva) AS iva,
+            Sum(abonos) AS abonos,
+            Sum(saldo)::numeric(12, 2) AS saldo,
+            SUM(saldo_cambio) as saldo_cambio
+          FROM
+            (
+              SELECT
+                c.id_cliente,
+                c.nombre_fiscal,
+                Sum(f.total) AS total,
+                Sum(f.importe_iva) AS iva,
+                COALESCE(Sum(faa.abonos),0) as abonos,
+                COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
+                (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
+              FROM
+                clientes AS c
+                INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
+                LEFT JOIN (
+                  SELECT
+                    d.id_cliente,
+                    d.id_factura,
+                    Sum(d.abonos) AS abonos
+                  FROM
+                  (
+                    SELECT
+                      f.id_cliente,
+                      f.id_factura,
+                      Sum(fa.total) AS abonos
+                    FROM
+                      facturacion AS f
+                        INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
+                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
+                      AND Date(fa.fecha) >= '2017-01-01' AND Date(fa.fecha) <= '{$fecha}'{$sql}
+                    GROUP BY f.id_cliente, f.id_factura
+
+                    UNION
+
+                    SELECT
+                      f.id_cliente,
+                      f.id_nc AS id_factura,
+                      Sum(f.total) AS abonos
+                    FROM
+                      facturacion AS f
+                    WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
+                      AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
+                    GROUP BY f.id_cliente, f.id_factura
+                  ) AS d
+                  GROUP BY d.id_cliente, d.id_factura
+                ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+                LEFT JOIN (SELECT id_remision, id_factura, status
+                          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+                ) fh ON f.id_factura = fh.id_remision
+              WHERE f.status <> 'ca' AND f.status <> 'b'
+                 AND f.id_abono_factura IS NULL AND id_nc IS NULL
+                 AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
+                 AND COALESCE(fh.id_remision, 0) = 0
+              GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
+            ) AS sal
+          GROUP BY id_cliente, nombre_fiscal
+          HAVING Sum(saldo)::numeric(12, 2) > 0"
+        );
+
+        if ($saldo_clientes->num_rows() > 0)
+        {
+          $empresa->clientes = $saldo_clientes->result();
+        }
+      }
+      $info['saldo_clientes'] = $empresas;
     }
 
     // denominaciones
@@ -909,6 +995,8 @@ class caja_chica_model extends CI_Model {
     $subtitulo = '';
     if ($noCajas == 1)
       $subtitulo = ' LIMON';
+    elseif ($noCajas == 2)
+      $subtitulo = ' GASTOS';
 
     // echo "<pre>";
     //   var_dump($caja);
@@ -1179,117 +1267,185 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
     // Boletas pendientes x recuperar
-    $pdf->SetLeftMargin(111);
-    $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(111, $pdf->GetY()+3);
-    $pdf->SetAligns(array('L', 'C'));
-    $pdf->SetWidths(array(75, 25));
-    $pdf->Row(array('PENDIENTES DE RECUPERAR', 'IMPORTE'), true, true);
-
-    $pdf->SetFont('Arial','', 6);
-    $pdf->SetXY(111, $pdf->GetY());
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(75, 25));
-    $pdf->Row(array('FACTURADOR', 'IMPORTE'), true, true);
-
-    $pdf->SetFont('Arial','', 6);
-    $pdf->SetAligns(array('C', 'R'));
-    $pdf->SetWidths(array(75, 25));
-
     $totalBoletas2 = 0;
-    foreach ($caja['boletas_arecuperar'] as $key => $boleta)
-    {
-      if($pdf->GetY() >= $pdf->limiteY) {
+    if ($noCajas == 1 || $noCajas == 3) {
+      $pdf->SetLeftMargin(111);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(75, 25));
+      $pdf->Row(array('PENDIENTES DE RECUPERAR', 'IMPORTE'), true, true);
 
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(111, 10);
-        } else
-          $pdf->AddPage();
-        // // nomenclatura
-        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
-        $pdf->SetFont('Helvetica','B', 7);
-        $pdf->SetXY(111, $pdf->GetY());
-        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetXY(111, $pdf->GetY());
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(75, 25));
+      $pdf->Row(array('FACTURADOR', 'IMPORTE'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'R'));
+      $pdf->SetWidths(array(75, 25));
+
+      foreach ($caja['boletas_arecuperar'] as $key => $boleta)
+      {
+        if($pdf->GetY() >= $pdf->limiteY) {
+
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(111, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(75, 25));
+          $pdf->Row(array('FACTURADOR', 'IMPORTE'), true, true);
+
+          $boletasY = $pdf->GetY();
+        }
+
+        $pdf->SetFont('Helvetica','', 7);
+        $pdf->SetX(111);
+
         $pdf->SetWidths(array(75, 25));
-        $pdf->Row(array('FACTURADOR', 'IMPORTE'), true, true);
+        $pdf->Row(array(
+          $boleta->proveedor,
+          String::formatoNumero($boleta->importe, 2, '', false)), false, true);
 
-        $boletasY = $pdf->GetY();
+        $totalBoletas2 += floatval($boleta->importe);
       }
 
-      $pdf->SetFont('Helvetica','', 7);
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetAligns(array('R', 'R'));
       $pdf->SetX(111);
-
-      $pdf->SetWidths(array(75, 25));
-      $pdf->Row(array(
-        $boleta->proveedor,
-        String::formatoNumero($boleta->importe, 2, '', false)), false, true);
-
-      $totalBoletas2 += floatval($boleta->importe);
+      $pdf->Row(array('TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
+      // $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
     }
-
-    $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetAligns(array('R', 'R'));
-    $pdf->SetX(111);
-    $pdf->Row(array('TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
-    // $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
-
-    // cheques de boletas en transito
-    $pdf->SetLeftMargin(111);
-    $pdf->SetFillColor(230, 230, 230);
-    $pdf->SetXY(111, $pdf->GetY()+3);
-    $pdf->SetAligns(array('L', 'C'));
-    $pdf->SetWidths(array(83, 17));
-    $pdf->Row(array('CHEQUES EN TRANSITO', 'IMPORTE'), true, true);
-
-    $pdf->SetFont('Arial','', 6);
-    $pdf->SetXY(111, $pdf->GetY());
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(18, 28, 37, 17));
-    $pdf->Row(array('FECHA', 'REF', 'PRODUTOR', 'IMPORTE'), true, true);
-
-    $pdf->SetFont('Arial','', 6);
-    $pdf->SetAligns(array('C', 'C', 'C', 'R'));
-    $pdf->SetWidths(array(18, 28, 37, 17));
 
     $totalBoletasTransito = 0;
-    foreach ($caja['boletas_ch_entransito'] as $key => $boleta)
-    {
-      if($pdf->GetY() >= $pdf->limiteY) {
+    if ($noCajas == 1 || $noCajas == 3) {
+      // cheques de boletas en transito
+      $pdf->SetLeftMargin(111);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(83, 17));
+      $pdf->Row(array('CHEQUES EN TRANSITO', 'IMPORTE'), true, true);
 
-        if (count($pdf->pages) > $pdf->page) {
-          $pdf->page++;
-          $pdf->SetXY(111, 10);
-        } else
-          $pdf->AddPage();
-        // // nomenclatura
-        // $this->printCajaNomenclatura($pdf, $nomenclaturas);
-        $pdf->SetFont('Helvetica','B', 7);
-        $pdf->SetXY(111, $pdf->GetY());
-        $pdf->SetAligns(array('C', 'C', 'C', 'C'));
-        $pdf->SetWidths(array(18, 28, 37, 17));
-        $pdf->Row(array('FECHA', 'REF', 'PRODUTOR', 'IMPORTE'), true, true);
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetXY(111, $pdf->GetY());
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(18, 28, 37, 17));
+      $pdf->Row(array('FECHA', 'REF', 'PRODUTOR', 'IMPORTE'), true, true);
 
-        $boletasY = $pdf->GetY();
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R'));
+      $pdf->SetWidths(array(18, 28, 37, 17));
+
+      foreach ($caja['boletas_ch_entransito'] as $key => $boleta)
+      {
+        if($pdf->GetY() >= $pdf->limiteY) {
+
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(111, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(18, 28, 37, 17));
+          $pdf->Row(array('FECHA', 'REF', 'PRODUTOR', 'IMPORTE'), true, true);
+
+          $boletasY = $pdf->GetY();
+        }
+
+        $pdf->SetFont('Helvetica','', 7);
+        $pdf->SetX(111);
+
+        $pdf->SetAligns(array('C', 'C', 'C', 'R'));
+        $pdf->Row(array(
+          String::fechaAT($boleta->fecha),
+          $boleta->numero_ref,
+          $boleta->nombre_fiscal,
+          String::formatoNumero($boleta->monto, 2, '', false)), false, true);
+
+        $totalBoletasTransito += floatval($boleta->monto);
       }
 
-      $pdf->SetFont('Helvetica','', 7);
+      $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(111);
-
-      $pdf->SetAligns(array('C', 'C', 'C', 'R'));
-      $pdf->Row(array(
-        String::fechaAT($boleta->fecha),
-        $boleta->numero_ref,
-        $boleta->nombre_fiscal,
-        String::formatoNumero($boleta->monto, 2, '', false)), false, true);
-
-      $totalBoletasTransito += floatval($boleta->monto);
+      // $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
+      $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
     }
 
-    $pdf->SetFont('Arial', 'B', 7);
-    $pdf->SetX(111);
-    // $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
-    $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
+    $totalSaldoClientes = 0;
+    if ($noCajas == 2) {
+      // Saldo de clientes remisiones
+      $pdf->SetLeftMargin(111);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(80, 20));
+      $pdf->Row(array('SALDO DE CLIENTES', 'IMPORTE'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetXY(111, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(80, 20));
+      $pdf->Row(array('CLIENTE', 'SALDO'), true, true);
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(80, 20));
+
+      foreach ($caja['saldo_clientes'] as $key => $empresa)
+      {
+        if (count($empresa->clientes) > 0) {
+          $pdf->Row(array(
+            $empresa->nombre_fiscal,
+            ''), true, true);
+          foreach ($empresa->clientes as $key => $cliente)
+          {
+            if($pdf->GetY() >= $pdf->limiteY) {
+
+              if (count($pdf->pages) > $pdf->page) {
+                $pdf->page++;
+                $pdf->SetXY(111, 10);
+              } else
+                $pdf->AddPage();
+              // // nomenclatura
+              // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+              $pdf->SetFont('Helvetica','B', 7);
+              $pdf->SetXY(111, $pdf->GetY());
+              $pdf->SetAligns(array('L', 'R'));
+              $pdf->SetWidths(array(80, 20));
+              $pdf->Row(array('CLIENTE', 'SALDO'), true, true);
+
+              $boletasY = $pdf->GetY();
+            }
+
+            $pdf->SetFont('Helvetica','', 7);
+            $pdf->SetX(111);
+
+            $pdf->SetAligns(array('L', 'R'));
+            $pdf->Row(array(
+              $cliente->nombre,
+              String::formatoNumero($cliente->saldo, 2, '', false)), false, true);
+
+            $totalSaldoClientes += floatval($cliente->saldo);
+          }
+        }
+      }
+
+      $pdf->SetFont('Arial', 'B', 7);
+      $pdf->SetX(111);
+      // $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
+      $pdf->Row(array('TOTAL', String::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
+    }
 
     // Tabulaciones
     $pdf->SetFont('Arial','B', 6);
