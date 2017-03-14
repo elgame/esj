@@ -23,6 +23,8 @@
 
     quitarAdeudosEmpleados();
 
+    onSubmit();
+
 
     $('#total-efectivo-diferencia').text(util.darFormatoNum($('#ttotal-diferencia').val()));
 
@@ -32,6 +34,13 @@
     $("#frmcajachica").submit(function(event) {
       $("#table-fondocajas tbody tr").each(function(index, el) {
         var tr = $(this);
+        if ( (parseFloat(tr.find('#fondo_ingreso').val())||0) > 0 && (parseFloat(tr.find('#fondo_egreso').val())||0) > 0) {
+          alert("En cada fondo de caja solo puede tener INGRESO o EGRESO no ambos.");
+          event.preventDefault();
+        } else if ( (parseFloat(tr.find('#fondo_ingreso').val())||0) == 0 && (parseFloat(tr.find('#fondo_egreso').val())||0) == 0) {
+          alert("En cada fondo de caja es requerido tener un INGRESO o EGRESO.");
+          event.preventDefault();
+        }
       });
     });
   };
@@ -116,6 +125,8 @@
     $('#btn-add-fondocaja').on('click', function(event) {
       agregarFondoCaja();
     });
+
+    $("#dvfondo_caja").text("FONDO DE CAJA: "+$("#table-fondocajas .fondoc_saldo").last().text());
   };
 
   var btnDelFondoCaja = function () {
@@ -149,7 +160,7 @@
                 '<td> <input type="text" name="fondo_referencia[]" value="" id="fondo_referencia" class="span11"> </td>'+
                 '<td> <input type="number" name="fondo_ingreso[]" value="" id="fondo_ingreso" class="span11 vpositive"></td>'+
                 '<td> <input type="number" name="fondo_egreso[]" value="" id="fondo_egreso" class="span11 vpositive"></td>'+
-                '<td></td>'+
+                '<td class="fondoc_saldo"></td>'+
                 '<td></td>'+
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-fondo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
               '</tr>';

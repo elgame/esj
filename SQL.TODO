@@ -1,4 +1,27 @@
 
+ ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc
+   CREATE TABLE otros.cajaprestamo_fondo
+      (
+        id_fondo bigserial NOT NULL,
+        id_empleado bigint,
+        id_categoria integer NOT NULL,
+        fecha date NOT NULL,
+        referencia character varying(70),
+        tipo_movimiento boolean NOT NULL DEFAULT true, -- true: ingreso, false: egreso
+        no_caja integer NOT NULL DEFAULT 1,
+        monto double precision NOT NULL DEFAULT 0,
+        no_impresiones smallint NOT NULL DEFAULT 0,
+        CONSTRAINT cajaprestamo_fondo_pkey PRIMARY KEY (id_fondo),
+        CONSTRAINT cajaprestamo_fondo_id_categoria_fkey FOREIGN KEY (id_categoria)
+            REFERENCES public.cajachica_categorias (id_categoria) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE,
+        CONSTRAINT cajaprestamo_fondo_id_empleado_fkey FOREIGN KEY (id_empleado)
+            REFERENCES public.usuarios (id) MATCH SIMPLE
+            ON UPDATE CASCADE ON DELETE CASCADE
+      ) WITH ( OIDS=FALSE ); ALTER TABLE otros.cajaprestamo_fondo OWNER TO programa;
+      COMMENT ON COLUMN otros.cajaprestamo_fondo.tipo_movimiento IS 'true: ingreso, false: egreso';
+   * ALTER TABLE public.nomina_prestamos ADD COLUMN referencia character varying(100);
+   * ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN no_ticket bigserial NOT NULL;
  ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct
     ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';

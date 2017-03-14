@@ -7,6 +7,7 @@ class caja_chica_prest_model extends CI_Model {
     $info = array(
       'saldo_inicial'    => 0,
       'fondos_caja'      => array(),
+      'prestamos_lp'     => array(),
       'prestamos'        => array(),
       'pagos'            => array(),
       'denominaciones'   => array(),
@@ -28,25 +29,82 @@ class caja_chica_prest_model extends CI_Model {
       $info['saldo_inicial'] = $ultimoSaldo->result()[0]->saldo;
     }
 
+    $fondos_caja = $this->db->query(
+      "SELECT cf.id_fondo, cf.fecha, cf.referencia, cf.tipo_movimiento, cf.no_caja, cf.monto, cf.no_impresiones, cc.id_categoria,
+        cc.abreviatura AS categoria, e.nombre_fiscal AS empresa
+      FROM otros.cajaprestamo_fondo cf
+      INNER JOIN cajachica_categorias cc ON cc.id_categoria = cf.id_categoria
+      LEFT JOIN empresas e ON e.id_empresa = cc.id_empresa
+      WHERE cf.fecha <= '{$fecha}' AND cf.no_caja = {$noCaja}
+      ORDER BY cf.fecha ASC"
+    );
+
+    if ($fondos_caja->num_rows() > 0)
+    {
+      $info['fondos_caja'] = $fondos_caja->result();
+    }
+
+    // Prestamos a largo plazo
     $prestamos = $this->db->query(
-      "SELECT id_prestamo, id_prestamo_nom, id_empleado, id_categoria, id_nomenclatura, concepto, fecha, monto, categoria, nomenclatura
-      FROM (
-        SELECT cp.id_prestamo, cp.id_prestamo_nom, cp.id_empleado, cp.id_categoria, cp.id_nomenclatura, cp.concepto, cp.fecha, cp.monto,
-          cc.abreviatura as categoria, cn.nomenclatura
-        FROM otros.cajaprestamo_prestamos cp
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
-        INNER JOIN cajachica_nomenclaturas cn ON cn.id = cp.id_nomenclatura
-        WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
-        UNION
-        SELECT cp.id_prestamo AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, null AS id_categoria,
-          null AS id_nomenclatura, ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno) AS concepto, Date(np.fecha) AS fecha,
-          np.prestado AS monto, null AS categoria, null AS nomenclatura
-        FROM nomina_prestamos np
-        INNER JOIN usuarios u ON u.id = np.id_usuario
-        LEFT JOIN otros.cajaprestamo_prestamos cp ON np.id_prestamo = cp.id_prestamo_nom
-        WHERE (np.tipo = 'ef') AND np.fecha = '{$fecha}' AND cp.id_prestamo IS NULL
-      ) AS t
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date(np.fecha) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+      FROM nomina_prestamos np
+      INNER JOIN usuarios u ON u.id = np.id_usuario
+      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa
+      LEFT JOIN (
+        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+        WHERE nfp.fecha < '{$fecha}'
+        GROUP BY np.id_prestamo
+      ) pai ON np.id_prestamo = pai.id_prestamo
+      LEFT JOIN (
+        SELECT id_prestamo, no_ticket, monto AS pago_dia
+        FROM nomina_fiscal_prestamos
+        WHERE fecha = '{$fecha}'
+      ) abd ON np.id_prestamo = abd.id_prestamo
+      WHERE Date(np.fecha) >= '2016-02-11'
       ORDER BY id_prestamo_nom ASC"
+    );
+
+    if ($prestamos->num_rows() > 0)
+    {
+      $info['prestamos_lp'] = $prestamos->result();
+      foreach ($info['prestamos_lp'] as $key => $item) {
+        $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
+        if ($item->pago_dia > 0)
+          ++$item->no_pagos;
+        if ($item->saldo_fin == 0)
+          unset($info['prestamos_lp'][$key]);
+      }
+    }
+
+    $prestamos = $this->db->query(
+      "SELECT cp.id_prestamo AS id_prestamo_nom, cp.id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, '') AS categoria,
+        (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date(cp.fecha) AS fecha, cp.monto, cp.concepto AS referencia,
+        (cp.monto-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
+      FROM otros.cajaprestamo_prestamos cp
+        INNER JOIN usuarios u ON u.id = cp.id_empleado
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+        LEFT JOIN (
+          SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+          FROM otros.cajaprestamo_pagos nfp
+            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo
+          WHERE nfp.fecha < '{$fecha}'
+          GROUP BY np.id_prestamo
+        ) pai ON cp.id_prestamo = pai.id_prestamo
+        LEFT JOIN (
+          SELECT id_prestamo, id_pago, monto AS pago_dia
+          FROM otros.cajaprestamo_pagos
+          WHERE fecha = '{$fecha}'
+        ) abd ON cp.id_prestamo = abd.id_prestamo
+      WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}"
     );
 
     if ($prestamos->num_rows() > 0)
@@ -196,6 +254,45 @@ class caja_chica_prest_model extends CI_Model {
 
   public function guardar($data)
   {
+    $fondoc = array();
+    $fondoc_updt = array();
+
+    // fondo caja DEUDORES DIVERSOS
+    foreach ($data['fondo_id_categoria'] as $key => $id_cat)
+    {
+      if (isset($data['fondo_del'][$key]) && $data['fondo_del'][$key] == 'true' &&
+        isset($data['fondo_id_fondo'][$key]) && floatval($data['fondo_id_fondo'][$key]) > 0) {
+        // $gastos_ids['delets'][] = $this->getDataGasto($data['fondo_id_fondo'][$key]);
+
+        $this->db->delete('otros.cajaprestamo_fondo', "id_fondo = ".$data['fondo_id_fondo'][$key]);
+      } elseif ($data['fondo_id_fondo'][$key] > 0) {
+        $prestamos_updt = array(
+          'id_categoria'    => $id_cat,
+          'fecha'           => $data['fondo_fecha'][$key],
+          'referencia'      => $data['fondo_referencia'][$key],
+          'tipo_movimiento' => ($data['fondo_ingreso'][$key]>0? 't': 'f'),
+          'no_caja'         => $data['fno_caja'],
+          'monto'           => ($data['fondo_ingreso'][$key]>0? $data['fondo_ingreso'][$key]: $data['fondo_egreso'][$key]),
+        );
+        $this->db->update('otros.cajaprestamo_fondo', $prestamos_updt, "id_fondo = ".$data['fondo_id_fondo'][$key]);
+      } else {
+        $fondoc[] = array(
+          'id_empleado'     => $this->session->userdata('id_usuario'),
+          'id_categoria'    => $id_cat,
+          'fecha'           => $data['fondo_fecha'][$key],
+          'referencia'      => $data['fondo_referencia'][$key],
+          'tipo_movimiento' => ($data['fondo_ingreso'][$key]>0? 't': 'f'),
+          'no_caja'         => $data['fno_caja'],
+          'monto'           => ($data['fondo_ingreso'][$key]>0? $data['fondo_ingreso'][$key]: $data['fondo_egreso'][$key]),
+        );
+      }
+    }
+
+    if (count($fondoc) > 0)
+    {
+      $this->db->insert_batch('otros.cajaprestamo_fondo', $fondoc);
+    }
+
     $prestamos = array();
     $prestamos_updt = array();
 
@@ -741,6 +838,170 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->Output();
   }
 
+  public function printFondo($id_fondo)
+  {
+    $fondoc = $this->db->query(
+      "SELECT cf.id_fondo, cf.fecha, cf.referencia, cf.tipo_movimiento, cf.no_caja, cf.monto, cf.no_impresiones, cc.id_categoria,
+        cc.abreviatura AS categoria, e.nombre_fiscal AS empresa, (u.nombre || ' ' || u.apellido_paterno) AS registro
+      FROM otros.cajaprestamo_fondo cf
+      INNER JOIN usuarios u ON u.id = cf.id_empleado
+      INNER JOIN cajachica_categorias cc ON cc.id_categoria = cf.id_categoria
+      LEFT JOIN empresas e ON e.id_empresa = cc.id_empresa
+      WHERE cf.id_fondo = {$id_fondo}"
+    )->row();
+
+    // echo "<pre>";
+    //   var_dump($fondoc);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+
+    // $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()-3);
+    $pdf->Row(array('TICKET FONDO DE CAJA'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-3);
+    $pdf->Row(array( ($fondoc->tipo_movimiento=='t'? 'INGRESO': 'EGRESO') ), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Folio: '.$fondoc->id_fondo, String::fechaAT($fondoc->fecha)), false, false);
+
+    $pdf->SetWidths(array(20, 43));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('Caja: '.$fondoc->no_caja, String::formatoNumero($fondoc->monto, 2, '$', false) ), false, false);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('CANTIDAD:'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array(String::num2letras($fondoc->monto)), false, false);
+    $pdf->SetX(0);
+    $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->Row(array('EMPRESA:'), false, false);
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array($fondoc->empresa." ({$fondoc->categoria})"), false, false);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('REFERENCIA: '. $fondoc->referencia), false, false);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('REGISTRO: '. $fondoc->registro), false, false);
+
+    $pdf->SetAligns(array('C'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Row(array(($fondoc->no_impresiones>0? 'COPIA No '. $fondoc->no_impresiones: 'ORIGINAL')), false, false);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
+
+  public function printPrestamoLp($ticket, $fecha)
+  {
+    $fondoc = $this->db->query(
+      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+        ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
+        Date(abd.fecha) AS fecha, np.prestado AS monto, (np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
+        (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
+        COALESCE(abd.pago_dia, 0) AS pago_dia, abd.no_ticket, np.tipo
+      FROM nomina_prestamos np
+      INNER JOIN usuarios u ON u.id = np.id_usuario
+      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa
+      LEFT JOIN (
+        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+        WHERE nfp.fecha < '{$fecha}'
+        GROUP BY np.id_prestamo
+      ) pai ON np.id_prestamo = pai.id_prestamo
+      INNER JOIN (
+        SELECT id_prestamo, fecha, no_ticket, monto AS pago_dia
+        FROM nomina_fiscal_prestamos
+        WHERE no_ticket = {$ticket}
+      ) abd ON np.id_prestamo = abd.id_prestamo
+      WHERE abd.no_ticket = {$ticket}
+      ORDER BY id_prestamo_nom ASC"
+    )->row();
+
+    // echo "<pre>";
+    //   var_dump($fondoc);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', array(63, 130));
+    $pdf->show_head = false;
+
+    // $pdf->AddPage();
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetXY(0, 0);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-5);
+    $pdf->Row(array('       CAJA DE PRESTAMOS'), false, false);
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()-3);
+    $pdf->Row(array('TICKET PRESTAMO LARGO PLAZO'), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('Folio: '.$fondoc->no_ticket, String::fechaAT($fondoc->fecha)), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('PRESTAMO: ', String::formatoNumero($fondoc->monto, 2)), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('SALDO INICIAL: ', String::formatoNumero($fondoc->saldo_ini, 2)), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('ABONO '.(($fondoc->no_pagos+1).'/'.$fondoc->tno_pagos).':', String::formatoNumero($fondoc->pago_dia, 2)), false, false);
+
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('SALDO: ', String::formatoNumero($fondoc->saldo_ini-$fondoc->pago_dia, 2)), false, false);
+
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(63));
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('EMPRESA: '.$fondoc->categoria), false, false);
+
+    $pdf->SetXY(0, $pdf->GetY()-2);
+    $pdf->Row(array('EMPLEADO: '.$fondoc->empleado), false, false);
+
+    $pdf->AutoPrint(true);
+    $pdf->Output();
+  }
 
 
 }

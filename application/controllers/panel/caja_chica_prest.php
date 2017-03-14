@@ -16,6 +16,8 @@ class caja_chica_prest extends MY_Controller {
     'caja_chica_prest/rpt_ingresos_pdf/',
     'caja_chica_prest/rpt_ingresos_xls/',
     'caja_chica_prest/print_vale/',
+    'caja_chica_prest/print_fondo/',
+    'caja_chica_prest/print_prestamolp/',
     'caja_chica_prest/ajax_saldar_adeudos/',
   );
 
@@ -638,6 +640,18 @@ class caja_chica_prest extends MY_Controller {
   {
     $this->load->model('caja_chica_prest_model');
     $this->caja_chica_prest_model->printCaja($_GET['ffecha'], $_GET['fno_caja']);
+  }
+
+  public function print_fondo()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->printFondo($_GET['id']);
+  }
+
+  public function print_prestamolp()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->printPrestamoLp($_GET['id'], $_GET['fecha']);
   }
 
   public function print_vale()

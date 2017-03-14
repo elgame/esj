@@ -64,7 +64,10 @@
         </select>
 
         <form class="form-horizontal" action="<?php echo $action ?>" method="POST" id="frmcajachica" name="registerform">
-          <?php $totalprestamos = $totalpagos = 0; ?>
+          <?php
+          $totalfondo = $totalprestamos = $totalpagos = $totalpreslp_salini = $totalpreslp_pago_dia = $totalpreslp_salfin = 0;
+          $fecha_caja_chica = set_value('fecha_caja_chica', isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d'));
+          ?>
           <!-- Header -->
           <div class="span12" style="margin: 10px 0 0 0;">
             <div class="row-fluid">
@@ -73,7 +76,7 @@
               </div>
               <div class="span2" style="text-align: right;">
                 <div class="row-fluid">
-                  <div class="span12">Fecha <input type="date" name="fecha_caja_chica" value="<?php echo set_value('fecha_caja_chica', isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d')) ?>" id="fecha_caja" class="input-medium" readonly></div>
+                  <div class="span12">Fecha <input type="date" name="fecha_caja_chica" value="<?php echo $fecha_caja_chica ?>" id="fecha_caja" class="input-medium" readonly></div>
                 </div>
                 <div class="row-fluid" style="margin: 3px 0;">
                   <div class="span12">Saldo Inicial <input type="text" name="saldo_inicial" value="<?php echo set_value('saldo_inicial', $caja['saldo_inicial']) ?>" id="saldo_inicial" class="input-medium vpositive" <?php echo $readonly ?>></div>
@@ -115,7 +118,7 @@
                                 <button type="button" class="btn btn-success" id="btn-add-fondocaja" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button>
                                 <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
                               </th>
-                              <th colspan="5"></th>
+                              <th colspan="5" id="dvfondo_caja"></th>
                             </tr>
                             <tr>
                               <th>EMPRESA</th>
@@ -131,8 +134,10 @@
                           </thead>
                           <tbody style="overflow-y: auto;max-height: 300px;">
                             <?php
+                                $saldofc = 0;
                                   foreach ($caja['fondos_caja'] as $fondoc) {
-                                      $totalfondo += floatval($prestamo->monto);
+                                      $totalfondo += floatval($fondoc->monto);
+                                      $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
                                     ?>
                                     <tr>
                                       <td>
@@ -146,7 +151,7 @@
                                       <td> <input type="text" name="fondo_referencia[]" value="<?php echo $fondoc->referencia ?>" id="fondo_referencia" class="span11"> </td>
                                       <td> <input type="number" name="fondo_ingreso[]" value="<?php echo ($fondoc->tipo_movimiento=='t'? $fondoc->monto: '') ?>" id="fondo_ingreso" class="span11 vpositive"></td>
                                       <td> <input type="number" name="fondo_egreso[]" value="<?php echo ($fondoc->tipo_movimiento=='f'? $fondoc->monto: '') ?>" id="fondo_egreso" class="span11 vpositive"></td>
-                                      <td><?php echo $fondoc->saldo ?></td>
+                                      <td class="fondoc_saldo"><?php echo $saldofc ?></td>
                                       <td><a href="<?php echo base_url('panel/caja_chica_prest/print_fondo/?id='.$fondoc->id_fondo)?>" target="_blank" title="Imprimir">
                                           <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $fondoc->id_fondo ?></a></td>
                                       <td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-fondo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>
@@ -158,7 +163,67 @@
                     </div>
                     <!--/ Deudores diversos -->
 
-                    <!-- Prestamos-->
+                    <!-- Prestamos largo plazo -->
+                    <div class="row-fluid">
+                      <div class="span12" style="margin-top: 1px;">
+                        <table class="table table-striped table-bordered table-hover table-condensed" id="table-prestamolp">
+                          <thead>
+                            <tr>
+                              <th colspan="9">PRESTAMOS A LARGO PLAZO
+                                <!-- <button type="button" class="btn btn-success" id="btn-add-prestamo" style="padding: 2px 7px 2px; <?php echo $display ?>"><i class="icon-plus"></i></button> -->
+                                <!-- <a href="#modal-movimientos" role="button" class="btn btn-info" data-toggle="modal" id="btn-show-movimientos" style="padding: 2px 7px 2px; float: right;<?php echo $display ?>">Movimientos</a> -->
+                              </th>
+                              <th colspan="1">IMPORTE</th>
+                            </tr>
+                            <tr>
+                              <th>EMPRESA</th>
+                              <th>TRABAJADOR</th>
+                              <th>FECHA</th>
+                              <th>REFERENCIA</th>
+                              <th>CARGO <br> PRESTAMOS</th>
+                              <th>SALDOS <br> INICIALES</th>
+                              <th>ABONO <br> DEL DIA</th>
+                              <th>No.</th>
+                              <th>TICKET <br> INGRESO</th>
+                              <th>SALDOS <br> FINALES</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                                  foreach ($caja['prestamos_lp'] as $prestamo) {
+                                      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+                                      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+                                      $totalpreslp_salfin += floatval($prestamo->saldo_fin);
+                                    ?>
+                                    <tr>
+                                      <td><?php echo $prestamo->categoria ?></td>
+                                      <td><?php echo $prestamo->empleado ?></td>
+                                      <td><?php echo String::fechaAT($prestamo->fecha) ?></td>
+                                      <td><?php echo $prestamo->referencia ?></td>
+                                      <td><?php echo $prestamo->monto ?></td>
+                                      <td><?php echo $prestamo->saldo_ini ?></td>
+                                      <td><?php echo $prestamo->pago_dia ?></td>
+                                      <td><?php echo $prestamo->no_pagos.'/'.$prestamo->tno_pagos ?></td>
+                                      <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamolp/?id='.$prestamo->no_ticket."&fecha=".$fecha_caja_chica)?>"
+                                            target="_blank" title="Imprimir" style="display:<?php echo ($prestamo->no_ticket>0? 'block': 'none') ?>">
+                                          <i class="ico icon-print" style="cursor:pointer"></i> <?php echo $prestamo->no_ticket ?></a></td>
+                                      <td><?php echo $prestamo->saldo_fin ?></td>
+                                    </tr>
+                            <?php } ?>
+                                  <tr class="row-total">
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">SUMAS</td>
+                                    <td><?php echo $totalpreslp_salini ?></td>
+                                    <td><?php echo $totalpreslp_pago_dia ?></td>
+                                    <td colspan="2"></td>
+                                    <td><?php echo $totalpreslp_salfin ?></td>
+                                  </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <!--/ Prestamos largo plazo -->
+
+                    <!-- Prestamos corto plazo -->
                     <div class="row-fluid">
                       <div class="span12" style="margin-top: 1px;">
                         <table class="table table-striped table-bordered table-hover table-condensed" id="table-ingresos">
@@ -215,7 +280,7 @@
                         </table>
                       </div>
                     </div>
-                    <!--/ Prestamos-->
+                    <!--/ Prestamos corto plazo -->
 
                     <!-- Saldo empleados -->
                     <div class="row-fluid">

@@ -1,4 +1,0 @@
-[03-Mar-2017 19:55:30 America/Mexico_City] PHP Fatal error:  Class 'String' not found in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 2573
-[03-Mar-2017 19:59:14 America/Mexico_City] PHP Fatal error:  Class 'String' not found in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 2573
-[03-Mar-2017 19:59:14 America/Mexico_City] PHP Fatal error:  Class 'String' not found in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 2573
-[03-Mar-2017 20:02:08 America/Mexico_City] PHP Fatal error:  Class 'Carbon\Carbon\Carbon' not found in /home/elgame/www/sanjorge/application/libraries/nomina.php on line 368
