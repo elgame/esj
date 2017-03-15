@@ -18,7 +18,9 @@ class caja_chica_prest extends MY_Controller {
     'caja_chica_prest/print_vale/',
     'caja_chica_prest/print_fondo/',
     'caja_chica_prest/print_prestamolp/',
+    'caja_chica_prest/print_prestamocp/',
     'caja_chica_prest/ajax_saldar_adeudos/',
+    'caja_chica_prest/abono_prestamo_cp/',
   );
 
   public function _remap($method)
@@ -128,6 +130,45 @@ class caja_chica_prest extends MY_Controller {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
     $this->load->view('panel/caja_chica/generar_prestamos', $params);
+  }
+
+  public function abono_prestamo_cp()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_prestamo_caja',
+            'label' => 'Prestamo',
+            'rules' => 'required'),
+      array('field' => 'no_caja',
+            'label' => 'NO caja',
+            'rules' => 'required|numeric'),
+      array('field' => 'id_categoria',
+            'label' => 'Empresa',
+            'rules' => 'required|numeric'),
+      array('field' => 'fecha',
+            'label' => 'Fecha',
+            'rules' => 'required'),
+      array('field' => 'concepto',
+            'label' => 'Concepto',
+            'rules' => 'required'),
+      array('field' => 'monto',
+            'label' => 'Monto',
+            'rules' => 'required|numeric'),
+    );
+    $this->form_validation->set_rules($rules);
+
+    $this->load->model('caja_chica_prest_model');
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $res_mdl = $this->caja_chica_prest_model->guardarPago($_POST);
+
+      if(!$res_mdl['error'])
+        redirect(base_url('panel/caja_chica_prest/cargar?ffecha='.$_POST['fecha'].'&fno_caja='.$_POST['no_caja']));
+    }
   }
 
   public function ajax_saldar_adeudos()
@@ -258,12 +299,12 @@ class caja_chica_prest extends MY_Controller {
       $rules[] = array('field' => 'prestamo_id_prestamo_nom[]',
                       'label' => 'Prestamo',
                       'rules' => '');
-      $rules[] = array('field' => 'prestamo_id_empleado[]',
+      $rules[] = array('field' => 'prestamo_empleado_id[]',
                       'label' => 'Prestamo',
-                      'rules' => '');
-      $rules[] = array('field' => 'prestamo_nomenclatura[]',
-                      'label' => 'Prestamo Nomenclatura',
                       'rules' => 'required');
+      // $rules[] = array('field' => 'prestamo_nomenclatura[]',
+      //                 'label' => 'Prestamo Nomenclatura',
+      //                 'rules' => 'required');
       $rules[] = array('field' => 'prestamo_concepto[]',
                       'label' => 'Prestamo Concepto',
                       'rules' => 'required');
@@ -652,6 +693,12 @@ class caja_chica_prest extends MY_Controller {
   {
     $this->load->model('caja_chica_prest_model');
     $this->caja_chica_prest_model->printPrestamoLp($_GET['id'], $_GET['fecha']);
+  }
+
+  public function print_prestamocp()
+  {
+    $this->load->model('caja_chica_prest_model');
+    $this->caja_chica_prest_model->printPrestamoCp($_GET['id'], $_GET['fecha']);
   }
 
   public function print_vale()

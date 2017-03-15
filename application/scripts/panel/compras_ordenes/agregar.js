@@ -196,7 +196,7 @@
     });
   };
 
-  var autocompleteAutorizo= function () {
+  var autocompleteAutorizo = function () {
     $("#autorizo").autocomplete({
       source: base_url + 'panel/usuarios/ajax_get_usuarios/',
       minLength: 1,

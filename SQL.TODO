@@ -20,8 +20,11 @@
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE ); ALTER TABLE otros.cajaprestamo_fondo OWNER TO programa;
       COMMENT ON COLUMN otros.cajaprestamo_fondo.tipo_movimiento IS 'true: ingreso, false: egreso';
-   * ALTER TABLE public.nomina_prestamos ADD COLUMN referencia character varying(100);
-   * ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN no_ticket bigserial NOT NULL;
+   ALTER TABLE public.nomina_prestamos ADD COLUMN referencia character varying(100);
+   ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN no_ticket bigserial NOT NULL;
+   * ALTER TABLE otros.cajaprestamo_pagos ALTER COLUMN id_nomenclatura DROP NOT NULL;
+   * ALTER TABLE otros.cajaprestamo_pagos ADD COLUMN id_prestamo_caja bigint;
+   * ALTER TABLE otros.cajaprestamo_pagos ADD CONSTRAINT cajaprestamo_pagos_id_prestamo_caja_fkey FOREIGN KEY (id_prestamo_caja) REFERENCES otros.cajaprestamo_prestamos (id_prestamo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
  ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct
     ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';

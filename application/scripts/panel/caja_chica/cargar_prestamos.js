@@ -3,6 +3,7 @@
 })(function ($, window) {
   $(function () {
 
+    btnAddPagoPc();
     btnAddPrestamo();
     btnDelPrestamo();
     onChancePrestamos();
@@ -20,6 +21,7 @@
 
     autocompleteCategorias();
     autocompleteCategoriasLive();
+    autocompleteEmpleado();
 
     quitarAdeudosEmpleados();
 
@@ -45,6 +47,19 @@
     });
   };
 
+  var btnAddPagoPc = function () {
+    $("#table-ingresos, #table-presdia").on('click', '.prestamo-cp-pago', function(event) {
+      console.log("ddd");
+      var $tr = $(this).parent().parent();
+      $("#pc_id_categoria").val($tr.find(".gasto-cargo-id").val());
+      $("#pc_id_prestamo_caja").val($tr.find('#prestamo_id_prestamo').val());
+      $("#pc_no_caja").val($("#fno_caja").val());
+      $("#pc_fecha").val($("#fecha_caja").val());
+
+      $('#addPrestamosCp').modal('show');
+    });
+  };
+
   var btnAddPrestamo = function () {
     $('#btn-add-prestamo').on('click', function(event) {
       agregarPrestamo();
@@ -52,7 +67,7 @@
   };
 
   var btnDelPrestamo = function () {
-    $('#table-ingresos').on('click', '.btn-del-prestamo', function(event) {
+    $('#table-ingresos, #table-presdia').on('click', '.btn-del-prestamo', function(event) {
       var $tr = $(this).parents('tr'),
       $prestamo_id_prestamo = $tr.find('#prestamo_id_prestamo'),
       $prestamo_del = $tr.find('#prestamo_del');
@@ -61,7 +76,7 @@
         $prestamo_del.val('true');
         $tr.css('display', 'none');
       } else {
-        $tr.find('.gasto-cargo, .prestamo-concepto, .prestamo-monto').removeAttr('required');
+        $tr.find('.prestamo-empleado, .prestamo-empleado-id, .gasto-cargo, .prestamo-concepto, .prestamo-monto').removeAttr('required');
         $tr.remove();
       }
       calculaTotalPrestamos();
@@ -74,20 +89,25 @@
                 '<td style="width: 100px;">'+
                   '<input type="text" name="prestamo_empresa[]" value="" class="input-small gasto-cargo" style="width: 150px;" required>'+
                   '<input type="hidden" name="prestamo_empresa_id[]" value="" class="input-small vpositive gasto-cargo-id">'+
-                  '<input type="hidden" name="prestamo_id_prestamo[]" id="prestamo_id_prestamo" value="" class="input-small vpositive">'+
+                  '<input type="hidden" name="prestamo_id_prestamo[]" value="" id="prestamo_id_prestamo" class="input-small vpositive">'+
                   '<input type="hidden" name="prestamo_del[]" value="" id="prestamo_del">'+
                   '<input type="hidden" name="prestamo_id_prestamo_nom[]" value="" class="input-small vpositive">'+
-                  '<input type="hidden" name="prestamo_id_empleado[]" value="" class="input-small vpositive">'+
+                  // '<input type="hidden" name="prestamo_id_empleado[]" value="" class="input-small vpositive">'+
                 '</td>'+
-                '<td style="width: 40px;">'+
-                  '<select name="prestamo_nomenclatura[]" class="prestamo_nomenclatura" style="width: 70px;">' +
-                    $('#nomeclaturas_base').html() +
-                  '</select>' +
+                '<td>'+
+                  '<input type="text" name="prestamo_empleado[]" value="" class="prestamo-empleado span12" maxlength="500" placeholder="Trabajador" required>'+
+                  '<input type="hidden" name="prestamo_empleado_id[]" value="" class="prestamo-empleado-id span12" required>'+
                 '</td>'+
+                '<td>'+$("#fecha_caja").val()+'</td>'+
                 '<td>'+
                   '<input type="text" name="prestamo_concepto[]" value="" class="prestamo-concepto span12" maxlength="500" placeholder="Concepto" required>'+
                 '</td>'+
                 '<td style="width: 100px;"><input type="text" name="prestamo_monto[]" value="" class="prestamo-monto vpositive input-small" placeholder="Monto" required></td>'+
+                '<td></td>'+
+                '<td></td>'+
+                '<td></td>'+
+                '<td></td>'+
+                '<td></td>'+
                 '<td style="width: 30px;"><button type="button" class="btn btn-danger btn-del-prestamo" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button></td>'+
               '</tr>';
 
@@ -261,6 +281,28 @@
       }
 
       calculaTotalPagos();
+    });
+  };
+
+  var autocompleteEmpleado = function () {
+    $('body').on('focus', '.prestamo-empleado:not(.ui-autocomplete-input)', function(event) {
+      $("#table-ingresos .prestamo-empleado").autocomplete({
+        source: base_url + 'panel/usuarios/ajax_get_usuarios/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $tr =  $(this).parent().parent();
+
+          $(this).css("background-color", "#A1F57A");
+          $tr.find(".prestamo-empleado-id").val(ui.item.id);
+        }
+      }).on("keydown", function(event) {
+        if(event.which == 8 || event.which == 46) {
+          var $tr =  $(this).parent().parent();
+          $(this).css("background-color", "#FFD071");
+          $tr.find(".prestamo-empleado-id").val('');
+        }
+      });
     });
   };
 
