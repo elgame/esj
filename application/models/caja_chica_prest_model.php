@@ -604,11 +604,16 @@ class caja_chica_prest_model extends CI_Model {
     $pdf->SetWidths(array(104));
     $pdf->Row(array('FECHA ' . $fecha), false, false);
 
+    $fondo_cajaa = 0;
+    foreach ($caja['fondos_caja'] as $fondoc) {
+      $fondo_cajaa = ($fondoc->tipo_movimiento=='t'? $fondo_cajaa+$fondoc->monto: $fondo_cajaa-$fondoc->monto);
+    }
+
     // Saldo inicial
     $pdf->SetXY(6, $pdf->GetY() + 5);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('SALDO INICIAL '.String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA '.String::formatoNumero($fondo_cajaa, 2, '$', false)), false, false);
 
     // nomenclatura
     // $this->printCajaNomenclatura($pdf, $nomenclaturas);
@@ -635,6 +640,117 @@ class caja_chica_prest_model extends CI_Model {
 
     $pdf->auxy = $pdf->GetY();
     $page_aux = $pdf->page;
+
+    // Deudores diversos
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetXY(6, 32);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->Row(array('DEUDORES DIVERSOS'), true, true);
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
+    $pdf->Row(array('EMPRESA', 'FONDO DE CAJA', 'FECHA', 'REFERENCIA', 'INGRESOS', 'EGRESOS', 'SALDOS', 'TICKET'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'R'));
+    $pdf->SetWidths(array(25, 55, 16, 35, 20, 20, 20, 13));
+
+    $totalfondo = $total_prestamos = 0;
+    $saldofc = 0;
+    foreach ($caja['fondos_caja'] as $fondoc) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalfondo += floatval($fondoc->monto);
+      $saldofc = ($fondoc->tipo_movimiento=='t'? $saldofc+$fondoc->monto: $saldofc-$fondoc->monto);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $fondoc->categoria,
+        $fondoc->empresa,
+        $fondoc->fecha,
+        $fondoc->referencia,
+        String::formatoNumero(($fondoc->tipo_movimiento=='t'? $fondoc->monto: ''), 2, '', false),
+        String::formatoNumero(($fondoc->tipo_movimiento=='f'? $fondoc->monto: ''), 2, '', false),
+        String::formatoNumero($saldofc, 2, '', false),
+        $fondoc->id_fondo
+      ), false, 'B');
+    }
+
+    // PRESTAMOS A LARGO PLAZO
+    $pdf->SetFont('Arial','B', 7);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFillColor(230, 230, 230);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(204));
+    $pdf->SetXY(6, $pdf->GetY()+3);
+    $pdf->Row(array('PRESTAMOS A LARGO PLAZO'), true, true);
+
+    $pdf->SetFont('Arial','B', 6);
+    $pdf->SetX(6);
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(25, 50, 16, 35, 18, 18, 18, 10, 13, 18));
+    $pdf->Row(array('EMPRESA', 'TRABAJADOR', 'FECHA', 'REFERENCIA', 'CARGO PRESTAMOS', 'SALDOS INICIALES', 'ABONO DEL DIA', 'No.', 'TICKET INGRESO', 'SALDOS FINALES'), FALSE, FALSE);
+
+    $pdf->SetFont('Arial','', 7);
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'L', 'C', 'C', 'R', 'R', 'R', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(25, 50, 16, 35, 18, 18, 18, 10, 13, 18));
+
+    $totalpreslp_salini = $totalpreslp_pago_dia = 0;
+    $totalpreslp_salfin = 0;
+    foreach ($caja['prestamos_lp'] as $prestamo) {
+      if($pdf->GetY() >= $pdf->limiteY){
+        if (count($pdf->pages) > $pdf->page) {
+          $pdf->page++;
+          $pdf->SetXY(6, 10);
+        } else
+          $pdf->AddPage();
+      }
+
+      $totalpreslp_salini += floatval($prestamo->saldo_ini);
+      $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
+      $totalpreslp_salfin += floatval($prestamo->saldo_fin);
+
+      $pdf->SetX(6);
+      $pdf->Row(array(
+        $prestamo->categoria,
+        $prestamo->empleado,
+        String::fechaAT($prestamo->fecha),
+        $prestamo->referencia,
+        String::formatoNumero($prestamo->monto, 2, '', false),
+        String::formatoNumero($prestamo->saldo_ini, 2, '', false),
+        String::formatoNumero($prestamo->pago_dia, 2, '', false),
+        $prestamo->no_pagos.'/'.$prestamo->tno_pagos,
+        $prestamo->no_ticket,
+        String::formatoNumero($prestamo->saldo_fin, 2, '', false),
+      ), false, 'B');
+    }
+
+    $pdf->SetFont('Arial', 'B', 7);
+    $pdf->SetX(137);
+    $pdf->SetFillColor(255, 255, 255);
+    $pdf->SetAligns(array('R', 'R', 'R', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(18, 18, 18, 10, 13, 18));
+    $pdf->Row(array('SUMAS',
+      String::formatoNumero($totalpreslp_salini, 2, '$', false),
+      String::formatoNumero($totalpreslp_pago_dia, 2, '$', false),
+      '', '',
+      String::formatoNumero($totalpreslp_salfin, 2, '$', false),
+      ), true, 'B');
+
+    $pdf->Output('CAJA_CHICA.pdf', 'I');
 
     // Prestamos
     $pdf->SetFont('Arial','B', 7);

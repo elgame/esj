@@ -225,7 +225,7 @@
 
     var totalCorte = parseFloat($('#ttotal-corte').val());
 
-    $('#total-efectivo-diferencia').text(util.darFormatoNum((parseFloat(total) - totalCorte).toFixed(2)));
+    $('#ttotal-diferencia').val((totalCorte-parseFloat(total)).toFixed(2));
   };
 
   var btnAddPagos = function () {

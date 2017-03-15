@@ -493,10 +493,10 @@
                             <td colspan="2">TOTAL EFECTIVO</td>
                             <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
                           </tr>
-                          <tr>
+                          <!-- <tr>
                             <td colspan="2">TOTAL DIFERENCIA</td>
                             <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
-                          </tr>
+                          </tr> -->
                         </tbody>
                       </table>
                     </div>
@@ -512,17 +512,25 @@
                             </tr>
                           </thead>
                           <tbody>
+                          <?php
+                          $tt_saldo_inicial       = $totalpreslp_salini+$totalprescp_salini;
+                          $tt_saldo_finales       = $totalpreslp_salfin+$totalprescp_salfin+$totalpreslgcp_salfin;
+                          $tt_efectivo_anterior   = $saldofc-$tt_saldo_inicial;
+                          $tt_caja_ingreso        = $totalpreslp_pago_dia+$totalprescp_pago_dia+$totalpreslgcp_pago_dia;
+                          $tt_caja_egreso         = $totalpreslgcp_monto;
+                          $tt_efectivo_disponible = $tt_efectivo_anterior+$tt_caja_ingreso-$tt_caja_egreso;
+                          ?>
                             <tr>
                               <td>SALDO INICIAL:</td>
-                              <td><input type="text" name="" value="<?php echo ($totalpreslp_salini+$totalprescp_salini); //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-saldo-inicial" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $tt_saldo_inicial; //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-saldo-inicial" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>EFECTIVO ANTERIOR:</td>
-                              <td><input type="text" name="" value="<?php echo ($saldofc-($totalpreslp_salini+$totalprescp_salini)); //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-efectivo-anter" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $tt_efectivo_anterior; //$caja['saldo_inicial'] ?>" class="input-small vpositive" id="total-efectivo-anter" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>CAJA INGRESOS:</td>
-                              <td><input type="text" name="" value="<?php echo ($totalpreslp_pago_dia+$totalprescp_pago_dia+$totalpreslgcp_pago_dia); ?>" class="input-small vpositive" id="total-saldo-prestamo" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $tt_caja_ingreso; ?>" class="input-small vpositive" id="total-saldo-prestamo" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>CAJA EGRESOS:</td>
@@ -530,19 +538,22 @@
                             </tr>
                             <tr>
                               <td>EFECTIVO DISPONIBLE:</td>
-                              <td><input type="text" name="" value="<?php echo $totalpreslgcp_monto ?>" class="input-small vpositive" id="ttotal-pagos" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $tt_efectivo_disponible ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
+                              <td>DIFERENCIA DEL CORTE:</td>
+                              <td><input type="text" name="total_diferencia" value="<?php echo $tt_efectivo_disponible-$totalEfectivo ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly></td>
+                            </tr>
+                            <!-- <tr>
                               <td>SALDO DEL CORTE:</td>
                               <td><input type="text" name="saldo_corte" value="<?php echo $caja['saldo_inicial'] - $totalprestamos + $totalpagos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo ($totalEfectivo - ($caja['saldo_inicial'] - $totalprestamos + $totalpagos)) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
-                            </tr>
-                            <tr>
+                            </tr> -->
+                            <!-- <tr>
                               <td colspan="2"></td>
-                            </tr>
+                            </tr> -->
                             <tr>
                               <td>FONDO DE CAJA:</td>
-                              <td><input type="text" name="fondo_caja" value="<?php echo $caja['saldo_inicial'] - $totalprestamos + $totalpagos + $totalempsaldos; ?>" class="input-small vpositive" id="ttotal-fondo_caja" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="fondo_caja" value="<?php echo ($totalEfectivo+($tt_efectivo_disponible-$totalEfectivo)+$tt_saldo_finales); ?>" class="input-small vpositive" id="ttotal-fondo_caja" style="text-align: right;" readonly></td>
                             </tr>
                           </tbody>
                         </table>
