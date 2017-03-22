@@ -387,6 +387,21 @@ class bascula_model extends CI_Model {
 
   }
 
+  public function ligarOrdenes($idb, $data)
+  {
+    $this->db->delete('bascula_lig_orden', "id_bascula = ".$idb);
+    foreach ($data['lig_ordenes'] as $key => $value) {
+      $this->db->insert('bascula_lig_orden', [
+          'id_bascula' => $idb,
+          'id_orden'   => $value,
+          'recicio'    => $data['lig_recibio'],
+          'entrego'    => $data['lig_entrego'],
+        ]);
+    }
+
+    return true;
+  }
+
   public function urlExists($url)
   {
     $file_headers = @get_headers($url);
@@ -496,23 +511,54 @@ class bascula_model extends CI_Model {
     return $data;
   }
 
-  // /**
-  //  * Obtiene el folio siguiente.
-  //  * @return int
-  //  */
-  // public function getSiguienteFolio()
-  // {
-  //   $lastFolio = $this->db->select('folio')
-  //     ->from('bascula')
-  //     ->order_by('id_bascula', 'DESC')
-  //     ->limit(1)
-  //     ->get();
+  /**
+   * Obtiene el folio siguiente.
+   * @return int
+   */
+  public function getOrdenesLigadas($idb)
+  {
+    $ordenesl = $this->db->query("SELECT * FROM bascula_lig_orden WHERE id_bascula = {$idb}");
+    $ordenesl = $ordenesl->result();
+    $result = $ids = [];
+    $entrego = '';
+    $recicio = '';
+    foreach ($ordenesl as $key => $value) {
+      $ids[] = $value->id_orden;
+      $entrego = $value->entrego;
+      $recicio = $value->recicio;
+    }
 
-  //   if ($lastFolio->num_rows() > 0)
-  //     return intval($lastFolio->row()->folio) + 1;
-  //   else
-  //     return 1;
-  // }
+    if (count($ids) > 0) {
+      $query = $this->db->query("SELECT co.id_orden,
+                  co.id_empresa, e.nombre_fiscal AS empresa,
+                  co.id_proveedor, p.nombre_fiscal AS proveedor,
+                  co.id_departamento, cd.nombre AS departamento,
+                  co.id_empleado, u.nombre AS empleado,
+                  co.id_autorizo, us.nombre AS autorizo,
+                  co.folio, co.fecha_creacion AS fecha, co.fecha_autorizacion,
+                  co.fecha_aceptacion, co.tipo_pago, co.tipo_orden, co.status,
+                  co.autorizado,
+                  (SELECT SUM(faltantes) FROM compras_productos WHERE id_orden = co.id_orden) as faltantes,
+                  (SELECT SUM(total) FROM compras_productos WHERE id_orden = co.id_orden) as total,
+                  (
+                    (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden) -
+                    (SELECT Count(*) FROM compras_productos WHERE id_orden = co.id_orden AND id_compra IS NULL)
+                  ) as prod_sincompras,
+                  '{$entrego}' AS entrego,
+                  '{$recicio}' AS recicio
+          FROM compras_ordenes AS co
+          INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
+          INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
+          INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
+          INNER JOIN usuarios AS u ON u.id = co.id_empleado
+          LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
+          WHERE 1 = 1 AND co.id_orden in(".implode(',', $ids).")
+          ORDER BY (co.fecha_creacion, co.folio) DESC");
+      $result = $query->result();
+    }
+
+    return $result;
+  }
 
   /**
    * Obtiene el folio siguiente segun el tipo (entrada o salida) y el area.
@@ -641,11 +687,11 @@ class bascula_model extends CI_Model {
       $pdf->SetWidths(array(29, 29));
       $pdf->SetXY(2, $pdf->GetY()-1);
       $pdf->Row(array('_____________________', '_____________________'), false, false);
-      if ($data->area != 'INSUMOS') {
+      if ($data->area != 'INSUMOS' && $data->area != 'INSUMOS MT') {
         $pdf->SetWidths(array(58));
         $pdf->SetXY(2, $pdf->GetY()-2);
         $pdf->Row(array($value->nombre), false, false);
-      }elseif ($data->area == 'INSUMOS' && $key == 4)
+      }elseif ( ($data->area == 'INSUMOS' || $data->area == 'INSUMOS MT') && $key == 5)
         break;
     }
     $pdf->SetFont('helvetica','', 8);

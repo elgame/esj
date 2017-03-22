@@ -32,6 +32,7 @@ class bascula extends MY_Controller {
     'bascula/show_view_agregar_camion/',
 
     'bascula/show_view_agregar_lote/',
+    'bascula/show_view_ligar_orden/',
 
     'bascula/rde_pdf/',
     'bascula/rde_xls/',
@@ -267,6 +268,7 @@ class bascula extends MY_Controller {
 
         $_POST['ptipo']         = $info['info'][0]->tipo;
         $_POST['parea']         = $info['info'][0]->id_area;
+        $_POST['parea_nom']     = $info['info'][0]->area;
         $_POST['pempresa']      = $empresa['info']->nombre_fiscal;
         $_POST['pid_empresa']   = $info['info'][0]->id_empresa;
 
@@ -1315,6 +1317,69 @@ class bascula extends MY_Controller {
     $this->load->view('panel/bascula/supermodal', $params);
   }
 
+  /**
+   * Muestra formulario para ligar ordenes compra.
+   * @return void
+   */
+  public function show_view_ligar_orden()
+  {
+    $this->carabiner->css(array(
+      array('libs/jquery.uniform.css', 'screen'),
+    ));
+
+    $this->carabiner->js(array(
+      array('libs/jquery.uniform.min.js'),
+      array('libs/jquery.numeric.js'),
+      array('panel/compras_ordenes/admin.js'),
+      // array('panel/bascula/fix_camiones.js'),
+    ));
+
+    $this->load->model('bascula_model');
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Agregar camion'
+    );
+
+    $this->configAddLigOrden();
+    if ($this->form_validation->run() == FALSE)
+    {
+      $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+    }
+    else
+    {
+      $this->load->model('bascula_model');
+
+      $res_mdl = $this->bascula_model->ligarOrdenes($_GET['idb'], $_POST);
+
+      if($res_mdl)
+        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.String::getVarsLink(array('msg')).'&msg=30&close=1'));
+    }
+
+    if (isset($_GET['Buscar'])) {
+      $this->load->model('compras_ordenes_model');
+      $_GET['fstatus'] = 'a';
+      $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
+    }
+
+    $data = $this->bascula_model->getOrdenesLigadas($_GET['idb']);
+
+    $params['ordenes_lig'] = $data;
+    $params['lig_entrego'] = isset($data[0]->entrego)? $data[0]->entrego: '';
+    $params['lig_recibio'] = isset($data[0]->recicio)? $data[0]->recicio: '';
+
+    $params['closeModal'] = false;
+    if (isset($_GET['close']))
+      $params['closeModal'] = true;
+
+    if (isset($_GET['msg']))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['template'] = $this->load->view('panel/bascula/ligar_orden', $params, true);
+
+    $this->load->view('panel/bascula/supermodal', $params);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos con validaciones de formulario.
@@ -1744,6 +1809,24 @@ class bascula extends MY_Controller {
     $this->form_validation->set_rules($rules);
   }
 
+  public function configAddLigOrden()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'lig_entrego',
+            'label' => 'Entrego',
+            'rules' => 'required'),
+      array('field' => 'lig_recibio',
+            'label' => 'Recibio',
+            'rules' => 'required'),
+      array('field' => 'lig_ordenes[]',
+            'label' => 'Recibio',
+            'rules' => ''),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
   /*
    |------------------------------------------------------------------------
    | Metodos para peticiones Ajax.
@@ -1942,6 +2025,11 @@ class bascula extends MY_Controller {
         break;
       case 15:
         $txt = 'El lote se agrego correctamente!';
+        $icono = 'success';
+        break;
+
+      case 30:
+        $txt = 'Las ordenes se ligaron correctamente!';
         $icono = 'success';
         break;
 

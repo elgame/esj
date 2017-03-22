@@ -117,6 +117,7 @@ class compras_ordenes_model extends CI_Model {
       'solicito'        => $_POST['solicito'],
       'id_cliente'      => (is_numeric($_POST['clienteId'])? $_POST['clienteId']: NULL),
       'descripcion'     => $_POST['descripcion'],
+      'cont_x_dia'      => $this->folioDia(substr($_POST['fecha'], 0, 10)),
     );
 
     //si se registra a un vehiculo
@@ -194,6 +195,8 @@ class compras_ordenes_model extends CI_Model {
   {
     $this->db->insert('compras_ordenes', $data);
     $id_orden = $this->db->insert_id();
+
+    $this->db->update('compras_ordenes', ['cont_x_dia' => $this->folioDia(substr($data['fecha_creacion'], 0, 10))], "WHERE id_orden = {$id_orden}");
 
     if(is_array($dataVeiculo) && count($dataVeiculo) > 0)
     {
@@ -603,7 +606,8 @@ class compras_ordenes_model extends CI_Model {
               co.ids_facrem,
               co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
-              co.id_almacen, ca.nombre AS almacen
+              co.id_almacen, ca.nombre AS almacen,
+              co.cont_x_dia
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
@@ -707,6 +711,19 @@ class compras_ordenes_model extends CI_Model {
       }
     }
     return $data;
+  }
+
+  public function folioDia($fecha)
+  {
+    $res = $this->db->select('cont_x_dia')
+      ->from('compras_ordenes')
+      ->where('Date(fecha_creacion)', $fecha)
+      ->order_by('cont_x_dia', 'DESC')
+      ->limit(1)->get()->row();
+
+    $cont_x_dia = (isset($res->cont_x_dia) ? $res->cont_x_dia : 0) + 1;
+
+    return $cont_x_dia;
   }
 
   public function folio($tipo = 'p', $regresa_product=false)
@@ -1611,9 +1628,6 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('Proveedor: ' . $orden['info'][0]->proveedor), false, false);
 
-    $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row(array('Almacen: ' . $orden['info'][0]->almacen), false, false);
-
     $pdf->SetAligns(array('C'));
     $pdf->SetXY(0, $pdf->GetY()-3);
     $pdf->Row(array('____________________________________________'), false, false);
@@ -1688,8 +1702,13 @@ class compras_ordenes_model extends CI_Model {
       $retencion += floatval($prod->retencion_iva/$tipoCambio);
       $ieps      += floatval($prod->ieps/$tipoCambio);
 
-      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas))
-        $codigoAreas[$prod->id_area] = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
+      if($prod->id_area != '' && !array_key_exists($prod->id_area, $codigoAreas)){
+        $cod_soft = $this->{($prod->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($prod->id_area);
+        $cod_soft = explode('/', $cod_soft);
+        if (count($cod_soft) > 0) {
+          $codigoAreas[$prod->id_area] = count($cod_soft)>1? $cod_soft[count($cod_soft)-2].'/'.$cod_soft[count($cod_soft)-1] : $cod_soft[0];
+        }
+      }
     }
 
     $pdf->SetWidths(array(20, 20, 23));
@@ -1768,9 +1787,6 @@ class compras_ordenes_model extends CI_Model {
     }
 
 
-    $pdf->SetAligns(array('C'));
-    $pdf->SetXY(0, $pdf->GetY()+3);
-    $pdf->Row(array('____________________________________________'), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row(array('AUTORIZA: '.strtoupper($orden['info'][0]->autorizo)), false, false);
 
@@ -1780,6 +1796,17 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('COD/AREA: ' . implode(' - ', $codigoAreas)), false, false);
     }
 
+    $pdf->SetAligns(array('C'));
+    $pdf->SetXY(0, $pdf->GetY()-1);
+    $pdf->Row(array('ALMACEN ' . $orden['info'][0]->almacen), false, false);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetWidths(array(30, 33));
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetX(0);
+    $pdf->Row(array('No '.String::formatoNumero($orden['info'][0]->cont_x_dia, 2, ''), String::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
+
+    $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY());
     if (strlen($orden['info'][0]->descripcion) > 0) {
       $pdf->Row(array('OBSERVACIONES: '.$orden['info'][0]->descripcion), false, false);
@@ -1791,8 +1818,8 @@ class compras_ordenes_model extends CI_Model {
       $pdf->Row(array('____________________________________________'), false, false);
     }
 
-    $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO.'), false, false);
+    // $pdf->SetXY(0, $pdf->GetY());
+    // $pdf->Row(array('PROVEEDOR: ES INDISPENSABLE PRESENTAR ESTA ORDEN DE COMPRA JUNTO CON SU FACTURA PARA QUE PROCEDA SU PAGO.'), false, false);
 
     $pdf->SetAligns(array('C'));
     $pdf->SetX(0);
