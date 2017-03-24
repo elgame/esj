@@ -1,40 +1,40 @@
 
- ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct
+ ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san
     -- Insumo MT
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CJAS DE 20KG', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CAJA MADERA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CJAS DE 15KG', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CJAS DE 23KG', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'PRODUCTO DE LIMPIEZA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CERA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'TARIMA NAC', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'TARIMA CER', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'PAPEL', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ARPILLA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ESQUINEROS', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'GRAPAS', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'PLASTICO VITAFILM', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FLEJE SEM', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ENGRAPADORA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'SURTIDORES P GRAPA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'PELIC ESTIRABLE', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FLEJE MANUAL 5/8', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'TAPA', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ETIQUETAS', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FICHAS', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CJA PLASTI 25KG', 0, TRUE, '43000010');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'BOLSA/rpilla', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'CAJA DE PLASTICO 28KG', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FIL', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'BACATE DESENGRASANTE', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FERTILIZANTES', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FERTILIZANTES', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'FERTILIZANTES', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'TAPA', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'DESENGRASANTE', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ROLLOS DE MAYA', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'ENGRAPADORA NEUMATICA', 0, TRUE, '0');
-    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (12, 'PINZAS PARA GRAPA', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 20KG', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CAJA MADERA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 15KG', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 23KG', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'PRODUCTO DE LIMPIEZA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CERA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'TARIMA NAC', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'TARIMA CER', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'PAPEL', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ARPILLA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ESQUINEROS', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'GRAPAS', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'PLASTICO VITAFILM', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FLEJE SEM', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ENGRAPADORA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'SURTIDORES P GRAPA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'PELIC ESTIRABLE', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FLEJE MANUAL 5/8', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'TAPA', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ETIQUETAS', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FICHAS', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJA PLASTI 25KG', 0, TRUE, '43000010');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'BOLSA/rpilla', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CAJA DE PLASTICO 28KG', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FIL', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'BACATE DESENGRASANTE', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FERTILIZANTES', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FERTILIZANTES', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'FERTILIZANTES', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'TAPA', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'DESENGRASANTE', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ROLLOS DE MAYA', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'ENGRAPADORA NEUMATICA', 0, TRUE, '0');
+    INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'PINZAS PARA GRAPA', 0, TRUE, '0');
     ALTER TABLE public.compras_ordenes ADD COLUMN cont_x_dia integer NOT NULL DEFAULT 0;
     CREATE TABLE public.bascula_lig_orden
     (
@@ -53,7 +53,7 @@
     WITH ( OIDS=FALSE );
     ALTER TABLE public.bascula_lig_orden OWNER TO programa;
 
- ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc
+ ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc|san
    CREATE TABLE otros.cajaprestamo_fondo
       (
         id_fondo bigserial NOT NULL,
@@ -79,7 +79,7 @@
    ALTER TABLE otros.cajaprestamo_pagos ALTER COLUMN id_nomenclatura DROP NOT NULL;
    ALTER TABLE otros.cajaprestamo_pagos ADD COLUMN id_prestamo_caja bigint;
    ALTER TABLE otros.cajaprestamo_pagos ADD CONSTRAINT cajaprestamo_pagos_id_prestamo_caja_fkey FOREIGN KEY (id_prestamo_caja) REFERENCES otros.cajaprestamo_prestamos (id_prestamo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
- ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct
+ ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct|san
     ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';
     ALTER TABLE public.compras_ordenes ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
