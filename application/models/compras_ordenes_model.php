@@ -698,7 +698,15 @@ class compras_ordenes_model extends CI_Model {
           }
         }
 
-        //Compras de la orden
+        // Boletas ligadas
+        $data['info'][0]->boletas_lig = $this->db->query(
+              "SELECT b.folio, bl.recicio, bl.entrego, a.nombre AS area
+               FROM bascula_lig_orden bl
+                LEFT JOIN bascula b ON b.id_bascula = bl.id_bascula
+                LEFT JOIN areas a ON a.id_area = b.id_area
+               WHERE bl.id_orden = {$data['info'][0]->id_orden}")->row();
+
+        // Compras de la orden
         $this->load->model('compras_model');
         $compras_data = $this->db->query("SELECT id_compra
                                    FROM compras_facturas
@@ -1773,7 +1781,7 @@ class compras_ordenes_model extends CI_Model {
       }
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row(array('CLIENTE: '.$orden['info'][0]->cliente), false, false);
-      $pdf->SetAligns(array('C'));
+      $pdf->SetAligns(array('L'));
       $pdf->SetXY(0, $pdf->GetY()+6);
       $pdf->Row(array('____________________________________________'), false, false);
       $pdf->SetXY(0, $pdf->GetY()-2);
@@ -1806,6 +1814,16 @@ class compras_ordenes_model extends CI_Model {
     $pdf->SetX(0);
     $pdf->Row(array('No '.String::formatoNumero($orden['info'][0]->cont_x_dia, 2, ''), String::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
 
+    if (isset($orden['info'][0]->boletas_lig->folio)) {
+      $pdf->SetX(0);
+      $pdf->Row(array('BOLETA: ' . $orden['info'][0]->boletas_lig->folio, $orden['info'][0]->boletas_lig->area), false, false);
+      $pdf->SetWidths(array(63));
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('RECIBIO: ' . $orden['info'][0]->boletas_lig->recicio), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('ENTREGO: ' . $orden['info'][0]->boletas_lig->entrego), false, false);
+    }
+
     $pdf->SetWidths(array(63));
     $pdf->SetXY(0, $pdf->GetY());
     if (strlen($orden['info'][0]->descripcion) > 0) {
@@ -1815,7 +1833,7 @@ class compras_ordenes_model extends CI_Model {
       $pdf->SetX(0);
       $pdf->Row(array($tituloclientt.substr($clientessss, 2)), false, false);
       $pdf->SetXY(0, $pdf->GetY()-3);
-      $pdf->Row(array('____________________________________________'), false, false);
+      $pdf->Row(array('______________________________________'), false, false);
     }
 
     // $pdf->SetXY(0, $pdf->GetY());
@@ -1828,55 +1846,6 @@ class compras_ordenes_model extends CI_Model {
     $this->db->where('id_orden', $orden['info'][0]->id_orden)->set('no_impresiones_tk', 'no_impresiones_tk+1', false)->update('compras_ordenes');
 
     $pdf->Output('orden.pdf', 'I');
-
-    // //a si es flete
-    // if($orden['info'][0]->tipo_orden == 'f' && is_array($info_bascula) && $info_bascula[0]->data != null){
-    //   $info_bascula = json_decode($info_bascula[0]->data);
-    //   if(isset($info_bascula->no_ticket{0}))
-    //   {
-    //     $this->load->model('bascula_model');
-    //     $id_bascula = $this->bascula_model->getIdfolio($info_bascula->no_ticket, 'sa', $info_bascula->area_id);
-    //     $data_bascula = $this->bascula_model->getBasculaInfo($id_bascula);
-
-    //     $pdf->SetX(160);
-    //     $pdf->Row(array('Ticket No', String::formatoNumero($info_bascula->no_ticket, 2, '')), false, false);
-    //     $pdf->SetX(160);
-    //     $pdf->Row(array('Bruto', String::formatoNumero($data_bascula['info'][0]->kilos_bruto, 2, '', false)), false, false);
-    //     $pdf->SetX(160);
-    //     $pdf->Row(array('Tara', String::formatoNumero($data_bascula['info'][0]->kilos_tara, 2, '', false)), false, false);
-    //     $pdf->SetX(160);
-    //     $pdf->Row(array('Neto', String::formatoNumero($data_bascula['info'][0]->kilos_neto, 2, '', false)), false, false);
-    //   }
-    // }
-
-    // $pdf->SetWidths(array(154));
-
-    // if($orden['info'][0]->status == 'f'){
-    //   $pdf->SetAligns(array('C'));
-    //   $pdf->SetY($y_compras);
-    //   foreach ($orden['info'][0]->compras as $key => $value)
-    //    {
-    //      $query = $this->db->query("SELECT c.id_compra, c.serie, c.folio, c.total, Date(ca.fecha) AS fecha_pago, ca.ref_movimiento, bc.alias, Sum(ca.total) AS pagado
-    //         FROM compras c
-    //           LEFT JOIN compras_abonos ca ON c.id_compra = ca.id_compra
-    //           LEFT JOIN banco_cuentas bc ON ca.id_cuenta = bc.id_cuenta
-    //         WHERE c.id_compra = {$value->id_compra}
-    //         GROUP BY c.id_compra, c.serie, c.folio, Date(ca.fecha), ca.ref_movimiento, bc.alias");
-    //      $total_compra = $pagado_compra = 0;
-    //      foreach ($query->result() as $keyd => $compra1)
-    //      {
-    //       $pagado_compra += $compra1->pagado;
-    //       $total_compra = $compra1;
-    //      }
-    //      $query->free_result();
-    //      if ($total_compra->total > 0) {
-    //       $pdf->SetX(20);
-    //       $pdf->Row(array(
-    //         ($pagado_compra == $total_compra->total? 'PAGADO ':'PENDIENTE ').String::fechaATexto($total_compra->fecha_pago, '/c').' '.
-    //         $total_compra->ref_movimiento.' '.$total_compra->alias.' ('.$total_compra->serie.$total_compra->folio.')'), false);
-    //      }
-    //    }
-    // }
   }
 
    public function getFechaUltimaCompra($id_producto, $id_codigo, $campo)
