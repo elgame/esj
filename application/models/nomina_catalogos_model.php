@@ -36,7 +36,7 @@ class nomina_catalogos_model extends CI_Model {
   public function findByClave($clave, $tipo = 'ba')
   {
     $sql_res = $this->db->select("*" )->from("nomina_catalogos")
-                        ->where("status", 't')->where("tipo", $tipo)->where("clave", $clave)
+                        ->where("status", 't')->where("tipo", $tipo)->where("clave", ''.$clave)
                         ->order_by('clave', 'ASC')->get();
     return $sql_res->row();
   }

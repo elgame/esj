@@ -172,6 +172,13 @@ class cfdi{
     // Carga los datos de la empresa que emite la factura.
     $this->cargaDatosFiscales($id, $data['table']);
 
+    if (!$isNomina) {
+      $CI =& get_instance();
+      $CI->load->model('nomina_catalogos_model');
+      $cod_rf = $CI->nomina_catalogos_model->findByClave($this->regimen_fiscal, 'rgf');
+      $this->regimen_fiscal = isset($cod_rf->nombre_corto)? $cod_rf->nombre_corto: $this->regimen_fiscal;
+    }
+
     // $cadenaOriginal = '||';
 
     // Array que contiene la secuencia de informacion respetando el orden expresado
@@ -1279,6 +1286,11 @@ class cfdi{
     if ($isNomina) {
       $namespace .= ' xmlns:nomina12="http://www.sat.gob.mx/nomina12"';
       $schemna   .= ' http://www.sat.gob.mx/nomina12 http://www.sat.gob.mx/sitio_internet/cfd/nomina/nomina12.xsd';
+    } else {
+      $CI =& get_instance();
+      $CI->load->model('nomina_catalogos_model');
+      $cod_rf = $CI->nomina_catalogos_model->findByClave($this->regimen_fiscal, 'rgf');
+      $this->regimen_fiscal = isset($cod_rf->nombre_corto)? $cod_rf->nombre_corto: $this->regimen_fiscal;
     }
 
 		$xml = '';
