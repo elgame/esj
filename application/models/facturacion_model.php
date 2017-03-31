@@ -1011,6 +1011,8 @@ class facturacion_model extends privilegios_model{
     $datosXML['retencion'] = $impuestosRetencion;
     $datosXML['traslado']  = $impuestosTraslados;
 
+    // log_message('error', $cadenaOriginal['cadenaOriginal']);
+
     // Genera el archivo XML y lo guarda en disco.
     $archivos = $this->cfdi->generaArchivos($datosXML);
 
@@ -3194,6 +3196,7 @@ class facturacion_model extends privilegios_model{
   {
     $this->load->library('cfdi');
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
+    $this->load->model('nomina_catalogos_model');
 
     $factura = $this->getInfoFactura($idFactura);
 
@@ -3343,10 +3346,13 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(109, $pdf->GetY() + 4);
     $pdf->Cell(108, 4, "Régimen Fiscal:", 0, 0, 'R', 1);
 
+    $cod_rf = $this->nomina_catalogos_model->findByClave($xml->Emisor->RegimenFiscal[0]['Regimen'], 'rgf');
+    $regimen_fiscal = isset($cod_rf->nombre_corto)? $cod_rf->nombre_corto: $xml->Emisor->RegimenFiscal[0]['Regimen'];
+
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->MultiCell(108, 4, $xml->Emisor->RegimenFiscal[0]['Regimen'], 0, 'C', 0);
+    $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'C', 0);
 
     //////////////////
     // domicilioEmisor //
