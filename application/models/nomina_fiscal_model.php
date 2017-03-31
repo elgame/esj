@@ -512,7 +512,7 @@ class nomina_fiscal_model extends CI_Model {
                 $empleado->incapacidades[] = array(
                   'DiasIncapacidad' => $diasIncapacidad,
                   'TipoIncapacidad' => $fi->sat_clave,
-                  'ImporteMonetario' => floatval($diasIncapacidad) * floatval($empleado->salario_diario)
+                  'ImporteMonetario' => number_format(floatval($diasIncapacidad) * floatval($empleado->salario_diario), 2),
                 );
               }
             }
