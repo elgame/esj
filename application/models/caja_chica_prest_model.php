@@ -69,7 +69,7 @@ class caja_chica_prest_model extends CI_Model {
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
       WHERE Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
-      ORDER BY id_prestamo_nom ASC"
+      ORDER BY fecha ASC, id_prestamo_nom ASC"
     );
 
     if ($prestamos->num_rows() > 0)
@@ -79,7 +79,7 @@ class caja_chica_prest_model extends CI_Model {
         $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
-        if ($item->saldo_fin == 0)
+        if ($item->saldo_ini == 0)
           unset($info['prestamos_lp'][$key]);
       }
     }
@@ -107,7 +107,8 @@ class caja_chica_prest_model extends CI_Model {
           WHERE fecha = '{$fecha}'
         ) abd ON cp.id_prestamo = abd.id_prestamo
       WHERE cp.fecha < '{$fecha}' AND cp.no_caja = {$noCaja}
-        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0"
+        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0
+      ORDER BY fecha ASC, id_prestamo ASC"
     );
 
     if ($prestamos->num_rows() > 0)
@@ -180,7 +181,8 @@ class caja_chica_prest_model extends CI_Model {
           WHERE fecha = '{$fecha}'
         ) abd ON cp.id_prestamo = abd.id_prestamo
       WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
-        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0"
+        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0
+      ORDER BY id_prestamo ASC"
     );
 
     if ($prestamos->num_rows() > 0)
