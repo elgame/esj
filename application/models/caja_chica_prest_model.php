@@ -55,7 +55,7 @@ class caja_chica_prest_model extends CI_Model {
       FROM nomina_prestamos np
       INNER JOIN usuarios u ON u.id = np.id_usuario
       INNER JOIN empresas e ON e.id_empresa = u.id_empresa
-      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
       LEFT JOIN (
         SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
         FROM nomina_fiscal_prestamos nfp
@@ -93,7 +93,7 @@ class caja_chica_prest_model extends CI_Model {
         COALESCE(abd.pago_dia, 0) AS pago_dia, abd.id_pago
       FROM otros.cajaprestamo_prestamos cp
         INNER JOIN usuarios u ON u.id = cp.id_empleado
-        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
         LEFT JOIN (
           SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
           FROM otros.cajaprestamo_pagos nfp

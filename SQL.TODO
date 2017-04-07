@@ -1,4 +1,6 @@
 
+ ✔ Reporte @done (17-04-04 15:29) pcc|san
+     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de saldos bancarios',104,TRUE,'banco/rpt_saldos_bancarios/','print',TRUE);
  ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san
     -- Insumo MT
     INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 20KG', 0, TRUE, '43000010');
