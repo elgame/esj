@@ -1,7 +1,7 @@
 
- ✔ Reporte @done (17-04-04 15:29) pcc|san
+ ✔ Reporte @done (17-04-04 15:29) pcc|san|lap
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de saldos bancarios',104,TRUE,'banco/rpt_saldos_bancarios/','print',TRUE);
- ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san
+ ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san|lap
     -- Insumo MT
     INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 20KG', 0, TRUE, '43000010');
     INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CAJA MADERA', 0, TRUE, '43000010');
@@ -55,7 +55,7 @@
     WITH ( OIDS=FALSE );
     ALTER TABLE public.bascula_lig_orden OWNER TO programa;
 
- ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc|san
+ ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc|san|lap
    CREATE TABLE otros.cajaprestamo_fondo
       (
         id_fondo bigserial NOT NULL,
@@ -76,6 +76,7 @@
             ON UPDATE CASCADE ON DELETE CASCADE
       ) WITH ( OIDS=FALSE ); ALTER TABLE otros.cajaprestamo_fondo OWNER TO programa;
       COMMENT ON COLUMN otros.cajaprestamo_fondo.tipo_movimiento IS 'true: ingreso, false: egreso';
+   ALTER TABLE public.nomina_prestamos ADD COLUMN tipo character varying(4);
    ALTER TABLE public.nomina_prestamos ADD COLUMN referencia character varying(100);
    ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN no_ticket bigserial NOT NULL;
    ALTER TABLE otros.cajaprestamo_pagos ALTER COLUMN id_nomenclatura DROP NOT NULL;
