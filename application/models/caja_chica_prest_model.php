@@ -689,6 +689,8 @@ class caja_chica_prest_model extends CI_Model {
 
     $totalpreslp_salini = $totalpreslp_pago_dia = 0;
     $totalpreslp_salfin = 0;
+    $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+    $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
     foreach ($caja['prestamos_lp'] as $prestamo) {
       if($pdf->GetY() >= $pdf->limiteY){
         if (count($pdf->pages) > $pdf->page) {
@@ -700,7 +702,17 @@ class caja_chica_prest_model extends CI_Model {
 
       $totalpreslp_salini += floatval($prestamo->saldo_ini);
       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
-      $totalpreslp_salfin += floatval($prestamo->saldo_fin);
+      $totalpreslp_salfin      += floatval($prestamo->saldo_fin);
+      if ($prestamo->tipo      == 'fi') {
+        $totalpreslp_salini_fi   += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_fi   += floatval($prestamo->saldo_fin);
+      }
+      else {
+        $totalpreslp_salini_ef   += floatval($prestamo->saldo_ini);
+        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+        $totalpreslp_salfin_ef   += floatval($prestamo->saldo_fin);
+      }
 
       $pdf->SetX(6);
       $pdf->Row(array(
@@ -727,6 +739,20 @@ class caja_chica_prest_model extends CI_Model {
       String::formatoNumero($totalpreslp_pago_dia, 2, '$', false),
       '', '',
       String::formatoNumero($totalpreslp_salfin, 2, '$', false),
+      ), true, 'B');
+    $pdf->SetX(120);
+    $pdf->Row(array('Fiscal',
+      String::formatoNumero($totalpreslp_salini_fi, 2, '$', false),
+      String::formatoNumero($totalpreslp_pago_dia_fi, 2, '$', false),
+      '', '',
+      String::formatoNumero($totalpreslp_salfin_fi, 2, '$', false),
+      ), true, 'B');
+    $pdf->SetX(120);
+    $pdf->Row(array('Efectivo',
+      String::formatoNumero($totalpreslp_salini_ef, 2, '$', false),
+      String::formatoNumero($totalpreslp_pago_dia_ef, 2, '$', false),
+      '', '',
+      String::formatoNumero($totalpreslp_salfin_ef, 2, '$', false),
       ), true, 'B');
 
     // PRESTAMOS A CORTO PLAZO

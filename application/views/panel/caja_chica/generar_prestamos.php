@@ -191,10 +191,22 @@
                           </thead>
                           <tbody>
                             <?php
+                                  $totalpreslp_salini_fi = $totalpreslp_pago_dia_fi = $totalpreslp_salfin_fi = 0;
+                                  $totalpreslp_salini_ef = $totalpreslp_pago_dia_ef = $totalpreslp_salfin_ef = 0;
                                   foreach ($caja['prestamos_lp'] as $prestamo) {
                                       $totalpreslp_salini += floatval($prestamo->saldo_ini);
                                       $totalpreslp_pago_dia += floatval($prestamo->pago_dia);
                                       $totalpreslp_salfin += floatval($prestamo->saldo_fin);
+                                      if ($prestamo->tipo == 'fi') {
+                                        $totalpreslp_salini_fi += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_fi += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_fi += floatval($prestamo->saldo_fin);
+                                      }
+                                      else {
+                                        $totalpreslp_salini_ef += floatval($prestamo->saldo_ini);
+                                        $totalpreslp_pago_dia_ef += floatval($prestamo->pago_dia);
+                                        $totalpreslp_salfin_ef += floatval($prestamo->saldo_fin);
+                                      }
                                     ?>
                                     <tr>
                                       <td><?php echo $prestamo->categoria ?></td>
@@ -217,6 +229,20 @@
                                     <td><?php echo $totalpreslp_pago_dia ?></td>
                                     <td colspan="2"></td>
                                     <td><?php echo $totalpreslp_salfin ?></td>
+                                  </tr>
+                                  <tr class="row-total">
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Fiscal</td>
+                                    <td><?php echo $totalpreslp_salini_fi ?></td>
+                                    <td><?php echo $totalpreslp_pago_dia_fi ?></td>
+                                    <td colspan="2"></td>
+                                    <td><?php echo $totalpreslp_salfin_fi ?></td>
+                                  </tr>
+                                  <tr class="row-total">
+                                    <td colspan="5" style="text-align: right; font-weight: bolder;">Efectivo</td>
+                                    <td><?php echo $totalpreslp_salini_ef ?></td>
+                                    <td><?php echo $totalpreslp_pago_dia_ef ?></td>
+                                    <td colspan="2"></td>
+                                    <td><?php echo $totalpreslp_salfin_ef ?></td>
                                   </tr>
                           </tbody>
                         </table>
