@@ -378,7 +378,7 @@
                                         <input type="text" name="prestamo_concepto[]" value="<?php echo $prestamo->concepto ?>" class="prestamo-concepto span12" maxlength="500" placeholder="Concepto" required <?php echo $readonly ?>>
                                       </td>
                                       <td style="width: 100px;"><input type="text" name="prestamo_monto[]" value="<?php echo $prestamo->monto ?>" class="prestamo-monto vpositive input-small" placeholder="Monto" required <?php echo ($prestamo->id_prestamo_nom>0? 'readonly': $readonly) ?>></td>
-                                      <td><a href="#" class="btn prestamo-cp-pago"><?php echo $prestamo->saldo_ini ?></a></td>
+                                      <td><a href="#" class="btn prestamo-cp-pago <?php echo ($prestamo->saldo_fin==0? ' hide': '') ?>"><?php echo $prestamo->saldo_ini ?></a></td>
                                       <td><?php echo $prestamo->pago_dia ?></td>
                                       <td></td>
                                       <td><a href="<?php echo base_url('panel/caja_chica_prest/print_prestamocp/?id='.$prestamo->id_pago."&fecha=".$fecha_caja_chica)?>"

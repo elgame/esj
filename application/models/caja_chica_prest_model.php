@@ -97,12 +97,12 @@ class caja_chica_prest_model extends CI_Model {
         LEFT JOIN (
           SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
           FROM otros.cajaprestamo_pagos nfp
-            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo
-          WHERE nfp.fecha < '{$fecha}'
+            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
+          WHERE nfp.fecha <= '{$fecha}'
           GROUP BY np.id_prestamo
         ) pai ON cp.id_prestamo = pai.id_prestamo
         LEFT JOIN (
-          SELECT id_prestamo, id_pago, monto AS pago_dia
+          SELECT id_prestamo_caja AS id_prestamo, id_pago, monto AS pago_dia
           FROM otros.cajaprestamo_pagos
           WHERE fecha = '{$fecha}'
         ) abd ON cp.id_prestamo = abd.id_prestamo
@@ -121,7 +121,7 @@ class caja_chica_prest_model extends CI_Model {
 
     // Prestamos a largo plazo de ese dia
     $prestamos = $this->db->query(
-      "SELECT np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
+      "SELECT 0 AS id_prestamo, np.id_prestamo AS id_prestamo_nom, np.id_usuario AS id_empleado, cc.id_categoria, COALESCE(cc.abreviatura, e.nombre_fiscal) AS categoria,
         ('PTMO NOM ' || u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS empleado,
         Date(np.fecha) AS fecha, np.prestado AS monto, ceil(np.prestado/np.pago_semana) AS tno_pagos, np.referencia,
         (np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini, COALESCE(pai.no_pagos, 0) AS no_pagos,
@@ -171,17 +171,17 @@ class caja_chica_prest_model extends CI_Model {
         LEFT JOIN (
           SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
           FROM otros.cajaprestamo_pagos nfp
-            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo
+            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
           WHERE nfp.fecha < '{$fecha}'
           GROUP BY np.id_prestamo
         ) pai ON cp.id_prestamo = pai.id_prestamo
         LEFT JOIN (
-          SELECT id_prestamo, id_pago, monto AS pago_dia
+          SELECT id_prestamo_caja AS id_prestamo, id_pago, monto AS pago_dia
           FROM otros.cajaprestamo_pagos
           WHERE fecha = '{$fecha}'
         ) abd ON cp.id_prestamo = abd.id_prestamo
       WHERE cp.fecha = '{$fecha}' AND cp.no_caja = {$noCaja}
-        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) > 0
+        AND ((cp.monto-COALESCE(pai.saldo_ini, 0))-COALESCE(abd.pago_dia, 0)) >= 0
       ORDER BY id_prestamo ASC"
     );
 
@@ -393,9 +393,9 @@ class caja_chica_prest_model extends CI_Model {
           'id_categoria'    => $data['prestamo_empresa_id'][$key],
           // 'id_nomenclatura' => $data['prestamo_nomenclatura'][$key],
           'concepto'        => $data['prestamo_concepto'][$key],
-          'fecha'           => $data['fecha_caja_chica'],
+          // 'fecha'           => $data['fecha_caja_chica'],
           'monto'           => $data['prestamo_monto'][$key],
-          'no_caja'         => $data['fno_caja'],
+          // 'no_caja'         => $data['fno_caja'],
         );
         $this->db->update('otros.cajaprestamo_prestamos', $prestamos_updt, "id_prestamo = ".$data['prestamo_id_prestamo'][$key]);
       } else {
@@ -492,12 +492,12 @@ class caja_chica_prest_model extends CI_Model {
           // 'id_empresa'      => ($data['pago_id_empresa'][$key]!=''? $data['pago_id_empresa'][$key]: NULL),
           // 'anio'            => ($data['pago_anio'][$key]!=''? $data['pago_anio'][$key]: NULL),
           // 'semana'          => ($data['pago_semana'][$key]!=''? $data['pago_semana'][$key]: NULL),
-          'id_prestamo'     => $data['id_prestamo_caja'],
-          'id_categoria'    => $data['id_categoria'],
-          'concepto'        => $data['concepto'],
-          'monto'           => $data['monto'],
-          'fecha'           => $data['fecha'],
-          'no_caja'         => $data['no_caja'],
+          'id_prestamo_caja' => $data['id_prestamo_caja'],
+          'id_categoria'     => $data['id_categoria'],
+          'concepto'         => $data['concepto'],
+          'monto'            => $data['monto'],
+          'fecha'            => $data['fecha'],
+          'no_caja'          => $data['no_caja'],
           // 'id_nomenclatura' => $data['pago_nomenclatura'][$key],
         );
     $this->db->insert('otros.cajaprestamo_pagos', $pagos);
