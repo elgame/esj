@@ -893,7 +893,7 @@ class caja_chica_prest_model extends CI_Model {
       String::formatoNumero($totalpreslgcp_salini, 2, '$', false),
       String::formatoNumero($totalpreslgcp_pago_dia, 2, '$', false),
       '', '',
-      String::formatoNumero($totalprescp_salfin, 2, '$', false),
+      String::formatoNumero($totalpreslgcp_salfin, 2, '$', false),
       ), true, 'B');
 
     $tt_saldo_inicial       = $totalpreslp_salini+$totalprescp_salini;
