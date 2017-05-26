@@ -98,7 +98,7 @@ class caja_chica_prest_model extends CI_Model {
           SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
           FROM otros.cajaprestamo_pagos nfp
             INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
-          WHERE nfp.fecha <= '{$fecha}'
+          WHERE nfp.fecha < '{$fecha}'
           GROUP BY np.id_prestamo
         ) pai ON cp.id_prestamo = pai.id_prestamo
         LEFT JOIN (
