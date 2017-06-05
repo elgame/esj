@@ -89,7 +89,7 @@
     COMMENT ON COLUMN public.compras_ordenes.flete_de IS 'v: fletes de venta, c: Fletes de compra';
     ALTER TABLE public.compras_requisicion ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
     INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INSUMOS MT','in',TRUE,FALSE);
- ✔ Reporte de banco @done (17-02-25 12:33) pcc|san|pct
+ ✔ Reporte de banco @done (17-02-25 12:33) pcc|san|pct|lap
    ALTER TABLE public.banco_cuentas ADD COLUMN tipo character varying(10) NOT NULL DEFAULT 'M.N.'::character varying;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Por Empresa 2',104,TRUE,'banco/rpt_acumulado_empresa/','print',TRUE);
    ALTER TABLE public.compras_salidas ADD COLUMN no_receta character varying(20);
@@ -110,9 +110,9 @@
    ALTER TABLE public.compras_salidas ADD COLUMN fecha_aplicacion date DEFAULT now();
  ✔ Privilegio reporte bodega @done (17-02-22 10:36) pcc|san|pct|gdl
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Mostrar totales en corte',379,FALSE,'bodega_guadalajara/show_totales_c/','copy',FALSE);
- ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc|san|pct|gdl
+ ✔ Imprimir almacen en salidas @done (17-02-15 22:46) pcc|san|pct|gdl|lap
    ALTER TABLE public.compras_salidas ADD COLUMN id_traspaso bigint;
- ✔ Caja chica remisiones @done (17-02-07 21:50) pcc|san|pct|gdl
+ ✔ Caja chica remisiones @done (17-02-07 21:50) pcc|san|pct|gdl|lap
     DROP MATERIALIZED VIEW public.saldos_facturas_remisiones;
     CREATE MATERIALIZED VIEW public.saldos_facturas_remisiones AS
      SELECT f.id_factura,
@@ -170,7 +170,7 @@
     ALTER TABLE public.saldos_facturas_remisiones OWNER TO programa;
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Codigos Salidas',405,TRUE,'catalogos_sft/rpt_codigos_cuentas_salidas/','print',TRUE);
 
- ✔ Produccion y regresar productos @done (17-01-31 20:38) pct|pcc|gdl|san
+ ✔ Produccion y regresar productos @done (17-01-31 20:38) pct|pcc|gdl|san|lap
     CREATE TABLE otros.produccion_historial
     (
       id bigserial NOT NULL,
@@ -222,16 +222,16 @@
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Cancelar',457,FALSE,'produccion/cancelar/','ban-circle',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte inventario',457,TRUE,'produccion/inventario/','print',TRUE);
 
- ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct|gdl
+ ✔ nomina prestamos @done (17-01-24 20:53) pcc|san|pct|gdl|lap
    ALTER TABLE public.nomina_fiscal_prestamos ADD COLUMN saldado boolean NOT NULL DEFAULT false;
- ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san|gdl
+ ✔ Bodega y  @done (17-01-18 14:02) pcc|pct|san|gdl|lap
     alter table otros.bodega_prestamos alter column tipo type character varying(5) using tipo::character varying;
     COMMENT ON COLUMN otros.bodega_prestamos.tipo IS 'true: prestamo (resta la existencia), false: pago del prestamo (incremente la existencia), dev: devolucion (resta la existencia)';
     ALTER TABLE otros.bodega_prestamos ALTER COLUMN tipo SET DEFAULT 'true';
     ALTER TABLE public.nomina_prestamos ADD COLUMN tipo character varying(4) NOT NULL DEFAULT 'fi'::character varying;
     COMMENT ON COLUMN public.nomina_prestamos.tipo IS 'fi: fiscal (solo de nomina), ef: efectivo (mostrar en caja)';
 
- ✔ Bodega @done (17-01-17 21:40) pcc|san|pct|gdl
+ ✔ Bodega @done (17-01-17 21:40) pcc|san|pct|gdl|lap
     ALTER TABLE public.facturacion_abonos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
     ALTER TABLE otros.bodega_efectivo ADD COLUMN a_bultos_vendidos double precision NOT NULL DEFAULT 0;
     ALTER TABLE otros.bodega_efectivo ADD COLUMN a_kilos_vendidos double precision NOT NULL DEFAULT 0;
