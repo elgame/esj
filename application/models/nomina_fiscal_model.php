@@ -570,6 +570,7 @@ class nomina_fiscal_model extends CI_Model {
       }
 
     $total_dias_trabajados = 0;
+    $ptu_percepciones_empleados = 0;
     if ($nm_tipo == 'pt') { // es ptu
       // obtiene el total de dias trabajados de todos los trabajadores
       // si tiene menos de 60 dias trabajados no aplica para ptu
@@ -579,6 +580,7 @@ class nomina_fiscal_model extends CI_Model {
 
         if ($value->ptu_dias_trabajados_empleado > 60) {
           $total_dias_trabajados += $value->ptu_dias_trabajados_empleado;
+          $ptu_percepciones_empleados += $value->ptu_percepciones_empleado;
           if ($empleadoId > 0 && $empleadoId != $value->id) {
             unset($empleados[$key]);
           }
@@ -595,6 +597,7 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($empleados as $key => $empleado)
     {
       if ($nm_tipo == 'pt') { // es ptu
+        $empleado->ptu_percepciones_empleados = $ptu_percepciones_empleados;
         $empleado->ptu_dias_trabajados_empleados = $total_dias_trabajados;
       }
       if (!isset($empresaa)) {

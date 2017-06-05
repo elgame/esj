@@ -203,7 +203,7 @@ class caja_chica_model extends CI_Model {
                 LEFT JOIN (SELECT id_remision, id_factura, status
                           FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
                 ) fh ON f.id_factura = fh.id_remision
-              WHERE f.status <> 'ca' AND f.status <> 'b'
+              WHERE f.status <> 'ca' AND f.status <> 'b' AND f.status <> 'pa'
                  AND f.id_abono_factura IS NULL AND id_nc IS NULL
                  AND Date(f.fecha) >= '2017-01-01' AND Date(f.fecha) <= '{$fecha}'{$sql}
                  AND COALESCE(fh.id_remision, 0) = 0
