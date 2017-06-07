@@ -59,7 +59,7 @@
                     <label class="control-label" for="fno_interior">No. interior </label>
                     <div class="controls">
                       <input type="text" name="fno_interior" id="fno_interior" class="span10" value="<?php echo isset($data->no_interior)?$data->no_interior:''; ?>"
-                        maxlength="7" placeholder="102, S/N">
+                        maxlength="20" placeholder="102, S/N">
                     </div>
                   </div>
 

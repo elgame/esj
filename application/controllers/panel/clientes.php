@@ -343,7 +343,7 @@ public function fecha($fecha)
 						'rules' => 'max_length[7]'),
 			array('field' => 'fno_interior',
 						'label' => 'No. interior',
-						'rules' => 'max_length[7]'),
+						'rules' => 'max_length[20]'),
 			array('field' => 'fcolonia',
 						'label' => 'Colonia',
 						'rules' => 'max_length[60]'),
