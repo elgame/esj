@@ -1,3 +1,10 @@
+ ☐ Crear productos bajos de inventario cargarlos en ordenes de requi
+ ☐ Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada
+ ☐ En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente
+   "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
+ ☐ En bascula agregar un tipo de pesada "Hojas de limon, desecho platano, piña" para pesar las hojas de limon y crear un Reporte de kilos de las remisiones y restarle los kilos de bascula de las pesadas de desecho
+ ☐ En el listado de productos poner una opcion para marcar los productos que tienen que regresar el producto dañado, y en las salidas en los tickets poner "Refacciones al cambio" y indicar que se tienen que regresar esos productos dañados
+ ☐ syscom sistema de asignacion
 
  ✔ 1.96h En salidas de almacen y tickets agregar los 15 datos que la señora me paso para @done (17-02-27 20:37)
  ✔ 0.53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques entransito @done (17-02-21 16:06)
