@@ -1,7 +1,7 @@
 
-  ✔ No interior clientes @done (17-06-01 10:56) pcc|san
+ ✔ No interior clientes @done (17-06-01 10:56) pcc|san|pct
     ALTER TABLE public.clientes ALTER COLUMN no_interior TYPE character varying(20);
- ✔ Reporte @done (17-04-04 15:29) pcc|san|lap
+ ✔ Reporte @done (17-04-04 15:29) pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de saldos bancarios',104,TRUE,'banco/rpt_saldos_bancarios/','print',TRUE);
  ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san|lap
     -- Insumo MT

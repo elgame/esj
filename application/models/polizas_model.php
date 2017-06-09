@@ -1173,7 +1173,7 @@ class polizas_model extends CI_Model {
     $query = $this->db->query(
       "SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
           f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
-          u.id_departamente, f.pasistencia, ud.nombre AS departamento
+          f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento
       FROM nomina_fiscal AS f
         INNER JOIN usuarios AS u ON u.id = f.id_empleado
         INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
@@ -1204,6 +1204,7 @@ class polizas_model extends CI_Model {
         }
 
         $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
