@@ -801,6 +801,9 @@ class nomina_fiscal_model extends CI_Model {
             $imss = $empleadoNomina[0]->nomina->deducciones['imss']['ImporteGravado'] +
                     $empleadoNomina[0]->nomina->deducciones['imss']['ImporteExcento'];
 
+            $rcv = $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteGravado'] +
+                    $empleadoNomina[0]->nomina->deducciones['rcv']['ImporteExcento'];
+
             $infonavit = $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteGravado'] +
                          $empleadoNomina[0]->nomina->deducciones['infonavit']['ImporteExcento'];
 
@@ -873,7 +876,7 @@ class nomina_fiscal_model extends CI_Model {
               'aguinaldo' => $aguinaldo,
               'total_percepcion' => $empleadoNomina[0]->nomina->subtotal,
               'imss' => $imss,
-              'vejez' => 0,
+              'vejez' => $rcv,
               'isr' => $empleadoNomina[0]->nomina->isr,
               'infonavit' => $infonavit,
               'subsidio_cobrado' => 0,
