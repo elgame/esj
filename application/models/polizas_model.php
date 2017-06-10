@@ -400,6 +400,20 @@ class polizas_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
+  public function getCuentaNVejez($basic=true){
+    $sql = '';
+    if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //sanjorge
+    elseif($this->empresaId==6) $sql=" AND UPPER(nombre) LIKE '%CENSATIA Y VEJEZ%'"; //francis -
+    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
+    else{
+      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+  }
   public function getCuentaNInfonavit($basic=true){
     $sql = '';
     if ($this->empresaId==2) $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //sanjorge
@@ -1205,7 +1219,7 @@ class polizas_model extends CI_Model {
 
         $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
-        $nominas[$value->id_empresa.$value->anio.$value->semana]->imss            += $value->imss;
+        $nominas[$value->id_empresa.$value->anio.$value->semana]->vejez           += $value->vejez;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->infonavit       += $value->infonavit;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->isr             += $value->isr;
         $nominas[$value->id_empresa.$value->anio.$value->semana]->total_neto      += $value->total_neto;
@@ -1378,6 +1392,16 @@ class polizas_model extends CI_Model {
                           $this->setEspacios('0',10).  //iddiario poner 0
                           $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                           $this->setEspacios("IMSS RETENIDO Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                          $this->setEspacios('',4)."\r\n"; //segmento de negocio
+        if($value->vejez > 0)
+          $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                          $this->setEspacios($this->getCuentaNVejez(),30).  //cuenta contpaq
+                          $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                          $this->setEspacios('1',1).  //tipo movimiento, abono = 1
+                          $this->setEspacios( $this->numero($value->vejez) , 20).  //importe movimiento - retencion
+                          $this->setEspacios('0',10).  //iddiario poner 0
+                          $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                          $this->setEspacios("RETIRO CENSATIA Y VEJEZ Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
                           $this->setEspacios('',4)."\r\n"; //segmento de negocio
         if($value->infonavit > 0)
           $response['data'] .= $this->setEspacios('M',2). //movimiento = M
