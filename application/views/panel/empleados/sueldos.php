@@ -53,8 +53,8 @@
   						  <tbody id="lista">
           <?php foreach ($empleados as $key => $e)
               {
-                $tipo = 'No asegurado'; $salario_diario=0; $factor_integracion = 0;
-                $clase_sdi = ''; $readly_asegurado = 'readonly';
+                $tipo = 'No asegurado'; $salario_diario=$e->salario_diario; $factor_integracion = 0;
+                $clase_sdi = ''; $readly_asegurado = '';
                 if ($e->esta_asegurado != 'f'){
                   $tipo = 'Asegurado';
                   $salario_diario = $e->nomina->salario_diario_integrado;

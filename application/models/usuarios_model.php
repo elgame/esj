@@ -338,7 +338,7 @@ class Usuarios_model extends privilegios_model {
 
       foreach ($datos['id_empledo'] as $key => $value)
       {
-        $sd = 0;
+        $sd = $datos['sueldo_diario'][$key];
         if ($datos['tipo'][$key] == 't') //asegurados
           $sd = number_format($datos['sueldo_diario'][$key] / $datos['factor_integracion'][$key], 4, '.', '');
 
