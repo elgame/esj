@@ -193,6 +193,13 @@
                     </div>
                   </div>
 
+                  <div class="control-group">
+                    <label class="control-label" for="show_saldo">Mostrar saldo en remisiones y ticket </label>
+                    <div class="controls">
+                      <input type="checkbox" name="show_saldo" id="show_saldo" value="true" <?php echo set_checkbox('show_saldo', 'true') ?>>
+                    </div>
+                  </div>
+
 	              </div> <!--/span-->
 
 	              <div class="clearfix"></div>

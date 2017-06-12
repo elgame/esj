@@ -1,4 +1,8 @@
 
+ ☐
+   ALTER TABLE public.compras_ordenes ADD COLUMN id_registra bigint;
+   ALTER TABLE public.clientes ADD COLUMN show_saldo boolean NOT NULL DEFAULT false;
+
   ✔ No interior clientes @done (17-06-01 10:56) pcc|san
     ALTER TABLE public.clientes ALTER COLUMN no_interior TYPE character varying(20);
  ✔ Reporte @done (17-04-04 15:29) pcc|san|lap

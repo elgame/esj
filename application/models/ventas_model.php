@@ -1216,6 +1216,11 @@ class Ventas_model extends privilegios_model{
     $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
 
+    $this->load->model('cuentas_cobrar_model');
+    $_GET['did_empresa'] = $factura['info']->id_empresa;
+    $_GET['fid_cliente'] = $factura['info']->id_cliente;
+    $saldo = $this->cuentas_cobrar_model->getCuentasCobrarData();
+
     $this->load->model('documentos_model');
     $manifiesto_chofer = $this->documentos_model->getJsonDataDocus($idVenta, 1);
     if (isset($manifiesto_chofer->chofer_id)) {
@@ -1785,8 +1790,14 @@ class Ventas_model extends privilegios_model{
       $pdf->SetXY(10, $pdf->GetY());
       $pdf->SetAligns(array('L'));
       $pdf->Row2(array('CIUDAD: '.$factura['info']->cliente->municipio.', '.$factura['info']->cliente->estado.', '.String::fechaATexto(date("Y-m-d")) ), false, false);
+
+      if ($factura['info']->cliente->show_saldo == 't') {
+        $pdf->SetXY(10, $pdf->GetY());
+        $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
+      }
+
       $pdf->SetWidths(array(70));
-      $pdf->SetXY(130, $yaux+3);
+      $pdf->SetXY(130, $yaux+10);
       $pdf->SetAligns(array('C'));
       $pdf->Row2(array('______________________________________________'), false, false);
       $pdf->SetXY(130, $pdf->GetY());
@@ -1982,6 +1993,11 @@ class Ventas_model extends privilegios_model{
 
     $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
+
+    $this->load->model('cuentas_cobrar_model');
+    $_GET['did_empresa'] = $factura['info']->id_empresa;
+    $_GET['fid_cliente'] = $factura['info']->id_cliente;
+    $saldo = $this->cuentas_cobrar_model->getCuentasCobrarData();
 
     // echo "<pre>";
     //   var_dump($hist);
@@ -2260,6 +2276,12 @@ class Ventas_model extends privilegios_model{
 
       $pdf->SetXY(0, $pdf->GetY()-1);
       $pdf->Row2(array(String::getMetodoPago($factura['info']->metodo_pago) ), false, false, 5);
+    }
+
+    if ($factura['info']->cliente->show_saldo == 't') {
+      $pdf->SetAligns(array('L'));
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
     }
 
 

@@ -607,13 +607,15 @@ class compras_ordenes_model extends CI_Model {
               co.no_impresiones_tk,
               co.regresa_product, co.flete_de,
               co.id_almacen, ca.nombre AS almacen,
-              co.cont_x_dia
+              co.cont_x_dia,
+              co.id_registra, (use.nombre || ' ' || use.apellido_paterno || ' ' || use.apellido_materno) AS dio_entrada
        FROM compras_ordenes AS co
        INNER JOIN empresas AS e ON e.id_empresa = co.id_empresa
        INNER JOIN proveedores AS p ON p.id_proveedor = co.id_proveedor
        INNER JOIN compras_departamentos AS cd ON cd.id_departamento = co.id_departamento
        INNER JOIN usuarios AS u ON u.id = co.id_empleado
        LEFT JOIN usuarios AS us ON us.id = co.id_autorizo
+       LEFT JOIN usuarios AS use ON use.id = co.id_registra
        LEFT JOIN clientes AS cl ON cl.id_cliente = co.id_cliente
        LEFT JOIN compras_vehiculos cv ON cv.id_vehiculo = co.id_vehiculo
        LEFT JOIN compras_almacenes ca ON ca.id_almacen = co.id_almacen
@@ -928,6 +930,7 @@ class compras_ordenes_model extends CI_Model {
       $data = array(
         'fecha_aceptacion' => date('Y-m-d H:i:s'),
         'status'           => 'a',
+        'id_registra'      => $this->session->userdata('id_usuario'),
       );
 
       $msg = 5;
@@ -1789,7 +1792,11 @@ class compras_ordenes_model extends CI_Model {
     }else
     {
       $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado) ), false, false);
+      $pdf->Row(array('REGISTRO: '.strtoupper($orden['info'][0]->empleado).
+          '  EL  '.String::fechaATexto($orden['info'][0]->fecha, '/c') ), false, false);
+      $pdf->SetXY(0, $pdf->GetY()-2);
+      $pdf->Row(array('DIO ENTRADA: '.strtoupper($orden['info'][0]->dio_entrada).
+          '  EL  '.String::fechaATexto($orden['info'][0]->fecha_aceptacion, '/c') ), false, false);
       $pdf->SetXY(0, $pdf->GetY()-2);
       $pdf->Row(array('SOLICITA: '.strtoupper($orden['info'][0]->empleado_solicito)), false, false);
     }
