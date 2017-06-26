@@ -172,7 +172,7 @@
                     <div class="controls">
                       <div class="input-append span12">
                         <input type="text" name="rancho" class="span11 showCodigoAreaAuto notr" id="rancho" data-ini="371" value="<?php echo set_value('rancho') ?>" placeholder="" required>
-                        <input type="hidden" name="rancho_id" value="" class="span12 showCodigoAreaAutoId" required>
+                        <input type="hidden" name="rancho_id" value="<?php echo set_value('rancho_id') ?>" class="span12 showCodigoAreaAutoId" required>
                         <i class="ico icon-list showCodigoArea notr" data-ini="371" style="cursor:pointer"></i>
                       </div>
                     </div>
@@ -183,7 +183,7 @@
                     <div class="controls">
                       <div class="input-append span12">
                         <input type="text" name="centro_costo" class="span11 showCodigoAreaAuto notr" id="centro_costo" value="<?php echo set_value('centro_costo') ?>" placeholder="" required>
-                        <input type="hidden" name="centro_costo_id" value="" class="span12 showCodigoAreaAutoId" required>
+                        <input type="hidden" name="centro_costo_id" value="<?php echo set_value('centro_costo_id') ?>" class="span12 showCodigoAreaAutoId" required>
                         <i class="ico icon-list showCodigoArea notr" style="cursor:pointer"></i>
                       </div>
                     </div>
