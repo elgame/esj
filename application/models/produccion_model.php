@@ -202,7 +202,9 @@ class produccion_model extends CI_Model {
       (
         SELECT ph.id_clasificacion, Sum(ph.cantidad) AS ventas, (Sum(ph.cantidad*ph.precio_venta)/Sum(ph.cantidad)) AS precio_prom
         FROM otros.produccion_historial ph
-        WHERE ph.status = 't' AND ph.tipo = 'f' AND Date(ph.fecha_produccion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sqlall}
+          INNER JOIN facturacion f on f.id_factura = ph.id_factura
+        WHERE ph.tipo = 'f' AND f.status <> 'ca' AND
+          Date(ph.fecha_produccion) BETWEEN '{$_GET['ffecha1']}' AND '{$_GET['ffecha2']}' {$sqlall}
         GROUP BY ph.id_clasificacion
       ) vnt ON c.id_clasificacion = vnt.id_clasificacion
       LEFT JOIN (
@@ -214,7 +216,9 @@ class produccion_model extends CI_Model {
       LEFT JOIN (
         SELECT ph.id_clasificacion, Sum(ph.cantidad) AS ventas, (Sum(ph.cantidad*ph.precio_venta)/Sum(ph.cantidad)) AS precio_prom
         FROM otros.produccion_historial ph
-        WHERE ph.status = 't' AND ph.tipo = 'f' AND Date(ph.fecha_produccion) < '{$fecha}' {$sqlall}
+          INNER JOIN facturacion f on f.id_factura = ph.id_factura
+        WHERE ph.tipo = 'f' AND f.status <> 'ca' AND
+          Date(ph.fecha_produccion) < '{$fecha}' {$sqlall}
         GROUP BY ph.id_clasificacion
       ) svnt ON c.id_clasificacion = svnt.id_clasificacion
       LEFT JOIN (

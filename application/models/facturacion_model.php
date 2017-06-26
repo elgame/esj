@@ -2281,6 +2281,10 @@ class facturacion_model extends privilegios_model{
         if ($this->input->get('did_empresa') != '')
         {
           $sql .= " AND f.id_empresa = " . $this->input->get('did_empresa');
+
+          if ($this->input->get('did_empresa') == 12) {
+            $sql .= " AND f.id_factura <> 23525";
+          }
         }
 
         if ($this->input->get('dtipo') != '')
