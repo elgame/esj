@@ -209,6 +209,14 @@ class compras_model extends privilegios_model{
 
   public function updateXml($compraId, $proveedorId, $xml)
   {
+    $comprah = array(
+      'subtotal'      => String::float($this->input->post('htotalImporte')),
+      'importe_iva'   => String::float($this->input->post('htotalImpuestosTrasladados')),
+      'importe_ieps'  => String::float($this->input->post('htotalIeps')),
+      'retencion_iva' => String::float($this->input->post('htotalRetencion')),
+      'retencion_isr' => String::float($this->input->post('htotalRetencionIsr')),
+      'total'         => String::float($this->input->post('htotalOrden')),
+    );
     $compra = array(
       'subtotal'      => String::float($this->input->post('totalImporte')),
       'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
@@ -216,10 +224,17 @@ class compras_model extends privilegios_model{
       'retencion_iva' => String::float($this->input->post('totalRetencion')),
       'retencion_isr' => String::float($this->input->post('totalRetencionIsr')),
       'total'         => String::float($this->input->post('totalOrden')),
-      'fecha'         => $this->input->post('fecha'),
-      'serie'         => $this->input->post('serie'),
-      'folio'         => $this->input->post('folio'),
     );
+
+    foreach ($compra as $key => $value) {
+      if ( $value > ($comprah[$key]+1) || $value < ($comprah[$key]-1)) {
+        return [ucfirst($key).' se modifico mas de 1, solo puede modificar decimales.'];
+      }
+    }
+
+    $compra['fecha'] = $this->input->post('fecha');
+    $compra['serie'] = $this->input->post('serie');
+    $compra['folio'] = $this->input->post('folio');
 
     // Realiza el upload del XML.
     if ($xml && $xml['tmp_name'] !== '')

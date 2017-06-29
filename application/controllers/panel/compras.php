@@ -72,9 +72,12 @@ class compras extends MY_Controller {
     }
     else
     {
-      $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
 
-      $params['frm_errors'] = $this->showMsgs(4);
+      if (is_array($response)) {
+        $params['frm_errors'] = $this->showMsgs(2, $response[0]);
+      } else
+        $params['frm_errors'] = $this->showMsgs(4);
     }
 
     $ordenes = $this->db->select('id_orden')->from('compras_facturas')->where('id_compra', $_GET['id'])->get()->result();
@@ -431,7 +434,7 @@ class compras extends MY_Controller {
         $icono = 'success';
       break;
       case 4:
-        $txt = 'EL XML se actualizo correctamente.';
+        $txt = 'Se actualizo correctamente.';
         $icono = 'success';
       break;
       case 5:
