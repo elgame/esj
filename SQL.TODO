@@ -1,5 +1,5 @@
 
- ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san
+ ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct
    ALTER TABLE public.compras_ordenes ADD COLUMN id_registra bigint;
    ALTER TABLE public.clientes ADD COLUMN show_saldo boolean NOT NULL DEFAULT false;
 
