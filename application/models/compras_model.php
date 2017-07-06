@@ -227,8 +227,8 @@ class compras_model extends privilegios_model{
     );
 
     foreach ($compra as $key => $value) {
-      if ( $value > ($comprah[$key]+1) || $value < ($comprah[$key]-1)) {
-        return [ucfirst($key).' se modifico mas de 1, solo puede modificar decimales.'];
+      if ( $value > ($comprah[$key]+2.5) || $value < ($comprah[$key]-2.5)) {
+        return [ucfirst($key).' se modifico mas de 2.5, no se puede modificar mas de eso.'];
       }
     }
 
