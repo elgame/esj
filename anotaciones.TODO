@@ -1,9 +1,12 @@
  ☐ Crear productos bajos de inventario cargarlos en ordenes de requi
- ✔ .48h Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada @done (17-06-10 15:30)
- ✔ 1.16h En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente @done (17-06-11 10:53)
-   "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
  ☐ En bascula agregar un tipo de pesada "Hojas de limon, desecho platano, piña" para pesar las hojas de limon y crear un Reporte de kilos de las remisiones y restarle los kilos de bascula de las pesadas de desecho
  ☐ En el listado de productos poner una opcion para marcar los productos que tienen que regresar el producto dañado, y en las salidas en los tickets poner "Refacciones al cambio" y indicar que se tienen que regresar esos productos dañados
+ ✔ .48h Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada @done (17-06-10 15:30)
+
+ ********************************************* Facturado
+
+ ✔ 1.16h En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente @done (17-06-11 10:53)
+   "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
  ✔ .63h En compras validar que solo puedan modificar decimales en los totales @done (17-06-28 12:25)
  ✔ .22h El reporte de productos facturados que no cargue la remision 443 de plasticos bubalu para que cuandre con el inventario de produccion @done (17-06-23 22:35)
 
