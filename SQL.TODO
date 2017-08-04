@@ -1,4 +1,9 @@
 
+ ☐ Cambiar sistema de privilegios por emplesa y usuarios
+   ALTER TABLE public.usuarios_privilegios ADD COLUMN id_empresa integer NOT NULL DEFAULT 2;
+   ALTER TABLE public.usuarios_privilegios ADD CONSTRAINT usuarios_privilegios_id_empresa_fkey FOREIGN KEY (id_empresa)
+      REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+
  ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct
    ALTER TABLE public.compras_ordenes ADD COLUMN id_registra bigint;
    ALTER TABLE public.clientes ADD COLUMN show_saldo boolean NOT NULL DEFAULT false;

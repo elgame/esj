@@ -34,6 +34,7 @@ $(function(){
 	});
 	campos_requeridos($("#festa_asegurado"));
 
+  getPrivilegiosEmpresa();
 });
 
 function cargaDepaPues () {
@@ -60,4 +61,19 @@ function campos_requeridos ($this) {
 		$("#frfc, #fcurp, #ffecha_entrada, #fsalario_diario, #fsalario_diario_real, #fregimen_contratacion").attr("required", "required");
 	}else
 		$("#frfc, #fcurp, #ffecha_entrada, #fsalario_diario, #fsalario_diario_real, #fregimen_contratacion").removeAttr("required");
+}
+
+function getPrivilegiosEmpresa() {
+  $("#id_empresa").change(function() {
+    var params = {
+      'id_usuario': $("#usuarioId").val(),
+      'id_empresa': $("#id_empresa").val(),
+    };
+    $.get(base_url+'panel/usuarios/ajax_get_usuario_priv/', params,
+      function(data){
+        console.log(data);
+
+        $('#list_privilegios').html(data);
+    });
+  });
 }

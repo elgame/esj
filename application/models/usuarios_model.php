@@ -141,7 +141,7 @@ class Usuarios_model extends privilegios_model {
 		if (is_array( $data_privilegios )) {
 			$privilegios = array();
 			foreach ($data_privilegios as $key => $value) {
-				$privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value);
+				$privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value, 'id_empresa' => $_POST['id_empresa']);
 			}
 			$this->db->insert_batch('usuarios_privilegios', $privilegios);
 		}
@@ -246,7 +246,7 @@ class Usuarios_model extends privilegios_model {
 	/*
 	 |	Obtiene la informacion de un usuario
 	 */
-	public function get_usuario_info($id_usuario=FALSE, $basic_info=FALSE)
+	public function get_usuario_info($id_usuario=FALSE, $basic_info=FALSE, $empresa_id=0)
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
@@ -274,6 +274,7 @@ class Usuarios_model extends privilegios_model {
 				->select('privilegio_id')
 				->from('usuarios_privilegios')
 				->where("usuario_id = '".$id_usuario."'")
+        ->where("id_empresa = {$empresa_id}")
 			->get();
 			if($res->num_rows() > 0){
 				foreach($res->result() as $priv)
