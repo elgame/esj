@@ -46,6 +46,12 @@ class compras extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('compras_model');
 
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    if(!$this->input->get('did_empresa'))
+      $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
+
     $params['compras'] = $this->compras_model->getCompras();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));

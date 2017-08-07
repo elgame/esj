@@ -152,13 +152,13 @@ public function fecha($fecha)
 			'titulo' => 'Administración de Clientes'
 		);
 
-    	$this->load->model('empresas_model');
-
-		$this->load->model('clientes_model');
-		$params['clientes'] = $this->clientes_model->getClientes();
+    $this->load->model('empresas_model');
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
     if(!isset($_GET['did_empresa']))
     	$_GET['did_empresa'] = $params['empresa']->id_empresa;
+
+    $this->load->model('clientes_model');
+    $params['clientes'] = $this->clientes_model->getClientes();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);

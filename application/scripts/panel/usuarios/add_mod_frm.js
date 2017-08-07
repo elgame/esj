@@ -1,16 +1,7 @@
+var empresaId = '';
 $(function(){
 	//marcar y desmarcar los checks box
-	$("#list_privilegios .treeview input:checkbox").on('click', function (){
-		var elemento_padre = $($(this).parent().get(0)).parent().get(0);
-		var numero_hijos = $("ul", elemento_padre).length;
-
-		if($("#dmod_privilegios").length > 0)
-			$("#dmod_privilegios").val('si');
-
-		if(numero_hijos > 0){
-			$("input:checkbox", elemento_padre).attr("checked", ($(this).attr("checked")? true: false));
-		}
-	});
+	eventoCheck();
 
 	// Autocomplete Empresas
 	$("#fempresa").autocomplete({
@@ -64,16 +55,58 @@ function campos_requeridos ($this) {
 }
 
 function getPrivilegiosEmpresa() {
+  empresaId = $("#id_empresa").val();
   $("#id_empresa").change(function() {
-    var params = {
-      'id_usuario': $("#usuarioId").val(),
-      'id_empresa': $("#id_empresa").val(),
-    };
-    $.get(base_url+'panel/usuarios/ajax_get_usuario_priv/', params,
-      function(data){
-        console.log(data);
+    guardarPrivilegios();
+  });
+}
 
-        $('#list_privilegios').html(data);
-    });
+function guardarPrivilegios() {
+  var params = {
+    id_usuario: $("#usuarioId").val(),
+    id_empresa: empresaId,
+    dprivilegios: []
+  };
+
+  $("input[name='dprivilegios[]']:checked").each(function(index, el) {
+    params.dprivilegios.push($(this).val());
+  });
+
+  $.post(base_url+'panel/usuarios/ajax_update_priv/',
+    params, function(data, textStatus, xhr) {
+      var params = {
+        'id_usuario': $("#usuarioId").val(),
+        'id_empresa': $("#id_empresa").val(),
+      };
+      $.get(base_url+'panel/usuarios/ajax_get_usuario_priv/', params,
+        function(data){
+          empresaId = $("#id_empresa").val();
+
+          $('#list_privilegios').html(data);
+
+          $(".treeview").treeview({
+            persist: "location",
+            unique: true
+          });
+
+          eventoCheck();
+
+      });
+  });
+
+  console.log(params);
+}
+
+function eventoCheck() {
+  $("#list_privilegios .treeview input:checkbox").on('click', function (){
+    var elemento_padre = $($(this).parent().get(0)).parent().get(0);
+    var numero_hijos = $("ul", elemento_padre).length;
+
+    if($("#dmod_privilegios").length > 0)
+      $("#dmod_privilegios").val('si');
+
+    if(numero_hijos > 0){
+      $("input:checkbox", elemento_padre).attr("checked", ($(this).attr("checked")? true: false));
+    }
   });
 }

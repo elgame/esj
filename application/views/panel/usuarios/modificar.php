@@ -215,10 +215,10 @@
                     <label class="control-label" style="width: 100px;">Privilegios </label>
                     <div class="controls" style="margin-left: 120px;">
                     <?php if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){ ?>
-                      <select name="id_empresa" id="id_empresa">
+                      <select name="idEmpresa" id="id_empresa">
                       <?php foreach ($empresas['empresas'] as $key => $empresa) { ?>
                         <option value="<?php echo $empresa->id_empresa ?>"
-                        <?php echo set_select('id_empresa', $empresa->id_empresa, false, $this->input->post('id_empresa')); ?>><?php echo $empresa->nombre_fiscal ?></option>
+                        <?php echo set_select('idEmpresa', $empresa->id_empresa, false, $this->input->post('idEmpresa')); ?>><?php echo $empresa->nombre_fiscal ?></option>
                       <?php } ?>
                       </select>
                     <?php } ?>
