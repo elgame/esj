@@ -59,6 +59,11 @@ class compras_ordenes extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('compras_ordenes_model');
 
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    if(!$this->input->get('did_empresa'))
+      $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
+
     $params['ordenes'] = $this->compras_ordenes_model->getOrdenes();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));

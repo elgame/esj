@@ -2,15 +2,35 @@ $(function(){
 
 	$(".transit_chekrs").on('click', function() {
 		var vt = $(this);
-		msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
-			function(obj){
-				window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
-			}, function(obj){
-				if (vt.attr('data-status') != 'Trans')
-					vt.removeAttr("checked");
-				else
-					vt.attr('checked', 'true');
-			});
+    if (!vt.is('checked')) {
+      $("#btnTransitoCancelar").off('click');
+      $("#btnTransitoCancelar").one('click', function() {
+        vt.attr('checked', true);
+      });
+      $("#btnTransitoContinuar").off('click');
+      $("#btnTransitoContinuar").one('click', function() {
+        $('#modal-transito').modal('hide');
+        msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
+         function(obj){
+           window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
+         }, function(obj){
+           if (vt.attr('data-status') != 'Trans')
+             vt.removeAttr("checked");
+           else
+             vt.attr('checked', 'true');
+         });
+      });
+      $('#modal-transito').modal('show');
+    }
+		// msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
+		// 	function(obj){
+		// 		window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
+		// 	}, function(obj){
+		// 		if (vt.attr('data-status') != 'Trans')
+		// 			vt.removeAttr("checked");
+		// 		else
+		// 			vt.attr('checked', 'true');
+		// 	});
 	});
 
   $(".sbc_chekrs").on('click', function() {

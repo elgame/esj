@@ -1,16 +1,18 @@
 
- ✔ Cambiar sistema de privilegios por emplesa y usuarios @done (17-08-05 10:30) pct|pct|san
+ ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap
+    ALTER TABLE public.banco_movimientos ADD COLUMN fecha_aplico date; COMMENT ON COLUMN public.banco_movimientos.fecha_aplico IS 'Fecha en que se aplico en el banco real (retiro o deposito)';
+ ✔ Cambiar sistema de privilegios por emplesa y usuarios @done (17-08-05 10:30) pct|pct|san|lap
    ALTER TABLE public.usuarios_privilegios ADD COLUMN id_empresa integer NOT NULL DEFAULT 2;
    ALTER TABLE public.usuarios_privilegios ADD CONSTRAINT usuarios_privilegios_id_empresa_fkey FOREIGN KEY (id_empresa)
       REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE public.usuarios_privilegios DROP CONSTRAINT usuarios_privilegios_pkey;
    ALTER TABLE public.usuarios_privilegios ADD CONSTRAINT usuarios_privilegios_pkey PRIMARY KEY(usuario_id, privilegio_id, id_empresa);
 
- ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct
+ ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct|lap
    ALTER TABLE public.compras_ordenes ADD COLUMN id_registra bigint;
    ALTER TABLE public.clientes ADD COLUMN show_saldo boolean NOT NULL DEFAULT false;
 
-  ✔ No interior clientes @done (17-06-01 10:56) pcc|san|pct
+  ✔ No interior clientes @done (17-06-01 10:56) pcc|san|pct|lap
     ALTER TABLE public.clientes ALTER COLUMN no_interior TYPE character varying(20);
  ✔ Reporte @done (17-04-04 15:29) pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de saldos bancarios',104,TRUE,'banco/rpt_saldos_bancarios/','print',TRUE);

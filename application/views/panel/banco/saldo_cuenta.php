@@ -254,6 +254,23 @@
       </div>
     </div><!--/modal impresoras -->
 
+    <!-- Modal -->
+    <div id="modal-transito" class="modal modal-w50 hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalLabel">Transito</h3>
+      </div>
+      <div class="modal-body">
+        <div class="row-fluid">
+          <input type="date" name="" value="">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btnTransitoCancelar" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+        <button class="btn btn-primary" id="btnTransitoContinuar" data-idm="" data-idc="">Continuar</button>
+      </div>
+    </div><!--/modal transito -->
+
 
           <!-- content ends -->
     </div><!--/#content.span10-->
