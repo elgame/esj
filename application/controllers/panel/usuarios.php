@@ -9,6 +9,8 @@ class usuarios extends MY_Controller {
 	private $excepcion_privilegio = array(
     'usuarios/ajax_get_usuarios/',
     'usuarios/ajax_change_empresa/',
+    'usuarios/ajax_get_usuario_priv/',
+    'usuarios/ajax_update_priv/',
   );
 
 	public function _remap($method){
@@ -87,6 +89,11 @@ class usuarios extends MY_Controller {
 		$this->load->model('usuarios_puestos_model');
 		$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
 
+    $this->load->model('empresas_model');
+    $params['empresas'] = $this->empresas_model->getEmpresas(150);
+    $empresa_default = $this->empresas_model->getDefaultEmpresa();
+    $_POST['idEmpresa'] = $empresa_default->id_empresa;
+
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -134,7 +141,14 @@ class usuarios extends MY_Controller {
 					redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
-			$params['data'] = $this->usuarios_model->get_usuario_info();
+      $this->load->model('empresas_model');
+      $params['empresas'] = $this->empresas_model->getEmpresas(150);
+      if (!isset($_POST['idEmpresa'])) {
+        $empresa_default = $this->empresas_model->getDefaultEmpresa();
+        $_POST['idEmpresa'] = $empresa_default->id_empresa;
+      }
+
+			$params['data'] = $this->usuarios_model->get_usuario_info(false, false, $_POST['idEmpresa']);
 			$this->load->model('usuarios_puestos_model');
 			$params['puestos'] = $this->usuarios_puestos_model->getPuestos(false);
 
@@ -199,6 +213,20 @@ class usuarios extends MY_Controller {
       $this->load->model('usuarios_model');
       echo json_encode($this->usuarios_model->changeEmpresaSel($_POST['empresa']));
    }
+
+  public function ajax_get_usuario_priv()
+  {
+    $this->load->model('usuarios_model');
+    $data = $this->usuarios_model->get_usuario_info($_GET['id_usuario'], false, $_GET['id_empresa']);
+    $privilegios = isset($data['privilegios']) ? $data['privilegios']: [];
+    echo $this->usuarios_model->getFrmPrivilegios(0, true, $privilegios);
+  }
+
+  public function ajax_update_priv()
+  {
+    $this->load->model('usuarios_model');
+    $this->usuarios_model->updatePrivilegios($this->input->post('dprivilegios'), $this->input->post('id_usuario'), $this->input->post('id_empresa'));
+  }
 
 
   /*

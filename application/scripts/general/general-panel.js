@@ -5,7 +5,8 @@ $(function(){
 		$.post(base_url + 'panel/usuarios/ajax_change_empresa/',
 		{empresa: $(this).val()},
 		function(data, textStatus, xhr) {
-			console.log(data);
+      var url = location.href.split('?');
+      location.href = url[0];
 		});
 	});
 });

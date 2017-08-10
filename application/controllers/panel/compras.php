@@ -46,6 +46,12 @@ class compras extends MY_Controller {
     $this->load->library('pagination');
     $this->load->model('compras_model');
 
+    // Obtiene los datos de la empresa predeterminada.
+    $this->load->model('empresas_model');
+    $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
+    if(!$this->input->get('did_empresa'))
+      $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
+
     $params['compras'] = $this->compras_model->getCompras();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
@@ -72,9 +78,12 @@ class compras extends MY_Controller {
     }
     else
     {
-      $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
+      $response = $this->compras_model->updateXml($_GET['id'], $_GET['idp'], $_FILES['xml']);
 
-      $params['frm_errors'] = $this->showMsgs(4);
+      if (is_array($response)) {
+        $params['frm_errors'] = $this->showMsgs(2, $response[0]);
+      } else
+        $params['frm_errors'] = $this->showMsgs(4);
     }
 
     $ordenes = $this->db->select('id_orden')->from('compras_facturas')->where('id_compra', $_GET['id'])->get()->result();
@@ -431,7 +440,7 @@ class compras extends MY_Controller {
         $icono = 'success';
       break;
       case 4:
-        $txt = 'EL XML se actualizo correctamente.';
+        $txt = 'Se actualizo correctamente.';
         $icono = 'success';
       break;
       case 5:

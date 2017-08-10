@@ -148,7 +148,7 @@ class caja_chica_model extends CI_Model {
         $sql .= " AND f.is_factura = 'f'";
         $saldo_clientes = $this->db->query(
           "SELECT
-            id_cliente,
+            id_cliente, show_saldo,
             nombre_fiscal as nombre,
             Sum(total) AS total,
             Sum(iva) AS iva,
@@ -158,7 +158,7 @@ class caja_chica_model extends CI_Model {
           FROM
             (
               SELECT
-                c.id_cliente,
+                c.id_cliente, c.show_saldo,
                 c.nombre_fiscal,
                 Sum(f.total) AS total,
                 Sum(f.importe_iva) AS iva,
@@ -209,7 +209,7 @@ class caja_chica_model extends CI_Model {
                  AND COALESCE(fh.id_remision, 0) = 0
               GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
             ) AS sal
-          GROUP BY id_cliente, nombre_fiscal
+          GROUP BY id_cliente, show_saldo, nombre_fiscal
           HAVING Sum(saldo)::numeric(12, 2) > 0"
         );
 
@@ -1673,7 +1673,8 @@ class caja_chica_model extends CI_Model {
       "SELECT cr.id_remision, cr.monto, cr.observacion, f.folio, cr.id_categoria, cc.abreviatura as empresa,
               COALESCE((select (serie || folio) as folio from facturacion where id_factura = fvr.id_factura), cr.folio_factura) as folio_factura,
               cr.id_movimiento, cr.row, cr.fecha, c.nombre_fiscal AS cliente, cc.nombre AS empresar, cr.folio AS folio_caja,
-              cr.no_impresiones, cr.no_caja, cr.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo
+              cr.no_impresiones, cr.no_caja, cr.fecha_creacion, (u.nombre || ' ' || u.apellido_paterno || ' ' || u.apellido_materno) AS usuario_creo,
+              c.id_cliente
        FROM cajachica_remisiones cr
        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
@@ -1683,6 +1684,17 @@ class caja_chica_model extends CI_Model {
        LEFT JOIN usuarios u ON u.id = cr.id_usuario
        WHERE cr.fecha = '{$fecha}' AND cr.id_remision = '{$id_remision}' AND cr.row = {$row} AND cr.no_caja = {$noCaja}"
     )->row();
+
+    $caja = $this->get($fecha, $noCaja );
+
+    $remisiones->caja_abierta = $caja['status'];
+    foreach ($caja['saldo_clientes'] as $key => $empresa) {
+      foreach ($empresa->clientes as $key2 => $cliente) {
+        if ($cliente->id_cliente === $remisiones->id_cliente) {
+          $remisiones->saldo = $cliente;
+        }
+      }
+    }
 
     return $remisiones;
   }
@@ -1759,6 +1771,12 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('Creado por:', $remisiones->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
     $pdf->Row(array('Creado:', String::fechaAT($remisiones->fecha_creacion)), false, false);
+
+    if (isset($remisiones->saldo) && $remisiones->saldo->show_saldo == 't') {
+      $saldo = $remisiones->saldo->saldo - ($remisiones->caja_abierta==='t'? $remisiones->monto: 0);
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array('SALDO DEUDOR ACTUALIZADO: ', String::formatoNumero($saldo, 2, '$', false)), false, false);
+    }
 
     $this->db->update('cajachica_remisiones', ['no_impresiones' => $remisiones->no_impresiones+1],
         "fecha = '{$fecha}' AND id_remision = '{$id_remision}' AND row = {$row} AND no_caja = {$noCaja}");

@@ -64,7 +64,7 @@
               <?php
               foreach ($this->usuarios_model->getEmpresasPermiso() as $key => $value) {
               ?>
-                <li><label><input type="radio" name="miemps" class="empresasSelects" value="<?php echo $value->url_accion ?>" <?php echo ($value->url_accion==$this->session->userdata('selempresa')? 'checked':'') ?>> <?php echo $value->nombre ?></label></li>
+                <li><label><input type="radio" name="miemps" class="empresasSelects" value="<?php echo $value->id_empresa ?>" <?php echo ($value->id_empresa==$this->session->userdata('selempresa')? 'checked':'') ?>> <?php echo $value->nombre_fiscal ?></label></li>
               <?php
               } ?>
 

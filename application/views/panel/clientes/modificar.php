@@ -59,7 +59,7 @@
                     <label class="control-label" for="fno_interior">No. interior </label>
                     <div class="controls">
                       <input type="text" name="fno_interior" id="fno_interior" class="span10" value="<?php echo isset($data->no_interior)?$data->no_interior:''; ?>"
-                        maxlength="7" placeholder="102, S/N">
+                        maxlength="20" placeholder="102, S/N">
                     </div>
                   </div>
 
@@ -195,6 +195,13 @@
                     <label class="control-label" for="fdigitos">Ultimos 4 digitos </label>
                     <div class="controls">
                       <input type="text" name="fdigitos" id="fdigitos" class="span12" value="<?php echo set_value('fdigitos', $data->ultimos_digitos); ?>" placeholder="1234">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="show_saldo">Mostrar saldo en remisiones y ticket </label>
+                    <div class="controls">
+                      <input type="checkbox" name="show_saldo" id="show_saldo" value="true" <?php echo set_checkbox('show_saldo', 'true', ($data->show_saldo==='t')) ?>>
                     </div>
                   </div>
 

@@ -198,6 +198,11 @@
 									<div class="control-group">
 									  <label class="control-label" style="width: 100px;">Privilegios </label>
 									  <div class="controls" style="margin-left: 120px;">
+                      <select name="idEmpresa" id="id_empresa">
+                      <?php foreach ($empresas['empresas'] as $key => $empresa) { ?>
+                        <option value="<?php echo $empresa->id_empresa ?>" <?php echo set_select('idEmpresa', $empresa->id_empresa, false, $this->input->post('idEmpresa')); ?>><?php echo $empresa->nombre_fiscal ?></option>
+                      <?php } ?>
+                      </select>
 									  	<div id="list_privilegios" style="height: 500px; overflow-y: auto; border:1px #ddd solid;">
 									  		<?php
 												if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){

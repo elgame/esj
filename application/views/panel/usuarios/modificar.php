@@ -26,6 +26,7 @@
             <form action="<?php echo base_url('panel/usuarios/modificar/?id='.$_GET['id']); ?>" method="post" class="form-horizontal">
               <fieldset>
                 <legend></legend>
+                <input type="hidden" name="usuarioId" id="usuarioId" value="<?php echo $_GET['id'] ?>">
 
                 <div class="span7">
                   <div class="control-group">
@@ -213,6 +214,14 @@
                   <div class="control-group">
                     <label class="control-label" style="width: 100px;">Privilegios </label>
                     <div class="controls" style="margin-left: 120px;">
+                    <?php if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){ ?>
+                      <select name="idEmpresa" id="id_empresa">
+                      <?php foreach ($empresas['empresas'] as $key => $empresa) { ?>
+                        <option value="<?php echo $empresa->id_empresa ?>"
+                        <?php echo set_select('idEmpresa', $empresa->id_empresa, false, $this->input->post('idEmpresa')); ?>><?php echo $empresa->nombre_fiscal ?></option>
+                      <?php } ?>
+                      </select>
+                    <?php } ?>
                       <div id="list_privilegios" style="height: 500px; overflow-y: auto; border:1px #ddd solid;">
                         <?php
                           if($this->usuarios_model->tienePrivilegioDe('', 'privilegios/index/')){

@@ -86,26 +86,27 @@ class clientes_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'nombre_fiscal'  => $this->input->post('fnombre_fiscal'),
-						'calle'          => $this->input->post('fcalle'),
-						'no_exterior'    => $this->input->post('fno_exterior'),
-						'no_interior'    => $this->input->post('fno_interior'),
-						'colonia'        => $this->input->post('fcolonia'),
-						'localidad'      => $this->input->post('flocalidad'),
-						'municipio'      => $this->input->post('fmunicipio'),
-						'estado'         => $this->input->post('festado'),
-						'cp'             => $this->input->post('fcp'),
-						'telefono'       => $this->input->post('ftelefono'),
-						'celular'        => $this->input->post('fcelular'),
-						'email'          => $this->input->post('femail'),
-						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-						'rfc'            => $this->input->post('frfc'),
-						'curp'           => $this->input->post('fcurp'),
-						'pais'           => $this->input->post('fpais'),
-            'dias_credito'   => (is_numeric($this->input->post('fdias_credito'))? $this->input->post('fdias_credito'): 0),
-            'metodo_pago'    => $this->input->post('fmetodo_pago'),
+            'nombre_fiscal'   => $this->input->post('fnombre_fiscal'),
+            'calle'           => $this->input->post('fcalle'),
+            'no_exterior'     => $this->input->post('fno_exterior'),
+            'no_interior'     => $this->input->post('fno_interior'),
+            'colonia'         => $this->input->post('fcolonia'),
+            'localidad'       => $this->input->post('flocalidad'),
+            'municipio'       => $this->input->post('fmunicipio'),
+            'estado'          => $this->input->post('festado'),
+            'cp'              => $this->input->post('fcp'),
+            'telefono'        => $this->input->post('ftelefono'),
+            'celular'         => $this->input->post('fcelular'),
+            'email'           => $this->input->post('femail'),
+            'cuenta_cpi'      => $this->input->post('fcuenta_cpi'),
+            'rfc'             => $this->input->post('frfc'),
+            'curp'            => $this->input->post('fcurp'),
+            'pais'            => $this->input->post('fpais'),
+            'dias_credito'    => (is_numeric($this->input->post('fdias_credito'))? $this->input->post('fdias_credito'): 0),
+            'metodo_pago'     => $this->input->post('fmetodo_pago'),
             'ultimos_digitos' => $this->input->post('fdigitos'),
-						'id_empresa' => $this->input->post('did_empresa'),
+            'id_empresa'      => $this->input->post('did_empresa'),
+            'show_saldo'      => $this->input->post('show_saldo')==='true'? 't': 'f',
 						);
 		}
 
@@ -135,26 +136,27 @@ class clientes_model extends CI_Model {
 		if ($data==NULL)
 		{
 			$data = array(
-						'nombre_fiscal'  => $this->input->post('fnombre_fiscal'),
-						'calle'          => $this->input->post('fcalle'),
-						'no_exterior'    => $this->input->post('fno_exterior'),
-						'no_interior'    => $this->input->post('fno_interior'),
-						'colonia'        => $this->input->post('fcolonia'),
-						'localidad'      => $this->input->post('flocalidad'),
-						'municipio'      => $this->input->post('fmunicipio'),
-						'estado'         => $this->input->post('festado'),
-						'cp'             => $this->input->post('fcp'),
-						'telefono'       => $this->input->post('ftelefono'),
-						'celular'        => $this->input->post('fcelular'),
-						'email'          => $this->input->post('femail'),
-						'cuenta_cpi'     => $this->input->post('fcuenta_cpi'),
-						'rfc'            => $this->input->post('frfc'),
-						'curp'           => $this->input->post('fcurp'),
-						'pais'           => $this->input->post('fpais'),
-						'dias_credito'   => $this->input->post('fdias_credito'),
-            'metodo_pago'    => $this->input->post('fmetodo_pago'),
+            'nombre_fiscal'   => $this->input->post('fnombre_fiscal'),
+            'calle'           => $this->input->post('fcalle'),
+            'no_exterior'     => $this->input->post('fno_exterior'),
+            'no_interior'     => $this->input->post('fno_interior'),
+            'colonia'         => $this->input->post('fcolonia'),
+            'localidad'       => $this->input->post('flocalidad'),
+            'municipio'       => $this->input->post('fmunicipio'),
+            'estado'          => $this->input->post('festado'),
+            'cp'              => $this->input->post('fcp'),
+            'telefono'        => $this->input->post('ftelefono'),
+            'celular'         => $this->input->post('fcelular'),
+            'email'           => $this->input->post('femail'),
+            'cuenta_cpi'      => $this->input->post('fcuenta_cpi'),
+            'rfc'             => $this->input->post('frfc'),
+            'curp'            => $this->input->post('fcurp'),
+            'pais'            => $this->input->post('fpais'),
+            'dias_credito'    => $this->input->post('fdias_credito'),
+            'metodo_pago'     => $this->input->post('fmetodo_pago'),
             'ultimos_digitos' => $this->input->post('fdigitos'),
-            'id_empresa' => $this->input->post('did_empresa'),
+            'id_empresa'      => $this->input->post('did_empresa'),
+            'show_saldo'      => $this->input->post('show_saldo')==='true'? 't': 'f',
 						);
 			// Bitacora
 	    $id_bitacora = $this->bitacora_model->_update('clientes', $id_cliente, $data,
@@ -218,7 +220,7 @@ class clientes_model extends CI_Model {
 
 		$sql_res = $this->db->select("id_cliente, nombre_fiscal, calle, no_exterior, no_interior, colonia, localidad, municipio,
 														estado, cp, telefono, celular, email, cuenta_cpi, rfc, curp, status, dias_credito, pais,
-                            metodo_pago, ultimos_digitos, id_empresa" )
+                            metodo_pago, ultimos_digitos, id_empresa, show_saldo" )
 												->from("clientes")
 												->where("id_cliente", $id_cliente)
 												->get();

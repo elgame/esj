@@ -11,11 +11,11 @@ class empresas_model extends CI_Model{
 	/**
 	 * Obtiene el listado de proveedores
 	 */
-	public function getEmpresas(){
+	public function getEmpresas($per_page=40){
 		$sql = '';
 		//paginacion
 		$params = array(
-				'result_items_per_page' => '40',
+				'result_items_per_page' => $per_page,
 				'result_page' => (isset($_GET['pag'])? $_GET['pag']: 0)
 		);
 		if($params['result_page'] % $params['result_items_per_page'] == 0)

@@ -266,7 +266,8 @@ class privilegios_model extends CI_Model{
 			->select('p.id, p.nombre, p.id_padre, p.url_accion, p.url_icono, p.target_blank')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep','p.id = ep.privilegio_id','inner')
-			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'")
+			->where("ep.usuario_id = '".$this->session->userdata('id_usuario')."' AND p.id_padre = '".$id_submenu."' AND mostrar_menu = 't'
+        AND ep.id_empresa = ".$this->session->userdata('selempresa'))
 			->order_by('p.nombre', 'asc')
 		->get();
 		foreach($res->result() as $data){

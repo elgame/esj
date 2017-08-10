@@ -217,36 +217,42 @@
                             <td><em>Subtotal</em></td>
                             <td id="importe-format">
                               <input type="text" name="totalImporte" id="totalImporte" value="<?php echo String::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
+                              <input type="hidden" name="htotalImporte" value="<?php echo $subtotal ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>IVA</td>
                             <td id="traslado-format">
                               <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
+                              <input type="hidden" name="htotalImpuestosTrasladados" value="<?php echo $iva ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>IEPS</td>
                             <td id="ieps-format">
                               <input type="text" name="totalIeps" id="totalIeps" value="<?php echo String::formatoNumero(set_value('totalIeps', $ieps), 2, '$', false); ?>">
+                              <input type="hidden" name="htotalIeps" value="<?php echo $ieps ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>RET.</td>
                             <td id="retencion-format">
                               <input type="text" name="totalRetencion" id="totalRetencion" value="<?php echo String::formatoNumero(set_value('totalRetencion', $retencion), 2, '$', false)?>">
+                              <input type="hidden" name="htotalRetencion" value="<?php echo $retencion ?>">
                             </td>
                           </tr>
                           <tr>
                             <td>RET ISR</td>
                             <td id="retencionisr-format">
                               <input type="text" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencionisr), 2, '$', false)?>">
+                              <input type="hidden" name="htotalRetencionIsr" value="<?php echo $retencionisr ?>">
                             </td>
                           </tr>
                           <tr style="font-weight:bold;font-size:1.2em;">
                             <td>TOTAL</td>
                             <td id="total-format">
                               <input type="text" name="totalOrden" id="totalOrden" value="<?php echo String::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
+                              <input type="hidden" name="htotalOrden" value="<?php echo $total ?>">
                             </td>
                           </tr>
                         </tbody>

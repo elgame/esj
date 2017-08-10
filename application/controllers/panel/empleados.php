@@ -41,10 +41,14 @@ class empleados extends MY_Controller {
 		);
 
 		$this->load->model('usuarios_model');
+
+    // Obtiene los datos de la empresa predeterminada.
     $this->load->model('empresas_model');
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+    if(!$this->input->get('did_empresa'))
+      $_GET['did_empresa'] = $params['empresa']->id_empresa;
 
 		$params['usuarios'] = $this->usuarios_model->get_usuarios(true, 't');
-    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);

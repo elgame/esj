@@ -72,12 +72,12 @@ class banco_layout_model extends banco_cuentas_model {
       $tipo_cuenta = '01';
       if ($data['toperacion']=='ba') //banamex
       {
-        if(strlen($value['proveedor_cuenta']) == 16){ //Tarjeta de debito o credito
+        if(mb_strlen($value['proveedor_cuenta']) == 16){ //Tarjeta de debito o credito
           $cuenta = $value['proveedor_cuenta'];
           $tipo_cuenta = '03';
         }else
           $cuenta = $this->numero($value['proveedor_sucursal'], 4).$this->numero($value['proveedor_cuenta'], 7);
-        $ref_alfanumerica = substr($value['ref_numerica'], 0, 10);
+        $ref_alfanumerica = mb_substr($value['ref_numerica'], 0, 10);
         $instrucciones = $value['ref_alfanumerica'];
         $descripcion = $value['descripcion'];
         $ref_numerica = '';
@@ -90,7 +90,7 @@ class banco_layout_model extends banco_cuentas_model {
         }else
           $value['beneficiario'] = ','.$this->string( $this->cleanStr($value['beneficiario']), 53, '/');
         $cuenta = $value['proveedor_cuenta'];
-        if(strlen($cuenta) == 16) //Tarjeta de debito o credito
+        if(mb_strlen($cuenta) == 16) //Tarjeta de debito o credito
           $tipo_cuenta = '03';
         $ref_alfanumerica = $value['ref_alfanumerica'];
         $instrucciones = $descripcion = '';
@@ -223,7 +223,7 @@ class banco_layout_model extends banco_cuentas_model {
       else //interbancaria
       {
         $cuenta = $value->data_prov->cuenta;
-        if(strlen($cuenta) == 16) //Tarjeta de debito o credito
+        if(mb_strlen($cuenta) == 16) //Tarjeta de debito o credito
           $tipo_cuenta = '03';
       }
 			$this->row_control .= $tipo_cuenta; //Tipo de cuenta
@@ -253,7 +253,7 @@ class banco_layout_model extends banco_cuentas_model {
 	{
 		if ($decimales)
 			$numero = str_replace('.', '', number_format($numero, 2, '.', ''));
-		$leng  = strlen($numero);
+		$leng  = mb_strlen($numero);
 		$datos = $pos-$leng;
 		$ceros = '';
 		for ($i = 1; $i <= $datos; $i++)
@@ -264,7 +264,7 @@ class banco_layout_model extends banco_cuentas_model {
 	}
 	private function string($str, $pos, $end='')
 	{
-		$leng = strlen($str);
+		$leng = mb_strlen($str);
 		$datos = $pos-$leng;
     if($datos > 0){
       $str .= $end;
@@ -273,7 +273,7 @@ class banco_layout_model extends banco_cuentas_model {
   			$str .= ' ';
   		}
     }else{
-      $str = substr($str, 0, $pos).$end;
+      $str = mb_substr($str, 0, $pos).$end;
     }
 		return $str;
 	}

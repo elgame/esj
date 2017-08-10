@@ -141,7 +141,7 @@ class Usuarios_model extends privilegios_model {
 		if (is_array( $data_privilegios )) {
 			$privilegios = array();
 			foreach ($data_privilegios as $key => $value) {
-				$privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value);
+				$privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value, 'id_empresa' => $_POST['idEmpresa']);
 			}
 			$this->db->insert_batch('usuarios_privilegios', $privilegios);
 		}
@@ -231,22 +231,27 @@ class Usuarios_model extends privilegios_model {
 		$this->db->update('usuarios', $data, array('id'=>$id_usuario));
 
 		//privilegios
-		if (is_array( $data_privilegios )) {
-			$this->db->delete('usuarios_privilegios', array('usuario_id' => $id_usuario));
-			$privilegios = array();
-			foreach ($data_privilegios as $key => $value) {
-				$privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value);
-			}
-			$this->db->insert_batch('usuarios_privilegios', $privilegios);
-		}
+    $this->updatePrivilegios($data_privilegios, $id_usuario, $this->input->post('idEmpresa'));
 
 		return array('error' => FALSE);
 	}
 
+  public function updatePrivilegios($data_privilegios, $id_usuario, $id_empresa)
+  {
+    $this->db->delete('usuarios_privilegios', array('usuario_id' => $id_usuario, 'id_empresa' => $id_empresa));
+    if (is_array( $data_privilegios )) {
+      $privilegios = array();
+      foreach ($data_privilegios as $key => $value) {
+        $privilegios[] = array('usuario_id' => $id_usuario, 'privilegio_id' => $value, 'id_empresa' => $id_empresa);
+      }
+      $this->db->insert_batch('usuarios_privilegios', $privilegios);
+    }
+  }
+
 	/*
 	 |	Obtiene la informacion de un usuario
 	 */
-	public function get_usuario_info($id_usuario=FALSE, $basic_info=FALSE)
+	public function get_usuario_info($id_usuario=FALSE, $basic_info=FALSE, $empresa_id=0)
 	{
 		$id_usuario = ($id_usuario==false)? $_GET['id']: $id_usuario;
 
@@ -274,6 +279,7 @@ class Usuarios_model extends privilegios_model {
 				->select('privilegio_id')
 				->from('usuarios_privilegios')
 				->where("usuario_id = '".$id_usuario."'")
+        ->where("id_empresa = {$empresa_id}")
 			->get();
 			if($res->num_rows() > 0){
 				foreach($res->result() as $priv)
@@ -338,7 +344,7 @@ class Usuarios_model extends privilegios_model {
 
       foreach ($datos['id_empledo'] as $key => $value)
       {
-        $sd = 0;
+        $sd = $datos['sueldo_diario'][$key];
         if ($datos['tipo'][$key] == 't') //asegurados
           $sd = number_format($datos['sueldo_diario'][$key] / $datos['factor_integracion'][$key], 4, '.', '');
 
@@ -409,13 +415,18 @@ class Usuarios_model extends privilegios_model {
       $emp = $this->empresas_model->getDefaultEmpresa();
       $this->session->set_userdata('selempresa', $emp->id_empresa);
     }
-    $result = $this->db->query(
-      "SELECT p.id, p.nombre, p.url_accion
-      FROM usuarios u
-        INNER JOIN usuarios_privilegios up ON u.id = up.usuario_id
-        INNER JOIN privilegios p ON p.id = up.privilegio_id
-      WHERE u.id = ".$this->session->userdata('id_usuario')."
-        AND up.privilegio_id in(SELECT id FROM privilegios WHERE id_padre = 382)");
+
+    $result = $this->db->query("SELECT e.id_empresa, e.nombre_fiscal
+      FROM empresas e INNER JOIN usuarios_privilegios up ON e.id_empresa = up.id_empresa
+      WHERE up.usuario_id = ".$this->session->userdata('id_usuario')." GROUP BY e.id_empresa");
+
+    // $result = $this->db->query(
+    //   "SELECT p.id, p.nombre, p.url_accion
+    //   FROM usuarios u
+    //     INNER JOIN usuarios_privilegios up ON u.id = up.usuario_id
+    //     INNER JOIN privilegios p ON p.id = up.privilegio_id
+    //   WHERE u.id = ".$this->session->userdata('id_usuario')."
+    //     AND up.privilegio_id in(SELECT id FROM privilegios WHERE id_padre = 382)");
     return $result->result();
   }
 
