@@ -168,6 +168,9 @@ class privilegios_model extends CI_Model{
 	 * @param unknown_type $returninfo
 	 */
 	public function tienePrivilegioDe($id_privilegio="", $url_accion="", $returninfo=false, $id_usuario = null){
+    $this->load->model('empresas_model');
+    $id_empresa = $this->empresas_model->getDefaultEmpresa()->id_empresa;
+
 		$band = false;
 		$url_accion = str_replace('index/', '', $url_accion);
 
@@ -180,7 +183,7 @@ class privilegios_model extends CI_Model{
 			->select('p.id, p.nombre, p.url_accion, p.mostrar_menu, p.url_icono')
 			->from('privilegios AS p')
 				->join('usuarios_privilegios AS ep', 'p.id = ep.privilegio_id', 'inner')
-			->where("ep.usuario_id = '".$id_usuario."' AND ".$sql."")
+			->where("ep.usuario_id = '".$id_usuario."' AND ep.id_empresa = '".$id_empresa."' AND ".$sql."")
 			->limit(1)
 		->get();
 		if($res->num_rows() > 0){

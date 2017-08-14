@@ -2,35 +2,29 @@ $(function(){
 
 	$(".transit_chekrs").on('click', function() {
 		var vt = $(this);
-    if (!vt.is('checked')) {
+
+    if (!vt.attr('checked')) {
       $("#btnTransitoCancelar").off('click');
       $("#btnTransitoCancelar").one('click', function() {
-        vt.attr('checked', true);
+        if (vt.attr('data-status') != 'Trans')
+          vt.removeAttr("checked");
+        else
+          vt.attr('checked', 'true');
       });
       $("#btnTransitoContinuar").off('click');
-      $("#btnTransitoContinuar").one('click', function() {
-        $('#modal-transito').modal('hide');
-        msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
-         function(obj){
-           window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
-         }, function(obj){
-           if (vt.attr('data-status') != 'Trans')
-             vt.removeAttr("checked");
-           else
-             vt.attr('checked', 'true');
-         });
-      });
+      $("#btnTransitoContinuar").one('click', funTransitoContinuar(vt));
       $('#modal-transito').modal('show');
+    } else {
+      msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
+        function(obj){
+          window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
+        }, function(obj){
+          if (vt.attr('data-status') != 'Trans')
+            vt.removeAttr("checked");
+          else
+            vt.attr('checked', 'true');
+        });
     }
-		// msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
-		// 	function(obj){
-		// 		window.location = base_url+"panel/banco/cambia_entransito?"+vt.val();
-		// 	}, function(obj){
-		// 		if (vt.attr('data-status') != 'Trans')
-		// 			vt.removeAttr("checked");
-		// 		else
-		// 			vt.attr('checked', 'true');
-		// 	});
 	});
 
   $(".sbc_chekrs").on('click', function() {
@@ -109,6 +103,29 @@ $(function(){
   //     }
   // });
 });
+
+function funTransitoContinuar(vt) {
+  console.log(vt);
+  if ($('#fecha_aplico_trans').val().length > 0) {
+    $('#modal-transito').modal('hide');
+    msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
+     function(obj){
+      if ($('#fecha_aplico_trans').val().length > 0) {
+        var url = vt.val()+'&fecha_aplico_trans='+$('#fecha_aplico_trans').val();
+         window.location = base_url+"panel/banco/cambia_entransito?"+url;
+      } else
+        alert("La fecha de cobro es obligatoria.");
+     }, function(obj){
+       if (vt.attr('data-status') != 'Trans')
+         vt.removeAttr("checked");
+       else
+         vt.attr('checked', 'true');
+     });
+  } else {
+    alert("La fecha de cobro es obligatoria.");
+    $("#btnTransitoContinuar").one('click', funTransitoContinuar);
+  }
+}
 
 function calculaSaldo() {
 	var empresa_real = $("#total_saldo").text();

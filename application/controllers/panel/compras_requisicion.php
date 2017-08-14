@@ -87,7 +87,7 @@ class compras_requisicion extends MY_Controller {
     // Obtiene los datos de la empresa predeterminada.
     $this->load->model('empresas_model');
     $params['empresa_default'] = $this->empresas_model->getDefaultEmpresa();
-    if(!$this->input->get('did_empresa'))
+    if(intval($this->input->get('did_empresa')) < 1)
       $_GET['did_empresa'] = $params['empresa_default']->id_empresa;
 
     $params['ordenes'] = $this->compras_requisicion_model->getOrdenes(40, false);

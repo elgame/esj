@@ -1,5 +1,5 @@
 
- ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap
+ ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc
     ALTER TABLE public.banco_movimientos ADD COLUMN fecha_aplico date; COMMENT ON COLUMN public.banco_movimientos.fecha_aplico IS 'Fecha en que se aplico en el banco real (retiro o deposito)';
  ✔ Cambiar sistema de privilegios por emplesa y usuarios @done (17-08-05 10:30) pct|pct|san|lap
    ALTER TABLE public.usuarios_privilegios ADD COLUMN id_empresa integer NOT NULL DEFAULT 2;

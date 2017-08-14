@@ -262,7 +262,7 @@
       </div>
       <div class="modal-body">
         <div class="row-fluid">
-          <input type="date" name="" value="">
+          <input type="date" name="fecha_aplico_trans" id="fecha_aplico_trans">
         </div>
       </div>
       <div class="modal-footer">

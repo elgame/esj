@@ -28,8 +28,8 @@
                 <input type="number" name="ffolio" id="ffolio" value="<?php echo set_value_get('ffolio'); ?>" class="input-mini search-query" autofocus>
 
                 <label for="dempresa">Empresa</label>
-                <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value('dempresa', $empresa_default->nombre_fiscal) ?>" size="73">
-                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value('did_empresa', $empresa_default->id_empresa) ?>">
+                <input type="text" name="dempresa" class="input-large search-query" id="empresa" value="<?php echo set_value_get('dempresa', $empresa_default->nombre_fiscal) ?>" size="73">
+                <input type="hidden" name="did_empresa" id="empresaId" value="<?php echo set_value_get('did_empresa', $empresa_default->id_empresa) ?>">
 
                 <label for="dproveedor">Proveedor</label>
                 <input type="text" name="dproveedor" class="input-large search-query" id="proveedor" value="<?php echo set_value_get('dproveedor'); ?>" size="73">
