@@ -1,7 +1,8 @@
+var vt;
 $(function(){
 
 	$(".transit_chekrs").on('click', function() {
-		var vt = $(this);
+		vt = $(this);
 
     if (!vt.attr('checked')) {
       $("#btnTransitoCancelar").off('click');
@@ -12,7 +13,7 @@ $(function(){
           vt.attr('checked', 'true');
       });
       $("#btnTransitoContinuar").off('click');
-      $("#btnTransitoContinuar").one('click', funTransitoContinuar(vt));
+      $("#btnTransitoContinuar").one('click', funTransitoContinuar);
       $('#modal-transito').modal('show');
     } else {
       msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
@@ -104,14 +105,14 @@ $(function(){
   // });
 });
 
-function funTransitoContinuar(vt) {
-  console.log(vt);
+function funTransitoContinuar() {
   if ($('#fecha_aplico_trans').val().length > 0) {
     $('#modal-transito').modal('hide');
     msb.confirm('Esta seguro de cambiar el estado?', 'cuentas', this,
      function(obj){
       if ($('#fecha_aplico_trans').val().length > 0) {
         var url = vt.val()+'&fecha_aplico_trans='+$('#fecha_aplico_trans').val();
+        console.log(base_url+"panel/banco/cambia_entransito?"+url);
          window.location = base_url+"panel/banco/cambia_entransito?"+url;
       } else
         alert("La fecha de cobro es obligatoria.");

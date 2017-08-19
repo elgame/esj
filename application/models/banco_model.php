@@ -144,43 +144,85 @@ class banco_model extends CI_Model {
           foreach ($cuentas['cuentas'] as $keyc => $cuenta) {
             // Se Obtiene el saldo anterior a fecha1
             $data_anterior = $this->db->query(
-                "SELECT deposito, retiro, (deposito - retiro) AS saldo
+                "SELECT deposito, retiro, ret_transito, (deposito - (retiro + ret_transito)) AS saldo
                 FROM (
                   SELECT
                     (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 't' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS deposito,
-
-                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS retiro
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS retiro,
+                    (SELECT COALESCE(Sum(monto), 0) FROM banco_movimientos WHERE status = 't' AND tipo = 'f' AND entransito = 't' AND metodo_pago = 'cheque' AND id_cuenta = {$cuenta->id_cuenta} AND Date(fecha) < '{$fecha1}' {$sql1}) AS ret_transito
                   ) AS m")->row();
             $cuenta->saldo_ini = $data_anterior->saldo;
 
             //Saldo en el rango de fecha
-            $res = $this->db->query("SELECT
-                m.id_movimiento,
-                Date(m.fecha) AS fecha,
-                m.numero_ref,
-                m.concepto,
-                Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
-                Coalesce(c.id_cliente, p.id_proveedor, 0) AS id_cli_pro,
-                m.monto,
-                '' AS retiro,
-                '' AS deposito,
-                0 AS saldo,
-                m.tipo,
-                m.status,
-                m.entransito,
-                m.salvo_buen_cobro,
-                m.metodo_pago,
-                m.id_cuenta_proveedor,
-                m.desglosar_iva
-              FROM banco_movimientos AS m
-                LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
-                LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
-              WHERE m.id_cuenta = {$cuenta->id_cuenta}
-                AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha}'
-                AND m.status = 't' AND (m.tipo = 't' OR (m.tipo = 'f'))
-                {$sql2}
-              ORDER BY m.fecha ASC, m.id_movimiento ASC");
+            $res = $this->db->query("SELECT *
+              FROM
+              (
+                (
+                  SELECT
+                    m.id_movimiento,
+                    Date(m.fecha) AS fecha,
+                    m.numero_ref,
+                    m.concepto,
+                    Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+                    Coalesce(c.id_cliente, p.id_proveedor, 0) AS id_cli_pro,
+                    m.monto,
+                    '' AS retiro,
+                    '' AS deposito,
+                    0 AS saldo,
+                    m.tipo,
+                    m.status,
+                    (CASE WHEN (m.fecha_aplico IS NULL) THEN m.entransito ELSE (CASE WHEN Date(m.fecha_aplico) > Date(m.fecha) THEN 'true'::boolean ELSE 'false'::boolean END) END) AS entransito,
+                    m.salvo_buen_cobro,
+                    m.metodo_pago,
+                    m.id_cuenta_proveedor,
+                    m.desglosar_iva
+                  FROM banco_movimientos AS m
+                    LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
+                    LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
+                  WHERE m.id_cuenta = {$cuenta->id_cuenta}
+                    AND Date(m.fecha) BETWEEN '{$fecha1}' AND '{$fecha}'
+                    AND m.status = 't' AND (m.tipo = 't' OR (m.tipo = 'f'))
+                    {$sql2}
+                  ORDER BY m.fecha ASC, m.id_movimiento ASC
+                )
+                UNION ALL
+                (
+                  SELECT
+                    m.id_movimiento,
+                    Date(m.fecha_aplico) AS fecha,
+                    m.numero_ref,
+                    m.concepto,
+                    Coalesce(c.nombre_fiscal, p.nombre_fiscal, a_nombre_de, '') AS cli_pro,
+                    Coalesce(c.id_cliente, p.id_proveedor, 0) AS id_cli_pro,
+                    m.monto,
+                    '' AS retiro,
+                    '' AS deposito,
+                    0 AS saldo,
+                    m.tipo,
+                    m.status,
+                    'false'::boolean AS entransito,
+                    m.salvo_buen_cobro,
+                    m.metodo_pago,
+                    m.id_cuenta_proveedor,
+                    m.desglosar_iva
+                  FROM banco_movimientos AS m
+                    LEFT JOIN clientes AS c ON c.id_cliente = m.id_cliente
+                    LEFT JOIN proveedores AS p ON p.id_proveedor = m.id_proveedor
+                  WHERE m.id_cuenta = {$cuenta->id_cuenta}
+                    AND Date(m.fecha_aplico) BETWEEN '{$fecha1}' AND '{$fecha}'
+                    AND m.status = 't' AND (m.tipo = 't' OR (m.tipo = 'f'))
+                    {$sql2}
+                  ORDER BY m.fecha_aplico ASC, m.id_movimiento ASC
+                )
+              ) t
+              ORDER BY fecha ASC, id_movimiento ASC");
             $cuenta->movimientos = $res->result();
+
+            foreach ($cuenta->movimientos as $key => $mov) {
+              if ($mov->entransito == 't' && $mov->metodo_pago == 'cheque'){
+                $cuenta->saldo -= $mov->monto;
+              }
+            }
 
             if ($con_mov) {
               if (count($cuenta->movimientos) === 0)
@@ -204,6 +246,9 @@ class banco_model extends CI_Model {
   {
     // Obtiene los datos del reporte.
     $data = $this->rAcumuladoEmpresaData();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
 
     $fecha = new DateTime($_GET['ffecha1']);
     $fecha2 = new DateTime($_GET['ffecha2']);
@@ -241,7 +286,7 @@ class banco_model extends CI_Model {
         $empresa->nombre_fiscal
       ), false, false);
 
-      $total_importes_ingre = $total_importes_egre = 0;
+      $total_importes_trans = $total_importes_ingre = $total_importes_egre = 0;
       foreach ($empresa->cuentas as $keyc => $cuenta) {
         if($pdf->GetY() >= $pdf->limiteY) {
           $pdf->AddPage();
@@ -280,6 +325,11 @@ class banco_model extends CI_Model {
             $pdf->AddPage();
           }
 
+          if ($mov->entransito == 't' && $mov->metodo_pago == 'cheque') {
+            $pdf->SetFont('helvetica','B', 7);
+          } else
+            $pdf->SetFont('helvetica','', 7);
+
           $pdf->SetX(6);
           $pdf->SetAligns($aligns);
           $pdf->SetWidths($widths);
@@ -292,10 +342,14 @@ class banco_model extends CI_Model {
               $mov->concepto,
             ), false, 'B');
 
-          if ($mov->tipo == 't')
-            $total_importes_ingre += $mov->monto;
-          else
-            $total_importes_egre += $mov->monto;
+          if ($mov->entransito == 't' && $mov->metodo_pago == 'cheque')
+            $total_importes_trans += $mov->monto;
+          else {
+            if ($mov->tipo == 't')
+              $total_importes_ingre += $mov->monto;
+            else
+              $total_importes_egre += $mov->monto;
+          }
         }
       }
 

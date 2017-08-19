@@ -367,7 +367,7 @@ class banco extends MY_Controller {
 		{
 			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->updateMovimiento($_GET['id_movimiento'],
-				array('entransito' => ($this->input->get('mstatus')=='Trans'? 'f' : 't') ));
+				array('entransito' => ($this->input->get('mstatus')=='Trans'? 'f' : 't'), 'fecha_aplico' => ($this->input->get('mstatus')=='Trans'? $this->input->get('fecha_aplico_trans') : NULL) ));
 			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=11'));
 		}else
 			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento', 'mstatus')).'&msg=1'));
