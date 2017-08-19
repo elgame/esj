@@ -219,8 +219,10 @@ class banco_model extends CI_Model {
             $cuenta->movimientos = $res->result();
 
             foreach ($cuenta->movimientos as $key => $mov) {
-              if ($mov->entransito == 't' && $mov->metodo_pago == 'cheque'){
+              if ($mov->entransito == 't' && $mov->metodo_pago == 'cheque') {
                 $cuenta->saldo -= $mov->monto;
+              }elseif ($mov->entransito == 'f' && $mov->metodo_pago == 'cheque') {
+                $cuenta->saldo += $mov->monto;
               }
             }
 
