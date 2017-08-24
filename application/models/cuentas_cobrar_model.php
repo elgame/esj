@@ -52,13 +52,13 @@ class cuentas_cobrar_model extends privilegios_model{
 
     $query = BDUtil::pagination(
       "SELECT
-      id_cliente,
-      nombre_fiscal as nombre,
-      Sum(total) AS total,
-      Sum(iva) AS iva,
-      Sum(abonos) AS abonos,
-      Sum(saldo)::numeric(12, 2) AS saldo,
-      SUM(saldo_cambio) as saldo_cambio
+        id_cliente,
+        nombre_fiscal as nombre,
+        Sum(total) AS total,
+        Sum(iva) AS iva,
+        Sum(abonos) AS abonos,
+        Sum(saldo)::numeric(12, 2) AS saldo,
+        SUM(saldo_cambio) as saldo_cambio
       FROM
       (
         SELECT
@@ -102,85 +102,22 @@ class cuentas_cobrar_model extends privilegios_model{
               AND Date(f.fecha) <= '{$fecha}'{$sql}
             GROUP BY f.id_cliente, f.id_factura
           ) AS d
-        GROUP BY d.id_cliente, d.id_factura
-      ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-      LEFT JOIN (SELECT id_remision, id_factura, status
-        FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+          GROUP BY d.id_cliente, d.id_factura
+        ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
+        LEFT JOIN (
+          SELECT id_remision, id_factura, status
+          FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
         ) fh ON f.id_factura = fh.id_remision
-      WHERE f.status <> 'ca' AND f.status <> 'b'
-        AND f.id_abono_factura IS NULL AND id_nc IS NULL
-        AND Date(f.fecha) <= '{$fecha}'{$sql}
-        AND COALESCE(fh.id_remision, 0) = 0
-      GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
+        WHERE f.status <> 'ca' AND f.status <> 'b'
+          AND f.id_abono_factura IS NULL AND id_nc IS NULL
+          AND Date(f.fecha) <= '{$fecha}'{$sql}
+          AND COALESCE(fh.id_remision, 0) = 0
+        GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
       ) AS sal
-      GROUP BY id_cliente, nombre_fiscal",
+      GROUP BY id_cliente, nombre_fiscal
+      HAVING Sum(saldo)::numeric(12, 2) > 0 OR SUM(saldo_cambio) > 0",
       $params, true);
     $res = $this->db->query($query['query']);
-    echo "<pre>";
-      var_dump("SELECT
-      id_cliente,
-      nombre_fiscal as nombre,
-      Sum(total) AS total,
-      Sum(iva) AS iva,
-      Sum(abonos) AS abonos,
-      Sum(saldo)::numeric(12, 2) AS saldo,
-      SUM(saldo_cambio) as saldo_cambio
-      FROM
-      (
-        SELECT
-          c.id_cliente,
-          c.nombre_fiscal,
-          Sum(f.total) AS total,
-          Sum(f.importe_iva) AS iva,
-          COALESCE(Sum(faa.abonos),0) as abonos,
-          COALESCE(Sum(f.total) - COALESCE(Sum(faa.abonos),0), 0) AS saldo,
-          (CASE WHEN f.tipo_cambio > 1 THEN COALESCE(Sum(f.total/f.tipo_cambio) - COALESCE(faa.abonos/f.tipo_cambio, 0), 0) ELSE 0 END) AS saldo_cambio
-        FROM
-          clientes AS c
-        INNER JOIN facturacion AS f ON c.id_cliente = f.id_cliente
-        LEFT JOIN (
-          SELECT
-          d.id_cliente,
-          d.id_factura,
-          Sum(d.abonos) AS abonos
-          FROM
-          (
-            SELECT
-              f.id_cliente,
-              f.id_factura,
-              Sum(fa.total) AS abonos
-            FROM
-              facturacion AS f
-            INNER JOIN facturacion_abonos AS fa ON f.id_factura = fa.id_factura
-            WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_abono_factura IS NULL
-              AND Date(fa.fecha) <= '{$fecha}'{$sql}
-            GROUP BY f.id_cliente, f.id_factura
-
-            UNION
-
-            SELECT
-              f.id_cliente,
-              f.id_nc AS id_factura,
-              Sum(f.total) AS abonos
-            FROM
-              facturacion AS f
-            WHERE f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NOT NULL AND f.id_abono_factura IS NULL
-              AND Date(f.fecha) <= '{$fecha}'{$sql}
-            GROUP BY f.id_cliente, f.id_factura
-          ) AS d
-        GROUP BY d.id_cliente, d.id_factura
-      ) AS faa ON f.id_cliente = faa.id_cliente AND f.id_factura = faa.id_factura
-      LEFT JOIN (SELECT id_remision, id_factura, status
-        FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
-        ) fh ON f.id_factura = fh.id_remision
-      WHERE f.status <> 'ca' AND f.status <> 'b'
-        AND f.id_abono_factura IS NULL AND id_nc IS NULL
-        AND Date(f.fecha) <= '{$fecha}'{$sql}
-        AND COALESCE(fh.id_remision, 0) = 0
-      GROUP BY c.id_cliente, c.nombre_fiscal, faa.abonos, f.tipo_cambio
-      ) AS sal
-      GROUP BY id_cliente, nombre_fiscal");
-    echo "</pre>";exit;
 
     $response = array(
       'cuentas'             => array(),
@@ -231,7 +168,7 @@ class cuentas_cobrar_model extends privilegios_model{
     $widths = array(85, 30, 30, 30, 30);
     $header = array('Cliente', 'Cargos', 'Abonos', 'Saldo', 'Saldo TC');
 
-    $res = $this->getCuentasCobrarData(60);
+    $res = $this->getCuentasCobrarData(9999999999);
 
     $total_saldo_cambio = $total_cargos = $total_abonos = $total_saldo = 0;
     foreach($res['cuentas'] as $key => $item){
@@ -281,7 +218,7 @@ class cuentas_cobrar_model extends privilegios_model{
   }
 
   public function cuentasCobrarExcel(){
-    $res = $this->getCuentasCobrarData(60);
+    $res = $this->getCuentasCobrarData(9999999999);
 
     $this->load->library('myexcel');
     $xls = new myexcel();
