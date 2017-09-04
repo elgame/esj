@@ -2047,6 +2047,7 @@ class polizas_model extends CI_Model {
       $sql .= " AND LOWER(bm.metodo_pago) <> 'cheque' ";
       $sql2 .= " AND LOWER(bm.metodo_pago) <> 'cheque' ";
     }
+    $order_by = 'ORDER BY t.fecha ASC, t.id_movimiento ASC';
 
     $query = $this->db->query(
       "SELECT *
@@ -2093,7 +2094,7 @@ class polizas_model extends CI_Model {
         )
         {$sql_union_bascula}
       ) AS t
-      ORDER BY {$order_by} ASC
+      {$order_by}
       ");
 
     // $cuenta_cuadre = $this->getCuentaCuadreGasto();
