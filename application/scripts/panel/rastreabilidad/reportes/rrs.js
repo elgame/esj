@@ -16,6 +16,17 @@ $(function(){
     }
   });
 
+  $('#frmListadoCuentas').on('submit', function(event) {
+    var linkDownXls = $("#linkDownXls"),
+        url = {
+          did_empresa: $("#did_empresa").val(),
+        };
+
+    linkDownXls.attr('href', linkDownXls.attr('data-url') +"?"+ $.param(url));
+
+    console.log(linkDownXls.attr('href'));
+  });
+
   $('#frmverform').on('submit', function(event) {
     var linkDownXls = $("#linkDownXls"),
         url = {

@@ -603,6 +603,184 @@ class proveedores_model extends CI_Model {
     }
   }
 
+  public function rpt_listado_cuentas_data()
+  {
+    $this->load->model('empresas_model');
+    $this->load->model('cuentas_cobrar_model');
+
+    $response = array('ventas' => array());
+    $sql1 = $sql2 = '';
+
+    if (empty($_GET['did_empresa'])){
+      $empresa = $this->empresas_model->getDefaultEmpresa();
+      $_GET['did_empresa'] = $empresa->id_empresa;
+    }
+    $sql2 .= " AND p.id_empresa = ".$_GET['did_empresa']."";
+
+    // Obtenemos las ventas
+    $query = $this->db->query(
+      "SELECT p.id_proveedor, p.nombre_fiscal, pc.alias, pc.sucursal, pc.cuenta, bb.nombre AS banco
+      FROM proveedores p
+        INNER JOIN proveedores_cuentas pc ON p.id_proveedor = pc.id_proveedor
+        INNER JOIN banco_bancos bb ON bb.id_banco = pc.id_banco
+      WHERE p.status = 'ac' AND pc.status = 't' {$sql2}
+      ORDER BY p.id_proveedor ASC, pc.alias ASC");
+
+    if($query->num_rows() > 0){
+      $listado = [];
+      $aux = 0;
+      foreach ($query->result() as $key => $value) {
+        if ($aux != $value->id_proveedor) {
+          $listado[$value->id_proveedor] = [
+            'proveedor' => $value->nombre_fiscal,
+            'cuentas' => [$value]
+          ];
+          $aux = $value->id_proveedor;
+        } else {
+          $listado[$value->id_proveedor]['cuentas'][] = $value;
+        }
+      }
+    }
+    $query->free_result();
+
+
+    return $listado;
+  }
+
+  /**
+  * Reporte de ventas de dia
+  * @return void
+  */
+  public function rpt_listado_cuentas_pdf()
+  {
+    // Obtiene los datos del reporte.
+    $data = $this->rpt_listado_cuentas_data();
+    // echo "<pre>";
+    //   var_dump($data);
+    // echo "</pre>";exit;
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa']);
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Listado de cuentas";
+
+    $pdf->AliasNbPages();
+
+    // Listado de Rendimientos
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetY($pdf->GetY()+2);
+
+    $aligns = array('L', 'L', 'R', 'R');
+    $widths = array(39, 77, 30, 60);
+    $header = array('BANCO','ALIAS','SUCURSAL','CUENTA');
+
+    $key11 = 0;
+    foreach($data as $key => $proveedor)
+    {
+      if($pdf->GetY() >= $pdf->limiteY || $key11==0) //salta de pagina si exede el max
+      {
+        if($pdf->GetY() >= $pdf->limiteY)
+          $pdf->AddPage();
+
+        $pdf->SetFont('helvetica','B',8);
+        $pdf->SetTextColor(0,0,0);
+        $pdf->SetFillColor(200,200,200);
+        // $pdf->SetY($pdf->GetY()-2);
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true);
+        $key11=1;
+      }
+
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns('L');
+      $pdf->SetWidths(array(200));
+      $pdf->Row(array(
+        $proveedor['proveedor']
+        ), false, false);
+
+      foreach ($proveedor['cuentas'] as $keyc => $cuenta) {
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetTextColor(0,0,0);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row(array(
+          $cuenta->banco,
+          $cuenta->alias,
+          $cuenta->sucursal,
+          $cuenta->cuenta,
+          ), false, false);
+      }
+    }
+
+    $pdf->Output('lista.pdf', 'I');
+  }
+
+  public function rpt_listado_cuentas_xls(){
+    $data = $this->rpt_listado_cuentas_data();
+
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=lista_cuentas.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($_GET['did_empresa']);
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Listado de cuentas";
+
+    $html = '<table>
+    <tbody>
+      <tr>
+        <td colspan="4" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+      </tr>
+      <tr>
+        <td colspan="4" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+      </tr>
+      <tr>
+        <td colspan="4"></td>
+      </tr>
+      <tr style="font-weight:bold">
+        <td style="border:1px solid #000;background-color: #cccccc;">BANCO</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">ALIAS</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">SUCURSAL</td>
+        <td style="border:1px solid #000;background-color: #cccccc;">CUENTA</td>
+      </tr>';
+
+      $key11 = 0;
+      foreach($data as $key => $proveedor)
+      {
+        $html .= '<tr>
+          <td style="border:1px solid #000;" colspan="4">'.$proveedor['proveedor'].'</td>
+        </tr>';
+
+        foreach ($proveedor['cuentas'] as $keyc => $cuenta) {
+          $html .= '<tr>
+            <td style="border:1px solid #000;">'.$cuenta->banco.'</td>
+            <td style="border:1px solid #000;">'.$cuenta->alias.'</td>
+            <td style="border:1px solid #000;">\''.$cuenta->sucursal.'</td>
+            <td style="border:1px solid #000;">\''.$cuenta->cuenta.'</td>
+          </tr>';
+        }
+    }
+
+    $html .= '
+    </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

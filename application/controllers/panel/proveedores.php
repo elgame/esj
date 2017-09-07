@@ -9,6 +9,9 @@ class proveedores extends MY_Controller {
 	private $excepcion_privilegio = array(
     'proveedores/ajax_get_proveedores/',
     'proveedores/rpt_seg_cert_pdf/',
+    'proveedores/rpt_listado_cuentas/',
+    'proveedores/rpt_listado_cuentas_pdf/',
+    'proveedores/rpt_listado_cuentas_xls/',
   );
 
 	public function _remap($method){
@@ -361,6 +364,45 @@ class proveedores extends MY_Controller {
   {
     $this->load->model('proveedores_model');
     $this->proveedores_model->reporteSegCert();
+  }
+
+  public function rpt_listado_cuentas()
+  {
+    $this->carabiner->js(array(
+      array('general/keyjump.js'),
+      array('panel/rastreabilidad/reportes/rrs.js')
+    ));
+
+    $params['info_empleado'] = $this->info_empleado['info']; //info empleado
+    $params['seo'] = array(
+      'titulo' => 'Listado de cuentas'
+    );
+    $this->load->model('empresas_model');
+
+    if(isset($_GET['msg']{0}))
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+    $params['empresa'] = $this->empresas_model->getDefaultEmpresa();
+
+    $this->load->view('panel/header', $params);
+    $this->load->view('panel/proveedores/rpt_listado_cuentas', $params);
+    $this->load->view('panel/footer');
+  }
+
+  /**
+   * Procesa los datos para mostrar el reporte ENTRADA DE FRUTA
+   * @return void
+   */
+  public function rpt_listado_cuentas_pdf()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->rpt_listado_cuentas_pdf();
+  }
+
+  public function rpt_listado_cuentas_xls()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->rpt_listado_cuentas_xls();
   }
 
 	private function showMsgs($tipo, $msg='', $title='Usuarios')
