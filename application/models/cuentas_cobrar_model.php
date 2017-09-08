@@ -1702,21 +1702,87 @@ return $response;
       $sql_field_cantidad = '';
       if($all_clientes && $all_facturas)
         $sql_field_cantidad = ", (SELECT Sum(cantidad) FROM facturacion_productos WHERE id_factura = f.id_factura) AS cantidad_productos";
+      // $facturas = $this->db->query("SELECT
+      //     f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
+      //     (CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
+      //     (f.total/f.tipo_cambio) AS total_cambio, f.tipo_cambio,
+      //     Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
+      //   FROM facturacion as f
+      //   LEFT JOIN (SELECT id_remision, id_factura, status
+      //     FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+      //   ) fh ON f.id_factura = fh.id_remision
+      //   WHERE f.id_cliente = {$cliente->id_cliente}
+      //     AND f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL
+      //     AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
+      //     AND COALESCE(fh.id_remision, 0) = 0
+      //     {$sql} {$sqlext[1]}
+      //   ORDER BY fecha ASC, folio ASC");
       $facturas = $this->db->query("SELECT
           f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio,
           (CASE f.is_factura WHEN true THEN 'FACTURA ELECTRONICA' ELSE 'REMISION' END)::text AS concepto, f.subtotal, f.importe_iva, f.total,
           (f.total/f.tipo_cambio) AS total_cambio, f.tipo_cambio,
-          Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento {$sql_field_cantidad}
+          Date(f.fecha + (f.plazo_credito || ' days')::interval) AS fecha_vencimiento,
+          ab.a_id_abono, ab.a_serie, ab.a_folio, ab.a_fecha, ab.a_concepto, ab.a_abono
         FROM facturacion as f
         LEFT JOIN (SELECT id_remision, id_factura, status
           FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
         ) fh ON f.id_factura = fh.id_remision
+        LEFT JOIN (
+          SELECT id_factura, string_agg(COALESCE(id_abono, 0)::text, ',') AS a_id_abono, string_agg(COALESCE(serie, '-'), ',') AS a_serie,
+            string_agg(COALESCE(folio, 0)::text, ',') AS a_folio, string_agg(fecha::text, ',') AS a_fecha,
+            string_agg(COALESCE(concepto, '-'), ',') AS a_concepto, string_agg(COALESCE(abono, 0)::text, ',') AS a_abono
+          FROM (
+            SELECT *
+            FROM
+            (
+              (
+                SELECT
+                  fa.id_factura,
+                  fa.id_abono,
+                  (CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
+                  (CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
+                  Date(fa.fecha) AS fecha,
+                  (CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
+                  fa.total AS abono
+                FROM
+                  facturacion_abonos as fa
+                  LEFT JOIN (
+                    SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
+                    FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+                    WHERE Date(fa.fecha) <= '{$fecha2}'
+                    GROUP BY f.id_factura
+                  ) abs ON abs.id_factura = fa.id_factura
+                  LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
+                WHERE Date(fa.fecha) <= '{$fecha2}'
+              )
+              UNION
+              (
+                SELECT
+                  id_nc AS id_factura,
+                  id_factura AS id_abono,
+                  serie,
+                  folio,
+                  Date(fecha) AS fecha,
+                  'NOTA CREDITO DIGITAL'::text AS concepto,
+                  total AS abono
+                FROM
+                  facturacion
+                WHERE status <> 'ca' AND status <> 'b' AND id_nc IS NOT NULL
+                  AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
+              )
+            ) AS ff
+            ORDER BY id_factura ASC, fecha ASC, id_abono ASC
+          ) AS ffs
+          GROUP BY id_factura
+          ORDER BY id_factura ASC
+        ) ab ON f.id_factura = ab.id_factura
         WHERE f.id_cliente = {$cliente->id_cliente}
           AND f.status <> 'ca' AND f.status <> 'b' AND f.id_nc IS NULL AND f.id_abono_factura IS NULL
           AND (Date(f.fecha) >= '{$fecha1}' AND Date(f.fecha) <= '{$fecha2}')
           AND COALESCE(fh.id_remision, 0) = 0
           {$sql} {$sqlext[1]}
-        ORDER BY fecha ASC, folio ASC");
+        ORDER BY fecha ASC, folio ASC
+      ");
       $cliente->saldo_facturas = 0;
       $cliente->facturas = $facturas->result();
       $facturas->free_result();
@@ -1728,47 +1794,67 @@ return $response;
         $cliente->facturas[$key]->saldo        = $factura->total;
         $cliente->facturas[$key]->saldo_cambio = $factura->total_cambio;
 
-        /** abonos **/
-        $abonos = $this->db->query("SELECT id_abono, serie, folio, fecha, concepto, abono
-          FROM (
-          (
-            SELECT
-              fa.id_abono,
-              (CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
-              (CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
-              Date(fa.fecha) AS fecha,
-              (CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
-              fa.total AS abono
-            FROM
-            facturacion_abonos as fa
-            LEFT JOIN (
-              SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
-              FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
-              WHERE f.id_factura = {$factura->id_factura}
-                AND Date(fa.fecha) <= '{$fecha2}'
-              GROUP BY f.id_factura
-            ) abs ON abs.id_factura = fa.id_factura
-            LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
-            WHERE fa.id_factura = {$factura->id_factura} AND Date(fa.fecha) <= '{$fecha2}'
-          )
-          UNION
-          (
-            SELECT
-              id_factura AS id_abono,
-              serie,
-              folio,
-              Date(fecha) AS fecha,
-              'NOTA CREDITO DIGITAL'::text AS concepto,
-              total AS abono
-            FROM
-              facturacion
-            WHERE status <> 'ca' AND status <> 'b' AND id_nc = {$factura->id_factura}
-              AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
-          )
-        ) AS ffs
-        ORDER BY id_abono");
-        $cliente->facturas[$key]->abonos = $abonos->result();
-        $abonos->free_result();
+        // /** abonos **/
+        // $abonos = $this->db->query("SELECT id_abono, serie, folio, fecha, concepto, abono
+        //   FROM (
+        //   (
+        //     SELECT
+        //       fa.id_abono,
+        //       (CASE WHEN abs.num=1 THEN ''::text ELSE f.serie END) AS serie,
+        //       (CASE WHEN abs.num=1 THEN fa.id_abono ELSE f.folio END) AS folio,
+        //       Date(fa.fecha) AS fecha,
+        //       (CASE WHEN abs.num=1 OR abs.is_factura = false THEN ('Pago del cliente (' || fa.ref_movimiento || ')')::text ELSE ('Pago en parcialidades')::text END) AS concepto,
+        //       fa.total AS abono
+        //     FROM
+        //     facturacion_abonos as fa
+        //     LEFT JOIN (
+        //       SELECT f.id_factura, Count(fa.id_abono) AS num, f.is_factura
+        //       FROM facturacion f INNER JOIN facturacion_abonos fa ON f.id_factura = fa.id_factura
+        //       WHERE f.id_factura = {$factura->id_factura}
+        //         AND Date(fa.fecha) <= '{$fecha2}'
+        //       GROUP BY f.id_factura
+        //     ) abs ON abs.id_factura = fa.id_factura
+        //     LEFT JOIN facturacion AS f ON fa.id_abono = f.id_abono_factura
+        //     WHERE fa.id_factura = {$factura->id_factura} AND Date(fa.fecha) <= '{$fecha2}'
+        //   )
+        //   UNION
+        //   (
+        //     SELECT
+        //       id_factura AS id_abono,
+        //       serie,
+        //       folio,
+        //       Date(fecha) AS fecha,
+        //       'NOTA CREDITO DIGITAL'::text AS concepto,
+        //       total AS abono
+        //     FROM
+        //       facturacion
+        //     WHERE status <> 'ca' AND status <> 'b' AND id_nc = {$factura->id_factura}
+        //       AND id_abono_factura IS NULL AND Date(fecha) <= '{$fecha2}'
+        //   )
+        // ) AS ffs
+        // ORDER BY id_abono");
+        // $cliente->facturas[$key]->abonos = $abonos->result();
+        // $abonos->free_result();
+
+        $cliente->facturas[$key]->abonos = [];
+        if ($factura->a_id_abono != '') {
+          $aid_abonos = explode(',', $factura->a_id_abono);
+          $aseries    = explode(',', $factura->a_serie);
+          $afolios    = explode(',', $factura->a_folio);
+          $afechas    = explode(',', $factura->a_fecha);
+          $aconceptos = explode(',', $factura->a_concepto);
+          $aabonos    = explode(',', $factura->a_abono);
+          foreach ($aid_abonos as $aidk => $aid_abono) {
+            $aabono = new stdClass;
+            $aabono->id_abono = $aid_abonos[$aidk];
+            $aabono->serie    = $aseries[$aidk];
+            $aabono->folio    = $afolios[$aidk] === '0'? '': $afolios[$aidk];
+            $aabono->fecha    = $afechas[$aidk];
+            $aabono->concepto = $aconceptos[$aidk];
+            $aabono->abono    = $aabonos[$aidk];
+            $cliente->facturas[$key]->abonos[] = $aabono;
+          }
+        }
 
         $cliente->facturas[$key]->abonos_total = 0;
         foreach ($cliente->facturas[$key]->abonos as $keyab => $abono)

@@ -1,5 +1,5 @@
 
- ☐ Caja 4
+ ✔ Caja 4 @done (17-09-08 00:51) lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 4',247,TRUE,'caja_chica/caja4/','usd',TRUE);
  ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc|pct|san
     ALTER TABLE public.banco_movimientos ADD COLUMN fecha_aplico date; COMMENT ON COLUMN public.banco_movimientos.fecha_aplico IS 'Fecha en que se aplico en el banco real (retiro o deposito)';
