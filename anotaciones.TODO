@@ -1,83 +1,87 @@
 
  ✔ 1.8h Crear listado de cuentas de proveedores @done (17-09-06 23:57)
- ✔ 2.33h En el nuevo reporte de bao acumulado por empresa pintar de color los cheques en transito y no afectar el saldo, cuando desmarquen la opcion de transito poner fecha para mostrarlos en el reporte ya afectando el saldo @done (17-08-19 10:20)
- ✔ 6.61h Cambiar sistema de privilegios por emplesa y usuarios, sincronizar la empresa seleccionada con los filtros @done (17-08-08 19:06)
- ☐ En bascula para autorizar las modificaciones que genera una contraseña dinamica cuando se utilice generar otra y enviarla al correo fvgg08@gmail.com
- ☐ En reporte de prestamos no sale el empleado si en esa semana liquida el prestamo.
- ☐ Crear productos bajos de inventario cargarlos en ordenes de requi
+ ✔ 3.33h En el nuevo reporte de banco acumulado por empresa pintar de color los cheques en transito y no afectar el saldo, cuando desmarquen la opcion de transito poner fecha para mostrarlos en el reporte ya afectando el saldo @done (17-08-19 10:20)
+ ✔ 7.61h Cambiar sistema de privilegios por empresa y usuarios, sincronizar la empresa seleccionada con los filtros @done (17-08-08 19:06)
+ ☐ En bascula para autorizar las modificaciones que genera una contraseña dinámica cuando se utilice generar otra y enviarla al correo fvgg08@gmail.com
+ ☐ En reporte de prestamos no sale el empleado si en esa semana liquida el préstamo.
+ ☐ Crear productos bajos de inventario cargarlos en ordenes de requisición
  ☐ Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada
  ☐ En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente
-   "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
- ☐ En bascula agregar un tipo de pesada "Hojas de limon, desecho platano, piña" para pesar las hojas de limon y crear un Reporte de kilos de las remisiones y restarle los kilos de bascula de las pesadas de desecho
- ☐ En el listado de productos poner una opcion para marcar los productos que tienen que regresar el producto dañado, y en las salidas en los tickets poner "Refacciones al cambio" y indicar que se tienen que regresar esos productos dañados
+   "Saldo deudor actualizado" y en las remisiones también mostrarlo, poder indicar en que clientes mostrarlos
+ ☐ En bascula agregar un tipo de pesada "Hojas de limón, desecho plátano, piña" para pesar las hojas de limón y crear un Reporte de kilos de las remisiones y restarle los kilos de bascula de las pesadas de desecho
+ ☐ En el listado de productos poner una opción para marcar los productos que tienen que regresar el producto dañado, y en las salidas en los tickets poner "Refacciones al cambio" y indicar que se tienen que regresar esos productos dañados
  ✔ .48h Ordenes de compras poner privilegio de dar entrada y en el ticket poner quien dio la entrada @done (17-06-10 15:30)
 
  ********************************************* Facturado
 
- ✔ 1.16h En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente @done (17-06-11 10:53)
+
+ ✔ 2.16h En caja 2 en ingresos de clientes en el ticket ponerle el saldo de lo que debe ese cliente @done (17-06-11 10:53)
    "Saldo deudor actualizado" y en las remisiones tambien mostrarlo, poder indicar en que clientes mostrarlos
- ✔ .63h En compras validar que solo puedan modificar decimales en los totales @done (17-06-28 12:25)
- ✔ .22h El reporte de productos facturados que no cargue la remision 443 de plasticos bubalu para que cuandre con el inventario de produccion @done (17-06-23 22:35)
+ ✔ 1.63h En compras validar que solo puedan modificar decimales en los totales @done (17-06-28 12:25)
+ ✔ .22h El reporte de productos facturados que no cargue la remisión 443 de plásticos bubalu para que cuadre con el inventario de producción @done (17-06-23 22:35)
 
- ✔ 1.96h En salidas de almacen y tickets agregar los 15 datos que la señora me paso para @done (17-02-27 20:37)
- ✔ 0.53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques entransito @done (17-02-21 16:06)
+ ✔ 1.96h En salidas de almacén y tickets agregar los 15 datos que la señora me paso para @done (17-02-27 20:37)
+ ✔ 0.53h Caja chica de limon poner fondo de caja, no sale total de boletas, y pone algunos cheques en transito @done (17-02-21 16:06)
  ✔ 1.5h En caja chica 2 poner los saldos de los clientes de remisiones de enero 2017 en adelante @done (17-03-09 15:39)
- ✔ 6.31h Caja chica de prestamo poner fondo de caja y dejarlo como el formato del archivo @done (17-03-15 13:37)
- ✔ 0.68h Reporte de saldos bancarios, saldo inicial, y al saldo final es quitando los cheques de transito, filtros de la hoja @done (17-03-01 18:28)
- ✔ 2.16h Reporte de bancos acumulado por empresas, como la hoja de ejemplo @done (17-02-25 12:58)
+ ✔ 7.31h Caja chica de préstamo poner fondo de caja y dejarlo como el formato del archivo @done (17-03-15 13:37)
+ ✔ 2.68h Reporte de saldos bancarios, saldo inicial, y al saldo final es quitando los cheques de transito, filtros de la hoja @done (17-03-01 18:28)
+ ✔ 3.16h Reporte de bancos acumulado por empresas, como la hoja de ejemplo @done (17-02-25 12:58)
  ✔ 0.81h En todos los reportes cambiar la fecha a formato dia/mes/año @done (17-02-28 00:23)
- ✔ 1.31h En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios, agregar privilegio para mostrar los totales @done (17-02-22 10:31)
- ✔ 2.5h En ordenes de flete seleccionar el tipo de orden (de venta, de compra) en ventas es ligar factura o remision (ya lo tiene), en compra es ligar una boleta de tipo entrada @done (17-03-07 20:12)
- ✔ 0.5h En ordenes poner seleccion de almacen para registrar la entrada @done (17-03-07 20:12)
- ✔ 1h En tickets de ordenes de compras acomodar como los ejemplos, (agregar autorizo, En cod area poner solo los ultimos 2, poner lo de almacen, Entrada mas grande, consecutivo por dia y fecha, ligar boleta) @done (17-03-22 20:47)
- ✔ 0.5h En boleta de recepcion cuando sea de insumo material cambia los datos de abajo como ejemplo @done (17-03-07 20:41)
- ✔ 2h En bascula poder capturar los datos de la boleta de recepción en el tipo de insumo material y ligar la orden de la entrada de material @done (17-03-22 20:47)
+ ✔ 3.31h En bodega quitar lineas, intercambiar columnas indicadas, Poner kilos y espacios, agregar privilegio para mostrar los totales @done (17-02-22 10:31)
+ ✔ 2.5h En ordenes de flete seleccionar el tipo de orden (de venta, de compra) en ventas es ligar factura o remisión (ya lo tiene), en compra es ligar una boleta de tipo entrada @done (17-03-07 20:12)
+ ✔ 1.5h En ordenes poner selección de almacén para registrar la entrada @done (17-03-07 20:12)
+ ✔ 3.5h En tickets de ordenes de compras acomodar como los ejemplos, (agregar autorizo, En cod área poner solo los últimos 2, poner lo de almacén, Entrada mas grande, consecutivo por dia y fecha, ligar boleta) @done (17-03-22 20:47)
+ ✔ 0.5h En boleta de recepción cuando sea de insumo material cambia los datos de abajo como ejemplo @done (17-03-07 20:41)
+ ✔ 5.51h En bascula poder capturar los datos de la boleta de recepción en el tipo de insumo material y ligar la orden de la entrada de material @done (17-03-22 20:47)
 
- ✔ 0.68h Reporte de codigo de salidas @done (17-02-07 21:17)
+ ✔ 1.68h Reporte de código de salidas @done (17-02-07 21:17)
  ✔ 0.1h En los tickets de la orden poner Entrada @done (17-02-07 21:22)
 
- ✔ 3h En bodega guadalajara acomodar el formato como la hoja de la señora, agregar calculos de acumulados @done (17-01-17 21:39)
+ ✔ 5h En bodega guadalajara acomodar el formato como la hoja de la señora, agregar cálculos de acumulados @done (17-01-17 21:39)
  ✔ 0.88h En reportes de caja incluir la caja de prestamos, prestamos = gastos y pagos = ingresos @done (17-01-18 19:07)
- ✔ 1.9h En cada de prestamos poner el saldo por trabajador, opcion para poder saldar los prestamos de un trabajador @done (17-01-18 22:01)
- ✔ 1.86H En caja poner las boletas que se pagaron en efectivo y aun no se recupera el dinero a la caja, poner los cheques en transito @done (17-01-23 13:56)
+ ✔ 2.9h En cada de prestamos poner el saldo por trabajador, opción para poder saldar los prestamos de un trabajador @done (17-01-18 22:01)
+ ✔ 2.86H En caja poner las boletas que se pagaron en efectivo y aun no se recupera el dinero a la caja, poner los cheques en transito @done (17-01-23 13:56)
  ✔ 1h Crear reportes de gastos y ventas en Bodega @done (17-01-23 16:27)
- ✔ 2.2h Agregar apartado en almacenes para regresar productos al inventario, parecido a salidas de productos @done (17-01-30 19:28)
- ✔ 5.7h Apartado produccion de productos, crear productos a partir de materia prima, tener inventario de esos productos, descontar al vender (remisiones y facturas), afectar inventario de materia prima @done (17-02-01 16:21)
+ ✔ 5.2h Agregar apartado en almacenes para regresar productos al inventario, parecido a salidas de productos @done (17-01-30 19:28)
+ ✔ 12.7h Apartado producción de productos, crear productos a partir de materia prima, tener inventario de esos productos, descontar al vender (remisiones y facturas), afectar inventario de materia prima @done (17-02-01 16:21)
 
- ✔ 10h Nomina 1.2 @done (17-01-23 14:20)
-   ✔ Ejecutar backup catalogos @done (17-01-23 14:20)
- ✔ 4.20h Agregar a ordenes, salidas y reportes multiple inventario, hacer traspaso de mercancia @done (17-01-05 20:55)
- ✔ 1.66h En entrada de almacen (ordenes de requisicion) que imprima en formato ticket @done (16-12-27 19:51)
- ✔ .56h En bodega guadalajara agregar apartado de ingresos como en caja chica @done (16-12-27 18:13)
- ✔ .66h En cajas chicas imprimir recibo en ingresos por reposicion, y poner titulo en los tickets "Ingresos" @done (16-12-12 14:55)
+ ✔ 23.5h Nomina 1.2 @done (17-01-23 14:20)
+   ✔ Ejecutar backup catálogos @done (17-01-23 14:20)
+ ✔ 7.20h Agregar a ordenes, salidas y reportes múltiple inventario, hacer traspaso de mercancía @done (17-01-05 20:55)
+ ✔ 3.66h En entrada de almacén (al crear las ordenes) que imprima en formato ticket @done (16-12-27 19:51)
+ ✔ 1.56h En bodega guadalajara agregar apartado de ingresos como en caja chica @done (16-12-27 18:13)
+ ✔ 1.66h En cajas chicas imprimir recibo en ingresos por reposición, y poner titulo en los tickets "Ingresos" @done (16-12-12 14:55)
  ✔ Reporte de bodega guadalajara, en cuentas por pagar si el saldo es 0 que no salga @done (16-12-12 15:04)
- ✔ 1.33h En cajas chicas crear reporte de gastos e ingresos juntos como estado de cuenta @done (16-12-12 22:45)
- ✔ 2h Crear nueva caja chica "Ventas de contado", poner titulo a cada caja chica @done (16-12-15 22:17)
+ ✔ 2.33h En cajas chicas crear reporte de gastos e ingresos juntos como estado de cuenta @done (16-12-12 22:45)
+ ✔ 3h Crear nueva caja chica "Ventas de contado", poner titulo a cada caja chica @done (16-12-15 22:17)
  ✔ En caja chica no salen las remisiones que se hacen ese dia hasta el dia siguiente @done (16-12-12 23:37)
 
- ✔ 0.26h Reporte de caja chica, quitar la columna de folio y agregar otra para poner el productor @done (16-10-21 15:24)
- ✔ 0.2h En ticket de salida poner lo de original y copia @done (16-10-21 19:12)
- ✔ 0.33h Entrega de fruta cargar los datos de la boleta @done (16-10-16 13:34)
- ✔ 0.36h En las remisiones cuando sea a contado que agregue el abono para que se pague automaticamente @done (16-10-16 20:07)
- ✔ Revisar reporte de compras por proveedor que no carge las ordenes canceladas @done (16-10-16 20:08)
- ✔ En bancos en las trasnferencias poder cambiar el movimiento transito @done (16-10-13 16:22)
+ ✔ 1.26h Reporte de caja chica, quitar la columna de folio y agregar otra para poner el productor @done (16-10-21 15:24)
+ ✔ 1.2h En ticket de salida poner lo de original y copia @done (16-10-21 19:12)
+ ✔ 1.33h Entrega de fruta cargar los datos de la boleta @done (16-10-16 13:34)
+ ✔ 1.36h En las remisiones cuando sea a contado que agregue el abono para que se pague automáticamente @done (16-10-16 20:07)
+ ✔ Revisar reporte de compras por proveedor que no cargue las ordenes canceladas @done (16-10-16 20:08)
+ ✔ En bancos en las transferencias poder cambiar el movimiento transito @done (16-10-13 16:22)
  ✔ En catalogo de productores en tipo agregar "con factura pago bancario" @done (16-10-13 16:00)
  ✔ Ticket de salida de productos agregar folio y fechas @done (16-10-13 13:55)
- ✔ 0.23h Catalogo de productores agregar campos extras (Coeplim, hectareas, etc) @done (16-10-04 15:46)
- ✔ 1.16h Bodega guadalajara en los tickets poner lo de original y copias, Al agregar remision si seleccionan bodega cargar folio automatico y cursor en clientes, poner boton de imprimir ticket y guardar la remision @done (16-09-28 14:41)
+ ✔ 1.23h Catalogo de productores agregar campos extras (Coeplim, hectáreas, etc) @done (16-10-04 15:46)
+ ✔ 4.16h Bodega Guadalajara en los tickets poner lo de original y copias, Al agregar remisión si seleccionan bodega cargar folio automático y cursor en clientes, poner boton de imprimir ticket y guardar la remisión @done (16-09-28 14:41)
 
  ✔ En productos agregar para poder cambiar los productos de familia @done (16-09-26 13:16)
- ✔ En el apartado entrada de fruta cambiar el formato como la hoja (agregar mas renglones, poner copia aun lado, agregar boleta y q ponga los kilos, agregar campos extas) @done (16-09-26 17:55)
+ ✔ En el apartado entrada de fruta cambiar el formato como la hoja (agregar mas renglones, poner copia aun lado, agregar boleta y q ponga los kilos, agregar campos extras) @done (16-09-26 17:55)
  ✔ En bascula reporte de movimientos poner opcional el seleccionar el cliente o proveedor @done (16-09-26 10:24)
- ✔ 2h Agregar a reporte de combustible reporte concentrado y unir con el desglosado como esta ahorita @done (16-09-27 10:37)
+ ✔ 2.5h Agregar a reporte de combustible reporte concentrado y unir con el desglosado como esta ahorita @done (16-09-27 10:37)
  ✔ En cuentas de proveedores agregar bancos de inbursa, bajio, bancopel @done (16-08-19 08:29)
- ✔ 0.3h En cajas chicas reportes de gastos e ingresos meter filtros de concepto (para buscar proveedor y cliente) y filtro de caja @done (16-08-17 15:40)
- ✔ En contrarecivos ordenarlo por folio decendente @done (16-08-04 12:37)
- ✔ 0.25h En reporte diario de entrada agregar filtro para que cargue el reporte con los kilos de bascula si es limon industrial o suelo que use los quilos pagados y la diferencia los mande a limun fruta y si no que promedio por cajas @done (16-08-17 18:29)
- ✔ 0.13h boleta de recepcion que diga si es original o copias @done (16-08-17 18:43)
- ☐ Ver el programa de cheques (compras a cheques), en cheques de reposicion ver donde se inserta y que la poliza de cheques solo tenga un movimiento en bancos que no registre por proveedor y tambien que cargue los cheques cancelados
+ ✔ 2.3h En cajas chicas reportes de gastos e ingresos meter filtros de concepto (para buscar proveedor y cliente) y filtro de caja @done (16-08-17 15:40)
+ ✔ En contrarecivos ordenarlo por folio descendente @done (16-08-04 12:37)
+ ✔ 3.75h En reporte diario de entrada agregar filtro para que cargue el reporte con los kilos de bascula si es limón industrial o suelo que use los kilos pagados y la diferencia los mande a limón fruta y si no que promedio por cajas @done (16-08-17 18:29)
+ ✔ 0.13h boleta de recepción que diga si es original o copias @done (16-08-17 18:43)
+ ☐ Ver el programa de cheques (compras a cheques), en cheques de reposicion ver donde se inserta y que la póliza de cheques solo tenga un movimiento en bancos que no registre por proveedor y también que cargue los cheques cancelados
+
 
 ******************************************** Facturado
+
+
 
 ✔ .51h Reporte de cuentas por pagar en los productos facturados poner el numero de certificado o poliza de seguro @done (16-07-17 13:51)
   que se pone en los datos de la factura y el numero de operacion
