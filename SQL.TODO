@@ -1,4 +1,100 @@
 
+ ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct
+   CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS
+       SELECT dd.id_factura,
+          COALESCE(dd.id_abono, 0::bigint) AS a_id_abono,
+          COALESCE(dd.serie, '-'::character varying) AS a_serie,
+          COALESCE(dd.folio, 0::bigint) AS a_folio,
+          dd.fecha AS a_fecha,
+          COALESCE(dd.concepto, '-'::text) AS a_concepto,
+          COALESCE(dd.abono, 0::double precision) AS a_abono
+         FROM ( SELECT ff.id_factura,
+                  ff.id_abono,
+                  ff.serie,
+                  ff.folio,
+                  ff.fecha,
+                  ff.concepto,
+                  ff.abono
+                 FROM ( SELECT fa.id_factura,
+                          fa.id_abono,
+                              CASE
+                                  WHEN abs.num = 1 THEN ''::text::character varying
+                                  ELSE f.serie
+                              END AS serie,
+                              CASE
+                                  WHEN abs.num = 1 THEN fa.id_abono
+                                  ELSE f.folio
+                              END AS folio,
+                          date(fa.fecha) AS fecha,
+                              CASE
+                                  WHEN abs.num = 1 OR abs.is_factura = false THEN ('Pago del cliente ('::text || fa.ref_movimiento::text) || ')'::text
+                                  ELSE 'Pago en parcialidades'::text
+                              END AS concepto,
+                          fa.total AS abono
+                         FROM facturacion_abonos fa
+                           LEFT JOIN ( SELECT f_1.id_factura,
+                                  count(fa_1.id_abono) AS num,
+                                  f_1.is_factura
+                                 FROM facturacion f_1
+                                   JOIN facturacion_abonos fa_1 ON f_1.id_factura = fa_1.id_factura
+                                WHERE date(fa_1.fecha) <= now()
+                                GROUP BY f_1.id_factura) abs ON abs.id_factura = fa.id_factura
+                           LEFT JOIN facturacion f ON fa.id_abono = f.id_abono_factura
+                        WHERE date(fa.fecha) <= now()
+                      UNION
+                       SELECT facturacion.id_nc AS id_factura,
+                          facturacion.id_factura AS id_abono,
+                          facturacion.serie,
+                          facturacion.folio,
+                          date(facturacion.fecha) AS fecha,
+                          'NOTA CREDITO DIGITAL'::text AS concepto,
+                          facturacion.total AS abono
+                         FROM facturacion
+                        WHERE facturacion.status::text <> 'ca'::text AND facturacion.status::text <> 'b'::text AND facturacion.id_nc IS NOT NULL AND facturacion.id_abono_factura IS NULL AND date(facturacion.fecha) <= now()) ff) dd
+      WITH DATA;
+      ALTER TABLE public.estado_cuenta_abonos OWNER TO programa;
+   CREATE MATERIALIZED VIEW public.estado_cuenta AS
+       SELECT c.id_cliente,
+          c.nombre_fiscal,
+          c.cuenta_cpi,
+          c.dias_credito,
+          f.id_factura,
+          f.id_empresa,
+          date(f.fecha) AS fecha,
+          f.serie,
+          f.folio,
+              CASE f.is_factura
+                  WHEN true THEN 'FACTURA ELECTRONICA'::text
+                  ELSE 'REMISION'::text
+              END AS concepto,
+          f.subtotal,
+          f.importe_iva,
+          f.total,
+          f.total / f.tipo_cambio AS total_cambio,
+          f.tipo_cambio,
+          f.is_factura,
+          date(f.fecha + ((f.plazo_credito || ' days'::text)::interval)) AS fecha_vencimiento,
+          ab.a_id_abono,
+          ab.a_serie,
+          ab.a_folio,
+          ab.a_fecha,
+          ab.a_concepto,
+          ab.a_abono
+         FROM clientes c
+           LEFT JOIN facturacion f ON c.id_cliente = f.id_cliente
+           LEFT JOIN ( SELECT remisiones_historial.id_remision,
+                  remisiones_historial.id_factura,
+                  remisiones_historial.status
+                 FROM remisiones_historial
+                WHERE remisiones_historial.status::text <> 'ca'::text AND remisiones_historial.status::text <> 'b'::text) fh ON f.id_factura = fh.id_remision
+           LEFT JOIN estado_cuenta_abonos ab ON f.id_factura = ab.id_factura
+        WHERE c.status::text = 'ac'::text AND f.status::text <> 'ca'::text AND f.status::text <> 'b'::text AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND COALESCE(fh.id_remision, 0::bigint) = 0
+        ORDER BY c.id_cliente, (date(f.fecha)), f.folio, ab.a_fecha
+      WITH DATA;
+      ALTER TABLE public.estado_cuenta OWNER TO postgres;
+
+ ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san
+   INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte listado de cuentas',10,TRUE,'proveedores/rpt_listado_cuentas/','print',TRUE);
  ✔ Caja 4 @done (17-09-08 00:51) lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 4',247,TRUE,'caja_chica/caja4/','usd',TRUE);
  ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc|pct|san
