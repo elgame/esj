@@ -1,5 +1,5 @@
 
- ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct
+ ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS
        SELECT dd.id_factura,
           COALESCE(dd.id_abono, 0::bigint) AS a_id_abono,
@@ -91,11 +91,30 @@
         WHERE c.status::text = 'ac'::text AND f.status::text <> 'ca'::text AND f.status::text <> 'b'::text AND f.id_nc IS NULL AND f.id_abono_factura IS NULL AND COALESCE(fh.id_remision, 0::bigint) = 0
         ORDER BY c.id_cliente, (date(f.fecha)), f.folio, ab.a_fecha
       WITH DATA;
-      ALTER TABLE public.estado_cuenta OWNER TO postgres;
+      ALTER TABLE public.estado_cuenta OWNER TO programa;
+  ✔ @done (17-09-12 22:23) pcc|san
+   CREATE OR REPLACE FUNCTION public.refreshallmaterializedviews(schema_arg text DEFAULT 'public'::text)
+        RETURNS integer AS
+      $BODY$
+        DECLARE
+          r RECORD;
+        BEGIN
+          RAISE NOTICE 'Refreshing materialized view in schema %', schema_arg;
+          FOR r IN SELECT matviewname FROM pg_matviews WHERE schemaname = schema_arg ORDER BY matviewname DESC
+          LOOP
+            RAISE NOTICE 'Refreshing %.%', schema_arg, r.matviewname;
+            EXECUTE 'REFRESH MATERIALIZED VIEW ' || schema_arg || '.' || r.matviewname;
+          END LOOP;
 
- ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san
+          RETURN 1;
+        END
+      $BODY$
+        LANGUAGE plpgsql VOLATILE COST 100;
+      ALTER FUNCTION public.refreshallmaterializedviews(text) OWNER TO programa;
+
+ ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte listado de cuentas',10,TRUE,'proveedores/rpt_listado_cuentas/','print',TRUE);
- ✔ Caja 4 @done (17-09-08 00:51) lap|san
+ ✔ Caja 4 @done (17-09-08 00:51) lap|san|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 4',247,TRUE,'caja_chica/caja4/','usd',TRUE);
  ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc|pct|san
     ALTER TABLE public.banco_movimientos ADD COLUMN fecha_aplico date; COMMENT ON COLUMN public.banco_movimientos.fecha_aplico IS 'Fecha en que se aplico en el banco real (retiro o deposito)';

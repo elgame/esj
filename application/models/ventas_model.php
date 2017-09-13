@@ -544,7 +544,7 @@ class Ventas_model extends privilegios_model{
       $resa = $this->cuentas_cobrar_model->addAbono($data, $id_venta);
     }
 
-    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
@@ -820,7 +820,7 @@ class Ventas_model extends privilegios_model{
 
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
-    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     // // Registra la salida de productos si tiene pallets
     // $this->addSalidaProductosPallets($id_venta, $_POST['did_empresa']);
@@ -918,7 +918,7 @@ class Ventas_model extends privilegios_model{
     // Elimina la salida de productos q se dio si se ligaron pallets
     $this->db->delete('compras_salidas', array('id_factura' => $id_venta));
 
-    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     // Bitacora
     $bitacora_accion = 'la nota de remision';
