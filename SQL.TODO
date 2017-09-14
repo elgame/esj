@@ -1,5 +1,5 @@
 
- ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct
+ ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|lap
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS
        SELECT dd.id_factura,
           COALESCE(dd.id_abono, 0::bigint) AS a_id_abono,
@@ -93,7 +93,7 @@
       WITH DATA;
       ALTER TABLE public.estado_cuenta OWNER TO postgres;
 
- ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san
+ ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san|lap
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte listado de cuentas',10,TRUE,'proveedores/rpt_listado_cuentas/','print',TRUE);
  ✔ Caja 4 @done (17-09-08 00:51) lap|san
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 4',247,TRUE,'caja_chica/caja4/','usd',TRUE);
