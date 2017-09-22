@@ -159,7 +159,7 @@ class areas_model extends CI_Model {
 			$data['info']	= $sql_res->row();
 		$sql_res->free_result();
 
-		if ($basic_info == False) {
+		if ($sql_res->num_rows() > 0 && $basic_info == false) {
       $data['calidades'] = array();
 
       $sql_res = $this->db->select("id_calidad, id_area, nombre, precio_compra, status")

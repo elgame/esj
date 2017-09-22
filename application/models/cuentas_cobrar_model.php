@@ -1488,8 +1488,8 @@ return $response;
     }elseif($this->input->get('ftipo')=='to'){
       $all_clientes = true;
       $all_facturas = true;
-      if($this->input->get('fid_cliente') != '')
-        $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
+      // if($this->input->get('fid_cliente') != '')
+      //   $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
     }
 
     if($this->input->get('did_empresa') != ''){
@@ -1501,13 +1501,15 @@ return $response;
     if($this->input->get('fid_cliente') != ''){
       $sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
       $sqlt .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
+      $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
     }
 
     $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito, id_factura,
         id_empresa, fecha, serie, folio, concepto, subtotal, importe_iva, total, total_cambio, tipo_cambio,
         is_factura, fecha_vencimiento, a_id_abono, a_serie, a_folio, a_fecha, a_concepto, a_abono
       FROM estado_cuenta
-      WHERE 1 = 1  {$sql_clientes} ORDER BY nombre_fiscal ASC, fecha ASC, a_fecha ASC ");
+      WHERE 1 = 1  {$sql_clientes}
+      ORDER BY nombre_fiscal ASC, id_factura ASC, a_id_abono ASC ");
     $response = array();
     $aux_cliente = 0;
     $aux_factura = 0;
