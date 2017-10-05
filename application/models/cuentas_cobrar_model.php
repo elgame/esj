@@ -1508,7 +1508,7 @@ return $response;
         id_empresa, fecha, serie, folio, concepto, subtotal, importe_iva, total, total_cambio, tipo_cambio,
         is_factura, fecha_vencimiento, a_id_abono, a_serie, a_folio, a_fecha, a_concepto, a_abono
       FROM estado_cuenta
-      WHERE 1 = 1  {$sql_clientes}
+      WHERE Date(fecha) <= '{$fecha2}'  {$sql_clientes}
       ORDER BY nombre_fiscal ASC, id_factura ASC, a_id_abono ASC ");
     $response = array();
     $aux_cliente = 0;
