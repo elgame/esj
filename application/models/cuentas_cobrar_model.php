@@ -1570,24 +1570,26 @@ return $response;
       }
 
       if ($aux_factura == $cliente1->id_factura && $cliente1->a_id_abono > 0) {
-        $aabono = new stdClass;
-        $aabono->id_abono = $cliente1->a_id_abono;
-        $aabono->serie    = $cliente1->a_serie;
-        $aabono->folio    = $cliente1->a_folio;
-        $aabono->fecha    = $cliente1->a_fecha;
-        $aabono->concepto = str_replace('()', '', $cliente1->a_concepto);
-        $aabono->abono    = $cliente1->a_abono;
-        $cliente->facturas[$cliente1->id_factura]->abonos[] = $aabono;
-        // echo "<pre>";
-        //   var_dump($cliente->facturas[$cliente1->id_factura]);
-        // echo "</pre>";
+        if ($cliente1->a_fecha <= $fecha2) {
+          $aabono = new stdClass;
+          $aabono->id_abono = $cliente1->a_id_abono;
+          $aabono->serie    = $cliente1->a_serie;
+          $aabono->folio    = $cliente1->a_folio;
+          $aabono->fecha    = $cliente1->a_fecha;
+          $aabono->concepto = str_replace('()', '', $cliente1->a_concepto);
+          $aabono->abono    = $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->abonos[] = $aabono;
+          // echo "<pre>";
+          //   var_dump($cliente->facturas[$cliente1->id_factura]);
+          // echo "</pre>";
 
-        $cliente->facturas[$cliente1->id_factura]->abonos_total += $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->abonos_total += $cliente1->a_abono;
 
-        $cliente->saldo                                               -= $cliente1->a_abono;
-        $cliente->saldo_cambio                                        -= $cliente1->a_abono/$cliente1->tipo_cambio;
-        $cliente->facturas[$cliente1->id_factura]->saldo        -= $cliente1->a_abono;
-        $cliente->facturas[$cliente1->id_factura]->saldo_cambio -= $cliente1->a_abono/$cliente1->tipo_cambio;
+          $cliente->saldo                                               -= $cliente1->a_abono;
+          $cliente->saldo_cambio                                        -= $cliente1->a_abono/$cliente1->tipo_cambio;
+          $cliente->facturas[$cliente1->id_factura]->saldo        -= $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->saldo_cambio -= $cliente1->a_abono/$cliente1->tipo_cambio;
+        }
       }
     }
 
