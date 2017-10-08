@@ -606,6 +606,9 @@ class String{
   }
 
   public static function ultimoDia($anho,$mes){
+    echo "<pre>";
+       var_dump($mes);
+     echo "</pre>";exit;
      if (((fmod($anho,4)==0) and (fmod($anho,100)!=0)) or (fmod($anho,400)==0)) {
          $dias_febrero = 29;
      } else {
