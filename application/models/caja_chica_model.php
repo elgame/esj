@@ -551,7 +551,7 @@ class caja_chica_model extends CI_Model {
   {
     $this->load->model('cuentas_cobrar_model');
 
-    $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     $remisiones = $this->db->query(
       "SELECT f.id_factura, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,

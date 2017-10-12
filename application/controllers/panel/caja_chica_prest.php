@@ -51,7 +51,7 @@ class caja_chica_prest extends MY_Controller {
     $params['seo']           = array('titulo' => 'Caja prestamos');
     $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
-    // $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+    // $this->db->query("SELECT refreshallmaterializedviews();");
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -70,7 +70,7 @@ class caja_chica_prest extends MY_Controller {
   //   $params['seo']        = array('titulo' => 'Caja chica 2');
   //   $params['nomenclaturas'] = $this->caja_chica_model->getNomenclaturas();
 
-  //   $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+  //   $this->db->query("SELECT refreshallmaterializedviews();");
 
   //   if(isset($_GET['msg']{0}))
   //     $params['frm_errors'] = $this->showMsgs($_GET['msg']);

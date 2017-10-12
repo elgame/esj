@@ -1046,7 +1046,7 @@ class facturacion_model extends privilegios_model{
         }
       }
 
-      $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+      $this->db->query("SELECT refreshallmaterializedviews();");
 
       $this->generaFacturaPdf($idFactura, $pathDocs);
 
@@ -1343,7 +1343,7 @@ class facturacion_model extends privilegios_model{
         // Cancela los productos de produccion historial
         $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$idFactura}'");
 
-        $this->db->query("REFRESH MATERIALIZED VIEW saldos_facturas_remisiones");
+        $this->db->query("SELECT refreshallmaterializedviews();");
 
         $this->enviarEmail($idFactura);
 
