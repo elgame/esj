@@ -1068,8 +1068,8 @@ class bascula_model extends CI_Model {
       if($value->accion != 'p')
         $this->db->update('bascula', array('accion' => 'sa'), "id_bascula = {$value->id_bascula}");
     }
-    if($delete)
-    {
+    // if($delete)
+    // {
       //Elimina el mov del banco
       $data_bascula = $this->db->query("SELECT id_movimiento, id_bascula_pago
                                         FROM banco_movimientos_bascula
@@ -1081,9 +1081,9 @@ class bascula_model extends CI_Model {
       }
 
       $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
-    }
-    else
-      $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
+    // }
+    // else
+    //   $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
   }
 
 
@@ -1299,7 +1299,7 @@ class bascula_model extends CI_Model {
         $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       }
 
-      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
+      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".(isset($data[0]['tipo'])? $data[0]['tipo']: '').'>';
       $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
       $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
       $pdf->titulo3 .= (isset($_GET['ftkilos']{0}) && $_GET['ftkilos']=='kb')?' Kilos de la bascula': ' Kilos calculados';
@@ -1498,7 +1498,7 @@ class bascula_model extends CI_Model {
           String::formatoNumero($gtotalImporte, 2, '$', false)), false);
       }
 
-      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$data[0]['area']['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.(isset($data[0]['area']['info'])? $data[0]['area']['info']->nombre: '').'_'.$fecha->format('d/m/Y').'.pdf', 'I');
   }
 
   public function rdefull_xls()
@@ -1527,7 +1527,7 @@ class bascula_model extends CI_Model {
       $titulo1 = $empresa['info']->nombre_fiscal;
     }
 
-    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data[0]['tipo'].'>';
+    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".(isset($data[0]['tipo'])? $data[0]['tipo']: '').'>';
     $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
     $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
@@ -1687,7 +1687,7 @@ class bascula_model extends CI_Model {
     $worksheet =& $xls->workbook->addWorksheet();
 
     $xls->titulo2 = 'REPORTE DIARIO DE ENTRADAS';
-    $xls->titulo3 = "<".$res['area']['info']->nombre."> DEL DIA " . $this->input->get('ffecha1');
+    $xls->titulo3 = "<".(isset($res['area']['info'])? $res['area']['info']->nombre: '')."> DEL DIA " . $this->input->get('ffecha1');
     $xls->titulo4 = 'Pagos en efectivo';
 
     $row=0;
@@ -1854,7 +1854,7 @@ class bascula_model extends CI_Model {
         $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       }
 
-      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data['tipo'].'>';
+      $pdf->titulo2 = "REPORTE DIARIO DE ENTRADAS <".(isset($data['tipo'])? $data['tipo']: '').'>';
       $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
       $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
@@ -1999,7 +1999,7 @@ class bascula_model extends CI_Model {
       $titulo1 = $empresa['info']->nombre_fiscal;
     }
 
-    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".$data['tipo'].'>';
+    $titulo2 = "REPORTE DIARIO DE ENTRADAS <".(isset($data['tipo'])? $data['tipo']: '').'>';
     $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
     $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
@@ -2338,7 +2338,7 @@ class bascula_model extends CI_Model {
         $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       }
 
-      $pdf->titulo2 = "REPORTE BOLETAS PAGADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
+      $pdf->titulo2 = "REPORTE BOLETAS PAGADAS <".(isset($area['info'])? $area['info']->nombre: '')."> <".(isset($data['tipo'])? $data['tipo']: '').'>';
       $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
       $pdf->titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
@@ -2420,7 +2420,7 @@ class bascula_model extends CI_Model {
           String::formatoNumero($importe, 2, '$', false)), false, false);
       }
 
-      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$area['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');
+      $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.(isset($area['info'])? $area['info']->nombre: '').'_'.$fecha->format('d/m/Y').'.pdf', 'I');
     }
 
   public function rbp_xls()
@@ -2448,7 +2448,7 @@ class bascula_model extends CI_Model {
     $empresa = $this->empresas_model->getInfoEmpresa((isset($_GET['fid_empresa']{0})? $_GET['fid_empresa']: 2));
 
     $titulo1 = $empresa['info']->nombre_fiscal;
-    $titulo2 = "REPORTE BOLETAS PAGADAS <".$area['info']->nombre."> <".$data['tipo'].'>';
+    $titulo2 = "REPORTE BOLETAS PAGADAS <".$area['info']->nombre."> <".(isset($data['tipo'])? $data['tipo']: '').'>';
     $prov_produc = $this->input->get('fproveedor').($this->input->get('fproveedor')!=''? " | ": '').$this->input->get('fproductor');
     $titulo3 = $fecha->format('d/m/Y')." Al ".$fecha2->format('d/m/Y')." | ".$prov_produc.' | '.$this->input->get('fempresa');
 
@@ -2548,7 +2548,7 @@ class bascula_model extends CI_Model {
       }
 
       $pdf->titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
-      $pdf->titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+      $pdf->titulo3 = $this->input->get('fempresa').' | '.(isset($data['tipo'])? $data['tipo']: '').' | '.(isset($data['status'])? $data['status']: '');
 
       $pdf->AliasNbPages();
       //$pdf->AddPage();
@@ -2656,7 +2656,7 @@ class bascula_model extends CI_Model {
 
     $titulo1 = $empresa['info']->nombre_fiscal;
     $titulo2 = "REPORTE DE ACUMULADOS DE PRODUCTOS <{$area['info']->nombre}> DEL {$fecha->format('d/m/Y')} AL {$fecha2->format('d/m/Y')}";
-    $titulo3 = $this->input->get('fempresa').' | '.$data['tipo'].' | '.$data['status'];
+    $titulo3 = $this->input->get('fempresa').' | '.(isset($data['tipo'])? $data['tipo']: '').' | '.(isset($data['status'])? $data['status']: '');
 
 
     $html = '<table>

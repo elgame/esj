@@ -1488,8 +1488,8 @@ return $response;
     }elseif($this->input->get('ftipo')=='to'){
       $all_clientes = true;
       $all_facturas = true;
-      if($this->input->get('fid_cliente') != '')
-        $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
+      // if($this->input->get('fid_cliente') != '')
+      //   $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
     }
 
     if($this->input->get('did_empresa') != ''){
@@ -1501,13 +1501,15 @@ return $response;
     if($this->input->get('fid_cliente') != ''){
       $sql .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
       $sqlt .= " AND f.id_cliente = '".$this->input->get('fid_cliente')."'";
+      $sql_clientes .= " AND id_cliente = ".$this->input->get('fid_cliente');
     }
 
     $clientes = $this->db->query("SELECT id_cliente, nombre_fiscal, cuenta_cpi, dias_credito, id_factura,
         id_empresa, fecha, serie, folio, concepto, subtotal, importe_iva, total, total_cambio, tipo_cambio,
         is_factura, fecha_vencimiento, a_id_abono, a_serie, a_folio, a_fecha, a_concepto, a_abono
       FROM estado_cuenta
-      WHERE 1 = 1  {$sql_clientes} ORDER BY nombre_fiscal ASC, fecha ASC, a_fecha ASC ");
+      WHERE Date(fecha) <= '{$fecha2}'  {$sql_clientes}
+      ORDER BY nombre_fiscal ASC, id_factura ASC, a_id_abono ASC ");
     $response = array();
     $aux_cliente = 0;
     $aux_factura = 0;
@@ -1568,24 +1570,26 @@ return $response;
       }
 
       if ($aux_factura == $cliente1->id_factura && $cliente1->a_id_abono > 0) {
-        $aabono = new stdClass;
-        $aabono->id_abono = $cliente1->a_id_abono;
-        $aabono->serie    = $cliente1->a_serie;
-        $aabono->folio    = $cliente1->a_folio;
-        $aabono->fecha    = $cliente1->a_fecha;
-        $aabono->concepto = str_replace('()', '', $cliente1->a_concepto);
-        $aabono->abono    = $cliente1->a_abono;
-        $cliente->facturas[$cliente1->id_factura]->abonos[] = $aabono;
-        // echo "<pre>";
-        //   var_dump($cliente->facturas[$cliente1->id_factura]);
-        // echo "</pre>";
+        if ($cliente1->a_fecha <= $fecha2) {
+          $aabono = new stdClass;
+          $aabono->id_abono = $cliente1->a_id_abono;
+          $aabono->serie    = $cliente1->a_serie;
+          $aabono->folio    = $cliente1->a_folio;
+          $aabono->fecha    = $cliente1->a_fecha;
+          $aabono->concepto = str_replace('()', '', $cliente1->a_concepto);
+          $aabono->abono    = $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->abonos[] = $aabono;
+          // echo "<pre>";
+          //   var_dump($cliente->facturas[$cliente1->id_factura]);
+          // echo "</pre>";
 
-        $cliente->facturas[$cliente1->id_factura]->abonos_total += $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->abonos_total += $cliente1->a_abono;
 
-        $cliente->saldo                                               -= $cliente1->a_abono;
-        $cliente->saldo_cambio                                        -= $cliente1->a_abono/$cliente1->tipo_cambio;
-        $cliente->facturas[$cliente1->id_factura]->saldo        -= $cliente1->a_abono;
-        $cliente->facturas[$cliente1->id_factura]->saldo_cambio -= $cliente1->a_abono/$cliente1->tipo_cambio;
+          $cliente->saldo                                               -= $cliente1->a_abono;
+          $cliente->saldo_cambio                                        -= $cliente1->a_abono/$cliente1->tipo_cambio;
+          $cliente->facturas[$cliente1->id_factura]->saldo        -= $cliente1->a_abono;
+          $cliente->facturas[$cliente1->id_factura]->saldo_cambio -= $cliente1->a_abono/$cliente1->tipo_cambio;
+        }
       }
     }
 

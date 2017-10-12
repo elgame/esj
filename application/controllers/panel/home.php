@@ -294,13 +294,14 @@ class home extends MY_Controller {
 				'label'		=> 'Contraseña',
 				'rules'		=> 'required')
 		);
-		$this->form_validation->set_rules($rules);
-		if($this->form_validation->run() == FALSE){
-			$params['frm_errors'] = array(
-					'title' => 'Error al Iniciar Sesión!',
-					'msg' => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
-					'ico' => 'error');
-		}else{
+
+    $this->form_validation->set_rules($rules);
+    if($this->form_validation->run() == FALSE){
+      $params['frm_errors'] = array(
+          'title' => 'Error al Iniciar Sesión!',
+          'msg' => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
+          'ico' => 'error');
+    }else{
 			$data = array('usuario' => $this->input->post('usuario'), 'pass' => $this->input->post('pass'));
 			$mdl_res = $this->usuarios_model->setLogin($data);
 			if ($mdl_res[0] && $this->usuarios_model->checkSession()) {

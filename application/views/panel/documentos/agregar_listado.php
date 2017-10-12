@@ -17,6 +17,7 @@
         foreach ($documentos as $key => $doc)
         {
           $priv = str_replace('panel/', '', $doc->url_form).'/';
+          $active = '';
 
           // Si el usuario tiene el privilegio de editar el documento entra.
           if ($this->usuarios_model->tienePrivilegioDe('', $priv, false))

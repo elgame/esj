@@ -115,6 +115,10 @@ class facturacion_model extends privilegios_model{
       $empresa = $this->empresas_model->getInfoEmpresa($response['info']->id_empresa);
       $response['info']->empresa = $empresa['info'];
 
+      $this->load->library('cfdi');
+      if ($response['info']->empresa->cer_org !== '')
+        $response['info']->no_certificado = $this->cfdi->obtenNoCertificado($response['info']->empresa->cer_org);
+
       // Carga la info del cliente.
 			$this->load->model('clientes_model');
 			$prov = $this->clientes_model->getClienteInfo($response['info']->id_cliente);

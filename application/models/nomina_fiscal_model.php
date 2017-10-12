@@ -5592,6 +5592,10 @@ class nomina_fiscal_model extends CI_Model {
 
     $nomina = $this->db->query("SELECT uuid, xml FROM nomina_fiscal WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$semana['anio']} AND semana = {$semana['semana']}")->row();
 
+    if (!isset($nomina->xml)) {
+      return false;
+    }
+
     $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
 
     // echo "<pre>";
