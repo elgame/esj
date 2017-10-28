@@ -1,5 +1,5 @@
 
- ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|gdl
+ ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|lap|gdl
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS
        SELECT dd.id_factura,
           COALESCE(dd.id_abono, 0::bigint) AS a_id_abono,
@@ -92,7 +92,7 @@
         ORDER BY c.id_cliente, (date(f.fecha)), f.folio, ab.a_fecha
       WITH DATA;
       ALTER TABLE public.estado_cuenta OWNER TO programa;
-  ✔ @done (17-09-12 22:23) pcc|san|gdl
+  ✔ @done (17-09-12 22:23) pcc|san
    CREATE OR REPLACE FUNCTION public.refreshallmaterializedviews(schema_arg text DEFAULT 'public'::text)
         RETURNS integer AS
       $BODY$
@@ -112,28 +112,28 @@
         LANGUAGE plpgsql VOLATILE COST 100;
       ALTER FUNCTION public.refreshallmaterializedviews(text) OWNER TO programa;
 
- ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san|pcc|gdl
+ ✔ Crear listado de cuentas de proveedores @done (17-09-11 13:06) pct|san|pcc
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte listado de cuentas',10,TRUE,'proveedores/rpt_listado_cuentas/','print',TRUE);
- ✔ Caja 4 @done (17-09-08 00:51) lap|san|pcc|gdl
+ ✔ Caja 4 @done (17-09-08 00:51) lap|san|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Caja chica 4',247,TRUE,'caja_chica/caja4/','usd',TRUE);
- ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc|pct|san|gdl
+ ✔ El nuevo reporte de banc @done (17-08-10 16:11) lap|pcc|pct|san
     ALTER TABLE public.banco_movimientos ADD COLUMN fecha_aplico date; COMMENT ON COLUMN public.banco_movimientos.fecha_aplico IS 'Fecha en que se aplico en el banco real (retiro o deposito)';
- ✔ Cambiar sistema de privilegios por emplesa y usuarios @done (17-08-05 10:30) pct|pct|san|lap|gdl
+ ✔ Cambiar sistema de privilegios por emplesa y usuarios @done (17-08-05 10:30) pct|pct|san|lap
    ALTER TABLE public.usuarios_privilegios ADD COLUMN id_empresa integer NOT NULL DEFAULT 2;
    ALTER TABLE public.usuarios_privilegios ADD CONSTRAINT usuarios_privilegios_id_empresa_fkey FOREIGN KEY (id_empresa)
       REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE public.usuarios_privilegios DROP CONSTRAINT usuarios_privilegios_pkey;
    ALTER TABLE public.usuarios_privilegios ADD CONSTRAINT usuarios_privilegios_pkey PRIMARY KEY(usuario_id, privilegio_id, id_empresa);
 
- ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct|lap|gdl
+ ✔ Entradas, clintes @done (17-06-14 08:59) pcc|san|pct|lap
    ALTER TABLE public.compras_ordenes ADD COLUMN id_registra bigint;
    ALTER TABLE public.clientes ADD COLUMN show_saldo boolean NOT NULL DEFAULT false;
 
-  ✔ No interior clientes @done (17-06-01 10:56) pcc|san|pct|lap|gdl
+  ✔ No interior clientes @done (17-06-01 10:56) pcc|san|pct|lap
     ALTER TABLE public.clientes ALTER COLUMN no_interior TYPE character varying(20);
- ✔ Reporte @done (17-04-04 15:29) pcc|san|lap|pct|gdl
+ ✔ Reporte @done (17-04-04 15:29) pcc|san|lap|pct
      INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte de saldos bancarios',104,TRUE,'banco/rpt_saldos_bancarios/','print',TRUE);
- ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san|lap|gdl
+ ✔ Tickets de ordenes y boletas @done (17-03-22 13:06) pct|pcc|san|lap
     -- Insumo MT
     INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CJAS DE 20KG', 0, TRUE, '43000010');
     INSERT INTO public.calidades(id_area, nombre, precio_compra, status, cuenta_cpi) VALUES (14, 'CAJA MADERA', 0, TRUE, '43000010');
@@ -187,7 +187,7 @@
     WITH ( OIDS=FALSE );
     ALTER TABLE public.bascula_lig_orden OWNER TO programa;
 
- ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc|san|lap|gdl
+ ✔ Caja de prestamos @done (17-03-11 09:48) pct|pcc|san|lap
    CREATE TABLE otros.cajaprestamo_fondo
       (
         id_fondo bigserial NOT NULL,
@@ -214,14 +214,14 @@
    ALTER TABLE otros.cajaprestamo_pagos ALTER COLUMN id_nomenclatura DROP NOT NULL;
    ALTER TABLE otros.cajaprestamo_pagos ADD COLUMN id_prestamo_caja bigint;
    ALTER TABLE otros.cajaprestamo_pagos ADD CONSTRAINT cajaprestamo_pagos_id_prestamo_caja_fkey FOREIGN KEY (id_prestamo_caja) REFERENCES otros.cajaprestamo_prestamos (id_prestamo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
- ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct|san|gdl
+ ✔ Fletes de venta @done (17-03-09 13:36) pcc|lap|pct|san
     ALTER TABLE public.compras_requisicion ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_requisicion.flete_de IS 'v: fletes de venta, c: Fletes de compra';
     ALTER TABLE public.compras_ordenes ADD COLUMN flete_de character varying(5) NOT NULL DEFAULT 'v'::character varying;
     COMMENT ON COLUMN public.compras_ordenes.flete_de IS 'v: fletes de venta, c: Fletes de compra';
     ALTER TABLE public.compras_requisicion ADD COLUMN id_almacen integer NOT NULL DEFAULT 1;
     INSERT INTO public.areas(nombre, tipo, status, predeterminado) VALUES ('INSUMOS MT','in',TRUE,FALSE);
- ✔ Reporte de banco @done (17-02-25 12:33) pcc|san|pct|lap|gdl
+ ✔ Reporte de banco @done (17-02-25 12:33) pcc|san|pct|lap
    ALTER TABLE public.banco_cuentas ADD COLUMN tipo character varying(10) NOT NULL DEFAULT 'M.N.'::character varying;
    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Reporte Acumulado Por Empresa 2',104,TRUE,'banco/rpt_acumulado_empresa/','print',TRUE);
    ALTER TABLE public.compras_salidas ADD COLUMN no_receta character varying(20);
