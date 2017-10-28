@@ -1917,7 +1917,7 @@ class facturacion extends MY_Controller {
    {
       $this->load->model('clasificaciones_model');
 
-      echo json_encode($this->clasificaciones_model->ajaxClasificaciones());
+      echo json_encode($this->clasificaciones_model->ajaxClasificaciones(100));
    }
 
   /**

@@ -188,7 +188,7 @@ class clasificaciones_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. clasificaciones de una area
 	 */
-	public function ajaxClasificaciones(){
+	public function ajaxClasificaciones($limit=20){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
@@ -200,7 +200,7 @@ class clasificaciones_model extends CI_Model {
 				FROM clasificaciones
 				WHERE status = true {$sql}
 				ORDER BY nombre ASC
-				LIMIT 20");
+				LIMIT {$limit}");
 
 		$response = array();
 		if($res->num_rows() > 0){
