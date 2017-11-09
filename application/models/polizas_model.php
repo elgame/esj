@@ -16,6 +16,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA TRASLADADO COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA TRASLADADO'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like 'IVA TRASLADADO'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
     }
@@ -30,6 +31,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND UPPER(nombre) LIKE '%IVA X TRASLADAR COBRADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA X TRASLADAR'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like 'IVA X TRASLADAR'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
     }
@@ -44,6 +46,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //tests carga las de sanjorge
     }
@@ -58,6 +61,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //tests carga las de sanjorge
     }
@@ -72,6 +76,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //tests carga las de sanjorge
     }
@@ -86,6 +91,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE POR DIFERIR%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
     }
@@ -100,6 +106,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND nombre like '%IVA ACREDITABLE PAGADO%'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //tests carga las de sanjorge
     }
@@ -114,6 +121,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA X PAGAR'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
     }
@@ -128,6 +136,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '100% RETENCION IVA PAGADO'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
     }
@@ -142,6 +151,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA X PAGAR'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
     }
@@ -156,6 +166,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND id_empresa = {$this->empresaId} AND nombre like '4% RETENCION IVA PAGADO'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
     }
@@ -170,6 +181,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO X PAGAR%'"; //tests carga las de sanjorge
     }
@@ -184,6 +196,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO PAGADO%'"; //tests carga las de sanjorge
     }
@@ -198,6 +211,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //tests carga las de sanjorge
     }
@@ -212,6 +226,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //tests carga las de sanjorge
     }
@@ -226,6 +241,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
     }
@@ -240,6 +256,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=" AND nombre like '%REBAJAS Y BONIFICACIONES'"; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //tests carga las de sanjorge
     }
@@ -254,6 +271,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $cuenta = '50007000'; //Gomez gudiño
     elseif($this->empresaId==5) $cuenta=""; //vianey rocio
     elseif($this->empresaId==12) $cuenta="50000100"; //plasticos
+    elseif($this->empresaId==14) $cuenta="50000100"; //mamita
     else{
       $cuenta = '50000100';
     }
@@ -268,7 +286,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%SUELDOS VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
@@ -284,7 +304,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%VACACIONES VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
@@ -300,7 +322,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%PRIMA VACACIONAL VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
@@ -316,7 +340,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%AGUINALDOS VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
@@ -332,7 +358,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND nombre like '%COMPENSACION VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
@@ -349,7 +377,9 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA VENTAS%'"; //mamita
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
@@ -366,6 +396,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
     }
@@ -380,6 +411,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
     }
@@ -394,6 +426,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%IMSS RETENIDO%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
     }
@@ -408,6 +441,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
     }
@@ -422,6 +456,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
     }
@@ -436,6 +471,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==3) $sql=""; //Gomez gudiño
     elseif($this->empresaId==5) $sql=""; //vianey rocio
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
+    elseif($this->empresaId==14) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //mamita
     else{
       $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
     }
