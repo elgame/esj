@@ -1,4 +1,13 @@
 
+ ☐ CFDI 3.3
+   - Cargar catalogos catalogos33.backup,
+    ALTER TABLE c_clave_prodservs SET SCHEMA otros;
+    ALTER TABLE c_clave_unidades SET SCHEMA otros;
+    ALTER TABLE c_regimen_fiscal SET SCHEMA otros;
+    ALTER TABLE public.clasificaciones ADD COLUMN clave_prod_serv character varying(30);
+    ALTER TABLE public.clasificaciones ADD COLUMN clave_unidad character varying(15);
+    UPDATE public.empresas SET cfdi_version='3.3';
+
  ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|lap|gdl
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS
        SELECT dd.id_factura,

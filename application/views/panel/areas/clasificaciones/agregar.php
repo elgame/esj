@@ -99,13 +99,19 @@
                 </div>
               </div>
 
-              <!-- <div class="control-group">
-                <label class="control-label" for="fcalibres">Autocomplete Calibres </label>
+              <div class="control-group">
+                <label class="control-label" for="dclave_producto">Clave de Productos/Servicios </label>
                 <div class="controls">
-                  <input type="text" id="auto-calibres" class="span3"
-                    value="" placeholder="Nombre del Calibre">
+                  <input type="text" name="dclave_producto" class="span9" id="dclave_producto" value="<?php echo set_value('dclave_producto'); ?>" size="73">
                 </div>
-              </div> -->
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="dclave_unidad">Clave de unidad </label>
+                <div class="controls">
+                  <input type="text" name="dclave_unidad" class="span9" id="dclave_unidad" value="<?php echo set_value('dclave_unidad'); ?>" size="73">
+                </div>
+              </div>
 
               <!-- <div class="control-group">
                 <label class="control-label" for="fcalibres">Calibres Seleccionados</label>
