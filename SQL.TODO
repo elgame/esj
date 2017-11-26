@@ -7,6 +7,8 @@
     ALTER TABLE public.clasificaciones ADD COLUMN clave_prod_serv character varying(30);
     ALTER TABLE public.clasificaciones ADD COLUMN clave_unidad character varying(15);
     UPDATE public.empresas SET cfdi_version='3.3';
+    ALTER TABLE public.facturacion ADD COLUMN cfdi_ext json;
+    ALTER TABLE public.facturacion ALTER COLUMN sello TYPE character varying(400);
 
  ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|lap|gdl
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS

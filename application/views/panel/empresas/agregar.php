@@ -127,8 +127,8 @@
                       <?php foreach ($regimen_fiscales as $key => $value)
                       {
                       ?>
-                        <option value="<?php echo $value->clave ?>"
-                          <?php echo set_select('dregimen_fiscal', $value->clave, false, $this->input->post('dregimen_fiscal')); ?>><?php echo $value->nombre_corto." ({$value->clave})" ?></option>
+                        <option value="<?php echo $value->c_RegimenFiscal ?>"
+                          <?php echo set_select('dregimen_fiscal', $value->c_RegimenFiscal, false, $this->input->post('dregimen_fiscal')); ?>><?php echo $value->label ?></option>
                       <?php
                       } ?>
                       </select>

@@ -103,6 +103,7 @@
                 <label class="control-label" for="dclave_producto">Clave de Productos/Servicios </label>
                 <div class="controls">
                   <input type="text" name="dclave_producto" class="span9" id="dclave_producto" value="<?php echo set_value('dclave_producto'); ?>" size="73">
+                  <input type="hidden" name="dclave_producto_cod" class="span9" id="dclave_producto_cod" value="<?php echo set_value('dclave_producto_cod'); ?>" size="73">
                 </div>
               </div>
 
@@ -110,6 +111,7 @@
                 <label class="control-label" for="dclave_unidad">Clave de unidad </label>
                 <div class="controls">
                   <input type="text" name="dclave_unidad" class="span9" id="dclave_unidad" value="<?php echo set_value('dclave_unidad'); ?>" size="73">
+                  <input type="hidden" name="dclave_unidad_cod" class="span9" id="dclave_unidad_cod" value="<?php echo set_value('dclave_unidad_cod'); ?>" size="73">
                 </div>
               </div>
 

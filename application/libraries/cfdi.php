@@ -910,6 +910,112 @@ class cfdi{
   }
 
 
+  public function obtenDatosCfdi33($data, $productosApi, $id_nc = false)
+  {
+    $CI =& get_instance();
+
+    // Obtiene el ID de la empresa que emite la factura, si no llega
+    // entonces obtiene el ID por default.
+    // $id_empresa = isset($data['id_empresa']) ? $data['id_empresa'] : $this->default_id_empresa;
+    $id = isset($data['did_empresa']) ? $data['did_empresa'] : $this->default_id_empresa;
+
+    // Carga los datos de la empresa que emite la factura.
+    $this->cargaDatosFiscales($id, 'empresas');
+
+    // Obtiene los datos del receptor.
+    $CI->load->model('clientes_model');
+    $cliente = $CI->clientes_model->getClienteInfo($_POST['did_cliente'], true);
+
+    if ($id_nc) {
+      // Obtiene los datos de la factura.
+      $CI->load->model('facturacion_model');
+      $factura = $CI->facturacion_model->getInfoFactura($id_nc, true);
+
+      $cfdiRel = array(
+        'tipoRelacion' => '01',
+        'cfdiRelacionado' => array(
+          array(
+            'uuid' => $factura['info']->uuid,
+          )
+        ),
+      );
+    }
+
+    // $CI->load->model('catalogos33_model');
+    // $this->regimen_fiscal = $CI->catalogos33_model->regimenFiscales($this->regimen_fiscal);
+
+    $tipoComprobante = 'I';
+    if ($data['dtipo_comprobante'] == 'ingreso')
+      $tipoComprobante = 'I';
+    elseif ($data['dtipo_comprobante'] == 'egreso')
+      $tipoComprobante = 'E';
+    elseif ($data['dtipo_comprobante'] == 'traslado')
+      $tipoComprobante = 'T';
+    elseif ($data['dtipo_comprobante'] == 'nomina')
+      $tipoComprobante = 'N';
+
+
+    $datosApi = array(
+      'emisor' => array(
+        'nombreFiscal'  => $this->nombre_fiscal,
+        'rfc'           => $this->rfc,
+        'calle'         => $this->calle,
+        'noExterior'    => $this->no_exterior,
+        'noInterior'    => $this->no_interior,
+        'colonia'       => $this->colonia,
+        'localidad'     => $this->localidad,
+        'municipio'     => $this->municipio,
+        'estado'        => $this->estado,
+        'pais'          => $this->pais,
+        'cp'            => $this->cp,
+        'regimenFiscal' => $this->regimen_fiscal,
+        'cer'           => $this->obtenCer($this->path_certificado),
+        'key'           => $this->obtenKey($this->path_key),
+      ),
+      'receptor' => array(
+        'nombreFiscal' => $cliente['info']->nombre_fiscal,
+        'rfc'          => $cliente['info']->rfc,
+        'calle'        => $cliente['info']->calle,
+        'noExterior'   => $cliente['info']->no_exterior,
+        'noInterior'   => $cliente['info']->no_interior,
+        'colonia'      => $cliente['info']->colonia,
+        'localidad'    => $cliente['info']->localidad,
+        'municipio'    => $cliente['info']->municipio,
+        'estado'       => $cliente['info']->estado,
+        'pais'         => $cliente['info']->pais,
+        'cp'           => $cliente['info']->cp,
+      ),
+      'serie'             => $data['dserie'],
+      'folio'             => $data['dfolio'],
+      'fecha'             => $data['dfecha'].date(':s'),
+      'formaDePago'       => $data['dforma_pago'],
+      'condicionesDePago' => $data['dcondicion_pago'] == 'cr'? 'CREDITO': 'CONTADO',
+      'moneda'            => $data['moneda'],
+      'tipoCambio'        => $data['tipoCambio'],
+      'tipoDeComprobante' => $tipoComprobante,
+      'metodoDePago'      => $data['dmetodo_pago'],
+      'confirmacion'      => '',
+      'usoCfdi'           => $data['duso_cfdi'],
+      'noCertificado'     => $data['dno_certificado'],
+      'totalImporte'      => $data['total_subtotal'],
+      'descuento'         => '0',
+      'total'             => $data['total_totfac'],
+      'trasladosImporte'  => array(
+        'iva' => $data['total_iva']
+      ),
+      'retencionesImporte'  => array(
+        'iva' => $data['total_retiva']
+      ),
+      'productos' => $productosApi
+    );
+
+    if (isset($cfdiRel) && $cfdiRel) {
+      $datosApi['cfdiRelacionados'] = $cfdiRel;
+    }
+
+    return $datosApi;
+  }
+
   /**
    * Carga los datos fiscales de la empresa|proveedor que emitira la factura.
    *

@@ -142,7 +142,8 @@ function __autoload($class_name) {
 			"core/",
 			"core/system/",
 			"libraries/",
-			'libraries/fpdf/',
+      'libraries/fpdf/',
+			'libraries/catalogos/',
 			"models/"
 	);
 
@@ -158,6 +159,28 @@ function __autoload($class_name) {
 			}
 		}
 	}
+
+  $clasesPath = array(
+      "vendor/tightenco/collect/src/Illuminate/Support/",
+      "vendor/tightenco/collect/src/Illuminate/Traits/",
+      "vendor/tightenco/collect/src/Illuminate/Contracts/Support/",
+      "vendor/tightenco/collect/src/Illuminate/Support/Traits/",
+  );
+
+  foreach ($clasesPath as $clasePath){
+    // echo $clasePath.$class_name.'.php'.'<br>';
+    if(file_exists($clasePath.$class_name.'.php')){
+      // var_dump(file_exists($clasePath.$class_name.'.php'));
+      include_once($clasePath.$class_name.'.php');
+    }else{
+      $class_name_lower = strtolower($class_name);
+
+      //hacemos un ?ltimo intento pero con FirstCharUpper
+      if(file_exists($clasePath.$class_name_lower.'.php')){
+        include_once($clasePath.$class_name_lower.'.php');
+      }
+    }
+  }
 }
 
 

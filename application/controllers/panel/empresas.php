@@ -81,8 +81,10 @@ class empresas extends MY_Controller {
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
 		}
 
-    $this->load->model('nomina_catalogos_model');
-    $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    // $this->load->model('nomina_catalogos_model');
+    // $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    $this->load->model('catalogos33_model');
+    $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
 
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -129,8 +131,10 @@ class empresas extends MY_Controller {
 		}else
 			$params['frm_errors'] = $this->showMsgs(1);
 
-    $this->load->model('nomina_catalogos_model');
-    $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    // $this->load->model('nomina_catalogos_model');
+    // $params['regimen_fiscales'] = $this->nomina_catalogos_model->tipo('rgf');
+    $this->load->model('catalogos33_model');
+    $params['regimen_fiscales'] = $this->catalogos33_model->regimenFiscales();
 
 		if(isset($_GET['msg']{0}))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);

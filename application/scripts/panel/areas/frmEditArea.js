@@ -52,6 +52,9 @@ var edit_clasificacion = (function($){
 			getCalidades();
 			return false;
 		});
+
+    autocompleteProdServ();
+    autocompleteUnidad();
 	}
 
 	function getCalidades(pag){
@@ -74,6 +77,40 @@ var edit_clasificacion = (function($){
 	function changePage(pag){
 		getCalidades( (pag? pag: 0) );
 	}
+
+  function autocompleteProdServ() {
+    $("#dclave_producto").autocomplete({
+      source: base_url+'panel/catalogos33/claveProdServ/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#dclave_producto_cod").val(ui.item.id);
+        $("#dclave_producto").css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dclave_producto").css("background-color", "#FFD9B3");
+        $("#dclave_producto_cod").val("");
+      }
+    });
+  }
+
+  function autocompleteUnidad() {
+    $("#dclave_unidad").autocomplete({
+      source: base_url+'panel/catalogos33/claveUnidad/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#dclave_unidad_cod").val(ui.item.id);
+        $("#dclave_unidad").css("background-color", "#B0FFB0");
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#dclave_unidad").css("background-color", "#FFD9B3");
+        $("#dclave_unidad_cod").val("");
+      }
+    });
+  }
 
 	objr.init = init;
 	objr.page = changePage;

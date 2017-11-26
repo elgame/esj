@@ -106,6 +106,17 @@ class documentos extends MY_Controller {
       $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
       // Carga la vista de la factura con sus datos.
+      $metodosPago       = new MetodosPago();
+      $formaPago         = new FormaPago();
+      $usoCfdi           = new UsoCfdi();
+      $tipoDeComprobante = new TipoDeComprobante();
+      // $monedas           = new Monedas();
+
+      $params['metodosPago']       = $metodosPago->get()->all();
+      $params['formaPago']         = $formaPago->get()->all();
+      $params['usoCfdi']           = $usoCfdi->get()->all();
+      $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+      // $params['monedas']           = $monedas->get()->all();
       $params['facturaView'] = $this->load->view('panel/facturacion/ver', $params, true);
 
       $is_finalizados = $this->db

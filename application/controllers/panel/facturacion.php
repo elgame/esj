@@ -266,6 +266,18 @@ class facturacion extends MY_Controller {
 
     $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
 
+    $metodosPago       = new MetodosPago();
+    $formaPago         = new FormaPago();
+    $usoCfdi           = new UsoCfdi();
+    $tipoDeComprobante = new TipoDeComprobante();
+    // $monedas           = new Monedas();
+
+    $params['metodosPago']       = $metodosPago->get()->all();
+    $params['formaPago']         = $formaPago->get()->all();
+    $params['usoCfdi']           = $usoCfdi->get()->all();
+    $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+    // $params['monedas']           = $monedas->get()->all();
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

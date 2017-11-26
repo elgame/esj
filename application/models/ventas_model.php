@@ -260,7 +260,12 @@ class Ventas_model extends privilegios_model{
 
     // Obtiene la forma de pago, si es en parcialidades entonces la forma de
     // pago son las parcialidades "Parcialidad 1 de X".
-    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+    // $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    $cfdi_ext = [
+      'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
+      'usoCfdi'           => $this->input->post('duso_cfdi'),
+    ];
 
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
@@ -276,7 +281,7 @@ class Ventas_model extends privilegios_model{
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
       'ano_aprobacion'      => $anoAprobacion[0],
       'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-      'forma_pago'          => $formaPago,
+      'forma_pago'          => $this->input->post('dforma_pago'),
       'metodo_pago'         => $this->input->post('dmetodo_pago'),
       'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
       'no_certificado'      => $this->input->post('dno_certificado'),
@@ -292,6 +297,7 @@ class Ventas_model extends privilegios_model{
       'is_factura'          => 'f',
       'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
+      'cfdi_ext'            => json_encode($cfdi_ext),
     );
     //Si existe el parametro es una nota de credito de la factura
     $bitacora_accion = 'la nota de remision';
@@ -303,7 +309,7 @@ class Ventas_model extends privilegios_model{
     }
 
     // Tipo de cambio y moneda
-    if ($datosFactura['moneda'] !== 'M.N.')
+    if ($datosFactura['moneda'] !== 'MXN')
       $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
     else
       $datosFactura['tipo_cambio'] = '1';
@@ -507,7 +513,7 @@ class Ventas_model extends privilegios_model{
       $datosFactura['docs_finalizados'] = 't';
 
     //Si es otra moneda actualiza al tipo de cambio
-    if($datosFactura['moneda'] !== 'M.N.')
+    if($datosFactura['moneda'] !== 'MXN')
     {
       $datosFactura1 = array();
       $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
@@ -563,7 +569,12 @@ class Ventas_model extends privilegios_model{
 
     // Obtiene la forma de pago, si es en parcialidades entonces la forma de
     // pago son las parcialidades "Parcialidad 1 de X".
-    $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+    // $formaPago = ($_POST['dforma_pago'] == 'Pago en parcialidades') ? $this->input->post('dforma_pago_parcialidad') : 'Pago en una sola exhibición';
+
+    $cfdi_ext = [
+      'tipoDeComprobante' => ($this->input->post('dtipo_comprobante')=='ingreso'? 'I': 'E'),
+      'usoCfdi'           => $this->input->post('duso_cfdi'),
+    ];
 
     $datosFactura = array(
       'id_cliente'          => $this->input->post('did_cliente'),
@@ -579,7 +590,7 @@ class Ventas_model extends privilegios_model{
       'no_aprobacion'       => $this->input->post('dno_aprobacion'),
       'ano_aprobacion'      => $anoAprobacion[0],
       'tipo_comprobante'    => $this->input->post('dtipo_comprobante'),
-      'forma_pago'          => $formaPago,
+      'forma_pago'          => $this->input->post('dforma_pago'),
       'metodo_pago'         => $this->input->post('dmetodo_pago'),
       'metodo_pago_digitos' => ($_POST['dmetodo_pago'] === 'efectivo') ? 'No identificado' : ($_POST['dmetodo_pago_digitos'] !== '' ? $_POST['dmetodo_pago_digitos']  : 'No identificado'),
       'no_certificado'      => $this->input->post('dno_certificado'),
@@ -595,10 +606,11 @@ class Ventas_model extends privilegios_model{
       'is_factura'          => 'f',
       'sin_costo_nover'     => isset($_POST['dsincosto_nover']) ? 't' : 'f',
       'moneda'              => $_POST['moneda'],
+      'cfdi_ext'            => json_encode($cfdi_ext),
     );
 
     //Si es otra moneda actualiza al tipo de cambio
-    if($datosFactura['moneda'] !== 'M.N.')
+    if($datosFactura['moneda'] !== 'MXN')
     {
       $datosFactura['tipo_cambio']   = $_POST['tipoCambio'];
       $datosFactura['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
@@ -806,7 +818,7 @@ class Ventas_model extends privilegios_model{
     //   $datosFactura['docs_finalizados'] = 't';
 
     //Si es otra moneda actualiza al tipo de cambio
-    if($datosFactura['moneda'] !== 'M.N.')
+    if($datosFactura['moneda'] !== 'MXN')
     {
       foreach ($productosFactura as $key => $value)
       {
@@ -1212,9 +1224,21 @@ class Ventas_model extends privilegios_model{
   public function generaNotaRemisionPdf($idVenta, $path = null)
   {
     // include(APPPATH.'libraries/phpqrcode/qrlib.php');
+    error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
     $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);
+
+    if ($factura['info']->version > 3.2) {
+      $metodosPago = new MetodosPago();
+      $formaPago   = new FormaPago();
+      $usoCfdi     = new UsoCfdi();
+      $factura['info']->cfdi_ext = $factura['info']->cfdi_ext? json_decode($factura['info']->cfdi_ext): false;
+      $factura['info']->metodosPago = $metodosPago->search($factura['info']->metodo_pago);
+      $factura['info']->formaPago = $formaPago->search($factura['info']->forma_pago);
+      $factura['info']->usoCfdi = $usoCfdi->search($factura['info']->cfdi_ext->usoCfdi);
+    }
 
     $this->load->model('cuentas_cobrar_model');
     $_GET['did_empresa'] = $factura['info']->id_empresa;
@@ -1361,9 +1385,20 @@ class Ventas_model extends privilegios_model{
 
     $municipio   = strtoupper($factura['info']->empresa->municipio);
     $estado = strtoupper($factura['info']->empresa->estado);
+    $cp = strtoupper($factura['info']->empresa->cp);
     $fecha = String::fechaATexto($factura['info']->fecha);
 
-    $pdf->Cell(108, 4, "{$municipio}, {$estado} | {$fecha}", 0, 0, 'R', 0);
+    $pdf->Cell(108, 4, "{$municipio}, {$estado} ({$cp}) | {$fecha}", 0, 0, 'R', 0);
+
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "Uso de CFDI:", 0, 0, 'R', 1);
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "{$factura['info']->usoCfdi['key']} - {$factura['info']->usoCfdi['value']}", 0, 0, 'R', 0);
 
     //////////////////
     // domicilioEmisor //
@@ -1676,11 +1711,17 @@ class Ventas_model extends privilegios_model{
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(1, $pdf->GetY());
-    $pdf->Cell(78, 4, $factura['info']->forma_pago, 0, 0, 'L', 1);
+    if ($factura['info']->version > 3.2)
+      $pdf->Cell(78, 4, "{$factura['info']->formaPago['key']} - {$factura['info']->formaPago['value']}", 0, 0, 'L', 1);
+    else
+      $pdf->Cell(78, 4, $factura['info']->forma_pago, 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(78, $pdf->GetY());
-    $pdf->Cell(78, 4, "Pago en ".String::getMetodoPago($factura['info']->metodo_pago), 0, 0, 'L', 1);
+    if ($factura['info']->version > 3.2)
+      $pdf->Cell(78, 4, "{$factura['info']->metodosPago['key']} - {$factura['info']->metodosPago['value']}", 0, 0, 'L', 1);
+    else
+      $pdf->Cell(78, 4, "Pago en ".String::getMetodoPago($factura['info']->metodo_pago), 0, 0, 'L', 1);
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(156, $pdf->GetY() - 11);

@@ -77,6 +77,8 @@ class clasificaciones_model extends CI_Model {
             'cuenta_cpi2'     => $this->input->post('fcuenta_cpi2'),
             'codigo'          => $this->input->post('fcodigo'),
             'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
+            'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
+            'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
 		}
 
@@ -119,6 +121,8 @@ class clasificaciones_model extends CI_Model {
             'cuenta_cpi2'  => $this->input->post('fcuenta_cpi2'),
             'codigo'       => $this->input->post('fcodigo'),
             'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
+            'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
+            'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
 
       // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));
@@ -147,12 +151,13 @@ class clasificaciones_model extends CI_Model {
 	 * @param  boolean $basic_info [description]
 	 * @return [type]              [description]
 	 */
-	public function getClasificacionInfo($id_clasificacion=FALSE, $basic_info=FALSE)
+	public function getClasificacionInfo($id_clasificacion=FALSE, $basic_info=FALSE, $firstP = true)
 	{
-		$id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
+    if ($firstP)
+      $id_clasificacion = (isset($_GET['id']))? $_GET['id']: $id_clasificacion;
 
 		$sql_res = $this->db->select("id_clasificacion, id_area, nombre, precio_venta, cuenta_cpi, status, iva, id_unidad,
-                                  cuenta_cpi2, codigo, inventario" )
+                                  cuenta_cpi2, codigo, inventario, clave_prod_serv, clave_unidad" )
 												->from("clasificaciones")
 												->where("id_clasificacion", $id_clasificacion)
 												->get();
@@ -166,6 +171,10 @@ class clasificaciones_model extends CI_Model {
 
 		if ($basic_info == false)
     {
+      $this->load->model('catalogos33_model');
+      $data['cprodserv'] = $this->catalogos33_model->claveProdServ($data['info']->clave_prod_serv);
+      $data['cunidad'] = $this->catalogos33_model->claveUnidad($data['info']->clave_unidad);
+
       $sql_res = $this->db->query(
         "SELECT cal.id_calibre, cal.nombre
          FROM calibres as cal

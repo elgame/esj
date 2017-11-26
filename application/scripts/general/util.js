@@ -230,7 +230,7 @@ var util = {
 
 
 			/* Asigna el tipo de moneda, para 1 = PESO, para distinto de 1 = PESOS*/
-			tipoMoneda = tipoMoneda?tipoMoneda:'M.N.';
+			tipoMoneda = tipoMoneda?tipoMoneda:'MXN';
       tipoMonedaCodigo = this.obtenerTipoMoneda(tipoMoneda);
       moneda = number == 1 ? tipoMonedaCodigo[0] : tipoMonedaCodigo[1];
 
@@ -245,7 +245,7 @@ var util = {
 
       codigoTipoFrancos = { 'BIF': 1, 'CDF': 1, 'CHF': 1, 'DJF': 1, 'GNF': 1, 'RWF': 1 },
 
-      codigoTipoPesos = { 'ARS': 1, 'CLP': 1, 'COP': 1, 'CUP': 1, 'DOP': 1, 'M.N.': 1, 'PHP': 1 },
+      codigoTipoPesos = { 'ARS': 1, 'CLP': 1, 'COP': 1, 'CUP': 1, 'DOP': 1, 'MXN': 1, 'M.N.': 1, 'PHP': 1 },
 
       codigoTipoLibras = { 'EGP': 1, 'FKP': 1, 'GBP': 1, 'LBP': 1, 'SHP': 1, 'SYP': 1 },
 
