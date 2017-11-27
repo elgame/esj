@@ -25,12 +25,12 @@ class clientes extends MY_Controller {
 			redirect(base_url('panel/home'));
 	}
 
-public function fecha($fecha)
-{
-	$meses = array('ENE' => '01', 'FEB' => '02', 'MAR' => '03', 'ABR' => '04', 'MAY' => '05', 'JUN' => '06', 'JUL' => '07', 'AGO' => '08', 'SEP' => '09', 'OCT' => '10', 'NOV' => '11', 'DIC' => '12' );
-	$fecha = explode('/', $fecha);
-	return $fecha[2].'-'.$meses[strtoupper($fecha[1])].'-'.$fecha[0];
-}
+  public function fecha($fecha)
+  {
+    $meses = array('ENE' => '01', 'FEB' => '02', 'MAR' => '03', 'ABR' => '04', 'MAY' => '05', 'JUN' => '06', 'JUL' => '07', 'AGO' => '08', 'SEP' => '09', 'OCT' => '10', 'NOV' => '11', 'DIC' => '12' );
+    $fecha = explode('/', $fecha);
+    return $fecha[2].'-'.$meses[strtoupper($fecha[1])].'-'.$fecha[0];
+  }
 
 	public function merges()
 	{
@@ -180,6 +180,8 @@ public function fecha($fecha)
 		));
 		$this->carabiner->js(array(
       	array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.numeric.js'),
+        array('general/keyjump.js'),
 			array('panel/clientes/agregar.js'),
 		));
 
@@ -205,8 +207,12 @@ public function fecha($fecha)
 		}
 
 		$this->load->model('documentos_model');
-		$params['documentos'] = $this->documentos_model->getDocumentos();
-    $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
+    $params['documentos'] = $this->documentos_model->getDocumentos();
+    $params['empresa']    = $this->empresas_model->getDefaultEmpresa();
+
+    //bancos
+    $this->load->model('banco_cuentas_model');
+    $params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -230,6 +236,8 @@ public function fecha($fecha)
 			));
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
+        array('libs/jquery.numeric.js'),
+        array('general/keyjump.js'),
 				array('libs/jquery.treeview.js'),
 				array('panel/clientes/agregar.js')
 			));
@@ -256,6 +264,11 @@ public function fecha($fecha)
 			}
 
 			$params['cliente'] = $this->clientes_model->getClienteInfo();
+      //Cuentas del cliente
+      $params['cuentas_clientes'] = $this->clientes_model->getCuentas($_GET['id']);
+      //bancos
+      $this->load->model('banco_cuentas_model');
+      $params['bancos'] = $this->banco_cuentas_model->getBancos(false);
 
 			$this->load->model('documentos_model');
 			$params['documentos'] = $this->documentos_model->getDocumentos();

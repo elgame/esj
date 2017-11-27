@@ -113,6 +113,7 @@ class clientes_model extends CI_Model {
 		$this->db->insert('clientes', $data);
 		$id_cliente = $this->db->insert_id('clientes', 'id_cliente');
 		$this->addDocumentos($id_cliente);
+    $this->addCuentas($id_cliente);
 
 		// Bitacora
     $this->bitacora_model->_insert('clientes', $id_cliente,
@@ -182,6 +183,7 @@ class clientes_model extends CI_Model {
 
 		$this->db->delete('clientes_documentos', array('id_cliente' => $id_cliente));
 		$this->addDocumentos($id_cliente);
+    $this->addCuentas($id_cliente);
 
 		return array('error' => FALSE);
 	}
@@ -206,6 +208,74 @@ class clientes_model extends CI_Model {
 		if(count($data) > 0)
 			$this->db->insert_batch('clientes_documentos', $data);
 	}
+
+  /**
+   * ******* CUENTAS DE CLIENTES ****************
+   * ***********************************************
+   * Agrega o actualiza cuentas del cliente
+   * @param [type] $id_cliente [description]
+   */
+  private function addCuentas($id_cliente)
+  {
+    $cuentas = $this->getCuentas($id_cliente);
+
+    if ( is_array($this->input->post('cuentas_alias')) )
+    {
+      foreach ($this->input->post('cuentas_alias') as $key => $value)
+      {
+        $data = array('id_cliente' => $id_cliente,
+                'alias'        => $_POST['cuentas_alias'][$key],
+                'cuenta'       => $_POST['cuentas_cuenta'][$key],
+                'id_banco'     => $_POST['fbanco'][$key],
+              );
+        if (is_numeric($_POST['cuentas_id'][$key]))  //update
+        {
+          foreach ($cuentas as $keyc => $cuent) {
+            if ($cuent->id_cuenta == $_POST['cuentas_id'][$key]) {
+              unset($cuentas[$keyc]);
+            }
+          }
+
+          // if($_POST['cuentas_delte'][$key] == 'true')
+          //  $data['status'] = 'f';
+          $this->db->update('clientes_cuentas', $data, "id_cuenta = {$_POST['cuentas_id'][$key]}");
+        }else  //insert
+        {
+          if($data['alias'] != '' && $data['cuenta'] != '')
+            $this->db->insert('clientes_cuentas', $data);
+        }
+      }
+    }
+
+    // Elimina las cuentas
+    if (count($cuentas) > 0)
+      foreach ($cuentas as $keyc => $cuent) {
+        $this->db->update('clientes_cuentas', array('status' => 'f'), "id_cuenta = {$cuent->id_cuenta}");
+      }
+  }
+
+  /**
+   * Obtiene el listado de cuentas del cliente
+   * @return [type] [description]
+   */
+  public function getCuentas($id_cliente, $id_cuenta=null){
+    $sql = ($id_cuenta==null? '': ' AND pc.id_cuenta = '.$id_cuenta);
+    $res = $this->db->query("
+        SELECT pc.id_cuenta, pc.id_cliente, pc.alias, pc.cuenta, pc.status,
+          (pc.alias || ' *' || substring(pc.cuenta from '....$')) AS full_alias,
+          bb.id_banco, bb.nombre AS banco, bb.codigo, bb.rfc
+        FROM clientes_cuentas AS pc
+          LEFT JOIN banco_bancos AS bb ON pc.id_banco = bb.id_banco
+        WHERE pc.status = 't' AND pc.id_cliente = {$id_cliente} {$sql}
+        ORDER BY full_alias ASC");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      $response = $res->result();
+    }
+
+    return $response;
+  }
 
 	/**
 	 * Obtiene la informacion de un proveedor

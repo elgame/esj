@@ -23,6 +23,8 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/rpt_ventas2_xls/',
 
     'cuentas_cobrar/factura_abono_parci/',
+
+    'cuentas_cobrar/com_pago/',
   );
 
 
@@ -302,6 +304,25 @@ class cuentas_cobrar extends MY_Controller {
   }
 
   /**
+   * Genera los complementos de pago
+   * @return [type] [description]
+   */
+  public function com_pago()
+  {
+    if (isset($_GET['idm']{0}))
+    {
+      $this->load->model('cuentas_cobrar_pago_model');
+      $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm']);
+      if($respons['passes'])
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=11'));
+      else
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg='.$respons['codigo']));
+
+    }else
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=1'));
+  }
+
+  /**
    * RPTS
    */
   public function rpt_ventas_xls(){
@@ -384,6 +405,15 @@ class cuentas_cobrar extends MY_Controller {
         break;
       case 10:
         $txt = 'Los abonos se eliminaron correctamente.';
+        $icono = 'success';
+        break;
+
+      case 12:
+        $txt = 'Ya se registro el complemento de pago.';
+        $icono = 'success';
+        break;
+      case 13:
+        $txt = 'Los CFDI no requieren complemento de pago.';
         $icono = 'success';
         break;
 

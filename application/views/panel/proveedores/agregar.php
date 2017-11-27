@@ -226,8 +226,8 @@
 
 	              				</div> <!--/span-->
 
-	              				<div class="span11">
-	              					<table class="table table-striped table-bordered table-hover table-condensed">
+        				<div class="span11">
+        					<table class="table table-striped table-bordered table-hover table-condensed">
 										<thead>
 										  <tr>
 										    <th>Banamex</th>
@@ -291,9 +291,9 @@
 
 										</tbody>
 									</table>
-	              				</div>
+	              </div>
 
-	              				<div class="clearfix"></div>
+	              <div class="clearfix"></div>
 
 								<div class="form-actions">
 								  <button type="submit" class="btn btn-primary">Guardar</button>

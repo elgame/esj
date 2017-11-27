@@ -1154,41 +1154,41 @@ if($close){
       e.nombre_fiscal, e.logo
       ORDER BY Date(fa.fecha) DESC
       ", $params, true);
-$res = $this->db->query($query['query']);
+    $res = $this->db->query($query['query']);
 
-$response = array(
-  'abonos'         => array(),
-  'facturas'       => array(),
-  'total_rows'     => $query['total_rows'],
-  'items_per_page' => $params['result_items_per_page'],
-  'result_page'    => $params['result_page'],
-  );
+    $response = array(
+      'abonos'         => array(),
+      'facturas'       => array(),
+      'total_rows'     => $query['total_rows'],
+      'items_per_page' => $params['result_items_per_page'],
+      'result_page'    => $params['result_page'],
+      );
 
-if($res->num_rows() > 0)
-{
-  $response['abonos'] = $res->result();
-  $res->free_result();
+    if($res->num_rows() > 0)
+    {
+      $response['abonos'] = $res->result();
+      $res->free_result();
 
 
-  if($movimientoId!=null)
-  {
-    $res = $this->db->query(
-      "SELECT
-      fa.id_abono, f.serie, f.folio, fa.ref_movimiento, fa.concepto, fa.total, Date(fa.fecha) AS fecha
-      FROM facturacion AS f
-      INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-      INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-      WHERE f.status <> 'ca' AND f.status <> 'b'
-      {$sql}
-      ORDER BY fa.id_abono ASC
-      ");
-    $response['facturas'] = $res->result();
-    $res->free_result();
+      if($movimientoId!=null)
+      {
+        $res = $this->db->query(
+          "SELECT
+          fa.id_abono, f.serie, f.folio, fa.ref_movimiento, fa.concepto, fa.total, Date(fa.fecha) AS fecha
+          FROM facturacion AS f
+          INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
+          INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
+          WHERE f.status <> 'ca' AND f.status <> 'b'
+          {$sql}
+          ORDER BY fa.id_abono ASC
+          ");
+        $response['facturas'] = $res->result();
+        $res->free_result();
+      }
+    }
+
+    return $response;
   }
-}
-
-return $response;
-}
 
   /**
    * Funcion que registra una factura del abono a una factura

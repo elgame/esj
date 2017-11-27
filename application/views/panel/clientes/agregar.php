@@ -23,7 +23,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/clientes/agregar'); ?>" method="post" class="form-horizontal">
+						<form action="<?php echo base_url('panel/clientes/agregar'); ?>" method="post" class="form-horizontal" id="formcliente">
 						  <fieldset>
 								<legend></legend>
 
@@ -204,19 +204,74 @@
 
 	              <div class="clearfix"></div>
 
+                <div class="span11">
+                  <table class="table table-striped table-bordered table-hover table-condensed">
+                    <thead>
+                      <tr>
+                        <th>BANCO</th>
+                        <th>ALIAS</th>
+                        <th>CUENTA/CLABE/TARJETA</th>
+                        <th>OPC</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableCuentas">
+                    <?php if (is_array($this->input->post('cuentas_alias')))
+                    {
+                      foreach ($this->input->post('cuentas_alias') as $key => $value)
+                      {
+                    ?>
+                      <tr>
+                          <td>
+                            <input type="hidden" name="cuentas_id[]" value="<?php echo $_POST['cuentas_id'][$key]; ?>" class="cuentas_id">
+                            <select name="fbanco[]" class="fbanco">
+                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) { ?>
+                              <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco); ?>><?php echo $valueb->nombre; ?></option>
+                            <?php
+                            }?>
+                            </select>
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $_POST['cuentas_alias'][$key]; ?>" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $_POST['cuentas_cuenta'][$key]; ?>" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+                    <?php
+                      }
+                    } ?>
+                      <tr>
+                        <td>
+                          <input type="hidden" name="cuentas_id[]" value="" class="cuentas_id">
+                            <select name="fbanco[]" class="fbanco">
+                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+                            ?>
+                                <option value="<?php echo $valueb->id_banco ?>"><?php echo $valueb->nombre; ?></option>
+                            <?php
+                            }?>
+                            </select>
+                        </td>
+                        <td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias"></td>
+                        <td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int"></td>
+                        <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="clearfix"></div>
+
 	              <fieldset>
 	              	<legend>Documentos del cliente</legend>
-							<?php
-							$ul1 = $ul2 = '';
-							foreach ($documentos['documentos'] as $key => $value) {
-								if($key % 2 == 0)
-									$ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
-														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
-								else
-									$ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
-														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
-							}
-							?>
+    							<?php
+    							$ul1 = $ul2 = '';
+    							foreach ($documentos['documentos'] as $key => $value) {
+    								if($key % 2 == 0)
+    									$ul1 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
+    														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
+    								else
+    									$ul2 .= '<li><label><input type="checkbox" name="documentos[]" value="'.$value->id_documento.'"
+    														'.set_checkbox('documentos[]', $value->id_documento).'> '.$value->nombre.'</label></li>';
+    							}
+    							?>
 									<ul class="span6">
 										<?php echo $ul1; ?>
 									</ul>

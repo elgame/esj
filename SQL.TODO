@@ -9,6 +9,60 @@
     UPDATE public.empresas SET cfdi_version='3.3';
     ALTER TABLE public.facturacion ADD COLUMN cfdi_ext json;
     ALTER TABLE public.facturacion ALTER COLUMN sello TYPE character varying(400);
+    UPDATE public.banco_bancos SET rfc='BAF950102JP5' WHERE Lower(nombre) LIKE Lower('%Afirme%');
+    UPDATE public.banco_bancos SET rfc='BBA940707IE1' WHERE Lower(nombre) LIKE Lower('%BanBajio%');
+    UPDATE public.banco_bancos SET rfc='BMN930209927' WHERE Lower(nombre) LIKE Lower('%Banorte%');
+    UPDATE public.banco_bancos SET rfc='BNM840515VB1' WHERE Lower(nombre) LIKE Lower('%Banamex%');
+    UPDATE public.banco_bancos SET rfc='BSM970519DU8' WHERE Lower(nombre) LIKE Lower('%Santander%');
+    UPDATE public.banco_bancos SET rfc='BBA830831LJ2' WHERE Lower(nombre) LIKE Lower('%BBVA Bancomer%');
+    UPDATE public.banco_bancos SET rfc='HMI950125KG8' WHERE Lower(nombre) LIKE Lower('%HSBC%');
+    UPDATE public.banco_bancos SET rfc='BSI061110963' WHERE Lower(nombre) LIKE Lower('%BanCoppel%');
+    UPDATE public.banco_bancos SET rfc='SIN9412025I4' WHERE Lower(nombre) LIKE Lower('%Scotiabank%');
+    INSERT INTO public.banco_bancos (nombre, codigo, rfc) VALUES ('INBURSA', '', 'BII931004P61'),
+      ('FAMSA', '', 'BAF060524EV6');
+    CREATE TABLE public.clientes_cuentas
+    (
+      id_cuenta bigserial NOT NULL,
+      id_cliente bigint NOT NULL,
+      alias character varying(60) NOT NULL,
+      cuenta character varying(19) NOT NULL,
+      status boolean NOT NULL DEFAULT true,
+      id_banco integer NOT NULL DEFAULT 1,
+      CONSTRAINT clientes_cuentas_pkey PRIMARY KEY (id_cuenta),
+      CONSTRAINT clientes_cuentas_id_banco_fkey FOREIGN KEY (id_banco)
+          REFERENCES public.banco_bancos (id_banco) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE,
+      CONSTRAINT clientes_cuentas_id_cliente_fkey FOREIGN KEY (id_cliente)
+          REFERENCES public.clientes (id_cliente) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE CASCADE
+    ) WITH (OIDS=FALSE); ALTER TABLE public.clientes_cuentas OWNER TO programa;
+    CREATE TABLE public.banco_movimientos_com_pagos
+    (
+      id bigserial NOT NULL,
+      id_movimiento bigint NOT NULL,
+      fecha timestamp with time zone NOT NULL,
+      serie character varying(10),
+      folio bigint NOT NULL,
+      xml text,
+      uuid character varying(50),
+      cfdi_ext json,
+      sello text,
+      cadena_original text,
+      status character varying(20) NOT NULL DEFAULT 'facturada'::character varying, -- facturada, cancelada
+      version character varying(5),
+      CONSTRAINT banco_movimientos_com_pagos_pkey PRIMARY KEY (id),
+      CONSTRAINT banco_movimientos_com_pagos_id_movimiento_fkey FOREIGN KEY (id_movimiento)
+          REFERENCES public.banco_movimientos (id_movimiento) MATCH SIMPLE
+          ON UPDATE CASCADE ON DELETE NO ACTION
+    ) WITH ( OIDS=FALSE ); ALTER TABLE public.banco_movimientos_com_pagos OWNER TO programa;
+    COMMENT ON COLUMN public.banco_movimientos_com_pagos.status IS 'facturada, cancelada';
+    CREATE TABLE public.facturacion_com_pagos
+    (
+      id_movimiento bigint NOT NULL,
+      id_factura bigint NOT NULL,
+      CONSTRAINT facturacion_com_pagos_pkey PRIMARY KEY (id_movimiento, id_factura)
+    ) WITH ( OIDS=FALSE ); ALTER TABLE public.facturacion_com_pagos OWNER TO programa;
+
 
  ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|lap|gdl
    CREATE MATERIALIZED VIEW public.estado_cuenta_abonos AS

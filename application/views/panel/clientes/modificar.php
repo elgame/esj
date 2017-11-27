@@ -209,6 +209,87 @@
 
                 <div class="clearfix"></div>
 
+                <div class="span11">
+                  <table class="table table-striped table-bordered table-hover table-condensed">
+                    <thead>
+                      <tr>
+                        <th>BANCO</th>
+                        <th>ALIAS</th>
+                        <th>CUENTA/CLABE/TARJETA</th>
+                        <th>OPC</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableCuentas">
+                    <?php if (count($cuentas_clientes) > 0)
+                    {
+                      foreach ($cuentas_clientes as $key => $value)
+                      {
+                    ?>
+                      <tr>
+                          <td>
+                            <input type="hidden" name="cuentas_id[]" value="<?php echo $value->id_cuenta; ?>" class="cuentas_id">
+                            <select name="fbanco[]" class="fbanco">
+                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+                            ?>
+                                <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco, false, $value->id_banco); ?>><?php echo $valueb->nombre; ?></option>
+                            <?php
+                            }?>
+                            </select>
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $value->alias; ?>" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $value->cuenta; ?>" class="cuentas_cuenta vpos-int"></td>
+                          <td>
+                            <button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button>
+                          </td>
+                      </tr>
+                    <?php
+                      }
+                    } ?>
+                    <?php if (is_array($this->input->post('cuentas_alias')))
+                    {
+                      foreach ($this->input->post('cuentas_alias') as $key => $value)
+                      {
+                    ?>
+                      <tr>
+                          <td>
+                            <input type="hidden" name="cuentas_id[]" value="<?php echo $_POST['cuentas_id'][$key]; ?>" class="cuentas_id">
+                            <select name="fbanco[]" class="fbanco">
+                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+                            ?>
+                                <option value="<?php echo $valueb->id_banco ?>" <?php echo set_select('fbanco', $valueb->id_banco); ?>><?php echo $valueb->nombre; ?></option>
+                            <?php
+                            }?>
+                            </select>
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="<?php echo $_POST['cuentas_alias'][$key]; ?>" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="<?php echo $_POST['cuentas_cuenta'][$key]; ?>" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+                    <?php
+                      }
+                    } ?>
+                      <tr>
+                          <td>
+                            <input type="hidden" name="cuentas_id[]" value="" class="cuentas_id">
+                            <select name="fbanco[]" class="fbanco">
+                            <?php  foreach ($bancos['bancos'] as $keyb => $valueb) {
+                            ?>
+                                <option value="<?php echo $valueb->id_banco ?>"><?php echo $valueb->nombre; ?></option>
+                            <?php
+                            }?>
+                            </select>
+                          </td>
+                          <td><input type="text" name="cuentas_alias[]" value="" class="cuentas_alias"></td>
+                          <td><input type="text" name="cuentas_cuenta[]" value="" class="cuentas_cuenta vpos-int"></td>
+                          <td><button type="button" class="btn btn-danger delProd"><i class="icon-remove"></i></button></td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="clearfix"></div>
+
                 <fieldset>
                   <legend>Documentos del cliente</legend>
               <?php

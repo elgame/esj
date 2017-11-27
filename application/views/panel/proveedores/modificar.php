@@ -231,7 +231,7 @@
                 </div> <!--/span-->
 
                 <div class="span11">
-                          <table class="table table-striped table-bordered table-hover table-condensed">
+                  <table class="table table-striped table-bordered table-hover table-condensed">
                     <thead>
                       <tr>
                         <th>Banamex</th>

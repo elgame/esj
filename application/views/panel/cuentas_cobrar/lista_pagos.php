@@ -23,7 +23,7 @@
           </div>
           <div class="box-content">
             <!-- <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
-              <i class="icon-print"></i> Imprimir</a> | 
+              <i class="icon-print"></i> Imprimir</a> |
             <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a> -->
 
@@ -32,7 +32,7 @@
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
                 <input type="date" name="ffecha1" class="input-large search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1'); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> | 
+                <input type="date" name="ffecha2" class="input-large search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2'); ?>" size="10"> |
 
                 <label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa', (isset($empresa->nombre_fiscal)? $empresa->nombre_fiscal: '') ); ?>" size="73">
@@ -55,7 +55,7 @@
               </thead>
               <tbody>
             <?php
-            $total_saldo = $total_abono = $total_cargo = 0; 
+            $total_saldo = $total_abono = $total_cargo = 0;
             foreach($data['abonos'] as $cuenta){
             ?>
                 <tr>
@@ -67,13 +67,15 @@
                   <td>
                   	<a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_abono/?p='.$cuenta->id_movimiento); ?>" target="_blank" title="Imprimir">
           						<i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
-          					<?php  
+          					<?php
           					echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_movimiento/', array(
           							'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
           							'btn_type' => 'btn-danger',
           							'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
           						);
           					?>
+                    <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/com_pago/?idm='.$cuenta->id_movimiento); ?>" target="_blank" title="Genera Com Pago">
+                      <i class="icon-check icon-white"></i> <span class="hidden-tablet">Com Pago</span></a>
                   </td>
                 </tr>
             <?php }?>
