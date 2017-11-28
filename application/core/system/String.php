@@ -172,7 +172,7 @@ class String{
   @result string - Devuelve el n?mero escrito en letra.
 
   */
-  public static function num2letras($num, $moneda='M.N.', $fem = false, $dec = true) {
+  public static function num2letras($num, $moneda='MXN', $fem = false, $dec = true) {
     $matuni[2]  = "dos";
     $matuni[3]  = "tres";
     $matuni[4]  = "cuatro";

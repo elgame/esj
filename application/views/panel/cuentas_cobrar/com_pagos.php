@@ -31,7 +31,7 @@
                 </div>
               </div>
 
-            <button type="submit" class="btn btn-success btn-large">Registrar</button>
+            <button type="submit" name="save" class="btn btn-success btn-large">Registrar</button>
           </div><!--/row-->
 
         </form>
@@ -54,4 +54,14 @@
 </script>
 <?php }
 }?>
+<?php if ($closeModal) { ?>
+  <script>
+  $(function(){
+    setInterval(function() {
+      window.parent.$('#supermodal').modal('hide');
+      window.parent.location = window.parent.location;
+    }, 1000);
+  });
+  </script>
+<?php } ?>
 <!-- Bloque de alertas -->

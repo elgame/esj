@@ -53,6 +53,12 @@
                   <option value="b" <?php echo set_select_get('fstatus', 'b'); ?>>PREFACTURAS</option>
                 </select>
 
+                <label for="ftipo">Tipo</label>
+                <select name="ftipo" class="input-medium" id="ftipo">
+                  <option value="com_pago" <?php echo set_select_get('ftipo', 'com_pago'); ?>>Complementos de pago</option>
+                  <option value="parcial" <?php echo set_select_get('ftipo', 'parcial'); ?>>Pago en parcialidades</option>
+                </select>
+
                 <input type="submit" name="enviar" value="Enviar" class="btn">
               </div>
             </form>
@@ -73,7 +79,9 @@
                 </tr>
               </thead>
               <tbody>
-            <?php foreach($datos_s['fact'] as $fact) {?>
+            <?php
+            if (isset($datos_s)) {
+            foreach($datos_s['fact'] as $fact) {?>
                 <tr>
                   <td style="width:70px;"><?php echo $fact->fecha; ?></td>
                   <td>
@@ -165,27 +173,91 @@
                     ?>
                   </td>
                 </tr>
-            <?php }?>
+            <?php }
+            }?>
+
+            <?php
+            if (isset($datos_cp)) {
+            foreach($datos_cp['pagos'] as $fact) {?>
+                <tr>
+                  <td style="width:70px;"><?php echo $fact->fecha; ?></td>
+                  <td>
+                    <span class="label"><?php echo ($fact->serie ? $fact->serie.' - ' : '').$fact->folio; ?></span>
+                  </td>
+                  <td><?php echo $fact->nombre_fiscal; ?></td>
+                  <td><?php echo $fact->empresa; ?></td>
+                  <td><?php echo String::formatoNumero($fact->monto, 2, '$', false); ?></td>
+                  <td></td>
+                  <td></td>
+                  <td><?php
+                      if ($fact->status === 'facturada')
+                      {
+                        $texto = 'Timbrada';
+                        $label = 'success';
+                      } else {
+                        $texto = 'Cancelada';
+                        $label = 'important';
+                      }?>
+                      <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
+                  </td>
+                  <td></td>
+                  <td class="center">
+
+                    <a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
+                      <i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
+                    <?php
+                      if ($fact->status !== 'cancelada')
+                      {
+                        echo '<a class="btn btn-danger" href="base_url(\'panel/cuentas_cobrar/cancelar_com_pago/?id='.$fact->id.'\')"
+                          onclick="msb.confirm(\'Estas seguro de Cancelar la factura?<br><strong>NOTA: Esta opción no se podra revertir.</strong>\', \'Facturas\', this); return false;" title="Cancelar">
+                        <i class="icon-ban-circle icon-white"></i> <span class="hidden-tablet">Cancelar</span></a>';
+                      }
+
+                      // if ($fact->status !== 'b')
+                      // {
+
+
+                      //   if ($fact->status_timbrado === 't')
+                      //   {
+                      //     echo '<a class="btn" href="'.base_url('panel/facturacion/xml/?id='.$fact->id_factura).'" title="Descargar XML" target="_BLANK"><i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>';
+                      //   }
+
+                      //   echo $this->usuarios_model->getLinkPrivSm('facturacion/enviar_documentos/', array(
+                      //     'params'   => 'id='.$fact->id_factura,
+                      //     'btn_type' => 'btn-success',
+                      //     'attrs' => array('rel' => 'superbox-50x450'))
+                      //   );
+
+                      // } else {
+                      //   echo '<a class="btn btn-success" href="'.base_url('panel/facturacion/agregar/?idb='.$fact->id_factura).'"><i class="icon-certificate icon-white"></i> <span class="hidden-tablet">Timbrar</span></a>';
+                      // }
+                    ?>
+                  </td>
+                </tr>
+            <?php }
+            }?>
               </tbody>
             </table>
 
             <?php
-            //Paginacion
-            $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
-                'total_rows'    => $datos_s['total_rows'],
-                'per_page'      => $datos_s['items_per_page'],
-                'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],
-                'page_query_string' => TRUE,
-                'num_links'     => 1,
-                'anchor_class'  => 'pags corner-all',
-                'num_tag_open'  => '<li>',
-                'num_tag_close' => '</li>',
-                'cur_tag_open'  => '<li class="active"><a href="#">',
-                'cur_tag_close' => '</a></li>'
-            ));
-            $pagination = $this->pagination->create_links();
-            echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+            if (isset($datos_s)) {
+              //Paginacion
+              $this->pagination->initialize(array(
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                  'total_rows'    => $datos_s['total_rows'],
+                  'per_page'      => $datos_s['items_per_page'],
+                  'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],
+                  'page_query_string' => TRUE,
+                  'num_links'     => 1,
+                  'anchor_class'  => 'pags corner-all',
+                  'num_tag_open'  => '<li>',
+                  'num_tag_close' => '</li>',
+                  'cur_tag_open'  => '<li class="active"><a href="#">',
+                  'cur_tag_close' => '</a></li>'
+              ));
+              $pagination = $this->pagination->create_links();
+              echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+            }
             ?>
           </div>
         </div><!--/span-->

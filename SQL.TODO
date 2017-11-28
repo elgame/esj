@@ -63,6 +63,11 @@
       id_factura bigint NOT NULL,
       CONSTRAINT facturacion_com_pagos_pkey PRIMARY KEY (id_movimiento, id_factura)
     ) WITH ( OIDS=FALSE ); ALTER TABLE public.facturacion_com_pagos OWNER TO programa;
+    ALTER TABLE public.banco_movimientos_com_pagos ADD COLUMN id_empresa bigint NOT NULL;
+    ALTER TABLE public.banco_movimientos_com_pagos ADD CONSTRAINT banco_movimientos_com_pagos_id_empresa_fkey FOREIGN KEY (id_empresa)
+      REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
+    ALTER TABLE public.banco_movimientos_com_pagos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+
 
 
  ✔ Reporte de estado de cuenta @done (17-09-12 16:19) pct|pcc|lap|san|lap|gdl

@@ -74,7 +74,7 @@
                   <label class="control-label" for="fnumero">Cuenta/CLABE </label>
                   <div class="controls">
                     <input type="text" name="fnumero" id="fnumero" class="span6" maxlength="20"
-                    value="<?php echo isset($data->numero)?$data->numero:''; ?>" placeholder="12352">
+                    value="<?php echo isset($data->cuenta)?$data->cuenta:''; ?>" placeholder="12352">
                   </div>
                 </div>
 

@@ -1149,7 +1149,7 @@ class cfdi{
         array(
           'claveProdServ'           => '84111506',
           'claveUnidad'             => 'ACT',
-          'unidad'                  => '',
+          'unidad'                  => 'ACT',
           'cantidad'                => '1',
           'concepto'                => 'Pago',
           'cuentaPredial'           => '',

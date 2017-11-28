@@ -122,6 +122,7 @@ class facturacion extends MY_Controller {
 
     $this->load->library('pagination');
     $this->load->model('facturacion_model');
+    $this->load->model('cuentas_cobrar_pago_model');
     $this->load->model('empresas_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
@@ -129,7 +130,10 @@ class facturacion extends MY_Controller {
     $params['seo'] = array('titulo' => 'Facturas');
 
     //obtenemos las notas de credito
-    $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_abono_factura IS NOT NULL");
+    if (isset($_POST['ftipo']) && $_POST['ftipo'] == 'parcial') {
+      $params['datos_s'] = $this->facturacion_model->getFacturas('40', " AND id_abono_factura IS NOT NULL");
+    } else
+      $params['datos_cp'] = $this->cuentas_cobrar_pago_model->getComPagoData();
 
     $params['fecha']  = str_replace(' ', 'T', date("Y-m-d H:i"));
 

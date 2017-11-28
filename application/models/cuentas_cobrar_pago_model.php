@@ -7,90 +7,100 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
   }
 
 
-  // public function getAbonosData($movimientoId=null)
-  // {
-  //   //paginacion
-  //   $params = array(
-  //     'result_items_per_page' => '60',
-  //     'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
-  //     );
-  //   if($params['result_page'] % $params['result_items_per_page'] == 0)
-  //     $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
+  public function getComPagoData()
+  {
+    //paginacion
+    $params = array(
+      'result_items_per_page' => '40',
+      'result_page'       => (isset($_GET['pag'])? $_GET['pag']: 0)
+      );
+    if($params['result_page'] % $params['result_items_per_page'] == 0)
+      $params['result_page'] = ($params['result_page']/$params['result_items_per_page']);
 
-  //   $response = array();
-  //   $sql = $sql2 = '';
+    $response = array();
+    $sql = $sql2 = '';
 
-  //   if($movimientoId!=null)
-  //     $sql .= " AND bmf.id_movimiento = {$movimientoId}";
-  //   else{
-  //     if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
-  //       $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m").'-01';
-  //       $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
-  //     }
-  //     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
-  //       $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
-  //       $sql .= " AND Date(fa.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
-  //     }
+    if (empty($_GET['ffecha1']) && empty($_GET['ffecha2'])){
+      $_GET['ffecha1'] = $this->input->get('ffecha1')!=''? $_GET['ffecha1']: date("Y-m").'-01';
+      $_GET['ffecha2'] = $this->input->get('ffecha2')!=''? $_GET['ffecha2']: date("Y-m-d");
+    }
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
+      $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+      $sql .= " AND Date(f.fecha) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+    }
 
-  //     if ($this->input->get('did_empresa') != '')
-  //       $sql .= " AND f.id_empresa = '".$_GET['did_empresa']."'";
-  //   }
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getDefaultEmpresa();
+    if( ! $this->input->get('did_empresa') != '')
+    {
+      $_GET['did_empresa'] = $empresa->id_empresa;
+      $_GET['dempresa'] = $empresa->nombre_fiscal;
+    }
+    if ($this->input->get('did_empresa') != '')
+      $sql .= " AND e.id_empresa = '".$_GET['did_empresa']."'";
 
+    if($this->input->get('fid_cliente') != '')
+      $sql .= " AND c.id_cliente = '".$this->input->get('fid_cliente')."'";
 
-  //   $query = BDUtil::pagination(
-  //     "SELECT
-  //     bmf.id_movimiento, fa.ref_movimiento, fa.concepto, Sum(fa.total) AS total_abono,
-  //     bc.cuenta_cpi, Sum(f.subtotal) AS subtotal, Sum(f.total) AS total, Sum(((fa.total*100/f.total)*f.importe_iva/100)) AS importe_iva,
-  //     Sum(((fa.total*100/f.total)*f.retencion_iva/100)) AS retencion_iva, c.nombre_fiscal,
-  //     c.cuenta_cpi AS cuenta_cpi_cliente, Date(fa.fecha) AS fecha, e.nombre_fiscal AS empresa, e.logo
-  //     FROM facturacion AS f
-  //     INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-  //     INNER JOIN banco_cuentas AS bc ON bc.id_cuenta = fa.id_cuenta
-  //     INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
-  //     INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
-  //     INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-  //     WHERE f.status <> 'ca' AND f.status <> 'b'
-  //     {$sql}
-  //     GROUP BY bmf.id_movimiento, fa.ref_movimiento, fa.concepto,
-  //     bc.cuenta_cpi, c.nombre_fiscal, c.cuenta_cpi, Date(fa.fecha),
-  //     e.nombre_fiscal, e.logo
-  //     ORDER BY Date(fa.fecha) DESC
-  //     ", $params, true);
-  //   $res = $this->db->query($query['query']);
-
-  //   $response = array(
-  //     'abonos'         => array(),
-  //     'facturas'       => array(),
-  //     'total_rows'     => $query['total_rows'],
-  //     'items_per_page' => $params['result_items_per_page'],
-  //     'result_page'    => $params['result_page'],
-  //     );
-
-  //   if($res->num_rows() > 0)
-  //   {
-  //     $response['abonos'] = $res->result();
-  //     $res->free_result();
+    if($this->input->get('fstatus') != '') {
+      $status = '';
+      if ($this->input->get('fstatus') == 'ca')
+        $status = 'cancelada';
+      elseif ($this->input->get('fstatus') == 'p' || $this->input->get('fstatus') == 'pa')
+        $status = 'facturada';
+      $sql .= " AND f.status = '".$status."'";
+    }
 
 
-  //     if($movimientoId!=null)
-  //     {
-  //       $res = $this->db->query(
-  //         "SELECT
-  //         fa.id_abono, f.serie, f.folio, fa.ref_movimiento, fa.concepto, fa.total, Date(fa.fecha) AS fecha
-  //         FROM facturacion AS f
-  //         INNER JOIN facturacion_abonos AS fa ON fa.id_factura = f.id_factura
-  //         INNER JOIN banco_movimientos_facturas AS bmf ON bmf.id_abono_factura = fa.id_abono
-  //         WHERE f.status <> 'ca' AND f.status <> 'b'
-  //         {$sql}
-  //         ORDER BY fa.id_abono ASC
-  //         ");
-  //       $response['facturas'] = $res->result();
-  //       $res->free_result();
-  //     }
-  //   }
+    $query = BDUtil::pagination(
+      "SELECT
+        f.id, f.id_movimiento, f.fecha, f.serie, f.folio, f.uuid, f.cfdi_ext, f.sello, f.cadena_original,
+        f.status, f.version, f.id_empresa, f.no_impresiones, bm.monto, c.nombre_fiscal, e.nombre_fiscal AS empresa
+      FROM banco_movimientos_com_pagos AS f
+        INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
+        INNER JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+        INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
+      WHERE 1 = 1
+      {$sql}
+      ORDER BY Date(f.fecha) DESC
+      ", $params, true);
+    $res = $this->db->query($query['query']);
 
-  //   return $response;
-  // }
+    $response = array(
+      'pagos'         => array(),
+      'total_rows'     => $query['total_rows'],
+      'items_per_page' => $params['result_items_per_page'],
+      'result_page'    => $params['result_page'],
+      );
+
+    if($res->num_rows() > 0)
+    {
+      $response['pagos'] = $res->result();
+      $res->free_result();
+    }
+
+    // echo "<pre>";
+    //   var_dump($response);
+    // echo "</pre>";exit;
+
+    return $response;
+  }
+
+  public function getInfoComPago($id_compago=false, $id_movimiento=false)
+  {
+    $sql = $id_compago? "WHERE bcp.id = {$id_compago}" : "WHERE bcp.id_movimiento = {$id_movimiento} AND bcp.status = 'facturada'";
+    $factura = $this->db->query(
+      "SELECT bcp.id, bcp.id_movimiento, bcp.fecha, bcp.serie, bcp.folio, bcp.xml, bcp.uuid, bcp.cfdi_ext, bcp.sello, bcp.cadena_original,
+        bcp.status, bcp.version, bcp.id_empresa, bcp.no_impresiones, e.logo
+      FROM banco_movimientos_com_pagos AS bcp
+        INNER JOIN empresas AS e ON e.id_empresa = bcp.id_empresa
+      {$sql}")->row();
+
+    if (isset($factura->cfdi_ext))
+      $factura->cfdi_ext = json_decode($factura->cfdi_ext);
+
+    return $factura;
+  }
 
   public function addComPago($id_movimiento, $id_cuenta_cliente)
   {
@@ -133,56 +143,75 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
         // xml 3.3
         $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente);
+        // echo "<pre>";
+        //   var_dump($datosApi);
+        // echo "</pre>";exit;
 
         // Timbrado de la factura.
-        $result = $this->timbrar($datosApi, $idFactura);
+        $result = $this->timbrar($datosApi, $id_movimiento);
 
         if ($result['passes'])
         {
 
-          // $xmlName = explode('/', $archivos['pathXML']);
+          // // $xmlName = explode('/', $archivos['pathXML']);
 
-          // copy($archivos['pathXML'], $pathDocs.end($xmlName));
+          // // copy($archivos['pathXML'], $pathDocs.end($xmlName));
 
-          //Si es otra moneda actualiza al tipo de cambio
-          if($datosFactura['moneda'] !== 'MXN')
-          {
-            $datosFactura1 = array();
-            $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-            $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
+          // //Si es otra moneda actualiza al tipo de cambio
+          // if($datosFactura['moneda'] !== 'MXN')
+          // {
+          //   $datosFactura1 = array();
+          //   $datosFactura1['total']         = number_format($datosFactura['total']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //   $datosFactura1['subtotal']      = number_format($datosFactura['subtotal']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //   $datosFactura1['importe_iva']   = number_format($datosFactura['importe_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //   $datosFactura1['retencion_iva'] = number_format($datosFactura['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //   $this->db->update('facturacion', $datosFactura1, array('id_factura' => $idFactura));
 
-            foreach ($productosFactura as $key => $value)
-            {
-              $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
-              $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
-            }
+          //   foreach ($productosFactura as $key => $value)
+          //   {
+          //     $value['precio_unitario'] = number_format($value['precio_unitario']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //     $value['importe']         = number_format($value['importe']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //     $value['iva']             = number_format($value['iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //     $value['retencion_iva']   = number_format($value['retencion_iva']*$datosFactura['tipo_cambio'], 2, '.', '');
+          //     $this->db->update('facturacion_productos', $value, "id_factura = {$value['id_factura']} AND num_row = {$value['num_row']}");
+          //   }
+          // }
+
+          $dataTimbrado = array(
+            'id_movimiento'   => $id_movimiento,
+            'id_empresa'      => $queryMov[0]->id_empresa,
+            'fecha'           => $datosApi['fecha'],
+            'serie'           => $datosApi['serie'],
+            'folio'           => $datosApi['folio'],
+            'xml'             => $result['timbrado']->data->xml,
+            'uuid'            => $result['timbrado']->data->uuid,
+            'cadena_original' => $result['timbrado']->data->cadenaOriginal,
+            'sello'           => $result['timbrado']->data->sello,
+            'version'         => $queryMov[0]->version,
+            'cfdi_ext'        => json_encode($datosApi),
+          );
+          $this->db->insert('banco_movimientos_com_pagos', $dataTimbrado);
+          $id_compago = $this->db->insert_id();
+
+          foreach ($queryMov as $key => $pago) {
+            $this->db->insert('facturacion_com_pagos', [
+              'id_movimiento' => $id_movimiento,
+              'id_factura'    => $pago->id_factura,
+            ]);
           }
 
           $this->db->query("SELECT refreshallmaterializedviews();");
 
-          $this->generaFacturaPdf($idFactura, $pathDocs);
+          $this->load->model('documentos_model');
+          $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $dataTimbrado['serie'], $dataTimbrado['folio']);
 
-          // si probiene de una venta se asigna
-          if (isset($_GET['id_vd'])) {
-            $this->load->model('ventas_dia_model');
-            $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $idFactura, 'id_venta' => $_GET['id_vd']));
-          }
+          $this->generaFacturaPdf33($id_compago, $pathDocs);
 
-        }
-        else
-        {
-          rmdir($pathDocs);
         }
 
         // $datosFactura, $cadenaOriginal, $sello, $productosFactura,
         // echo "<pre>";
-        //   var_dump($datosXML);
+        //   var_dump($result);
         // echo "</pre>";exit;
 
         return $result;
@@ -192,7 +221,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return array("passes" => false, "codigo" => "12");
   }
 
-  private function timbrar($dataXml, $idFactura, $delFiles = true)
+  private function timbrar($dataXml, $id_movimiento)
   {
     $this->load->library('facturartebarato_api');
 
@@ -201,57 +230,20 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     // Realiza el timbrado usando la libreria.
     $timbrado = $this->facturartebarato_api->timbrar($dataXml);
 
-    // echo "<pre>";
-    //   var_dump($timbrado);
-    // echo "</pre>";exit;
-
     $result = array(
-      'id_factura' => $idFactura,
-      'codigo'     => $timbrado->codigo
+      'id_factura' => $id_movimiento,
+      'codigo'     => $timbrado->codigo,
+      'timbrado'   => $timbrado,
     );
 
     // Si no hubo errores al momento de realizar el timbrado.
     if ($timbrado->status)
     {
-      // Si el codigo es 501:Autenticación no válida o 708:No se pudo conectar al SAT,
-      // significa que el timbrado esta pendiente.
-      if ($timbrado->codigo === '501' || $timbrado->codigo === '708')
-      {
-        // Se coloca el status de timbre de la factura como pendiente.
-        $statusTimbrado = 'p';
-      }
-      else
-      {
-        // Si el timbrado se realizo correctamente.
-
-        // Se coloca el status de timbre de la factura como timbrado.
-        $statusTimbrado = 't';
-      }
-
-      // Actualiza los datos en la BDD.
-      $dataTimbrado = array(
-        'xml'             => $timbrado->data->xml,
-        'status_timbrado' => $statusTimbrado,
-        'uuid'            => $timbrado->data->uuid,
-        'cadena_original' => $timbrado->data->cadenaOriginal,
-        'sello'           => $timbrado->data->sello,
-        'certificado'     => $dataXml['emisor']['cer'],
-        'cfdi_ext'        => json_encode($dataXml),
-      );
-      $this->db->update('facturacion', $dataTimbrado, array('id_factura' => $idFactura));
-
       $result['passes'] = true;
+      $result['msg'] = $timbrado->mensaje;
     }
     else
     {
-      // Si es true $delFile entonces elimina todo lo relacionado con la factura.
-      if ($delFiles)
-      {
-        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
-        $this->db->delete('facturacion', array('id_factura' => $idFactura));
-        // unlink($pathXML);
-      }
-
       // Entra si hubo un algun tipo de error de conexion a internet.
       if ($timbrado->codigo === 'ERR_INTERNET_DISCONNECTED')
         $result['msg'] = 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
@@ -261,13 +253,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         $result['msg'] = $timbrado->mensaje;
 
       $result['passes'] = false;
-      }
+    }
 
-      // echo "<pre>";
-      //   var_dump($timbrado);
-      // echo "</pre>";exit;
+    // echo "<pre>";
+    //   var_dump($timbrado);
+    // echo "</pre>";exit;
 
-      return $result;
+    return $result;
   }
 
   public function getFolioSerie($serie, $empresa, $sqlX = null)
@@ -281,6 +273,545 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $folio = (isset($res->folio)? $res->folio: 0)+1;
 
     return $folio;
+  }
+
+  public function generaFacturaPdf33($id_compago, $path = null)
+  {
+    $factura = $this->getInfoComPago($id_compago);
+
+    $this->load->library('cfdi');
+    include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
+
+    $this->load->model('catalogos33_model');
+    $metodosPago       = new MetodosPago();
+    $formaPago         = new FormaPago();
+    $usoCfdi           = new UsoCfdi();
+    $tipoDeComprobante = new TipoDeComprobante();
+    $regimenFiscal     = $this->catalogos33_model->regimenFiscales($factura->cfdi_ext->emisor->regimenFiscal);
+
+    $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:'), '', $factura->xml));
+    if($xml === false)
+      return false;
+    // echo "<pre>";
+    //   var_dump($factura, $xml);
+    // echo "</pre>";exit;
+
+    $this->load->library('mypdf');
+
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+
+    $pdf->show_head = false;
+
+    $pdf->AliasNbPages();
+    $pdf->AddPage();
+
+    $pdf->SetFont('Arial','B', 70);
+    $pdf->SetTextColor(160,160,160);
+    $pdf->RotatedText(65, 130, ($factura->no_impresiones==0? 'ORIGINAL': 'COPIA #'.$factura->no_impresiones), 45);
+
+    $pdf->SetXY(0, 0);
+    /////////////////////////////////////
+    // Folio Fisca, CSD, Lugar y Fecha //
+    /////////////////////////////////////
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 2);
+    $pdf->Cell(108, 4, "Folio Fiscal:", 0, 0, 'R', 1);
+
+    $titulo_comprobante = '                 Complemento de Pago';
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Cell(50, 4, $titulo_comprobante.':  '.($factura->serie.$factura->folio) , 0, 0, 'L', 1);
+
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 6);
+    $pdf->Cell(108, 4, $xml->Complemento->TimbreFiscalDigital[0]['UUID'], 0, 0, 'C', 0);
+
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->Cell(48, 4, "Fecha y hora de impresión:", 0, 0, 'L', 1);
+    $pdf->SetXY(48, $pdf->GetY());
+    $pdf->Cell(60, 4, "No de Serie del Certificado del CSD:", 0, 0, 'R', 1);
+
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->Cell(48, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'L', 0);
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(48, $pdf->GetY());
+    $pdf->Cell(60, 4, $factura->cfdi_ext->noCertificado, 0, 0, 'R', 0);
+
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "Lugar. fecha y hora de emisión:", 0, 0, 'R', 1);
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+
+    $municipio   = strtoupper($factura->cfdi_ext->emisor->municipio);
+    $estado = strtoupper($factura->cfdi_ext->emisor->estado);
+    $fecha = explode('T', $factura->cfdi_ext->fecha);
+    $fecha = String::fechaATexto($fecha[0]);
+
+    $pdf->Cell(108, 4, "{$municipio}, {$estado} ({$factura->cfdi_ext->emisor->cp}) | {$fecha}", 0, 0, 'R', 0);
+
+
+    // $pdf->SetXY(30, 2);
+
+    //////////////////////////
+    // Rfc y Regimen Fiscal //
+    //////////////////////////
+
+    // 0, 171, 72 = verde
+
+    $pdf->SetFont('helvetica','B', 9);
+    // $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetTextColor(255, 255, 255);
+
+
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "Emisor:", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(19, 93));
+    $pdf->Row(array('RFC:', $factura->cfdi_ext->emisor->rfc), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 196));
+    $pdf->SetX(0);
+    $pdf->Row(array('NOMBRE:', $factura->cfdi_ext->emisor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->SetX(0);
+    $pdf->Row(array('DOMICILIO:', $factura->cfdi_ext->emisor->calle.' No. '.$factura->cfdi_ext->emisor->noExterior.
+          ((isset($factura->cfdi_ext->emisor->noInterior)) ? ' Int. '.$factura->cfdi_ext->emisor->noInterior : '') ), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 83, 19, 83));
+    $pdf->SetX(0);
+    $pdf->Row(array('COLONIA:', $factura->cfdi_ext->emisor->colonia, 'LOCALIDAD:', $factura->cfdi_ext->emisor->localidad), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 46, 19, 40, 11, 46, 11, 30));
+    $pdf->SetX(0);
+    $pdf->Row(array('MUNICIPIO:', $factura->cfdi_ext->emisor->municipio, 'ESTADO:', $factura->cfdi_ext->emisor->estado, 'PAIS:', $factura->cfdi_ext->emisor->pais, 'CP:', $factura->cfdi_ext->emisor->cp), false, false, null, 2, 1);
+
+    $end_y = $pdf->GetY();
+
+    //////////
+    // Logo //
+    //////////
+    $logo = (file_exists($factura->logo)) ? $factura->logo : '' ;
+    if($logo != '')
+      $pdf->Image($logo, 115, 2, 0, 21);
+    $pdf->SetXY(0, 25);
+
+    $pdf->SetFont('helvetica','b', 9);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->Cell(108, 4, "Régimen Fiscal:", 0, 0, 'R', 1);
+
+    $regimen_fiscal = "{$regimenFiscal->c_RegimenFiscal} - {$regimenFiscal->nombre}";
+    $uso_cfdi = $usoCfdi->search($factura->cfdi_ext->usoCfdi);
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(109, $pdf->GetY() + 4);
+    $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'C', 0);
+    $pdf->SetXY(119, $pdf->GetY() + 4);
+    $pdf->MultiCell(98, 4, "USO CFDI: {$uso_cfdi['key']} - {$uso_cfdi['value']}", 0, 'R', 0);
+
+    //////////////////
+    // Datos Receptor //
+    //////////////////
+    $pdf->setY($end_y);
+    $domicilioReceptor = '';
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->calle) ? $factura->cfdi_ext->receptor->calle : '');
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->noExterior) ? ' #'.$factura->cfdi_ext->receptor->noExterior : '');
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->noInterior)) ? ' Int. '.$factura->cfdi_ext->receptor->noInterior : '';
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->colonia) ? ', '.$factura->cfdi_ext->receptor->colonia : '');
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->localidad) ? ', '.$factura->cfdi_ext->receptor->localidad : '');
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->municipio)) ? ', '.$factura->cfdi_ext->receptor->municipio : '';
+    $domicilioReceptor .= (isset($factura->cfdi_ext->receptor->estado) ? ', '.$factura->cfdi_ext->receptor->estado : '');
+
+    $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 1);
+    $pdf->Cell(216, 4, "Receptor:", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','', 8);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+
+    $pdf->SetX(0);
+    $pdf->SetAligns(array('L', 'L'));
+    $pdf->SetWidths(array(19, 93));
+    $pdf->Row(array('RFC:', $factura->cfdi_ext->receptor->rfc), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 196));
+    $pdf->SetX(0);
+    $pdf->Row(array('NOMBRE:', $factura->cfdi_ext->receptor->nombreFiscal), false, false, null, 2, 1);
+    $pdf->SetX(0);
+    $pdf->Row(array('DOMICILIO:', (isset($factura->cfdi_ext->receptor->calle) ? $factura->cfdi_ext->receptor->calle : '').
+              ' No. '.(isset($factura->cfdi_ext->receptor->noExterior) ? $factura->cfdi_ext->receptor->noExterior : '').
+              ((isset($factura->cfdi_ext->receptor->noInterior)) ? ' Int. '.$factura->cfdi_ext->receptor->noInterior : '') ), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 83, 19, 83));
+    $pdf->SetX(0);
+    $pdf->Row(array('COLONIA:', (isset($factura->cfdi_ext->receptor->colonia) ? $factura->cfdi_ext->receptor->colonia : ''),
+              'LOCALIDAD:', (isset($factura->cfdi_ext->receptor->localidad) ? $factura->cfdi_ext->receptor->localidad : '')), false, false, null, 2, 1);
+    $pdf->SetWidths(array(19, 65, 11, 65, 11, 40));
+    $pdf->SetX(0);
+    $pdf->Row(array('ESTADO:', (isset($factura->cfdi_ext->receptor->estado) ? $factura->cfdi_ext->receptor->estado : ''),
+            'PAIS:', (isset($factura->cfdi_ext->receptor->pais) ? $factura->cfdi_ext->receptor->pais : ''),
+            'CP:', (isset($factura->cfdi_ext->receptor->cp) ? $factura->cfdi_ext->receptor->cp : '') ), false, false, null, 2, 1);
+
+    ///////////////
+    // Productos //
+    ///////////////
+
+    $pdf->SetFillColor(0, 171, 72);
+    $pdf->SetXY(0, $pdf->GetY() + 5);
+    $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
+    $aligns2 = array('C', 'C', 'L', 'C', 'R', 'R');
+    $widths = array(30, 35, 16, 75, 30, 30);
+    $header = array('Cantidad', 'Unidad de Medida', 'C. Unidad', 'Descripcion', 'Precio Unitario', 'Importe');
+
+    $pdf->limiteY = 250;
+
+    $pdf->setY($pdf->GetY() + 1);
+    $hay_prod_certificados = false;
+    foreach($factura->cfdi_ext->productos as $key => $item)
+    {
+      $band_head = false;
+
+      if($pdf->GetY() >= $pdf->limiteY || $key === 0) //salta de pagina si exede el max
+      {
+        if($key > 0) $pdf->AddPage();
+
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->SetFillColor(242, 242, 242);
+        $pdf->SetX(0);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($header, true, true, null, 2, 1);
+      }
+
+      $pdf->SetFont('Arial', '', 8);
+      $pdf->SetTextColor(0,0,0);
+
+      $pdf->SetX(0);
+      $pdf->SetAligns($aligns2);
+      $pdf->SetWidths($widths);
+
+      $pdf->Row(array(
+        String::formatoNumero($item->cantidad, 2, ''),
+        $item->unidad,
+        $item->claveUnidad,
+        $this->cfdi->replaceSpecialChars($item->claveProdServ.' - '.$item->concepto, true),
+        String::formatoNumero( $item->valorUnitario, 2, '$', false),
+        String::formatoNumero( $item->importe, 2, '$', false),
+      ), false, true, null, 2, 1);
+    }
+
+    /////////////
+    // Totales //
+    /////////////
+
+    if($pdf->GetY() + 30 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    $h = 15;
+    $h += 6;
+
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetXY(0, $pdf->GetY() + 1);
+    $pdf->Cell(156, $h, "", 1, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(1, $pdf->GetY() + 1);
+    $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica', '', 10);
+    $pdf->SetXY(0, $pdf->GetY() + 4);
+    $pdf->MultiCell(156, 6, String::num2letras($factura->cfdi_ext->total), 0, 'C', 0);
+
+    $pdf->Line(1, $pdf->GetY(), 200, $pdf->GetY());
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(1, $pdf->GetY()+1);
+    $frmPago = $formaPago->search($factura->cfdi_ext->formaDePago);
+    $pdf->Cell(91, 4, "Forma de Pago: {$frmPago['key']} - {$frmPago['value']}", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(91, $pdf->GetY());
+    $text_condicionpago = '';
+    $pdf->Cell(65, 4, $text_condicionpago, 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','B', 9);
+    $pdf->SetXY(1, $pdf->GetY()+4.5);
+    $metPago = $metodosPago->search($factura->cfdi_ext->metodoDePago);
+    $pdf->Cell(148, 4, "Metodo de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
+
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetXY(111, $pdf->GetY());
+    $pdf->Cell(39, 4, "Tipo de Cambio: ".String::formatoNumero($factura->cfdi_ext->tipoCambio, 4), 0, 0, 'L', 1);
+
+
+    $pdf->SetFont('helvetica','B', 10);
+    $pdf->SetXY(156, $pdf->GetY() - 16);
+    $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
+
+    $pdf->SetXY(186, $pdf->GetY());
+    $pdf->Cell(30, 5, String::formatoNumero($factura->cfdi_ext->totalImporte, 2, '$', false), 1, 0, 'R', 1);
+
+    // Pinta traslados, retenciones
+
+    $pdf->SetXY(156, $pdf->GetY() + 5);
+    $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
+
+    $pdf->SetXY(186, $pdf->GetY());
+    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->trasladosImporte->iva, 2, '$', false), 1, 0, 'R', 1);
+
+    $pdf->SetXY(156, $pdf->GetY() + 5);
+    $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
+
+    $pdf->SetXY(186, $pdf->GetY());
+    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->total, 2, '$', false), 1, 0, 'R', 1);
+
+    ///////////////////
+    // Complemento de Pagos //
+    ///////////////////
+
+    $pdf->SetXY(0, $pdf->GetY() + 10);
+
+    if (isset($factura->cfdi_ext->pagos)) {
+      // $tipoRelacion = new TipoRelacion();
+      // $tipo_rel = $tipoRelacion->search($factura->cfdi_ext->cfdiRelacionados->tipoRelacion);
+      $pdf->SetFillColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 4, "Complemento de Recepción de Pagos:", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 8);
+
+      $pdf->SetAligns(array('L', 'R'));
+      $pdf->SetWidths(array(108, 108));
+      $pdf->SetXY(0, $pdf->GetY()+4);
+      $pdf->Row(array("Pago", "Fecha: {$factura->cfdi_ext->pagos[0]->fechaPago}"), false, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $cuentas = "RFC Emisor Cta Ordenante: {$factura->cfdi_ext->pagos[0]->rfcEmisorCtaOrd} | Cta Ordenante: {$factura->cfdi_ext->pagos[0]->cuentaOrd}";
+      $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $cuentas = "RFC Emisor Cta Beneficiario: {$factura->cfdi_ext->pagos[0]->rfcEmisorCtaBen} | Cta Beneficiario: {$factura->cfdi_ext->pagos[0]->cuentaBen}";
+      $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $frmPago = $formaPago->search($factura->cfdi_ext->pagos[0]->formaDePago);
+      $cuentas = "Forma de Pago: {$frmPago['key']} - {$frmPago['value']} | Num operación: {$factura->cfdi_ext->pagos[0]->numOperacion}";
+      $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $cuentas = "Moneda: {$factura->cfdi_ext->pagos[0]->moneda} | Tipo cambio: {$factura->cfdi_ext->pagos[0]->tipoCambio} | Monto: {$factura->cfdi_ext->pagos[0]->monto}";
+      $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+      $pdf->SetFont('helvetica','B', 8);
+
+      $pdf->SetXY(0, $pdf->GetY());
+      $pdf->Row(array("Documentos"), false, true, null, 2, 1);
+
+      $pdf->SetFont('helvetica','', 8);
+      foreach ($factura->cfdi_ext->pagos[0]->doctoRelacionado as $key => $value) {
+        $pdf->SetXY(0, $pdf->GetY());
+        $cuentas = "Id documento: {$value->idDocumento}".($value->serie!=''? " | Serie: {$value->serie}": '')." | Folio: {$value->folio}";
+        $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+        $pdf->SetXY(0, $pdf->GetY());
+        $metPago = $metodosPago->search($value->metodoDePago);
+        $cuentas = "Moneda: {$value->moneda} | Metodo de Pago: {$metPago['key']} - {$metPago['value']} | No parcialidad: {$value->numParcialidad}";
+        $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+        $pdf->SetXY(0, $pdf->GetY());
+        $cuentas = "Saldo anterior: {$value->saldoAnterior} | Pago: {$value->importePagado} | Saldo insoluto: {$value->saldoInsoluto}";
+        $pdf->Row(array($cuentas), false, false, null, 2, 1);
+
+        $pdf->Line(0, $pdf->GetY(), 216, $pdf->GetY());
+      }
+    }
+
+    ////////////////////////
+    // CFDI Relacionados //
+    ///////////////////////
+    if (isset($factura->cfdi_ext->cfdiRelacionados)) {
+      $tipoRelacion = new TipoRelacion();
+      $tipo_rel = $tipoRelacion->search($factura->cfdi_ext->cfdiRelacionados->tipoRelacion);
+      $pdf->SetFillColor(0, 171, 72);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetFillColor(242, 242, 242);
+      $pdf->SetTextColor(0, 0, 0);
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->Cell(216, 4, "CFDI Relacionados:", 0, 0, 'L', 1);
+
+      $pdf->SetFont('helvetica','', 8);
+
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(216));
+
+      $pdf->SetXY(0, $pdf->GetY()+4);
+      $pdf->Row(array("Tipo de Relacion: {$tipo_rel['key']} - {$tipo_rel['value']}" ), false, true, null, 2, 1);
+
+      foreach ($factura->cfdi_ext->cfdiRelacionados->cfdiRelacionado as $key => $value) {
+        $pdf->SetXY(0, $pdf->GetY());
+        $pdf->Row(array("UUID: {$value->uuid}"), false, true, null, 2, 1);
+      }
+    }
+
+
+    ////////////////////
+    // Timbrado Datos //
+    ////////////////////
+
+    if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(3, $pdf->GetY());
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(196));
+    $pdf->Row(array('Sello Digital del CFDI:'), false, 0);
+
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetXY(3, $pdf->GetY() - 3);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(211));
+    $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['SelloCFD']), false, false);
+
+    if($pdf->GetY() + 25 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(3, $pdf->GetY() - 2);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(196));
+    $pdf->Row(array('Sello Digital del SAT:'), false, 0);
+
+    $pdf->SetFont('helvetica', '', 8);
+    $pdf->SetXY(3, $pdf->GetY() - 3);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(211));
+    $pdf->Row(array($xml->Complemento->TimbreFiscalDigital[0]['SelloSAT']), false, 0);
+
+    /////////////
+    // QR CODE //
+    /////////////
+
+    // Genera Qr.
+    $cad_sello = substr($factura->sello, -8);
+    $cadenaOriginalSAT = "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?&id={$factura->uuid}&re={$factura->cfdi_ext->emisor->rfc}&rr={$factura->cfdi_ext->receptor->rfc}&tt={$factura->cfdi_ext->total}&fe={$cad_sello}";
+
+    // echo "<pre>";
+    //   var_dump($cadenaOriginalSAT, $total, $diff);
+    // echo "</pre>";exit;
+
+    QRcode::png($cadenaOriginalSAT, APPPATH.'media/qrtemp.png', 'H', 3);
+
+    if($pdf->GetY() + 50 >= $pdf->limiteY) //salta de pagina si exede el max
+        $pdf->AddPage();
+
+    $pdf->SetXY(0, $pdf->GetY());
+    $pdf->Image(APPPATH.'media/qrtemp.png', null, null, 40);
+
+    // Elimina el QR generado temporalmente.
+    unlink(APPPATH.'media/qrtemp.png');
+
+    ////////////////////
+    // Timbrado Datos //
+    ////////////////////
+
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->SetXY(45, $pdf->GetY() - 39);
+    $pdf->SetAligns(array('L'));
+    $pdf->SetWidths(array(160));
+
+    $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(45, $pdf->GetY() + 1);
+    $pdf->Cell(80, 6, "RFC Prov Certif:", 0, 0, 'R', 1);
+
+    $pdf->SetXY(125, $pdf->GetY());
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['RfcProvCertif'], 0, 0, 'C', 0);
+
+    $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(45, $pdf->GetY() + 10);
+    $pdf->Cell(80, 6, "No de Serie del Certificado del SAT:", 0, 0, 'R', 1);
+
+    $pdf->SetXY(125, $pdf->GetY());
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['NoCertificadoSAT'], 0, 0, 'C', 0);
+
+    $pdf->SetFont('helvetica', 'B', 10);
+    $pdf->SetFillColor(242, 242, 242);
+    $pdf->SetTextColor(0, 171, 72);
+    $pdf->SetXY(45, $pdf->GetY() + 10);
+    $pdf->Cell(80, 6, "Fecha y hora de certificación:", 0, 0, 'R', 1);
+
+    $pdf->SetXY(125, $pdf->GetY());
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->Cell(65, 6, $xml->Complemento->TimbreFiscalDigital[0]['FechaTimbrado'], 0, 0, 'C', 0);
+
+    $pdf->SetXY(0, $pdf->GetY()+13);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('helvetica', 'B', 8);
+    $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
+    $pdf->SetXY(10, $pdf->GetY()+3);
+
+    //------------ IMAGEN CANDELADO --------------------
+
+    if($factura->status === 'ca'){
+      $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
+    }
+
+    $folio = $this->cfdi->acomodarFolio($factura->folio);
+    $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;
+    if ($path) {
+      file_put_contents($path."{$file}.xml", $factura->xml);
+      $pdf->Output($path."{$file}.pdf", 'F');
+    } else {
+      // Actualiza el # de impresion
+      $this->db->update('banco_movimientos_com_pagos', ['no_impresiones' => $factura->no_impresiones+1], "id = ".$factura->id);
+
+      $pdf->Output($file.'.pdf', 'I');
+    }
   }
 
 }

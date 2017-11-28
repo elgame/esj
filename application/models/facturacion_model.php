@@ -771,8 +771,8 @@ class facturacion_model extends privilegios_model{
           'retencionCedularPorcent' => '0',
           'retencionIsr'            => '0',
           'retencionIsrPorcent'     => '0',
-          'retencionIva'            => $_POST['prod_diva_total'][$key],
-          'retencionIvaPorcent'     => $_POST['prod_diva_porcent'][$key],
+          'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
+          'retencionIvaPorcent'     => $_POST['prod_dreten_iva_porcent'][$key],
           'retencionIvc'            => '0',
           'retencionIvcPorcent'     => '0',
           'trasladoCedular'         => '0',
@@ -781,8 +781,8 @@ class facturacion_model extends privilegios_model{
           'trasladoIepsPorcent'     => '0',
           'trasladoIsh'             => '0',
           'trasladoIshPorcent'      => '0',
-          'trasladoIva'             => $_POST['prod_dreten_iva_total'][$key],
-          'trasladoIvaPorcent'      => $_POST['prod_dreten_iva_porcent'][$key],
+          'trasladoIva'             => $_POST['prod_diva_total'][$key],
+          'trasladoIvaPorcent'      => $_POST['prod_diva_porcent'][$key],
           'valorUnitario'           => $_POST['prod_dpreciou'][$key],
         );
 
@@ -1495,30 +1495,30 @@ class facturacion_model extends privilegios_model{
    */
     public function getClienteDocs($idCliente, $idFactura = null)
     {
-        $query = $this->db->query(
-          "SELECT rd.id_documento, rd.nombre
-           FROM clientes_documentos cd INNER JOIN rastria_documentos rd ON rd.id_documento = cd.id_documento
-           WHERE cd.id_cliente = {$idCliente}
-           ORDER BY rd.id_documento ASC"
-        );
+      $query = $this->db->query(
+        "SELECT rd.id_documento, rd.nombre
+         FROM clientes_documentos cd INNER JOIN rastria_documentos rd ON rd.id_documento = cd.id_documento
+         WHERE cd.id_cliente = {$idCliente}
+         ORDER BY rd.id_documento ASC"
+      );
 
-        if ($query->num_rows() > 0)
+      if ($query->num_rows() > 0)
+      {
+        $docs = array();
+        foreach ($query->result()  as $objDoc)
         {
-          $docs = array();
-          foreach ($query->result()  as $objDoc)
-          {
-            if (is_null($idFactura))
-              $docs[] = $objDoc->id_documento;
-            else {
-              $status = 'f';
-              if ($objDoc->nombre == "REMISION Y/O FACTURA")
-                $status = 't';
-              $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento, 'status' => $status);
-            }
+          if (is_null($idFactura))
+            $docs[] = $objDoc->id_documento;
+          else {
+            $status = 'f';
+            if ($objDoc->nombre == "REMISION Y/O FACTURA")
+              $status = 't';
+            $docs[] = array('id_factura' => $idFactura, 'id_documento' => $objDoc->id_documento, 'status' => $status);
           }
         }
+      }
 
-        return isset($docs) ? $docs : false;
+      return isset($docs) ? $docs : false;
     }
 
     public function addFacturaBorrador()
