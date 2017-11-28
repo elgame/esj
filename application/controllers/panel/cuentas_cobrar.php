@@ -311,13 +311,97 @@ class cuentas_cobrar extends MY_Controller {
   {
     if (isset($_GET['idm']{0}))
     {
-      $this->load->model('cuentas_cobrar_pago_model');
-      $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm']);
-      if($respons['passes'])
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=11'));
-      else
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg='.$respons['codigo']));
+      $this->carabiner->js(array(
+        array('libs/jquery.numeric.js'),
+        array('general/msgbox.js'),
+        array('general/supermodal.js'),
+        array('general/keyjump.js'),
+        array('general/util.js'),
+        array('panel/facturacion/cuentas_cobrar.js'),
+      ));
 
+      $this->load->library('pagination');
+      $this->load->model('cuentas_cobrar_model');
+      $this->load->model('banco_cuentas_model');
+
+      $params['info_empleado']  = $this->info_empleado['info'];
+      $params['seo']        = array('titulo' => 'Agregar abonos');
+
+      $params['template']   = '';
+      $params['closeModal'] = false;
+
+      if (isset($_POST['dcuenta']{0}))
+      {
+        $this->load->model('cuentas_cobrar_pago_model');
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], $_POST['dcuenta']);
+        if($respons['passes'])
+          redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=11'));
+        else
+          redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg='.$respons['codigo']));
+        // $ids_aux = $_GET['id'];
+        // $tipos_aux = $_GET['tipo'];
+
+        // $this->configAddAbono();
+        // if($this->form_validation->run() == FALSE)
+        // {
+        //   $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+        // }
+        // else
+        // {
+        //   if(isset($_GET['total']{0})) //si es masivo
+        //     $respons = $this->cuentas_cobrar_model->addAbonoMasivo();
+        //   else
+        //     $respons = $this->cuentas_cobrar_model->addAbono();
+
+        //   if($this->input->post('imprimir') == 'si')
+        //     $params['print_recibo'] = $respons['id_movimiento'];
+
+        //   $params['closeModal'] = true;
+        //   $params['frm_errors'] = $this->showMsgs(4);
+        // }
+
+        // if(isset($_GET['total']{0})) //si es masivo
+        // {
+        //   $params['data'] = array('saldo' => $_GET['total'], 'facturas' => array() );
+        //   $ids   = explode(',', substr($ids_aux, 1));
+        //   $tipos = explode(',', substr($tipos_aux, 1));
+
+        //   foreach ($ids as $key => $value)
+        //   {
+        //     $params['data']['facturas'][] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
+        //   }
+        //   $_GET['id'] = $ids_aux;
+        //   $_GET['tipo'] = $tipos_aux;
+        // }else
+        //   $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
+        // $id_empresa = isset($params['data']['empresa']->id_empresa)? $params['data']['empresa']->id_empresa : $params['data']['facturas'][0]['empresa']->id_empresa;
+
+
+        // //Cuentas de banco
+        // $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
+        // //metodos de pago
+        // $params['metods_pago']  = array(
+        //   array('nombre' => 'Transferencia', 'value' => 'transferencia'),
+        //   array('nombre' => 'Cheque', 'value' => 'cheque'),
+        //   array('nombre' => 'Efectivo', 'value' => 'efectivo'),
+        //   array('nombre' => 'Deposito', 'value' => 'deposito'),
+        // );
+
+        // $params['template'] = $this->load->view('panel/cuentas_cobrar/tpl_agregar_abono', $params, true);;
+      }else
+        $_GET['msg'] = 1;
+
+      if(isset($_GET['msg']{0}))
+        $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      $this->load->model('clientes_model');
+      $movs = $this->db->query("SELECT id_cliente FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
+      $params['cuentas'] = $this->clientes_model->getCuentas($movs->id_cliente);
+
+      $params['noHeader'] = false;
+      $this->load->view('panel/header',$params);
+      $this->load->view('panel/cuentas_cobrar/com_pagos',$params);
+      $this->load->view('panel/footer',$params);
     }else
       redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=1'));
   }

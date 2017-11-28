@@ -770,7 +770,7 @@ class facturacion extends MY_Controller {
     }
 
     $requerido_moneda = '';
-    if (isset($_POST['moneda']) && $_POST['moneda'] !== 'M.N.' )
+    if (isset($_POST['moneda']) && $_POST['moneda'] !== 'MXN' )
       $requerido_moneda = 'required|';
     $rules[] = array(
         'field'   => 'moneda',

@@ -74,7 +74,7 @@
           							'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
           						);
           					?>
-                    <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/com_pago/?idm='.$cuenta->id_movimiento); ?>" target="_blank" title="Genera Com Pago">
+                    <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/com_pago/?idm='.$cuenta->id_movimiento); ?>" rel="superbox-50x500" title="Genera Com Pago">
                       <i class="icon-check icon-white"></i> <span class="hidden-tablet">Com Pago</span></a>
                   </td>
                 </tr>

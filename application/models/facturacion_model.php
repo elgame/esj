@@ -615,8 +615,10 @@ class facturacion_model extends privilegios_model{
     // Tipo de cambio y moneda
     if ($datosFactura['moneda'] !== 'MXN')
       $datosFactura['tipo_cambio'] = $_POST['tipoCambio'];
-    else
+    else {
+      $_POST['tipoCambio'] = '1';
       $datosFactura['tipo_cambio'] = '1';
+    }
 
     // Si el tipo de comprobante es "egreso" o una nota de credito.
     $bitacora_accion = 'la factura';

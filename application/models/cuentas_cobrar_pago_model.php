@@ -92,7 +92,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
   //   return $response;
   // }
 
-  public function addComPago($id_movimiento)
+  public function addComPago($id_movimiento, $id_cuenta_cliente)
   {
     $query = $this->db->query(
           "SELECT *, (select Count(id_movimiento) from banco_movimientos_com_pagos where id_movimiento = {$id_movimiento}) AS num_row
@@ -106,7 +106,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       $queryMov = $this->db->query(
           "SELECT bm.id_movimiento, bm.fecha, bm.metodo_pago AS forma_pago, bm.concepto,
             bm.monto AS pago, bb.rfc, bc.numero AS num_cuenta, caf.total AS pago_factura, v.version, v.serie, v.folio,
-            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente
+            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa
            FROM banco_movimientos bm
             INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
             INNER JOIN banco_bancos bb ON bb.id_banco = bm.id_banco
@@ -119,9 +119,20 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
            WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2"
         );
 
+      $queryCliente = $this->db->query(
+          "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc
+           FROM clientes_cuentas cc
+            INNER JOIN banco_bancos bb ON bb.id_banco = cc.id_banco
+           WHERE cc.id_cuenta = {$id_cuenta_cliente}"
+        );
+
       if ($queryMov->num_rows() > 0) {
+        $queryMov            = $queryMov->result();
+        $queryCliente        = $queryCliente->row();
+        $queryCliente->folio = $this->getFolioSerie('P', $queryMov[0]->id_empresa);
+
         // xml 3.3
-        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($_POST, $productosApi, $cid_nc);
+        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente);
 
         // Timbrado de la factura.
         $result = $this->timbrar($datosApi, $idFactura);
@@ -262,36 +273,14 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
   public function getFolioSerie($serie, $empresa, $sqlX = null)
   {
     $res = $this->db->select('folio')
-      ->from('facturacion')
+      ->from('banco_movimientos_com_pagos')
       ->where("serie = '".$serie."' AND id_empresa = ".$empresa."") // AND status != 'b'
-      ->where('is_factura', 't')
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
     $folio = (isset($res->folio)? $res->folio: 0)+1;
 
-    if ( ! is_null($sqlX))
-      $this->db->where($sqlX);
-
-    $res = $this->db->select('*')
-      ->from('facturacion_series_folios')
-      ->where("serie = '".$serie."' AND id_empresa = ".$empresa)
-      ->limit(1)->get()->row();
-
-    if(is_object($res)){
-      if($folio < $res->folio_inicio)
-        $folio = $res->folio_inicio;
-
-      $res->folio = $folio;
-      $msg = 'ok';
-
-      if($folio > $res->folio_fin || $folio < $res->folio_inicio)
-        $msg = "El folio ".$folio." está fuera del rango de folios para la serie ".$serie.". <br>
-          Verifique las configuraciones para asignar un nuevo rango de folios";
-    }else
-      $msg = 'La serie no existe.';
-
-    return array($res, $msg);
+    return $folio;
   }
 
 }
