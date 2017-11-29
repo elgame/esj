@@ -78,7 +78,7 @@ class clasificaciones_model extends CI_Model {
             'codigo'          => $this->input->post('fcodigo'),
             'inventario'      => $this->input->post('dinventario')=='t'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
-            'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
+            // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
 		}
 
@@ -122,7 +122,7 @@ class clasificaciones_model extends CI_Model {
             'codigo'       => $this->input->post('fcodigo'),
             'inventario'   => $this->input->post('dinventario')=='t'? 't': 'f',
             'clave_prod_serv' => $this->input->post('dclave_producto_cod'),
-            'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
+            // 'clave_unidad'    => $this->input->post('dclave_unidad_cod'),
 						);
 
       // $this->db->delete('clasificaciones_calibres', array('id_clasificacion' => $id_clasificacion));

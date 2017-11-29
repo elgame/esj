@@ -678,9 +678,9 @@ class areas extends MY_Controller {
       array('field' => 'dclave_producto_cod',
             'label' => 'Clave de Productos/Servicios',
             'rules' => 'required'),
-      array('field' => 'dclave_unidad_cod',
-            'label' => 'Clave de unidad',
-            'rules' => 'required'),
+      // array('field' => 'dclave_unidad_cod',
+      //       'label' => 'Clave de unidad',
+      //       'rules' => 'required'),
 		);
 
 		$this->form_validation->set_rules($rules);

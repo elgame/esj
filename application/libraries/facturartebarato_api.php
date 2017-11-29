@@ -22,7 +22,7 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $apiURL = 'localhost/facturartebarato/public/v2/';
+  protected $apiURL = 'https://development.kubox.mx/v2/';
 
   /**
    * Almacena la informacion de la peticion por curl.
@@ -86,7 +86,7 @@ class facturartebarato_api {
       )));
     }
 
-    $apiURL = "http://{$this->apiURL}auth/login";
+    $apiURL = "{$this->apiURL}auth/login";
     $postData = array('usuario' => $this->user, 'password' => $this->password);
     // Checa si ahi conexion a internet.
     $this->resultAPI = $this->post($apiURL, $postData);
@@ -118,7 +118,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "http://{$this->apiURL}timbre/factura33";
+    $apiURL = "{$this->apiURL}timbre/factura33";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.
@@ -206,7 +206,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "http://{$this->apiURL}timbre/nomina33";
+    $apiURL = "{$this->apiURL}timbre/nomina33";
 
     $postData = json_encode($postData);
     // Checa si ahi conexion a internet.
@@ -299,7 +299,7 @@ class facturartebarato_api {
    */
   public function verificarPendiente()
   {
-    $apiURL = "http://{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
+    $apiURL = "{$this->user}:{$this->password}@{$this->apiURL}timbre/{$this->uuid}";
 
     // Obtiene la respues del webservice.
     $this->resultAPI = $this->get($apiURL);
@@ -320,7 +320,7 @@ class facturartebarato_api {
       return $resLogin;
     }
 
-    $apiURL = "http://{$this->apiURL}timbre/cancelar";
+    $apiURL = "{$this->apiURL}timbre/cancelar";
     $params = json_encode($params);
     $resultAPI = $this->post($apiURL, $params);
 

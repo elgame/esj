@@ -123,7 +123,7 @@
                 </div>
               </div>
 
-              <div class="control-group">
+              <!-- <div class="control-group">
                 <label class="control-label" for="dclave_unidad">Clave de unidad </label>
                 <div class="controls">
                   <input type="text" name="dclave_unidad" class="span9" id="dclave_unidad"
@@ -131,7 +131,7 @@
                   <input type="hidden" name="dclave_unidad_cod" class="span9" id="dclave_unidad_cod"
                     value="<?php echo (!empty($data['info']->clave_unidad)? $data['cunidad']->c_clave_unidad: ''); ?>" size="73">
                 </div>
-              </div>
+              </div> -->
 
                <!-- <div class="control-group">
                 <label class="control-label" for="fcalibres">Autocomplete Calibres </label>
