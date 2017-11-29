@@ -720,29 +720,35 @@ class nomina_fiscal_model extends CI_Model {
           $datos['descuento_otros']
         );
 
+        $empleadoNomina[0]->folio = $datos['anio'].''.$datos['numSemana'];
+
         $result = array('xml' => '', 'uuid' => '');
         if($datos['esta_asegurado'] == 't')
         {
           // Obtiene los datos para la cadena original.
-          $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa);
-          $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
-          $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
-          // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
-          // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
-          $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
-          $datosCadenaOriginal['total'] = $total;
+          $datosCadenaOriginal = $this->datosCadenaOriginal($empleado, $empresa, $empleadoNomina);
+          // $datosCadenaOriginal['subTotal'] = $empleadoNomina[0]->nomina->subtotal;
+          // $datosCadenaOriginal['descuento'] = $empleadoNomina[0]->nomina->descuento;
+          // // $datosCadenaOriginal['retencion'][0]['importe'] = $empleadoNomina[0]->nomina->isr;
+          // // $datosCadenaOriginal['totalImpuestosRetenidos'] = $empleadoNomina[0]->nomina->isr;
+          // $total = $empleadoNomina[0]->nomina->subtotal - $empleadoNomina[0]->nomina->descuento;
+          // $datosCadenaOriginal['total'] = $total;
 
-          // Concepto de la nomina.
-          $concepto = array(array(
-            'cantidad'        => 1,
-            'unidad'          => 'ACT',
-            'descripcion'     => 'Pago de nómina',
-            'valorUnitario'   => $datosCadenaOriginal['subTotal'],
-            'importe'         => $datosCadenaOriginal['subTotal'],
-            'idClasificacion' => null,
-          ));
+          // // Concepto de la nomina.
+          // $concepto = array(array(
+          //   'cantidad'        => 1,
+          //   'unidad'          => 'ACT',
+          //   'descripcion'     => 'Pago de nómina',
+          //   'valorUnitario'   => $datosCadenaOriginal['subTotal'],
+          //   'importe'         => $datosCadenaOriginal['subTotal'],
+          //   'idClasificacion' => null,
+          // ));
 
-          $datosCadenaOriginal['concepto'] = $concepto;
+          // $datosCadenaOriginal['concepto'] = $concepto;
+
+          echo "<pre>";
+            var_dump($datosCadenaOriginal, $empleadoNomina);
+          echo "</pre>";exit;
 
 
           // Obtiene la cadena original para la nomina.
@@ -1425,70 +1431,116 @@ class nomina_fiscal_model extends CI_Model {
   *
   * @return array
   */
-  private function datosCadenaOriginal($empleado, $empresa)
+  private function datosCadenaOriginal($empleado, $empresa, $nomina=null)
   {
-    $nombreEmpleado = $empleado['info'][0]->nombre.
-      ($empleado['info'][0]->apellido_paterno? ' '.$empleado['info'][0]->apellido_paterno :'').
-      ($empleado['info'][0]->apellido_materno? ' '.$empleado['info'][0]->apellido_materno:'');
+    echo "<pre>";
+      var_dump($empleado, $empresa, $nomina);
+    echo "</pre>";exit;
+    // $nombreEmpleado = $empleado['info'][0]->nombre.
+    //   ($empleado['info'][0]->apellido_paterno? ' '.$empleado['info'][0]->apellido_paterno :'').
+    //   ($empleado['info'][0]->apellido_materno? ' '.$empleado['info'][0]->apellido_materno:'');
 
-      $metodoDePago = String::getMetodoPago('', 'Efectivo');
-      $NumCtaPago = 'No identificado';
-      if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '' && $empleado['info'][0]->banco != 'efectivo') {
-        $metodoDePago = String::getMetodoPago('', 'Transferencia electrónica de fondos');
-        $NumCtaPago = $empleado['info'][0]->cuenta_banco;
-      }
+      // $metodoDePago = String::getMetodoPago('', 'Efectivo');
+      // $NumCtaPago = 'No identificado';
+      // if ($empleado['info'][0]->esta_asegurado == 't' && $empleado['info'][0]->cuenta_banco != '' && $empleado['info'][0]->banco != 'efectivo') {
+      //   $metodoDePago = String::getMetodoPago('', 'Transferencia electrónica de fondos');
+      //   $NumCtaPago = $empleado['info'][0]->cuenta_banco;
+      // }
+
+    $this->cfdi->cargaDatosFiscales($empresa['info']->id_empresa);
+
+    $noCertificado = $this->cfdi->obtenNoCertificado();
 
     // Array con los datos necesarios para generar la cadena original.
-    $data = array(
-      'id'                => $empresa['info']->id_empresa,
-      'table'             => 'empresas',
-
-      'version'           => $empresa['info']->cfdi_version,
-      'serie'             => '',
-      'folio'             => '',
-      'fecha'             => date('Y-m-d\TH:i:s'),
-      // 'noAprobacion'      => $this->input->post('dno_aprobacion'),
-      // 'anoAprobacion'     => $anoAprobacion[0],
-      'tipoDeComprobante' => 'egreso',
-      'formaDePago'       => 'Pago en una sola exhibicion',
-      'condicionesDePago' => '',
-      'subTotal'          => 0, //total_importe
-      'descuento'         => 0, //descuento
-      'total'             => 0,
-      'metodoDePago'      => 'NA', //$metodoDePago, // Tansferencia
-      'NumCtaPago'        => '', //$NumCtaPago,
-
-      'rfc'               => $empleado['info'][0]->rfc,
-      'nombre'            => $nombreEmpleado,
-      'calle'             => $empleado['info'][0]->calle,
-      'noExterior'        => $empleado['info'][0]->numero,
-      'noInterior'        => '',
-      'colonia'           => $empleado['info'][0]->colonia,
-      'localidad'         => '',
-      'municipio'         => $empleado['info'][0]->municipio,
-      'estado'            => $empleado['info'][0]->estado,
-      'pais'              => 'MEXICO',
-      'codigoPostal'      => $empleado['info'][0]->cp,
-      'Moneda'            => 'MXN',
-      'TipoCambio'        => 1,
-
-      'concepto' => array(),
-
-      'retencion' => array(array(
-        'impuesto' => 'ISR',
-        'importe'  => 0,
-      )),
-      'totalImpuestosRetenidos' => 0,
-
-      'traslado' => array(array(
-        'Impuesto' => 'IVA',
-        'tasa'     => '0',
-        'importe'  => '0',
-      )),
-      'totalImpuestosTrasladados' => 0,
-
-      'sinCosto' => false,
+    $datosApi = array(
+      'emisor' => array(
+        'nombreFiscal'  => $empresa['info']->nombre_fiscal,
+        'rfc'           => $empresa['info']->rfc,
+        'regimenFiscal' => $empresa['info']->regimen_fiscal,
+        'curp'          => $empresa['info']->curp!=''? $empresa['info']->curp: '',
+        'cp'            => $empresa['info']->cp,
+        'cer'           => $this->cfdi->obtenCer($this->cfdi->path_certificado),
+        'key'           => $this->cfdi->obtenKey($this->cfdi->path_key),
+      ),
+      'noCertificado'    => $noCertificado,
+      'periodicidadPago' => $nomina[0]->nomina->receptor['PeriodicidadPago'],
+      'fechaPago'        => $nomina[0]->nomina->FechaPago,
+      'fechaInicialPago' => $nomina[0]->nomina->FechaInicialPago,
+      'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
+      'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
+      'registroPatronal' => $empresa['info']->registro_patronal,
+      'esDependencia'    => 'IP',
+      'data' => array(
+        array(
+          'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
+          'folio'                         => $nomina[0]->folio,
+          'nombre'                        => $nomina[0]->nombre,
+          'rfc'                           => $nomina[0]->rfc,
+          'curp'                          => $nomina[0]->curp,
+          'noEmpleado'                    => $nomina[0]->nomina->receptor['NumEmpleado'],
+          'claveEntFed'                   => $nomina[0]->nomina->receptor['ClaveEntFed'],
+          'departamento'                  => $empleado['info'][0]->puesto,
+          'ex_RiesgoPuesto'               => $nomina[0]->riesgo_puesto,
+          'ex_FechaInicioRelLaboral'      => $nomina[0]->nomina->receptor['FechaInicioRelLaboral'],
+          'seguro_social'                 => $nomina[0]->nomina->receptor['NumSeguridadSocial'],
+          'tipoContrato'                  => $nomina[0]->nomina->receptor['TipoContrato'],
+          'tipoRegimen'                   => $nomina[0]->nomina->receptor['TipoRegimen'],
+          'sdi'                           => $nomina[0]->nomina->receptor['SalarioDiarioIntegrado'],
+          'diasPago'                      => $nomina[0]->nomina->NumDiasPagados,
+          'total'                         => ($nomina[0]->nomina->TotalPercepciones-$nomina[0]->nomina->TotalDeducciones+$nomina[0]->nomina->TotalOtrosPagos),
+        )
+      )
     );
+    // $data = array(
+    //   'id'                => $empresa['info']->id_empresa,
+    //   'table'             => 'empresas',
+
+    //   'version'           => $empresa['info']->cfdi_version,
+    //   'serie'             => '',
+    //   'folio'             => '',
+    //   'fecha'             => date('Y-m-d\TH:i:s'),
+    //   // 'noAprobacion'      => $this->input->post('dno_aprobacion'),
+    //   // 'anoAprobacion'     => $anoAprobacion[0],
+    //   'tipoDeComprobante' => 'N',
+    //   'formaDePago'       => 'Pago en una sola exhibicion',
+    //   'condicionesDePago' => '',
+    //   'subTotal'          => 0, //total_importe
+    //   'descuento'         => 0, //descuento
+    //   'total'             => 0,
+    //   'metodoDePago'      => 'NA', //$metodoDePago, // Tansferencia
+    //   'NumCtaPago'        => '', //$NumCtaPago,
+
+    //   'rfc'               => $empleado['info'][0]->rfc,
+    //   'nombre'            => $nombreEmpleado,
+    //   'calle'             => $empleado['info'][0]->calle,
+    //   'noExterior'        => $empleado['info'][0]->numero,
+    //   'noInterior'        => '',
+    //   'colonia'           => $empleado['info'][0]->colonia,
+    //   'localidad'         => '',
+    //   'municipio'         => $empleado['info'][0]->municipio,
+    //   'estado'            => $empleado['info'][0]->estado,
+    //   'pais'              => 'MEXICO',
+    //   'codigoPostal'      => $empleado['info'][0]->cp,
+    //   'Moneda'            => 'MXN',
+    //   'TipoCambio'        => 1,
+
+    //   'concepto' => array(),
+
+    //   'retencion' => array(array(
+    //     'impuesto' => 'ISR',
+    //     'importe'  => 0,
+    //   )),
+    //   'totalImpuestosRetenidos' => 0,
+
+    //   'traslado' => array(array(
+    //     'Impuesto' => 'IVA',
+    //     'tasa'     => '0',
+    //     'importe'  => '0',
+    //   )),
+    //   'totalImpuestosTrasladados' => 0,
+
+    //   'sinCosto' => false,
+    // );
 
     return $data;
   }

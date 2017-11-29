@@ -764,35 +764,45 @@ class facturacion_model extends privilegios_model{
           'cfdi_ext'              => json_encode($cfdi_extpp),
         );
 
-        $productosApi[] = array(
-          'claveProdServ'           => isset($clasificacion['info'])? $clasificacion['info']->clave_prod_serv : '',
-          'claveUnidad'             => $_POST['pclave_unidad_cod'][$key],
-          'unidad'                  => $_POST['prod_dmedida'][$key],
-          'cantidad'                => $_POST['prod_dcantidad'][$key],
-          'concepto'                => $descripcion,
-          'cuentaPredial'           => '',
-          'descuentoProd'           => '0',
-          'descuentoProdPorcent'    => '0',
-          'importe'                 => $_POST['prod_importe'][$key],
-          'noIdentificacion'        => $_POST['no_identificacion'][$key],
-          'retencionCedular'        => '0',
-          'retencionCedularPorcent' => '0',
-          'retencionIsr'            => '0',
-          'retencionIsrPorcent'     => '0',
-          'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
-          'retencionIvaPorcent'     => $_POST['prod_dreten_iva_porcent'][$key],
-          'retencionIvc'            => '0',
-          'retencionIvcPorcent'     => '0',
-          'trasladoCedular'         => '0',
-          'trasladoCedularPorcent'  => '0',
-          'trasladoIeps'            => '0',
-          'trasladoIepsPorcent'     => '0',
-          'trasladoIsh'             => '0',
-          'trasladoIshPorcent'      => '0',
-          'trasladoIva'             => $_POST['prod_diva_total'][$key],
-          'trasladoIvaPorcent'      => $_POST['prod_diva_porcent'][$key],
-          'valorUnitario'           => $_POST['prod_dpreciou'][$key],
-        );
+        $addProdApi = true;
+        if($datosFactura['sin_costo'] == 't')
+        {
+          if ($_POST['prod_did_prod'][$key] == '49' || $_POST['prod_did_prod'][$key] == '50' ||
+              $_POST['prod_did_prod'][$key] == '51' || $_POST['prod_did_prod'][$key] == '52' ||
+              $_POST['prod_did_prod'][$key] == '53')
+            $addProdApi = false;
+        }
+        if ($addProdApi) {
+          $productosApi[] = array(
+            'claveProdServ'           => isset($clasificacion['info'])? $clasificacion['info']->clave_prod_serv : '',
+            'claveUnidad'             => $_POST['pclave_unidad_cod'][$key],
+            'unidad'                  => $_POST['prod_dmedida'][$key],
+            'cantidad'                => $_POST['prod_dcantidad'][$key],
+            'concepto'                => $descripcion,
+            'cuentaPredial'           => '',
+            'descuentoProd'           => '0',
+            'descuentoProdPorcent'    => '0',
+            'importe'                 => $_POST['prod_importe'][$key],
+            'noIdentificacion'        => $_POST['no_identificacion'][$key],
+            'retencionCedular'        => '0',
+            'retencionCedularPorcent' => '0',
+            'retencionIsr'            => '0',
+            'retencionIsrPorcent'     => '0',
+            'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
+            'retencionIvaPorcent'     => $_POST['prod_dreten_iva_porcent'][$key],
+            'retencionIvc'            => '0',
+            'retencionIvcPorcent'     => '0',
+            'trasladoCedular'         => '0',
+            'trasladoCedularPorcent'  => '0',
+            'trasladoIeps'            => '0',
+            'trasladoIepsPorcent'     => '0',
+            'trasladoIsh'             => '0',
+            'trasladoIshPorcent'      => '0',
+            'trasladoIva'             => $_POST['prod_diva_total'][$key],
+            'trasladoIvaPorcent'      => $_POST['prod_diva_porcent'][$key],
+            'valorUnitario'           => $_POST['prod_dpreciou'][$key],
+          );
+        }
 
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
         {
@@ -979,7 +989,8 @@ class facturacion_model extends privilegios_model{
     $this->db->insert('facturacion_cliente', $dataCliente);
 
     // Timbrado de la factura.
-    log_message('debug Timbre', json_encode($datosApi));
+    log_message('error', "Timbre");
+    log_message('error', json_encode($datosApi));
     $result = $this->timbrar($datosApi, $idFactura);
 
     if ($result['passes'])
