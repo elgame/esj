@@ -10,6 +10,7 @@
 
       autocompleteClasifi();
       autocompleteClasifiLive();
+      autocompleteClaveUnidadLive();
 
       delProducto();
       eventEnterImporte();
@@ -128,6 +129,31 @@
     });
   }
 
+  var autocompleteClaveUnidadLive = function () {
+    $('#table_prod').on('focus', 'input#pclave_unidad:not(.ui-autocomplete-input)', function(event) {
+      $(this).autocomplete({
+        source: base_url+'panel/catalogos33/claveUnidad/',
+        minLength: 1,
+        selectFirst: true,
+        select: function( event, ui ) {
+          var $this = $(this),
+              $tr = $this.parent().parent();
+
+          $this.css("background-color", "#B0FFB0");
+
+          $tr.find('#pclave_unidad_cod').val(ui.item.id);
+        }
+      }).keydown(function(event){
+        if(event.which == 8 || event == 46) {
+          var $tr = $(this).parent().parent();
+
+          $(this).css("background-color", "#FFD9B3");
+          $tr.find('#pclave_unidad_cod').val('');
+        }
+      });
+    });
+  }
+
   /*
    |------------------------------------------------------------------------
    | EVENTOS
@@ -217,7 +243,7 @@
   // Valida si un producto esta correcto.
   var validAdd = function ($tr) {
     if ($tr.find("#prod_dmedida").val() === '' || $tr.find("#prod_dcantidad").val() == 0 ||
-        $tr.find("#prod_dpreciou").val() == 0) {
+        $tr.find("#prod_dpreciou").val() == 0 || $tr.find("#pclave_unidad").val() == '') {
       return false;
     } else return true;
   };
@@ -247,7 +273,10 @@
                   '<input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span9 pull-right">'+
                   '<input type="hidden" name="prod_did_tamanio[]" value="" id="prod_did_tamanio" class="span9 pull-right">'+
                 '</td>' +
-                '<td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'"></td>' +
+                '<td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12 jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">'+
+                  '<input type="text" name="pclave_unidad[]" class="span12 jump'+jumpIndex+'" id="pclave_unidad" value="" placeholder="Clave de Unidad" data-next="jump'+(++jumpIndex)+'">'+
+                  '<input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="">'+
+                '</td>' +
                 '<td>' +
                     '<input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                 '</td>' +

@@ -67,6 +67,7 @@
     ALTER TABLE public.banco_movimientos_com_pagos ADD CONSTRAINT banco_movimientos_com_pagos_id_empresa_fkey FOREIGN KEY (id_empresa)
       REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     ALTER TABLE public.banco_movimientos_com_pagos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
+    ALTER TABLE public.facturacion_productos ADD COLUMN cfdi_ext json;
 
 
 

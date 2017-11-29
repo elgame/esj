@@ -341,6 +341,10 @@
 
                             $_POST['prod_dmedida_id'][$key] = $p->id_unidad;
                             $_POST['isCert'][$key] = $p->certificado === 't' ? '1' : '0';
+
+                            $cfdi_extp = json_decode($p->cfdi_ext);
+                            $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
+                            $_POST['pclave_unidad_cod'][$key] = $cfdi_extp->clave_unidad->key;
                           }
                         } ?>
 
@@ -385,6 +389,9 @@
                                     <?php } ?>
                                   </select>
                                   <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $_POST['prod_dmedida_id'][$k] ?>" id="prod_dmedida_id" class="span12 vpositive">
+
+                                  <input type="text" name="pclave_unidad[]" class="span12" id="pclave_unidad" value="<?php echo $_POST['pclave_unidad'][$k] ?>" placeholder="Clave de Unidad">
+                                  <input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="<?php echo $_POST['pclave_unidad_cod'][$k] ?>">
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
@@ -470,6 +477,9 @@
                         <?php } ?>
                       </select>
                       <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $uni ?>" id="prod_dmedida_id" class="span12 vpositive">
+
+                      <input type="text" name="pclave_unidad[]" class="span12" id="pclave_unidad" value="" placeholder="Clave de Unidad">
+                      <input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="">
                     </td>
                     <td>
                         <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">

@@ -127,7 +127,7 @@ class facturacion extends MY_Controller {
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['opcmenu_active'] = 'Facturacion'; //activa la opcion del menu
-    $params['seo'] = array('titulo' => 'Facturas');
+    $params['seo'] = array('titulo' => 'Complementos de Pago (Pago en parcialidades o Diferido)');
 
     //obtenemos las notas de credito
     if (isset($_POST['ftipo']) && $_POST['ftipo'] == 'parcial') {
@@ -677,6 +677,12 @@ class facturacion extends MY_Controller {
               'rules'   => ''),
         array('field'   => 'isCert[]',
               'label'   => 'Cert.',
+              'rules'   => ''),
+        array('field'   => 'pclave_unidad[]',
+              'label'   => 'Clave de unidad',
+              'rules'   => ''),
+        array('field'   => 'pclave_unidad_cod[]',
+              'label'   => 'Clave de unidad',
               'rules'   => ''),
 
         array('field'   => 'dversion',

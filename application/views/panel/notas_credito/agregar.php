@@ -261,6 +261,9 @@
                                       </td>
                                       <td>
                                         <input type="text" name="prod_dmedida[]" class="span12" value="<?php echo $_POST['prod_dmedida'][$k]?>" id="prod_dmedida">
+
+                                        <input type="text" name="pclave_unidad[]" class="span12" id="pclave_unidad" value="<?php echo $_POST['pclave_unidad'][$k]?>" placeholder="Clave de Unidad">
+                                        <input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="<?php echo $_POST['pclave_unidad_cod'][$k]?>">
                                       </td>
                                       <td>
                                           <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]?>" id="prod_dcantidad">
@@ -309,7 +312,12 @@
                                         <input type="hidden" name="prod_did_calidad[]" value="" id="prod_did_calidad" class="span9 pull-right">
                                         <input type="hidden" name="prod_did_tamanio[]" value="" id="prod_did_tamanio" class="span9 pull-right">
                                       </td>
-                                      <td><input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12"></td>
+                                      <td>
+                                        <input type="text" name="prod_dmedida[]" value="" id="prod_dmedida" class="span12">
+
+                                        <input type="text" name="pclave_unidad[]" class="span12" id="pclave_unidad" value="" placeholder="Clave de Unidad">
+                                        <input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="">
+                                      </td>
                                       <td>
                                           <input type="text" name="prod_dcantidad[]" value="0" id="prod_dcantidad" class="span12 vpositive">
                                       </td>

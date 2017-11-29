@@ -121,6 +121,7 @@ $(function(){
 
   autocompleteClasifi();
   autocompleteClasifiLive();
+  autocompleteClaveUnidadLive();
 
   if ($('#did_empresa').val() !== '') {
     loadSerieFolio($('#did_empresa').val());
@@ -886,6 +887,9 @@ function addProducto(unidades, prod) {
                     // '<option value="No aplica">No aplica</option>' +
                   '</select>' +
                   '<input type="hidden" name="prod_dmedida_id[]" value="'+idUnidadClasificacion+'" id="prod_dmedida_id" class="span12 vpositive">' +
+
+                  '<input type="text" name="pclave_unidad[]" class="span12 jump'+jumpIndex+'" id="pclave_unidad" value="" placeholder="Clave de Unidad" data-next="jump'+(++jumpIndex)+'">'+
+                  '<input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="">'+
                 '</td>' +
                 '<td>' +
                     '<input type="text" name="prod_dcantidad[]" value="'+cantidad+'" id="prod_dcantidad" class="span12 vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
@@ -1211,11 +1215,37 @@ function autocompleteClasifiLive () {
   });
 }
 
+function autocompleteClaveUnidadLive () {
+  $('#table_prod').on('focus', 'input#pclave_unidad:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/catalogos33/claveUnidad/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $this = $(this),
+            $tr = $this.parent().parent();
+
+        $this.css("background-color", "#B0FFB0");
+
+        $tr.find('#pclave_unidad_cod').val(ui.item.id);
+      }
+    }).keydown(function(event){
+      if(event.which == 8 || event == 46) {
+        var $tr = $(this).parent().parent();
+
+        $(this).css("background-color", "#FFD9B3");
+        $tr.find('#pclave_unidad_cod').val('');
+      }
+    });
+  });
+}
+
 function valida_agregar ($tr) {
   // $tr.find("#prod_did_prod").val() === '' ||
   if($("#privAddDescripciones").length == 0 && $("#isNotaCredito").length == 0)
   {
-    if ($tr.find("#prod_did_calidad").val() === '' || $tr.find("#prod_did_tamanio").val() == '') {
+    if ($tr.find("#prod_did_calidad").val() === '' || $tr.find("#prod_did_tamanio").val() == '' ||
+      $tr.find("#pclave_unidad").val() == '') {
       return false;
     }
   // Valida agregar descripciones

@@ -496,6 +496,12 @@ class ventas extends MY_Controller {
         array('field'   => 'isCert[]',
               'label'   => 'Certificado',
               'rules'   => ''),
+        array('field'   => 'pclave_unidad[]',
+              'label'   => 'Clave de unidad',
+              'rules'   => ''),
+        array('field'   => 'pclave_unidad_cod[]',
+              'label'   => 'Clave de unidad',
+              'rules'   => ''),
 
         array('field'   => 'dversion',
               'label'   => '',

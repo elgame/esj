@@ -122,7 +122,7 @@ class Ventas_model extends privilegios_model{
         ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, u.cantidad AS und_kg, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.certificado, fp.id_size_rendimiento,
-                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2')
+                ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.cfdi_ext')
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', 'u.nombre = fp.unidad', 'left')
@@ -384,6 +384,13 @@ class Ventas_model extends privilegios_model{
           }
         }
 
+        $cfdi_ext = [
+          'clave_unidad' => [
+            'key'   => $_POST['pclave_unidad_cod'][$key],
+            'value' => $_POST['pclave_unidad'][$key],
+          ]
+        ];
+
         $productosFactura[] = array(
           'id_factura'            => $id_venta,
           'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -408,6 +415,7 @@ class Ventas_model extends privilegios_model{
           'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
+          'cfdi_ext'              => json_encode($cfdi_ext),
         );
 
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
@@ -682,6 +690,13 @@ class Ventas_model extends privilegios_model{
           );
         }
 
+        $cfdi_ext = [
+          'clave_unidad' => [
+            'key'   => $_POST['pclave_unidad_cod'][$key],
+            'value' => $_POST['pclave_unidad'][$key],
+          ]
+        ];
+
         $productosFactura[] = array(
           'id_factura'            => $id_venta,
           'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -706,6 +721,7 @@ class Ventas_model extends privilegios_model{
           'id_calidad'            => (isset($_POST['prod_did_calidad'][$key])? $_POST['prod_did_calidad'][$key]: NULL),
           'id_tamanio'            => (isset($_POST['prod_did_tamanio'][$key])? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
+          'cfdi_ext'              => json_encode($cfdi_ext),
         );
 
         if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
@@ -1224,8 +1240,6 @@ class Ventas_model extends privilegios_model{
   public function generaNotaRemisionPdf($idVenta, $path = null)
   {
     // include(APPPATH.'libraries/phpqrcode/qrlib.php');
-    error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
     $factura = $this->getInfoVenta($idVenta, false, true);
     $hist    = $this->getHistRemision($idVenta);

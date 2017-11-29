@@ -8,7 +8,7 @@
             <a href="<?php echo base_url('panel'); ?>">Inicio</a> <span class="divider">/</span>
           </li>
           <li>
-            Pago en parcialidades
+            Complementos de Pago
           </li>
         </ul>
       </div>
@@ -16,7 +16,7 @@
       <div class="row-fluid">
         <div class="box span12">
           <div class="box-header well" data-original-title>
-            <h2><i class="icon-file"></i> Pago en parcialidades</h2>
+            <h2><i class="icon-file"></i> Complementos de Pago (Pago en parcialidades o Diferido)</h2>
             <div class="box-icon">
               <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
             </div>

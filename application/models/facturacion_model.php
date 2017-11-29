@@ -125,11 +125,11 @@ class facturacion_model extends privilegios_model{
 			$response['info']->cliente = $prov['info'];
 
       $res = $this->db
-        ->select('fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
+        ->select("fp.id_factura, fp.id_clasificacion, fp.num_row, fp.cantidad, fp.descripcion, fp.precio_unitario,
                 fp.importe, fp.iva, fp.unidad, fp.retencion_iva, cl.cuenta_cpi, cl.cuenta_cpi2, fp.porcentaje_iva, fp.porcentaje_retencion, fp.ids_pallets,
                 u.id_unidad, fp.kilos, fp.cajas, fp.id_unidad_rendimiento, fp.ids_remisiones, fp.clase, fp.peso, fp.certificado, fp.id_size_rendimiento,
                 ac.nombre AS areas_calidad, ac.id_calidad, at.nombre AS areas_tamanio, at.id_tamanio, fp.descripcion2, fp.no_identificacion,
-                cl.clave_prod_serv, cl.clave_unidad')
+                cl.clave_prod_serv, fp.cfdi_ext->'clave_unidad'->>'key' AS clave_unidad, fp.cfdi_ext", false)
         ->from('facturacion_productos as fp')
         ->join('clasificaciones as cl', 'cl.id_clasificacion = fp.id_clasificacion', 'left')
         ->join('unidades as u', "u.nombre = fp.unidad and u.status = 't'", 'left')
@@ -726,6 +726,13 @@ class facturacion_model extends privilegios_model{
           }
         }
 
+        $cfdi_extpp = [
+          'clave_unidad' => [
+            'key'   => $_POST['pclave_unidad_cod'][$key],
+            'value' => $_POST['pclave_unidad'][$key],
+          ]
+        ];
+
         $productosFactura[] = array(
           'id_factura'            => $idFactura,
           'id_clasificacion'      => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -754,11 +761,12 @@ class facturacion_model extends privilegios_model{
           'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
           'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
           'no_identificacion'     => $_POST['no_identificacion'][$key],
+          'cfdi_ext'              => json_encode($cfdi_extpp),
         );
 
         $productosApi[] = array(
           'claveProdServ'           => isset($clasificacion['info'])? $clasificacion['info']->clave_prod_serv : '',
-          'claveUnidad'             => isset($clasificacion['info'])? $clasificacion['info']->clave_unidad : '',
+          'claveUnidad'             => $_POST['pclave_unidad_cod'][$key],
           'unidad'                  => $_POST['prod_dmedida'][$key],
           'cantidad'                => $_POST['prod_dcantidad'][$key],
           'concepto'                => $descripcion,
