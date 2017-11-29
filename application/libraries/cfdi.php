@@ -6,7 +6,7 @@ class cfdi{
   public $path_key             = '';
   public $pass_key             = 'Piloto01';//CHONITA09
 
-	public $version = '3.2';
+	public $version = '3.3';
 
   private $rfc            = 'NEDR620710H76';
   private $razon_social   = 'ROBERTO NEVAREZ DOMINGUEZ';

@@ -262,6 +262,54 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return $result;
   }
 
+  public function cancelaFactura($id_compago)
+  {
+    $this->load->library('cfdi');
+    $this->load->library('facturartebarato_api');
+    $this->load->model('documentos_model');
+
+    // Obtenemos la info de la factura a cancelar.
+    $factura = $this->getInfoComPago($id_compago);
+
+    if ($factura->uuid != '')
+    {
+      $status_uuid = '708';
+      // Carga los datos fiscales de la empresa dentro de la lib CFDI.
+      $this->cfdi->cargaDatosFiscales($factura->id_empresa);
+
+      // Parametros que necesita el webservice para la cancelacion.
+      $params = array(
+        'rfc'   => $factura->cfdi_ext->emisor->rfc,
+        'uuids' => $factura->uuid,
+        'cer'   => $this->cfdi->obtenCer(),
+        'key'   => $this->cfdi->obtenKey(),
+      );
+
+      // Llama el metodo cancelar para que realiza la peticion al webservice.
+      $result = $this->facturartebarato_api->cancelar($params);
+
+      if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
+      {
+        $status_uuid = $result->data->status_uuid;
+        $this->db->update('banco_movimientos_com_pagos',
+          array('status' => 'cancelada'), "id = {$id_compago}");
+
+        // Regenera el PDF de la factura.
+        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura->cfdi_ext->receptor->nombreFiscal, $factura->serie, $factura->folio);
+        $this->generaFacturaPdf33($id_compago, $pathDocs);
+
+        $this->db->query("SELECT refreshallmaterializedviews();");
+
+        // $this->enviarEmail($idFactura);
+
+      }
+    }else{
+      $status_uuid = '201';
+    }
+
+    return array('msg' => $status_uuid);
+  }
+
   public function getFolioSerie($serie, $empresa, $sqlX = null)
   {
     $res = $this->db->select('folio')
@@ -401,6 +449,12 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Row(array('MUNICIPIO:', $factura->cfdi_ext->emisor->municipio, 'ESTADO:', $factura->cfdi_ext->emisor->estado, 'PAIS:', $factura->cfdi_ext->emisor->pais, 'CP:', $factura->cfdi_ext->emisor->cp), false, false, null, 2, 1);
 
     $end_y = $pdf->GetY();
+
+    //------------ IMAGEN CANDELADO --------------------
+
+    if($factura->status === 'cancelada'){
+      $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
+    }
 
     //////////
     // Logo //
@@ -795,11 +849,6 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Cell(220, 6, 'ESTE DOCUMENTO ES UNA REPRESENTACION IMPRESA DE UN CFDI.', 0, 0, 'C', 0);
     $pdf->SetXY(10, $pdf->GetY()+3);
 
-    //------------ IMAGEN CANDELADO --------------------
-
-    if($factura->status === 'ca'){
-      $pdf->Image(APPPATH.'/images/cancelado.png', 20, 40, 190, 190, "PNG");
-    }
 
     $folio = $this->cfdi->acomodarFolio($factura->folio);
     $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;

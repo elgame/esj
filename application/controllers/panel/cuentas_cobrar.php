@@ -372,21 +372,21 @@ class cuentas_cobrar extends MY_Controller {
 
   public function cancelar_com_pago()
   {
-    if (isset($_GET['id_movimiento']{0}) )
+    if(isset($_GET['id']{0}))
     {
       $this->load->model('banco_cuentas_model');
       $this->load->model('cuentas_cobrar_pago_model');
 
-      $pago = $this->cuentas_cobrar_pago_model->getInfoComPago(false, $_GET['id_movimiento']);
+      $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
 
       if (isset($pago->id))
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=101'));
+        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=101'));
       else {
-        $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+        $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
+        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=10'));
       }
     }else
-      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+      redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=1'));
   }
 
   public function imprimir_com_pago()

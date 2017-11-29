@@ -979,6 +979,7 @@ class facturacion_model extends privilegios_model{
     $this->db->insert('facturacion_cliente', $dataCliente);
 
     // Timbrado de la factura.
+    log_message('debug Timbre', json_encode($datosApi));
     $result = $this->timbrar($datosApi, $idFactura);
 
     if ($result['passes'])
