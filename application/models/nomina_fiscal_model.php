@@ -1344,7 +1344,8 @@ class nomina_fiscal_model extends CI_Model {
 
     $msg = '';
 
-    if ($result['result']->status)
+    log_message('error', json_encode($result));
+    if ($result['result']->status || $result->status)
     {
       $errorTimbrar = false;
 
@@ -1451,11 +1452,12 @@ class nomina_fiscal_model extends CI_Model {
 
       $archivo = $this->cfdi->guardarXMLXPath('media/cfdi/FiniquitosXML/', $result['result']->data->xml, $datosApi['data'][0]['rfc']);
 
-      $msg = $result['result']->mensaje;
+      $msg = isset($result->mensaje)? $result->mensaje: $result['result']->mensaje;
     }
     else
     {
       $errorTimbrar = true;
+      $msg = isset($result->mensaje)? $result->mensaje: 'Otro error';
       $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
       // unlink($archivo['pathXML']);
     }
@@ -1496,7 +1498,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
       'registroPatronal' => $empresa['info']->registro_patronal,
-      'esDependencia'    => 'IP',
+      // 'esDependencia'    => 'IP',
       'data' => array(
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
