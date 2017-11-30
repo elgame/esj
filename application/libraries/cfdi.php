@@ -1470,16 +1470,16 @@ class cfdi{
    * @param  boolean $update
    * @return void
    */
-  private function guardarXMLNomina($data, $nameAppend)
+  public function guardarXMLNomina($xml, $nameAppend)
   {
-    $vers = str_replace('.', '_', $this->version);
-    $xml  = $this->{'generarXML'.$vers}($data, true);
+    // $vers = str_replace('.', '_', $this->version);
+    // $xml  = $this->{'generarXML'.$vers}($data, true);
 
     $empresa = $this->validaDir('empresa', 'NominasXML/');
     $dir_anio = $this->validaDir('anio', 'NominasXML/'.$empresa.'/');
     $dir_semana = $this->validaDir('semana', 'NominasXML/'.$empresa.'/'.$dir_anio.'/');
 
-    $path_guardar = APPPATH.'media/cfdi/NominasXML/'.$empresa.'/'.$dir_anio.'/'.$dir_semana.'/'.$data['receptor']['rfc'].$nameAppend.'.xml';
+    $path_guardar = APPPATH.'media/cfdi/NominasXML/'.$empresa.'/'.$dir_anio.'/'.$dir_semana.'/'.$nameAppend.'.xml';
 
     $fp = fopen($path_guardar, 'w');
     fwrite($fp, $xml);
@@ -1495,17 +1495,17 @@ class cfdi{
    * @param  boolean $update
    * @return void
    */
-  private function guardarXMLXPath($path, $data)
+  public function guardarXMLXPath($path, $xml, $nombre)
   {
     $path = APPPATH.$path;
 
-    $vers = str_replace('.', '_', $this->version);
-    $xml  = $this->{'generarXML'.$vers}($data, true);
+    // $vers = str_replace('.', '_', $this->version);
+    // $xml  = $this->{'generarXML'.$vers}($data, true);
 
     $directorio = date('Y');
     $this->crearFolder($path, $directorio."/");
 
-    $path_guardar = $path.$directorio.'/'.$data['receptor']['rfc'].'.xml';
+    $path_guardar = $path.$directorio.'/'.$nombre.'.xml';
 
     $fp = fopen($path_guardar, 'w');
     fwrite($fp, $xml);

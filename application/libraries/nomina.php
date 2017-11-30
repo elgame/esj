@@ -561,6 +561,7 @@ class nomina
       'ImporteGravado' => round($this->empleado->nomina->sueldo, 2),
       'ImporteExcento' => 0,
       'total'          => round($this->empleado->nomina->sueldo + 0, 2),
+      'ApiKey'         => 'pe_sueldo_',
     );
   }
 
@@ -580,6 +581,7 @@ class nomina
       'ImporteGravado' => round($premioPuntualidad, 2),
       'ImporteExcento' => 0,
       'total'          => round($premioPuntualidad + 0, 2),
+      'ApiKey'         => 'pe_premio_puntualidad_',
     );
   }
 
@@ -599,6 +601,7 @@ class nomina
       'ImporteGravado' => round($premioAsistencia, 2),
       'ImporteExcento' => 0,
       'total'          => round($premioAsistencia + 0, 2),
+      'ApiKey'         => 'pe_p_asistencia_',
     );
   }
 
@@ -618,6 +621,7 @@ class nomina
       'ImporteGravado' => 0,
       'ImporteExcento' => round($despensa, 2),
       'total'          => round($despensa + 0, 2),
+      'ApiKey'         => 'pe_vales_despensa_',
     );
   }
 
@@ -653,6 +657,7 @@ class nomina
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_horas_extras_',
     );
   }
 
@@ -684,6 +689,7 @@ class nomina
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_aguinaldo_',
     );
   }
 
@@ -701,6 +707,7 @@ class nomina
       'ImporteGravado' => round($this->empleado->nomina->vacaciones, 2),
       'ImporteExcento' => 0,
       'total'          => round($this->empleado->nomina->vacaciones, 2) + 0,
+      'ApiKey'         => 'pe_sueldo_',
     );
   }
 
@@ -732,6 +739,7 @@ class nomina
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_prima_vacacional_',
     );
   }
 
@@ -784,6 +792,7 @@ class nomina
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_ptu_',
     );
   }
 
@@ -830,6 +839,7 @@ class nomina
       'ImporteGravado' => 0,
       'ImporteExcento' => round($totalImss, 2),
       'total'          => round($totalImss, 2) + 0,
+      'ApiKey'         => 'de_seguro_social_',
     );
   }
 
@@ -860,6 +870,7 @@ class nomina
       'ImporteGravado' => 0,
       'ImporteExcento' => round($rcv, 2),
       'total'          => round($rcv, 2) + 0,
+      'ApiKey'         => 'de_cesantia_vejez_',
     );
   }
 
@@ -883,6 +894,7 @@ class nomina
       'ImporteGravado' => 0,
       'ImporteExcento' => round($infonavit, 2),
       'total'          => round($infonavit, 2) + 0,
+      'ApiKey'         => 'de_credito_vivienda_',
     );
   }
 
@@ -902,7 +914,8 @@ class nomina
         'ImporteGravado'   => 0,
         'ImporteExcento'   => round($this->subsidio, 2),
         'total'            => round($this->subsidio, 2) + 0,
-        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) ),
+        'ApiKey'           => 'top_subsidio_empleo_',
       );
 
       return array(
@@ -912,6 +925,7 @@ class nomina
         'ImporteGravado' => 0,
         'ImporteExcento' => round($this->isr, 2),
         'total'          => round($this->isr, 2) + 0,
+        'ApiKey'         => 'de_isr_',
       );
     }
     else
@@ -1002,7 +1016,8 @@ class nomina
         'ImporteGravado'   => 0,
         'ImporteExcento'   => round($rango->subsidio, 2),
         'total'            => round($rango->subsidio, 2) + 0,
-        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) )
+        'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($this->subsidio, 2) + 0) ),
+        'ApiKey'           => 'top_subsidio_empleo_',
       );
 
       // Si es el puro aguinaldo saca la tabla de diarios
@@ -1053,12 +1068,13 @@ class nomina
       $isrAguinaldoPrimaPtu = round(($isrAuxConOtros - $isrAuxSinOtros) * 365, 2);
 
       return array(
-        'TipoDeduccion' => '002',
+        'TipoDeduccion'  => '002',
         'Clave'          => $this->clavesPatron['isr'],
         'Concepto'       => 'ISR',
         'ImporteGravado' => 0,
         'ImporteExcento' => round($isr + $isrAguinaldoPrimaPtu + $isrAguinaldo, 2),
         'total'          => round($isr + $isrAguinaldoPrimaPtu + $isrAguinaldo, 2) + 0,
+        'ApiKey'         => 'de_isr_',
       );
     }
   }
@@ -1090,6 +1106,7 @@ class nomina
       'ImporteGravado' => 0,
       'ImporteExcento' => round($otros, 2),
       'total'          => round($otros, 2) + 0,
+      'ApiKey'         => 'de_otros_',
     );
   }
 

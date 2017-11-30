@@ -528,6 +528,7 @@ class finiquito
       'ImporteGravado' => round($this->empleado->nomina->sueldo, 2),
       'ImporteExcento' => 0,
       'total'          => round($this->empleado->nomina->sueldo + 0, 2),
+      'ApiKey'         => 'pe_sueldo_',
     );
   }
 
@@ -547,6 +548,7 @@ class finiquito
       'ImporteGravado' => round($premioPuntualidad, 2),
       'ImporteExcento' => 0,
       'total'          => round($premioPuntualidad + 0, 2),
+      'ApiKey'         => 'pe_premio_puntualidad_',
     );
   }
 
@@ -566,6 +568,7 @@ class finiquito
       'ImporteGravado' => round($premioAsistencia, 2),
       'ImporteExcento' => 0,
       'total'          => round($premioAsistencia + 0, 2),
+      'ApiKey'         => 'pe_p_asistencia_',
     );
   }
 
@@ -585,6 +588,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($despensa, 2),
       'total'          => round($despensa + 0, 2),
+      'ApiKey'         => 'pe_vales_despensa_',
     );
   }
 
@@ -620,6 +624,7 @@ class finiquito
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_horas_extras_',
     );
   }
 
@@ -651,6 +656,7 @@ class finiquito
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_aguinaldo_',
     );
   }
 
@@ -668,6 +674,7 @@ class finiquito
       'ImporteGravado' => round($this->empleado->nomina->vacaciones, 2),
       'ImporteExcento' => 0,
       'total'          => round($this->empleado->nomina->vacaciones, 2) + 0,
+      'ApiKey'         => 'pe_sueldo_',
     );
   }
 
@@ -699,6 +706,7 @@ class finiquito
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_prima_vacacional_',
     );
   }
 
@@ -731,6 +739,7 @@ class finiquito
       'ImporteGravado' => round($gravado, 2),
       'ImporteExcento' => round($excento, 2),
       'total'          => round($gravado, 2) + round($excento, 2),
+      'ApiKey'         => 'pe_indemnizacion_',
     );
   }
 
@@ -781,6 +790,7 @@ class finiquito
       'ImporteGravado' => (float)$gravado,
       'ImporteExcento' => (float)$excento,
       'total'          => floatval($gravado) + floatval($excento),
+      'ApiKey'         => 'pe_ptu_',
     );
   }
 
@@ -827,6 +837,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($totalImss, 2),
       'total'          => round($totalImss, 2) + 0,
+      'ApiKey'         => 'de_seguro_social_',
     );
   }
 
@@ -857,6 +868,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($rcv, 2),
       'total'          => round($rcv, 2) + 0,
+      'ApiKey'         => 'de_cesantia_vejez_',
     );
   }
 
@@ -876,6 +888,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($infonavit, 2),
       'total'          => round($infonavit, 2) + 0,
+      'ApiKey'         => 'de_credito_vivienda_',
     );
   }
 
@@ -994,7 +1007,8 @@ class finiquito
       'ImporteGravado'   => 0,
       'ImporteExcento'   => round($subsidio, 2),
       'total'            => round($subsidio, 2) + 0,
-      'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($subsidio, 2) + 0) )
+      'SubsidioAlEmpleo' => array('SubsidioCausado' => (round($subsidio, 2) + 0) ),
+      'ApiKey'           => 'top_subsidio_empleo_',
     );
 
     return array(
@@ -1004,6 +1018,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($isr, 2),
       'total'          => round($isr, 2) + 0,
+      'ApiKey'         => 'de_isr_',
     );
   }
 
@@ -1029,6 +1044,7 @@ class finiquito
       'ImporteGravado' => 0,
       'ImporteExcento' => round($otros, 2),
       'total'          => round($otros, 2) + 0,
+      'ApiKey'         => 'de_otros_',
     );
   }
 

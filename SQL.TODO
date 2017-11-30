@@ -1,5 +1,5 @@
 
- ✔ CFDI 3.3 @done (17-11-27 13:05) pct|pcc
+ ✔ CFDI 3.3 @done (17-11-27 13:05) pct|pcc|san
    - Cargar catalogos catalogos33.backup,
     ALTER TABLE c_clave_prodservs SET SCHEMA otros;
     ALTER TABLE c_clave_unidades SET SCHEMA otros;
@@ -68,6 +68,8 @@
       REFERENCES public.empresas (id_empresa) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
     ALTER TABLE public.banco_movimientos_com_pagos ADD COLUMN no_impresiones integer NOT NULL DEFAULT 0;
     ALTER TABLE public.facturacion_productos ADD COLUMN cfdi_ext json;
+    ALTER TABLE public.nomina_fiscal ADD COLUMN cfdi_ext json;
+    ALTER TABLE public.finiquito ADD COLUMN cfdi_ext json;
 
 
 
