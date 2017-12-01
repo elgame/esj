@@ -789,7 +789,7 @@ class facturacion_model extends privilegios_model{
             'retencionIsr'            => '0',
             'retencionIsrPorcent'     => '0',
             'retencionIva'            => $_POST['prod_dreten_iva_total'][$key],
-            'retencionIvaPorcent'     => $_POST['prod_dreten_iva_porcent'][$key],
+            'retencionIvaPorcent'     => ($_POST['prod_dreten_iva_porcent'][$key]*100),
             'retencionIvc'            => '0',
             'retencionIvcPorcent'     => '0',
             'trasladoCedular'         => '0',
@@ -4528,7 +4528,7 @@ class facturacion_model extends privilegios_model{
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5, String::formatoNumero(($factura['info']->subtotal/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
 
     // Pinta traslados, retenciones
 
@@ -4536,7 +4536,7 @@ class facturacion_model extends privilegios_model{
     $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura['info']->importe_iva, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,String::formatoNumero(($factura['info']->importe_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
 
     if ($factura['info']->retencion_iva > 0)
     {
@@ -4544,14 +4544,14 @@ class facturacion_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,String::formatoNumero(($factura['info']->retencion_iva/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,String::formatoNumero(($factura['info']->total/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Observaciones //
