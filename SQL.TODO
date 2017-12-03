@@ -70,6 +70,8 @@
     ALTER TABLE public.facturacion_productos ADD COLUMN cfdi_ext json;
     ALTER TABLE public.nomina_fiscal ADD COLUMN cfdi_ext json;
     ALTER TABLE public.finiquito ADD COLUMN cfdi_ext json;
+    ALTER TABLE public.nomina_aguinaldo ADD COLUMN cfdi_ext json;
+    ALTER TABLE public.nomina_ptu ADD COLUMN cfdi_ext json;
 
 
 

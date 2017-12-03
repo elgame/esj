@@ -4289,17 +4289,20 @@ class facturacion_model extends privilegios_model{
     $pdf->SetFillColor(242, 242, 242);
     $pdf->SetTextColor(0, 171, 72);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "Régimen Fiscal:", 0, 0, 'R', 1);
+    $pdf->Cell(108, 4, "Régimen Fiscal: ", 0, 0, 'R', 1);
 
-    $regimen_fiscal = "{$regimenFiscal->c_RegimenFiscal} - {$regimenFiscal->nombre}";
+    $regimen_fiscal = "{$regimenFiscal->c_RegimenFiscal} - {$regimenFiscal->nombre} ";
     $uso_cfdi = $usoCfdi->search($factura['info']->cfdi_ext->usoCfdi);
+    $tipo_comprobante = $tipoDeComprobante->search($factura['info']->cfdi_ext->tipoDeComprobante);
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'C', 0);
-    $pdf->SetXY(119, $pdf->GetY() + 4);
-    $pdf->MultiCell(98, 4, "USO CFDI: {$uso_cfdi['key']} - {$uso_cfdi['value']}", 0, 'R', 0);
+    $pdf->MultiCell(108, 4, $regimen_fiscal, 0, 'R', 0);
+    $pdf->SetXY(119, $pdf->GetY() + 1);
+    $pdf->MultiCell(98, 4, "TIPO DE COMPROBANTE : {$tipo_comprobante['key']} - {$tipo_comprobante['value']} ", 0, 'R', 0);
+    $pdf->SetXY(119, $pdf->GetY() + 1);
+    $pdf->MultiCell(98, 4, "USO: {$uso_cfdi['key']} - {$uso_cfdi['value']} ", 0, 'R', 0);
 
     //////////////////
     // Datos Receptor //
@@ -4415,10 +4418,10 @@ class facturacion_model extends privilegios_model{
     $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
 
     $pdf->SetXY(0, $pdf->GetY());
-    $aligns = array('C', 'C', 'C', 'C', 'C', 'C');
-    $aligns2 = array('C', 'C', 'L', 'C', 'R', 'R');
-    $widths = array(30, 35, 16, 75, 30, 30);
-    $header = array('Cantidad', 'Unidad de Medida', 'C. Unidad', 'Descripcion', 'Precio Unitario', 'Importe');
+    $aligns = array('C', 'C', 'C', 'C', 'C', 'C', 'C');
+    $aligns2 = array('C', 'C', 'L', 'L', 'C', 'R', 'R');
+    $widths = array(25, 35, 16, 19, 61, 30, 30);
+    $header = array('Cantidad', 'Unidad de Medida', 'C. Unidad', 'C. ProdServ', 'Descripcion', 'Precio Unitario', 'Importe');
 
     $pdf->limiteY = 250;
 
@@ -4468,7 +4471,8 @@ class facturacion_model extends privilegios_model{
           String::formatoNumero($item->cantidad, 2, ''),
           $item->unidad,
           $item->clave_unidad,
-          $this->cfdi->replaceSpecialChars($item->clave_prod_serv.' - '.$item->descripcion.$descripcion_ext, true),
+          $item->clave_prod_serv,
+          $this->cfdi->replaceSpecialChars($item->descripcion.$descripcion_ext, true),
           // $item->certificado === 't' ? 'Certificado' : '',
           String::formatoNumero( ($item->precio_unitario/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false),
           String::formatoNumero( ($item->importe/($factura['info']->tipo_cambio>0? $factura['info']->tipo_cambio: 1)), 2, '$', false),
@@ -4494,6 +4498,12 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(1, $pdf->GetY() + 1);
     $pdf->Cell(154, 4, "Total con letra:", 0, 0, 'L', 1);
 
+    $pdf->SetFont('helvetica','', 9);
+    $pdf->SetXY(90, $pdf->GetY());
+    $pdf->Cell(39, 4, "Moneda: ".$factura['info']->moneda, 0, 0, 'L', 1);
+    $pdf->SetXY(115, $pdf->GetY());
+    $pdf->Cell(39, 4, "Tipo de Cambio: ".String::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
+
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetXY(0, $pdf->GetY() + 4);
     $pdf->MultiCell(156, 6, $factura['info']->total_letra, 0, 'C', 0);
@@ -4516,11 +4526,6 @@ class facturacion_model extends privilegios_model{
     $pdf->SetXY(1, $pdf->GetY()+4.5);
     $metPago = $metodosPago->search($factura['info']->cfdi_ext->metodoDePago);
     $pdf->Cell(148, 4, "Metodo de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 1);
-
-    $pdf->SetFont('helvetica','', 9);
-    $pdf->SetXY(111, $pdf->GetY());
-    $metPago = $metodosPago->search($factura['info']->cfdi_ext->metodoDePago);
-    $pdf->Cell(39, 4, "Tipo de Cambio: ".String::formatoNumero($factura['info']->tipo_cambio, 4), 0, 0, 'L', 1);
 
 
     $pdf->SetFont('helvetica','B', 10);
