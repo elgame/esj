@@ -565,6 +565,9 @@ class facturacion_model extends privilegios_model{
     $tipoDeComprobante = 'I';
     if ($this->input->post('dtipo_comprobante')=='egreso')
       $tipoDeComprobante = 'E';
+    elseif ($this->input->post('dserie')=='T')
+      $tipoDeComprobante = 'T';
+
     $cfdi_ext = [
       'tipoDeComprobante' => $tipoDeComprobante,
       'usoCfdi'           => $this->input->post('duso_cfdi'),
@@ -672,7 +675,7 @@ class facturacion_model extends privilegios_model{
     // en la factura.
     foreach ($_POST['prod_ddescripcion'] as $key => $descripcion)
     {
-      if ($_POST['prod_importe'][$key] != 0)
+      if ($_POST['prod_importe'][$key] > 0 || ($tipoDeComprobante == 'T' && $_POST['prod_importe'][$key] == 0))
       {
         $descripcioncad = strlen($_POST['prod_ddescripcion2'][$key])>0? " ({$_POST['prod_ddescripcion2'][$key]})": '';
         $descripcioncad .= ((isset($_POST['prod_dclase'][$key]) && $_POST['prod_dclase'][$key] !== '') ? ' Clase '.$_POST['prod_dclase'][$key] : '') . ((isset($_POST['prod_dpeso'][$key]) && $_POST['prod_dpeso'][$key] !== '0' && $_POST['prod_dpeso'][$key] !== '') ? ' Peso '.$_POST['prod_dpeso'][$key] : '');

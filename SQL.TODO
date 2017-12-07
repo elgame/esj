@@ -1,6 +1,6 @@
 
  ✔ CFDI 3.3 @done (17-11-27 13:05) pct|pcc|san
-   - Cargar catalogos catalogos33.backup,
+   - Cargar catalogos catalogos33.backup, Agregar una serie T para traslados
     ALTER TABLE c_clave_prodservs SET SCHEMA otros;
     ALTER TABLE c_clave_unidades SET SCHEMA otros;
     ALTER TABLE c_regimen_fiscal SET SCHEMA otros;
