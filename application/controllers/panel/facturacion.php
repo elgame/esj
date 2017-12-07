@@ -369,6 +369,17 @@ class facturacion extends MY_Controller {
       ->get()
       ->result();
 
+    $metodosPago       = new MetodosPago();
+    $formaPago         = new FormaPago();
+    $usoCfdi           = new UsoCfdi();
+    $tipoDeComprobante = new TipoDeComprobante();
+    // $monedas           = new Monedas();
+
+    $params['metodosPago']       = $metodosPago->get()->all();
+    $params['formaPago']         = $formaPago->get()->all();
+    $params['usoCfdi']           = $usoCfdi->get()->all();
+    $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
+
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 

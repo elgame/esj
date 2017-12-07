@@ -147,11 +147,13 @@
 
                         if ($fact->status !== 'ca' && $fact->id_nc === null)
                         {
-                           echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
+                          if ($fact->tipo_comprobante !== 'traslado') {
+                            echo $this->usuarios_model->getLinkPrivSm('documentos/agregar/', array(
                               'params'   => 'id='.$fact->id_factura,
                               'btn_type' => 'btn-success',
                               'attrs'    => array())
-                          );
+                            );
+                          }
 
                           echo $this->usuarios_model->getLinkPrivSm('facturacion/cancelar/', array(
                             'params'   => 'id='.$fact->id_factura,
@@ -160,7 +162,7 @@
                           );
                         }
 
-                        if ($fact->id_nc === null && $fact->status !== 'ca') {
+                        if ($fact->id_nc === null && $fact->status !== 'ca' && $fact->tipo_comprobante !== 'traslado') {
                           echo $this->usuarios_model->getLinkPrivSm('notas_credito/agregar/', array(
                               'params'   => 'id='.$fact->id_factura,
                               'btn_type' => '',
@@ -198,6 +200,11 @@
 
                         if ($fact->status_timbrado === 'ca' && $fact->refacturada === 'f')
                         {
+                          echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
+                            'params'   => 'idr='.$fact->id_factura,
+                            'btn_type' => 'btn-success')
+                          );
+                        } elseif ($fact->tipo_comprobante === 'traslado'){
                           echo $this->usuarios_model->getLinkPrivSm('facturacion/refacturar/', array(
                             'params'   => 'idr='.$fact->id_factura,
                             'btn_type' => 'btn-success')
