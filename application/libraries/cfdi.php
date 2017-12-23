@@ -931,14 +931,25 @@ class cfdi{
       $CI->load->model('facturacion_model');
       $factura = $CI->facturacion_model->getInfoFactura($id_nc, true);
 
-      $cfdiRel = array(
-        'tipoRelacion' => '01',
-        'cfdiRelacionado' => array(
-          array(
-            'uuid' => $factura['info']->uuid,
-          )
-        ),
-      );
+      if ($factura['info']->tipo_comprobante === 'traslado') { // Traslados
+        $cfdiRel = array(
+          'tipoRelacion' => '06',
+          'cfdiRelacionado' => array(
+            array(
+              'uuid' => $factura['info']->uuid,
+            )
+          ),
+        );
+      } else { // Notas de credito
+        $cfdiRel = array(
+          'tipoRelacion' => '01',
+          'cfdiRelacionado' => array(
+            array(
+              'uuid' => $factura['info']->uuid,
+            )
+          ),
+        );
+      }
     }
 
     // $CI->load->model('catalogos33_model');
@@ -1011,6 +1022,11 @@ class cfdi{
 
     if (isset($cfdiRel) && $cfdiRel) {
       $datosApi['cfdiRelacionados'] = $cfdiRel;
+    }
+
+    if ($tipoComprobante === 'T') {
+      $datosApi['formaDePago'] = '';
+      $datosApi['metodoDePago'] = '';
     }
 
     return $datosApi;

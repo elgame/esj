@@ -67,7 +67,8 @@ class facturacion_model extends privilegios_model{
 		$query = BDUtil::pagination("
 				SELECT f.id_factura, Date(f.fecha) AS fecha, f.serie, f.folio, c.nombre_fiscal,
                 e.nombre_fiscal as empresa, f.condicion_pago, f.forma_pago, f.status, f.total, f.id_nc,
-                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada, f.total
+                f.status_timbrado, f.uuid, f.docs_finalizados, f.observaciones, f.refacturada, f.total,
+                f.tipo_comprobante
 				FROM facturacion AS f
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
         INNER JOIN clientes AS c ON c.id_cliente = f.id_cliente
@@ -550,7 +551,7 @@ class facturacion_model extends privilegios_model{
    *
    * @return  array
 	 */
-  public function addFactura($borrador = false)
+  public function addFactura($borrador = false, $facturaId=null)
   {
     $this->load->library('cfdi');
     $this->load->model('clientes_model');
@@ -565,8 +566,10 @@ class facturacion_model extends privilegios_model{
     $tipoDeComprobante = 'I';
     if ($this->input->post('dtipo_comprobante')=='egreso')
       $tipoDeComprobante = 'E';
-    elseif ($this->input->post('dserie')=='T')
+    elseif ($this->input->post('dserie')=='T'){
+      $_POST['dtipo_comprobante'] = 'traslado';
       $tipoDeComprobante = 'T';
+    }
 
     $cfdi_ext = [
       'tipoDeComprobante' => $tipoDeComprobante,
@@ -630,6 +633,10 @@ class facturacion_model extends privilegios_model{
       $datosFactura['id_nc'] = $_GET['id'];
       $cid_nc = $datosFactura['id_nc'];
       $bitacora_accion = 'la nota de credito';
+    }
+
+    if ($facturaId > 0) { // Para traslados
+      $cid_nc = $facturaId;
     }
 
     // Inserta los datos de la factura y obtiene el Id. Este en caso
@@ -780,7 +787,7 @@ class facturacion_model extends privilegios_model{
             'claveProdServ'           => isset($clasificacion['info'])? $clasificacion['info']->clave_prod_serv : '',
             'claveUnidad'             => $_POST['pclave_unidad_cod'][$key],
             'unidad'                  => $_POST['prod_dmedida'][$key],
-            'cantidad'                => $_POST['prod_dcantidad'][$key],
+            'cantidad'                => ($_POST['prod_dcantidad'][$key]>0? $_POST['prod_dcantidad'][$key]: 1),
             'concepto'                => $descripcion,
             'cuentaPredial'           => '',
             'descuentoProd'           => '0',
@@ -802,7 +809,7 @@ class facturacion_model extends privilegios_model{
             'trasladoIsh'             => '0',
             'trasladoIshPorcent'      => '0',
             'trasladoIva'             => $_POST['prod_diva_total'][$key],
-            'trasladoIvaPorcent'      => $_POST['prod_diva_porcent'][$key],
+            'trasladoIvaPorcent'      => ($tipoDeComprobante !== 'T'? $_POST['prod_diva_porcent'][$key]: '16'),
             'valorUnitario'           => $_POST['prod_dpreciou'][$key],
           );
         }
@@ -990,6 +997,10 @@ class facturacion_model extends privilegios_model{
     );
     // Inserta los datos del cliente.
     $this->db->insert('facturacion_cliente', $dataCliente);
+
+    // echo "<pre>";
+    //   var_dump($datosApi);
+    // echo "</pre>";exit;
 
     // Timbrado de la factura.
     log_message('error', "Timbre");
@@ -5104,7 +5115,7 @@ class facturacion_model extends privilegios_model{
   {
     $this->db->update('facturacion', array('refacturada' => 't'), array('id_factura' => $facturaId));
 
-    $resultTimbrado =  $this->addFactura();
+    $resultTimbrado =  $this->addFactura(false, $facturaId);
 
     if ($resultTimbrado['passes'])
     {

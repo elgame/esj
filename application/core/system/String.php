@@ -823,7 +823,7 @@ class String{
     return date("z", strtotime($fecha)) + 1;
   }
 
-  public function numeroCardinal($numero = 1)
+  public static function numeroCardinal($numero = 1)
   {
     $terminacion = array('mo', 'er','do','er','to','to','to','mo','vo','no','mo');
     if (($numero % 100) > 11 && ($numero % 100) < 13)

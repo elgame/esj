@@ -192,11 +192,11 @@
               <div class="control-group">
                 <label class="control-label" for="moneda">Moneda</label>
                 <div class="controls">
-                  <?php $moneda_borrado = isset($factura) ? $factura['info']->moneda : (isset($_POST['moneda'])? $_POST['moneda']: 'M.N.');
-                  $moneda_borradover = (set_select('moneda', 'M.N.', false, $moneda_borrado)==' selected="selected"' || $moneda_borrado=='M.N.')? 'none': 'block';
+                  <?php $moneda_borrado = isset($factura) ? $factura['info']->moneda : (isset($_POST['moneda'])? $_POST['moneda']: 'MXN');
+                  $moneda_borradover = (set_select('moneda', 'MXN', false, $moneda_borrado)==' selected="selected"' || $moneda_borrado=='MXN')? 'none': 'block';
                   ?>
                   <select name="moneda" class="span8 pull-left" id="moneda">
-                    <option value="M.N." <?php echo set_select('moneda', 'M.N.', false, $moneda_borrado); ?>>Peso mexicano (M.N.)</option>
+                    <option value="MXN" <?php echo set_select('moneda', 'MXN', false, $moneda_borrado); ?>>Peso mexicano (MXN)</option>
                     <option value="USD" <?php echo set_select('moneda', 'USD', false, $moneda_borrado); ?>>Dólar estadounidense (USD)</option>
                   </select>
                   <input type="text" name="tipoCambio" class="span3 pull-left vpositive" id="tipoCambio" value="<?php echo set_value('tipoCambio', isset($factura) ? $factura['info']->tipo_cambio : ''); ?>"
@@ -218,25 +218,20 @@
                 <label class="control-label" for="dforma_pago">Forma de pago</label>
                 <div class="controls">
                   <select name="dforma_pago" class="span9" id="dforma_pago">
-
                     <?php
-                      $option = $factura['info']->forma_pago;
-
-                      $parcialidades = true;
-                      if ($option === 'Pago en una sola exhibición' || $option === '')
-                        $parcialidades = false;
-                     ?>
-
-                    <option value="Pago en una sola exhibición" <?php echo set_select('dforma_pago', 'Pago en una sola exhibición', $option === 'Pago en una sola exhibición' ? true : false); ?>>Pago en una sola exhibición</option>
-                    <option value="Pago en parcialidades" <?php echo set_select('dforma_pago', 'Pago en parcialidades', $parcialidades ? true : false); ?>>Pago en parcialidades</option>
+                    $formap = $factura['info']->forma_pago;
+                    foreach ($formaPago as $key => $frp) {
+                    ?>
+                      <option value="<?php echo $frp['key'] ?>" <?php echo set_select('dforma_pago', $frp['key'], $formap == $frp['key'] ? true : false); ?>><?php echo $frp['key'].' - '.$frp['value'] ?></option>
+                    <?php } ?>
                   </select>
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group hide">
                 <label class="control-label" for="dforma_pago">Parcialidades</label>
                 <div class="controls">
-                  <input type="text" name="dforma_pago_parcialidad" class="span9" id="dforma_pago_parcialidad" value="<?php echo set_value('dforma_pago_parcialidad', $parcialidades ? $option : 'Parcialidad 1 de X'); ?>">
+                  <input type="text" name="dforma_pago_parcialidad" class="span9" id="dforma_pago_parcialidad" value="<?php echo set_value('dforma_pago_parcialidad', 'Parcialidad 1 de X'); ?>">
                 </div>
               </div>
 
@@ -246,16 +241,16 @@
                   <select name="dmetodo_pago" class="span9" id="dmetodo_pago">
 
                     <?php
-                    $metodo = $factura['info']->metodo_pago;
-                    ?>
-                    <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
-                      <option value="<?php echo $key ?>" <?php echo set_select('dmetodo_pago', $key, $metodo === $key ? true : false); ?>><?php echo $key.' - '.$mtp ?></option>
+                      $metodo = $factura['info']->metodo_pago;
+                     ?>
+                    <?php foreach ($metodosPago as $key => $mtp) { ?>
+                      <option value="<?php echo $mtp['key'] ?>" <?php echo set_select('dmetodo_pago', $mtp['key'], $metodo === $mtp['key'] ? true : false); ?>><?php echo $mtp['key'].' - '.$mtp['value'] ?></option>
                     <?php } ?>
                   </select>
                 </div>
               </div>
 
-              <div class="control-group">
+              <div class="control-group hide">
                 <label class="control-label" for="dmetodo_pago_digitos">Ultimos 4 digitos</label>
                 <div class="controls">
                   <input type="text" name="dmetodo_pago_digitos" class="span9" id="dmetodo_pago_digitos" value="<?php echo set_value('dmetodo_pago_digitos', $factura['info']->metodo_pago_digitos); ?>">
@@ -284,6 +279,25 @@
                 </div>
               </div>
 
+              <?php
+              if (!isset($factura) || (isset($factura) && $factura['info']->version > 3.2)) {
+              ?>
+              <div class="control-group">
+                <label class="control-label" for="duso_cfdi">Uso de CFDI</label>
+                <div class="controls">
+                  <select name="duso_cfdi" class="span9" id="duso_cfdi">
+
+                    <?php
+                      $metodo = isset($factura) ? $factura['info']->cfdi_ext->uso_cfdi : '';
+                     ?>
+                    <?php foreach ($usoCfdi as $key => $usoCfdi) { ?>
+                      <option value="<?php echo $usoCfdi['key'] ?>" <?php echo set_select('duso_cfdi', $usoCfdi['key'], $metodo === $usoCfdi['key'] ? true : false); ?>><?php echo $usoCfdi['key'].' - '.$usoCfdi['value'] ?></option>
+                    <?php } ?>
+                  </select>
+                </div>
+              </div>
+              <?php }?>
+
               <div class="control-group">
                 <div class="controls">
                   <div class="well span9">
@@ -300,6 +314,7 @@
               <table class="table table-striped table-bordered table-hover table-condensed" id="table_prod">
                 <thead>
                   <tr>
+                    <th></th>
                     <th>Descripción</th>
                     <th class="cporte" style="<?php echo $displayCPorte; ?>">Clase</th>
                     <th class="cporte" style="<?php echo $displayCPorte; ?>">Peso</th>
@@ -346,6 +361,10 @@
                             $_POST['prod_dclase'][$key]             = $p->clase;
                             $_POST['prod_dpeso'][$key]              = $p->peso;
                             $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
+
+                            $cfdi_extp = json_decode($p->cfdi_ext);
+                            $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
+                            $_POST['pclave_unidad_cod'][$key] = $cfdi_extp->clave_unidad->key;
                           }
                         } ?>
 
@@ -397,6 +416,9 @@
                                     <?php } ?>
                                   </select>
                                   <input type="hidden" name="prod_dmedida_id[]" value="<?php echo $_POST['prod_dmedida_id'][$k] ?>" id="prod_dmedida_id" class="span12 vpositive">
+
+                                  <input type="text" name="pclave_unidad[]" class="span12" id="pclave_unidad" value="<?php echo $_POST['pclave_unidad'][$k] ?>" placeholder="Clave de Unidad">
+                                  <input type="hidden" name="pclave_unidad_cod[]" class="span9" id="pclave_unidad_cod" value="<?php echo $_POST['pclave_unidad_cod'][$k] ?>">
                                 </td>
                                 <td>
                                     <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $_POST['prod_dcantidad'][$k]; ?>" id="prod_dcantidad">
