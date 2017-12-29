@@ -1498,7 +1498,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
       'registroPatronal' => $empresa['info']->registro_patronal,
-      // 'esDependencia'    => 'IP',
+      'esDependencia'    => 'IP',
       'data' => array(
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
@@ -6195,7 +6195,7 @@ class nomina_fiscal_model extends CI_Model {
     $empresa = $this->empresas_model->getInfoEmpresa($empresaId, true);
 
     // echo "<pre>";
-    //   var_dump($empleados);
+    //   var_dump($empleados, $empresa);
     // echo "</pre>";exit;
 
     include_once(APPPATH.'libraries/phpqrcode/qrlib.php');
@@ -6206,7 +6206,7 @@ class nomina_fiscal_model extends CI_Model {
       return false;
     }
 
-    $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina:'), '', $nomina->xml));
+    $xml = simplexml_load_string(str_replace(array('cfdi:', 'tfd:', 'nomina12:'), '', $nomina->xml));
 
     $cfdi_ext = json_decode($nomina->cfdi_ext);
     // echo "<pre>";
@@ -6240,7 +6240,19 @@ class nomina_fiscal_model extends CI_Model {
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
     $tipoDeComprobante = new TipoDeComprobante();
-    // $regimenFiscal     = $this->catalogos33_model->regimenFiscales($factura['info']->cfdi_ext->emisor->regimenFiscal);
+    $regimenFiscal     = $this->catalogos33_model->regimenFiscales($cfdi_ext->emisor->regimenFiscal);
+    $tipoComp = $tipoDeComprobante->search((string)$xml[0]['TipoDeComprobante']);
+
+    $pdf->SetFont('Helvetica','', 9);
+    $pdf->SetXY(111, $pdf->GetY()-10);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array("Expedido: {$cfdi_ext->emisor->cp}"), false, false, null, 1, 1);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(105, 100));
+    $pdf->Row(array('Régimen Fiscal: ' . $regimenFiscal->label, "Tipo de Comprobante: {$tipoComp['key']} - {$tipoComp['value']}"), false, false, null, 1, 1);
 
     $dep_tiene_empleados = true;
     $y = $pdf->GetY();
@@ -6306,7 +6318,9 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array("001", 'Sueldo Gravado', String::formatoNumero($percepciones['sueldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->SetXY(6, $pdf->GetY());
+      $pdf->Row(array("001", 'Sueldo Exento', String::formatoNumero($percepciones['sueldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['sueldo'] += $percepciones['sueldo']['total'];
       $total_gral['sueldo'] += $percepciones['sueldo']['total'];
       if($pdf->GetY() >= $pdf->limiteY)
@@ -6321,7 +6335,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('049', 'P Asistencia Gravado', String::formatoNumero($percepciones['premio_asistencia']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('049', 'P Asistencia Exento', String::formatoNumero($percepciones['premio_asistencia']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['pasistencia'] += $empleado->pasistencia;
         $total_gral['pasistencia'] += $empleado->pasistencia;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6337,7 +6353,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('029', 'Despensa Gravado', String::formatoNumero($percepciones['premio_despensa']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('029', 'Despensa Exento', String::formatoNumero($percepciones['premio_despensa']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['despensa'] += $empleado->despensa;
         $total_gral['despensa'] += $empleado->despensa;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6353,7 +6371,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('019', 'Horas Extras Gravado', String::formatoNumero($percepciones['horas_extras']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('019', 'Horas Extras Exento', String::formatoNumero($percepciones['horas_extras']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
         $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6369,7 +6389,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('001', 'Vacaciones Gravado', String::formatoNumero($percepciones['vacaciones']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('001', 'Vacaciones Exento', String::formatoNumero($percepciones['vacaciones']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
         $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6381,7 +6403,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('021', 'Prima vacacional Gravado', String::formatoNumero($percepciones['prima_vacacional']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('021', 'Prima vacacional Exento', String::formatoNumero($percepciones['prima_vacacional']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
         $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6413,7 +6437,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Aguinaldo Gravado', String::formatoNumero($percepciones['aguinaldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('002', 'Aguinaldo Exento', String::formatoNumero($percepciones['aguinaldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6437,7 +6463,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
         $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6452,7 +6478,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('010', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['infonavit'] += $deducciones['infonavit']['total'];
         $total_gral['infonavit'] += $deducciones['infonavit']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6465,7 +6491,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('001', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       if($pdf->GetY() >= $pdf->limiteY)
@@ -6479,7 +6505,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('004', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
         $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6494,7 +6520,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('018', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
         $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6522,7 +6548,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->nomina_fiscal_isr;
         $total_gral['isr'] += $empleado->nomina_fiscal_isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6576,11 +6602,31 @@ class nomina_fiscal_model extends CI_Model {
     {
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(6, $pdf->GetY()+4);
-      $pdf->Cell(78, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
+      $pdf->Cell(60, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
 
-      $pdf->SetXY(86, $pdf->GetY());
+      $pdf->SetXY(68, $pdf->GetY());
       $metPago = $formaPago->search(''.$xml[0]['FormaPago']);
       $pdf->Cell(78, 4, "Forma de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 0);
+
+      $pdf->SetXY(138, $pdf->GetY());
+      $usCfdi = $usoCfdi->search(''.$xml->Receptor[0]['UsoCFDI']);
+      $pdf->Cell(78, 4, "Uso CFDI: {$usCfdi['key']} - {$usCfdi['value']}", 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      $pdf->Cell(60, 4, 'Registro patronal: '.$cfdi_ext->registroPatronal, 0, 0, 'L', 0);
+
+      $pdf->SetXY(68, $pdf->GetY());
+      $metPago = (''.$xml[0]['MetodoPago']!='')? $metodosPago->search(''.$xml[0]['MetodoPago']): null;
+      $pdf->Cell(78, 4, "Método de Pago: ".($metPago? "{$metPago['key']} - {$metPago['value']}": ''), 0, 0, 'L', 0);
+
+      $pdf->SetXY(138, $pdf->GetY());
+      $tipNom = $cfdi_ext->tipoNomina.' - '.($cfdi_ext->tipoNomina == 'O'? 'Nómina ordinaria': 'Nómina extraordinaria');
+      $pdf->Cell(78, 4, "Tipo Nomina: {$tipNom}", 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      $pdf->Cell(60, 4, 'Fecha de Pago: '.$cfdi_ext->fechaPago, 0, 0, 'L', 0);
 
       ////////////////////
       // Timbrado Datos //
@@ -6686,6 +6732,10 @@ class nomina_fiscal_model extends CI_Model {
   public function pdfReciboNominaFiscalFiniquito($empleadoId, $semanaa, $anio, $empresaId, $pdf=null)
   {
     $this->load->model('empresas_model');
+
+    if (!$pdf && !isset($_GET['cid_empresa'])) {
+      $_GET['cid_empresa'] = $empresaId;
+    }
 
     if ($empresaId !== '')
       $dia = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
@@ -7230,7 +7280,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array("001", 'Sueldo Gravado', String::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array("001", 'Sueldo Exento', String::formatoNumero('0', 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -7253,7 +7305,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($finiquitos->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('021', 'Prima vacacional Gravado', String::formatoNumero($finiquitos->prima_vacacional_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->Row(array('021', 'Prima vacacional Exento', String::formatoNumero($finiquitos->prima_vacacional_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -7267,7 +7321,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($finiquitos->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('002', 'Aguinaldo Gravado', String::formatoNumero($finiquitos->aguinaldo_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->Row(array('002', 'Aguinaldo Exento', String::formatoNumero($finiquitos->aguinaldo_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -7281,7 +7337,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Indemnizaciones', String::formatoNumero($finiquitos->indemnizaciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('025', 'Indemnizaciones Gravado', String::formatoNumero($finiquitos->indemnizaciones_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->SetXY(6, $pdf->GetY());
+          $pdf->Row(array('025', 'Indemnizaciones Exento', String::formatoNumero($finiquitos->indemnizaciones_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -7373,11 +7431,31 @@ class nomina_fiscal_model extends CI_Model {
       {
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(6, $pdf->GetY()+4);
-        $pdf->Cell(78, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
+        $pdf->Cell(60, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
 
-        $pdf->SetXY(86, $pdf->GetY());
+        $pdf->SetXY(68, $pdf->GetY());
         $metPago = $formaPago->search(''.$xml[0]['FormaPago']);
         $pdf->Cell(78, 4, "Forma de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 0);
+
+        $pdf->SetXY(138, $pdf->GetY());
+        $usCfdi = $usoCfdi->search(''.$xml->Receptor[0]['UsoCFDI']);
+        $pdf->Cell(78, 4, "Uso CFDI: {$usCfdi['key']} - {$usCfdi['value']}", 0, 0, 'L', 0);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(6, $pdf->GetY()+4);
+        $pdf->Cell(60, 4, 'Registro patronal: '.$cfdi_ext->registroPatronal, 0, 0, 'L', 0);
+
+        $pdf->SetXY(68, $pdf->GetY());
+        $metPago = (''.$xml[0]['MetodoPago']!='')? $metodosPago->search(''.$xml[0]['MetodoPago']): null;
+        $pdf->Cell(78, 4, "Método de Pago: ".($metPago? "{$metPago['key']} - {$metPago['value']}": ''), 0, 0, 'L', 0);
+
+        $pdf->SetXY(138, $pdf->GetY());
+        $tipNom = $cfdi_ext->tipoNomina.' - '.($cfdi_ext->tipoNomina == 'O'? 'Nómina ordinaria': 'Nómina extraordinaria');
+        $pdf->Cell(78, 4, "Tipo Nomina: {$tipNom}", 0, 0, 'L', 0);
+
+        $pdf->SetFont('helvetica','B', 9);
+        $pdf->SetXY(6, $pdf->GetY()+4);
+        $pdf->Cell(60, 4, 'Fecha de Pago: '.$cfdi_ext->fechaPago, 0, 0, 'L', 0);
 
         ////////////////////
         // Timbrado Datos //
@@ -8924,7 +9002,19 @@ class nomina_fiscal_model extends CI_Model {
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
     $tipoDeComprobante = new TipoDeComprobante();
-    // $regimenFiscal     = $this->catalogos33_model->regimenFiscales($factura['info']->cfdi_ext->emisor->regimenFiscal);
+    $regimenFiscal     = $this->catalogos33_model->regimenFiscales($cfdi_ext->emisor->regimenFiscal);
+    $tipoComp = $tipoDeComprobante->search((string)$xml[0]['TipoDeComprobante']);
+
+    $pdf->SetFont('Helvetica','', 9);
+    $pdf->SetXY(111, $pdf->GetY()-10);
+    $pdf->SetAligns(array('R'));
+    $pdf->SetWidths(array(100));
+    $pdf->Row(array("Expedido: {$cfdi_ext->emisor->cp}"), false, false, null, 1, 1);
+
+    $pdf->SetXY(6, $pdf->GetY());
+    $pdf->SetAligns(array('L', 'R'));
+    $pdf->SetWidths(array(105, 100));
+    $pdf->Row(array('Régimen Fiscal: ' . $regimenFiscal->label, "Tipo de Comprobante: {$tipoComp['key']} - {$tipoComp['value']}"), false, false, null, 1, 1);
 
     $dep_tiene_empleados = true;
     $y = $pdf->GetY();
@@ -8992,7 +9082,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('003', 'PTU Gravado', String::formatoNumero($percepciones['ptu']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->SetXY(6, $pdf->GetY());
+        $pdf->Row(array('003', 'PTU Exento', String::formatoNumero($percepciones['ptu']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
         $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -9071,11 +9163,31 @@ class nomina_fiscal_model extends CI_Model {
     {
       $pdf->SetFont('helvetica','B', 9);
       $pdf->SetXY(6, $pdf->GetY()+4);
-      $pdf->Cell(78, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
+      $pdf->Cell(60, 4, 'RFC EMISOR: '.$xml->Emisor[0]['Rfc'], 0, 0, 'L', 0);
 
-      $pdf->SetXY(86, $pdf->GetY());
+      $pdf->SetXY(68, $pdf->GetY());
       $metPago = $formaPago->search(''.$xml[0]['FormaPago']);
       $pdf->Cell(78, 4, "Forma de Pago: {$metPago['key']} - {$metPago['value']}", 0, 0, 'L', 0);
+
+      $pdf->SetXY(138, $pdf->GetY());
+      $usCfdi = $usoCfdi->search(''.$xml->Receptor[0]['UsoCFDI']);
+      $pdf->Cell(78, 4, "Uso CFDI: {$usCfdi['key']} - {$usCfdi['value']}", 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      $pdf->Cell(60, 4, 'Registro patronal: '.$cfdi_ext->registroPatronal, 0, 0, 'L', 0);
+
+      $pdf->SetXY(68, $pdf->GetY());
+      $metPago = (''.$xml[0]['MetodoPago']!='')? $metodosPago->search(''.$xml[0]['MetodoPago']): null;
+      $pdf->Cell(78, 4, "Método de Pago: ".($metPago? "{$metPago['key']} - {$metPago['value']}": ''), 0, 0, 'L', 0);
+
+      $pdf->SetXY(138, $pdf->GetY());
+      $tipNom = $cfdi_ext->tipoNomina.' - '.($cfdi_ext->tipoNomina == 'O'? 'Nómina ordinaria': 'Nómina extraordinaria');
+      $pdf->Cell(78, 4, "Tipo Nomina: {$tipNom}", 0, 0, 'L', 0);
+
+      $pdf->SetFont('helvetica','B', 9);
+      $pdf->SetXY(6, $pdf->GetY()+4);
+      $pdf->Cell(60, 4, 'Fecha de Pago: '.$cfdi_ext->fechaPago, 0, 0, 'L', 0);
 
       ////////////////////
       // Timbrado Datos //

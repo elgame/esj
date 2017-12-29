@@ -725,6 +725,45 @@ $(function(){
     $parent.find('#pprecio').trigger('change');
   });
 
+  var fechaDeCambio = '';
+  $("#cambiarFecha").click(function() {
+    $("#myModalFechaCh").modal('show');
+  });
+  $('#myModalFechaCh').on('show', function () {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+      },
+    })
+    .done(function(resp) {
+      fechaDeCambio = resp.fecha;
+      $('#fechaCh').val(fechaDeCambio);
+    });
+  });
+  $('#btn-auth2').on('click', function(event) {
+    $.ajax({
+      url: base_url + 'panel/bascula/auth_modify/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        usuario: $('#usuarioCh').val(),
+        pass: $('#passCh').val()
+      },
+    })
+    .done(function(resp) {
+      if (resp.passes) {
+        $('#pfecha').val($('#fechaCh').val());
+        $('#usuarioCh').val('');
+        $('#passCh').val('');
+        $("#myModalFechaCh").modal('hide');
+      } else {
+        noty({"text": resp.msg, "layout":"topRight", "type": 'error'});
+      }
+    });
+  });
+
 });
 
 var getSnapshot = function ($parent) {

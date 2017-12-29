@@ -2090,7 +2090,8 @@ class bascula extends MY_Controller {
         'passes' => false,
         'title'  => 'Error al Autorizar el Usuario!',
         'msg'    => preg_replace("[\n|\r|\n\r]", '', validation_errors()),
-        'ico'    => 'error'
+        'ico'    => 'error',
+        'fecha'  => date("Y-m-d\TH:i"),
       );
     }
     else

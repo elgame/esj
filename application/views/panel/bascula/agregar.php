@@ -11,7 +11,7 @@
           'rancho'     => '',
           'camion'     => '',
           'chofer'     => '',
-          'fecha'      => '',
+          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
           'k_bruto'    => '',
           'k_tara'     => '',
           'cajas_pres' => '',
@@ -29,8 +29,8 @@
           $crumbTitle = 'Modificar';
           echo '<input type="hidden" id="isEditar" value="t" />';
           $autorizarInput = '<input type="hidden" name="autorizar" id="autorizar" value="" />';
-
           $bmod = array(
+          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
           'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
           'area'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
           'empresa'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
@@ -38,7 +38,7 @@
           'rancho'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
           'camion'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
           'chofer'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
-          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')?'':' readonly'),
+          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
           'k_bruto'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
           'k_tara'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
           'cajas_pres' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
@@ -271,7 +271,12 @@
                     <label class="control-label" for="pfecha">Fecha</label>
                     <div class="controls">
                       <input type="datetime-local" name="pfecha"
-                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="span10" <?php echo $disabled.$bmod['fecha']; ?> data-next="pproveedor|pcliente">
+                        value="<?php echo set_value('pfecha', $fecha ); ?>" id="pfecha" class="input-large" <?php echo $disabled.$bmod['fecha']; ?> data-next="pproveedor|pcliente">
+                      <?php if ($bmod['fecha'] == ' readonly') { ?>
+                        <span class="help-inline">
+                          <button class="btn" type="button" id="cambiarFecha"><i class="icon-calendar"></i></button>
+                        </span>
+                      <?php } ?>
                     </div>
                   </div>
 
@@ -828,6 +833,38 @@
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
     <button class="btn btn-primary" id="btn-auth">Autorizar</button>
+  </div>
+</div>
+
+<!-- Modal Fecha -->
+<div id="myModalFechaCh" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Cambio de fecha</h3>
+  </div>
+  <div class="modal-body">
+    <div class="row-fluid" style="text-align: center;">
+      <div class="input-prepend" title="Fecha" data-rel="tooltip">
+        <span class="add-on"><i class="icon-calendar"></i>
+        </span><input class="input-large span10" name="fechaCh" value="" id="fechaCh" type="datetime-local" placeholder="Fecha">
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="input-prepend" title="Usuario" data-rel="tooltip">
+        <span class="add-on"><i class="icon-user"></i>
+        </span><input class="input-large span10" name="usuarioCh" value="" id="usuarioCh" type="text" placeholder="usuario">
+      </div>
+      <div class="clearfix"></div>
+
+      <div class="input-prepend mtop" title="Contraseña" data-rel="tooltip">
+        <span class="add-on"><i class="icon-lock"></i>
+        </span><input class="input-large span10" name="passCh" value="" id="passCh" type="password" placeholder="******">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+    <button class="btn btn-primary" id="btn-auth2">Autorizar</button>
   </div>
 </div>
 
