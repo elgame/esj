@@ -1116,11 +1116,12 @@ class nomina_fiscal_model extends CI_Model {
 
     // fecha en la que se inciaran a calcular los dias transcurrido del año
     // a la fecha de renuncia.
-    $fechaInicio = date('Y-01-01');
-    if (strtotime($fechaInicio) < strtotime($fechaEntrada))
-    {
-      $fechaInicio = date($fechaEntrada);
-    }
+    // $fechaInicio = date('Y-01-01');
+    // if (strtotime($fechaInicio) < strtotime($fechaEntrada))
+    // {
+    //   $fechaInicio = date($fechaEntrada);
+    // }
+    $fechaInicio = date($fechaEntrada);
 
     // Saca los dias transcurridos desde el 1 de Enero del año a la fecha de salida.
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
