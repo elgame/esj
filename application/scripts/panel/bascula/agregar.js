@@ -749,7 +749,8 @@ $(function(){
       dataType: 'json',
       data: {
         usuario: $('#usuarioCh').val(),
-        pass: $('#passCh').val()
+        pass: $('#passCh').val(),
+        tipo: 'fecha'
       },
     })
     .done(function(resp) {

@@ -2109,7 +2109,12 @@ class bascula extends MY_Controller {
         $this->load->model('usuarios_model');
         $tienePriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/modificar-auth/', false, $user[0]->id);
 
-        if ($tienePriv)
+        $fechaPriv = true;
+        if ($this->input->post('tipo') === 'fecha') {
+          $fechaPriv = $this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/', false, $user[0]->id);
+        }
+
+        if ($tienePriv && $fechaPriv)
         {
            $resp = array(
             'passes'  => true,
