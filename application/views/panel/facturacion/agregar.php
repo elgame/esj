@@ -1091,14 +1091,28 @@
                     <!-- Datos ComercioExterior -->
                     <div class="span6">
                       <div class="control-group">
+                        <label class="control-label" for="cce_motivo_traslado">Motivo traslado <i class="icon-question-sign helpover" data-title=""></i></label>
+                        <div class="controls">
+                          <?php
+                            $com_ex = isset($borrador) && isset($borrador['ce']) ? $borrador['ce'] : null;
+                            isset($com_ex) ? $com_ex->extra = json_decode($com_ex->extras) : '';
+                            $motivo_traslado = isset($com_ex) ? $com_ex->motivo_traslado : ''; ?>
+                          <select name="comercioExterior[motivoTraslado]" class="span12 sikey" id="cce_motivo_traslado" data-next="cce_tipo_operacion">
+                            <option value=""></option>
+                            <?php foreach ($ceMotTraslado as $key => $value): ?>
+                            <option value="<?php echo $value['key'] ?>" <?php echo set_select('comercioExterior[motivoTraslado]', $value['key'], $motivo_traslado === $value['key'] ? true : false); ?>><?php echo $value['key'] ?> - <?php echo $value['value'] ?></option>
+                            <?php endforeach ?>
+                          </select>
+                        </div>
+                      </div><!--/control-group -->
+                      <div class="control-group">
                         <label class="control-label" for="cce_tipo_operacion">Tipo Operacion <i class="icon-question-sign helpover" data-title="Tipo Operacion: Atributo requerido que indica el tipo de operación de comercio exterior que se realiza, puede ser importación o exportación, A = exportación de servicios. 2 = exportación."></i></label>
                         <div class="controls">
                           <?php
                             $com_ex = isset($borrador) && isset($borrador['ce']) ? $borrador['ce'] : null;
                             $tipo_operacion = isset($com_ex) ? $com_ex->tipo_operacion : ''; ?>
-                          <select name="comercioExterior[tipo_operacion]" class="span12 sikey" id="cce_tipo_operacion" data-next="cce_clave_pedimento">
-                            <option value="A" <?php echo set_select('comercioExterior[tipo_operacion]', 'A', $tipo_operacion === 'A' ? true : false); ?>>Exportación de servicios</option>
-                            <option value="2" <?php echo set_select('comercioExterior[tipo_operacion]', '2', $tipo_operacion === '2' ? true : false); ?>>Exportación</option>
+                          <select name="comercioExterior[tipoOperacion]" class="span12 sikey" id="cce_tipo_operacion" data-next="cce_clave_pedimento">
+                            <option value="2" <?php echo set_select('comercioExterior[tipoOperacion]', '2', $tipo_operacion === '2' ? true : false); ?>>2 - Exportación</option>
                           </select>
                         </div>
                       </div><!--/control-group -->
@@ -1106,9 +1120,9 @@
                         <label class="control-label" for="cce_clave_pedimento">Clave de pedimento <i class="icon-question-sign helpover" data-title="Clave de pedimento: Atributo que indica la clave de pedimento que se haya declarado conforme al apéndice 2 del anexo 22 de las reglas generales de comercio exterior."></i></label>
                         <div class="controls">
                           <?php $clave_pedimento = isset($com_ex) ? $com_ex->clave_pedimento : ''; ?>
-                          <select name="comercioExterior[clave_pedimento]" class="span12 sikey" id="cce_clave_pedimento" data-next="cce_certificado_origen">
-                            <option value="" <?php echo set_select('comercioExterior[clave_pedimento]', '', $clave_pedimento === '' ? true : false); ?>></option>
-                            <option value="A1" <?php echo set_select('comercioExterior[clave_pedimento]', 'A1', $clave_pedimento === 'A1' ? true : false); ?>>IMPORTACION O EXPORTACION DEFINITIVA</option>
+                          <select name="comercioExterior[clavePedimento]" class="span12 sikey" id="cce_clave_pedimento" data-next="cce_certificado_origen">
+                            <option value="" <?php echo set_select('comercioExterior[clavePedimento]', '', $clave_pedimento === '' ? true : false); ?>></option>
+                            <option value="A1" <?php echo set_select('comercioExterior[clavePedimento]', 'A1', $clave_pedimento === 'A1' ? true : false); ?>>A1 - IMPORTACION O EXPORTACION DEFINITIVA</option>
                           </select>
                         </div>
                       </div><!--/control-group -->
@@ -1116,23 +1130,23 @@
                         <label class="control-label" for="cce_certificado_origen">Certificado de origen <i class="icon-question-sign helpover" data-title="Certificado de origen: Atributo derivado de la excepción de certificados de Origen de los Tratados de Libre Comercio que ha celebrado México con diversos países. 0 = No Funge como certificado de origen 1 = Funge como certificado de origen."></i></label>
                         <div class="controls">
                           <?php $certificado_origen = isset($com_ex) ? $com_ex->certificado_origen : ''; ?>
-                          <select name="comercioExterior[certificado_origen]" class="span12 sikey" id="cce_certificado_origen" data-next="cce_num_certificado_origen">
-                            <option value="" <?php echo set_select('comercioExterior[certificado_origen]', '', $certificado_origen === '' ? true : false); ?>></option>
-                            <option value="0" <?php echo set_select('comercioExterior[certificado_origen]', '0', $certificado_origen === '0' ? true : false); ?>>No Funge como certificado de origen</option>
-                            <option value="1" <?php echo set_select('comercioExterior[certificado_origen]', '1', $certificado_origen === '1' ? true : false); ?>>Funge como certificado de origen</option>
+                          <select name="comercioExterior[certificadoOrigen]" class="span12 sikey" id="cce_certificado_origen" data-next="cce_num_certificado_origen">
+                            <option value="" <?php echo set_select('comercioExterior[certificadoOrigen]', '', $certificado_origen === '' ? true : false); ?>></option>
+                            <option value="0" <?php echo set_select('comercioExterior[certificadoOrigen]', '0', $certificado_origen === '0' ? true : false); ?>>No Funge como certificado de origen</option>
+                            <option value="1" <?php echo set_select('comercioExterior[certificadoOrigen]', '1', $certificado_origen === '1' ? true : false); ?>>Funge como certificado de origen</option>
                           </select>
                         </div>
                       </div><!--/control-group -->
                       <div class="control-group">
                         <label class="control-label" for="cce_num_certificado_origen">Num de certificado de origen <i class="icon-question-sign helpover" data-title="Num de certificado de origen: Atributo opcional para expresar el folio del certificado de origen o el folio fiscal del CFDI con el que se pagó la expedición del certificado de origen"></i></label>
                         <div class="controls">
-                          <input type="text" name="comercioExterior[num_certificado_origen]" class="span12 sikey" id="cce_num_certificado_origen" value="<?php echo set_value('comercioExterior[num_certificado_origen]', isset($com_ex) ? $com_ex->num_certificado_origen : ''); ?>" placeholder="Num de certificado de origen" minlength="6" maxlength="40" data-next="cce_numero_exportador_confiable">
+                          <input type="text" name="comercioExterior[numCertificadoOrigen]" class="span12 sikey" id="cce_num_certificado_origen" value="<?php echo set_value('comercioExterior[numCertificadoOrigen]', isset($com_ex) ? $com_ex->num_certificado_origen : ''); ?>" placeholder="Num de certificado de origen" minlength="6" maxlength="40" data-next="cce_numero_exportador_confiable">
                         </div>
                       </div><!--/control-group -->
                       <div class="control-group">
                         <label class="control-label" for="cce_numero_exportador_confiable">Numero exportador confiable <i class="icon-question-sign helpover" data-title="Numero exportador confiable: Atributo opcional que indica el número de exportador confiable, conforme al artículo 22 del Anexo 1 del Tratado de Libre Comercio con la Asociación Europea y a la Decisión de la Comunidad Europea"></i></label>
                         <div class="controls">
-                          <input type="text" name="comercioExterior[numero_exportador_confiable]" class="span12 sikey" id="cce_numero_exportador_confiable" value="<?php echo set_value('comercioExterior[numero_exportador_confiable]', isset($com_ex) ? $com_ex->num_certificado_origen : ''); ?>" placeholder="Numero exportador confiable" minlength="1" maxlength="50" data-next="cce_incoterm">
+                          <input type="text" name="comercioExterior[numeroExportadorConfiable]" class="span12 sikey" id="cce_numero_exportador_confiable" value="<?php echo set_value('comercioExterior[numeroExportadorConfiable]', isset($com_ex) ? $com_ex->num_certificado_origen : ''); ?>" placeholder="Numero exportador confiable" minlength="1" maxlength="50" data-next="cce_incoterm">
                         </div>
                       </div><!--/control-group -->
                     </div>
@@ -1145,21 +1159,9 @@
                           <?php $incoterm = isset($com_ex) ? $com_ex->incoterm : ''; ?>
                           <select name="comercioExterior[incoterm]" class="span12 sikey" id="cce_incoterm" data-next="cce_subdivision">
                             <option value="" <?php echo set_select('comercioExterior[incoterm]', '', $incoterm === '' ? true : false); ?>></option>
-                            <option value="CFR" <?php echo set_select('comercioExterior[incoterm]', 'CFR', $incoterm === 'CFR' ? true : false); ?>>COSTE Y FLETE (PUERTO DE DESTINO CONVENIDO)</option>
-                            <option value="CIF" <?php echo set_select('comercioExterior[incoterm]', 'CIF', $incoterm === 'CIF' ? true : false); ?>>COSTE, SEGURO Y FLETE (PUERTO DE DESTINO CONVENIDO)</option>
-                            <option value="CPT" <?php echo set_select('comercioExterior[incoterm]', 'CPT', $incoterm === 'CPT' ? true : false); ?>>TRANSPORTE PAGADO HASTA (EL LUGAR DE DESTINO CONVENIDO)</option>
-                            <option value="CIP" <?php echo set_select('comercioExterior[incoterm]', 'CIP', $incoterm === 'CIP' ? true : false); ?>>TRANSPORTE Y SEGURO PAGADOS HASTA (LUGAR DE DESTINO CONVENIDO)</option>
-                            <option value="DAF" <?php echo set_select('comercioExterior[incoterm]', 'DAF', $incoterm === 'DAF' ? true : false); ?>>ENTREGADA EN FRONTERA (LUGAR CONVENIDO)</option>
-                            <option value="DAP" <?php echo set_select('comercioExterior[incoterm]', 'DAP', $incoterm === 'DAP' ? true : false); ?>>ENTREGADA EN LUGAR</option>
-                            <option value="DAT" <?php echo set_select('comercioExterior[incoterm]', 'DAT', $incoterm === 'DAT' ? true : false); ?>>ENTREGADA EN TERMINAL</option>
-                            <option value="DES" <?php echo set_select('comercioExterior[incoterm]', 'DES', $incoterm === 'DES' ? true : false); ?>>ENTREGADA SOBRE BUQUE (PUERTO DE DESTINO CONVENIDO)</option>
-                            <option value="DEQ" <?php echo set_select('comercioExterior[incoterm]', 'DEQ', $incoterm === 'DEQ' ? true : false); ?>>ENTREGADA EN MUELLE (PUERTO DE DESTINO CONVENIDO)</option>
-                            <option value="DDU" <?php echo set_select('comercioExterior[incoterm]', 'DDU', $incoterm === 'DDU' ? true : false); ?>>ENTREGADA DERECHOS NO PAGADOS (LUGAR DE DESTINO CONVENIDO)</option>
-                            <option value="DDP" <?php echo set_select('comercioExterior[incoterm]', 'DDP', $incoterm === 'DDP' ? true : false); ?>>ENTREGADA DERECHOS PAGADOS (LUGAR DE DESTINO CONVENIDO)</option>
-                            <option value="EXW" <?php echo set_select('comercioExterior[incoterm]', 'EXW', $incoterm === 'EXW' ? true : false); ?>>EN FABRICA (LUGAR CONVENIDO)</option>
-                            <option value="FCA" <?php echo set_select('comercioExterior[incoterm]', 'FCA', $incoterm === 'FCA' ? true : false); ?>>FRANCO TRANSPORTISTA (LUGAR DESIGNADO)</option>
-                            <option value="FAS" <?php echo set_select('comercioExterior[incoterm]', 'FAS', $incoterm === 'FAS' ? true : false); ?>>FRANCO AL COSTADO DEL BUQUE (PUERTO DE CARGA CONVENIDO)</option>
-                            <option value="FOB" <?php echo set_select('comercioExterior[incoterm]', 'FOB', $incoterm === 'FOB' ? true : false); ?>>FRANCO A BORDO (PUERTO DE CARGA CONVENIDO)</option>
+                            <?php foreach ($ceIncoterm as $key => $value): ?>
+                            <option value="<?php echo $value['key'] ?>" <?php echo set_select('comercioExterior[incoterm]', $value['key'], $incoterm === $value['key'] ? true : false); ?>><?php echo $value['key'] ?> - <?php echo $value['value'] ?></option>
+                            <?php endforeach ?>
                           </select>
                         </div>
                       </div><!--/control-group -->
@@ -1183,13 +1185,13 @@
                       <div class="control-group">
                         <label class="control-label" for="cce_tipocambio_USD">Tipo Cambio USD <i class="icon-question-sign helpover" data-title="Tipo Cambio USD: Atributo que indica el número de pesos mexicanos que equivalen a un dólar de Estados Unidos, de acuerdo al artículo 20 del Código Fiscal de la Federación"></i></label>
                         <div class="controls">
-                          <input type="number" step="any" name="comercioExterior[tipocambio_USD]" class="span12 vnumeric sikey" id="cce_tipocambio_USD" value="<?php echo set_value('comercioExterior[tipocambio_USD]', isset($com_ex) ? $com_ex->tipocambio_USD : ''); ?>" placeholder="Tipo Cambio USD" data-next="cce_total_USD">
+                          <input type="number" step="any" name="comercioExterior[tipoCambioUSD]" class="span12 vnumeric sikey" id="cce_tipocambio_USD" value="<?php echo set_value('comercioExterior[tipoCambioUSD]', isset($com_ex) ? $com_ex->tipocambio_USD : ''); ?>" placeholder="Tipo Cambio USD" data-next="cce_total_USD">
                         </div>
                       </div><!--/control-group -->
                       <div class="control-group">
                         <label class="control-label" for="cce_total_USD">Total USD <i class="icon-question-sign helpover" data-title="Total USD: Atributo que indica el importe total del comprobante en dólares de Estados Unidos"></i></label>
                         <div class="controls">
-                          <input type="number" step="any" name="comercioExterior[total_USD]" class="span12 vnumeric sikey" id="cce_total_USD" value="<?php echo set_value('comercioExterior[total_USD]', isset($com_ex) ? $com_ex->total_USD : ''); ?>" placeholder="Total USD" data-next="cce_emisor_curp">
+                          <input type="number" step="any" name="comercioExterior[totalUSD]" class="span12 vnumeric sikey" id="cce_total_USD" value="<?php echo set_value('comercioExterior[totalUSD]', isset($com_ex) ? $com_ex->total_USD : ''); ?>" placeholder="Total USD" data-next="cce_emisor_curp">
                         </div>
                       </div><!--/control-group -->
                     </div>
@@ -1207,9 +1209,80 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_curp">Curp <i class="icon-question-sign helpover" data-title="Curp: Atributo opcional para expresar la CURP del emisor del CFDI cuando es una persona física"></i></label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[Emisor][Curp]" class="span12 sikey" id="cce_emisor_curp" value="<?php echo set_value('comercioExterior[Emisor][Curp]', isset($com_ex->emisor_curp) ? $com_ex->emisor_curp : ''); ?>" placeholder="Curp" data-next="cce_receptor_num_reg_id_trib">
+                            <input type="text" name="comercioExterior[emisor][curp]" class="span12 sikey" id="cce_emisor_curp" value="<?php echo set_value('comercioExterior[emisor][curp]', isset($com_ex->emisor_curp) ? $com_ex->emisor_curp : ''); ?>" placeholder="Curp" data-next="cce_emisor_calle">
                           </div>
                         </div><!--/control-group -->
+
+                        <hr>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_calle">Calle:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][calle]" id="cce_emisor_calle" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][calle]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->calle : ''); ?>" maxlength="100" data-next="cce_emisor_no_exterior">
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_no_exterior">No exterior:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][numeroExterior]" id="cce_emisor_no_exterior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroExterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroExterior : ''); ?>" maxlength="50" data-next="cce_emisor_no_interior">
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_no_interior">No interior:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][numeroInterior]" id="cce_emisor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroInterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroInterior : ''); ?>" maxlength="50" data-next="cce_emisor_pais">
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_pais">País:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][pais]" id="cce_emisor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][pais]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->pais : ''); ?>" maxlength="60" data-next="cce_emisor_estado">
+                            <span class="cce_emisor_pais help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_estado">Estado:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][estado]" id="cce_emisor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][estado]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->estado : ''); ?>" maxlength="45" data-next="cce_emisor_municipio">
+                            <span class="cce_emisor_estado help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_municipio">Municipio / Delegación:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][municipio]" id="cce_emisor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][municipio]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->municipio : ''); ?>" maxlength="45" data-next="cce_emisor_localidad">
+                            <span class="cce_emisor_municipio help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_localidad">Localidad:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][localidad]" id="cce_emisor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][localidad]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->localidad : ''); ?>" maxlength="45" data-next="cce_emisor_cp">
+                            <span class="cce_emisor_localidad help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_cp">CP:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][codigoPostal]" id="cce_emisor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][codigoPostal]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->codigoPostal : ''); ?>" maxlength="10" data-next="cce_emisor_colonia">
+                            <span class="cce_emisor_cp help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_emisor_colonia">Colonia:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[emisor][domicilio][colonia]" id="cce_emisor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][colonia]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->colonia : ''); ?>" maxlength="60" data-next="cce_receptor_num_reg_id_trib">
+                            <span class="cce_emisor_colonia help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   <!--/Emisor -->
@@ -1225,18 +1298,111 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_receptor_num_reg_id_trib">Num Reg Id Trib <i class="icon-question-sign helpover" data-title="Num Reg Id Trib: Atributo requerido para incorporar el número de identificación o registro fiscal del país de residencia para efectos fiscales del receptor del CFDI"></i></label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[Receptor][NumRegIdTrib]" class="span12 sikey" id="cce_receptor_num_reg_id_trib" value="<?php echo set_value('comercioExterior[Receptor][NumRegIdTrib]', isset($com_ex->receptor_numregidtrib) ? $com_ex->receptor_numregidtrib : ''); ?>" placeholder="Num Reg Id Trib" minlength="6" maxlength="40" data-next="cce_receptor_curp">
+                            <input type="text" name="comercioExterior[receptor][numRegIdTrib]" class="span12 sikey" id="cce_receptor_num_reg_id_trib" value="<?php echo set_value('comercioExterior[receptor][numRegIdTrib]', isset($com_ex->receptor_numregidtrib) ? $com_ex->receptor_numregidtrib : ''); ?>" placeholder="Num Reg Id Trib" minlength="6" maxlength="40" data-next="cce_receptor_calle">
                           </div>
                         </div><!--/control-group -->
+
+                        <hr>
+
                         <div class="control-group">
-                          <label class="control-label" for="cce_receptor_curp">Curp <i class="icon-question-sign helpover" data-title="Curp: Atributo opcional para expresar la CURP del receptor del CFDI cuando es una persona física"></i></label>
+                          <label class="control-label" for="cce_receptor_calle">Calle:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[Receptor][Curp]" class="span12 sikey" id="cce_receptor_curp" value="<?php echo set_value('comercioExterior[Receptor][Curp]', isset($com_ex->receptor_curp) ? $com_ex->receptor_curp : ''); ?>" placeholder="Curp" data-next="cce_destinatario_num_reg_id_trib">
+                            <input type="text" name="comercioExterior[receptor][domicilio][calle]" id="cce_receptor_calle" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][calle]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->calle : ''); ?>" maxlength="100" data-next="cce_receptor_no_exterior">
                           </div>
-                        </div><!--/control-group -->
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_no_exterior">No exterior:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][numeroExterior]" id="cce_receptor_no_exterior" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][numeroExterior]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->numeroExterior : ''); ?>" maxlength="50" data-next="cce_receptor_no_interior">
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_no_interior">No interior:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][numeroInterior]" id="cce_receptor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][numeroInterior]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->numeroInterior : ''); ?>" maxlength="50" data-next="cce_receptor_pais">
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_pais">País:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][pais]" id="cce_receptor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][pais]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->pais : ''); ?>" maxlength="60" data-next="cce_receptor_estado">
+                            <span class="cce_receptor_pais help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_estado">Estado:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][estado]" id="cce_receptor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][estado]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->estado : ''); ?>" maxlength="45" data-next="cce_receptor_municipio">
+                            <span class="cce_receptor_estado help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_municipio">Municipio / Delegación:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][municipio]" id="cce_receptor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][municipio]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->municipio : ''); ?>" maxlength="45" data-next="cce_receptor_localidad">
+                            <span class="cce_receptor_municipio help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_localidad">Localidad:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][localidad]" id="cce_receptor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][localidad]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->localidad : ''); ?>" maxlength="45" data-next="cce_receptor_cp">
+                            <span class="cce_receptor_localidad help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_cp">CP:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][codigoPostal]" id="cce_receptor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][codigoPostal]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->codigoPostal : ''); ?>" maxlength="10" data-next="cce_receptor_colonia">
+                            <span class="cce_receptor_cp help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
+
+                        <div class="control-group">
+                          <label class="control-label" for="cce_receptor_colonia">Colonia:</label>
+                          <div class="controls">
+                            <input type="text" name="comercioExterior[receptor][domicilio][colonia]" id="cce_receptor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][colonia]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->colonia : ''); ?>" maxlength="60" data-next="cce_propietario_numRegIdTrib">
+                            <span class="cce_receptor_colonia help-block nomarg" style="color:#bd362f"></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div><!--/Receptor -->
+
+                  <!-- Propietario -->
+                  <div class="row-fluid">
+                    <div class="box span12">
+                      <div class="box-header well">
+                        <h2><i class="icon-align-justify"></i><span class="break"></span>Propietario</h2>
+                        <div class="box-icon">
+                        </div>
+                      </div>
+                      <div class="box-content" style="padding: 0;">
+
+                        <table class="table table-striped" id="table-destinatariod">
+                            <thead>
+                              <tr>
+                                <th>Num Reg Id Trib <i class="icon-question-sign helpover" data-title=""></i></th>
+                                <th>Residencia Fiscal <i class="icon-question-sign helpover" data-title=""></i></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td class="center"><input type="text" name="comercioExterior[propietario][numRegIdTrib]" value="<?php echo set_value('comercioExterior[propietario][numRegIdTrib]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario->numRegIdTrib : ''); ?>" id="cce_propietario_numRegIdTrib" class="span12 sikey" data-next="cce_propietario_residenciaFiscal"></td>
+                                <td class="center"><input type="text" name="comercioExterior[propietario][residenciaFiscal]" value="<?php echo set_value('comercioExterior[propietario][residenciaFiscal]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario->residenciaFiscal : ''); ?>" id="cce_propietario_residenciaFiscal" class="span12 sikey" data-next="cce_destinatario_num_reg_id_trib"></td>
+                              </tr>
+                            </tbody>
+                         </table>
+                      </div>
+                    </div>
+                  </div><!--/Propietario -->
 
                   <!-- Destinatario -->
                   <div class="row-fluid">
@@ -1253,38 +1419,20 @@
                         </div>
 
                         <div class="row-fluid">
-                          <div class="span3">
+                          <div class="span4">
                             <div class="control-group">
                               <label class="control-label" for="cce_destinatario_num_reg_id_trib" style="width: 115px;">Num Reg Id Trib <i class="icon-question-sign helpover" data-title="Num Reg Id Trib: Atributo opcional para incorporar el número de identificación o registro fiscal del país de residencia para efectos fiscales del destinatario de la mercancía exportada."></i></label>
                               <div class="controls" style="margin-left: 133px;">
-                                <input type="text" name="comercioExterior[Destinatario][NumRegIdTrib]" class="span12 sikey" id="cce_destinatario_num_reg_id_trib" value="<?php echo set_value('comercioExterior[Destinatario][NumRegIdTrib]', isset($com_ex->destinatario) ? $com_ex->destinatario->numregidtrib : ''); ?>" placeholder="Num Reg Id Trib" minlength="6" maxlength="40" data-next="cce_destinatario_rfc">
+                                <input type="text" name="comercioExterior[destinatario][numRegIdTrib]" class="span12 sikey" id="cce_destinatario_num_reg_id_trib" value="<?php echo set_value('comercioExterior[destinatario][numRegIdTrib]', isset($com_ex->destinatario) ? $com_ex->destinatario->numregidtrib : ''); ?>" placeholder="Num Reg Id Trib" minlength="6" maxlength="40" data-next="cce_destinatario_nombre">
                               </div>
                             </div><!--/control-group -->
                           </div>
 
-                          <div class="span3">
-                            <div class="control-group">
-                              <label class="control-label" for="cce_destinatario_rfc" style="width: 80px;">Rfc <i class="icon-question-sign helpover" data-title="Rfc: Atributo opcional para expresar el RFC del destinatario de la mercancía exportada"></i></label>
-                              <div class="controls" style="margin-left: 83px;">
-                                <input type="text" name="comercioExterior[Destinatario][Rfc]" class="span12 sikey" id="cce_destinatario_rfc" value="<?php echo set_value('comercioExterior[Destinatario][Rfc]', isset($com_ex->destinatario) ? $com_ex->destinatario->rfc : ''); ?>" placeholder="Rfc" data-next="cce_destinatario_curp">
-                              </div>
-                            </div><!--/control-group -->
-                          </div>
-
-                          <div class="span3">
-                            <div class="control-group">
-                              <label class="control-label" for="cce_destinatario_curp" style="width: 80px;">Curp <i class="icon-question-sign helpover" data-title="Curp: Atributo opcional para expresar la CURP del destinatario de la mercancía cuando es persona física"></i></label>
-                              <div class="controls" style="margin-left: 83px;">
-                                <input type="text" name="comercioExterior[Destinatario][Curp]" class="span12 sikey" id="cce_destinatario_curp" value="<?php echo set_value('comercioExterior[Destinatario][Curp]', isset($com_ex->destinatario) ? $com_ex->destinatario->curp : ''); ?>" placeholder="Curp" data-next="cce_destinatario_nombre">
-                              </div>
-                            </div><!--/control-group -->
-                          </div>
-
-                          <div class="span3">
+                          <div class="span5">
                             <div class="control-group">
                               <label class="control-label" for="cce_destinatario_nombre" style="width: 80px;">Nombre <i class="icon-question-sign helpover" data-title="Nombre: Atributo opcional para expresar el nombre completo, denominación o razón social del destinatario de la mercancía exportada"></i></label>
                               <div class="controls" style="margin-left: 83px;">
-                                <input type="text" name="comercioExterior[Destinatario][Nombre]" class="span12 sikey" id="cce_destinatario_nombre" value="<?php echo set_value('comercioExterior[Destinatario][Nombre]', isset($com_ex->destinatario) ? $com_ex->destinatario->nombre : ''); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
+                                <input type="text" name="comercioExterior[destinatario][nombre]" class="span12 sikey" id="cce_destinatario_nombre" value="<?php echo set_value('comercioExterior[destinatario][nombre]', isset($com_ex->destinatario) ? $com_ex->destinatario->nombre : ''); ?>" placeholder="Nombre" data-next="cce_destinatario_dom_calle">
                               </div>
                             </div><!--/control-group -->
                           </div>
@@ -1307,16 +1455,16 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Calle]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Calle]', isset($com_ex->destinatario) ? $com_ex->destinatario->calle : ''); ?>" id="cce_destinatario_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cce_destinatario_dom_numeroExterior"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][NumeroExterior]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][NumeroExterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_exterior : ''); ?>" id="cce_destinatario_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_numeroInterior"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][NumeroInterior]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][NumeroInterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_interior : ''); ?>" id="cce_destinatario_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_referencia"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Referencia]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Referencia]', isset($com_ex->destinatario) ? $com_ex->destinatario->referencia : ''); ?>" id="cce_destinatario_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cce_destinatario_dom_pais"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Pais]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Pais]', isset($com_ex->destinatario) ? $com_ex->destinatario->pais : ''); ?>" id="cce_destinatario_dom_pais" maxlength="40" class="span12 sikey" data-next="cce_destinatario_dom_estado"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Estado]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Estado]', isset($com_ex->destinatario) ? $com_ex->destinatario->estado : ''); ?>" id="cce_destinatario_dom_estado" maxlength="60" class="span12 sikey" data-next="cce_destinatario_dom_municipio"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Municipio]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Municipio]', isset($com_ex->destinatario) ? $com_ex->destinatario->municipio : ''); ?>" id="cce_destinatario_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_localidad"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Localidad]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][CodigoPostal]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][CodigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
-                                <td class="center"><input type="text" name="comercioExterior[Destinatario][Domicilio][Colonia]" value="<?php echo set_value('comercioExterior[Destinatario][Domicilio][Colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][calle]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][calle]', isset($com_ex->destinatario) ? $com_ex->destinatario->calle : ''); ?>" id="cce_destinatario_dom_calle" minlength="1" maxlength="100" class="span12 sikey" data-next="cce_destinatario_dom_numeroExterior"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroExterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroExterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_exterior : ''); ?>" id="cce_destinatario_dom_numeroExterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_numeroInterior"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][numeroInterior]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][numeroInterior]', isset($com_ex->destinatario) ? $com_ex->destinatario->numero_interior : ''); ?>" id="cce_destinatario_dom_numeroInterior" minlength="1" maxlength="55" class="span12 sikey" data-next="cce_destinatario_dom_referencia"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][referencia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][referencia]', isset($com_ex->destinatario) ? $com_ex->destinatario->referencia : ''); ?>" id="cce_destinatario_dom_referencia" minlength="1" maxlength="250" class="span12 sikey" data-next="cce_destinatario_dom_pais"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][pais]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][pais]', isset($com_ex->destinatario) ? $com_ex->destinatario->pais : ''); ?>" id="cce_destinatario_dom_pais" maxlength="40" class="span12 sikey" data-next="cce_destinatario_dom_estado"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][estado]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][estado]', isset($com_ex->destinatario) ? $com_ex->destinatario->estado : ''); ?>" id="cce_destinatario_dom_estado" maxlength="60" class="span12 sikey" data-next="cce_destinatario_dom_municipio"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][municipio]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][municipio]', isset($com_ex->destinatario) ? $com_ex->destinatario->municipio : ''); ?>" id="cce_destinatario_dom_municipio" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_localidad"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][localidad]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][localidad]', isset($com_ex->destinatario) ? $com_ex->destinatario->localidad : ''); ?>" id="cce_destinatario_dom_localidad" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_codigopostal"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][codigoPostal]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][codigoPostal]', isset($com_ex->destinatario) ? $com_ex->destinatario->codigo_postal : ''); ?>" class="span12 sikey" id="cce_destinatario_dom_codigopostal" minlength="1" maxlength="12" data-next="cce_destinatario_dom_colonia"></td>
+                                <td class="center"><input type="text" name="comercioExterior[destinatario][domicilio][colonia]" value="<?php echo set_value('comercioExterior[destinatario][domicilio][colonia]', isset($com_ex->destinatario) ? $com_ex->destinatario->colonia : ''); ?>" id="cce_destinatario_dom_colonia" minlength="1" maxlength="120" class="span12 sikey" data-next="cce_destinatario_dom_calle"></td>
                                 <!-- <td>
                                   <select name="comercioExterior[Destinatario][Domicilio][Estado]" id="cce_destinatario_dom_estado" class="span12 sikey" data-next="cce_destinatario_dom_pais">
                                     <option value=""></option>
@@ -1357,8 +1505,8 @@
 
                         <select id="mercancias-unidades" style="display: none;">
                           <option value=""></option>
-                          <?php foreach ($unidad_medidas as $clave => $unidad) { ?>
-                            <option value="<?php echo $clave; ?>"><?php echo $unidad; ?></option>
+                          <?php foreach ($ceUnidades as $clave => $unidad) { ?>
+                            <option value="<?php echo $clave; ?>"><?php echo $clave.' - '.$unidad['value']; ?></option>
                           <?php } ?>
                         </select>
 
@@ -1376,38 +1524,38 @@
                             </thead>
                             <tbody>
                               <?php $keyindex = 0;
-                              if (isset($this->input->post("comercioExterior")['Mercancias']) && count($this->input->post("comercioExterior")['Mercancias']['NoIdentificacion']) > 0) {
-                                foreach ($this->input->post("comercioExterior")['Mercancias']['NoIdentificacion'] as $key => $NoIdentificacion) {
+                              if (isset($this->input->post("comercioExterior")['mercancias']) && count($this->input->post("comercioExterior")['mercancias']['noIdentificacion']) > 0) {
+                                foreach ($this->input->post("comercioExterior")['mercancias']['noIdentificacion'] as $key => $NoIdentificacion) {
                               ?>
                                 <?php $keyindex = $key; ?>
                                   <tr>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][NoIdentificacion][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['NoIdentificacion'][$key] ?>" class="span12 sikey" maxlength="100"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][FraccionArancelaria][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['FraccionArancelaria'][$key] ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][CantidadAduana][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['CantidadAduana'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][noIdentificacion][]" value="<?php echo $_POST['comercioExterior']['mercancias']['noIdentificacion'][$key] ?>" class="span12 sikey" maxlength="100"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][fraccionArancelaria][]" value="<?php echo $_POST['comercioExterior']['mercancias']['fraccionArancelaria'][$key] ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][cantidadAduana][]" value="<?php echo $_POST['comercioExterior']['mercancias']['cantidadAduana'][$key] ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
-                                      <select name="comercioExterior[Mercancias][UnidadAduana][]" class="span12 sikey">
+                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey">
                                         <option value=""></option>
-                                      <?php foreach ($unidad_medidas as $clave => $unidad) { ?>
-                                        <option value="<?php echo $clave; ?>" <?php echo $_POST['comercioExterior']['Mercancias']['UnidadAduana'][$key] == $clave? 'selected': '' ?>><?php echo $unidad; ?></option>
+                                      <?php foreach ($ceUnidades as $clave => $unidad) { ?>
+                                        <option value="<?php echo $clave; ?>" <?php echo $_POST['comercioExterior']['mercancias']['unidadAduana'][$key] == $clave? 'selected': '' ?>><?php echo $clave.' - '.$unidad['value']; ?></option>
                                       <?php } ?>
                                       </select>
                                     </td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorUnitarioAduana][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['ValorUnitarioAduana'][$key] ?>" class="span12 sikey vpositive"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorDolares][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['ValorDolares'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][valorUnitarioAduana][]" value="<?php echo $_POST['comercioExterior']['mercancias']['valorUnitarioAduana'][$key] ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][valorDolares][]" value="<?php echo $_POST['comercioExterior']['mercancias']['valorDolares'][$key] ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
                                       <button type="button" class="btn btn-danger btn-del-mercancias" data-index="<?php echo $key ?>"><i class="icon-remove"></i></button>
                                       <button type="button" class="btn btn-success btn-add-desc-especifica" data-index="<?php echo $key ?>"><i class="icon-plus"></i></button>
                                     </td>
                                   </tr>
                                   <?php
-                                  if (isset($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas']) &&
-                                      count($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas'][$key]['Marca']) > 0) {
-                                    foreach ($this->input->post("comercioExterior")['Mercancias']['DescripcionesEspecificas'][$key]['Marca'] as $key2 => $descEsp) { ?>
+                                  if (isset($this->input->post("comercioExterior")['mercancias']['descripcionesEspecificas']) &&
+                                      count($this->input->post("comercioExterior")['mercancias']['descripcionesEspecificas'][$key]['marca']) > 0) {
+                                    foreach ($this->input->post("comercioExterior")['mercancias']['descripcionesEspecificas'][$key]['marca'] as $key2 => $descEsp) { ?>
                                       <tr class="<?php echo $key ?>">
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][Marca][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2] ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][Modelo][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2] ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][SubModelo][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2] ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][NumeroSerie][]" value="<?php echo $_POST['comercioExterior']['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2] ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][marca][]" value="<?php echo $_POST['comercioExterior']['mercancias']['descripcionesEspecificas'][$key]['marca'][$key2] ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][modelo][]" value="<?php echo $_POST['comercioExterior']['mercancias']['descripcionesEspecificas'][$key]['modelo'][$key2] ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][subModelo][]" value="<?php echo $_POST['comercioExterior']['mercancias']['descripcionesEspecificas'][$key]['subModelo'][$key2] ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][numeroSerie][]" value="<?php echo $_POST['comercioExterior']['mercancias']['descripcionesEspecificas'][$key]['numeroSerie'][$key2] ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
                                         <td class="center">
                                           <button type="button" class="btn btn-danger btn-del-mercancias"><i class="icon-remove"></i></button>
                                         </td>
@@ -1422,19 +1570,19 @@
                               ?>
                                 <?php $keyindex = $key; ?>
                                   <tr>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][NoIdentificacion][]" value="<?php echo $mercancia->noidentificacion; ?>" class="span12 sikey" maxlength="100"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][FraccionArancelaria][]" value="<?php echo $mercancia->fraccionar_ancelaria; ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][CantidadAduana][]" value="<?php echo $mercancia->cantidad_aduana; ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][noIdentificacion][]" value="<?php echo $mercancia->noidentificacion; ?>" class="span12 sikey" maxlength="100"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][fraccionArancelaria][]" value="<?php echo $mercancia->fraccionar_ancelaria; ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][cantidadAduana][]" value="<?php echo $mercancia->cantidad_aduana; ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
-                                      <select name="comercioExterior[Mercancias][UnidadAduana][]" class="span12 sikey">
+                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey">
                                         <option value=""></option>
-                                      <?php foreach ($unidad_medidas as $clave => $unidad) { ?>
-                                          <option value="<?php echo $clave; ?>" <?php echo $clave == $mercancia->unidad_aduana ? 'selected' : '' ?>><?php echo $unidad; ?></option>
+                                      <?php foreach ($ceUnidades as $clave => $unidad) { ?>
+                                          <option value="<?php echo $clave; ?>" <?php echo $clave == $mercancia->unidad_aduana ? 'selected' : '' ?>><?php echo $clave.' - '.$unidad['value']; ?></option>
                                       <?php }?>
                                       </select>
                                     </td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorUnitarioAduana][]" value="<?php echo $mercancia->valor_unitario_aduana; ?>" class="span12 sikey vpositive"></td>
-                                    <td class="center"><input type="text" name="comercioExterior[Mercancias][ValorDolares][]" value="<?php echo $mercancia->valor_dolares; ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][valorUnitarioAduana][]" value="<?php echo $mercancia->valor_unitario_aduana; ?>" class="span12 sikey vpositive"></td>
+                                    <td class="center"><input type="text" name="comercioExterior[mercancias][valorDolares][]" value="<?php echo $mercancia->valor_dolares; ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
                                       <button type="button" class="btn btn-danger btn-del-mercancias" data-index="<?php echo $key ?>"><i class="icon-remove"></i></button>
                                       <button type="button" class="btn btn-success btn-add-desc-especifica" data-index="<?php echo $key ?>"><i class="icon-plus"></i></button>
@@ -1443,10 +1591,10 @@
                                   <?php if(isset($mercancia->esp)) {
                                     foreach ($mercancia->esp as $key2 => $descEsp) { ?>
                                       <tr class="<?php echo $key ?>">
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][Marca][]" value="<?php echo $descEsp->marca; ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][Modelo][]" value="<?php echo $descEsp->modelo; ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][SubModelo][]" value="<?php echo $descEsp->submodelo; ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
-                                        <td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas][<?php echo $key ?>][NumeroSerie][]" value="<?php echo $descEsp->numeroserie; ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][marca][]" value="<?php echo $descEsp->marca; ?>" placeholder="Marca" class="span12 sikey" maxlength="35"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][modelo][]" value="<?php echo $descEsp->modelo; ?>" placeholder="Modelo" class="span12 sikey" maxlength="80"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][subModelo][]" value="<?php echo $descEsp->submodelo; ?>" placeholder="SubModelo" class="span12 sikey" maxlength="50"></td>
+                                        <td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas][<?php echo $key ?>][numeroSerie][]" value="<?php echo $descEsp->numeroserie; ?>" placeholder="NumeroSerie" class="span12 sikey" maxlength="40"></td>
                                         <td class="center">
                                           <button type="button" class="btn btn-danger btn-del-mercancias"><i class="icon-remove"></i></button>
                                         </td>

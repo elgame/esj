@@ -13,7 +13,8 @@ class cpais_model extends CI_Model {
   {
     $sql = '';
     if ($term !== '')
-      $sql = "translate(lower(nombre),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%'";
+      $sql = "(translate(lower(nombre),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%' OR
+              translate(lower(c_pais),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($term, 'UTF-8'))."%')";
     $res = $this->db->query(" SELECT id, c_pais, nombre
         FROM otros.c_paises
         WHERE {$sql}

@@ -274,13 +274,17 @@ class facturacion extends MY_Controller {
     $formaPago         = new FormaPago();
     $usoCfdi           = new UsoCfdi();
     $tipoDeComprobante = new TipoDeComprobante();
-    // $monedas           = new Monedas();
+    $ceUnidades        = new UnidadesMedida();
+    $ceMotTraslado     = new MotivoTraslado();
+    $ceIncoterm        = new Incoterm();
 
     $params['metodosPago']       = $metodosPago->get()->all();
     $params['formaPago']         = $formaPago->get()->all();
     $params['usoCfdi']           = $usoCfdi->get()->all();
     $params['tipoDeComprobante'] = $tipoDeComprobante->get()->all();
-    // $params['monedas']           = $monedas->get()->all();
+    $params['ceUnidades']        = $ceUnidades->getCE()->all();
+    $params['ceMotTraslado']     = $ceMotTraslado->get()->all();
+    $params['ceIncoterm']        = $ceIncoterm->get()->all();
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);

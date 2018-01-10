@@ -13,7 +13,8 @@ class clocalidad_model extends CI_Model {
   {
     $sql = '';
     if (isset($params['term']))
-      $sql .= " AND translate(lower(nombre),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($params['term'], 'UTF-8'))."%'";
+      $sql .= " AND (translate(lower(nombre),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($params['term'], 'UTF-8'))."%' OR
+                    translate(lower(c_localidad),'áéíóúäëïöü','aeiouaeiou') LIKE '%".pg_escape_string(mb_strtolower($params['term'], 'UTF-8'))."%')";
     if (isset($params['c_estado'])) {
       $sql .= " AND c_estado = '{$params['c_estado']}'";
     }

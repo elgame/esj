@@ -1,4 +1,13 @@
 
+ ☐ Comercio exterior 3.3
+   - Cargar el archivo faccion_arancelariaV2.backup
+    ALTER TABLE public.fraccion_arancelaria OWNER TO programa;
+    REVOKE ALL ON TABLE public.fraccion_arancelaria FROM facturar_factura;
+    REVOKE ALL ON TABLE public.fraccion_arancelaria FROM facturar;
+    DROP TABLE otros.c_fraccion_arancelaria;
+    ALTER TABLE fraccion_arancelaria SET SCHEMA otros;
+    ALTER TABLE otros.fraccion_arancelaria RENAME TO c_fraccion_arancelaria;
+
  ✔ CFDI 3.3 @done (17-11-27 13:05) pct|pcc|san
    - Cargar catalogos catalogos33.backup, Agregar una serie T para traslados
     ALTER TABLE c_clave_prodservs SET SCHEMA otros;
