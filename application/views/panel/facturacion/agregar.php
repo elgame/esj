@@ -387,8 +387,12 @@
                                 $_POST['isCert'][$key]                  = $p->certificado === 't' ? '1' : '0';
 
                                 $cfdi_extp = json_decode($p->cfdi_ext);
-                                $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
-                                $_POST['pclave_unidad_cod'][$key] = $cfdi_extp->clave_unidad->key;
+                                $_POST['pclave_unidad'][$key]     = '';
+                                $_POST['pclave_unidad_cod'][$key] = '';
+                                if (isset($cfdi_extp->clave_unidad)) {
+                                  $_POST['pclave_unidad'][$key]     = $cfdi_extp->clave_unidad->value;
+                                  $_POST['pclave_unidad_cod'][$key] = $cfdi_extp->clave_unidad->key;
+                                }
                               }
                             } ?>
 
@@ -1112,6 +1116,7 @@
                             $com_ex = isset($borrador) && isset($borrador['ce']) ? $borrador['ce'] : null;
                             $tipo_operacion = isset($com_ex) ? $com_ex->tipo_operacion : ''; ?>
                           <select name="comercioExterior[tipoOperacion]" class="span12 sikey" id="cce_tipo_operacion" data-next="cce_clave_pedimento">
+                            <option value=""></option>
                             <option value="2" <?php echo set_select('comercioExterior[tipoOperacion]', '2', $tipo_operacion === '2' ? true : false); ?>>2 - Exportación</option>
                           </select>
                         </div>
@@ -1232,14 +1237,14 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_no_interior">No interior:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][numeroInterior]" id="cce_emisor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroInterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroInterior : ''); ?>" maxlength="50" data-next="cce_emisor_pais">
+                            <input type="text" name="comercioExterior[emisor][domicilio][numeroInterior]" id="cce_emisor_no_interior" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][numeroInterior]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->numeroInterior : ''); ?>" maxlength="50" autocomplete="nope" data-next="cce_emisor_pais">
                           </div>
                         </div>
 
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_pais">País:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][pais]" id="cce_emisor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][pais]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->pais : ''); ?>" maxlength="60" data-next="cce_emisor_estado">
+                            <input type="text" name="comercioExterior[emisor][domicilio][pais]" id="cce_emisor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][pais]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_emisor_estado">
                             <span class="cce_emisor_pais help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1247,7 +1252,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_estado">Estado:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][estado]" id="cce_emisor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][estado]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->estado : ''); ?>" maxlength="45" data-next="cce_emisor_municipio">
+                            <input type="text" name="comercioExterior[emisor][domicilio][estado]" id="cce_emisor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][estado]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_municipio">
                             <span class="cce_emisor_estado help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1255,7 +1260,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_municipio">Municipio / Delegación:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][municipio]" id="cce_emisor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][municipio]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->municipio : ''); ?>" maxlength="45" data-next="cce_emisor_localidad">
+                            <input type="text" name="comercioExterior[emisor][domicilio][municipio]" id="cce_emisor_municipio" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][municipio]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->municipio : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_localidad">
                             <span class="cce_emisor_municipio help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1263,7 +1268,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_localidad">Localidad:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][localidad]" id="cce_emisor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][localidad]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->localidad : ''); ?>" maxlength="45" data-next="cce_emisor_cp">
+                            <input type="text" name="comercioExterior[emisor][domicilio][localidad]" id="cce_emisor_localidad" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][localidad]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->localidad : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_emisor_cp">
                             <span class="cce_emisor_localidad help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1271,7 +1276,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_cp">CP:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][codigoPostal]" id="cce_emisor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][codigoPostal]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->codigoPostal : ''); ?>" maxlength="10" data-next="cce_emisor_colonia">
+                            <input type="text" name="comercioExterior[emisor][domicilio][codigoPostal]" id="cce_emisor_cp" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][codigoPostal]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->codigoPostal : ''); ?>" maxlength="10" autocomplete="nope" data-next="cce_emisor_colonia">
                             <span class="cce_emisor_cp help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1279,7 +1284,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_emisor_colonia">Colonia:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[emisor][domicilio][colonia]" id="cce_emisor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][colonia]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->colonia : ''); ?>" maxlength="60" data-next="cce_receptor_num_reg_id_trib">
+                            <input type="text" name="comercioExterior[emisor][domicilio][colonia]" id="cce_emisor_colonia" class="span12 sikey" value="<?php echo set_value('comercioExterior[emisor][domicilio][colonia]', isset($com_ex->extra->emisor) ? $com_ex->extra->emisor->domicilio->colonia : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_receptor_num_reg_id_trib">
                             <span class="cce_emisor_colonia help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1328,7 +1333,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_receptor_pais">País:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[receptor][domicilio][pais]" id="cce_receptor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][pais]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->pais : ''); ?>" maxlength="60" data-next="cce_receptor_estado">
+                            <input type="text" name="comercioExterior[receptor][domicilio][pais]" id="cce_receptor_pais" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][pais]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->pais : ''); ?>" maxlength="60" autocomplete="nope" data-next="cce_receptor_estado">
                             <span class="cce_receptor_pais help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1336,7 +1341,7 @@
                         <div class="control-group">
                           <label class="control-label" for="cce_receptor_estado">Estado:</label>
                           <div class="controls">
-                            <input type="text" name="comercioExterior[receptor][domicilio][estado]" id="cce_receptor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][estado]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->estado : ''); ?>" maxlength="45" data-next="cce_receptor_municipio">
+                            <input type="text" name="comercioExterior[receptor][domicilio][estado]" id="cce_receptor_estado" class="span12 sikey" value="<?php echo set_value('comercioExterior[receptor][domicilio][estado]', isset($com_ex->extra->receptor) ? $com_ex->extra->receptor->domicilio->estado : ''); ?>" maxlength="45" autocomplete="nope" data-next="cce_receptor_municipio">
                             <span class="cce_receptor_estado help-block nomarg" style="color:#bd362f"></span>
                           </div>
                         </div>
@@ -1395,8 +1400,8 @@
                             </thead>
                             <tbody>
                               <tr>
-                                <td class="center"><input type="text" name="comercioExterior[propietario][numRegIdTrib]" value="<?php echo set_value('comercioExterior[propietario][numRegIdTrib]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario->numRegIdTrib : ''); ?>" id="cce_propietario_numRegIdTrib" class="span12 sikey" data-next="cce_propietario_residenciaFiscal"></td>
-                                <td class="center"><input type="text" name="comercioExterior[propietario][residenciaFiscal]" value="<?php echo set_value('comercioExterior[propietario][residenciaFiscal]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario->residenciaFiscal : ''); ?>" id="cce_propietario_residenciaFiscal" class="span12 sikey" data-next="cce_destinatario_num_reg_id_trib"></td>
+                                <td class="center"><input type="text" name="comercioExterior[propietario][numRegIdTrib]" value="<?php echo set_value('comercioExterior[propietario][numRegIdTrib]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario[0]->numRegIdTrib : ''); ?>" id="cce_propietario_numRegIdTrib" class="span12 sikey" data-next="cce_propietario_residenciaFiscal"></td>
+                                <td class="center"><input type="text" name="comercioExterior[propietario][residenciaFiscal]" value="<?php echo set_value('comercioExterior[propietario][residenciaFiscal]', isset($com_ex->extra->propietario) ? $com_ex->extra->propietario[0]->residenciaFiscal : ''); ?>" id="cce_propietario_residenciaFiscal" class="span12 sikey" data-next="cce_destinatario_num_reg_id_trib"></td>
                               </tr>
                             </tbody>
                          </table>
@@ -1533,7 +1538,7 @@
                                     <td class="center"><input type="text" name="comercioExterior[mercancias][fraccionArancelaria][]" value="<?php echo $_POST['comercioExterior']['mercancias']['fraccionArancelaria'][$key] ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
                                     <td class="center"><input type="text" name="comercioExterior[mercancias][cantidadAduana][]" value="<?php echo $_POST['comercioExterior']['mercancias']['cantidadAduana'][$key] ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
-                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey">
+                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey ceUnidadAduana">
                                         <option value=""></option>
                                       <?php foreach ($ceUnidades as $clave => $unidad) { ?>
                                         <option value="<?php echo $clave; ?>" <?php echo $_POST['comercioExterior']['mercancias']['unidadAduana'][$key] == $clave? 'selected': '' ?>><?php echo $clave.' - '.$unidad['value']; ?></option>
@@ -1574,7 +1579,7 @@
                                     <td class="center"><input type="text" name="comercioExterior[mercancias][fraccionArancelaria][]" value="<?php echo $mercancia->fraccionar_ancelaria; ?>" class="fraccionArancelaria span12 sikey" maxlength="20"></td>
                                     <td class="center"><input type="text" name="comercioExterior[mercancias][cantidadAduana][]" value="<?php echo $mercancia->cantidad_aduana; ?>" class="span12 sikey vpositive"></td>
                                     <td class="center">
-                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey">
+                                      <select name="comercioExterior[mercancias][unidadAduana][]" class="span12 sikey ceUnidadAduana">
                                         <option value=""></option>
                                       <?php foreach ($ceUnidades as $clave => $unidad) { ?>
                                           <option value="<?php echo $clave; ?>" <?php echo $clave == $mercancia->unidad_aduana ? 'selected' : '' ?>><?php echo $clave.' - '.$unidad['value']; ?></option>

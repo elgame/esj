@@ -336,7 +336,7 @@ class clientes_model extends CI_Model {
 
 		$res = $this->db->query(
       	"SELECT c.id_cliente, c.nombre_fiscal, c.rfc, c.calle, c.no_exterior, c.no_interior, c.colonia, c.municipio, c.estado, c.cp,
-          c.telefono, c.dias_credito, c.metodo_pago, c.ultimos_digitos, c.id_empresa, e.nombre_fiscal AS empresa
+        c.pais, c.curp, c.telefono, c.dias_credito, c.metodo_pago, c.ultimos_digitos, c.id_empresa, e.nombre_fiscal AS empresa
   			FROM clientes c INNER JOIN empresas e ON e.id_empresa = c.id_empresa
   			WHERE c.status = 'ac'
         	{$sql}

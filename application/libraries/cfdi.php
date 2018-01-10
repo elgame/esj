@@ -1029,6 +1029,24 @@ class cfdi{
       $datosApi['metodoDePago'] = '';
     }
 
+    if (!empty($_POST['comercioExterior']['tipoOperacion']) ||
+        !empty($_POST['comercioExterior']['clavePedimento']) ||
+        !empty($_POST['comercioExterior']['certificadoOrigen']) ) {
+      $datosApi['comercioExterior'] = $_POST['comercioExteriorPros'];
+
+      $datosApi['emisor']['calle']      = $datosApi['comercioExterior']['emisor']['domicilio']['calle'];
+      $datosApi['emisor']['noExterior'] = $datosApi['comercioExterior']['emisor']['domicilio']['numeroExterior'];
+      $datosApi['emisor']['noInterior'] = $datosApi['comercioExterior']['emisor']['domicilio']['numeroInterior'];
+      $datosApi['emisor']['colonia']    = $datosApi['comercioExterior']['emisor']['domicilio']['colonia'];
+      $datosApi['emisor']['localidad']  = $datosApi['comercioExterior']['emisor']['domicilio']['localidad'];
+      $datosApi['emisor']['municipio']  = $datosApi['comercioExterior']['emisor']['domicilio']['municipio'];
+      $datosApi['emisor']['estado']     = $datosApi['comercioExterior']['emisor']['domicilio']['estado'];
+      $datosApi['emisor']['pais']       = $datosApi['comercioExterior']['emisor']['domicilio']['pais'];
+      $datosApi['emisor']['cp']         = $datosApi['comercioExterior']['emisor']['domicilio']['codigoPostal'];
+      if ($tipoComprobante !== 'T')
+        unset($datosApi['comercioExterior']['propietario']);
+    }
+
     return $datosApi;
   }
 

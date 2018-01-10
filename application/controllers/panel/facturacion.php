@@ -887,33 +887,37 @@ class facturacion extends MY_Controller {
       'rules'   => ''
     );
 
-    if (!empty($this->input->post('comercioExterior')['clave_pedimento']) ||
-      !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-      !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-      !empty($this->input->post('comercioExterior')['incoterm']) ) {
+    if (!empty($this->input->post('comercioExterior')['tipoOperacion']) ||
+      !empty($this->input->post('comercioExterior')['clavePedimento']) ||
+      !empty($this->input->post('comercioExterior')['certificadoOrigen']) ) {
       array_push($rules,
           array(
-            'field'   => 'comercioExterior[tipo_operacion]',
+            'field'   => 'comercioExterior[motivoTraslado]',
+            'label'   => 'Motivo traslado',
+            'rules'   => ''
+          ), // callback_comercio_exterior_check
+          array(
+            'field'   => 'comercioExterior[tipoOperacion]',
             'label'   => 'Tipo de operacion',
-            'rules'   => 'required|callback_comercio_exterior_check'
-          ),
+            'rules'   => 'required'
+          ), // callback_comercio_exterior_check
           array(
-            'field'   => 'comercioExterior[clave_pedimento]',
+            'field'   => 'comercioExterior[clavePedimento]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[certificado_origen]',
+            'field'   => 'comercioExterior[certificadoOrigen]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[num_certificado_origen]',
+            'field'   => 'comercioExterior[numCertificadoOrigen]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[numero_exportador_confiable]',
+            'field'   => 'comercioExterior[numeroExportadorConfiable]',
             'label'   => '',
             'rules'   => ''
           ),
@@ -933,132 +937,217 @@ class facturacion extends MY_Controller {
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[tipocambio_USD]',
+            'field'   => 'comercioExterior[tipoCambioUSD]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[total_USD]',
+            'field'   => 'comercioExterior[totalUSD]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Emisor][Curp]',
+            'field'   => 'comercioExterior[emisor][curp]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Receptor][NumRegIdTrib]',
-            'label'   => 'Receptor NumRegIdTrib',
-            'rules'   => 'required|min_length[6]|max_length[40]'
-          ),
-          array(
-            'field'   => 'comercioExterior[Receptor][Curp]',
+            'field'   => 'comercioExterior[emisor][domicilio][calle]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][NumRegIdTrib]',
+            'field'   => 'comercioExterior[emisor][domicilio][numeroExterior]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Rfc]',
+            'field'   => 'comercioExterior[emisor][domicilio][numeroInterior]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Curp]',
+            'field'   => 'comercioExterior[emisor][domicilio][pais]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Nombre]',
+            'field'   => 'comercioExterior[emisor][domicilio][estado]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Calle]',
+            'field'   => 'comercioExterior[emisor][domicilio][municipio]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[emisor][domicilio][localidad]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[emisor][domicilio][codigoPostal]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[emisor][domicilio][colonia]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][numRegIdTrib]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][calle]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][numeroExterior]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][numeroInterior]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][pais]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][estado]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][municipio]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][localidad]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][codigoPostal]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[receptor][domicilio][colonia]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[propietario][numRegIdTrib]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[propietario][residenciaFiscal]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[destinatario][numRegIdTrib]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[destinatario][nombre]',
+            'label'   => '',
+            'rules'   => ''
+          ),
+          array(
+            'field'   => 'comercioExterior[destinatario][domicilio][calle]',
             'label'   => 'Destinatario Calle',
             'rules'   => 'required|max_length[100]'
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][NumeroExterior]',
+            'field'   => 'comercioExterior[destinatario][domicilio][numeroExterior]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][NumeroInterior]',
+            'field'   => 'comercioExterior[destinatario][domicilio][numeroInterior]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Referencia]',
+            'field'   => 'comercioExterior[destinatario][domicilio][referencia]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Pais]',
+            'field'   => 'comercioExterior[destinatario][domicilio][pais]',
             'label'   => 'Destinatario Pais',
             'rules'   => 'required'
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Estado]',
+            'field'   => 'comercioExterior[destinatario][domicilio][estado]',
             'label'   => 'Destinatario Estado',
             'rules'   => 'required|max_length[30]'
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Municipio]',
+            'field'   => 'comercioExterior[destinatario][domicilio][municipio]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Localidad]',
+            'field'   => 'comercioExterior[destinatario][domicilio][localidad]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][CodigoPostal]',
+            'field'   => 'comercioExterior[destinatario][domicilio][codigoPostal]',
             'label'   => 'Destinatario CodigoPostal',
             'rules'   => 'required|max_length[12]'
           ),
           array(
-            'field'   => 'comercioExterior[Destinatario][Domicilio][Colonia]',
+            'field'   => 'comercioExterior[destinatario][domicilio][colonia]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][NoIdentificacion][]',
+            'field'   => 'comercioExterior[mercancias][noIdentificacion][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][FraccionArancelaria][]',
+            'field'   => 'comercioExterior[mercancias][fraccionArancelaria][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][CantidadAduana][]',
+            'field'   => 'comercioExterior[mercancias][cantidadAduana][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][UnidadAduana][]',
+            'field'   => 'comercioExterior[mercancias][unidadAduana][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][ValorUnitarioAduana][]',
+            'field'   => 'comercioExterior[mercancias][valorUnitarioAduana][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][ValorDolares][]',
+            'field'   => 'comercioExterior[mercancias][valorDolares][]',
             'label'   => '',
             'rules'   => ''
           ),
           array(
-            'field'   => 'comercioExterior[Mercancias][DescripcionesEspecificas][]',
+            'field'   => 'comercioExterior[mercancias][descripcionesEspecificas][]',
             'label'   => '',
             'rules'   => ''
           )
@@ -1246,30 +1335,30 @@ class facturacion extends MY_Controller {
     $empresa = isset($empresa['info']) ? $empresa['info'] : null;
     $cliente = isset($cliente['info']) ? $cliente['info'] : null;
 
-    if (!$this->validateTImporte($inputs['comercioExterior']['tipocambio_USD'])) {
+    if (!$this->validateTImporte($inputs['comercioExterior']['tipoCambioUSD'])) {
       $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Cambio USD no es valido, maximo 6 decimales.");
       return false;
     }
-    if (!$this->validateTImporte($inputs['comercioExterior']['total_USD'])) {
+    if (!$this->validateTImporte($inputs['comercioExterior']['totalUSD'])) {
       $this->form_validation->set_message('comercio_exterior_check', "El Total USD no es valido, maximo 6 decimales.");
       return false;
     }
-    if (!$this->validateTCurpLite($inputs['comercioExterior']['Emisor']['Curp'])) {
+    if (!$this->validateTCurpLite($inputs['comercioExterior']['emisor']['curp'])) {
       $this->form_validation->set_message('comercio_exterior_check', "La CURP del Emisor no es valida.");
       return false;
     }
-    if (!$this->validateTCurpLite($inputs['comercioExterior']['Receptor']['Curp'])) {
-      $this->form_validation->set_message('comercio_exterior_check', "La CURP del Receptor no es valida.");
-      return false;
-    }
-    if (!$this->validateTCurpLite($inputs['comercioExterior']['Destinatario']['Curp'])) {
-      $this->form_validation->set_message('comercio_exterior_check', "La CURP del Destinatario no es valida.");
-      return false;
-    }
-    if (!$this->validateTRfcLite($inputs['comercioExterior']['Destinatario']['Rfc'])) {
-      $this->form_validation->set_message('comercio_exterior_check', "El RFC del Destinatario no es valido.");
-      return false;
-    }
+    // if (!$this->validateTCurpLite($inputs['comercioExterior']['receptor']['Curp'])) {
+    //   $this->form_validation->set_message('comercio_exterior_check', "La CURP del Receptor no es valida.");
+    //   return false;
+    // }
+    // if (!$this->validateTCurpLite($inputs['comercioExterior']['Destinatario']['Curp'])) {
+    //   $this->form_validation->set_message('comercio_exterior_check', "La CURP del Destinatario no es valida.");
+    //   return false;
+    // }
+    // if (!$this->validateTRfcLite($inputs['comercioExterior']['Destinatario']['Rfc'])) {
+    //   $this->form_validation->set_message('comercio_exterior_check', "El RFC del Destinatario no es valido.");
+    //   return false;
+    // }
 
     if (!isset($monedas[$inputs['moneda']])) { // cfdi:Comprobante:Moneda
       $this->form_validation->set_message('comercio_exterior_check', "El Tipo de Moneda no es valido, selecciona un valor diferente a '{$inputs['moneda']}'.");
@@ -1283,57 +1372,57 @@ class facturacion extends MY_Controller {
     }
 
     // cfdi:Comprobante:tipoDeComprobante
-    if (isset($inputs['comercioExterior']['tipo_operacion']) &&
-        ($inputs['comercioExterior']['tipo_operacion'] == 'A' || $inputs['comercioExterior']['tipo_operacion'] == '2')) {
-      if (!isset($inputs['dtipo_comprobante']) || $inputs['dtipo_comprobante'] != 'ingreso') {
-        $this->form_validation->set_message('comercio_exterior_check', "El tipo de comprobante debe ser ingreso, ya que tipo de operación del complemento es A o 2.");
-        return false;
-      }
-    }
+    // if (isset($inputs['comercioExterior']['tipoOperacion']) &&
+    //     ($inputs['comercioExterior']['tipoOperacion'] == 'A' || $inputs['comercioExterior']['tipoOperacion'] == '2')) {
+    //   if (!isset($inputs['dtipo_comprobante']) || $inputs['dtipo_comprobante'] != 'ingreso') {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El tipo de comprobante debe ser ingreso, ya que tipo de operación del complemento es A o 2.");
+    //     return false;
+    //   }
+    // }
 
-    // Emisor Nodos: DomicilioFiscal y ExpedidoEn
-    if (!is_array($empresa) && $empresa->pais != '' && $empresa->pais != 'MEX') {
-      $this->form_validation->set_message('comercio_exterior_check', "El campo país de la empresa tiene que ser MEX, modifica la empresa seleccionando del catalogo el país.");
-      return false;
-    }
-    if (!is_array($empresa) && $empresa->estado != '') {
-      $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$empresa->pais}' AND c_estado = '{$empresa->estado}'")->result();
-      if (count($num) === 0) {
-        $this->form_validation->set_message('comercio_exterior_check', "El campo estado de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el estado del catalogo.");
-        return false;
-      }
-    }
-    if (!is_array($empresa) && $empresa->municipio != '') {
-      $num = $this->db->query("SELECT * FROM otros.c_municipios WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}'")->result();
-      if (count($num) === 0) {
-        $this->form_validation->set_message('comercio_exterior_check', "El campo municipio de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el municipio del catalogo.");
-        return false;
-      }
-    }
-    if (!is_array($empresa) && $empresa->localidad != '') {
-      $num = $this->db->query("SELECT * FROM otros.c_localidades WHERE c_estado = '{$empresa->estado}' AND c_localidad = '{$empresa->localidad}'")->result();
-      if (count($num) === 0) {
-        $this->form_validation->set_message('comercio_exterior_check', "El campo localidad de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el localidad del catalogo.");
-        return false;
-      }
-    }
-    if (!is_array($empresa) && $empresa->cp != '') {
-      $query = "SELECT * FROM otros.c_cps WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}' AND c_cp = '{$empresa->cp}'";
-      if (!is_array($empresa) && $empresa->localidad != '')
-        $query .= " AND c_localidad = '{$empresa->localidad}'";
-      $num = $this->db->query($query)->result();
-      if (count($num) === 0) {
-        $this->form_validation->set_message('comercio_exterior_check', "El campo codigo postal de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el codigo postal del catalogo.");
-        return false;
-      }
-    }
-    if (!is_array($empresa) && $empresa->colonia != '') {
-      $num = $this->db->query("SELECT * FROM otros.c_colonias WHERE c_cp = '{$empresa->cp}' AND c_colonia = '{$empresa->colonia}'")->result();
-      if (count($num) === 0) {
-        $this->form_validation->set_message('comercio_exterior_check', "El campo colonia de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el colonia del catalogo.");
-        return false;
-      }
-    }
+    // // Emisor Nodos: DomicilioFiscal y ExpedidoEn
+    // if (!is_array($empresa) && $empresa->pais != '' && $empresa->pais != 'MEX') {
+    //   $this->form_validation->set_message('comercio_exterior_check', "El campo país de la empresa tiene que ser MEX, modifica la empresa seleccionando del catalogo el país.");
+    //   return false;
+    // }
+    // if (!is_array($empresa) && $empresa->estado != '') {
+    //   $num = $this->db->query("SELECT * FROM otros.c_estados WHERE c_pais = '{$empresa->pais}' AND c_estado = '{$empresa->estado}'")->result();
+    //   if (count($num) === 0) {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El campo estado de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el estado del catalogo.");
+    //     return false;
+    //   }
+    // }
+    // if (!is_array($empresa) && $empresa->municipio != '') {
+    //   $num = $this->db->query("SELECT * FROM otros.c_municipios WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}'")->result();
+    //   if (count($num) === 0) {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El campo municipio de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el municipio del catalogo.");
+    //     return false;
+    //   }
+    // }
+    // if (!is_array($empresa) && $empresa->localidad != '') {
+    //   $num = $this->db->query("SELECT * FROM otros.c_localidades WHERE c_estado = '{$empresa->estado}' AND c_localidad = '{$empresa->localidad}'")->result();
+    //   if (count($num) === 0) {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El campo localidad de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el localidad del catalogo.");
+    //     return false;
+    //   }
+    // }
+    // if (!is_array($empresa) && $empresa->cp != '') {
+    //   $query = "SELECT * FROM otros.c_cps WHERE c_estado = '{$empresa->estado}' AND c_municipio = '{$empresa->municipio}' AND c_cp = '{$empresa->cp}'";
+    //   if (!is_array($empresa) && $empresa->localidad != '')
+    //     $query .= " AND c_localidad = '{$empresa->localidad}'";
+    //   $num = $this->db->query($query)->result();
+    //   if (count($num) === 0) {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El campo codigo postal de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el codigo postal del catalogo.");
+    //     return false;
+    //   }
+    // }
+    // if (!is_array($empresa) && $empresa->colonia != '') {
+    //   $num = $this->db->query("SELECT * FROM otros.c_colonias WHERE c_cp = '{$empresa->cp}' AND c_colonia = '{$empresa->colonia}'")->result();
+    //   if (count($num) === 0) {
+    //     $this->form_validation->set_message('comercio_exterior_check', "El campo colonia de la empresa tiene que ser un valor del catalogo, modifica la empresa seleccionando el colonia del catalogo.");
+    //     return false;
+    //   }
+    // }
 
     // cfdi:Comprobante:Receptor
     if (!is_array($cliente) && $cliente->rfc != 'XEXX010101000') { // cfdi:Comprobante:Receptor:rfc

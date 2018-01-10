@@ -49,6 +49,7 @@ $(function(){
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
+        console.log(ui.item.item);
         $("#did_cliente").val(ui.item.id);
         createInfoCliente(ui.item.item);
         $("#dcliente").css("background-color", "#B0FFB0");
@@ -62,6 +63,8 @@ $(function(){
         $('#destinatario_nombre').val(ui.item.item.nombre_fiscal);
         $('#destinatario_rfc').val(ui.item.item.rfc);
         $('#destinatario_domicilio').val(dire);
+
+        setCeDatosEmisorRece(ui.item.item, 'receptor');
       }
   }).on("keydown", function(event){
       if(event.which == 8 || event == 46){
@@ -103,6 +106,8 @@ $(function(){
       var e = jQuery.Event("keydown");
       e.which = 8; // # Some key code value
       $("#dcliente").trigger(e).val("");
+
+      setCeDatosEmisorRece(ui.item.item);
     }
   }).on("keydown", function(event){
     if(event.which == 8 || event == 46){

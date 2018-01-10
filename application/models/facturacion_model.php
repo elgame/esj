@@ -228,7 +228,7 @@ class facturacion_model extends privilegios_model{
       $comercioe = $this->db->query(
         "SELECT id, id_factura, version, tipo_operacion, clave_pedimento, certificado_origen, num_certificado_origen,
           numero_exportador_confiable, incoterm, subdivision, observaciones, \"tipocambio_USD\", \"total_USD\", emisor_curp,
-          receptor_numregidtrib, receptor_curp
+          receptor_numregidtrib, receptor_curp, motivo_traslado, extras
          FROM facturacion_ce
          WHERE id_factura = {$idFactura}");
       if ($comercioe->num_rows() > 0) {
@@ -461,22 +461,44 @@ class facturacion_model extends privilegios_model{
 
       $inputce = $this->input->post('comercioExterior');
 
+      $extras = [
+        'version'                   => '1.1',
+        'motivoTraslado'            => isset($inputce['motivoTraslado'])? $inputce['motivoTraslado'] : '',
+        'tipoOperacion'             => isset($inputce['tipoOperacion'])? $inputce['tipoOperacion'] : '',
+        'clavePedimento'            => isset($inputce['clavePedimento'])? $inputce['clavePedimento'] : '',
+        'certificadoOrigen'         => isset($inputce['certificadoOrigen'])? $inputce['certificadoOrigen'] : '',
+        'numCertificadoOrigen'      => isset($inputce['numCertificadoOrigen'])? $inputce['numCertificadoOrigen'] : '',
+        'numeroExportadorConfiable' => isset($inputce['numeroExportadorConfiable'])? $inputce['numeroExportadorConfiable'] : '',
+        'incoterm'                  => isset($inputce['incoterm'])? $inputce['incoterm'] : '',
+        'subdivision'               => isset($inputce['subdivision'])? $inputce['subdivision'] : '',
+        'observaciones'             => isset($inputce['observaciones'])? $inputce['observaciones'] : '',
+        'tipoCambioUSD'             => isset($inputce['tipoCambioUSD'])? floatval($inputce['tipoCambioUSD']) : 0,
+        'totalUSD'                  => isset($inputce['totalUSD'])? floatval($inputce['totalUSD']) : 0,
+
+        'emisor'                    => $inputce['emisor'],
+        'receptor'                  => $inputce['receptor'],
+        'propietario'               => [$inputce['propietario']],
+        'destinatario'              => [$inputce['destinatario']],
+        'mercancias'                => [],
+      ];
       $ce = array(
         'id_factura'                  => $idFactura,
-        'version'                     => '1.0',
-        'tipo_operacion'              => isset($inputce['tipo_operacion'])? $inputce['tipo_operacion'] : '',
-        'clave_pedimento'             => isset($inputce['clave_pedimento'])? $inputce['clave_pedimento'] : '',
-        'certificado_origen'          => isset($inputce['certificado_origen'])? $inputce['certificado_origen'] : '',
-        'num_certificado_origen'      => isset($inputce['num_certificado_origen'])? $inputce['num_certificado_origen'] : '',
-        'numero_exportador_confiable' => isset($inputce['numero_exportador_confiable'])? $inputce['numero_exportador_confiable'] : '',
-        'incoterm'                    => isset($inputce['incoterm'])? $inputce['incoterm'] : '',
-        'subdivision'                 => isset($inputce['subdivision'])? $inputce['subdivision'] : '',
-        'observaciones'               => isset($inputce['observaciones'])? $inputce['observaciones'] : '',
-        'tipocambio_USD'              => isset($inputce['tipocambio_USD'])? floatval($inputce['tipocambio_USD']) : 0,
-        'total_USD'                   => isset($inputce['total_USD'])? floatval($inputce['total_USD']) : 0,
-        'emisor_curp'                 => isset($inputce['Emisor']['Curp'])? $inputce['Emisor']['Curp'] : '',
-        'receptor_curp'               => isset($inputce['Receptor']['Curp'])? $inputce['Receptor']['Curp'] : '',
-        'receptor_numregidtrib'       => isset($inputce['Receptor']['NumRegIdTrib'])? $inputce['Receptor']['NumRegIdTrib'] : '',
+        'version'                     => $extras['version'],
+        'motivo_traslado'             => $extras['motivoTraslado'],
+        'tipo_operacion'              => $extras['tipoOperacion'],
+        'clave_pedimento'             => $extras['clavePedimento'],
+        'certificado_origen'          => $extras['certificadoOrigen'],
+        'num_certificado_origen'      => $extras['numCertificadoOrigen'],
+        'numero_exportador_confiable' => $extras['numeroExportadorConfiable'],
+        'incoterm'                    => $extras['incoterm'],
+        'subdivision'                 => $extras['subdivision'],
+        'observaciones'               => $extras['observaciones'],
+        'tipocambio_USD'              => $extras['tipoCambioUSD'],
+        'total_USD'                   => $extras['totalUSD'],
+        'emisor_curp'                 => '',
+        'receptor_curp'               => '',
+        'receptor_numregidtrib'       => '',
+        'extras'                      => json_encode($extras),
         'created_at'                  => date("Y-m-d H:i:s"),
         'updated_at'                  => date("Y-m-d H:i:s")
         );
@@ -485,54 +507,68 @@ class facturacion_model extends privilegios_model{
 
       $ce = array(
         'comercio_exterior_id' => $idce,
-        'numregidtrib'         => isset($inputce['Destinatario']['NumRegIdTrib']) ? $inputce['Destinatario']['NumRegIdTrib'] : '',
-        'rfc'                  => isset($inputce['Destinatario']['Rfc']) ? $inputce['Destinatario']['Rfc'] : '',
-        'curp'                 => isset($inputce['Destinatario']['Curp']) ? $inputce['Destinatario']['Curp'] : '',
-        'nombre'               => isset($inputce['Destinatario']['Nombre']) ? $inputce['Destinatario']['Nombre'] : '',
-        'calle'                => isset($inputce['Destinatario']['Domicilio']['Calle']) ? $inputce['Destinatario']['Domicilio']['Calle'] : '',
-        'numero_exterior'      => isset($inputce['Destinatario']['Domicilio']['NumeroExterior']) ? $inputce['Destinatario']['Domicilio']['NumeroExterior'] : '',
-        'numero_interior'      => isset($inputce['Destinatario']['Domicilio']['NumeroInterior']) ? $inputce['Destinatario']['Domicilio']['NumeroInterior'] : '',
-        'colonia'              => isset($inputce['Destinatario']['Domicilio']['Colonia']) ? $inputce['Destinatario']['Domicilio']['Colonia'] : '',
-        'localidad'            => isset($inputce['Destinatario']['Domicilio']['Localidad']) ? $inputce['Destinatario']['Domicilio']['Localidad'] : '',
-        'referencia'           => isset($inputce['Destinatario']['Domicilio']['Referencia']) ? $inputce['Destinatario']['Domicilio']['Referencia'] : '',
-        'municipio'            => isset($inputce['Destinatario']['Domicilio']['Municipio']) ? $inputce['Destinatario']['Domicilio']['Municipio'] : '',
-        'estado'               => isset($inputce['Destinatario']['Domicilio']['Estado']) ? $inputce['Destinatario']['Domicilio']['Estado'] : '',
-        'pais'                 => isset($inputce['Destinatario']['Domicilio']['Pais']) ? $inputce['Destinatario']['Domicilio']['Pais'] : '',
-        'codigo_postal'        => isset($inputce['Destinatario']['Domicilio']['CodigoPostal']) ? $inputce['Destinatario']['Domicilio']['CodigoPostal'] : '',
+        'numregidtrib'         => isset($inputce['destinatario']['numRegIdTrib']) ? $inputce['destinatario']['numRegIdTrib'] : '',
+        'rfc'                  => '',
+        'curp'                 => '',
+        'nombre'               => isset($inputce['destinatario']['nombre']) ? $inputce['destinatario']['nombre'] : '',
+        'calle'                => isset($inputce['destinatario']['domicilio']['calle']) ? $inputce['destinatario']['domicilio']['calle'] : '',
+        'numero_exterior'      => isset($inputce['destinatario']['domicilio']['numeroExterior']) ? $inputce['destinatario']['domicilio']['numeroExterior'] : '',
+        'numero_interior'      => isset($inputce['destinatario']['domicilio']['numeroInterior']) ? $inputce['destinatario']['domicilio']['numeroInterior'] : '',
+        'colonia'              => isset($inputce['destinatario']['domicilio']['colonia']) ? $inputce['destinatario']['domicilio']['colonia'] : '',
+        'localidad'            => isset($inputce['destinatario']['domicilio']['localidad']) ? $inputce['destinatario']['domicilio']['localidad'] : '',
+        'referencia'           => isset($inputce['destinatario']['domicilio']['referencia']) ? $inputce['destinatario']['domicilio']['referencia'] : '',
+        'municipio'            => isset($inputce['destinatario']['domicilio']['municipio']) ? $inputce['destinatario']['domicilio']['municipio'] : '',
+        'estado'               => isset($inputce['destinatario']['domicilio']['estado']) ? $inputce['destinatario']['domicilio']['estado'] : '',
+        'pais'                 => isset($inputce['destinatario']['domicilio']['pais']) ? $inputce['destinatario']['domicilio']['pais'] : '',
+        'codigo_postal'        => isset($inputce['destinatario']['domicilio']['codigoPostal']) ? $inputce['destinatario']['domicilio']['codigoPostal'] : '',
         'created_at'           => date("Y-m-d H:i:s"),
         'updated_at'           => date("Y-m-d H:i:s")
         );
       $this->db->insert('facturacion_ce_destinatario', $ce);
 
-      if (isset($inputce['Mercancias'])) {
+      if (isset($inputce['mercancias'])) {
         $count = 0;
-        foreach ($inputce['Mercancias']['NoIdentificacion'] as $key => $value) {
+        foreach ($inputce['mercancias']['noIdentificacion'] as $key => $value) {
           $count2 = 0;
+          $extras['mercancias'][$key] = [
+            'noIdentificacion'    => $inputce['mercancias']['noIdentificacion'][$key],
+            'fraccionArancelaria' => $inputce['mercancias']['fraccionArancelaria'][$key],
+            'cantidadAduana'      => $inputce['mercancias']['cantidadAduana'][$key],
+            'unidadAduana'        => $inputce['mercancias']['unidadAduana'][$key],
+            'valorUnitarioAduana' => $inputce['mercancias']['valorUnitarioAduana'][$key],
+            'valorDolares'        => $inputce['mercancias']['valorDolares'][$key],
+          ];
           $mercancia = array(
             'comercio_exterior_id'  => $idce,
             'row'                   => $count,
-            'noidentificacion'      => $inputce['Mercancias']['NoIdentificacion'][$key],
-            'fraccionar_ancelaria'  => $inputce['Mercancias']['FraccionArancelaria'][$key],
-            'cantidad_aduana'       => $inputce['Mercancias']['CantidadAduana'][$key],
-            'unidad_aduana'         => $inputce['Mercancias']['UnidadAduana'][$key],
-            'valor_unitario_aduana' => $inputce['Mercancias']['ValorUnitarioAduana'][$key],
-            'valor_dolares'         => $inputce['Mercancias']['ValorDolares'][$key],
+            'noidentificacion'      => $inputce['mercancias']['noIdentificacion'][$key],
+            'fraccionar_ancelaria'  => $inputce['mercancias']['fraccionArancelaria'][$key],
+            'cantidad_aduana'       => $inputce['mercancias']['cantidadAduana'][$key],
+            'unidad_aduana'         => $inputce['mercancias']['unidadAduana'][$key],
+            'valor_unitario_aduana' => $inputce['mercancias']['valorUnitarioAduana'][$key],
+            'valor_dolares'         => $inputce['mercancias']['valorDolares'][$key],
             'created_at'           => date("Y-m-d H:i:s"),
             'updated_at'           => date("Y-m-d H:i:s")
           );
           $this->db->insert('facturacion_ce_mercancias', $mercancia);
 
 
-          if ( isset($inputce['Mercancias']['DescripcionesEspecificas'][$key]) && is_array($inputce['Mercancias']['DescripcionesEspecificas'][$key])) {
-            foreach ($inputce['Mercancias']['DescripcionesEspecificas'][$key]['Marca'] as $key2 => $value2) {
+          if ( isset($inputce['mercancias']['descripcionesEspecificas'][$key]) && is_array($inputce['mercancias']['descripcionesEspecificas'][$key])) {
+            foreach ($inputce['mercancias']['descripcionesEspecificas'][$key]['marca'] as $key2 => $value2) {
+              $extras['mercancias'][$key]['descripcionesEspecificas'][] = [
+                'marca'       => $inputce['mercancias']['descripcionesEspecificas'][$key]['marca'][$key2],
+                'modelo'      => $inputce['mercancias']['descripcionesEspecificas'][$key]['modelo'][$key2],
+                'subModelo'   => $inputce['mercancias']['descripcionesEspecificas'][$key]['subModelo'][$key2],
+                'numeroSerie' => $inputce['mercancias']['descripcionesEspecificas'][$key]['numeroSerie'][$key2],
+              ];
               $mercancia_esp = array(
                 'comercio_exterior_id' => $idce,
                 'row'                  => $count,
                 'row2'                 => $count2,
-                'marca'                => $inputce['Mercancias']['DescripcionesEspecificas'][$key]['Marca'][$key2],
-                'modelo'               => $inputce['Mercancias']['DescripcionesEspecificas'][$key]['Modelo'][$key2],
-                'submodelo'            => $inputce['Mercancias']['DescripcionesEspecificas'][$key]['SubModelo'][$key2],
-                'numeroserie'          => $inputce['Mercancias']['DescripcionesEspecificas'][$key]['NumeroSerie'][$key2],
+                'marca'                => $inputce['mercancias']['descripcionesEspecificas'][$key]['marca'][$key2],
+                'modelo'               => $inputce['mercancias']['descripcionesEspecificas'][$key]['modelo'][$key2],
+                'submodelo'            => $inputce['mercancias']['descripcionesEspecificas'][$key]['subModelo'][$key2],
+                'numeroserie'          => $inputce['mercancias']['descripcionesEspecificas'][$key]['numeroSerie'][$key2],
                 'created_at'           => date("Y-m-d H:i:s"),
                 'updated_at'           => date("Y-m-d H:i:s")
               );
@@ -543,7 +579,7 @@ class facturacion_model extends privilegios_model{
           ++$count;
         }
       }
-
+      return $extras;
     }
 
   /**
@@ -941,11 +977,10 @@ class facturacion_model extends privilegios_model{
       $this->db->insert('facturacion_remision_hist', array('id_remision' => $_POST['id_nr'], 'id_factura' => $idFactura));
     }
 
-    if (!empty($this->input->post('comercioExterior')['clave_pedimento']) ||
-        !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-        !empty($this->input->post('comercioExterior')['numero_exportador_confiable']) ||
-        !empty($this->input->post('comercioExterior')['incoterm']) ) {
-      $this->addComercioExterior($idFactura, $borrador);
+    if (!empty($this->input->post('comercioExterior')['tipoOperacion']) ||
+        !empty($this->input->post('comercioExterior')['clavePedimento']) ||
+        !empty($this->input->post('comercioExterior')['certificadoOrigen']) ) {
+      $_POST['comercioExteriorPros'] = $this->addComercioExterior($idFactura, $borrador);
     }
 
     // Si es un borrador
@@ -1627,6 +1662,13 @@ class facturacion_model extends privilegios_model{
             $dunidad_c = $data_unidad->cantidad>0? $data_unidad->cantidad: NULL;
           }
 
+          $cfdi_extpp = [
+            'clave_unidad' => [
+              'key'   => $_POST['pclave_unidad_cod'][$key],
+              'value' => $_POST['pclave_unidad'][$key],
+            ]
+          ];
+
           $productosFactura[] = array(
             'id_factura'       => $idBorrador,
             'id_clasificacion' => $_POST['prod_did_prod'][$key] !== '' ? $_POST['prod_did_prod'][$key] : null,
@@ -1651,6 +1693,11 @@ class facturacion_model extends privilegios_model{
             'certificado' => $_POST['isCert'][$key] === '1' ? 't' : 'f',
             'id_unidad'   => $did_unidad,
             'unidad_c'   => $dunidad_c,
+            'id_calidad'            => ($_POST['prod_did_calidad'][$key] !== ''? $_POST['prod_did_calidad'][$key]: NULL),
+            'id_tamanio'            => ($_POST['prod_did_tamanio'][$key] !== ''? $_POST['prod_did_tamanio'][$key]: NULL),
+            'descripcion2'          => $_POST['prod_ddescripcion2'][$key],
+            'no_identificacion'     => $_POST['no_identificacion'][$key],
+            'cfdi_ext'              => json_encode($cfdi_extpp),
           );
 
           if ($_POST['prod_did_prod'][$key] === '49' && !isset($seg_cer_entro['49']))
@@ -1781,6 +1828,12 @@ class facturacion_model extends privilegios_model{
       if (count($dataSeguroCerti) > 0)
       {
         $this->db->insert_batch('facturacion_seg_cert', $dataSeguroCerti);
+      }
+
+      if (!empty($this->input->post('comercioExterior')['tipoOperacion']) ||
+          !empty($this->input->post('comercioExterior')['clavePedimento']) ||
+          !empty($this->input->post('comercioExterior')['certificadoOrigen']) ) {
+        $_POST['comercioExteriorPros'] = $this->addComercioExterior($idBorrador, true);
       }
     }
 

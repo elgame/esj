@@ -221,16 +221,16 @@ var addMercancias = function () {
       indexMercancias = parseInt($("#indexMercancias").text())||0;
 
   $trHtml = $('<tr>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][NoIdentificacion]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="100"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][FraccionArancelaria]['+indexMercancias+']" value="" class="fraccionArancelaria span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="20"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][CantidadAduana]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][noIdentificacion]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="100"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][fraccionArancelaria]['+indexMercancias+']" value="" class="fraccionArancelaria span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="20"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][cantidadAduana]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
                 '<td class="center">' +
-                  '<select name="comercioExterior[Mercancias][UnidadAduana]['+indexMercancias+']" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'">' +
+                  '<select name="comercioExterior[mercancias][unidadAduana]['+indexMercancias+']" class="span12 sikey ceUnidadAduana jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'">' +
                   $("#mercancias-unidades").html() +
                   '</select>' +
                 '</td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][ValorUnitarioAduana]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][ValorDolares]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][valorUnitarioAduana]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][valorDolares]['+indexMercancias+']" value="" class="span12 sikey jumpMercancia'+jumpIndexMercancias+' vpositive" data-next="jumpMercancia'+(++jumpIndexMercancias)+'"></td>' +
                 '<td class="center">' +
                   '<button type="button" class="btn btn-danger btn-del-mercancias" data-index="'+indexMercancias+'"><i class="icon-remove"></i></button>' +
                   '<button type="button" class="btn btn-success btn-add-desc-especifica" data-index="'+indexMercancias+'"><i class="icon-plus"></i></button>' +
@@ -259,10 +259,10 @@ var addMercanciasDescEspe = function (index, $tr) {
       coproSoci = $selectAdquiriente.find('option:selected').val();
 
   $trHtml = $('<tr class="DescripcionesEspecificas'+index+'">' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas]['+index+'][Marca][]" value="" placeholder="Marca" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="35"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas]['+index+'][Modelo][]" value="" placeholder="Modelo" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="80"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas]['+index+'][SubModelo][]" value="" placeholder="SubModelo" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="50"></td>' +
-                '<td class="center"><input type="text" name="comercioExterior[Mercancias][DescripcionesEspecificas]['+index+'][NumeroSerie][]" value="" placeholder="NumeroSerie" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="40"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas]['+index+'][marca][]" value="" placeholder="Marca" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="35"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas]['+index+'][modelo][]" value="" placeholder="Modelo" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="80"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas]['+index+'][subModelo][]" value="" placeholder="SubModelo" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="50"></td>' +
+                '<td class="center"><input type="text" name="comercioExterior[mercancias][descripcionesEspecificas]['+index+'][numeroSerie][]" value="" placeholder="NumeroSerie" class="span12 sikey jumpMercancia'+jumpIndexMercancias+'" data-next="jumpMercancia'+(++jumpIndexMercancias)+'" maxlength="40"></td>' +
                 '<td class="center">' +
                   '<button type="button" class="btn btn-danger btn-del-mercancias"><i class="icon-remove"></i></button>' +
                 '</td>' +
@@ -282,7 +282,251 @@ var addMercanciasDescEspe = function (index, $tr) {
 var autocompleteCatalogos = function () {
   var $dpais =  $("#cce_destinatario_dom_pais"), $destado = $("#cce_destinatario_dom_estado"),
       $dmunicipio = $("#cce_destinatario_dom_municipio"), $dlocalidad = $("#cce_destinatario_dom_localidad"),
-      $dcp = $("#cce_destinatario_dom_codigopostal"), $dcolonia = $("#cce_destinatario_dom_colonia");
+      $dcp = $("#cce_destinatario_dom_codigopostal"), $dcolonia = $("#cce_destinatario_dom_colonia"),
+      $cce_emisor_pais = $("#cce_emisor_pais"), $cce_emisor_estado = $("#cce_emisor_estado"), $cce_emisor_municipio = $("#cce_emisor_municipio"),
+      $cce_emisor_localidad = $("#cce_emisor_localidad"), $cce_emisor_cp = $("#cce_emisor_cp"), $cce_emisor_colonia = $("#cce_emisor_colonia"),
+      $cce_receptor_pais = $("#cce_receptor_pais"), $cce_receptor_estado = $("#cce_receptor_estado"),
+      $cce_propietario_residenciaFiscal = $("#cce_propietario_residenciaFiscal");
+
+  $cce_propietario_residenciaFiscal.autocomplete({
+    source: base_url + 'panel/catalogos/cpaises',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_propietario_residenciaFiscal.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_propietario_residenciaFiscal.val(ui.item.id);
+        $("span.cce_propietario_residenciaFiscal").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_propietario_residenciaFiscal.css("background-color", "#FFD071");
+      $("span.cce_propietario_residenciaFiscal").hide();
+    }
+  });
+
+  // ---------------------------------
+
+  $cce_receptor_pais.autocomplete({
+    source: base_url + 'panel/catalogos/cpaises',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_receptor_pais.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_receptor_pais.val(ui.item.id);
+        $("span.cce_receptor_pais").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_receptor_pais.css("background-color", "#FFD071");
+      $("span.cce_receptor_pais").hide();
+    }
+  });
+
+  $cce_receptor_estado.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/cestados',
+        dataType: "json",
+        data: {
+          'c_pais': $cce_receptor_pais.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_receptor_estado.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_receptor_estado.val(ui.item.id);
+        $("span.cce_receptor_estado").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_receptor_estado.css("background-color", "#FFD071");
+      $("span.cce_receptor_estado").hide();
+    }
+  });
+
+  // -------------------------------------------------
+
+  $cce_emisor_pais.autocomplete({
+    source: base_url + 'panel/catalogos/cpaises',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_pais.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_pais.val(ui.item.id);
+        $("span.cce_emisor_pais").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_pais.css("background-color", "#FFD071");
+      $("span.cce_emisor_pais").hide();
+    }
+  });
+
+  $cce_emisor_estado.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/cestados',
+        dataType: "json",
+        data: {
+          'c_pais': $cce_emisor_pais.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_estado.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_estado.val(ui.item.id);
+        $("span.cce_emisor_estado").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_estado.css("background-color", "#FFD071");
+      $("span.cce_emisor_estado").hide();
+    }
+  });
+
+  $cce_emisor_municipio.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/cmunicipios',
+        dataType: "json",
+        data: {
+          'c_estado': $cce_emisor_estado.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_municipio.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_municipio.val(ui.item.id);
+        $("span.cce_emisor_municipio").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_municipio.css("background-color", "#FFD071");
+      $("span.cce_emisor_municipio").hide();
+    }
+  });
+
+  $cce_emisor_localidad.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/clocalidades',
+        dataType: "json",
+        data: {
+          'c_estado': $cce_emisor_estado.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_localidad.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_localidad.val(ui.item.id);
+        $("span.cce_emisor_localidad").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_localidad.css("background-color", "#FFD071");
+      $("span.cce_emisor_localidad").hide();
+    }
+  });
+
+  $cce_emisor_cp.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/ccps',
+        dataType: "json",
+        data: {
+          'c_estado': $cce_emisor_estado.val(),
+          'c_municipio': $cce_emisor_municipio.val(),
+          'c_localidad': $cce_emisor_localidad.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_cp.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_cp.val(ui.item.id);
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_cp.css("background-color", "#FFD071");
+    }
+  });
+
+  $cce_emisor_colonia.autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url: base_url + 'panel/catalogos/ccolonias',
+        dataType: "json",
+        data: {
+          'c_cp': $cce_emisor_cp.val(),
+          'term': request.term,
+        },
+        success: function( data ) {
+          response( data );
+        }
+      });
+    },
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $cce_emisor_colonia.css("background-color", "#A1F57A");
+      setTimeout(function(){
+        $cce_emisor_colonia.val(ui.item.id);
+        $("span.cce_emisor_colonia").text(ui.item.value).show();
+      }, 100);
+    }
+  }).on("keydown", function(event) {
+    if(event.which == 8 || event.which == 46) {
+      $cce_emisor_colonia.css("background-color", "#FFD071");
+      $("span.cce_emisor_colonia").hide();
+    }
+  });
+
+  // -------------------------------------------------
 
   $dpais.autocomplete({
     source: base_url + 'panel/catalogos/cpaises',
@@ -454,6 +698,18 @@ var autocompleteCatalogos = function () {
 
 };
 
+var setCeDatosEmisorRece = function (data, tipo = 'emisor') {
+  $('#cce_'+tipo+'_calle').val(data.calle)
+  $('#cce_'+tipo+'_no_exterior').val(data.no_exterior)
+  $('#cce_'+tipo+'_no_interior').val(data.no_interior)
+  $('#cce_'+tipo+'_pais').val(data.pais)
+  $('#cce_'+tipo+'_estado').val(data.estado)
+  $('#cce_'+tipo+'_municipio').val(data.municipio)
+  $('#cce_'+tipo+'_localidad').val(data.localidad)
+  $('#cce_'+tipo+'_cp').val(data.cp)
+  $('#cce_'+tipo+'_colonia').val(data.colonia)
+};
+
 // Autocomplete para las empresas.
 var autocompleteFraccionArancelaria = function () {
   $('#table-mercancias').on('focus', 'input.fraccionArancelaria:not(.ui-autocomplete-input)', function(event) {
@@ -462,9 +718,12 @@ var autocompleteFraccionArancelaria = function () {
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
-        var $empresa =  $(this);
+        var $empresa =  $(this),
+        $tr = $empresa.parent().parent();
 
         $empresa.val(ui.item.id).css("background-color", "#A1F57A");
+        $tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]').prop('selected', true);
+        console.log($tr.find('select.ceUnidadAduana option[value="'+ui.item.item.unidad+'"]'), $tr);
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {

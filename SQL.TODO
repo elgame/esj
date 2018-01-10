@@ -7,6 +7,8 @@
     DROP TABLE otros.c_fraccion_arancelaria;
     ALTER TABLE fraccion_arancelaria SET SCHEMA otros;
     ALTER TABLE otros.fraccion_arancelaria RENAME TO c_fraccion_arancelaria;
+    ALTER TABLE public.facturacion_ce ADD COLUMN motivo_traslado character varying(10);
+    ALTER TABLE public.facturacion_ce ADD COLUMN extras json;
 
  ✔ CFDI 3.3 @done (17-11-27 13:05) pct|pcc|san
    - Cargar catalogos catalogos33.backup, Agregar una serie T para traslados
