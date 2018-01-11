@@ -1043,6 +1043,10 @@ class cfdi{
       $datosApi['emisor']['estado']     = $datosApi['comercioExterior']['emisor']['domicilio']['estado'];
       $datosApi['emisor']['pais']       = $datosApi['comercioExterior']['emisor']['domicilio']['pais'];
       $datosApi['emisor']['cp']         = $datosApi['comercioExterior']['emisor']['domicilio']['codigoPostal'];
+
+      $datosApi['receptor']['numRegIdTrib'] = $datosApi['comercioExterior']['receptor']['numRegIdTrib'];
+      $datosApi['comercioExterior']['receptor']['numRegIdTrib'] = '';
+
       if ($tipoComprobante !== 'T')
         unset($datosApi['comercioExterior']['propietario']);
     }

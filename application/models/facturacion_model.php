@@ -4698,6 +4698,7 @@ class facturacion_model extends privilegios_model{
     // Comercio Exterior //
     ///////////////////////
     if (isset($factura['ce'])) {
+      $ceExtras = json_decode($factura['ce']->extras);
       $pdf->SetFillColor(0, 171, 72);
       $pdf->SetXY(0, $pdf->GetY() + 1);
       $pdf->Cell(216, 1, "", 0, 0, 'L', 1);
@@ -4706,7 +4707,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFillColor(242, 242, 242);
       $pdf->SetTextColor(0, 0, 0);
       $pdf->SetXY(0, $pdf->GetY() + 1);
-      $pdf->Cell(216, 4, "Comercio Exterior:", 0, 0, 'L', 1);
+      $pdf->Cell(216, 4, "Comercio Exterior V{$ceExtras->version}", 0, 0, 'L', 1);
 
       $pdf->SetFont('helvetica','', 8);
 
@@ -4714,39 +4715,106 @@ class facturacion_model extends privilegios_model{
       $pdf->SetAligns(array('L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(35, 73, 35, 73));
       $pdf->Row(array(
-            'Tipo Operacion', $factura['ce']->tipo_operacion,
+            'Motivo traslado', $factura['ce']->motivo_traslado,
             'Incoterm', $factura['ce']->incoterm
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Clave de pedimento', $factura['ce']->clave_pedimento,
+            'Tipo Operacion', $factura['ce']->tipo_operacion,
             'Subdivision', $factura['ce']->subdivision
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Cer de origen', $factura['ce']->certificado_origen,
+            'Clave de pedimento', $factura['ce']->clave_pedimento,
             'Observaciones', $factura['ce']->observaciones
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# cer de origen', $factura['ce']->num_certificado_origen,
+            'Cer de origen', $factura['ce']->certificado_origen,
             'Tipo Cambio USD', $factura['ce']->tipocambio_USD
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '# Expt confiable', $factura['ce']->numero_exportador_confiable,
+            '# cer de origen', $factura['ce']->num_certificado_origen,
             'Total USD', $factura['ce']->total_USD
           ), false, true, null, 2, 1);
-
       $pdf->SetX(0);
       $pdf->Row(array(
-            'Emisor CURP', $factura['ce']->emisor_curp,
-            'Receptor Num Id Trib ', $factura['ce']->receptor_numregidtrib
+            '# Expt confiable', $factura['ce']->numero_exportador_confiable,
+            '', ''
+          ), false, true, null, 2, 1);
+
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->Cell(216, 4, "Emisor ".(!empty($ceExtras->emisor->curp)? "(CURP: {$ceExtras->emisor->curp})": ''), 0, 0, 'L', 1);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Calle', $ceExtras->emisor->domicilio->calle,
+            'No. Exterior', $ceExtras->emisor->domicilio->numeroExterior,
+            'No. Interior', $ceExtras->emisor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
       $pdf->Row(array(
-            '', '',
-            'Receptor CURP', $factura['ce']->receptor_curp
+            'Colonia', $ceExtras->emisor->domicilio->colonia,
+            'Localidad', $ceExtras->emisor->domicilio->localidad,
+            'Codigo Postal', $ceExtras->emisor->domicilio->codigoPostal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Municipio', $ceExtras->emisor->domicilio->municipio,
+            'Estado', $ceExtras->emisor->domicilio->estado,
+            'Pais', $ceExtras->emisor->domicilio->pais,
+            'Referencia', '',
+          ), false, true, null, 2, 1);
+
+      if ($ceExtras->propietario[0]->numRegIdTrib != '') {
+        $pdf->SetXY(0, $pdf->GetY() + 1);
+        $pdf->SetFont('helvetica','B', 8);
+        $pdf->Cell(216, 4, "Propietario ", 0, 0, 'L', 1);
+        $pdf->SetFont('helvetica','', 8);
+        $pdf->SetXY(0, $pdf->GetY() + 4);
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+        $pdf->SetWidths(array(17, 64, 17, 118));
+        $pdf->SetX(0);
+        $pdf->Row(array(
+              'Num Id Trib', $ceExtras->propietario[0]->numRegIdTrib,
+              'Nombre', $ceExtras->propietario[0]->residenciaFiscal,
+            ), false, true, null, 2, 1);
+      }
+
+      $pdf->SetXY(0, $pdf->GetY() + 1);
+      $pdf->SetFont('helvetica','B', 8);
+      $pdf->Cell(216, 4, "Receptor ".(!empty($ceExtras->receptor->numRegIdTrib)? "(Num Id Trib: {$ceExtras->receptor->numRegIdTrib})": ''), 0, 0, 'L', 1);
+      $pdf->SetFont('helvetica','', 8);
+      $pdf->SetXY(0, $pdf->GetY() + 4);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(20, 64, 20, 56, 20, 36));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Calle', $ceExtras->receptor->domicilio->calle,
+            'No. Exterior', $ceExtras->receptor->domicilio->numeroExterior,
+            'No. Interior', $ceExtras->receptor->domicilio->numeroInterior,
+          ), false, true, null, 2, 1);
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Colonia', $ceExtras->receptor->domicilio->colonia,
+            'Localidad', $ceExtras->receptor->domicilio->localidad,
+            'Codigo Postal', $ceExtras->receptor->domicilio->codigoPostal,
+          ), false, true, null, 2, 1);
+      $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
+      $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
+      $pdf->SetX(0);
+      $pdf->Row(array(
+            'Municipio', $ceExtras->receptor->domicilio->municipio,
+            'Estado', $ceExtras->receptor->domicilio->estado,
+            'Pais', $ceExtras->receptor->domicilio->pais,
+            'Referencia', '',
           ), false, true, null, 2, 1);
 
       $pdf->SetXY(0, $pdf->GetY() + 1);
@@ -4755,12 +4823,10 @@ class facturacion_model extends privilegios_model{
       $pdf->SetFont('helvetica','', 8);
       $pdf->SetXY(0, $pdf->GetY() + 4);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
-      $pdf->SetWidths(array(17, 27, 10, 27, 10, 31, 17, 77));
+      $pdf->SetWidths(array(17, 64, 17, 118));
       $pdf->SetX(0);
       $pdf->Row(array(
             'Num Id Trib', $factura['ce']->destinatario->numregidtrib,
-            'RFC', $factura['ce']->destinatario->rfc,
-            'CURP', $factura['ce']->destinatario->curp,
             'Nombre', $factura['ce']->destinatario->nombre,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L'));
