@@ -1122,9 +1122,12 @@ class nomina_fiscal_model extends CI_Model {
     //   $fechaInicio = date($fechaEntrada);
     // }
     $fechaInicio = date($fechaEntrada);
+    $fechaIniAguinaldo = date("Y-m")."-01";
+    $fechaIniAguinaldo = ($fechaInicio < $fechaIniAguinaldo)? $fechaIniAguinaldo: $fechaInicio;
 
     // Saca los dias transcurridos desde el 1 de Enero del año a la fecha de salida.
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
+    $diasTransAguinaldo = $fechaSalida->diff(new DateTime($fechaIniAguinaldo))->format("%a") + 1;
 
     $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, 4, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
     $fechaInicioSemana = new DateTime($semanaQueSeVa['fecha_inicio']);
@@ -1152,6 +1155,7 @@ class nomina_fiscal_model extends CI_Model {
               u.no_seguro,
               up.nombre as puesto,
               {$diasTranscurridos} as dias_transcurridos,
+              {$diasTransAguinaldo} AS dias_trans_aguinaldo,
               (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
               FROM nomina_asistencia
               WHERE DATE(fecha_ini) >= '{$anio}-01-01' AND DATE(fecha_fin) <= '{$anio}-12-31' AND id_usuario = u.id) as dias_faltados_anio,

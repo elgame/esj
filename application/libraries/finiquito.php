@@ -194,7 +194,7 @@ class finiquito
     $this->empleado->dias_vacaciones       = $this->diasDeVacaciones();
     $this->empleado->dias_prima_vacacional = $this->diasPrimaVacacional();
     $this->empleado->factor_integracion    = $this->factorIntegracion();
-    $this->empleado->dias_aguinaldo        = 0;
+    $this->empleado->dias_aguinaldo        = $this->empleado->dias_trans_aguinaldo;
 
     $this->empleado->nomina = new stdclass;
     $this->empleado->nomina->aguinaldo = $this->aguinaldo();
@@ -418,7 +418,7 @@ class finiquito
   {
     $diasAguinaldo = 0;
     if ($this->con_aguin) {
-      $diasAguinaldo = round(($this->empleado->dias_trabajados / 365 ) * $this->empresaConfig->aguinaldo, 2);
+      $diasAguinaldo = round(($this->empleado->dias_aguinaldo / 365 ) * $this->empresaConfig->aguinaldo, 2);
     }
     return $diasAguinaldo * $this->empleado->salario_diario;
   }
