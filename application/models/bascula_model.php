@@ -1068,8 +1068,8 @@ class bascula_model extends CI_Model {
       if($value->accion != 'p')
         $this->db->update('bascula', array('accion' => 'sa'), "id_bascula = {$value->id_bascula}");
     }
-    // if($delete)
-    // {
+    if($delete)
+    {
       //Elimina el mov del banco
       $data_bascula = $this->db->query("SELECT id_movimiento, id_bascula_pago
                                         FROM banco_movimientos_bascula
@@ -1081,9 +1081,10 @@ class bascula_model extends CI_Model {
       }
 
       $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
-    // }
-    // else
-    //   $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
+    }
+    else
+      $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
+      // $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
   }
 
 
