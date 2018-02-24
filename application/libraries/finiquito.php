@@ -225,7 +225,8 @@ class finiquito
     // $this->empleado->nomina->deducciones['imss'] = $this->dImss();
     // $this->empleado->nomina->deducciones['rcv'] = $this->dRcv();
     // $this->empleado->nomina->deducciones['infonavit'] = $this->dInfonavit();
-    $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
+    // $this->empleado->nomina->deducciones['otros'] = $this->dOtros();
+    $this->empleado->nomina->deducciones['otros'] = $this->dPrestamo();
     $this->empleado->nomina->deducciones['isr'] = $this->dIsr();
 
     // Totales Percepciones
@@ -1045,6 +1046,32 @@ class finiquito
       'ImporteExcento' => round($otros, 2),
       'total'          => round($otros, 2) + 0,
       'ApiKey'         => 'de_otros_',
+    );
+  }
+
+  /**
+   * Deduccion prestamos - 012
+   *
+   * @return array
+   */
+  public function dPrestamo()
+  {
+    // $otros = floatval($this->empleado->descuento_playeras);
+    $otros = 0;
+    $otros += $this->empleado->prestamos;
+    // foreach ($this->empleado->prestamos as $prestamo)
+    // {
+    //   $otros += floatval($prestamo['pago_semana_descontar']);
+    // }
+
+    return array(
+      'TipoDeduccion' => '012',
+      'Clave'          => $this->clavesPatron['otros'],
+      'Concepto'       => 'Anticipo de salarios',
+      'ImporteGravado' => 0,
+      'ImporteExcento' => round($otros, 2),
+      'total'          => round($otros, 2) + 0,
+      'ApiKey'         => 'de_anticipo_salarios_',
     );
   }
 
