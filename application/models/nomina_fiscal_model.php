@@ -2877,6 +2877,11 @@ class nomina_fiscal_model extends CI_Model {
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
 
+    if ($empresaId !== '')
+      $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $diaComienza = '4';
+
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq
     $configuraciones = $this->configuraciones();
