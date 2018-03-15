@@ -49,6 +49,49 @@
 	                    <input type="text" name="dcuenta" id="dcuenta" value="<?php echo set_value('dcuenta'); ?>" class="input-xlarge" required>
 	                  </div>
 	                </div>
+
+                  <div class="control-group">
+                    <label class="control-label" for="dcuenta">Asignar a: </label>
+                    <div class="controls">
+                      <select name="dtipo_cuenta">
+                        <option value=""></option>
+                        <option value="IvaTrasladado" <?php echo set_select('dtipo_cuenta'); ?>>Iva Trasladado</option>
+                        <option value="IvaXTrasladar" <?php echo set_select('dtipo_cuenta'); ?>>Iva Por Trasladar</option>
+                        <option value="IvaRetCobradoAc" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Cobrado</option>
+                        <option value="IvaRetXCobrarAc" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Por Cobrar</option>
+                        <option value="NCVenta" <?php echo set_select('dtipo_cuenta'); ?>>Nota de Credito Venta</option>
+                        <option value="IvaXAcreditar" <?php echo set_select('dtipo_cuenta'); ?>>Iva Por Acreditar</option>
+                        <option value="IvaAcreditado" <?php echo set_select('dtipo_cuenta'); ?>>Iva Acreditado</option>
+                        <option value="IvaRetXPagar100" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret 100% Por Pagar</option>
+                        <option value="IvaRetPagado100" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret 100% Pagado</option>
+                        <option value="IvaRetXPagar" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Por Pagar</option>
+                        <option value="IvaRetPagado" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Pagado</option>
+                        <option value="IvaRetXPagarHono" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Por Pagar Honorarios</option>
+                        <option value="IvaRetPagadoHono" <?php echo set_select('dtipo_cuenta'); ?>>Iva Ret Pagado Honorarios</option>
+                        <option value="IsrRetXPagarHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar Honorarios</option>
+                        <option value="IsrRetPagadoHono" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Pagado Honorarios</option>
+                        <option value="IsrRetXPagar" <?php echo set_select('dtipo_cuenta'); ?>>Isr Ret Por Pagar</option>
+                        <option value="NCGasto" <?php echo set_select('dtipo_cuenta'); ?>>Rebajas Y Bonificaciones Gastos</option>
+                        <option value="CuadreGasto" <?php echo set_select('dtipo_cuenta'); ?>>Cuenta Cuadre Gasto</option>
+                        <option value="NSueldo" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Sueldo</option>
+                        <option value="NSueldoProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Sueldo Produccion</option>
+                        <option value="NVacaciones" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Vacaciones</option>
+                        <option value="NVacacionesProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Vacaciones Produccion</option>
+                        <option value="NPrimaVacacional" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Prima Vacacional</option>
+                        <option value="NPrimaVacacionalProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Prima Vacacional Produccion</option>
+                        <option value="NAguinaldo" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Aguinaldo</option>
+                        <option value="NAguinaldoProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Aguinaldo Produccion</option>
+                        <option value="NPAsistencia" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Premio Asistencia</option>
+                        <option value="NPAsistenciaProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Premio Asistencia Produccion</option>
+                        <option value="NominaPagar" <?php echo set_select('dtipo_cuenta'); ?>>Nominas Por Pagar</option>
+                        <option value="NSubsidio" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Subsidio</option>
+                        <option value="NImss" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Imss</option>
+                        <option value="NVejez" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Cesantia Y Vejez</option>
+                        <option value="NInfonavit" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Infonavit</option>
+                        <option value="NIsr" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Isr</option>
+                      </select>
+                    </div>
+                  </div>
 								</div> <!--/span -->
 
 								<div class="span4">
@@ -56,7 +99,7 @@
 	                  <label class="control-label" style="width: 100px;">Cuentas </label>
 	                  <div class="controls" style="margin-left: 120px;">
 	                  	<div id="lista_cuentas" style="height: 300px; overflow-y: auto; border:1px #ddd solid;">
-	                  		
+
 	                    </div>
 	                  </div>
 	                </div>

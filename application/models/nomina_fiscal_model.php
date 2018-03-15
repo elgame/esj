@@ -7855,6 +7855,12 @@ class nomina_fiscal_model extends CI_Model {
       'a' => array('L', 'L', 'C')
     );
 
+    // echo "<pre>";
+    // print_r (String::suma_fechas($sem['fecha_inicio'], 0));
+    // print_r (String::obtenerDiaSemana($sem['fecha_inicio']));
+    // print_r (String::dia($sem['fecha_inicio'], 'c'));
+    // echo "</pre>";exit;
+
     $pdf->SetFont('Helvetica','B', 8);
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetFillColor(255, 255, 255); // 242, 242, 242
@@ -7864,10 +7870,14 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->Row($columnas['n'], 1, 1, null, 2, 1);
 
     $columnas = array(
-      'n' => array('', '', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'PTMOS'),
-      'w' => array(5, 60, 17, 17, 17, 17, 17, 17, 17, 21),
-      'a' => array('', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')
+      'n' => array('', '', 'S', 'L', 'M', 'M', 'J', 'V', 'D', 'Asistencias', 'Faltas', 'Incapac.'),
+      'w' => array(5, 80, 10, 10, 10, 10, 10, 10, 10, 18, 15, 15),
+      'a' => array('', 'L', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C')
     );
+
+    for ($i=0; $i < 7; $i++) {
+      $columnas['n'][$i+2] = String::dia(String::suma_fechas($sem['fecha_inicio'], $i), 'c');
+    }
 
     $pdf->SetFont('Helvetica','B', 8);
     $pdf->SetXY(6, $pdf->GetY());
@@ -7920,13 +7930,31 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->Row($columnas['n'], false, false, null, 2, 1);
           }
 
-          $pdf->SetFont('Helvetica','B', 8);
+          $dias_semana = ['', $empleado->nombre];
+          $dias_totales = ['A' => 0, 'F' => 0, 'IN' => 0];
+          for ($i=0; $i < 7; $i++) {
+            $tipo = 'A';
+            if (isset($empleado->dias_faltantes)) {
+              foreach ($empleado->dias_faltantes as $key => $value) {
+                if ($value['fecha'] == String::suma_fechas($sem['fecha_inicio'], $i)) {
+                  $tipo = strtoupper($value['tipo']);
+                }
+              }
+            }
+            $dias_totales[$tipo]++;
+            $dias_semana[] = $tipo;
+          }
+          $dias_semana[] = $dias_totales['A'];
+          $dias_semana[] = $dias_totales['F'];
+          $dias_semana[] = $dias_totales['IN'];
+
+          $pdf->SetFont('Helvetica','', 8);
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetFillColor(255, 255, 255); // 242, 242, 242
           $pdf->SetTextColor(0, 0, 0);
           $pdf->SetAligns($columnas['a']);
           $pdf->SetWidths($columnas['w']);
-          $pdf->Row(array('', $empleado->nombre, '', '', '', '', '', '', '', ''), 1, 1, null, 2, 1);
+          $pdf->Row($dias_semana, 1, true, null, 2, 1);
         }
       }
     }

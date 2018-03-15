@@ -1,4 +1,24 @@
 
+ ✔ En asistencias el botón de imprimir no imprime las asistencias como se marcan y total de asistencias @done (18-03-15 17:19)
+ ☐ En póliza de nómina no cargar los trabajadores que no estén asegurados de los descuentos y poner las cuentas en mamita
+ ☐ En póliza de nómina no carga los finiquitos
+ ☐ En cuentas por pagar cuando se agregan abonos a facturas que tienen IVA en la póliza de ingresos poner el IVA proporcional no total
+ ☐ En cuentas por cobrar al abonar factura poner opción para que seleccionen la forma de pago (efectivo, cheque, trans, etc) y en los complementos de pago detectar si es efectivo no pedir la cuenta del cliente (timbrar en público en general)
+ ☐ En movimiento de cuenta poner filtro de empresa para que muestre de todas no solo d empaque
+ ☐ Nomina Cuando están en vacaciones el jueves no lo pone como falta y no lo deja poner
+ ☐ Nomina Al poner incapacidades de repente no las guarda
+ ☐ Nomina De repente se quita un trabajador al guardar la nómina
+ ☐ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves
+ ☐ Checar los pagos masivos a pasado que duplica los pagos de una sola factura
+ ☐ De repente se registra doble en banco cuando se abona una factura de venta desde el listado
+ ☐ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar
+ ☐ En caja chica dan de baja remisiones y el abono se registra doble en cuentas pagar
+ ☐ En la aplicación de cheques marca error al imprimir el cheque en las cuentas nuevas (dio error con gubalu)
+ ✔ Camaras (admin, 12345abc, 1234abcd) IP 243 y 244 @done (18-03-15 17:35)
+ ☐ En el listado de empresas de la sesión agregar mamita.
+ ☐ Báscula de repente no imprime, no abre la ventana de imprimir se tiene que dar imprimir de nuevo
+ ☐ Acomodar los formatos de los cheques de las cuentas, cuando agrega una cuenta nueva dependiendo el banco que asigne el formato de cheque
+
  ✔ 6h Optimizar reporte de estado de cuentas @done (17-09-12 22:39)
  ✔ 1.8h Crear listado de cuentas de proveedores @done (17-09-06 23:57)
  ✔ 3.33h En el nuevo reporte de banco acumulado por empresa pintar de color los cheques en transito y no afectar el saldo, cuando desmarquen la opcion de transito poner fecha para mostrarlos en el reporte ya afectando el saldo @done (17-08-19 10:20)

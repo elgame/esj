@@ -29,8 +29,8 @@ class cuentas_cpi_model extends CI_Model {
 		$query = BDUtil::pagination(
 			"SELECT cc.id_cuenta, cc.id_padre, cc.nivel, cc.cuenta, cc.nombre, cc.tipo, e.id_empresa, e.nombre_fiscal
 			FROM cuentas_contpaq cc
-				INNER JOIN empresas e ON cc.id_empresa = e.id_empresa 
-			WHERE cc.status = 't' AND cc.id_cuenta > 0 {$sql} 
+				INNER JOIN empresas e ON cc.id_empresa = e.id_empresa
+			WHERE cc.status = 't' AND cc.id_cuenta > 0 {$sql}
 			ORDER BY cc.nombre ASC
 		", $params, true);
 		$res = $this->db->query($query['query']);
@@ -57,7 +57,8 @@ class cuentas_cpi_model extends CI_Model {
 			'cuenta'     => $this->input->post('dcuenta'),
 			'nombre'     => $this->input->post('dnombre'),
 			'tipo'       => '',
-			'id_empresa' => $this->input->post('did_empresa'),
+      'id_empresa' => $this->input->post('did_empresa'),
+			'tipo_cuenta' => $this->input->post('dtipo_cuenta'),
 		);
 		$this->db->insert('cuentas_contpaq', $data);
 		return array(true, '');
@@ -72,6 +73,7 @@ class cuentas_cpi_model extends CI_Model {
 			'cuenta'     => $this->input->post('dcuenta'),
 			'nombre'     => $this->input->post('dnombre'),
 			'id_empresa' => $this->input->post('did_empresa'),
+      'tipo_cuenta' => $this->input->post('dtipo_cuenta'),
 		);
 		$this->db->update('cuentas_contpaq', $data, "id_cuenta = '{$id_cuenta}'");
 		return array(true, '');

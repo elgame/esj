@@ -1,4 +1,7 @@
 
+ ☐ Restructuracion de las cuentas contpaq para polizas
+   ALTER TABLE public.cuentas_contpaq ADD COLUMN tipo_cuenta character varying(40);
+
  ☐ Comercio exterior 3.3
    - Cargar el archivo faccion_arancelariaV2.backup
     ALTER TABLE public.fraccion_arancelaria OWNER TO programa;
