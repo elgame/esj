@@ -1464,6 +1464,7 @@ class nomina_fiscal_model extends CI_Model {
       $errorTimbrar = true;
       $msg = isset($result->mensaje)? $result->mensaje: 'Otro error';
       $msg = isset($result['result']->mensaje)? $result['result']->mensaje: 'Otro error';
+      $msg = isset($result['result']->msg)? $result['result']->msg: 'Otro error';
       // unlink($archivo['pathXML']);
     }
 
@@ -1528,10 +1529,15 @@ class nomina_fiscal_model extends CI_Model {
 
     foreach ($nomina[0]->nomina->percepciones as $key => $value) {
       if (floatval($value['ImporteGravado']+$value['ImporteExcento']) > 0) {
-        $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
-        $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
-        $datosApi['data'][0]["{$value['ApiKey']}excento"]  = $value['ImporteExcento'];
-        $datosApi['data'][0]["{$value['ApiKey']}gravado"]  = $value['ImporteGravado'];
+        if (isset($datosApi['data'][0]["{$value['ApiKey']}clave"])) {
+          $datosApi['data'][0]["{$value['ApiKey']}excento"]  += $value['ImporteExcento'];
+          $datosApi['data'][0]["{$value['ApiKey']}gravado"]  += $value['ImporteGravado'];
+        } else {
+          $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
+          $datosApi['data'][0]["{$value['ApiKey']}concepto"] = $value['Concepto'];
+          $datosApi['data'][0]["{$value['ApiKey']}excento"]  = $value['ImporteExcento'];
+          $datosApi['data'][0]["{$value['ApiKey']}gravado"]  = $value['ImporteGravado'];
+        }
         if ($value['ApiKey'] === 'pe_indemnizacion_') {
           $datosApi['data'][0]["{$value['ApiKey']}numAñosServicio"]     = (int)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['NumAñosServicio'];
           $datosApi['data'][0]["{$value['ApiKey']}ultimoSueldoMensOrd"] = (float)$nomina[0]->nomina->percepcionesSeparacionIndemnizacion['UltimoSueldoMensOrd'];
@@ -1540,6 +1546,7 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
     }
+
     foreach ($nomina[0]->nomina->deducciones as $key => $value) {
       if (floatval($value['total']) > 0) {
         $datosApi['data'][0]["{$value['ApiKey']}clave"]    = $value['Clave'];
@@ -2869,6 +2876,11 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $anio==null? date("Y"): $anio;
     $this->load->model('empresas_model');
     $this->load->model('usuarios_departamentos_model');
+
+    if ($empresaId !== '')
+      $diaComienza = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $empresaId)->get()->row()->dia_inicia_semana;
+    else
+      $diaComienza = '4';
 
     $semana = $this->fechasDeUnaSemana($semana, $anio, $diaComienza);
     $_GET['cid_empresa'] = $empresaId; //para las cuentas del contpaq

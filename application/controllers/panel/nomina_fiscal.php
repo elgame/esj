@@ -646,7 +646,7 @@ class nomina_fiscal extends MY_Controller {
     }
     else
     {
-      redirect(base_url('panel/nomina_fiscal/finiquito/?'.String::getVarsLink(array('msg')).'&msg=8'));
+      redirect(base_url('panel/nomina_fiscal/finiquito/?'.String::getVarsLink(array('msg')).'&msg=8&custom='.$result['msg']));
     }
   }
 
@@ -1147,7 +1147,7 @@ class nomina_fiscal extends MY_Controller {
         $icono = 'success';
         break;
       case 8:
-        $txt = 'Ocurrio un error al intentar generar el finiquito, intentelo de nuevo.';
+        $txt = 'Error al intentar generar el finiquito, '.$_GET['custom'];
         $icono = 'error';
         break;
       case 9:
