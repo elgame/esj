@@ -21,6 +21,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaTrasladado'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaXTrasladar($basic=true){
@@ -36,6 +39,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaXTrasladar'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetCobradoAc($basic=true){
@@ -51,6 +57,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetCobradoAc'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXCobrarAc($basic=true){
@@ -66,6 +75,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetXCobrarAc'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNCVenta($basic=true){
@@ -81,6 +93,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NCVenta'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaXAcreditar($basic=true){
@@ -96,6 +111,9 @@ class polizas_model extends CI_Model {
       $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaXAcreditar'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaAcreditado($basic=true){
