@@ -18,7 +18,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA TRASLADADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA TRASLADADO'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
+      $sql=" AND nivel = 4 AND nombre like 'IVA TRASLADADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -36,7 +36,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA X TRASLADAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA X TRASLADAR'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
+      $sql=" AND nivel = 4 AND nombre like 'IVA X TRASLADAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -54,7 +54,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO COBRADO'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO COBRADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -72,7 +72,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like 'IVA RETENIDO X COBRAR'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 39 AND nivel = 4 AND nombre like 'IVA RETENIDO X COBRAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -90,7 +90,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%REBAJAS Y BONIFICA%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1251 AND nombre like '%REBAJAS Y BONIFICA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -108,7 +108,7 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PO%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
     if (!isset($data->cuenta)) {
@@ -126,9 +126,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA ACREDITABLE PA%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 231 AND nivel = 4 AND nombre like '%IVA ACREDITABLE PA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaAcreditado'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXPagar100($basic=true){
@@ -141,9 +144,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
+      $sql=" AND nombre like '100% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetXPagar100'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetPagado100($basic=true){
@@ -156,9 +162,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
+      $sql=" AND nombre like '100% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetPagado100'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXPagar($basic=true){
@@ -171,9 +180,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA X PAGAR'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA X PAGAR'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetXPagar'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetPagado($basic=true){
@@ -186,9 +198,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '4% RETENCION IVA PAGADO'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '4% RETENCION IVA PAGADO'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetPagado'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetXPagarHono($basic=true){
@@ -201,9 +216,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO X PAGAR%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO X PAGAR%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO X PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetXPagarHono'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIvaRetPagadoHono($basic=true){
@@ -216,9 +234,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IVA HONORARIO PAGADO%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO PAGADO%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%IVA HONORARIO PAGADO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IvaRetPagadoHono'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetXPagarHono($basic=true){
@@ -231,9 +252,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS X PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXPagarHono'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetPagadoHono($basic=true){
@@ -246,9 +270,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nivel = 4 AND nombre like '%SOBRE HONORARIOS PAGADO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetPagadoHono'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaIsrRetXPagar($basic=true){
@@ -261,9 +288,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%ISR RETENIDO BANCA%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 19 AND nombre like '%ISR RETENIDO BANCA%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'IsrRetXPagar'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNCGasto($basic=true){
@@ -276,9 +306,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%REB. Y BONF. S/C%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1276 AND nombre like '%REB. Y BONF. S/C%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NCGasto'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaCuadreGasto()
@@ -292,6 +325,10 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==14) $cuenta="50000100"; //mamita
     else{
       $cuenta = '50000100';
+    }
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'CuadreGasto'")->row();
+      $cuenta = (isset($data->cuenta)? $data->cuenta : '');
     }
     return $cuenta;
   }
@@ -308,9 +345,13 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%SUELDOS PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NSueldo': 'NSueldoProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNVacaciones($basic=true, $departamento=null){
@@ -326,9 +367,13 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%VACACIONES PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1296 AND nombre like '%VACACIONES%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NVacaciones': 'NVacacionesProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNPrimaVacacional($basic=true, $departamento=null){
@@ -344,9 +389,13 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%PRIMA VACACIONAL PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1296 AND nombre like '%PRIMA VACACIONAL%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NPrimaVacacional': 'NPrimaVacacionalProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNAguinaldo($basic=true, $departamento=null){
@@ -362,9 +411,13 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%AGUINALDOS PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1296 AND nombre like '%AGUINALDOS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NAguinaldo': 'NAguinaldoProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNHorasHex($basic=true, $departamento=null){
@@ -380,9 +433,13 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND nombre like '%COMPENSACION PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1296 AND nombre like '%HORAS EXTRAS%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NHorasHex': 'NHorasHexProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   private function getPAsistenciaContpaq($basic=true, $departamento=1)
@@ -399,12 +456,38 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //plasticos
     elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%ASISTENCIA PRODUCCION%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
+      $sql=" AND LOWER(nombre) LIKE '%ASISTENCIA%' AND id_padre = '1191'"; //tests carga las de sanjorge
     }
-    $query = $this->db->query(
-      "SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->result();
-
-    return (isset($query[0]->cuenta)? $query[0]->cuenta: '');
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NPAsistencia': 'NPAsistenciaProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
+    // return (isset($data->cuenta)? $data->cuenta: '');
+  }
+  private function getNIndemnizacionesContpaq($basic=true, $departamento=1)
+  {
+    $sql = '';
+    if ($this->empresaId==2 && $departamento == 1) $sql=" AND UPPER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1296'"; //sanjorge
+    elseif($this->empresaId==2 && $departamento != 1) $sql=" AND id_padre IN(2036, 2037) AND nombre like '%INDEMNIZACIONES%'"; //sanjorge
+    elseif($this->empresaId==6) $sql=" AND LOWER(nombre) LIKE '%ispt antes%'"; //francis -
+    elseif($this->empresaId==4) $sql=""; //Raul jorge
+    elseif($this->empresaId==3) $sql=""; //Gomez gudiño
+    elseif($this->empresaId==5) $sql=""; //vianey rocio
+    elseif($this->empresaId==12 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento == 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    elseif($this->empresaId==12 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //plasticos
+    elseif($this->empresaId==14 && $departamento != 1) $sql=" AND UPPER(nombre) like '%INDEMNIZACIONES%'"; //mamita
+    else{
+      $sql=" AND LOWER(nombre) LIKE '%INDEMNIZACIONES%' AND id_padre = '1191'"; //tests carga las de sanjorge
+    }
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $tipo_cuenta = $departamento == 1? 'NIndemnizaciones': 'NIndemnizacionesProd';
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = '{$tipo_cuenta}'")->row();
+    }
+    return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNominaPagar($basic=true){
     $sql = '';
@@ -416,9 +499,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%NOMINAS POR PAGAR%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1163 AND nombre like '%NOMINAS POR PAGAR%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NominaPagar'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNSubsidio($basic=true){
@@ -431,9 +517,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%SUBSIDIO AL EMPLEO%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 28 AND nombre like '%SUBSIDIO AL EMPLEO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NSubsidio'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNImss($basic=true){
@@ -446,9 +535,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%IMSS RETENIDO%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%IMSS RETENIDO%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nombre like '%IMSS RETENIDO%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NImss'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNVejez($basic=true){
@@ -461,9 +553,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%CENSATIA Y VEJEZ%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nombre like '%CENSATIA Y VEJEZ%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NVejez'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNInfonavit($basic=true){
@@ -476,9 +571,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%CREDITO INFONAVIT%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nombre like '%CREDITO INFONAVIT%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NInfonavit'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
   public function getCuentaNIsr($basic=true){
@@ -491,9 +589,12 @@ class polizas_model extends CI_Model {
     elseif($this->empresaId==12) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //plasticos
     elseif($this->empresaId==14) $sql=" AND nombre like '%ISPT ANTES DEL SUB%'"; //mamita
     else{
-      $this->empresaId = 2; $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
+      $sql=" AND id_padre = 1191 AND nombre like '%ISPT ANTES DEL SUB%'"; //tests carga las de sanjorge
     }
     $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} {$sql}")->row();
+    if (!isset($data->cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'NIsr'")->row();
+    }
     return $basic? (isset($data->cuenta)? $data->cuenta : ''): $data;
   }
 
@@ -1227,10 +1328,15 @@ class polizas_model extends CI_Model {
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2'])){
       $response['titulo3'] = "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
       $sql .= " AND Date(f.fecha_inicio) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
+      $sql2 .= " AND Date(f.fecha_salida) BETWEEN '".$_GET['ffecha1']."' AND '".$_GET['ffecha2']."' ";
     }
 
-    if ($this->input->get('fid_empresa') != '')
+    $dias_desface = 4;
+    if ($this->input->get('fid_empresa') != '') {
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $sql2 .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
+      $dias_desface = $this->db->select('dia_inicia_semana')->from('empresas')->where('id_empresa', $_GET['fid_empresa'])->get()->row()->dia_inicia_semana;
+    }
 
     $fecha = $_GET['ffecha1'];
     if($_GET['ffecha1'] > $_GET['ffecha2'])
@@ -1239,20 +1345,48 @@ class polizas_model extends CI_Model {
     $folio = $this->input->get('ffolio');
 
     $query = $this->db->query(
-      "SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
-          f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
-          f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento
-      FROM nomina_fiscal AS f
-        INNER JOIN usuarios AS u ON u.id = f.id_empleado
-        INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
-      WHERE f.esta_asegurado = 't'
-         {$sql}
-      ORDER BY f.id_empleado ASC, f.id_empresa ASC, f.semana ASC
+      "SELECT id_empleado, id_empresa, anio, semana, fecha_inicio, fecha_final, sueldo_semanal, vacaciones,
+            prima_vacacional, aguinaldo, horas_extras, subsidio_pagado, subsidio, imss, infonavit, isr, total_neto, fondo_ahorro,
+            vejez, id_departamente, pasistencia, departamento, indemnizaciones, tipo
+      FROM (
+        (
+          SELECT f.id_empleado, f.id_empresa, f.anio, f.semana, Date(f.fecha_inicio) AS fecha_inicio, Date(f.fecha_final) AS fecha_final, f.sueldo_semanal, f.vacaciones,
+              f.prima_vacacional, f.aguinaldo, f.horas_extras, f.subsidio_pagado, f.subsidio, f.imss, f.infonavit, f.isr, f.total_neto, f.fondo_ahorro,
+              f.vejez, u.id_departamente, f.pasistencia, ud.nombre AS departamento,
+              0 AS indemnizaciones, 'no' AS tipo
+          FROM nomina_fiscal AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE f.esta_asegurado = 't'
+             {$sql}
+        )
+        UNION
+        (
+          SELECT f.id_empleado, f.id_empresa, 0 AS anio, 0 AS semana, Date(now()) AS fecha_inicio, Date(f.fecha_salida) AS fecha_final, f.sueldo_semanal,
+            f.vacaciones, f.prima_vacacional, f.aguinaldo, 0 AS horas_extras, 0 AS subsidio_pagado, f.subsidio, 0 AS imss, 0 AS infonavit,
+            f.isr, f.total_neto, 0 AS fondo_ahorro, 0 AS vejez, u.id_departamente, 0 AS pasistencia, ud.nombre AS departamento,
+            f.indemnizaciones, 'fi' AS tipo
+          FROM finiquito AS f
+            INNER JOIN usuarios AS u ON u.id = f.id_empleado
+            INNER JOIN usuarios_departamento AS ud ON ud.id_departamento = u.id_departamente
+          WHERE u.esta_asegurado = 't'
+             {$sql2}
+        )
+      ) AS n
+      ORDER BY id_empleado ASC, id_empresa ASC, semana ASC
       ");
 
     $nominas = array();
     foreach ($query->result() as $key => $value)
     {
+      if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
+        $semana = String::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
+        $value->anio = $semana['anio'];
+        $value->semana = $semana['semana'];
+        $value->fecha_inicio = $semana['fecha_inicio'];
+        $value->fecha_final = $semana['fecha_final'];
+      }
+
       if(isset($nominas[$value->id_empresa.$value->anio.$value->semana]))
       {
         if ($value->departamento == "ADMINISTRACION") {
@@ -1262,6 +1396,7 @@ class polizas_model extends CI_Model {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo1        += $value->aguinaldo;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras1     += $value->horas_extras;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia1      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones1  += $value->indemnizaciones;
         } else {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->sueldo_semanal2   += $value->sueldo_semanal;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->vacaciones2       += $value->vacaciones;
@@ -1269,6 +1404,7 @@ class polizas_model extends CI_Model {
           $nominas[$value->id_empresa.$value->anio.$value->semana]->aguinaldo2        += $value->aguinaldo;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->horas_extras2     += $value->horas_extras;
           $nominas[$value->id_empresa.$value->anio.$value->semana]->pasistencia2      += $value->pasistencia;
+          $nominas[$value->id_empresa.$value->anio.$value->semana]->indemnizaciones2  += $value->indemnizaciones;
         }
 
         $nominas[$value->id_empresa.$value->anio.$value->semana]->subsidio        += $value->subsidio;
@@ -1288,6 +1424,7 @@ class polizas_model extends CI_Model {
           $value->aguinaldo1        = $value->aguinaldo;
           $value->horas_extras1     = $value->horas_extras;
           $value->pasistencia1      = $value->pasistencia;
+          $value->indemnizaciones1  = $value->indemnizaciones;
 
           $value->sueldo_semanal2   = 0;
           $value->vacaciones2       = 0;
@@ -1295,6 +1432,7 @@ class polizas_model extends CI_Model {
           $value->aguinaldo2        = 0;
           $value->horas_extras2     = 0;
           $value->pasistencia2      = 0;
+          $value->indemnizaciones2  = 0;
         } else {
           $value->sueldo_semanal1   = 0;
           $value->vacaciones1       = 0;
@@ -1302,6 +1440,7 @@ class polizas_model extends CI_Model {
           $value->aguinaldo1        = 0;
           $value->horas_extras1     = 0;
           $value->pasistencia1      = 0;
+          $value->indemnizaciones1  = 0;
 
           $value->sueldo_semanal2   = $value->sueldo_semanal;
           $value->vacaciones2       = $value->vacaciones;
@@ -1309,6 +1448,7 @@ class polizas_model extends CI_Model {
           $value->aguinaldo2        = $value->aguinaldo;
           $value->horas_extras2     = $value->horas_extras;
           $value->pasistencia2      = $value->pasistencia;
+          $value->indemnizaciones2  = $value->indemnizaciones;
         }
         $nominas[$value->id_empresa.$value->anio.$value->semana] = $value;
       }
@@ -1332,7 +1472,7 @@ class polizas_model extends CI_Model {
         //Se obtienen los prestamos
         $prestamos = $this->db->query("SELECT u.id, u.cuenta_cpi, (u.apellido_paterno || ' ' || u.apellido_materno || ' ' || u.nombre) AS nombre, COALESCE(Sum(nfp.monto), 0) AS prestamo
                                FROM nomina_fiscal_prestamos AS nfp INNER JOIN usuarios AS u ON nfp.id_empleado = u.id
-                               WHERE nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
+                               WHERE u.esta_asegurado = 't' AND nfp.anio = '{$value->anio}' AND nfp.semana = '{$value->semana}' {$sql2}
                                GROUP BY u.id")->result();
 
         //Se obtienen los fondos_ahorro
@@ -1410,6 +1550,16 @@ class polizas_model extends CI_Model {
                             $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
                             $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
                             $this->setEspacios( $this->numero($value->{'pasistencia'.$iper}) , 20).  //importe movimiento - retencion
+                            $this->setEspacios('0',10).  //iddiario poner 0
+                            $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
+                            $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto
+                            $this->setEspacios('',4)."\r\n"; //segmento de negocio
+          if($value->{'indemnizaciones'.$iper} > 0)
+            $response['data'] .= $this->setEspacios('M',2). //movimiento = M
+                            $this->setEspacios($this->getNIndemnizacionesContpaq(true, $iper),30).  //cuenta contpaq
+                            $this->setEspacios("Nom {$value->semana}",10).  //referencia movimiento
+                            $this->setEspacios('0',1).  //tipo movimiento, clientes es un cargo = 0
+                            $this->setEspacios( $this->numero($value->{'indemnizaciones'.$iper}) , 20).  //importe movimiento - retencion
                             $this->setEspacios('0',10).  //iddiario poner 0
                             $this->setEspacios('0.0',20).  //importe de moneda extranjera = 0.0
                             $this->setEspacios("ASISTENCIA Nom {$value->semana} Sem {$value->fecha_inicio}-{$value->fecha_final}", 100). //concepto

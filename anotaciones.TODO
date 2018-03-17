@@ -1,7 +1,7 @@
 
  ✔ En asistencias el botón de imprimir no imprime las asistencias como se marcan y total de asistencias @done (18-03-15 17:19)
- ☐ En póliza de nómina no cargar los trabajadores que no estén asegurados de los descuentos y poner las cuentas en mamita
- ☐ En póliza de nómina no carga los finiquitos
+ ✔ En póliza de nómina no cargar los trabajadores que no estén asegurados de los descuentos y poner las cuentas en mamita @done (18-03-17 11:56)
+ ✔ En póliza de nómina no carga los finiquitos @done (18-03-17 15:13)
  ☐ En cuentas por pagar cuando se agregan abonos a facturas que tienen IVA en la póliza de ingresos poner el IVA proporcional no total
  ☐ En cuentas por cobrar al abonar factura poner opción para que seleccionen la forma de pago (efectivo, cheque, trans, etc) y en los complementos de pago detectar si es efectivo no pedir la cuenta del cliente (timbrar en público en general)
  ☐ En movimiento de cuenta poner filtro de empresa para que muestre de todas no solo d empaque

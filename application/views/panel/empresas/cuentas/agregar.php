@@ -81,8 +81,12 @@
                         <option value="NPrimaVacacionalProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Prima Vacacional Produccion</option>
                         <option value="NAguinaldo" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Aguinaldo</option>
                         <option value="NAguinaldoProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Aguinaldo Produccion</option>
+                        <option value="NHorasHex" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Horas Ext</option>
+                        <option value="NHorasHexProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Horas Ext Produccion</option>
                         <option value="NPAsistencia" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Premio Asistencia</option>
                         <option value="NPAsistenciaProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Premio Asistencia Produccion</option>
+                        <option value="NIndemnizaciones" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Indemnizaciones</option>
+                        <option value="NIndemnizacionesProd" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Indemnizaciones Produccion</option>
                         <option value="NominaPagar" <?php echo set_select('dtipo_cuenta'); ?>>Nominas Por Pagar</option>
                         <option value="NSubsidio" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Subsidio</option>
                         <option value="NImss" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Imss</option>
