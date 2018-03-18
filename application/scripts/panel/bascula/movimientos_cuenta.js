@@ -1,4 +1,21 @@
 $(function(){
+
+  // Autocomplete Empresas
+  $("#fempresa").autocomplete({
+    source: base_url + 'panel/bascula/ajax_get_empresas/',
+    minLength: 1,
+    selectFirst: true,
+    select: function( event, ui ) {
+      $("#fid_empresa").val(ui.item.id);
+      $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+    }
+  }).keydown(function(e){
+    if (e.which === 8) {
+      $(this).css({'background-color': '#FFD9B3'});
+      $('#fid_empresa').val('');
+    }
+  });
+
   /**
    * asigna o quita la compra en los pagos de banco
    */
@@ -138,7 +155,20 @@ function setAutocomplet(tipo, first){
   }
   if (tipo == "en") {
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      // source: base_url + 'panel/bascula/ajax_get_proveedores/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_proveedores/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {
@@ -153,7 +183,20 @@ function setAutocomplet(tipo, first){
     });
   }else if(tipo == "sa"){
     $("#fproveedor").autocomplete({
-      source: base_url + 'panel/bascula/ajax_get_clientes/',
+      // source: base_url + 'panel/bascula/ajax_get_clientes/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#fid_empresa").val()) > 0)
+          params.did_empresa = $("#fid_empresa").val();
+        $.ajax({
+            url: base_url + 'panel/bascula/ajax_get_clientes/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
       minLength: 1,
       selectFirst: true,
       select: function( event, ui ) {

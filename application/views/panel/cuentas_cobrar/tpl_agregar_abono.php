@@ -26,7 +26,7 @@
                 <label class="control-label" for="dcuenta">Cuenta Bancaria</label>
                 <div class="controls">
                   <select name="dcuenta" id="dcuenta" required>
-                <?php 
+                <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
                     <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
@@ -38,6 +38,17 @@
                   <label for="imprimir" style="float: right;">Imprimir recibo?
                     <input type="checkbox" name="imprimir" id="imprimir" value="si">
                   </label>
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="fmetodo_pago">Metodo de pago </label>
+                <div class="controls">
+                  <select name="fmetodo_pago" id="fmetodo_pago" required>
+                  <?php foreach ($metods_pago as $key => $value) { ?>
+                    <option value="<?php echo $value['value']; ?>" <?php echo set_select('fmetodo_pago', $value['value']); ?>><?php echo $value['nombre']; ?></option>
+                  <?php }?>
+                  </select>
                 </div>
               </div>
 
@@ -62,21 +73,8 @@
                 </div>
               </div>
 
-              <div class="control-group" style="display: none;">
-                <label class="control-label" for="fmetodo_pago">Metodo de pago </label>
-                <div class="controls">
-                  <select name="fmetodo_pago" id="fmetodo_pago" required>
-              <?php  foreach ($metods_pago as $key => $value) {
-              ?>
-                    <option value="<?php echo $value['value']; ?>"><?php echo $value['nombre']; ?></option>
-              <?php
-              }?>
-                  </select>
-                </div>
-              </div>
-              
             </div>
-            <?php  
+            <?php
             if(isset($_GET['total']{0})) //si es masivo
             {
             ?>
@@ -91,7 +89,7 @@
                 </tr>
               </thead>
               <tbody>
-              <?php  
+              <?php
               $suma_saldo = $suma_monto = 0;
               foreach ($data['facturas'] as $key => $value)
               {

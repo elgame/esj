@@ -794,6 +794,10 @@ class bascula_model extends CI_Model {
         }
       }
 
+      if ($this->input->get('fid_empresa') != '') {
+        $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";
+      }
+
       if ($this->input->get('prancho') != '') {
         $sql .= " AND Upper(b.rancho) LIKE '".mb_strtoupper($_GET['prancho'], 'UTF-8')."'";
       }

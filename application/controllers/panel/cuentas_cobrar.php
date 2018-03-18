@@ -340,10 +340,12 @@ class cuentas_cobrar extends MY_Controller {
       $params['template']   = '';
       $params['closeModal'] = false;
 
-      if (isset($_POST['dcuenta']{0}))
+      $movs = $this->db->query("SELECT id_cliente, metodo_pago FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
+
+      if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');
-        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], $_POST['dcuenta']);
+        $respons = $this->cuentas_cobrar_pago_model->addComPago($_GET['idm'], (isset($_POST['dcuenta']{0})? $_POST['dcuenta']: 0));
         if($respons['passes']) {
           $params['frm_errors'] = $this->showMsgs('8', $respons['msg']);
           $params['closeModal'] = true;
@@ -359,13 +361,13 @@ class cuentas_cobrar extends MY_Controller {
       }
 
       $this->load->model('clientes_model');
-      $movs = $this->db->query("SELECT id_cliente FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
       $params['cuentas'] = $this->clientes_model->getCuentas($movs->id_cliente);
+      $params['metodo_pago'] = $movs->metodo_pago;
 
       $params['noHeader'] = false;
-      $this->load->view('panel/header',$params);
-      $this->load->view('panel/cuentas_cobrar/com_pagos',$params);
-      $this->load->view('panel/footer',$params);
+      $this->load->view('panel/header', $params);
+      $this->load->view('panel/cuentas_cobrar/com_pagos', $params);
+      $this->load->view('panel/footer', $params);
     }else
       redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=1'));
   }
@@ -441,6 +443,9 @@ class cuentas_cobrar extends MY_Controller {
         array('field'   => 'dreferencia',
               'label'   => 'Referencia',
               'rules'   => 'required|max_length[10]'),
+        array('field'   => 'fmetodo_pago',
+              'label'   => 'Metodo de pago',
+              'rules'   => 'required'),
     );
     $this->form_validation->set_rules($rules);
   }
@@ -503,6 +508,10 @@ class cuentas_cobrar extends MY_Controller {
       case 13:
         $txt = 'Los CFDI no requieren complemento de pago.';
         $icono = 'success';
+        break;
+      case 14:
+        $txt = 'La empresa no tiene una serie "P", agregala a la empresa.';
+        $icono = 'error';
         break;
 
       case 11:

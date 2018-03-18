@@ -1054,7 +1054,7 @@ class cfdi{
     return $datosApi;
   }
 
-  public function obtenDatosCfdi33ComP($data, $cuentaCliente)
+  public function obtenDatosCfdi33ComP($data, $cuentaCliente, $folio)
   {
     // echo "<pre>";
     //   var_dump($data, $cuentaCliente);
@@ -1090,16 +1090,16 @@ class cfdi{
     $comPago = [
       'cadenaPago'        => "",
       'certificadoPago'   => "",
-      'cuentaBen'         => $data[0]->num_cuenta,
-      'cuentaOrd'         => $cuentaCliente->cuenta,
+      'cuentaBen'         => $formaDePago != '01'? $data[0]->num_cuenta: '',
+      'cuentaOrd'         => $cuentaCliente? $cuentaCliente->cuenta : '',
       'fechaPago'         => str_replace(' ', 'T', substr($data[0]->fecha, 0, 19)),
       'formaDePago'       => $formaDePago,
       'moneda'            => $cfdi_ext->moneda,
       'monto'             => $data[0]->pago,
       'nombreBancoOrdExt' => "",
       'numOperacion'      => "1",
-      'rfcEmisorCtaBen'   => $data[0]->rfc,
-      'rfcEmisorCtaOrd'   => $cuentaCliente->rfc,
+      'rfcEmisorCtaBen'   => $formaDePago != '01'? $data[0]->rfc: '',
+      'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
       'selloPago'         => "",
       'tipoCadPago'       => "",
       'tipoCambio'        => $cfdi_ext->tipoCambio,
@@ -1166,9 +1166,9 @@ class cfdi{
         'cp'           => $cliente['info']->cp,
       ),
       'serie'             => 'P',
-      'folio'             => $cuentaCliente->folio,
+      'folio'             => $folio,
       'fecha'             => date("Y-m-d\TH:i:s"),
-      'formaDePago'       => '03',
+      'formaDePago'       => '99',
       'condicionesDePago' => 'CONTADO',
       'moneda'            => 'XXX',
       'tipoCambio'        => '1',

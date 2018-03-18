@@ -42,6 +42,15 @@
                 </div>
 
                 <div class="control-group">
+                  <label class="control-label" for="fempresa">Empresa</label>
+                  <div class="controls">
+                    <input type="text" name="fempresa"
+                      value="<?php echo set_value_get('fempresa') ?>" id="fempresa" class="span12 getjsval" placeholder="Empresa">
+                    <input type="hidden" name="fid_empresa" value="<?php echo set_value_get('fid_empresa') ?>" id="fid_empresa" class="getjsval">
+                  </div>
+                </div>
+
+                <div class="control-group">
                   <label class="control-label autocomplet_en" for="fproveedor">Proveedor</label>
                   <label class="control-label autocomplet_sa" for="fproveedor" style="display: none;">Cliente</label>
                   <div class="controls">

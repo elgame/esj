@@ -1912,20 +1912,22 @@ class polizas_model extends CI_Model {
           WHERE fao.tipo = 's' AND bmf.id_movimiento = {$value->id_movimiento}
           GROUP BY Date(fao.fecha), fao.concepto, fao.cuenta_cpi")->row();
 
-          $importe_iva = $importe_retencion = 0;
-          $facturasIds = explode(',', $value->idfacturas);
-          foreach ($facturasIds as $keyi => $facid)
-          {
-            $facid2 = explode('-', $facid);
-            $infodac = $this->db->query("SELECT
-                importe_iva, retencion_iva,
-                (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= {$facid2[1]} AND id_factura = facturacion.id_factura) AS num
-              FROM facturacion WHERE id_factura = {$facid2[0]}")->row();
-            if($infodac->num == 1){
-              $importe_iva += $infodac->importe_iva;
-              $importe_retencion += $infodac->retencion_iva;
-            }
-          }
+          $importe_iva = $value->importe_iva;
+          $importe_retencion = $value->retencion_iva;
+          // Quitamos la opcion que ponga todo el iva en el primer pago
+          // $facturasIds = explode(',', $value->idfacturas);
+          // foreach ($facturasIds as $keyi => $facid)
+          // {
+          //   $facid2 = explode('-', $facid);
+          //   $infodac = $this->db->query("SELECT
+          //       importe_iva, retencion_iva,
+          //       (SELECT Count(*) FROM facturacion_abonos WHERE id_abono <= {$facid2[1]} AND id_factura = facturacion.id_factura) AS num
+          //     FROM facturacion WHERE id_factura = {$facid2[0]}")->row();
+          //   if($infodac->num == 1){
+          //     $importe_iva += $infodac->importe_iva;
+          //     $importe_retencion += $infodac->retencion_iva;
+          //   }
+          // }
 
           // $factor = $value->total_abono*100/($value->total); //abono*100/total_factura
           $impuestos['iva_retener']['importe']    = $importe_retencion; //$value->retencion_iva; //$factor*$value->retencion_iva/100;

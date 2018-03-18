@@ -15,11 +15,18 @@
           <div class="row-fluid">
             <div class="span12">
 
-
+              <div class="control-group">
+                <label class="control-label" for="dcuenta">Método de pago</label>
+                <div class="controls">
+                  <strong><?php echo $metodo_pago ?></strong>
+                </div>
+              </div>
+            <?php if ($metodo_pago != 'efectivo') { ?>
               <div class="control-group">
                 <label class="control-label" for="dcuenta">Cuenta Bancaria Cliente</label>
                 <div class="controls">
                   <select name="dcuenta" id="dcuenta" required>
+                    <option value=""></option>
                 <?php
                 foreach ($cuentas as $key => $value) {
                 ?>
@@ -30,6 +37,7 @@
                   </select>
                 </div>
               </div>
+            <?php } ?>
 
             <button type="submit" name="save" class="btn btn-success btn-large">Registrar</button>
           </div><!--/row-->

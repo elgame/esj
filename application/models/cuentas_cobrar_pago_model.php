@@ -129,20 +129,25 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
            WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2"
         );
 
-      $queryCliente = $this->db->query(
-          "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc
-           FROM clientes_cuentas cc
-            INNER JOIN banco_bancos bb ON bb.id_banco = cc.id_banco
-           WHERE cc.id_cuenta = {$id_cuenta_cliente}"
-        );
+      if ($id_cuenta_cliente > 0) {
+        $queryCliente = $this->db->query(
+            "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc
+             FROM clientes_cuentas cc
+              INNER JOIN banco_bancos bb ON bb.id_banco = cc.id_banco
+             WHERE cc.id_cuenta = {$id_cuenta_cliente}"
+          );
+      }
 
       if ($queryMov->num_rows() > 0) {
         $queryMov            = $queryMov->result();
-        $queryCliente        = $queryCliente->row();
-        $queryCliente->folio = $this->getFolioSerie('P', $queryMov[0]->id_empresa);
+        $queryCliente        = isset($queryCliente)? $queryCliente->row() : null;
+        $folio = $this->getFolioSerie('P', $queryMov[0]->id_empresa);
+        if ($folio === false) {
+          return array("passes" => false, "codigo" => "14");
+        }
 
         // xml 3.3
-        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente);
+        $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio);
         // echo "<pre>";
         //   var_dump($datosApi);
         // echo "</pre>";exit;
@@ -317,6 +322,10 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       ->where("serie = '".$serie."' AND id_empresa = ".$empresa."") // AND status != 'b'
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
+
+    if (!isset($res->folio)) {
+      return false;
+    }
 
     $folio = (isset($res->folio)? $res->folio: 0)+1;
 
