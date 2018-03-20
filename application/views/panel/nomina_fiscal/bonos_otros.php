@@ -283,6 +283,7 @@
     <?php if (isset($close)) {?>
         setInterval(function() {
           window.parent.$('#supermodal').modal('hide');
+          window.parent.location.reload();
       }, 2000);
     <?php }?>
 
