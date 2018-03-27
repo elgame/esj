@@ -8,7 +8,8 @@
  ✔ Nomina Cuando están en vacaciones el jueves no lo pone como falta y no lo deja poner @done (18-03-19 12:39)
  ☐ Nomina Al poner incapacidades de repente no las guarda
  ☐ Nomina De repente se quita un trabajador al guardar la nómina
- ☐ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves
+ ☐ Nominas guardadas borra a los trabajadores que estan despedidos
+ ✔ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves @done (18-03-22 17:16)
  ☐ Checar los pagos masivos a pasado que duplica los pagos de una sola factura
  ☐ De repente se registra doble en banco cuando se abona una factura de venta desde el listado
  ☐ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar

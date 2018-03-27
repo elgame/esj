@@ -2908,11 +2908,11 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetFont('Helvetica','', 10);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(6, 27);
-    $pdf->Cell(100, 6, "Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $pdf->SetFont('Helvetica','B', 10);
     $pdf->SetXY(6, $pdf->GetY() + 6);
-    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
@@ -9409,11 +9409,11 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetFont('Helvetica','', 10);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(6, 27);
-    $pdf->Cell(100, 6, "Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $pdf->SetFont('Helvetica','B', 10);
     $pdf->SetXY(6, $pdf->GetY() + 6);
-    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'isr' => 0,
@@ -11211,11 +11211,11 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetFont('Helvetica','', 10);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(6, 27);
-    $pdf->Cell(100, 6, "Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $pdf->SetFont('Helvetica','B', 10);
     $pdf->SetXY(6, $pdf->GetY() + 6);
-    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: A4914083100", 0, 0, 'L', 0);
+    $pdf->Cell(100, 6, "ADMINISTRACION Reg. Pat. IMSS: {$empresa['info']->registro_patronal}", 0, 0, 'L', 0);
 
     $total_gral = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'isr' => 0,
