@@ -6,7 +6,8 @@
  ✔ En cuentas por cobrar al abonar factura poner opción para que seleccionen la forma de pago (efectivo, cheque, trans, etc) y en los complementos de pago detectar si es efectivo no pedir la cuenta del cliente (timbrar en público en general) @done (18-03-18 14:19)
  ✔ En movimiento de cuenta poner filtro de empresa para que muestre de todas no solo d empaque @done (18-03-18 14:42)
  ✔ Nomina Cuando están en vacaciones el jueves no lo pone como falta y no lo deja poner @done (18-03-19 12:39)
- ☐ Nomina Al poner incapacidades de repente no las guarda
+ ✔ Nomina Al poner incapacidades de repente no las guarda @done (18-03-26 22:47)
+     - Primero agregar incapacidades
  ☐ Nomina De repente se quita un trabajador al guardar la nómina
  ☐ Nominas guardadas borra a los trabajadores que estan despedidos
  ✔ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves @done (18-03-22 17:16)

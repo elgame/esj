@@ -7,6 +7,31 @@
     eventOnChangeSelectDia();
     eventDblClickEmpleado();
     eventOnChangeSemana();
+
+
+    $('#btnGuardarAsis').click(function(event) {
+      var params = {
+        numSemana : $('#numSemana').val(),
+        empresaId : $('#empresaId').val(),
+        anio      : $('#anio').val(),
+        empleados : []
+      };
+      $('.rowIdAsis').each(function(index, el) {
+        params.empleados.push($(this).attr('data-id'));
+      });
+      console.log('test', params);
+      $.post(base_url+'panel/nomina_fiscal/validaAddAsistencias/', params,
+        function(data){
+          if (data.error) {
+            msb.confirm("Estas seguro de guardar las asistencias? <br> Otro usuario ya guardo asistencias, si continua se sobrescribirán las asistencias previamente guardadas.", 'Asistencias', this, function () {
+              $('#formAsistencia').submit();
+            });
+          } else {
+            $('#formAsistencia').submit();
+          }
+
+      }, 'json');
+    });
   });
 
   var autocompleteEmpresas = function () {

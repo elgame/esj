@@ -58,7 +58,7 @@
             </form>
 
 
-            <form action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
+            <form id="formAsistencia" action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
 
               <div class="row-fluid">
                 <div class="span4">
@@ -73,11 +73,11 @@
                   <a href="<?php echo base_url('panel/nomina_fiscal/asistencia_pdf/?id=' . (isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa) . '&sem=' . $numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-danger" target="_blank" style="float: left;" id="asis-pdf">Imprimir</a>
                 </div>
                 <div class="span1">
-                  <button type="submit" name="guardar" class="btn btn-success" style="float: right;">Guardar</button>
+                  <button type="button" name="guardar" id="btnGuardarAsis" class="btn btn-success" style="float: right;">Guardar</button>
                 </div>
               </div>
 
-              <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana">
+              <input type="hidden" value="<?php echo $numSemanaSelected?>" name="numSemana" id="numSemana">
               <?php
                 foreach ($puestos['puestos'] as $puesto) {
                   $tuvoEmpleados = false;
@@ -98,7 +98,7 @@
                             if ($puesto->id_departamento === $e->id_departamente) {
                               $tuvoEmpleados = true;
                     ?>
-                          <tr>
+                          <tr class="rowIdAsis" data-id="<?php echo $e->id ?>">
                             <td class="empleado-dbl-click"><a href="<?php echo base_url('panel/nomina_fiscal/show_otros/?eid='.$e->id.'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn btn-info" rel="superbox-50x450" title="Bonos y Otros"><i class="icon-cogs"></i></a><?php echo $e->nombre; ?></td>
 
                             <?php foreach ($dias as $dia => $fecha) { ?>

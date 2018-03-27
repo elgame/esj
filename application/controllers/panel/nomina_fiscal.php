@@ -7,6 +7,7 @@ class nomina_fiscal extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_fiscal/addAsistencias/',
+    'nomina_fiscal/validaAddAsistencias/',
     'nomina_fiscal/show_otros/',
     'nomina_fiscal/bonos_otros/',
     'nomina_fiscal/add_vacaciones/',
@@ -414,8 +415,9 @@ class nomina_fiscal extends MY_Controller {
   public function asistencia()
   {
     $this->carabiner->js(array(
-        array('general/supermodal.js'),
-        array('panel/nomina_fiscal/asistencia.js'),
+      array('general/msgbox.js'),
+      array('general/supermodal.js'),
+      array('panel/nomina_fiscal/asistencia.js'),
     ));
 
     $params['info_empleado']  = $this->info_empleado['info']; //info empleado
@@ -484,6 +486,14 @@ class nomina_fiscal extends MY_Controller {
     $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['did_empresa'], $_GET['anio']);
 
     redirect(base_url('panel/nomina_fiscal/asistencia/?'.String::getVarsLink(array('msg')).'&msg=3'));
+  }
+
+  public function validaAddAsistencias()
+  {
+    $this->load->model('nomina_fiscal_model');
+    $response['error'] = $this->nomina_fiscal_model->validaAddAsistencias($_POST['empleados'], $_POST['numSemana'], $_POST['empresaId'], $_POST['anio']);
+
+    echo json_encode($response);
   }
 
   public function show_otros()

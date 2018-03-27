@@ -116,7 +116,7 @@
                       <th colspan="6" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
-                      <th>VACAS.</th>
+                      <th>VACAS. <?php echo count($empleados); ?></th>
                       <th>NOMBRE</th>
                       <th>PUESTO</th>
                       <th>SALARIO</th>
