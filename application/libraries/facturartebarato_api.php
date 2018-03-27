@@ -252,12 +252,23 @@ class facturartebarato_api {
     {
       // Obtiene el codigo de incidencia.
       if (isset($this->resultAPI->errors) && $this->resultAPI->errors) {
-        foreach ($this->resultAPI->errors->data as $key => $value) {
-          $incidencias =  array(
-            'status'  => false,
-            'codigo'  => $this->resultAPI->status_code,
-            'mensaje' => $value->{'Empleado 1'}[0]
-          );
+        if (!isset($this->resultAPI->errors->data)) {
+          foreach ($this->resultAPI->errors as $key => $value) {
+            $value = is_array($value)? $value[0]: $value;
+            $incidencias =  array(
+              'status'  => false,
+              'codigo'  => $this->resultAPI->status_code,
+              'mensaje' => $value
+            );
+          }
+        } else {
+          foreach ($this->resultAPI->errors->data as $key => $value) {
+            $incidencias =  array(
+              'status'  => false,
+              'codigo'  => $this->resultAPI->status_code,
+              'mensaje' => $value->{'Empleado 1'}[0]
+            );
+          }
         }
       }
       else
