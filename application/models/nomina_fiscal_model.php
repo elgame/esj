@@ -2970,6 +2970,11 @@ class nomina_fiscal_model extends CI_Model {
         'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
         'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
 
+      $empleados_sin_departamento = [];
+      foreach ($empleados as $key => $empleado) {
+        $empleados_sin_departamento[$empleado->id] = $empleado;
+      }
+
       $dep_tiene_empleados = true;
       $y = $pdf->GetY();
       foreach ($empleados as $key => $empleado)
@@ -3302,6 +3307,11 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
+
+          echo $empleado->id.'---'.(isset($empleados_sin_departamento[$empleado->id])? 'si': 'no').'<br>';
+          unset($empleados_sin_departamento[intval($empleado->id)]);
+          echo $empleado->id.'---'.(isset($empleados_sin_departamento[$empleado->id])? 'si': 'no').'<br>';
+          // $empleados_sin_departamento[$empleado->id] = '';
         }
       }
 
@@ -3523,6 +3533,12 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('Helvetica','', 10);
     }
+
+    echo "<pre>";
+    // var_dump(count($empleados_sin_departamento));
+      unset($empleados_sin_departamento['16']);
+      var_dump(count($empleados_sin_departamento), $empleados_sin_departamento);
+    echo "</pre>";exit;
 
     //finiquito
     $total_dep = array( 'sueldo' => 0, 'horas_extras' => 0, 'vacaciones' => 0, 'prima_vacacional' => 0, 'subsidio' => 0,

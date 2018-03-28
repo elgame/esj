@@ -1,5 +1,5 @@
 
- ✔ Correciones de nomina @done (18-03-26 22:10) pcc
+ ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct
    ALTER TABLE public.nomina_asistencia ADD COLUMN id_registro bigint;
    COMMENT ON COLUMN public.nomina_asistencia.id_registro IS 'id del usuario que registro las asistencias';
 
