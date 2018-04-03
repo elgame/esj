@@ -849,16 +849,18 @@ class nomina_fiscal_model extends CI_Model {
                 'id_prestamo' => $prestamo['id_prestamo'],
                 'monto' => $prestamo['pago_semana_descontar'],
                 'fecha' => $fechasSemana['fecha_final'],
+
+                'prestamo' => $prestamo
               );
 
-              // Suma lo que lleva pagado mas lo que se esta abonando.
-              $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
+              // // Suma lo que lleva pagado mas lo que se esta abonando.
+              // $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
 
-              // Si ya termino de pagar el prestamo entonces le cambia el status.
-              if ($totalAbonado >= floatval($prestamo['prestado']))
-              {
-                $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
-              }
+              // // Si ya termino de pagar el prestamo entonces le cambia el status.
+              // if ($totalAbonado >= floatval($prestamo['prestado']))
+              // {
+              //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
+              // }
             }
 
             $totalNoFiscal = floatval($datos['total_no_fiscal']);
@@ -957,16 +959,18 @@ class nomina_fiscal_model extends CI_Model {
               'id_prestamo' => $prestamo['id_prestamo'],
               'monto' => $prestamo['pago_semana_descontar'],
               'fecha' => $fechasSemana['fecha_final'],
+
+              'prestamo' => $prestamo
             );
 
-            // Suma lo que lleva pagado mas lo que se esta abonando.
-            $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
+            // // Suma lo que lleva pagado mas lo que se esta abonando.
+            // $totalAbonado = floatval($prestamo['total_pagado']) + floatval($prestamo['pago_semana_descontar']);
 
-            // Si ya termino de pagar el prestamo entonces le cambia el status.
-            if ($totalAbonado >= floatval($prestamo['prestado']))
-            {
-              $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
-            }
+            // // Si ya termino de pagar el prestamo entonces le cambia el status.
+            // if ($totalAbonado >= floatval($prestamo['prestado']))
+            // {
+            //   $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $prestamo['id_prestamo']));
+            // }
           }
 
           $totalNoFiscal = floatval($datos['total_no_fiscal']);
@@ -1040,6 +1044,29 @@ class nomina_fiscal_model extends CI_Model {
     // Inserta los abonos de los prestamos.
     if (count($prestamosEmpleados) > 0)
     {
+      foreach ($prestamosEmpleados as $key => $prestamo) {
+        $pres = $prestamo['prestamo'];
+
+        $data_nomina = $this->db->select('prestamos')->form('nomina_fiscal')
+             ->where('id_empleado', $prestamo['id_empleado'])
+             ->where('id_empresa', $prestamo['id_empresa'])
+             ->where('anio', $prestamo['anio'])
+             ->where('semana', $prestamo['semana'])->row();
+
+        if (isset($data_nomina->prestamos) && $data_nomina->prestamos > 0) {
+          unset($prestamo['prestamo']);
+
+          // Suma lo que lleva pagado mas lo que se esta abonando.
+          $totalAbonado = floatval($pres['total_pagado']) + floatval($pres['pago_semana_descontar']);
+
+          // Si ya termino de pagar el prestamo entonces le cambia el status.
+          if ($totalAbonado >= floatval($pres['prestado']))
+          {
+            $this->db->update('nomina_prestamos', array('status' => 'f'), array('id_prestamo' => $pres['id_prestamo']));
+          }
+        }
+      }
+
       $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 

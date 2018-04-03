@@ -125,7 +125,7 @@
             <div class="clearfix"></div>
             <?php } ?>
 
-            <button type="submit" class="btn btn-success btn-large">Guardar</button>
+            <button type="submit" id="btnGuardarAbono" class="btn btn-success btn-large" <?php echo ($frm_errors['ico'] === 'success'? 'disabled' : '') ?>>Guardar</button>
           </div><!--/row-->
 
         </form>

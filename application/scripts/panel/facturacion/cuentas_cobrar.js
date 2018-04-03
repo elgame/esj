@@ -85,6 +85,13 @@ var abonom = (function($){
   function init(){
     $(".sel_abonom").on('click', selabono);
     btn_abonos_masivo = $(".btn_abonos_masivo");
+
+    if ($("#btnGuardarAbono").length > 0)
+    {
+      $("#form").on('submit', function () {
+        $("#btnGuardarAbono").prop('disabled', true);
+      });
+    }
   }
 
   function selabono(){

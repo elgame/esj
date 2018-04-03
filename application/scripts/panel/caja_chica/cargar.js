@@ -34,6 +34,18 @@
     searchModalMovimientos();
 
     $("#lista_remisiones_modal, #lista_movimientos_modal").filterTable();
+
+    var preventClickCerrar = false;
+    if ($(".btnCerrarCaja").length > 0)
+    {
+      $(".btnCerrarCaja").click(function (e) {
+        if (!preventClickCerrar) {
+          preventClickCerrar = true;
+        } else {
+          e.preventDefault();
+        }
+      });
+    }
   });
 
   var btnAddIngreso = function () {
