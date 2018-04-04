@@ -1,0 +1,6 @@
+[03-Apr-2018 20:42:25 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057
+[03-Apr-2018 20:42:26 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057
+[03-Apr-2018 20:42:33 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057
+[03-Apr-2018 20:44:20 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057
+[03-Apr-2018 20:44:22 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057
+[03-Apr-2018 20:44:29 America/Mexico_City] PHP Fatal error:  Call to undefined method CI_DB_postgre_driver::row() in /home/elgame/www/sanjorge/application/models/nomina_fiscal_model.php on line 1057

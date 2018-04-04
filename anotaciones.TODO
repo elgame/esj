@@ -13,7 +13,7 @@
  ✔ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves @done (18-03-22 17:16)
  ☐ Checar los pagos masivos a pasado que duplica los pagos de una sola factura
  ✔ De repente se registra doble en banco cuando se abona una factura de venta desde el listado @done (18-04-03 13:33)
- ☐ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar
+ ✔ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar @done (18-04-03 20:54)
  ✔ En caja chica dan de baja remisiones y el abono se registra doble en cuentas pagar @done (18-04-03 14:37)
  ☐ En la aplicación de cheques marca error al imprimir el cheque en las cuentas nuevas (dio error con gubalu)
  ✔ Camaras (admin, 12345abc, 1234abcd) IP 243 y 244 @done (18-03-15 17:35)

@@ -1047,14 +1047,16 @@ class nomina_fiscal_model extends CI_Model {
       foreach ($prestamosEmpleados as $key => $prestamo) {
         $pres = $prestamo['prestamo'];
 
-        $data_nomina = $this->db->select('prestamos')->form('nomina_fiscal')
+        $data_nomina = $this->db->select('prestamos')->from('nomina_fiscal')
              ->where('id_empleado', $prestamo['id_empleado'])
              ->where('id_empresa', $prestamo['id_empresa'])
              ->where('anio', $prestamo['anio'])
-             ->where('semana', $prestamo['semana'])->row();
+             ->where('semana', $prestamo['semana'])->get()->row();
 
         if (isset($data_nomina->prestamos) && $data_nomina->prestamos > 0) {
           unset($prestamo['prestamo']);
+
+          $this->db->insert('nomina_fiscal_prestamos', $prestamo);
 
           // Suma lo que lleva pagado mas lo que se esta abonando.
           $totalAbonado = floatval($pres['total_pagado']) + floatval($pres['pago_semana_descontar']);
@@ -1067,7 +1069,7 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
+      // $this->db->insert_batch('nomina_fiscal_prestamos', $prestamosEmpleados);
     }
 
     // $endTime = new DateTime(date('Y-m-d H:i:s'));

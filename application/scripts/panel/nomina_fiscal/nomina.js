@@ -532,7 +532,7 @@
             tipo: 'se'
           }, function(data, textStatus, xhr) {
             alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
-            location.reload();
+            // location.reload();
           });
         } else {
           $('#ultimo-no-generado').val(idUltimoError);

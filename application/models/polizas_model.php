@@ -326,7 +326,7 @@ class polizas_model extends CI_Model {
     else{
       $cuenta = '50000100';
     }
-    if (!isset($data->cuenta)) {
+    if (!isset($cuenta)) {
       $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'CuadreGasto'")->row();
       $cuenta = (isset($data->cuenta)? $data->cuenta : '');
     }
