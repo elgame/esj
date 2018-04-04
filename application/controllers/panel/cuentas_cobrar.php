@@ -510,7 +510,7 @@ class cuentas_cobrar extends MY_Controller {
         $icono = 'success';
         break;
       case 14:
-        $txt = 'La empresa no tiene una serie "P", agregala a la empresa.';
+        $txt = "La empresa no tiene una serie 'P', agregala a la empresa.";
         $icono = 'error';
         break;
 

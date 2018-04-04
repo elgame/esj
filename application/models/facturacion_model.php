@@ -4758,16 +4758,22 @@ class facturacion_model extends privilegios_model{
             'No. Interior', $ceExtras->emisor->domicilio->numeroInterior,
           ), false, true, null, 2, 1);
       $pdf->SetX(0);
+
+      $this->load->model('clocalidad_model');
+      $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad);
       $pdf->Row(array(
             'Colonia', $ceExtras->emisor->domicilio->colonia,
-            'Localidad', $ceExtras->emisor->domicilio->localidad,
+            'Localidad', ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
             'Codigo Postal', $ceExtras->emisor->domicilio->codigoPostal,
           ), false, true, null, 2, 1);
       $pdf->SetAligns(array('L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'));
       $pdf->SetWidths(array(17, 37, 17, 37, 17, 27, 17, 47));
       $pdf->SetX(0);
+
+      $this->load->model('cmunicipio_model');
+      $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio);
       $pdf->Row(array(
-            'Municipio', $ceExtras->emisor->domicilio->municipio,
+            'Municipio', ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
             'Estado', $ceExtras->emisor->domicilio->estado,
             'Pais', $ceExtras->emisor->domicilio->pais,
             'Referencia', '',

@@ -57,7 +57,7 @@
 <script type="text/javascript" charset="UTF-8">
 
   $(document).ready(function(){
-    noty({"text":"<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
+    noty({"text": "<?php echo $frm_errors['msg']; ?>", "layout":"topRight", "type":"<?php echo $frm_errors['ico']; ?>"});
   });
 </script>
 <?php }

@@ -1,9 +1,9 @@
 
- ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct
+ ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct|san
    ALTER TABLE public.nomina_asistencia ADD COLUMN id_registro bigint;
    COMMENT ON COLUMN public.nomina_asistencia.id_registro IS 'id del usuario que registro las asistencias';
 
- ✔ Restructuracion de las cuentas contpaq para polizas @done (18-03-17 11:16) lap|pcc|pct
+ ✔ Restructuracion de las cuentas contpaq para polizas @done (18-03-17 11:16) lap|pcc|pct|san
    ALTER TABLE public.cuentas_contpaq ADD COLUMN tipo_cuenta character varying(40);
 
  ☐ Comercio exterior 3.3

@@ -323,7 +323,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       ->order_by('folio', 'DESC')
       ->limit(1)->get()->row();
 
-    if (!isset($res->folio)) {
+    $res_serie = $this->db->select('id_serie_folio')
+      ->from('facturacion_series_folios')
+      ->where("serie = '".$serie."' AND id_empresa = ".$empresa."") // AND status != 'b'
+      ->order_by('id_serie_folio', 'DESC')
+      ->limit(1)->get()->row();
+
+    if (!isset($res->folio) && !isset($res_serie->id_serie_folio)) {
       return false;
     }
 
