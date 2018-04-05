@@ -4760,7 +4760,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
 
       $this->load->model('clocalidad_model');
-      $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad);
+      $localidad = $this->clocalidad_model->getLocalidadKey($ceExtras->emisor->domicilio->localidad, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
             'Colonia', $ceExtras->emisor->domicilio->colonia,
             'Localidad', ($localidad? $localidad."({$ceExtras->emisor->domicilio->localidad})" : $ceExtras->emisor->domicilio->localidad),
@@ -4771,7 +4771,7 @@ class facturacion_model extends privilegios_model{
       $pdf->SetX(0);
 
       $this->load->model('cmunicipio_model');
-      $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio);
+      $municipio = $this->cmunicipio_model->getMunicipioKey($ceExtras->emisor->domicilio->municipio, $ceExtras->emisor->domicilio->estado);
       $pdf->Row(array(
             'Municipio', ($municipio? $municipio."({$ceExtras->emisor->domicilio->municipio})" : $ceExtras->emisor->domicilio->municipio),
             'Estado', $ceExtras->emisor->domicilio->estado,
