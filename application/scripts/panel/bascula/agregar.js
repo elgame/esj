@@ -117,11 +117,9 @@ $(function(){
 
       // if (($('#paccion').val() !== 'p' && $('#paccion').val() !== 'b') || $('#isEditar').length === 1) {
       if ($('#autorizar').length === 0) {
-        alert("no");
         $form.attr('action', $form.attr('action') + '&p=t');
         $form.submit();
       } else {
-        alert("si");
         var win=window.open($('#btnPrint').attr('href'), '_blank');
         win.focus();
       }
@@ -132,7 +130,6 @@ $(function(){
     var $this = $(this),
         option = $this.find('option:selected').val(),
         priv_modif_kilosbt = $("#modif_kilosbt").val();
-
     if (option === 'en') {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
@@ -813,7 +810,6 @@ var calculaKilosNeto = function () {
 var recargaTipo = function () {
   var option = $('#ptipo').find('option:selected').val(),
   priv_modif_kilosbt = $("#modif_kilosbt").val();
-
   if (option === 'en') {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
@@ -823,6 +819,8 @@ var recargaTipo = function () {
     if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
+    } else if ($('#paccion').val() === 'sa') {
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
     }
   } else {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
