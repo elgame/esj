@@ -74,7 +74,29 @@ $(function(){
   abonom.init();
 
   modalAbonos.init();
+
+  comPagos.init();
 });
+
+//complemento de pagos
+var comPagos = (function($){
+  var objs = {};
+
+  function init(){
+    if ($("#btnRegComPago").length > 0)
+    {
+      $("#formCompago").on('submit', function () {
+        setTimeout(function () {
+          $("#btnRegComPago").attr('disabled', true);
+        }, 100);
+        $("#btnRegComPago .loader").show();
+      });
+    }
+  }
+
+  objs.init = init;
+  return objs;
+})(jQuery);
 
 
 //Abonos masivos
@@ -89,7 +111,9 @@ var abonom = (function($){
     if ($("#btnGuardarAbono").length > 0)
     {
       $("#form").on('submit', function () {
-        $("#btnGuardarAbono").prop('disabled', true);
+        setTimeout(function () {
+          $("#btnGuardarAbono").prop('disabled', true);
+        }, 100);
       });
     }
   }

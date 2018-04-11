@@ -342,6 +342,9 @@ class cuentas_cobrar extends MY_Controller {
 
       $movs = $this->db->query("SELECT id_cliente, metodo_pago FROM banco_movimientos WHERE id_movimiento = {$_GET['idm']}")->row();
 
+        // echo "<pre>";
+        //   var_dump('dd', $_POST);
+        // echo "</pre>";exit;
       if (isset($_POST['save']) && (isset($_POST['dcuenta']{0}) || $movs->metodo_pago == 'efectivo'))
       {
         $this->load->model('cuentas_cobrar_pago_model');

@@ -10,7 +10,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/com_pago?'.String::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/com_pago?'.String::getVarsLink(array())); ?>" method="post" id="formCompago">
 
           <div class="row-fluid">
             <div class="span12">
@@ -39,7 +39,9 @@
               </div>
             <?php } ?>
 
-            <button type="submit" name="save" class="btn btn-success btn-large">Registrar</button>
+            <button type="submit" name="save" id="btnRegComPago" class="btn btn-success btn-large">
+              <img class="loader" src="<?php echo base_url('application/images/bootstrap/ajax-loaders/ajax-loader-9.gif'); ?>" style="display: none;">
+              Registrar</button>
           </div><!--/row-->
 
         </form>
