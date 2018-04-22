@@ -183,7 +183,6 @@
         idUltimoError = 0;
         // Ciclo para recorrer todos los <tr> de los empleado.
         $('.tr-empleado').each(function(index, el) {
-          console.log($(this).find('.generar-nomina').val());
           if ($(this).find('.generar-nomina').val() === '1') {
             guardaNominaEmpleado($(this));
           }
@@ -522,23 +521,45 @@
       }
 
       // Si el empleado que se timbro es el ultimo que se tenia que timbrar
-      if (result.ultimoNoGenerado == result.empleadoId) {
+      setTimeout(function () {
         if (errorTimbrar === false) {
-          // agrega la nomina a terminadas
-          $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
-            empresa_id: $('#empresaId').val(),
-            anio: $('#anio').val(),
-            semana: $('#semanas').find('option:selected').val(),
-            tipo: 'se'
-          }, function(data, textStatus, xhr) {
-            alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
-            // location.reload();
-          });
+          if ($('.tr-empleado .generar-nomina[value=1]').length == 0) {
+            // agrega la nomina a terminadas
+            $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
+              empresa_id: $('#empresaId').val(),
+              anio: $('#anio').val(),
+              semana: $('#semanas').find('option:selected').val(),
+              tipo: 'se'
+            }, function(data, textStatus, xhr) {
+              alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
+              location.reload();
+            });
+          } else {
+            alert('Error: '+result.msg);
+          }
         } else {
           $('#ultimo-no-generado').val(idUltimoError);
           alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
         }
-      }
+      }, Math.floor((Math.random() * 350) + 90));
+
+      // if (result.ultimoNoGenerado == result.empleadoId) {
+      //   if (errorTimbrar === false) {
+      //     // agrega la nomina a terminadas
+      //     $.post(base_url + 'panel/nomina_fiscal/ajax_add_nomina_terminada/', {
+      //       empresa_id: $('#empresaId').val(),
+      //       anio: $('#anio').val(),
+      //       semana: $('#semanas').find('option:selected').val(),
+      //       tipo: 'se'
+      //     }, function(data, textStatus, xhr) {
+      //       alert('Terminado. Las nomina se generaron correctamente. De click en Aceptar!!!');
+      //       location.reload();
+      //     });
+      //   } else {
+      //     $('#ultimo-no-generado').val(idUltimoError);
+      //     alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
+      //   }
+      // }
 
       loader.close();
     })

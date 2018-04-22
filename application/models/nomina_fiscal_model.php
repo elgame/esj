@@ -1533,7 +1533,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
       'registroPatronal' => $empresa['info']->registro_patronal,
-      // 'esDependencia'    => 'IP',
+      'esDependencia'    => 'IP',
       'data' => array(
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
@@ -1969,7 +1969,7 @@ class nomina_fiscal_model extends CI_Model {
     foreach ($datos as $key => $empleadoId) {
       $filtros['empleadoId'] = $empleadoId;
       $empleado = $this->listadoEmpleadosAsistencias($filtros);
-      if (count($empleado[0]->dias_faltantes) > 0) {
+      if (isset($empleado[0]->dias_faltantes) && count($empleado[0]->dias_faltantes) > 0) {
         foreach ($empleado[0]->dias_faltantes as $keye => $falta) {
           if ($falta['id_registro'] != $this->session->userdata('id_usuario')) {
             $registro_alguienmas = true;

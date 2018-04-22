@@ -18,7 +18,7 @@ class nomina_trabajos_model extends CI_Model {
       'horas'           => floatval($datos['horas']),
       'importe_trabajo' => floatval($datos['importe_trabajo']),
       'importe_extra'   => floatval($datos['importe_extra']),
-      'tipo_asistencia' => $datos['tipo_asistencia'],
+      // 'tipo_asistencia' => $datos['tipo_asistencia'],
     );
 
     $data_labores = isset($datos['arealhr'])? $datos['arealhr']: [];
@@ -48,9 +48,9 @@ class nomina_trabajos_model extends CI_Model {
     // si existe el registro
     $existe = $this->db->query("SELECT Count(*) AS num FROM nomina_trabajos_dia WHERE id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}")->row();
 
+    // && $data['tipo_asistencia'] == 'a'
     if ($data['horas'] > 5 && $data['importe_trabajo'] > 0 &&
-      $data['fecha'] != '' && $data['id_empresa'] > 0 && count($data_labores) > 0 &&
-      $data['tipo_asistencia'] == 'a') {
+      $data['fecha'] != '' && $data['id_empresa'] > 0 && count($data_labores) > 0 ) {
 
       if ($existe->num > 0)
         $this->db->update('nomina_trabajos_dia', $data, "id_usuario = {$data['id_usuario']} AND fecha = '{$data['fecha']}' AND id_empresa = {$data['id_empresa']}");
@@ -103,8 +103,8 @@ class nomina_trabajos_model extends CI_Model {
         }
       }
 
-      // Quita la falta al trabajador
-      $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
+      // // Quita la falta al trabajador
+      // $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
 
       return array('passess' => true);
     } else {
@@ -114,18 +114,18 @@ class nomina_trabajos_model extends CI_Model {
         $this->db->insert('nomina_trabajos_dia', $data);
       }
 
-      $tipo = explode('-', $data['tipo_asistencia']);
-      if ($tipo[0] == 'a')
-        $tipo[0] = 'f';
-      // Registra falta al trabajador
-      $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
-      $this->db->insert('nomina_asistencia', array(
-            'id_usuario' => $data['id_usuario'],
-            'fecha_ini'  => $data['fecha'],
-            'fecha_fin'  => $data['fecha'],
-            'tipo'       => $tipo[0],
-            'id_clave'   => isset($tipo[1])? $tipo[1]: null,
-          ));
+      // $tipo = explode('-', $data['tipo_asistencia']);
+      // if ($tipo[0] == 'a')
+      //   $tipo[0] = 'f';
+      // // Registra falta al trabajador
+      // $this->db->delete('nomina_asistencia', "id_usuario = {$data['id_usuario']} AND Date(fecha_ini) = '{$data['fecha']}' AND tipo = 'f'");
+      // $this->db->insert('nomina_asistencia', array(
+      //       'id_usuario' => $data['id_usuario'],
+      //       'fecha_ini'  => $data['fecha'],
+      //       'fecha_fin'  => $data['fecha'],
+      //       'tipo'       => $tipo[0],
+      //       'id_clave'   => isset($tipo[1])? $tipo[1]: null,
+      //     ));
       return array('passess' => false);
     }
 

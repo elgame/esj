@@ -482,7 +482,7 @@
       $tr.find('#fhrs_trabajo_importe').val(total.toFixed(2));
     }
     total += parseFloat(total_hrs_extra); // hrs extras
-
+    console.log(hrs, total);
     $tr.find('#fhrs_trabajo').val(hrs);
     $tr.find('#fhrs_extra_importe').val( total_hrs_extra );
     $tr.find('#fcosto').val(total.toFixed(2));
