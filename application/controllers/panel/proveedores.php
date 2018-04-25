@@ -12,6 +12,7 @@ class proveedores extends MY_Controller {
     'proveedores/rpt_listado_cuentas/',
     'proveedores/rpt_listado_cuentas_pdf/',
     'proveedores/rpt_listado_cuentas_xls/',
+    'proveedores/catalogo_xls/'
   );
 
 	public function _remap($method){
@@ -75,6 +76,12 @@ class proveedores extends MY_Controller {
 		$this->load->view('panel/proveedores/admin', $params);
 		$this->load->view('panel/footer');
 	}
+
+  public function catalogo_xls()
+  {
+    $this->load->model('proveedores_model');
+    $this->proveedores_model->catalogo_xls();
+  }
 
 	/**
 	 * Muestra el Formulario para agregar un proveedor

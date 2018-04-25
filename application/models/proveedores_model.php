@@ -781,6 +781,89 @@ class proveedores_model extends CI_Model {
     echo $html;
   }
 
+  public function catalogo_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=proveedores.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $proveedores = $this->db->query("SELECT *
+        FROM proveedores p
+        WHERE status <> 'e'
+        ORDER BY p.nombre_fiscal ASC")->result();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Catalogo de proveedores";
+    $titulo3 = '';
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="3" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="3"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Nombre Fiscal</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Calle</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">No exterior</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">No interior</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Colonia</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Localidad</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Municipio</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Estado</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Pais</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">CP</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Telefono</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Celular</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Email</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cta Contpaq</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">RFC</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">CURP</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Dias de Credito</td>
+        </tr>';
+
+    foreach ($proveedores as $key => $proveedor)
+    {
+      $html .= '<tr>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->nombre_fiscal.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->calle.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->no_exterior.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->no_interior.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->colonia.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->localidad.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->municipio.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->estado.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->pais.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->cp.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->telefono.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->celular.'</td>
+          <td style="width:400px;border:1px solid #000;">'.$proveedor->email.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->cuenta_cpi.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->rfc.'</td>
+          <td style="width:150px;border:1px solid #000;">'.$proveedor->curp.'</td>
+          <td style="width:100px;border:1px solid #000;">'.$proveedor->dias_credito.'</td>
+        </tr>';
+    }
+
+    $html .= '
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
 }
 /* End of file usuarios_model.php */
 /* Location: ./application/controllers/usuarios_model.php */

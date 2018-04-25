@@ -52,6 +52,9 @@
 							</fieldset>
 						</form>
 
+            <a href="<?php echo base_url('panel/proveedores/catalogo_xls/?'.String::getVarsLink(array('fnombre')) ); ?>"
+                class="pull-left">
+              <i class="icon-table"></i> Catalogo</a>
 						<?php
 						echo $this->usuarios_model->getLinkPrivSm('proveedores/agregar/', array(
 										'params'   => '',
