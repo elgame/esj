@@ -1533,7 +1533,7 @@ class nomina_fiscal_model extends CI_Model {
       'fechaFinalPago'   => $nomina[0]->nomina->FechaFinalPago,
       'tipoNomina'       => $nomina[0]->nomina->TipoNomina,
       'registroPatronal' => $empresa['info']->registro_patronal,
-      'esDependencia'    => 'IP',
+      // 'esDependencia'    => 'IP',
       'data' => array(
         array(
           'serie'                         => $nomina[0]->nomina->receptor['NumEmpleado'],
@@ -2146,8 +2146,10 @@ class nomina_fiscal_model extends CI_Model {
     $anio = substr($datos['vfecha'], 0, 4);
 
     $data_vac = $this->db->query("SELECT Date(fecha) AS fecha, Date(fecha_fin) AS fecha_fin FROM nomina_fiscal_vacaciones WHERE id_empleado = {$empleadoId} AND anio = {$anio} AND semana = {$numSemana}")->row();
-    if(isset($data_vac->fecha))
+    if(isset($data_vac->fecha)){
+      log_message('error', "Vacaciones: F1: ".$data_vac->fecha.", F2: ".$data_vac->fecha_fin.", usuario: ".$empleadoId);
       $this->db->delete('nomina_asistencia', "id_usuario = {$empleadoId} AND fecha_ini BETWEEN '{$data_vac->fecha}' AND '{$data_vac->fecha_fin}'");
+    }
     $this->db->where("id_empleado = {$empleadoId} AND anio = {$anio} AND semana = {$numSemana}");
     $this->db->delete('nomina_fiscal_vacaciones');
 
@@ -2168,7 +2170,7 @@ class nomina_fiscal_model extends CI_Model {
       $fecha2 = new DateTime($datos['vfecha1']);
       for ($cont = $fecha1->diff($fecha2)->d; $cont >= 0; $cont--)
       {
-        var_dump(array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
+        // var_dump(array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
         $this->db->insert('nomina_asistencia', array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
         $fecha1->add(new DateInterval('P1D'));
       }
@@ -2192,9 +2194,11 @@ class nomina_fiscal_model extends CI_Model {
     $empled = $this->usuarios_model->get_usuario_info($empleadoId, true);
     //Elimina los seleccionados
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($numSemana, $anio, $empled['info'][0]->dia_inicia_semana);
-    if(count($datos['eliminar_incapacidad']) > 0)
+    if(count($datos['eliminar_incapacidad']) > 0){
+      log_message('error', "Incapacidad: ids: ".implode(',', $datos['eliminar_incapacidad']).", usuario: ".$empleadoId);
       $this->db->delete('nomina_asistencia', "id_asistencia IN(".implode(',', $datos['eliminar_incapacidad']).") AND
           id_usuario = {$empleadoId}");
+    }
 
     foreach ($datos['idias'] as $key => $value)
     {
