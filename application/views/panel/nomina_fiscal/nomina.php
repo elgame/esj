@@ -208,7 +208,7 @@
                                             $e->fondo_ahorro; //+
                                             //$e->descuento_playeras;
 
-                        $totalComplementoEmpleado = (($e->esta_asegurado=='f'&&$e->nomina_guardada=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
+                        $totalComplementoEmpleado = (($e->esta_asegurado=='f' && $e->nomina_guardada=='f'? $e->dias_trabajados-1: $e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
 
                         $bgColor = '';
                         $htmlLabel = '';

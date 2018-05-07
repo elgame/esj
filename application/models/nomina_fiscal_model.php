@@ -555,7 +555,7 @@ class nomina_fiscal_model extends CI_Model {
           $empleado->dias_trabajados += 1;
         }
 
-        if($dias_trabajadosAux != -1) {
+        if($dias_trabajadosAux != -1 && $nm_guardada->num > 0) {
           $empleado->dias_trabajados = $dias_trabajadosAux;
         }
 

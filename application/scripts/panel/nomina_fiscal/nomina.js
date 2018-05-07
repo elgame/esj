@@ -535,11 +535,13 @@
               location.reload();
             });
           } else {
-            alert('Error: '+result.msg);
+            console.log(result);
           }
         } else {
-          $('#ultimo-no-generado').val(idUltimoError);
-          alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
+          if (result.ultimoNoGenerado == result.empleadoId) {
+            $('#ultimo-no-generado').val(idUltimoError);
+            alert('Ocurrio un problema con una o más nominas de empleados, vuelva a presionar el botón "Guardar" para generar esas nominas faltantes.');
+          }
         }
       }, Math.floor((Math.random() * 350) + 90));
 
