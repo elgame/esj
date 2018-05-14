@@ -885,6 +885,7 @@ var calculaTotales = function (trIndex, kilosNeto) {
   var $ptotal_cajas = $('#ptotal_cajas'),
       $tableCajas   = $('#tableCajas'),
       $ptotal       = $('#ptotal'),
+      $area         = $('#parea'),
 
       kilosNeto  = kilosNeto || (parseFloat($('#pkilos_neto').val()) || 0),
       totalCajas = 0,
@@ -927,7 +928,13 @@ var calculaTotales = function (trIndex, kilosNeto) {
     $tr.find('#ppromedio').val(promedio);
     // $tr.find('#tdpromedio').html(promedio)
 
-    importe = (kilos * precio).toFixed(2);
+    // Si el area es coco entonces calcula diferente el importe
+    if ($area.find('option:selected').attr('data-coco') === 't') {
+      importe = (cajas * precio).toFixed(2);
+    } else { // Calcula con los kilos
+      importe = (kilos * precio).toFixed(2);
+    }
+
     $tr.find('#pimporte').val(importe);
     $tr.find('#tdimporte').html(importe);
 

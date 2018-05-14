@@ -177,7 +177,7 @@
                       <select name="parea" class="input-xlarge" id="parea" <?php echo $disabled; ?> data-next="<?php echo ($e === true? 'pfecha': 'pfolio'); ?>">
                         <option value="" <?php echo $bmod['area']; ?>></option>
                         <?php foreach ($areas['areas'] as $area){ ?>
-                          <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>"
+                          <option value="<?php echo $area->id_area ?>" data-tipo="<?php echo $area->tipo; ?>" data-coco="<?php echo ($area->nombre == 'COCOS'? 't': 'f') ?>"
                             <?php $set_select=set_select('parea', $area->id_area, false, isset($_POST['parea']) ? $_POST['parea'] : ($area->predeterminado == 't' ? $area->id_area: '') );
                              echo $set_select.($set_select==' selected="selected"'? '': $bmod['area']); ?>><?php echo $area->nombre ?></option>
                         <?php } ?>
