@@ -700,8 +700,20 @@ class nomina_fiscal_model extends CI_Model {
     // foreach ($datos['empleado_id'] as $key => $empleadoId)
     // {
       // Si la nomina del empleado no se ha generado entonces entra.
+      $existe_nomina = $this->db->from("nomina_fiscal")
+        ->select('id_empleado, uuid')
+        ->where("id_empresa", $empresaId)
+        ->where("id_empleado", $empleadoId)
+        ->where("anio", $datos['anio'])
+        ->where("semana", $datos['numSemana'])->get()->row();
+      if ($datos['esta_asegurado'] == 't') {
+        $existe_nomina = (isset($existe_nomina->uuid) && $existe_nomina->uuid != '')? true: false;
+      } else {
+        $existe_nomina = (isset($existe_nomina->id_empleado) && $existe_nomina->id_empleado > 0)? true: false;
+      }
+
       $msg = '';
-      if ($datos['generar_nomina'] === '1')
+      if ($datos['generar_nomina'] === '1' && !$existe_nomina)
       {
         // $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
         $empleado = $this->usuarios_model->get_usuario_info($empleadoId, true);
@@ -1135,11 +1147,14 @@ class nomina_fiscal_model extends CI_Model {
     $anio = $fechaSalida->format('Y');
     $semana_salida = date("W", $fechaSalida->getTimestamp());
 
-    $fechaEntrada = $this->db->query("SELECT DATE(COALESCE(fecha_imss, fecha_entrada)) as fecha_entrada
-                               FROM usuarios as u
+    $fechaEntrada = $this->db->query("SELECT DATE(COALESCE(fecha_imss, fecha_entrada)) as fecha_entrada, e.dia_inicia_semana
+                               FROM usuarios as u INNER JOIN empresas e ON e.id_empresa = u.id_empresa
                                WHERE u.esta_asegurado = 't' AND u.status = 't' {$sql}")->row();
-    if(isset($fechaEntrada->fecha_entrada))
+    $diasInicia = 4;
+    if(isset($fechaEntrada->fecha_entrada)) {
+      $diasInicia = $fechaEntrada->dia_inicia_semana;
       $fechaEntrada = $fechaEntrada->fecha_entrada;
+    }
     else
       return false;
 
@@ -1151,14 +1166,14 @@ class nomina_fiscal_model extends CI_Model {
     //   $fechaInicio = date($fechaEntrada);
     // }
     $fechaInicio = date($fechaEntrada);
-    $fechaIniAguinaldo = date("Y-m")."-01";
+    $fechaIniAguinaldo = date("Y")."-01-01";
     $fechaIniAguinaldo = ($fechaInicio < $fechaIniAguinaldo)? $fechaIniAguinaldo: $fechaInicio;
 
     // Saca los dias transcurridos desde el 1 de Enero del año a la fecha de salida.
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
     $diasTransAguinaldo = $fechaSalida->diff(new DateTime($fechaIniAguinaldo))->format("%a") + 1;
 
-    $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, 4, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
+    $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, $diasInicia, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
     $fechaInicioSemana = new DateTime($semanaQueSeVa['fecha_inicio']);
     $diasTrabajadosSemana = $fechaInicioSemana->diff($fechaSalida)->days + 1;
 
@@ -1253,7 +1268,10 @@ class nomina_fiscal_model extends CI_Model {
         $anio_anterior = $res_vacaciones->fecha;
     }
     $empleado[0]->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, $fechaSalida->format('Y-m-d')));
-
+    // echo "<pre>";
+    // var_dump ($anio_anterior, $fechaSalida->format('Y-m-d'), $res_vacaciones->fecha);
+    // echo "</pre>";exit;
+    //
     // Obtenemos los prestamos
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($empleado[0]->id_empresa);
@@ -2149,6 +2167,9 @@ class nomina_fiscal_model extends CI_Model {
     if(isset($data_vac->fecha)){
       log_message('error', "Vacaciones: F1: ".$data_vac->fecha.", F2: ".$data_vac->fecha_fin.", usuario: ".$empleadoId);
       $this->db->delete('nomina_asistencia', "id_usuario = {$empleadoId} AND fecha_ini BETWEEN '{$data_vac->fecha}' AND '{$data_vac->fecha_fin}'");
+
+      $this->db->where("id_usuario = {$empleadoId} AND Date(fecha) = '{$data_vac->fecha}'");
+      $this->db->delete('usuarios_historial');
     }
     $this->db->where("id_empleado = {$empleadoId} AND anio = {$anio} AND semana = {$numSemana}");
     $this->db->delete('nomina_fiscal_vacaciones');
@@ -2174,6 +2195,14 @@ class nomina_fiscal_model extends CI_Model {
         $this->db->insert('nomina_asistencia', array('fecha_ini' => $fecha1->format("Y-m-d"), 'fecha_fin' => $fecha1->format("Y-m-d"), 'id_usuario' => $empleadoId, 'tipo' => 'f'));
         $fecha1->add(new DateInterval('P1D'));
       }
+
+      // Historiales del usuario
+      $this->load->model('usuario_historial_model');
+      $this->usuario_historial_model->setIdUsuario($empleadoId);
+      $evento = array('evento' => 'Vacaciones del '.$datos['vfecha']." al ".$datos['vfecha1'],
+        'fecha' => $datos['vfecha'], 'valor_anterior' => null, 'valor_nuevo' => null);
+      $historial = $this->usuario_historial_model->buildEvent($evento);
+      $this->usuario_historial_model->guardaHistorial(array($historial));
     }
 
     return array('passes' => true);
