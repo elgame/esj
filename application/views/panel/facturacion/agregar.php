@@ -1715,9 +1715,11 @@
               <!-- <th>Clasificacion</th> -->
             </tr>
           </thead>
-          <tbody>
+          <tbody id="mdlRemisiones">
 
-            <?php foreach ($remisiones as $key => $remision) {
+            <?php
+            if (isset($remisiones)) {
+              foreach ($remisiones as $key => $remision) {
                     $rendimientos = array();
                     foreach ($remision->pallets as $pallet) {
                       $rendimientos = array_merge($rendimientos, $pallet['rendimientos']);
@@ -1731,7 +1733,8 @@
                 <td><?php echo $remision->fecha ?></td>
                 <!-- <td></td> -->
               </tr>
-            <?php } ?>
+            <?php }
+            } ?>
           </tbody>
         </table>
       </div>

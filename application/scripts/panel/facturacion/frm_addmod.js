@@ -417,7 +417,28 @@ $(function(){
   // Boton Ventas de Remision.
   $('#show-remisiones').on('click', function(event) {
     var $this = $(this); // boton
-    $('#modal-remisiones').modal('show');
+    $.get(base_url + 'panel/facturacion/getRemisiones', function(remisiones) {
+      var html = '';
+
+      remisiones.forEach(function(el) {
+        var $rendimientos = [], selected = '';
+        el.pallets.forEach(function (pallet) {
+          $rendimientos = $rendimientos.concat(pallet.rendimientos);
+        });
+        $rendimientos = JSON.stringify($rendimientos);
+
+        selected = $('#remision'+el.id_factura).length>0? ' checked': '';
+
+        html += '<tr style="" id="chk-cli-remision-'+el.id_factura+'">'+
+                '<td><input type="checkbox" value="'+el.id_factura+'"'+selected+' class="chk-cli-remisiones"><input type="hidden" id="jsondata" value="'+$rendimientos+'"></td>'+
+                '<td>'+el.serie+el.folio+'</td>'+
+                '<td>'+el.nombre_fiscal+'</td>'+
+                '<td>'+el.fecha+'</td>'+
+              '</tr>';
+      });
+      $('#mdlRemisiones').html(html);
+      $('#modal-remisiones').modal('show');
+    }, 'json');
   });
 
   $('#BtnAddRemisiones').on('click', function(event) {

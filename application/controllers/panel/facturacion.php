@@ -36,6 +36,8 @@ class facturacion extends MY_Controller {
 
     'facturacion/xml/',
     'facturacion/nomina/',
+
+    'facturacion/getRemisiones/'
   );
 
   public function _remap($method)
@@ -266,7 +268,7 @@ class facturacion extends MY_Controller {
 
     $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
-    $params['remisiones'] = $this->facturacion_model->getRemisiones();
+    // $params['remisiones'] = $this->facturacion_model->getRemisiones();
 
     $params['unidad_medidas'] = $this->cunidadesmedida_model->getCE();
 
@@ -313,6 +315,13 @@ class facturacion extends MY_Controller {
 
       redirect(base_url('panel/facturacion/agregar/?&msg=11'));
     }
+  }
+
+  public function getRemisiones()
+  {
+    $this->load->model('facturacion_model');
+    $remisiones = $this->facturacion_model->getRemisiones();
+    echo json_encode($remisiones);
   }
 
   /**

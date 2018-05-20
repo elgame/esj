@@ -1414,7 +1414,9 @@ class Ventas_model extends privilegios_model{
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, "{$factura['info']->usoCfdi['key']} - {$factura['info']->usoCfdi['value']}", 0, 0, 'R', 0);
+    if (isset($factura['info']->usoCfdi)) {
+      $pdf->Cell(108, 4, "{$factura['info']->usoCfdi['key']} - {$factura['info']->usoCfdi['value']}", 0, 0, 'R', 0);
+    }
 
     //////////////////
     // domicilioEmisor //

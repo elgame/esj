@@ -921,8 +921,12 @@ class facturacion_model extends privilegios_model{
 
     if(count($produccionFactura) > 0) {
       if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
-        // Cancela los productos de produccion historial
-        $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$_POST['id_nr']}'");
+      // if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
+        foreach ($_POST['remisionesIds'] as $kerr => $remmm) {
+          // Cancela los productos de produccion historial
+          $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$_POST['id_nr']}'");
+          // $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$remmm}'");
+        }
       }
 
       if ((isset($_GET['idb']) && ! $borrador) || $borrador)
@@ -5264,13 +5268,30 @@ class facturacion_model extends privilegios_model{
       $sql = " AND f.id_factura = {$remisionId}";
     }
 
+    if ($this->input->get('empresaId') > 0)
+    {
+      $sql .= " AND f.id_empresa = {$remisionId}";
+    }
+
     $remisiones = $this->db->query(
       "SELECT f.id_factura, f.serie, f.folio, c.nombre_fiscal, f.is_factura, DATE(f.fecha) as fecha
        FROM facturacion f
        INNER JOIN clientes c ON c.id_cliente = f.id_cliente
-       LEFT JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
-       WHERE f.status = 'ca' AND f.is_factura = false AND ((SELECT status FROM facturacion WHERE id_factura = fvp.id_factura) in ('ca', 'b') OR COALESCE(fvp.id_factura, 0) = 0) {$sql}
+       LEFT JOIN (SELECT id_remision, id_factura, status
+                  FROM remisiones_historial WHERE status <> 'ca' AND status <> 'b'
+        ) fh ON f.id_factura = fh.id_remision
+       WHERE f.status <> 'ca' AND f.status <> 'b' AND f.is_factura = false
+        AND COALESCE(fh.id_remision, 0) = 0 {$sql}
        ORDER BY (DATE(f.fecha), f.serie, f.folio) DESC")->result();
+
+    // $remisiones = $this->db->query(
+    //   "SELECT f.id_factura, f.serie, f.folio, c.nombre_fiscal, f.is_factura, DATE(f.fecha) as fecha
+    //    FROM facturacion f
+    //    INNER JOIN clientes c ON c.id_cliente = f.id_cliente
+    //    LEFT JOIN facturacion_ventas_remision_pivot fvp ON fvp.id_venta = f.id_factura
+    //    WHERE f.status = 'ca' AND f.is_factura = false AND (
+    //     (SELECT status FROM facturacion WHERE id_factura = fvp.id_factura) in ('ca', 'b') OR COALESCE(fvp.id_factura, 0) = 0) {$sql}
+    //    ORDER BY (DATE(f.fecha), f.serie, f.folio) DESC")->result();
 
     // echo "<pre>";
     //   var_dump($remisiones);
