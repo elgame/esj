@@ -346,6 +346,8 @@ class caja_chica_model extends CI_Model {
   {
     $ingresos = array();
 
+    $nombresCajas = ['1' => 'Caja Limon', '2' => 'Caja Gastos', '3' => 'Caja Coco', '4' => 'Caja Venta de Contado'];
+
     // ingresos
     if (isset($data['ingreso_concepto']) && is_array($data['ingreso_concepto'])) {
       foreach ($data['ingreso_concepto'] as $key => $ingreso)
@@ -368,6 +370,16 @@ class caja_chica_model extends CI_Model {
             'id_usuario'      => $this->session->userdata('id_usuario'),
           );
 
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_ingresos', $data['ingreso_id_ingresos'][$key], $ingreso_udt,
+                          array(':accion'       => 'el ingreso por reposicion', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_ingresos',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
           $this->db->update('cajachica_ingresos', $ingreso_udt, "id_ingresos = ".$data['ingreso_id_ingresos'][$key]);
         } else {
           $ingresos = array(
@@ -384,6 +396,14 @@ class caja_chica_model extends CI_Model {
           );
 
           $this->db->insert('cajachica_ingresos', $ingresos);
+          $idingresoo = $this->db->insert_id();
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_ingresos', $idingresoo,
+                        array(':accion'    => 'el ingreso por reposicion', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$ingreso} | Monto: {$data['ingreso_monto'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
         }
       }
     }
@@ -518,6 +538,16 @@ class caja_chica_model extends CI_Model {
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
           );
 
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_gastos', $data['gasto_id_gasto'][$key], $gastos_udt,
+                          array(':accion'       => 'el gasto del dia', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_gasto',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
           $this->db->update('cajachica_gastos', $gastos_udt, "id_gasto = ".$data['gasto_id_gasto'][$key]);
         } else {
           $gastos = array(
@@ -534,7 +564,15 @@ class caja_chica_model extends CI_Model {
             'id_usuario'      => $this->session->userdata('id_usuario'),
           );
           $this->db->insert('cajachica_gastos', $gastos);
-          $gastos_ids['adds'][] = $this->db->insert_id();
+          $gastooidd = $this->db->insert_id();
+          $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_gastos', $gastooidd,
+                        array(':accion'    => 'el gasto del dia', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$gasto} | Monto: {$data['gasto_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
         }
       }
 

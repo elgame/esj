@@ -38,6 +38,10 @@ class bitacora_msg_model extends CI_Model {
     'banco_movimientos_cancel'   => 'Se :accion :folio :empresa',
     'facturacion_abonos_insert'  => 'Se agrego :accion :folio :empresa',
     'facturacion_abonos_cancel'  => 'Se elimino :accion :folio :empresa',
+    'cajachica_ingresos_insert'  => 'Se agrego :accion :folio :empresa',
+    'cajachica_ingresos_update'  => 'Se modifico :accion :folio :empresa',
+    'cajachica_gastos_insert'    => 'Se agrego :accion :folio :empresa',
+    'cajachica_gastos_update'    => 'Se modifico :accion :folio :empresa',
 		);
 
   protected $secciones = array(
@@ -52,6 +56,7 @@ class bitacora_msg_model extends CI_Model {
     'cuentas por pagar',
     'banco',
     'cuentas por cobrar',
+    'caja chica',
 
     );
 
@@ -296,7 +301,34 @@ class bitacora_msg_model extends CI_Model {
         )
       ),
 
-    );
+      // caja chica
+    'cajachica_ingresos_update' => array(
+        'campos' => array(
+          'concepto'        => 'Concepto',
+          'monto'           => 'Abono',
+          'id_nomenclatura' => 'Nom',
+          'poliza'          => 'Poliza',
+          'id_categoria'    => 'Empresa',
+        ),
+        'campos_ids' => array(
+          'id_categoria' => "SELECT abreviatura as dato FROM cajachica_categorias WHERE id_categoria = ?",
+        )
+      ),
+    'cajachica_gastos_update' => array(
+        'campos' => array(
+          'concepto'        => 'Concepto',
+          'monto'           => 'Cargo',
+          'id_nomenclatura' => 'Nom',
+          'folio'           => 'Folio',
+          'id_categoria'    => 'Empresa',
+          'reposicion'      => 'Reposición',
+        ),
+        'campos_ids' => array(
+          'id_categoria' => "SELECT abreviatura as dato FROM cajachica_categorias WHERE id_categoria = ?",
+        )
+      ),
+
+  );
 
 
   public function getSecciones()
