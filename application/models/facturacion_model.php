@@ -920,12 +920,12 @@ class facturacion_model extends privilegios_model{
     }
 
     if(count($produccionFactura) > 0) {
-      if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
-      // if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
+      // Cancela los productos de produccion historial
+      // if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
+      //   $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$_POST['id_nr']}'");
+      if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
         foreach ($_POST['remisionesIds'] as $kerr => $remmm) {
-          // Cancela los productos de produccion historial
-          $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$_POST['id_nr']}'");
-          // $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$remmm}'");
+          $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$remmm}'");
         }
       }
 
@@ -977,9 +977,14 @@ class facturacion_model extends privilegios_model{
     }
 
     // Agrega al historial de remisiones
-    if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
-      $this->db->insert('facturacion_remision_hist', array('id_remision' => $_POST['id_nr'], 'id_factura' => $idFactura));
+    if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
+      foreach ($_POST['remisionesIds'] as $kerr => $remmm) {
+        $this->db->insert('facturacion_remision_hist', array('id_remision' => $remmm, 'id_factura' => $idFactura));
+      }
     }
+    // if (isset($_POST['id_nr']) && $_POST['id_nr'] > 0) {
+    //   $this->db->insert('facturacion_remision_hist', array('id_remision' => $_POST['id_nr'], 'id_factura' => $idFactura));
+    // }
 
     if (!empty($this->input->post('comercioExterior')['tipoOperacion']) ||
         !empty($this->input->post('comercioExterior')['clavePedimento']) ||
@@ -1117,11 +1122,20 @@ class facturacion_model extends privilegios_model{
     // echo "<pre>";
     //   var_dump($timbrado);
     // echo "</pre>";exit;
-
-    $result = array(
-      'id_factura' => $idFactura,
-      'codigo'     => $timbrado->codigo
-    );
+    if (isset($timbrado->codigo)) {
+      $result = array(
+        'id_factura' => $idFactura,
+        'codigo'     => $timbrado->codigo
+      );
+    } else {
+      $result = array(
+        'id_factura' => $idFactura,
+        'codigo'     => 'ERR_INTERNET_DISCONNECTED',
+        'msg'        => 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.',
+        'passes'     => false,
+      );
+      return $result;
+    }
 
     // Si no hubo errores al momento de realizar el timbrado.
     if ($timbrado->status)
@@ -5270,7 +5284,7 @@ class facturacion_model extends privilegios_model{
 
     if ($this->input->get('empresaId') > 0)
     {
-      $sql .= " AND f.id_empresa = {$remisionId}";
+      $sql .= " AND f.id_empresa = {$this->input->get('empresaId')}";
     }
 
     $remisiones = $this->db->query(

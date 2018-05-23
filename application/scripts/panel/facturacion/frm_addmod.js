@@ -417,7 +417,8 @@ $(function(){
   // Boton Ventas de Remision.
   $('#show-remisiones').on('click', function(event) {
     var $this = $(this); // boton
-    $.get(base_url + 'panel/facturacion/getRemisiones', function(remisiones) {
+    var dataa = {'empresaId': $('#did_empresa').val()};
+    $.get(base_url + 'panel/facturacion/getRemisiones', dataa, function(remisiones) {
       var html = '';
 
       remisiones.forEach(function(el) {
