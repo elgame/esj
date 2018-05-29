@@ -313,7 +313,7 @@ class nomina_fiscal_model extends CI_Model {
             u.tipo_contrato,
             u.tipo_jornada,
             u.riesgo_puesto,
-            COALESCE(upp.nombre, up.nombre) as puesto,
+            up.nombre as puesto,
             -1 as dias_trabajados,
             extract(days FROM (timestamp '{$anio}-12-31' - DATE(COALESCE(u.fecha_imss, u.fecha_entrada)) )) as dias_aguinaldo_full,
             (SELECT COALESCE(DATE_PART('DAY', SUM((fecha_fin - fecha_ini) + '1 day'))::integer, 0) as dias
@@ -372,10 +372,10 @@ class nomina_fiscal_model extends CI_Model {
         FROM nomina_fiscal nf
             INNER JOIN usuarios u ON u.id = nf.id_empleado
             LEFT JOIN usuarios_puestos up ON up.id_puesto = u.id_puesto
-            LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
+            -- LEFT JOIN usuarios_puestos upp ON upp.id_puesto = nf.id_puesto
         WHERE nf.anio = {$anioPtu} AND nf.id_empresa = {$filtros['empresaId']} AND nf.esta_asegurado = 't' AND
             (SELECT COALESCE(SUM(dias_trabajados), 0) FROM nomina_fiscal WHERE anio = {$anioPtu} AND id_empresa = {$filtros['empresaId']} AND id_empleado = u.id) > 0
-        GROUP BY u.id, upp.nombre, up.nombre, nf.esta_asegurado
+        GROUP BY u.id, up.nombre, nf.esta_asegurado
         ORDER BY u.apellido_paterno ASC, u.apellido_materno ASC";
         //{$sqle_id}
       }

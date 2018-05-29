@@ -114,7 +114,7 @@
                     </tr>
                     <tr>
                       <!-- <th>VACAS.</th> -->
-                      <th></th>
+                      <th><?php echo count($empleados); ?></th>
                       <th>NOMBRE</th>
                       <th>PUESTO</th>
                       <th>Días Lab.</th>
@@ -207,7 +207,7 @@
                           //                     $e->nomina->deducciones['imss']['total'] +
                           //                     $e->nomina->deducciones['rcv']['total']; //+
                                               //$e->descuento_playeras;
-
+                          $e->esta_asegurado = $e->ptu_generado !== 'false'? 't': $e->esta_asegurado;
                           $totalComplementoEmpleado = (($e->esta_asegurado=='f'?$e->dias_trabajados-1:$e->dias_trabajados) * 6/ ($e->esta_asegurado=='f'?6:7) ) * $e->salario_diario_real;
 
                           $bgColor = '';

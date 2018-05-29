@@ -759,17 +759,21 @@ class nomina
 
     if ($this->empleado->utilidad_empresa_ptu > 0 && $this->empleado->ptu_percepciones_empleados > 0 && $this->empleado->ptu_dias_trabajados_empleados > 0)
     {
-      $ptu = $this->empleado->utilidad_empresa_ptu / 2;
+      if ($this->empleado->ptu_generado === 'false') {
+        $ptu = $this->empleado->utilidad_empresa_ptu / 2;
 
-      $percepciones = round((floatval($this->empleado->ptu_percepciones_empleado) * $ptu) / floatval($this->empleado->ptu_percepciones_empleados), 3);
-      $dias = round((floatval($this->empleado->ptu_dias_trabajados_empleado) * $ptu) / floatval($this->empleado->ptu_dias_trabajados_empleados), 3);
+        $percepciones = round((floatval($this->empleado->ptu_percepciones_empleado) * $ptu) / floatval($this->empleado->ptu_percepciones_empleados), 3);
+        $dias = round((floatval($this->empleado->ptu_dias_trabajados_empleado) * $ptu) / floatval($this->empleado->ptu_dias_trabajados_empleados), 3);
 
-      $this->empleado->ptu_empleado_percepciones = $percepciones;
-      $this->empleado->ptu_empleado_dias         = $dias;
-      $this->empleado->ptu_empleado_percepciones_fact = round($ptu/floatval($this->empleado->ptu_percepciones_empleados), 4);
-      $this->empleado->ptu_empleado_dias_fact         = round($ptu/floatval($this->empleado->ptu_dias_trabajados_empleados), 4);
+        $this->empleado->ptu_empleado_percepciones = $percepciones;
+        $this->empleado->ptu_empleado_dias         = $dias;
+        $this->empleado->ptu_empleado_percepciones_fact = round($ptu/floatval($this->empleado->ptu_percepciones_empleados), 4);
+        $this->empleado->ptu_empleado_dias_fact         = round($ptu/floatval($this->empleado->ptu_dias_trabajados_empleados), 4);
 
-      $ptuTrabajador = $percepciones + $dias;
+        $ptuTrabajador = $percepciones + $dias;
+      } else {
+        $ptuTrabajador = $this->empleado->nomina_fiscal_ptu;
+      }
 
       $topeExcento = 15 * $this->salariosZonasConfig->zona_b;
 
