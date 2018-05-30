@@ -59,7 +59,7 @@ class nomina_fiscal_model extends CI_Model {
     if ($filtros['empresaId'] !== '')
     {
       $sql .= " AND u.id_empresa = {$filtros['empresaId']}";
-      $sqlpt .= " AND u.id_empresa = {$filtros['empresaId']}";
+      // $sqlpt .= " AND u.id_empresa = {$filtros['empresaId']}";
       $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_empresa = {$filtros['empresaId']}";
     }
 
