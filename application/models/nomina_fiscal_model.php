@@ -10569,6 +10569,8 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
+
+          unset($empleados_sin_departamento[intval($empleado->id)]);
         }
       }
 
