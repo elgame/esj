@@ -60,7 +60,7 @@ class nomina_fiscal_model extends CI_Model {
     {
       $sql .= " AND u.id_empresa = {$filtros['empresaId']}";
       // $sqlpt .= " AND u.id_empresa = {$filtros['empresaId']}";
-      $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_empresa = {$filtros['empresaId']}";
+      // $sqlg .= " AND ".($tipo=='ag'? 'nagui': 'nf').".id_empresa = {$filtros['empresaId']}";
     }
 
     if ($filtros['puestoId'] !== '')
@@ -3023,12 +3023,15 @@ class nomina_fiscal_model extends CI_Model {
       'ptu' => 0, 'aguinaldo' => 0, 'infonavit' => 0, 'imms' => 0, 'prestamos' => 0, 'fondo_ahorro' => 0, 'isr' => 0,
       'total_percepcion' => 0, 'total_deduccion' => 0, 'total_neto' => 0, 'pasistencia' => 0, 'despensa' => 0);
 
+    $numero_trabajadores2 = 0;
     $empleados_sin_departamento = [];
     foreach ($empleados as $key => $empleado) {
       $empleados_sin_departamento[$empleado->id] = $empleado;
+      $numero_trabajadores2++;
     }
 
     // $departamentos = $this->usuarios_model->departamentos();
+    $numero_trabajadores = 0;
     $_GET['did_empresa'] = $empresaId;
     $departamentos = $this->usuarios_departamentos_model->getPuestos(false)['puestos'];
     foreach ($departamentos as $keyd => $departamento)
@@ -3370,6 +3373,7 @@ class nomina_fiscal_model extends CI_Model {
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
+          $numero_trabajadores++;
           unset($empleados_sin_departamento[intval($empleado->id)]);
         }
       }
@@ -3459,19 +3463,19 @@ class nomina_fiscal_model extends CI_Model {
           }
         }
 
-        // Subsidio
-        if ($total_dep['subsidio'] > 0)
-        {
-          $pdf->SetXY(6, $pdf->GetY());
-          $pdf->SetAligns(array('L', 'L', 'R'));
-          $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
-          if($pdf->GetY() >= $pdf->limiteY)
-          {
-            $pdf->AddPage();
-            $y2 = $pdf->GetY();
-          }
-        }
+        // // Subsidio
+        // if ($total_dep['subsidio'] > 0)
+        // {
+        //   $pdf->SetXY(6, $pdf->GetY());
+        //   $pdf->SetAligns(array('L', 'L', 'R'));
+        //   $pdf->SetWidths(array(15, 62, 25));
+        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   if($pdf->GetY() >= $pdf->limiteY)
+        //   {
+        //     $pdf->AddPage();
+        //     $y2 = $pdf->GetY();
+        //   }
+        // }
 
         // PTU
         if ($total_dep['ptu'] > 0)
@@ -3508,6 +3512,20 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetFont('Helvetica','', 9);
 
         $pdf->SetY($y2);
+        // Subsidio
+        if ($total_dep['subsidio'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y2 = $pdf->GetY();
+          }
+        }
+
         if ($total_dep['infonavit'] > 0)
         {
           $pdf->SetXY(108, $pdf->GetY());
@@ -3925,6 +3943,8 @@ class nomina_fiscal_model extends CI_Model {
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
+        $numero_trabajadores++;
+
         $pdf->SetFont('Helvetica', '', 9);
         $pdf->SetXY(120, $pdf->GetY()+3);
         $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
@@ -4017,19 +4037,19 @@ class nomina_fiscal_model extends CI_Model {
           }
         }
 
-        // Subsidio
-        if ($total_dep['subsidio'] > 0)
-        {
-          $pdf->SetXY(6, $pdf->GetY());
-          $pdf->SetAligns(array('L', 'L', 'R'));
-          $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
-          if($pdf->GetY() >= $pdf->limiteY)
-          {
-            $pdf->AddPage();
-            $y2 = $pdf->GetY();
-          }
-        }
+        // // Subsidio
+        // if ($total_dep['subsidio'] > 0)
+        // {
+        //   $pdf->SetXY(6, $pdf->GetY());
+        //   $pdf->SetAligns(array('L', 'L', 'R'));
+        //   $pdf->SetWidths(array(15, 62, 25));
+        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   if($pdf->GetY() >= $pdf->limiteY)
+        //   {
+        //     $pdf->AddPage();
+        //     $y2 = $pdf->GetY();
+        //   }
+        // }
 
         // PTU
         if ($total_dep['ptu'] > 0)
@@ -4066,6 +4086,20 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetFont('Helvetica','', 9);
 
         $pdf->SetY($y2);
+        // Subsidio
+        if ($total_dep['subsidio'] > 0)
+        {
+          $pdf->SetXY(108, $pdf->GetY());
+          $pdf->SetAligns(array('L', 'L', 'R'));
+          $pdf->SetWidths(array(15, 62, 25));
+          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          if($pdf->GetY() >= $pdf->limiteY)
+          {
+            $pdf->AddPage();
+            $y2 = $pdf->GetY();
+          }
+        }
+
         if ($total_dep['infonavit'] > 0)
         {
           $pdf->SetXY(108, $pdf->GetY());
@@ -4272,22 +4306,6 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // Subsidio
-      if ($empleado->subsidio > 0)
-      {
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'R'));
-        $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio, 2, '$', false)), false, 0, null, 1, 1);
-        $total_dep['subsidio'] += $empleado->subsidio;
-        $total_gral['subsidio'] += $empleado->subsidio;
-        if($pdf->GetY() >= $pdf->limiteY)
-        {
-          $pdf->AddPage();
-          $y2 = $pdf->GetY();
-        }
-      }
-
       // // PTU
       // if ($empleado->nomina_fiscal_ptu > 0)
       // {
@@ -4327,6 +4345,21 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','', 9);
 
       $pdf->SetY($y2);
+      // Subsidio
+      if ($empleado->subsidio > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio*-1, 2, '$', false)), false, 0, null, 1, 1);
+        $total_dep['subsidio'] += $empleado->subsidio;
+        $total_gral['subsidio'] += $empleado->subsidio;
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
 
       if ($empleado->isr != 0)
       {
@@ -4352,6 +4385,10 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $y + 2);
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
+
+      $empleado->total_percepcion -= $empleado->subsidio;
+      $empleado->total_deduccion -= $empleado->subsidio;
+
       $total_dep['total_percepcion'] += $empleado->total_percepcion;
       $total_gral['total_percepcion'] += $empleado->total_percepcion;
       $total_dep['total_deduccion'] += $empleado->total_deduccion;
@@ -4375,6 +4412,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Cell(200, 2, "--------------------------------------------------------------------------------------", 0, 0, 'L', 0);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
+
+      $numero_trabajadores++;
     }
 
     //****** Total finiquito ******
@@ -4440,20 +4479,6 @@ class nomina_fiscal_model extends CI_Model {
         }
       }
 
-      // Subsidio
-      if ($total_dep['subsidio'] > 0)
-      {
-        $pdf->SetXY(6, $pdf->GetY());
-        $pdf->SetAligns(array('L', 'L', 'R'));
-        $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
-        if($pdf->GetY() >= $pdf->limiteY)
-        {
-          $pdf->AddPage();
-          $y2 = $pdf->GetY();
-        }
-      }
-
       // PTU
       if ($total_dep['ptu'] > 0)
       {
@@ -4489,6 +4514,21 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetFont('Helvetica','', 9);
 
       $pdf->SetY($y2);
+
+      // Subsidio
+      if ($total_dep['subsidio'] > 0)
+      {
+        $pdf->SetXY(108, $pdf->GetY());
+        $pdf->SetAligns(array('L', 'L', 'R'));
+        $pdf->SetWidths(array(15, 62, 25));
+        $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+        if($pdf->GetY() >= $pdf->limiteY)
+        {
+          $pdf->AddPage();
+          $y2 = $pdf->GetY();
+        }
+      }
+
       if ($total_dep['infonavit'] > 0)
       {
         $pdf->SetXY(108, $pdf->GetY());
@@ -4641,19 +4681,19 @@ class nomina_fiscal_model extends CI_Model {
       }
     }
 
-    // Subsidio
-    if ($total_gral['subsidio'] > 0)
-    {
-      $pdf->SetXY(6, $pdf->GetY());
-      $pdf->SetAligns(array('L', 'L', 'R'));
-      $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
-      if($pdf->GetY() >= $pdf->limiteY)
-      {
-        $pdf->AddPage();
-        $y2 = $pdf->GetY();
-      }
-    }
+    // // Subsidio
+    // if ($total_gral['subsidio'] > 0)
+    // {
+    //   $pdf->SetXY(6, $pdf->GetY());
+    //   $pdf->SetAligns(array('L', 'L', 'R'));
+    //   $pdf->SetWidths(array(15, 62, 25));
+    //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+    //   if($pdf->GetY() >= $pdf->limiteY)
+    //   {
+    //     $pdf->AddPage();
+    //     $y2 = $pdf->GetY();
+    //   }
+    // }
 
     // PTU
     if ($total_gral['ptu'] > 0)
@@ -4690,6 +4730,20 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetFont('Helvetica','', 9);
 
     $pdf->SetY($y2);
+    // Subsidio
+    if ($total_gral['subsidio'] > 0)
+    {
+      $pdf->SetXY(108, $pdf->GetY());
+      $pdf->SetAligns(array('L', 'L', 'R'));
+      $pdf->SetWidths(array(15, 62, 25));
+      $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+      if($pdf->GetY() >= $pdf->limiteY)
+      {
+        $pdf->AddPage();
+        $y2 = $pdf->GetY();
+      }
+    }
+
     if ($total_gral['infonavit'] > 0)
     {
       $pdf->SetXY(108, $pdf->GetY());
@@ -4769,7 +4823,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
 
     $pdf->Output('Nomina.pdf', 'I');
   }
