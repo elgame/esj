@@ -136,6 +136,10 @@ class banco_pagos_model extends CI_Model {
       }
     }
 
+    $cuentaa = explode('-', $cuenta_retiro->cuenta);
+    if (count($cuentaa) == 3)
+      $cuenta_retiro->cuenta = $cuentaa[1];
+
     $data = array(
       //Reg de Control
       'id_cuenta'      => $cuenta_retiro->id_cuenta,
@@ -352,6 +356,10 @@ class banco_pagos_model extends CI_Model {
           );
       }
     }
+
+    $cuentaa = explode('-', $cuenta_retiro->cuenta);
+    if (count($cuentaa) == 3)
+      $cuenta_retiro->cuenta = $cuentaa[1];
 
     $data = array(
       //Reg de Control

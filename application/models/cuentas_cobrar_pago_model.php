@@ -146,12 +146,16 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
           return array("passes" => false, "codigo" => "14");
         }
 
+        $queryMov[0]->num_cuenta = str_replace('-', '', $queryMov[0]->num_cuenta);
+
         // xml 3.3
         $datosApi = $this->cfdi->obtenDatosCfdi33ComP($queryMov, $queryCliente, $folio);
         // echo "<pre>";
         //   var_dump($datosApi);
         // echo "</pre>";exit;
 
+        log_message('error', "ComPago");
+        log_message('error', json_encode($datosApi));
         // Timbrado de la factura.
         $result = $this->timbrar($datosApi, $id_movimiento);
 
