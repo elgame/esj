@@ -1,8 +1,8 @@
 
  ☐ Crear apartado para cargar los reportes de asistencia del checador y se asignen las asistencias, si tiene una entrada o salida solamente poner asistencia pero indicar una nota
  ☐ Imprimir recibos de nomina en formato de tikect con el desglose de las actividades agrupadas por dia
- ☐ En nomina poner fijo los campos de nombre de la tabla para que no se mueva
- ☐ Al editar una compra que sume los importes al total
+ ✔ En nomina poner fijo los campos de nombre de la tabla para que no se mueva @done (18-06-12 13:28)
+ ✔ Al editar una compra que sume los importes al total @done (18-06-12 14:40)
 
  ☐ Bitacora de cajas chicas
  ✔ Caja de prestamo quitar el renglon por default @done (18-05-17 13:34)
