@@ -406,9 +406,9 @@
                         <!-- Total Nomina -->
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-nomina-span"><?php
-                            $ttotal_nomina = $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
+                            $ttotal_nomina = $e->esta_asegurado=='f'? 0: (floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
                             $ttotal_nomina_cheques = 0;
-                            if($e->cuenta_banco == ''){
+                            if(($e->cuenta_banco == '' && $e->nomina_guardada == 'f') || ($e->cuenta_banco == '' && $ttotal_nomina == 0 && $e->nomina_guardada == 't')){
                               $ttotal_nomina_cheques = $ttotal_nomina;
                               $ttotal_nomina = 0;
                             }
