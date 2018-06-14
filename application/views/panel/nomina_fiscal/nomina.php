@@ -109,7 +109,7 @@
                 <table class="table table-striped" style="display: block; overflow-x: auto;">
                   <thead>
                     <tr>
-                      <th style="width: 192px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
+                      <th style="width: 202px;padding-top: 17px;padding-bottom: 17px;position: absolute;border-right: 1px #ccc solid;" colspan="2"></th>
                       <th colspan="4"></th>
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
@@ -118,8 +118,8 @@
                     </tr>
                     <tr>
                       <th style="position: absolute;">VACAS. <?php echo count($empleados); ?></th>
-                      <th style="width: 170px;padding-left: 30px!important; padding-top: 26px; border-right: 1px #ccc solid; position: absolute; ">NOMBRE</th>
-                      <th style="padding-left: 215px!important;">PUESTO</th>
+                      <th style="width: 170px;padding-left: 40px!important; padding-top: 26px; border-right: 1px #ccc solid; position: absolute; ">NOMBRE</th>
+                      <th style="padding-left: 225px!important;">PUESTO</th>
                       <th>SALARIO</th>
                       <th>SDI</th>
                       <th>DIAS TRAB.</th>
@@ -285,6 +285,7 @@
                           ?>
                             <a href="<?php echo base_url('panel/nomina_fiscal/cancelar/?empleadoId='.$e->id.'&anio='.$_GET['anio'].'&semana='.$_GET['semana'].'&empresaId='.$_GET['empresaId']) ?>"
                               onclick="if(confirm('Seguro de cancelar el comprobante de nomina?')){return true;}else{return false;}" title="Cancelar"><i class="icon-ban-circle" style="zoom: 1.5;color: red;"></i></a>
+                              <br>
                           <?php
                               }
                           ?>
@@ -299,7 +300,7 @@
                             <input type="hidden" value="1" class="span12 sin-curp">
                           <?php } ?>
                         </td>
-                        <td style="background-color: #eee; height: 39px;width: 170px;padding-left: 30px!important;border-right: 1px #ccc solid; position: absolute; <?php echo $bgColor ?>">
+                        <td style="background-color: #eee; height: 39px;width: 170px;padding-left: 40px!important;border-right: 1px #ccc solid; position: absolute; <?php echo $bgColor ?>">
                           <?php echo strtoupper($e->nombre) ?>
                           <?php echo $htmlLabel ?>
                           <input type="hidden" name="empleado_id[]" value="<?php echo $e->id ?>" class="span12 empleado-id">
@@ -308,7 +309,7 @@
                           <input type="hidden" name="departamento_id[]" value="<?php echo $e->id_departamente ?>" class="span12">
                           <input type="hidden" name="dcuenta_banco[]" value="<?php echo $e->cuenta_banco ?>" class="span12 empleado-cuenta_banco">
                         </td>
-                        <td style="padding-left: 215px!important; <?php echo $bgColor ?>"><?php echo strtoupper($e->puesto) ?></td>
+                        <td style="padding-left: 225px!important; <?php echo $bgColor ?>"><?php echo strtoupper($e->puesto) ?></td>
                         <td style="<?php echo $bgColor ?>">
                           <?php echo String::formatoNumero($e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario) ?>
                           <input type="hidden" name="salario_diario[]" value="<?php echo $e->esta_asegurado=='f'?$e->salario_diario_real:$e->salario_diario ?>" class="span12 salario-diario">
@@ -481,7 +482,7 @@
                       $totalComplementos       += $totalComplementoEmpleado;
                     } ?>
                     <tr>
-                      <td colspan="2" style="width:193px; position: absolute; background-color: #BCD4EE; text-align: right; font-weight: bold;border-right: 1px #ccc solid;">TOTALES</td>
+                      <td colspan="2" style="width:202px; position: absolute; background-color: #BCD4EE; text-align: right; font-weight: bold;border-right: 1px #ccc solid;">TOTALES</td>
                       <td style="padding-left: 215px!important; background-color: #BCD4EE; text-align: right; font-weight: bold;"></td>
                       <td id="totales-salarios" style="background-color: #BCD4EE;"><?php echo String::formatoNumero($totalSalarios) ?></td>
                       <td id="totales-sdi" style="background-color: #BCD4EE;"><?php echo $totalSdi ?></td>
