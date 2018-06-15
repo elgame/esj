@@ -205,6 +205,8 @@
 
                     <a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
                       <i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
+                    <a class="btn" href="<?php echo base_url('panel/cuentas_cobrar/xml_com_pago/?id='.$fact->id) ?>" target="_blank" title="Imprimir">
+                      <i class="icon-download-alt icon-white"></i> <span class="hidden-tablet">XML</span></a>
                     <?php
                       if ($fact->status !== 'cancelada')
                       {

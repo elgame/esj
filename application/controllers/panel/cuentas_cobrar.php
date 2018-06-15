@@ -27,6 +27,7 @@ class cuentas_cobrar extends MY_Controller {
     'cuentas_cobrar/com_pago/',
     'cuentas_cobrar/cancelar_com_pago/',
     'cuentas_cobrar/imprimir_com_pago/',
+    'cuentas_cobrar/xml_com_pago/',
   );
 
 
@@ -405,6 +406,24 @@ class cuentas_cobrar extends MY_Controller {
         $params['url'] = 'panel/cuentas_cobrar/imprimir_com_pago/?id='.$_GET['id'].'&p=true';
         $this->load->view('panel/facturacion/print_view', $params);
       }
+    }
+    else
+      redirect(base_url('panel/facturacion/?msg=1'));
+  }
+
+  public function xml_com_pago()
+  {
+    if(isset($_GET['id']{0}))
+    {
+      $this->load->library('cfdi');
+      $this->load->model('cuentas_cobrar_pago_model');
+      $factura = $this->cuentas_cobrar_pago_model->getInfoComPago($_GET['id']);
+
+      $folio = $this->cfdi->acomodarFolio($factura->folio);
+      $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;
+      header('Content-type: text/xml');
+      header('Content-Disposition: attachment; filename="'.$file.'.xml"');
+      echo $factura->xml;
     }
     else
       redirect(base_url('panel/facturacion/?msg=1'));
