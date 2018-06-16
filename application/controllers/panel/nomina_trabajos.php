@@ -7,6 +7,7 @@ class nomina_trabajos extends MY_Controller {
    */
   private $excepcion_privilegio = array(
     'nomina_trabajos/ajax_save/',
+    'nomina_trabajos/nomina_fiscal_ticket/',
   );
 
   public function _remap($method)
@@ -120,6 +121,13 @@ class nomina_trabajos extends MY_Controller {
   {
     $this->load->model('nomina_trabajos_model');
     echo json_encode($this->nomina_trabajos_model->save($_POST));
+  }
+
+
+  public function nomina_fiscal_ticket()
+  {
+    $this->load->model('nomina_trabajos_model');
+    $this->nomina_trabajos_model->ticketNominaFiscal($_GET['semana'], $_GET['empresaId'], $_GET['anio']);
   }
 
 

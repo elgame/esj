@@ -212,6 +212,7 @@ class MYpdf extends FPDF {
     var $links;
     var $font;
     var $fontz;
+    var $font_bold = '';
 
     function SetWidths($w){
     	$this->widths=$w;
@@ -292,7 +293,7 @@ class MYpdf extends FPDF {
                 $x=$this->GetX();
                 $y=$this->GetY();
 
-                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), '', ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
+                $this->SetFont( (isset($this->font[$i]) ? $this->font[$i] : 'helvetica'), $this->font_bold, ($this->font_size+(isset($this->fontz[$i]) ? $this->fontz[$i] : 0)) );
 
                 if($header===true && $bordes===true)
                   $this->Rect($x,$y,$w,$h,'DF');

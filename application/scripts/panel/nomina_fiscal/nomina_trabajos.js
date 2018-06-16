@@ -197,16 +197,18 @@
         item = {
           id_area: $(this).val(),
           fhoras: $trcc.find('.fhrs_extras').val(),
-          fimporte: $trcc.find('.fhrs_extras_importe').val()
+          fimporte: $trcc.find('.fhrs_extras_importe').val(),
+          tipo: 'hex'
         };
 
         postData.hrs_extra.push(item);
-      } else {
+      } else if($(this).val() != "") {
         var $trcc = $(this).parent().parent(),
         item = {
           id_area: $(this).val(),
           flabor_id: [],
-          fhoras: []
+          fhoras: [],
+          tipo: 'hrs'
         };
 
         $trcc.find('.hideLabor').each(function(index, el) {
@@ -283,7 +285,7 @@
     // }
 
     for (var i in datos.arealhr) {
-      if ($.trim(datos.arealhr[i].id_area) == '' && datos.tipo_asistencia != 'f') {
+      if ($.trim(datos.arealhr[i].id_area) == '' && datos.tipo_asistencia != 'f' && datos.arealhr[i].tipo == 'hrs') {
         isValid = false;
         msg = "El Centro Costo es requerido.";
         break;
