@@ -1852,7 +1852,8 @@ class Ventas_model extends privilegios_model{
 
       if ($factura['info']->cliente->show_saldo == 't') {
         $pdf->SetXY(10, $pdf->GetY());
-        $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldo['cuentas'][0]->saldo, 2, '$', false)), false, false);
+        $saldodelcliente = count($saldo['cuentas']) > 0? $saldo['cuentas'][0]->saldo : 0;
+        $pdf->Row2(array('SALDO DEUDOR ACTUALIZADO: '. String::formatoNumero($saldodelcliente, 2, '$', false)), false, false);
       }
 
       $pdf->SetWidths(array(70));
