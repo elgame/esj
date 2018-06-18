@@ -65,6 +65,8 @@
                   <span class="label" style="background-color: green; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Asistencia</span>
                   <span class="label" style="background-color: red; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Falta</span>
                   <span class="label" style="background-color: yellow; color: black; text-shadow: none; border: 1px rgb(114, 114, 99) solid;">Incapacidad</span>
+
+                  <a href="<?php echo base_url('panel/nomina_fiscal/show_import_asistencias/?id='.(isset($_GET['empresaId']) ? $_GET['empresaId'] : $empresaDefault->id_empresa).'&sem='.$numSemanaSelected. '&anio=' . $_GET['anio']) ?>" class="btn" rel="superbox-50x450" title="Importar asistencias"><i class="icon-upload"></i></a>
                 </div>
                 <div class="span5">
                   <div style="font-size: 1.5em;"><?php echo "Semana <span class=\"label\" style=\"font-size: 1em;\">{$semana2['semana']}</span> - Del <span style=\"font-weight: bold;\">{$semana2['fecha_inicio']}</span> Al <span style=\"font-weight: bold;\">{$semana2['fecha_final']}</span>" ?></div>

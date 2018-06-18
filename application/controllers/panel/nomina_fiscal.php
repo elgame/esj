@@ -55,6 +55,8 @@ class nomina_fiscal extends MY_Controller {
     'nomina_fiscal/cancelar/',
     'nomina_fiscal/cancelar_ptu/',
     'nomina_fiscal/rpt_dim/',
+
+    'nomina_fiscal/show_import_asistencias/',
   );
 
   public function _remap($method)
@@ -546,6 +548,98 @@ class nomina_fiscal extends MY_Controller {
 
     $this->load->view('panel/nomina_fiscal/bonos_otros', $params);
   }
+
+  public function show_import_asistencias()
+  {
+    $this->carabiner->js(array(
+      array('libs/jquery.numeric.js'),
+      array('panel/nomina_fiscal/bonos_otros.js'),
+    ));
+
+    $params['info_empleado']  = $this->info_empleado['info'];
+    $params['opcmenu_active'] = 'Nomina Fiscal'; //activa la opcion del menu
+    $params['seo'] = array('titulo' => 'Nomina Fiscal - Importar asistencias');
+
+    $this->load->model('nomina_fiscal_model');
+    $this->load->model('empresas_model');
+
+    $anio = isset($_GET['anio'])? $_GET['anio']: date("Y");
+    // Obtiene la informacion de la empresa.
+    $params['empresa'] = $this->empresas_model->getInfoEmpresa($_GET['id'])['info'];
+
+
+    // Obtiene los dias de la semana.
+    $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empresa']->dia_inicia_semana);
+    $params['semana'] = $semana;
+
+    if (isset($_POST['id_empresa'])) {
+      $this->configImportarAsistencias();
+      if ($this->form_validation->run() == FALSE)
+      {
+        $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
+      }
+      else
+      {
+        $this->load->model('nomina_fiscal_otros_model');
+        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias();
+
+        // if(!$res_mdl['error'])
+        //   redirect(base_url('panel/clientes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+        // $_GET['msg']
+      }
+    }
+
+    // $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    // foreach ($params['dias'] as $key => $value)
+    //   $params['nombresDias'][] = String::dia($value);
+
+    // // Obtiene los bonos y otros que ya tiene el empleado de la semana.
+    // $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
+
+    // // Obtiene los prestamos que se hicieron en la semana cargada.
+    // $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
+
+    // // Obtiene el registro si se agrego vacaciones.
+    // $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
+
+    // //Incapacidades
+    // $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
+    // $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
+
+    if(isset($_GET['msg']{0}))
+    {
+      $params['frm_errors'] = $this->showMsgs($_GET['msg']);
+
+      if ($_GET['msg'] === '3')
+      {
+        $params['close'] = true;
+      }
+    }
+
+    $this->load->view('panel/nomina_fiscal/importar_asistencias', $params);
+  }
+
+  /*
+  | Asigna las reglas para validar un articulo al agregarlo
+  */
+  public function configImportarAsistencias()
+  {
+    $this->load->library('form_validation');
+    $rules = array(
+      array('field' => 'id_empresa',
+            'label' => 'Empresa',
+            'rules' => 'required|is_natural'),
+      array('field' => 'semana',
+            'label' => 'Semana',
+            'rules' => 'required|is_natural'),
+      array('field' => 'anio',
+            'label' => 'Año',
+            'rules' => 'required|is_natural'),
+    );
+
+    $this->form_validation->set_rules($rules);
+  }
+
 
   public function bonos_otros()
   {
