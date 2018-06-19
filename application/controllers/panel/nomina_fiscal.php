@@ -581,36 +581,17 @@ class nomina_fiscal extends MY_Controller {
       else
       {
         $this->load->model('nomina_fiscal_otros_model');
-        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias();
+        $res_mdl = $this->nomina_fiscal_otros_model->importAsistencias($semana);
 
-        // if(!$res_mdl['error'])
-        //   redirect(base_url('panel/clientes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
-        // $_GET['msg']
+        $_GET['msg'] = $res_mdl['error'];
       }
     }
-
-    // $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
-    // foreach ($params['dias'] as $key => $value)
-    //   $params['nombresDias'][] = String::dia($value);
-
-    // // Obtiene los bonos y otros que ya tiene el empleado de la semana.
-    // $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
-
-    // // Obtiene los prestamos que se hicieron en la semana cargada.
-    // $params['prestamos'] = $this->nomina_fiscal_model->getPrestamosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
-
-    // // Obtiene el registro si se agrego vacaciones.
-    // $params['vacaciones'] = $this->nomina_fiscal_model->getVacacionesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
-
-    // //Incapacidades
-    // $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
-    // $params['incapacidades'] = $this->nomina_fiscal_model->getIncapacidadesEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
 
     if(isset($_GET['msg']{0}))
     {
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
-      if ($_GET['msg'] === '3')
+      if ($_GET['msg'] === '500')
       {
         $params['close'] = true;
       }
@@ -1277,6 +1258,19 @@ class nomina_fiscal extends MY_Controller {
         break;
       case 708:
         $txt = 'No se pudo conectar al SAT para realizar la cancelación de El Recibo, intentelo mas tarde.';
+        $icono = 'error';
+        break;
+
+      case 500:
+        $txt = 'Las asistencias se guardaron correctamente.';
+        $icono = 'success';
+        break;
+      case 501:
+        $txt = 'Ocurrió un error al subir el archivo de asistencias.';
+        $icono = 'error';
+        break;
+      case 502:
+        $txt = 'Ocurrió un error al leer el archivo de asistencias.';
         $icono = 'error';
         break;
     }

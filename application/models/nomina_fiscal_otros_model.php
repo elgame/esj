@@ -742,30 +742,82 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
   }
 
 
-  public function importAsistencias()
+  public function importAsistencias($semana)
   {
-    $config['upload_path'] = './uploads/';
-    $config['allowed_types'] = 'csv';
+    $config['upload_path'] = APPPATH.'media/temp/';
+    $config['allowed_types'] = '*';
     $config['max_size'] = '2000';
 
     $this->load->library('upload', $config);
 
     if ( ! $this->upload->do_upload('archivo_asistencias'))
     {
-      echo "<pre>";
-        var_dump($this->upload->display_errors());
-      echo "</pre>";exit;
-      // $error = array('error' => $this->upload->display_errors());
-      // $this->load->view('upload_form', $error);
+      return array('error' => '501');
     }
     else
     {
-      echo "<pre>";
-        var_dump($this->upload->data());
-      echo "</pre>";exit;
-      // $data = array('upload_data' => $this->upload->data());
+      $file = $this->upload->data();
+      $nominaAsistencia = [];
 
-      // $this->load->view('upload_success', $data);
+      $handle = fopen($file['full_path'], "r");
+      if ($handle) {
+        $this->load->model('usuarios_model');
+
+        while (($line = fgets($handle)) !== false) {
+          $datos = str_getcsv($line);
+          if (isset($datos[0]) && is_numeric($datos[0])) { // si es un # de trabajador
+            $fecha = (DateTime::createFromFormat('d/m/Y', $datos[2]));
+            $fecha = $fecha->format('Y-m-d');
+
+            // si esta dentro del rango de la semana
+            if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
+              $empleado = $this->db->select("u.id, u.no_empleado" )->from("usuarios u")
+                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.no_empleado", $datos[0])->get()->row();
+              if (isset($empleado->id)) { // si existe el trabajador en la empresa
+                $tipo = 'f';
+                if ($datos[4] != '' && $datos[5] != '') {
+                  $tipo = 'a';
+                } elseif($datos[4] != '' || $datos[5] != '') {
+                  $tipo = 'a';
+                }
+
+                $incapasidad = $this->db->query("SELECT id_asistencia FROM nomina_asistencia
+                                           WHERE id_usuario = {$empleado->id} AND tipo = 'in'
+                                            AND DATE(fecha_ini) >= '{$fecha}' AND DATE(fecha_fin) <= '{$fecha}'")->row();
+
+                if (!isset($incapasidad->id_asistencia)) { // si no es incapacidad
+                  $this->db->where("id_usuario = {$empleado->id} AND tipo = 'f' AND
+                    DATE(fecha_ini) = '{$fecha}' AND DATE(fecha_fin) = '{$fecha}'"
+                  );
+                  $this->db->delete('nomina_asistencia'); // elimina la falta de ese día
+
+                  if ($tipo == 'f') { // si es una falta se inserta
+                    $nominaAsistencia[] = array(
+                      'fecha_ini'   => $fecha,
+                      'fecha_fin'   => $fecha,
+                      'id_usuario'  => $empleado->id,
+                      'tipo'        => $tipo,
+                      'id_clave'    => null,
+                      'id_registro' => $this->session->userdata('id_usuario'),
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+        fclose($handle);
+
+        // Si existen faltas o incapacidades las agrega.
+        if (count($nominaAsistencia) > 0)
+        {
+          $this->db->insert_batch('nomina_asistencia', $nominaAsistencia);
+        }
+      } else {
+        return array('error' => '502');
+      }
+
+      return array('error' => '500');
     }
   }
 }
