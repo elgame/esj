@@ -4,7 +4,7 @@
  ✔ En nomina poner fijo los campos de nombre de la tabla para que no se mueva @done (18-06-12 13:28)
  ✔ Al editar una compra que sume los importes al total @done (18-06-12 14:40)
 
- ☐ Bitacora de cajas chicas
+ ✔ Bitacora de cajas chicas @done (18-06-15 21:07)
  ✔ Caja de prestamo quitar el renglon por default @done (18-05-17 13:34)
  ☐ Bascula se cierra la ventana de imprimir
  ✔ Historial de empleados agregar fniquitos, vacaciones @done (18-05-17 16:25)
@@ -21,7 +21,7 @@ Cuentas por cobrar en primer listado si todas están pagadas no sale el cliente 
  ✔ Nomina De repente se quita un trabajador al guardar la nómina @done (18-04-22 18:21)
  ✔ Nominas guardadas borra a los trabajadores que estan despedidos @done (18-03-27 22:59)
  ✔ Nomina Gómez Gudiño cambiar la fecha de corte de viernes a jueves @done (18-03-22 17:16)
- ☐ Checar los pagos masivos a pasado que duplica los pagos de una sola factura
+ ✔ Checar los pagos masivos a pasado que duplica los pagos de una sola factura @done (18-06-15 21:08)
  ✔ Acomodar la impresion de las facturas con comercio exterior @done (18-04-04 12:52)
  ✔ De repente se registra doble en banco cuando se abona una factura de venta desde el listado @done (18-04-03 13:33)
  ✔ De repente los préstamos de nómina se marcan como pagados y aún le falta abonar @done (18-04-03 20:54)
@@ -32,7 +32,7 @@ Cuentas por cobrar en primer listado si todas están pagadas no sale el cliente 
    - Agregar los privilegios de la empresa
  ✔ Báscula de repente no imprime, no abre la ventana de imprimir se tiene que dar imprimir de nuevo @done (18-04-10 10:52)
  ✔ Acomodar los formatos de los cheques de las cuentas, cuando agrega una cuenta nueva dependiendo el banco que asigne el formato de cheque @done (18-04-19 14:06)
- ☐ En las boletas de coco cambiar la forma de calcular el importe que es cajas por precio y en la app visual dar de bajas por esos importes
+ ✔ En las boletas de coco cambiar la forma de calcular el importe que es cajas por precio y en la app visual dar de bajas por esos importes @done (18-06-15 21:07)
 
  ✔ 6h Optimizar reporte de estado de cuentas @done (17-09-12 22:39)
  ✔ 1.8h Crear listado de cuentas de proveedores @done (17-09-06 23:57)
