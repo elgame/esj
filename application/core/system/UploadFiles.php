@@ -16,10 +16,11 @@ class UploadFiles{
 				$config['max_height'] = '1085';
 				$config['encrypt_name'] = true;
 				$ci->load->library('upload', $config);
+
 				if(!$ci->upload->do_upload('dlogo')){
-					$data = array(false, $ci->upload->libupload->display_errors());
+					$data = array(false, $ci->upload->display_errors());
 				}else{
-					$data = array(true, $ci->upload->libupload->data());
+					$data = array(true, $ci->upload->data());
 					$config = array();
 					$config['image_library'] = 'gd2';
 					$config['source_image']	= $data[1]['full_path'];
