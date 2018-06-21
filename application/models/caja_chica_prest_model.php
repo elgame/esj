@@ -76,6 +76,7 @@ class caja_chica_prest_model extends CI_Model {
     {
       $info['prestamos_lp'] = $prestamos->result();
       foreach ($info['prestamos_lp'] as $key => $item) {
+        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
         $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
@@ -150,6 +151,7 @@ class caja_chica_prest_model extends CI_Model {
     {
       $info['prestamos_dia'] = $prestamos->result();
       foreach ($info['prestamos_dia'] as $key => $item) {
+        $item->tipo_nombre = $item->tipo==='fi'? 'Fiscal': 'Efectivo';
         $item->saldo_fin = $item->saldo_ini-$item->pago_dia;
         if ($item->pago_dia > 0)
           ++$item->no_pagos;
@@ -719,7 +721,7 @@ class caja_chica_prest_model extends CI_Model {
         $prestamo->categoria,
         $prestamo->empleado,
         String::fechaAT($prestamo->fecha),
-        $prestamo->referencia,
+        $prestamo->referencia.' '.($prestamo->tipo_nombre),
         String::formatoNumero($prestamo->monto, 2, '', false),
         String::formatoNumero($prestamo->saldo_ini, 2, '', false),
         String::formatoNumero($prestamo->pago_dia, 2, '', false),
@@ -873,7 +875,7 @@ class caja_chica_prest_model extends CI_Model {
           $prestamo->categoria,
           $prestamo->empleado,
           String::fechaAT($prestamo->fecha),
-          $prestamo->referencia,
+          $prestamo->referencia.' '.($prestamo->tipo_nombre),
           String::formatoNumero($prestamo->monto, 2, '', false),
           String::formatoNumero($prestamo->saldo_ini, 2, '', false),
           String::formatoNumero($prestamo->pago_dia, 2, '', false),

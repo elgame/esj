@@ -56,7 +56,7 @@
                 </select> -->
 
                 <input type="submit" name="enviar" value="Buscar" class="btn">
-                <?php if ( $_GET['anio'] < date("Y")){ ?>
+                <?php if ( $nominas_finalizadas){ ?>
                   <a class="btn btn-success pull-right" href="<?php echo base_url('panel/nomina_fiscal/rpt_dim/?'.String::getVarsLink(array('msg'))) ?>" target="_blank" title="DIM">
                     DIM</a>
                 <?php } ?>
