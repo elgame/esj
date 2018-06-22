@@ -44,7 +44,8 @@ $(function(){
           'area': $area.find('option:selected').val(),
         };
 
-    $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo') );
+    // var param_empresa = '&did_empresa=' + $('#pid_empresa').val();
+    // $("#pproveedor").autocomplete( "option", "source", base_url + 'panel/bascula/ajax_get_proveedores/?type='+$("#parea option:selected").attr('data-tipo')+param_empresa );
 
     if (getData.area !== '') {
       $.get(base_url + 'panel/bascula/ajax_get_next_folio/', getData, function(data) {
@@ -187,6 +188,13 @@ $(function(){
     select: function( event, ui ) {
       $("#pid_empresa").val(ui.item.id);
       $("#pempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+
+      $("#pid_proveedor").val('').css({'background-color': '#FFF'});
+      $("#pproveedor").val('').css({'background-color': '#FFF'});
+      $("#pid_productor").val('').css({'background-color': '#FFF'});
+      $("#pproductor").val('').css({'background-color': '#FFF'});
+      $("#pid_cliente").val('').css({'background-color': '#FFF'});
+      $("#pcliente").val('').css({'background-color': '#FFF'});
     }
   }).keydown(function(e){
     if (e.which === 8) {
@@ -201,6 +209,9 @@ $(function(){
       var params = {term : request.term};
       if(parseInt($("#pid_empresa").val()) > 0)
         params.did_empresa = $("#pid_empresa").val();
+
+      params.type = $("#parea option:selected").attr('data-tipo');
+
       $.ajax({
           url: base_url + 'panel/bascula/ajax_get_proveedores/',
           dataType: "json",
