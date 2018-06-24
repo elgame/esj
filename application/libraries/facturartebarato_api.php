@@ -22,7 +22,7 @@ class facturartebarato_api {
    *
    * @var string
    */
-  protected $apiURL = 'http://localhost/kubox/public/v2/';
+  protected $apiURL = 'https://development.kubox.mx/v2/';
 
   /**
    * Almacena la informacion de la peticion por curl.

@@ -14,6 +14,7 @@ $(function(){
 
   $("#form").submit(function(){
     var result = validaProductosEspecials();
+    console.log(result, $("#privAddDescripciones").length);
     if(result == false)
     {
       event.preventDefault();

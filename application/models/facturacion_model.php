@@ -449,6 +449,31 @@ class facturacion_model extends privilegios_model{
           $this->db->insert_batch('facturacion_ventas_remision_pivot', $remisiones);
         }
       }
+
+
+      if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
+        foreach ($_POST['remisionesIds'] as $kerr => $remmm) {
+          // Agrega al historial de remisiones
+          $existe = $this->db->query("SELECT Count(*) AS num FROM facturacion_remision_hist
+                                     WHERE id_remision = {$remmm} AND id_factura = {$idFactura}")->row();
+          if ($existe->num == 0) {
+            $this->db->insert('facturacion_remision_hist', array('id_remision' => $remmm, 'id_factura' => $idFactura));
+          }
+
+          // Productos de produccion
+          $productos = $this->db->query("SELECT * FROM otros.produccion_historial
+                                     WHERE id_factura = {$remmm}")->result();
+          if (count($productos) > 0) {
+            foreach ($productos as $kpp => $prod) {
+              $prod->id_factura = $idFactura;
+              $this->db->insert('otros.produccion_historial', $prod);
+            }
+          }
+          $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$remmm}'");
+        }
+      }
+
+
       return array('passes' => true, 'msg' => 'Se ligaron las remisiones correctamente');
     }
 
@@ -1128,12 +1153,22 @@ class facturacion_model extends privilegios_model{
         'codigo'     => $timbrado->codigo
       );
     } else {
+      $msg = isset($timbrado->msg)? $timbrado->msg: 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.';
       $result = array(
         'id_factura' => $idFactura,
         'codigo'     => 'ERR_INTERNET_DISCONNECTED',
-        'msg'        => 'Error Timbrado: Internet Desconectado. Verifique su conexión para realizar el timbrado.',
+        'msg'        => $msg,
         'passes'     => false,
       );
+
+      // Si es true $delFile entonces elimina todo lo relacionado con la factura.
+      if ($delFiles)
+      {
+        $this->db->delete('facturacion_cliente', array('id_factura' => $idFactura));
+        $this->db->delete('facturacion', array('id_factura' => $idFactura));
+        // unlink($pathXML);
+      }
+
       return $result;
     }
 
@@ -1188,7 +1223,7 @@ class facturacion_model extends privilegios_model{
         $result['msg'] = $timbrado->mensaje;
 
       $result['passes'] = false;
-      }
+    }
 
       // echo "<pre>";
       //   var_dump($timbrado);

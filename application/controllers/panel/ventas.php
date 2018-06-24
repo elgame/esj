@@ -649,7 +649,8 @@ class ventas extends MY_Controller {
 
       $res = $this->db->select('Count(id_factura) AS num')
         ->from('facturacion')
-        ->where("folio = ".$str." AND serie = '".$this->input->post('dserie')."' AND id_empresa = ". $this->input->post('did_empresa') ." AND is_factura = 'f' AND status != 'ca' ".$sql)
+        ->where("folio = ".$str." AND serie = '".$this->input->post('dserie')."' AND id_empresa = ". $this->input->post('did_empresa') ."
+            AND is_factura = 'f' ".$sql)
         ->get();
       $data = $res->row();
       if($data->num > 0){

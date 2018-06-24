@@ -1,7 +1,8 @@
 
  ✔ Detalle en bascula al cargar los proveedores duplicados, si cambias de empresa que limpie @done (18-06-21 18:59)
- ☐ En las remisiones si esta cancelada acepta el folio repetido, que no lo acepte
- ☐ Cuando se liga remisiones a una factura timbrada que se quite de cuentas por cobrar
+ ✔ En las remisiones si esta cancelada acepta el folio repetido, que no lo acepte @done (18-06-23 15:14)
+ ✔ Cuando se liga remisiones a una factura timbrada que se quite de cuentas por cobrar @done (18-06-24 13:58)
+ ✔ Checar que no agregue remisiones y facturas sin clasificación @done (18-06-23 12:18)
  ✔ Poner el tipo de prestamo en la caja de prestamos, solo en los de largo plazo @done (18-06-21 16:56)
  ✔ Aumentar la fuente en el tickets de los contrarecibos @done (18-06-21 15:12)
  ✔ Poner los logos a las empresas @done (18-06-21 14:57)
