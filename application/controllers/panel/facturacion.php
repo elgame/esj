@@ -2153,7 +2153,7 @@ class facturacion extends MY_Controller {
   {
     $this->load->model('facturacion_model');
 
-    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true);
+    $response = $this->facturacion_model->addPallestRemisiones($_POST['id_factura'], true, true);
 
     echo json_encode($response);
   }

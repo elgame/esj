@@ -402,7 +402,7 @@ class facturacion_model extends privilegios_model{
         return $data;
     }
 
-    public function addPallestRemisiones($idFactura, $borrador)
+    public function addPallestRemisiones($idFactura, $borrador, $ligarRemisiones=false)
     {
       if (isset($_POST['palletsIds']))
       {
@@ -451,7 +451,7 @@ class facturacion_model extends privilegios_model{
       }
 
 
-      if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0) {
+      if (isset($_POST['remisionesIds']) && count($_POST['remisionesIds']) > 0 && $ligarRemisiones) {
         foreach ($_POST['remisionesIds'] as $kerr => $remmm) {
           // Agrega al historial de remisiones
           $existe = $this->db->query("SELECT Count(*) AS num FROM facturacion_remision_hist
@@ -465,6 +465,7 @@ class facturacion_model extends privilegios_model{
                                      WHERE id_factura = {$remmm}")->result();
           if (count($productos) > 0) {
             foreach ($productos as $kpp => $prod) {
+              unset($prod->id);
               $prod->id_factura = $idFactura;
               $this->db->insert('otros.produccion_historial', $prod);
             }
@@ -785,7 +786,7 @@ class facturacion_model extends privilegios_model{
           $clasificacion = $this->clasificaciones_model->getClasificacionInfo($_POST['prod_did_prod'][$key], true, false);
           if ($clasificacion['info']->inventario == 't' && $_POST['prod_did_prod'][$key] !== '' && $tipoDeComprobante == 'I') {
             $produccionFactura[] = array(
-              'id_factura'       => $id_venta,
+              'id_factura'       => $idFactura,
               'id_empresa'       => $datosFactura['id_empresa'],
               'id_empleado'      => $this->session->userdata('id_usuario'),
               'id_clasificacion' => $_POST['prod_did_prod'][$key],
