@@ -130,12 +130,17 @@ $(function(){
   $('#ptipo').on('change', function(event) {
     var $this = $(this),
         option = $this.find('option:selected').val(),
-        priv_modif_kilosbt = $("#modif_kilosbt").val();
+        priv_modif_kilosbt = $("#modif_kilosbt").val(),
+        paccion = $('#paccion').val();
     if (option === 'en') {
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
       $('#groupCliente').css({'display': 'none'});
 
-      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+      // cargar kilos
+      if (paccion == 'n')
+        $("#pproductor").attr('data-next2', 'pkilos_brutos');
+      else
+        $("#pproductor").attr('data-next2', 'pkilos_tara');
 
       if (priv_modif_kilosbt == 'true') {
         $('#pkilos_brutos').prop("readonly", '');
@@ -148,7 +153,11 @@ $(function(){
       $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
       $('#groupCliente').css({'display': 'block'});
 
-      $("#pproductor").attr('data-next2', 'pkilos_tara');
+      // cargar kilos
+      if (paccion == 'n')
+        $("#pproductor").attr('data-next2', 'pkilos_tara');
+      else
+        $("#pproductor").attr('data-next2', 'pkilos_brutos');
 
       if (priv_modif_kilosbt == 'true') {
         $('#pkilos_brutos').prop("readonly", '');
@@ -820,26 +829,35 @@ var calculaKilosNeto = function () {
 
 var recargaTipo = function () {
   var option = $('#ptipo').find('option:selected').val(),
-  priv_modif_kilosbt = $("#modif_kilosbt").val();
+  priv_modif_kilosbt = $("#modif_kilosbt").val(),
+  paccion = $('#paccion').val();
   if (option === 'en') {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'block'});
     $('#groupCliente').css({'display': 'none'});
 
-    $("#pproductor").attr('data-next2', 'pkilos_brutos');
+    // cargar kilos
+    if (paccion == 'n')
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
+    else
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
 
-    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
+    if (paccion === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", '');
       $('#pkilos_tara').prop("readonly", 'readonly');
-    } else if ($('#paccion').val() === 'sa') {
+    } else if (paccion === 'sa') {
       $("#pproductor").attr('data-next2', 'pkilos_tara');
     }
   } else {
     $('#groupProveedor, #groupProveedorRancho').css({'display': 'none'});
     $('#groupCliente').css({'display': 'block'});
 
-    $("#pproductor").attr('data-next2', 'pkilos_tara');
+    // cargar kilos
+    if (paccion == 'n')
+      $("#pproductor").attr('data-next2', 'pkilos_tara');
+    else
+      $("#pproductor").attr('data-next2', 'pkilos_brutos');
 
-    if ($('#paccion').val() === 'n' && priv_modif_kilosbt == 'true') {
+    if (paccion === 'n' && priv_modif_kilosbt == 'true') {
       $('#pkilos_brutos').prop("readonly", 'readonly');
       $('#pkilos_tara').prop("readonly", '');
     }

@@ -55,7 +55,7 @@ class my_email {
 
     $mail->IsSMTP();
     $mail->SMTPDebug  = 1;
-    $mail->Host       = 'smtp.mailgun.org'; //smtp.gmail.com
+    $mail->Host       = 'smtp.sparkpostmail.com'; // 'smtp.mailgun.org'; //smtp.gmail.com
     $mail->SMTPAuth   = true;
     $mail->Username   = $this->data['correoEmisor'];
     $mail->Password   = $this->data['contrasena'];

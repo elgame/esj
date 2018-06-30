@@ -1501,10 +1501,10 @@ class facturacion_model extends privilegios_model{
             // Datos del Emisor //
             //////////////////////
 
-            $correoEmisorEm = "empaquesanjorge@hotmail.com"; // Correo con el q se emitira el correo.
+            $correoEmisorEm = "facturacion@empaquesanjorge.com"; // Correo con el q se emitira el correo.
             $nombreEmisor   = $factura['info']->empresa->nombre_fiscal;
-            $correoEmisor   = "postmaster@empaquesanjorge.com"; // Correo para el auth. empaquesanjorgemx@gmail.com (mandrill)
-            $contrasena     = "2b9f25bc4737f34edada0b29a56ff682"; // Contraseña de $correEmisor S4nj0rg3V14n3y
+            $correoEmisor   = 'SMTP_Injection'; // "postmaster@empaquesanjorge.com"; // Correo para el auth. empaquesanjorgemx@gmail.com (mandrill)
+            $contrasena     = "a35b970bfd921b8dd4300e51ade387c19a5e60db"; // "2b9f25bc4737f34edada0b29a56ff682"; // Contraseña de $correEmisor S4nj0rg3V14n3y
 
             ////////////////////////
             // Datos del Receptor //
