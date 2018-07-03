@@ -472,6 +472,8 @@ class facturacion_model extends privilegios_model{
           }
           $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$remmm}'");
         }
+
+        $this->db->query("SELECT refreshallmaterializedviews();");
       }
 
 
