@@ -1304,50 +1304,57 @@ class facturacion_model extends privilegios_model{
       if ($result->data->status_uuid === '201' || $result->data->status_uuid === '202')
       {
         $status_uuid = $result->data->status_uuid;
-        $this->db->update('facturacion',
-          array('status' => 'ca', 'status_timbrado' => 'ca'),
-          "id_factura = {$idFactura}"
-        );
 
-        // Quita la asignacion de la factura a la venta del dia
-        $this->load->model('ventas_dia_model');
-        $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $idFactura), true);
-
-        // Bitacora
-        $bitacora_accion = 'la factura';
-        if($factura['info']->id_nc > 0)
-          $bitacora_accion = 'la nota de credito';
-        $this->bitacora_model->_cancel('facturacion', $idFactura,
-                                        array(':accion'     => $bitacora_accion, ':seccion' => 'facturas',
-                                              ':folio'      => $factura['info']->serie.$factura['info']->folio,
-                                              ':id_empresa' => $factura['info']->id_empresa,
-                                              ':empresa'    => 'de '.$factura['info']->empresa->nombre_fiscal));
+        $this->cancelaFacturaClear($factura, $idFactura);
 
         // Regenera el PDF de la factura.
         $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
         $this->generaFacturaPdf($idFactura, $pathDocs);
 
-        // Elimina la salida de productos q se dio si se ligaron pallets
-        $this->db->delete('compras_salidas', array('id_factura' => $idFactura));
-
-        // Cancela los productos de produccion historial
-        $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$idFactura}'");
-
-        $this->db->query("SELECT refreshallmaterializedviews();");
-
         $this->enviarEmail($idFactura);
 
       }
     }else{
-      $this->db->update('facturacion',
-          array('status' => 'ca', 'status_timbrado' => 'ca'),
-          "id_factura = {$idFactura}"
-        );
+      $this->cancelaFacturaClear($factura, $idFactura);
+      // $this->db->update('facturacion',
+      //     array('status' => 'ca', 'status_timbrado' => 'ca'),
+      //     "id_factura = {$idFactura}"
+      //   );
       $status_uuid = '201';
     }
 
     return array('msg' => $status_uuid);
 	}
+
+  private function cancelaFacturaClear($factura, $idFactura)
+  {
+    $this->db->update('facturacion',
+      array('status' => 'ca', 'status_timbrado' => 'ca'),
+      "id_factura = {$idFactura}"
+    );
+
+    // Quita la asignacion de la factura a la venta del dia
+    $this->load->model('ventas_dia_model');
+    $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $idFactura), true);
+
+    // Bitacora
+    $bitacora_accion = 'la factura';
+    if($factura['info']->id_nc > 0)
+      $bitacora_accion = 'la nota de credito';
+    $this->bitacora_model->_cancel('facturacion', $idFactura,
+                                    array(':accion'     => $bitacora_accion, ':seccion' => 'facturas',
+                                          ':folio'      => $factura['info']->serie.$factura['info']->folio,
+                                          ':id_empresa' => $factura['info']->id_empresa,
+                                          ':empresa'    => 'de '.$factura['info']->empresa->nombre_fiscal));
+
+    // Elimina la salida de productos q se dio si se ligaron pallets
+    $this->db->delete('compras_salidas', array('id_factura' => $idFactura));
+
+    // Cancela los productos de produccion historial
+    $this->db->update('otros.produccion_historial', array('status' => 'f'), "id_factura = '{$idFactura}'");
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
+  }
 
    /**
     * Paga una factura cambiando su status a pagada 'pa'.
