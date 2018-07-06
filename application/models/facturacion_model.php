@@ -560,7 +560,7 @@ class facturacion_model extends privilegios_model{
           $count2 = 0;
           $extras['mercancias'][$key] = [
             'noIdentificacion'    => $inputce['mercancias']['noIdentificacion'][$key],
-            'fraccionArancelaria' => $inputce['mercancias']['fraccionArancelaria'][$key],
+            'fraccionArancelaria' => $inputce['mercancias']['fraccionArancelaria'][$key].'',
             'cantidadAduana'      => $inputce['mercancias']['cantidadAduana'][$key],
             'unidadAduana'        => $inputce['mercancias']['unidadAduana'][$key],
             'valorUnitarioAduana' => $inputce['mercancias']['valorUnitarioAduana'][$key],
@@ -570,7 +570,7 @@ class facturacion_model extends privilegios_model{
             'comercio_exterior_id'  => $idce,
             'row'                   => $count,
             'noidentificacion'      => $inputce['mercancias']['noIdentificacion'][$key],
-            'fraccionar_ancelaria'  => $inputce['mercancias']['fraccionArancelaria'][$key],
+            'fraccionar_ancelaria'  => $inputce['mercancias']['fraccionArancelaria'][$key].'',
             'cantidad_aduana'       => $inputce['mercancias']['cantidadAduana'][$key],
             'unidad_aduana'         => $inputce['mercancias']['unidadAduana'][$key],
             'valor_unitario_aduana' => $inputce['mercancias']['valorUnitarioAduana'][$key],
