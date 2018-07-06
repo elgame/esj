@@ -1087,8 +1087,8 @@ class bascula_model extends CI_Model {
       $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
     }
     else
-      $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
-      // $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
+      $this->db->update('bascula_pagos', array('status' => 'f'), "id_pago = {$id_pago}");
+      // $this->db->delete('bascula_pagos', "id_pago = {$id_pago}");
   }
 
 
