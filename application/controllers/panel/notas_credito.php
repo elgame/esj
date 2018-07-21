@@ -64,6 +64,8 @@ class notas_credito extends MY_Controller {
 
         if($respons['passes'])
           redirect(base_url('panel/notas_credito/agregar/?msg=4&id='.$_GET['id']));
+        else
+          $params['frm_errors'] = $this->showMsgs(2, $respons['msg']);
       }
 
       // $params['series'] = $this->facturacion_model->getSeriesFolios(100);
