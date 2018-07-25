@@ -108,7 +108,12 @@ class bascula_model extends CI_Model {
 
       if ($_POST['paccion'] == 'n')
       {
-        // $_POST['pfolio'] = $this->getSiguienteFolio();
+        $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
+          WHERE folio = {$this->input->post('pfolio')} AND tipo = '{$this->input->post('ptipo')}'
+          AND id_area = {$this->input->post('parea')}")->row();
+        if ($result->num > 0) {
+          $_POST['pfolio'] = $this->getSiguienteFolio($this->input->post('ptipo'), $this->input->post('parea'));
+        }
 
         $data = array(
           'id_empresa'   => $this->input->post('pid_empresa'),
