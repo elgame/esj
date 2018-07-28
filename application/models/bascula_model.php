@@ -449,7 +449,8 @@ class bascula_model extends CI_Model {
                 b.no_impresiones,
                 pr.nombre_fiscal AS productor,
                 b.certificado,
-                (u.nombre || '(' || u.usuario || ')') AS creadox")
+                (u.nombre || ' ' || u.apellido_paterno) AS creadox,
+                (SELECT nombre || ' ' || apellido_paterno FROM usuarios WHERE id = {$this->session->userdata('id_usuario')}) AS usuario")
       ->from("bascula AS b")
       ->join('empresas AS e', 'e.id_empresa = b.id_empresa', "inner")
       ->join('areas AS a', 'a.id_area = b.id_area', "inner")
@@ -615,8 +616,11 @@ class bascula_model extends CI_Model {
 
     //Actualiza el control de impresiones, se le suma 1
     //al valor de la BD para la siguiente impresion
-    $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false)
-        ->update('bascula');
+    $this->db->where('id_bascula', $id)->set('no_impresiones', 'no_impresiones+1', false);
+    if ($data['info'][0]->no_impresiones == 0) {
+      $this->db->set('fecha_imp_orig', "'".date("Y-m-d H:i:s")."'", false);
+    }
+    $this->db->update('bascula');
 
     foreach ($data['cajas'] as $key => $value)
     {
@@ -633,7 +637,7 @@ class bascula_model extends CI_Model {
 
     $pdf->printTicket($data['info'][0], $data['cajas'], $data['cajas_clasf']);
 
-    $pdf->AutoPrint(true);
+    // $pdf->AutoPrint(true);
     $pdf->Output();
   }
 

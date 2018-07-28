@@ -40,55 +40,55 @@ class mypdf_ticket extends FPDF {
 
         $this->SetTextColor(0, 0, 0);
         if ($this->header_entrar) {
-            $this->SetFont($this->fount_txt, '', 8);
-            $this->SetAligns(array('L', 'R'));
-            $this->SetWidths(array(20, 43));
-            $this->SetXY(0, 3);
-            $this->Row(array(($data->tipo=='en'? 'ENTRADA': 'SALIDA'), $data->area ), false, false);
             // Título
             $this->SetFont($this->fount_txt, '', 8);
             $this->SetXY(0, $this->GetY());
             $this->MultiCell($this->pag_size[0], 4, $this->titulo1, 0, 'C');
-            $this->SetFont($this->fount_txt, '', 7);
-            $this->MultiCell($this->pag_size[0], 4, $this->reg_fed, 0, 'C');
+
+            $this->SetFounts(array($this->fount_txt), array(-1.5));
+            $this->SetAligns(array('L'));
+            $this->SetWidths(array(38));
+            $this->SetXY(0, 3.5);
+            $this->Row(array(($data->tipo=='en'? 'ENTRADA': 'SALIDA').' '.$data->area ), false, true, 4);
+            $this->SetXY(38, 3.5);
+            $this->SetWidths(array(12));
+            $this->SetFounts(array($this->fount_txt), array(-1));
+            $this->Row(array('BOLETA'), false, false, 4);
+            $this->SetXY(50, 3.5);
+            $this->SetWidths(array(13));
+            $this->SetFounts(array($this->fount_num), array(1));
+            $this->Row(array($data->folio), false, true, 4);
+
+            $this->SetFounts(array($this->fount_txt), array(-1));
+            $this->SetWidths(array(63));
+            $this->SetAligns(array('C'));
+            $this->SetXY(0, $this->GetY()+.5);
+            $this->Row(array($this->reg_fed), false, false);
 
             $this->header_entrar = false;
         }
     }
 
-    public function datosTicket($data){
+    public function datosTicket($data) {
+        $this->SetXY(0, 11.5);
+        $this->MultiCell($this->pag_size[0], 2, '--------------------------------------------------------------------------', 0, 'L');
 
+        $this->SetY($this->GetY()-1);
 
-        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
-        $this->SetFont($this->fount_txt, '', $this->font_size);
-
-        $this->SetY($this->GetY()-2);
-        $this->SetWidths(array(14, 16, 13, 20));
-        $this->SetAligns(array('L', 'L', 'L', 'L'));
-        $this->SetFounts(array($this->fount_txt, $this->fount_num, $this->fount_txt, $this->fount_num),
-                         array(0, 2, 0, 1));
-        $this->Row(array( 'BOLETA: ', $data->folio, 'FECHA: ', substr($data->fecha_bruto, 0, 10)), false, false, 3);
-
-        $this->SetY($this->GetY());
-
-        $this->SetFont($this->fount_txt, '', $this->font_size+1);
-        $this->SetWidths(array(15, 25, 22));
-        $this->SetAligns(array('L', 'R', 'L'));
+        $this->SetWidths(array(12, 15, 20, 16));
+        $this->SetAligns(array('L', 'R', 'L', 'L'));
         $this->SetFounts(array($this->fount_txt, $this->fount_num, $this->fount_num),
-                         array(0, 2, 2));
-        $this->Row(array( 'BRUTO :', String::formatoNumero($data->kilos_bruto, 2, ''), substr($data->fecha_bruto, -11, -3)), false, false, 3);
+                         array(0, 1.5, 1, 1));
+        $this->Row(array( 'BRUTO:', String::formatoNumero($data->kilos_bruto, 2, ''), String::fechaATexto(substr($data->fecha_bruto, 0, 10), '/c'), substr($data->fecha_bruto, -11, -3)), false, false, 4);
         $this->SetY($this->GetY()+.5);
-        $this->Row(array( 'TARA :', String::formatoNumero($data->kilos_tara, 2, ''), substr($data->fecha_tara, -11, -3)), false, false, 3);
+        $this->Row(array( 'TARA:', String::formatoNumero($data->kilos_tara, 2, ''), String::fechaATexto(substr($data->fecha_tara, 0, 10), '/c'), substr($data->fecha_tara, -11, -3)), false, false, 4);
         $this->SetY($this->GetY()+.5);
-        $this->Row(array( 'NETO :', String::formatoNumero($data->kilos_neto, 2, ''), ''), false, false, 3);
+        $this->Row(array( 'NETO:', String::formatoNumero($data->kilos_neto, 2, ''), ''), false, false, 4);
     }
 
     public function productosTicket($data, $data_info){
-        $this->SetFont($this->fount_txt, '', $this->font_size);
-        $this->SetY($this->GetY()+2);
-        $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 
-        $this->SetY($this->GetY()-1);
+        $this->SetY($this->GetY()+1);
 
         // $this->SetFont($this->fount_txt, '', $this->font_size-1);
         $this->SetWidths(array(9, 11, 11.5, 10, 8.5, 16));
@@ -97,53 +97,60 @@ class mypdf_ticket extends FPDF {
                          array(-1,-1,-1,-1,-1,-1));
 
         // $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', '$', 'IMPORTE'), false, true, 5);
-        $this->Row(array('CJS', 'PROD', 'KILOS', 'P.P.', 'PCIO', 'IMPORTE'), false, true, 5);
+        $this->Row(array('Pzas', 'Produc', 'Kilos', 'P.P.', 'Prec', 'Importe'), false, true, 4);
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
         $this->CheckPageBreak(4);
         $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
         if(is_array($data_info)){
-            $this->SetY($this->GetY()+1);
-              // $this->SetFont($this->fount_txt, '', $this->font_size);
-              // $this->SetWidths(array(8, 12, 12, 10, 10, 18));
-              // $this->SetAligns(array('L'));
-              $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num,$this->fount_num,$this->fount_num),
-                         array(.5,-1,.5,.5,.5,.5));
-            $total_kilos = 0;
-            foreach ($data_info as $prod){
-              $this->SetY($this->GetY()-3);
-              $this->Row(array($prod->cajas,
-                               $prod->calidad,
-                               String::formatoNumero($prod->kilos, 2, ''),
-                               $prod->promedio,
-                               String::formatoNumero($prod->precio, 2, ''),
-                               String::formatoNumero($prod->importe, 2, '', false)), false, false);
-              $total_kilos += $prod->kilos;
-            }
-
-            $this->SetFont($this->fount_txt, '', $this->font_size);
-            $this->SetY($this->GetY()-4);
-            $this->SetWidths(array(19, 31));
-            $this->SetAligns(array('L', 'L'));
-            $this->SetFounts(array($this->fount_txt, $this->fount_num),
-                             array(0, 0));
-            $this->Row(array( 'Total Kilos', String::formatoNumero($total_kilos, 2, '', false)), false, false, 3);
+          $this->SetY($this->GetY()+1);
+          $this->SetFounts(array($this->fount_num,$this->fount_txt,$this->fount_num,$this->fount_num,$this->fount_num,$this->fount_num),
+                     array(.5,-1,.5,.5,.5,.5));
+          $total_kilos = 0;
+          $total_pzas = 0;
+          foreach ($data_info as $prod){
+            $this->SetY($this->GetY()-3);
+            $this->Row(array($prod->cajas,
+                             $prod->calidad,
+                             String::formatoNumero($prod->kilos, 2, ''),
+                             $prod->promedio,
+                             String::formatoNumero($prod->precio, 2, ''),
+                             String::formatoNumero($prod->importe, 2, '', false)), false, false);
+            $total_kilos += $prod->kilos;
+            $total_pzas += $prod->cajas;
+          }
         }
 
         $this->SetFont($this->fount_txt, '', $this->font_size);
-        $this->SetY($this->GetY()+2);
+        $this->SetY($this->GetY()-2);
         $this->CheckPageBreak(4);
         $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
 
         $this->SetFont($this->fount_txt, '', $this->font_size+1);
         $this->SetY($this->GetY()-2);
-        $this->SetWidths(array(30, 31));
-        $this->SetAligns(array('R', 'R'));
-        $this->SetFounts(array($this->fount_txt, $this->fount_num),
-                         array(0, 1));
-        $this->Row(array( 'IMPORTE TOTAL', String::formatoNumero($data->importe, 2, '', false)), false, false, 3);
+        $this->SetWidths(array(11, 20, 14, 18));
+        $this->SetAligns(array('L', 'R', 'R', 'R'));
+        $this->SetFounts(array($this->fount_num, $this->fount_num, $this->fount_txt, $this->fount_num), array(1, 1, 0, 1));
+        $this->Row(array($total_pzas, $total_kilos, 'SubTotal', String::formatoNumero($data->importe, 2, '', false)), false, false, 4);
 
-        $this->SetFont($this->fount_txt, '', $this->font_size);
+        $this->SetX(31);
+        $this->SetWidths(array(14, 18));
+        $this->SetAligns(array('R', 'R'));
+        $this->SetFounts(array($this->fount_txt, $this->fount_num), array(0, 1));
+        $this->Row(array('IVA', String::formatoNumero(0, 2, '', false)), false, false, 4);
+        $this->SetX(31);
+        $this->Row(array('Total', String::formatoNumero($data->importe, 2, '', false)), false, false, 4);
+
+        $this->SetXY(0, $this->GetY()-4);
+        $this->SetWidths(array(11));
+        $this->SetFounts(array($this->fount_txt), array(0));
+        $this->Row(array('Lote'), false, false, 4);
+        $this->SetXY(11, $this->GetY()-4);
+        $this->SetWidths(array(24));
+        $this->SetFounts(array($this->fount_num), array(1));
+        $this->Row(array($data->no_lote!=''? $data->no_lote: '-'), false, true, 4);
+
+        $this->SetFont($this->fount_txt, '', $this->font_size-1);
         $this->SetY($this->GetY() + 3);
 
         if ($data->tipo === 'en')
@@ -160,8 +167,9 @@ class mypdf_ticket extends FPDF {
         $this->MultiCell($this->pag_size[0], 3, 'CUENTA: ' . strtoupper($cuentaCpi), 0, 'L');
         $this->SetY($this->GetY()-2);
         $this->SetWidths(array($this->pag_size[0]));
+        $this->SetFounts(array($this->fount_txt), array(0));
         $this->SetAligns(array('L'));
-        $this->Row(array( strtoupper($nombreCpi) ), false, false);
+        $this->Row(array( '              '.strtoupper($nombreCpi) ), false, false);
 
         $this->SetY($this->GetY()-1);
         $this->MultiCell($this->pag_size[0], 3, 'RANCHO: ' . strtoupper($data->rancho), 0, 'L');
@@ -270,22 +278,53 @@ class mypdf_ticket extends FPDF {
 
       $this->SetY($this->GetY());
 
+      $this->MultiCell($this->pag_size[0], 2, '----------------------------------------------------------------', 0, 'L');
+
+      $bascula = 'Electrónica Toledo';
+      if ($data->kilos_neto2 == $data->kilos_neto && $data->tipo == 'en') {
+        $bascula = 'De piso en recepción';
+      }
+      $this->SetY($this->GetY()-1);
+      $this->SetFounts(array($this->fount_txt), array(-1));
+      $this->SetWidths(array($this->pag_size[0]));
+      $this->SetAligns(array('L'));
+      $this->Row(array("BASCULA: {$bascula}" ), false, false);
+
+      $this->MultiCell($this->pag_size[0], 2, '-------------------------------------------------------------------------', 0, 'L');
+
       $txt_impresion = $data->no_impresiones>0? 'COPIA '.$data->no_impresiones: 'ORIGINAL';
 
       $this->SetFont($this->fount_txt, '', $this->font_size+1);
+      $this->SetFounts(array($this->fount_txt), array(-1));
       $this->SetWidths(array(35, 27));
       $this->SetAligns(array('L', 'R'));
-      $this->Row(array('EXPEDIDO EL:' ), false, false);
-      $this->SetY($this->GetY() - 3);
-      $this->SetFounts(array($this->fount_num, $this->fount_txt), array(1, 0));
-      $this->SetFont($this->fount_txt, '', $this->font_size+1.5);
-      $this->Row(array(substr(date("Y-m-d H:i:s"), 0, 19), $txt_impresion), false, false);
-
-      $this->SetFounts(array($this->fount_txt, $this->fount_txt), array(1, 0));
+      $this->Row(array('CREADO:' ), false, false);
+      $this->SetY($this->GetY() - 3.5);
+      $this->SetFounts(array($this->fount_num, $this->fount_txt), array(0, 0));
+      if ($data->no_impresiones == 0) {
+        $this->Row(array(String::fechaATexto(date("Y-m-d"), '/c').' '.date("H:i:s"), $txt_impresion), false, false, 4);
+      } else {
+        $this->Row(array(String::fechaATexto(substr($data->fecha_imp_orig, 0, 10), '/c').' '.substr($data->fecha_imp_orig, -11, -3), 'ORIGINAL'), false, false, 4);
+      }
       $this->SetWidths(array($this->pag_size[0]));
+      $this->SetFounts(array($this->fount_txt), array(-1));
       $this->SetAligns(array('L'));
-      $this->SetY($this->GetY() - 2);
-      $this->Row(array('CREADO POR: '.$data->creadox ), false, false);
+      $this->SetY($this->GetY()-1);
+      $this->Row(array($data->creadox ), false, false, 4);
+      if ($data->no_impresiones > 0) {
+        $this->SetFounts(array($this->fount_txt), array(-1));
+        $this->SetWidths(array(35, 27));
+        $this->SetAligns(array('L', 'R'));
+        $this->Row(array('RE-IMPRESION:' ), false, false, 4);
+        $this->SetY($this->GetY()-1.2);
+        $this->SetFounts(array($this->fount_num, $this->fount_txt), array(0, 0));
+        $this->Row(array(String::fechaATexto(date("Y-m-d"), '/c').' '.date("H:i:s"), $txt_impresion), false, false, 4);
+        $this->SetWidths(array($this->pag_size[0]));
+        $this->SetFounts(array($this->fount_txt), array(-1));
+        $this->SetAligns(array('L'));
+        $this->SetY($this->GetY()-1);
+        $this->Row(array($data->usuario ), false, false, 4);
+      }
 
       $this->SetAligns(array('C'));
       $this->SetFont($this->fount_txt, '', $this->font_size);
@@ -387,7 +426,7 @@ class mypdf_ticket extends FPDF {
                 if($header && $bordes)
                     $this->Rect($x,$y,$w,$h,'DF');
                 elseif($bordes)
-                    $this->Rect($x,$y,$w,$h);
+                    $this->Rect($x,$y+1,$w,$h);
 
                 if($header)
                     $this->SetXY($x,$y+3);

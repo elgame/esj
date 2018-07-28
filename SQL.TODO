@@ -1,4 +1,9 @@
 
+ ✔ Canbios en boleta @done (18-07-27 13:41) pct
+   ALTER TABLE public.bascula ADD COLUMN fecha_imp_orig timestamp without time zone;
+   ALTER TABLE public.usuarios ADD COLUMN no_checador bigint;
+   CREATE INDEX usuarios_no_checador_idx ON public.usuarios USING btree (no_checador);
+
  ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct|san|lap
    ALTER TABLE public.nomina_asistencia ADD COLUMN id_registro bigint;
    COMMENT ON COLUMN public.nomina_asistencia.id_registro IS 'id del usuario que registro las asistencias';
@@ -6,7 +11,7 @@
  ✔ Restructuracion de las cuentas contpaq para polizas @done (18-03-17 11:16) lap|pcc|pct|san
    ALTER TABLE public.cuentas_contpaq ADD COLUMN tipo_cuenta character varying(40);
 
- ☐ Comercio exterior 3.3
+ ✔ Comercio exterior 3.3 @done (18-07-27 13:41)
    - Cargar el archivo faccion_arancelariaV2.backup
     ALTER TABLE public.fraccion_arancelaria OWNER TO programa;
     REVOKE ALL ON TABLE public.fraccion_arancelaria FROM facturar_factura;

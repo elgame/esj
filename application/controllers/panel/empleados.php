@@ -207,14 +207,17 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
-      {
-  			$this->load->model('usuarios_model');
-  			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
-  			if($res_mdl)
-  				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+      if ($this->validano_checador($user->no_checador)) {
+        if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
+        {
+    			$this->load->model('usuarios_model');
+    			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
+    			if($res_mdl)
+    				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+        } else
+          redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=8'));
       } else
-        redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=8'));
+        redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=10'));
 		}
 		else
 			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=9'));
@@ -476,6 +479,10 @@ class empleados extends MY_Controller {
                     'label' => 'No Trabajador',
                     'rules' => 'required|max_length[8]|callback_validano_empleado'),
 
+              array('field' => 'dno_checador',
+                    'label' => 'No Checador',
+                    'rules' => 'required|max_length[8]|callback_validano_checador'),
+
               array('field' => 'fdepartamente',
                     'label' => 'Departamento',
                     'rules' => ''),
@@ -611,6 +618,28 @@ class empleados extends MY_Controller {
     return true;
   }
 
+  public function validano_checador($no_empleado)
+  {
+    if ($no_empleado != '')
+    {
+      $sql = isset($_GET['id'])? "id <> {$_GET['id']}": '';
+      $query = $this->db->query("SELECT * FROM usuarios
+                                 WHERE {$sql}
+                                  AND no_checador = '{$no_empleado}' AND status = 't'");
+
+      if ($query->num_rows() > 0)
+      {
+        $dt = $query->row();
+        $this->form_validation->set_message('validano_checador', 'Ya existe un empleado con el mismo No de Checador, '.$dt->nombre.' '.$dt->apellido_paterno);
+        return false;
+      }
+    }else{
+      $this->form_validation->set_message('validano_checador', 'Es requerido el No de Checador');
+      return false;
+    }
+    return true;
+  }
+
   /*
   | Asigna las reglas para validar un articulo al agregarlo
   */
@@ -667,6 +696,10 @@ class empleados extends MY_Controller {
         break;
       case 9:
         $txt = 'Es requerido el No de Trabajador.';
+        $icono = 'error';
+        break;
+      case 10:
+        $txt = 'Ya existe un empleado con el mismo No de checador.';
         $icono = 'error';
         break;
 

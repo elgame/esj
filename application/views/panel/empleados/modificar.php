@@ -336,6 +336,13 @@
                   </div>
 
                   <div class="control-group">
+                    <label class="control-label" for="dno_checador">No Checador </label>
+                    <div class="controls">
+                      <input type="text" name="dno_checador" id="dno_checador" class="span12" value="<?php echo isset($data['info'][0]->no_checador)?$data['info'][0]->no_checador:''; ?>" maxlength="8" placeholder="# Checador">
+                    </div>
+                  </div>
+
+                  <div class="control-group">
                     <label class="control-label" for="tipo_contrato">Tipo Contrato </label>
                     <div class="controls">
                     <select name="tipo_contrato" id="tipo_contrato">
