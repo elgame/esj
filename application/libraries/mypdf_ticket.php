@@ -288,9 +288,38 @@ class mypdf_ticket extends FPDF {
       $this->SetFounts(array($this->fount_txt), array(-1));
       $this->SetWidths(array($this->pag_size[0]));
       $this->SetAligns(array('L'));
-      $this->Row(array("BASCULA: {$bascula}" ), false, false);
+      $this->Row(array("BASCULA: {$bascula}" ), false, false, 4);
 
-      $this->MultiCell($this->pag_size[0], 2, '-------------------------------------------------------------------------', 0, 'L');
+      $status = 'PENDIENTE';
+      if ($data->accion == 'p') { // contado
+        $fechaPago = String::fechaATexto(substr($data->fecha_pago, 0, 10), '/c').' '.substr($data->fecha_pago, -11, -3);
+        $status = 'PAGADA';
+      } elseif ($data->accion == 'b') { // transferencia o cheque
+        $fechaPago = '';
+        $status = 'PAGADA';
+        if (isset($data->pago->fecha)) {
+          $fechaPago = String::fechaATexto(substr($data->pago->fecha, 0, 10), '/c').' '.substr($data->pago->fecha, -11, -3);
+          $this->SetFounts(array($this->fount_txt), array(-1));
+          $this->SetWidths(array($this->pag_size[0]));
+          $this->SetAligns(array('L'));
+          $this->SetY($this->GetY()-1);
+          $this->Row(array("METODO PAGO: {$data->pago->tipo_pago}" ), false, false, 4);
+          $this->SetY($this->GetY()-1);
+          $this->Row(array("CUENTA: {$data->pago->alias}" ), false, false, 4);
+          if ($data->pago->usuario != '') {
+            $this->SetY($this->GetY()-1);
+            $this->Row(array("REALIZO: {$data->pago->usuario}" ), false, false, 4);
+          }
+        }
+      }
+      $this->SetFounts(array($this->fount_txt, $this->fount_num), array(-1, -1));
+      $this->SetWidths(array(32, 30));
+      $this->SetAligns(array('L', 'R'));
+      $this->SetY($this->GetY()-1);
+      $this->Row(array("STATUS: {$status}", $fechaPago), false, false, 4);
+
+      $this->SetY($this->GetY()+1);
+      $this->MultiCell($this->pag_size[0], 2, '--------------------------------------------------------------------', 0, 'L');
 
       $txt_impresion = $data->no_impresiones>0? 'COPIA '.$data->no_impresiones: 'ORIGINAL';
 

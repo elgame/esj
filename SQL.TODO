@@ -3,6 +3,9 @@
    ALTER TABLE public.bascula ADD COLUMN fecha_imp_orig timestamp without time zone;
    ALTER TABLE public.usuarios ADD COLUMN no_checador bigint;
    CREATE INDEX usuarios_no_checador_idx ON public.usuarios USING btree (no_checador);
+   ALTER TABLE public.bascula_pagos_basculas ADD COLUMN monto double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.bascula_pagos ADD COLUMN usuario_creo bigint;
+   ALTER TABLE public.bascula_pagos ADD CONSTRAINT bascula_pagos_usuario_creo_fkey FOREIGN KEY (usuario_creo) REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
 
  ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct|san|lap
    ALTER TABLE public.nomina_asistencia ADD COLUMN id_registro bigint;

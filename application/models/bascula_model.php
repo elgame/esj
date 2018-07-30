@@ -613,6 +613,13 @@ class bascula_model extends CI_Model {
     $this->load->library('mypdf_ticket');
 
     $data = $this->getBasculaInfo($id);
+    // Abonos
+    $data['info'][0]->pago = $this->db->query("SELECT bp.tipo_pago, bp.fecha, bp.concepto, bc.alias, (u.nombre || ' ' || u.apellido_paterno) AS usuario
+      FROM bascula_pagos bp
+        INNER JOIN bascula_pagos_basculas pb ON bp.id_pago = pb.id_pago
+        INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
+        LEFT JOIN usuarios u ON u.id = bp.usuario_creo
+      WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
 
     //Actualiza el control de impresiones, se le suma 1
     //al valor de la BD para la siguiente impresion
@@ -923,9 +930,10 @@ class bascula_model extends CI_Model {
   public function pago_basculas()
   {
     $bascula_pagos = array(
-      'tipo_pago' => $this->input->post('ptipo_pago'),
-      'monto'     => $this->input->post('pmonto'),
-      'concepto'  => $this->input->post('pconcepto'),
+      'tipo_pago'    => $this->input->post('ptipo_pago'),
+      'monto'        => $this->input->post('pmonto'),
+      'concepto'     => $this->input->post('pconcepto'),
+      'usuario_creo' => $this->session->userdata('id_usuario'),
     );
 
     $this->db->insert('bascula_pagos', $bascula_pagos);
@@ -977,10 +985,11 @@ class bascula_model extends CI_Model {
     {
 
       $bascula_pagos = array(
-        'tipo_pago'  => $datos['fmetodo_pago'],
-        'monto'      => $datos['dmonto'],
-        'concepto'   => $datos['dconcepto'],
-        'id_cuenta'  => $datos['dcuenta'],
+        'tipo_pago'    => $datos['fmetodo_pago'],
+        'monto'        => $datos['dmonto'],
+        'concepto'     => $datos['dconcepto'],
+        'id_cuenta'    => $datos['dcuenta'],
+        'usuario_creo' => $this->session->userdata('id_usuario'),
       );
 
       $this->db->insert('bascula_pagos', $bascula_pagos);
@@ -995,8 +1004,9 @@ class bascula_model extends CI_Model {
         $this->db->update('bascula', array('accion' => 'b'), array('id_bascula' => $pesada['id_bascula']));
 
         $pesadas[] = array(
-          'id_pago' => $id_bascula_pagos,
-          'id_bascula' => $pesada['id_bascula']
+          'id_pago'    => $id_bascula_pagos,
+          'id_bascula' => $pesada['id_bascula'],
+          'monto'      => $pesada['monto']
         );
         $this->db->update('banco_pagos_bascula', array('status' => 't'), array('id_bascula' => $pesada['id_bascula']));
       }
