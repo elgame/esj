@@ -17,6 +17,7 @@
           'cajas_pres' => '',
           'pagar'      => '',
           'cajas'      => array('',''),
+          'metodo_pago' => '',
         );
         $readonly   = 'readonly';
         $crumbTitle = 'Agregar';
@@ -30,21 +31,21 @@
           echo '<input type="hidden" id="isEditar" value="t" />';
           $autorizarInput = '<input type="hidden" name="autorizar" id="autorizar" value="" />';
           $bmod = array(
-          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
-          'tipo'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
-          'area'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
-          'empresa'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
-          'proveedor'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mproveedor/')?'':' readonly'),
-          'rancho'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
-          'camion'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
-          'chofer'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
-          'fecha'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
-          'k_bruto'    => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
-          'k_tara'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
-          'cajas_pres' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
-          'pagar'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
-          'fecha_pago' => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
-          'cajas'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
+          'tipo'        => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
+          'metodo_pago' => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mtipo/')?'':' disabled'),
+          'area'        => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/marea/')?'':' disabled'),
+          'empresa'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mempresa/')?'':' readonly'),
+          'proveedor'   => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mproveedor/')?'':' readonly'),
+          'rancho'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mrancho/')?'':' readonly'),
+          'camion'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcamion/')?'':' readonly'),
+          'chofer'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mchofer/')?'':' readonly'),
+          'fecha'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mfecha/')? '':' readonly'),
+          'k_bruto'     => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_bruto/')?'':' readonly'),
+          'k_tara'      => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mk_tara/')?'':' readonly'),
+          'cajas_pres'  => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas_pres/')?'':' readonly'),
+          'pagar'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar/')?'':' disabled'),
+          'fecha_pago'  => $this->usuarios_model->tienePrivilegioDe('', 'bascula/mpagar_fecha/'),
+          'cajas'       => ($this->usuarios_model->tienePrivilegioDe('', 'bascula/mcajas/')?array('',''): array(' disabled',' readonly')),
           );
         }
       ?>
@@ -245,7 +246,7 @@
                     <label class="control-label" for="pchofer">Chofer</label>
                     <div class="controls">
                       <input type="text" name="pchofer"
-                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pproductor" <?php echo $disabled.$bmod['chofer']; ?>>
+                        value="<?php echo set_value('pchofer', $this->input->post('pchofer')) ?>" id="pchofer" class="input-xlarge" placeholder="Chofer" data-next="pmetodo_pago" <?php echo $disabled.$bmod['chofer']; ?>>
                       <span class="help-inline">
                         <a href="<?php echo base_url('panel/bascula/show_view_agregar_chofer') ?>" class="btn" rel="superbox-40x600">Agregar</a>
                       </span>
@@ -297,6 +298,16 @@
                     </div>
                   </div>
                   <?php } ?>
+
+                  <div class="control-group">
+                    <label class="control-label" for="pmetodo_pago">Método de pago</label>
+                    <div class="controls">
+                      <select name="pmetodo_pago" class="input-xlarge" id="pmetodo_pago" <?php echo $disabled; ?>>
+                        <option value="co" <?php $set_select=set_select('pmetodo_pago', 'co', false, $this->input->post('pmetodo_pago')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['metodo_pago']); ?>>Contado</option>
+                        <option value="ot" <?php $set_select=set_select('pmetodo_pago', 'ot', false, $this->input->post('pmetodo_pago')); echo $set_select.($set_select==' selected="selected"'? '': $bmod['metodo_pago']); ?>>Otro</option>
+                      </select>
+                    </div>
+                  </div>
 
                   <div class="control-group">
                     <label class="control-label" for="pproductor">Productor</label>

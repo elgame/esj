@@ -106,7 +106,7 @@ class bascula_model extends CI_Model {
     {
       $idb = isset($_POST['pidb']) ? $_POST['pidb'] : '';
 
-      if ($_POST['paccion'] == 'n')
+      if ($_POST['paccion'] == 'n') // nueva boleta
       {
         $result = $this->db->query("SELECT Count(id_bascula) AS num FROM bascula
           WHERE folio = {$this->input->post('pfolio')} AND tipo = '{$this->input->post('ptipo')}'
@@ -128,6 +128,7 @@ class bascula_model extends CI_Model {
           'cajas_prestadas' => empty($_POST['pcajas_prestadas']) ? 0 : $_POST['pcajas_prestadas'],
           'certificado' => isset($_POST['certificado']) ? 't' : 'f',
 
+          'metodo_pago'  => $this->input->post('pmetodo_pago'),
           'id_productor' => empty($_POST['pid_productor']) ? null : $_POST['pid_productor'],
           'id_usuario' => $this->session->userdata('id_usuario'),
         );
@@ -302,7 +303,7 @@ class bascula_model extends CI_Model {
       // }
 
       if (!$bonificacion && isset($data2['accion']) && $data2['accion'] == 'sa') {
-        // $this->addSnapshot($idb, $data2['accion']);
+        $this->addSnapshot($idb, $data2['accion']);
       }
 
       $msg = '7';
