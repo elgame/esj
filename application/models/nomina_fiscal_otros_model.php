@@ -771,8 +771,8 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
 
             // si esta dentro del rango de la semana
             if (strtotime($fecha) >= strtotime($semana['fecha_inicio']) && strtotime($fecha) <= strtotime($semana['fecha_final'])) {
-              $empleado = $this->db->select("u.id, u.no_empleado" )->from("usuarios u")
-                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.no_empleado", $datos[0])->get()->row();
+              $empleado = $this->db->select("u.id, u.no_checador" )->from("usuarios u")
+                ->where("u.id_empresa", $_POST['id_empresa'])->where("u.no_checador", $datos[0])->get()->row();
               if (isset($empleado->id)) { // si existe el trabajador en la empresa
                 $tipo = 'f';
                 if ($datos[4] != '' && $datos[5] != '') {

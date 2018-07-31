@@ -309,15 +309,18 @@
                                         <th>FECHA</th>
                                         <!-- <th>FOLIO</th> -->
                                         <th>FACTURADOR</th>
-                                        <th>PRODUCTOR</th>
-                                        <th>IMPORTE</th>
+                                        <th>SUPERVISOR</th>
+                                        <th>PAGADO</th>
+                                        <th>PENDIENTE</th>
                                       </tr>
                                     </thead>
                                     <tbody>
                                       <?php
-                                        $totalBoletas = 0;
+                                        $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
                                         foreach ($caja['boletas'] as $key => $boleta) {
-                                          $totalBoletas += floatval($boleta->importe);
+                                          $totalBoletas           += floatval($boleta->importe);
+                                          $totalBoletasPagadas    += floatval($boleta->importe_pagada);
+                                          $totalBoletasPendientes += floatval($boleta->importe_pendiente);
                                         ?>
                                         <tr>
                                           <td>
@@ -328,14 +331,16 @@
                                           <!-- <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td> -->
                                           <td><?php echo $boleta->proveedor ?></td>
                                           <td><?php echo $boleta->productor ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe_pagada, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe_pendiente, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>
                                     </tbody>
                                     <tbody>
                                       <tr>
-                                        <td colspan="4"><input type="hidden" value="<?php echo $totalBoletas ?>" id="total-boletas"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletas, 2, '$') ?></td>
+                                        <td colspan="4"><input type="hidden" value="<?php echo $totalBoletasPagadas ?>" id="total-boletas"></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletasPagadas, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletasPendientes, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -552,7 +557,7 @@
                             </tr>
                             <tr>
                               <td>PAGO TOTAL LIMON:</td>
-                              <td><input type="text" name="" value="<?php echo $totalBoletas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo $totalBoletasPagadas ?>" class="input-small vpositive" id="" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>PAGO TOTAL GASTOS:</td>
@@ -560,8 +565,8 @@
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletas - $totalGastos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletas - $totalGastos) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletasPagadas - $totalGastos ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletasPagadas - $totalGastos) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>

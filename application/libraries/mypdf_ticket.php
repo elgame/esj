@@ -291,6 +291,7 @@ class mypdf_ticket extends FPDF {
       $this->Row(array("BASCULA: {$bascula}" ), false, false, 4);
 
       $status = 'PENDIENTE';
+      $fechaPago = '';
       if ($data->accion == 'p') { // contado
         $fechaPago = String::fechaATexto(substr($data->fecha_pago, 0, 10), '/c').' '.substr($data->fecha_pago, -11, -3);
         $status = 'PAGADA';

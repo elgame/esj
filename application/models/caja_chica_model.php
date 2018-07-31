@@ -83,19 +83,38 @@ class caja_chica_model extends CI_Model {
         $sql = " AND b.id_area = 7";
       }
       $boletas = $this->db->query(
-        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_pago) as fecha, pr.nombre_fiscal as proveedor,
-          b.importe, cb.folio as folio_caja_chica, p.nombre_fiscal as productor
+        "SELECT b.id_bascula, b.folio as boleta, DATE(b.fecha_bruto) as fecha, pr.nombre_fiscal as proveedor,
+          b.importe, cb.folio as folio_caja_chica, p.nombre_fiscal as productor,
+          DATE(b.fecha_pago) AS fecha_pago
         FROM bascula b
         INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
         LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
         LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
-        WHERE DATE(b.fecha_pago) = '{$fecha}' AND b.accion = 'p' AND b.status = 't'{$sql}
+        WHERE (DATE(b.fecha_pago) = '{$fecha}' OR DATE(b.fecha_bruto) = '{$fecha}') AND
+        (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b')) AND b.status = 't'{$sql}
         ORDER BY (b.folio) ASC"
       );
 
       if ($boletas->num_rows() > 0)
       {
-        $info['boletas'] = $boletas->result();
+        $boletas = $boletas->result();
+        foreach ($boletas as $key => $boleta) {
+          if ($boleta->fecha_pago == '') { // pendiente de pago
+            $boleta->importe_pendiente = $boleta->importe;
+            $boleta->importe_pagada    = 0;
+          } elseif (strtotime($boleta->fecha) == strtotime($boleta->fecha_pago) ||
+                    strtotime($fecha) == strtotime($boleta->fecha_pago)) { // se pago el mismo dia
+            $boleta->importe_pendiente = 0;
+            $boleta->importe_pagada    = $boleta->importe;
+          } elseif (strtotime($fecha) < strtotime($boleta->fecha_pago)) { // se pago dias despues
+            $boleta->importe_pendiente = $boleta->importe;
+            $boleta->importe_pagada    = 0;
+          } elseif (strtotime($fecha) > strtotime($boleta->fecha_pago)) { // se pago dias antes
+            $boleta->importe_pendiente = 0;
+            $boleta->importe_pagada    = $boleta->importe;
+          }
+        }
+        $info['boletas'] = $boletas;
       }
 
       // Boletas pendientes de recuperar dinero a caja
@@ -106,7 +125,8 @@ class caja_chica_model extends CI_Model {
           LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
           LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
-        WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01' AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL{$sql}
+        WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
+          AND b.accion = 'p' AND b.status = 't' AND bpb.id_bascula IS NULL{$sql}
         GROUP BY pr.id_proveedor
         ORDER BY proveedor ASC"
       );
@@ -1194,20 +1214,20 @@ class caja_chica_model extends CI_Model {
     // Boletas
     $pdf->SetFont('Arial','', 6);
     $pdf->SetXY(6, $pdf->GetY()+3);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C'));
-    $pdf->SetWidths(array(15, 15, 27, 27, 20));
-    $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'PRODUTOR', 'IMPORTE'), true, true);
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+    $pdf->SetWidths(array(15, 15, 22, 22, 15, 15));
+    $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'SUPERVISOR', 'PAGADO', 'PENDIENTE'), true, true);
 
     $pdf->SetFont('Arial','', 6);
-    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-    $pdf->SetWidths(array(15, 15, 27, 27, 20));
+    $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R', 'R'));
+    $pdf->SetWidths(array(15, 15, 22, 22, 15, 15));
 
     // $caja['boletas'] = array_merge($caja['boletas'], $caja['boletas']);
 
     // $pdf->SetFont('Arial','', 7);
     // $boletasY = $pdf->GetY();
 
-    $totalBoletas = 0;
+    $totalBoletasPagadas = $totalBoletasPendientes = $totalBoletas = 0;
     foreach ($caja['boletas'] as $key => $boleta)
     {
       if($pdf->GetY() >= $pdf->limiteY) {
@@ -1215,11 +1235,11 @@ class caja_chica_model extends CI_Model {
         $pdf->AddPage();
         // // nomenclatura
         // $this->printCajaNomenclatura($pdf, $nomenclaturas);
-        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R'));
-        $pdf->SetWidths(array(15, 15, 27, 27, 20));
+        $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R', 'R'));
+        $pdf->SetWidths(array(15, 15, 22, 22, 15, 15));
         $pdf->SetFont('Helvetica','B', 7);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'PRODUTOR', 'IMPORTE'), true, true);
+        $pdf->Row(array('BOLETA', 'FECHA', 'FACTURADOR', 'SUPERVISOR', 'PAGADO', 'PENDIENTE'), true, true);
 
         $boletasY = $pdf->GetY();
       }
@@ -1227,20 +1247,27 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Helvetica','', 7);
       $pdf->SetX(6);
 
-      $pdf->SetAligns(array('L', 'C', 'C', 'L', 'R'));
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'R', 'R'));
       $pdf->Row(array(
         $boleta->boleta,
         $boleta->fecha,
         $boleta->proveedor,
         $boleta->productor,
-        String::formatoNumero($boleta->importe, 2, '', false)), false, true);
+        String::formatoNumero($boleta->importe_pagada, 2, '', false),
+        String::formatoNumero($boleta->importe_pendiente, 2, '', false)
+      ), false, true);
 
-      $totalBoletas += floatval($boleta->importe);
+      $totalBoletas           += floatval($boleta->importe);
+      $totalBoletasPagadas    += floatval($boleta->importe_pagada);
+      $totalBoletasPendientes += floatval($boleta->importe_pendiente);
     }
 
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(6);
-    $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalBoletas, 2, '$', false)), false, true);
+    $pdf->Row(array('', '', '', 'TOTAL',
+      String::formatoNumero($totalBoletasPagadas, 2, '$', false),
+      String::formatoNumero($totalBoletasPendientes, 2, '$', false)
+    ), false, true);
 
     // Gastos del Dia
     $pag_aux2 = $pdf->page;
@@ -1554,11 +1581,11 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('TOTAL INGRESOS', String::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('PAGO TOT LIMON ', String::formatoNumero($totalBoletas, 2, '$', false)), false, false);
+    $pdf->Row(array('PAGO TOT LIMON ', String::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletas - $ttotalGastos, 2, '$', false)), false, false);
+    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
 

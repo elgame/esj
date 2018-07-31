@@ -302,7 +302,7 @@ class bascula_model extends CI_Model {
       // }
 
       if (!$bonificacion && isset($data2['accion']) && $data2['accion'] == 'sa') {
-        $this->addSnapshot($idb, $data2['accion']);
+        // $this->addSnapshot($idb, $data2['accion']);
       }
 
       $msg = '7';
