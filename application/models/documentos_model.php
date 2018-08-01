@@ -129,7 +129,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         // Si ya existe los documentos en la carpeta de la factura entonces
         // los elimina.
@@ -266,7 +266,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($data['id_factura']);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($data['id_factura'], $data['id_documento'], $path);
@@ -396,7 +396,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($idFactura, $idDocumento, $path);
@@ -439,7 +439,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Genera el documento de embarque.
     $this->generaDoc($idFactura, $idDocumento, $path);
@@ -499,7 +499,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -557,7 +557,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -614,7 +614,7 @@ class documentos_model extends CI_Model {
         $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
         // Obtiene la ruta donde se guardan los documentos del cliente.
-        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
         $dataJson = $this->db
           ->select('data')
@@ -669,8 +669,9 @@ class documentos_model extends CI_Model {
    * @param  string $folioFactura
    * @return string
    */
-  public function creaDirectorioDocsCliente($clienteNombre, $serieFactura, $folioFactura)
+  public function creaDirectorioDocsCliente($clienteNombre, $serieFactura, $folioFactura, $fecha=null)
   {
+    $fecha = explode('-', ($fecha? $fecha: date("Y-m-d")));
     $path = APPPATH.'documentos/CLIENTES/';
 
     if ( ! file_exists($path))
@@ -686,14 +687,14 @@ class documentos_model extends CI_Model {
       mkdir($path, 0777);
     }
 
-    $path .= date('Y').'/';
+    $path .= $fecha[0].'/';
     if ( ! file_exists($path))
     {
       // echo $path;
       mkdir($path, 0777);
     }
 
-    $path .= $this->mesToString(date('m')).'/';
+    $path .= $this->mesToString($fecha[1]).'/';
     if ( ! file_exists($path))
     {
       // echo $path;
@@ -805,7 +806,7 @@ class documentos_model extends CI_Model {
     $factura = $this->facturacion_model->getInfoFactura($idFactura);
 
     // Obtiene la ruta donde se guardan los documentos del cliente.
-    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+    $path = $this->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
 
     // Llama el metodo que ejecuta la funcion dependiendo del documento que se
     // esta actualizando y los guarda en disco.

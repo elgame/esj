@@ -1038,7 +1038,7 @@ class facturacion_model extends privilegios_model{
       $docsCliente = $this->getClienteDocs($datosFactura['id_cliente'], $idFactura);
 
       $this->load->model('documentos_model');
-      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $datosFactura['serie'], $datosFactura['folio']);
+      $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
 
       // Inserta los documentos del cliente con un status false.
       if ($docsCliente)
@@ -1049,7 +1049,7 @@ class facturacion_model extends privilegios_model{
     else
     {
         $this->load->model('documentos_model');
-        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $datosFactura['serie'], $datosFactura['folio']);
+        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($datosApi['receptor']['nombreFiscal'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
         $datosFactura['docs_finalizados'] = 't';
     }
 
@@ -1309,7 +1309,7 @@ class facturacion_model extends privilegios_model{
         $this->cancelaFacturaClear($factura, $idFactura);
 
         // Regenera el PDF de la factura.
-        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio);
+        $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($factura['info']->cliente->nombre_fiscal, $factura['info']->serie, $factura['info']->folio, substr($factura['info']->fecha, 0, 10));
         $this->generaFacturaPdf($idFactura, $pathDocs);
 
         $this->enviarEmail($idFactura);
@@ -1467,7 +1467,7 @@ class facturacion_model extends privilegios_model{
             $asunto = "Ha recibido una COMPROBANTE FISCAL DIGITAL de {$factura['info']->empresa->nombre_fiscal}";
 
             $tipoFactura = is_null($factura['info']->id_nc) ? 'Factura': 'Nota de Crédito';
-
+            $altBody = $body = '';
             // Si la factura esta timbrada
             if ($factura['info']->status_timbrado === "t")
             {

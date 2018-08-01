@@ -560,6 +560,14 @@ class catalogos_sft_model extends CI_Model{
 		}
 	}
 
+  public function getDescripCodigoSim($id_area)
+  {
+    $data = $this->db->query("SELECT id_cat_codigos AS id_area, codigo, nombre, descripcion, ubicacion, otro_dato, status, id_padre
+                               FROM otros.cat_codigos
+                               WHERE id_cat_codigos = {$id_area}")->row();
+    return $data->nombre;
+  }
+
 	/**
 	 * Obtiene el listado de clasificaciones para usar ajax
 	 * @param term. termino escrito en la caja de texto, busca en el nombre

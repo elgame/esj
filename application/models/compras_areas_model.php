@@ -216,6 +216,14 @@ class compras_areas_model extends CI_Model{
 		}
 	}
 
+  public function getDescripCodigoSim($id_area)
+  {
+    $data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre
+                               FROM compras_areas
+                               WHERE id_area = {$id_area}")->row();
+    return $data->nombre;
+  }
+
 	public function getHijos($id_area)
 	{
 		$data = $this->db->query("SELECT id_area, id_tipo, codigo, codigo_fin, nombre, status, id_padre,

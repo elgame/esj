@@ -513,7 +513,7 @@ class Ventas_model extends privilegios_model{
 
     // Obtiene los documentos que el cliente tiene asignados.
     $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
 
     // Inserta los documentos del cliente con un status false.
     if ($docsCliente)
@@ -827,7 +827,7 @@ class Ventas_model extends privilegios_model{
 
     // // Obtiene los documentos que el cliente tiene asignados.
     // $docsCliente = $this->facturacion_model->getClienteDocs($datosFactura['id_cliente'], $id_venta);
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio']);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($dataCliente['nombre'], $datosFactura['serie'], $datosFactura['folio'], substr($datosFactura['fecha'], 0, 10));
 
     // // Inserta los documentos del cliente con un status false.
     // if ($docsCliente)
@@ -942,7 +942,7 @@ class Ventas_model extends privilegios_model{
     $this->ventas_dia_model->idFacturaVenta(array('id_factura' => $id_venta), true);
 
     // Regenera el PDF de la factura.
-    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio);
+    $pathDocs = $this->documentos_model->creaDirectorioDocsCliente($remision['info']->cliente->nombre_fiscal, $remision['info']->serie, $remision['info']->folio, substr($remision['info']->fecha, 0, 10));
     $this->generaNotaRemisionPdf($id_venta, $pathDocs);
 
     // Elimina la salida de productos q se dio si se ligaron pallets

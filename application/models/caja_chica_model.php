@@ -1314,7 +1314,7 @@ class caja_chica_model extends CI_Model {
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'R'));
       $pdf->SetX(111);
       $pdf->Row(array(
-        $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigo($gasto->id_area),
+        $gasto->codigo_fin.' '.$this->{($gasto->campo=='id_area'? 'compras_areas_model': 'catalogos_sft_model')}->getDescripCodigoSim($gasto->id_area),
         $gasto->empresa,
         $gasto->nomenclatura,
         // $gasto->folio,
