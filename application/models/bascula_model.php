@@ -621,6 +621,9 @@ class bascula_model extends CI_Model {
         INNER JOIN banco_cuentas bc ON bc.id_cuenta = bp.id_cuenta
         LEFT JOIN usuarios u ON u.id = bp.usuario_creo
       WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
+    // Bitacora
+    $_GET['boletaId'] = $id;
+    $data['info'][0]->bitacora = $this->bitacora(true);
 
     //Actualiza el control de impresiones, se le suma 1
     //al valor de la BD para la siguiente impresion
@@ -3234,14 +3237,14 @@ class bascula_model extends CI_Model {
 
   }
 
-  private function bitacora()
+  private function bitacora($noFecha = false)
   {
     $sql = "";
     if ((isset($_GET['ffecha1']) && $_GET['ffecha1']) && (isset($_GET['ffecha2']) && $_GET['ffecha2']))
     {
       $sql .= " AND DATE(ba.fecha_tara) >= '{$_GET['ffecha1']}' AND DATE(ba.fecha_tara) <= '{$_GET['ffecha2']}'";
     }
-    else
+    elseif (!$noFecha)
     {
       $sql .= " AND DATE(ba.fecha_tara) >= '".date('Y-m-d')."' AND DATE(ba.fecha_tara) <= '".date('Y-m-d')."'";
     }
@@ -3274,6 +3277,11 @@ class bascula_model extends CI_Model {
     if (isset($_GET['fstatus']) && $_GET['fstatus'])
     {
       $sql .=  $_GET['fstatus'] == 1 ? " AND ba.accion = 'p'" : " AND ba.accion != 'p'";
+    }
+
+    if (isset($_GET['boletaId']) && $_GET['boletaId'])
+    {
+      $sql .= " AND ba.id_bascula = {$_GET['boletaId']}";
     }
 
     $query = $this->db->query(

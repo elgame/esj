@@ -356,6 +356,38 @@ class mypdf_ticket extends FPDF {
         $this->Row(array($data->usuario ), false, false, 4);
       }
 
+      if (isset($data->bitacora) && count($data->bitacora) > 0) {
+        $this->SetY($this->GetY()+1);
+        $this->Row(array('-------------------------------------------------------------------------'), false, false, 4);
+        $this->SetAligns(array('C'));
+        $this->SetY($this->GetY()-1);
+        $this->Row(array('Cambios'), false, false, 4);
+
+        foreach ($data->bitacora as $key => $value) {
+          $y = $this->GetY();
+          $this->SetFounts(array($this->fount_txt, $this->fount_txt), array(-1, -1));
+          $this->SetWidths(array(37, 25));
+          $this->SetAligns(array('L', 'R'));
+          $this->Row(array($value->campo, substr($value->fecha, 0, 19)), false, false, 4);
+          $this->SetWidths(array(31, 31));
+          $this->Row(array("Realizo: {$value->usuario_logueado}", "Autorizo: {$value->usuario_auth}"), false, false, 4);
+          $this->SetFounts(array($this->fount_txt), array(-1));
+          $this->SetWidths(array(62));
+          $this->SetAligns(array('L'));
+          $h = 8;
+          if (strlen($value->antes) > 0) {
+            $this->Row(array("Antes: ".str_replace('|', ' | ', $value->antes)), false, false, $this->getHRow(62, str_replace('|', ' | ', $value->antes)));
+            $h += $this->getHRow(62, str_replace('|', ' | ', $value->antes));
+          }
+          if (strlen($value->despues) > 0) {
+            $this->Row(array("Después: ".str_replace('|', ' | ', $value->despues)), false, false, $this->getHRow(62, str_replace('|', ' | ', $value->despues)));
+            $h += $this->getHRow(62, str_replace('|', ' | ', $value->despues));
+          }
+          $this->Row(array('------------------------------------------------------------------------'), false, false);
+        }
+      }
+
+
       $this->SetAligns(array('C'));
       $this->SetFont($this->fount_txt, '', $this->font_size);
       $this->SetY($this->GetY() + 5);
@@ -410,7 +442,12 @@ class mypdf_ticket extends FPDF {
         }
     }
 
-
+    public function getHRow($width, $text)
+    {
+      $nb = max(0, $this->NbLines($width, $text));
+      $h = ($this->font_size-3)*$nb;
+      return $h;
+    }
 
 
     /*Crear tablas*/
