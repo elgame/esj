@@ -8695,17 +8695,17 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetFont('Helvetica','', 8);
         $pdf->SetXY(6, $pdf->GetY());
 
-        if($empleado->fecha_ultima!='')
-        {
-          $fecha_aux = explode('-', $empleado->fecha_entrada);
-          $fecha_aux[0] = date("Y", strtotime("{$empleado->fecha_ultima} +1 year"));
-          $fecha_entrada = implode('-', $fecha_aux);
-        }else{
+        // if($empleado->fecha_ultima!='')
+        // {
+        //   $fecha_aux = explode('-', $empleado->fecha_entrada);
+        //   $fecha_aux[0] = date("Y", strtotime("{$empleado->fecha_ultima} +1 year"));
+        //   $fecha_entrada = implode('-', $fecha_aux);
+        // }else{
           $fecha_entrada = strtotime("{$empleado->fecha_entrada} +1 year");
           if(date("Y", $fecha_entrada) < date("Y") )
             $fecha_entrada = strtotime( date("Y").'-'.date("m-d", $fecha_entrada). " +1 year");
           $fecha_entrada = date("Y-m-d", $fecha_entrada);
-        }
+        // }
 
         $cumpleanios = strtotime( date("Y").'-'.date("m-d", strtotime("{$empleado->fecha_nacimiento}")) );
         if($cumpleanios < strtotime("now"))
@@ -8716,7 +8716,7 @@ class nomina_fiscal_model extends CI_Model {
           $empleado->nombre,
           ($empleado->fecha_ultima!=''? String::fechaATexto($empleado->fecha_ultima, '/c'): 'No a tenido'),
           String::fechaATexto($fecha_entrada, '/c'),
-          $nomina->diasVacacionesCorresponden($anios_trabajados_empleado+1),
+          $nomina->diasVacacionesCorresponden($anios_trabajados_empleado),
           String::fechaATexto($cumpleanios, '/c'),
           );
 
@@ -9079,7 +9079,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array("(== " . strtoupper(String::num2letras(String::float($total_pp))) . " ==)"), false, false);
       $pdf->SetX(33);
 
-      $inicio = new DateTime($empleado['info'][0]->fecha_imss);
+      $inicio = new DateTime(($empleado['info'][0]->fecha_imss? $empleado['info'][0]->fecha_imss : $empleado['info'][0]->fecha_entrada));
       $hoy = new DateTime(date('Y-m-d'));
 
       $pdf->Row(array("POR LAS VACACIONES DEL ".String::numeroCardinal($hoy->diff($inicio)->y)." AÑO DE LABORES. "), false, false);
