@@ -2,6 +2,7 @@
  ☐ Modificar el formato de impresion de la boleta y agregar los campos requeridos para mostrar los datos
  ☐ Modificar la caja chica de limon como las hojas de la señora
  ☐ Modificar la caja chica de prestamos como las hojas de la señora
+ ✔ Acomodar reporte y recibo de vacaciones, la fecha toma el de la ultima vacaciones que tomo el trabajador. @done (18-08-06 19:11)
  ✔ Detalle en bascula al cargar los proveedores duplicados, si cambias de empresa que limpie @done (18-06-21 18:59)
  ✔ En las remisiones si esta cancelada acepta el folio repetido, que no lo acepte @done (18-06-23 15:14)
  ✔ Cuando se liga remisiones a una factura timbrada que se quite de cuentas por cobrar @done (18-06-24 13:58)

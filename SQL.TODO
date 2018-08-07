@@ -1,5 +1,5 @@
 
- ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc
+ ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc|san
    ALTER TABLE public.bascula ADD COLUMN fecha_imp_orig timestamp without time zone;
    ALTER TABLE public.usuarios ADD COLUMN no_checador bigint;
    CREATE INDEX usuarios_no_checador_idx ON public.usuarios USING btree (no_checador);
