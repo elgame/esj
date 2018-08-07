@@ -93,6 +93,8 @@
                         <option value="NVejez" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Cesantia Y Vejez</option>
                         <option value="NInfonavit" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Infonavit</option>
                         <option value="NIsr" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Isr</option>
+                        <option value="PagoAdicional" <?php echo set_select('dtipo_cuenta'); ?>>Pago Adicional</option>
+                        <option value="PagoMenor" <?php echo set_select('dtipo_cuenta'); ?>>Pago Menor</option>
                       </select>
                     </div>
                   </div>

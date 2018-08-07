@@ -9,6 +9,8 @@
    ALTER TABLE public.bascula ADD COLUMN metodo_pago character varying(10);
    COMMENT ON COLUMN public.bascula.metodo_pago IS 'co: contado, ot: otro';
 
+   ALTER TABLE nomina_prestamos ADD COLUMN close boolean NOT NULL DEFAULT false;
+
  ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct|san|lap
    ALTER TABLE public.nomina_asistencia ADD COLUMN id_registro bigint;
    COMMENT ON COLUMN public.nomina_asistencia.id_registro IS 'id del usuario que registro las asistencias';

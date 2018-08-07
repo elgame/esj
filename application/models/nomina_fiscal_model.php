@@ -8802,7 +8802,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->titulo1 = $empresa['info']->nombre_fiscal;
       // $pdf->titulo1 S= $empresa['info']->nombre_fiscal;
       // $pdf->logo = $empresa['info']->logo;
-      $pdf->titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno;
+      $pdf->titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_materno;
       $pdf->titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
       $pdf->AliasNbPages();
       $pdf->AddPage();

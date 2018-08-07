@@ -78,7 +78,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       $pdf->SetAligns(array('L', 'L'));
       $pdf->SetWidths(array(100, 100));
       $pdf->Row(array($empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.
-        $empleado['info'][0]->apellido_paterno, $empleado['info'][0]->nombre_fiscal), false, true, null, 2, 1);
+        $empleado['info'][0]->apellido_materno, $empleado['info'][0]->nombre_fiscal), false, true, null, 2, 1);
 
       $columnas = array(
         'n' => array('FECHA', 'FECHA INICIO PAGO', 'PRESTADO', 'PAGO X SEMANA', 'SALDO'),
@@ -277,7 +277,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       }
 
       $titulo1 = $empresa['info']->nombre_fiscal;
-      $titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno;
+      $titulo2 = $empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_materno;
       $titulo3 = "Reporte de Prestamos del {$fecha1} al {$fecha2}";
 
       $html = '<table>
@@ -411,7 +411,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
       }
 
       $html .= '<tr style="font-weight:bold">
-        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_paterno.'</td>
+        <td colspan="2" style="border:1px solid #000;background-color: #cccccc;">'.$empleado['info'][0]->nombre.' '.$empleado['info'][0]->apellido_paterno.' '.$empleado['info'][0]->apellido_materno.'</td>
         <td colspan="3" style="border:1px solid #000;background-color: #cccccc;">'.$empleado['info'][0]->nombre_fiscal.'</td>
       </tr>';
 

@@ -870,12 +870,14 @@ if($close){
    */
   public function getCuentaPagoAdicional()
   {
-    return '42200400';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'PagoAdicional'")->row();
+    return (isset($data->cuenta)? $data->cuenta : '42200400');
   }
 
   public function getCuentaPagoMenor()
   {
-    return '00800000';
+    $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'PagoMenor'")->row();
+    return (isset($data->cuenta)? $data->cuenta : '00800000');
   }
 
   public function addAbonoMasivo()

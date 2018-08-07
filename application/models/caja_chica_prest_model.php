@@ -68,7 +68,7 @@ class caja_chica_prest_model extends CI_Model {
         FROM nomina_fiscal_prestamos
         WHERE fecha = '{$fecha}'
       ) abd ON np.id_prestamo = abd.id_prestamo
-      WHERE Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
+      WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) < '{$fecha}'
       ORDER BY fecha ASC, id_prestamo_nom ASC"
     );
 
