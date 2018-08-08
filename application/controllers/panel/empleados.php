@@ -207,7 +207,7 @@ class empleados extends MY_Controller {
       $this->load->library('form_validation');
       $user = $this->usuarios_model->get_usuario_info($_GET['id'])['info'][0];
 
-      if ($this->validano_checador($user->no_checador)) {
+      if ($this->validano_checador($user->no_checador) || $user->no_checador == '') {
         if ($this->validano_empleado($user->no_empleado, $user->id_empresa))
         {
     			$this->load->model('usuarios_model');
@@ -481,7 +481,7 @@ class empleados extends MY_Controller {
 
               array('field' => 'dno_checador',
                     'label' => 'No Checador',
-                    'rules' => 'required|max_length[8]|callback_validano_checador'),
+                    'rules' => 'max_length[8]|callback_validano_checador'),
 
               array('field' => 'fdepartamente',
                     'label' => 'Departamento',
@@ -633,10 +633,11 @@ class empleados extends MY_Controller {
         $this->form_validation->set_message('validano_checador', 'Ya existe un empleado con el mismo No de Checador, '.$dt->nombre.' '.$dt->apellido_paterno);
         return false;
       }
-    }else{
-      $this->form_validation->set_message('validano_checador', 'Es requerido el No de Checador');
-      return false;
     }
+    // else {
+    //   $this->form_validation->set_message('validano_checador', 'Es requerido el No de Checador');
+    //   return false;
+    // }
     return true;
   }
 
