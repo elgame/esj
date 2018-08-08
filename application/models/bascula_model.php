@@ -239,7 +239,10 @@ class bascula_model extends CI_Model {
         }
 
         if(isset($_POST['pfecha_pago']) && $data2['accion'] === 'p')
-          $data2['fecha_pago'] = $_POST['pfecha_pago'];
+          $data2['fecha_pago'] = !empty($_POST['pfecha_pago'])? $_POST['pfecha_pago']: NULL;
+        elseif (empty($_POST['pfecha_pago']) && $data2['accion'] !== 'p' && $data2['accion'] !== 'b') {
+          $data2['fecha_pago'] = NULL;
+        }
 
       }
 
