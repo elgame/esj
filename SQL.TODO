@@ -1,5 +1,5 @@
 
- ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc|san
+ ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc|san|lap
    ALTER TABLE public.bascula ADD COLUMN fecha_imp_orig timestamp without time zone;
    ALTER TABLE public.usuarios ADD COLUMN no_checador bigint;
    CREATE INDEX usuarios_no_checador_idx ON public.usuarios USING btree (no_checador);
@@ -8,7 +8,6 @@
    ALTER TABLE public.bascula_pagos ADD CONSTRAINT bascula_pagos_usuario_creo_fkey FOREIGN KEY (usuario_creo) REFERENCES public.usuarios (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE;
    ALTER TABLE public.bascula ADD COLUMN metodo_pago character varying(10);
    COMMENT ON COLUMN public.bascula.metodo_pago IS 'co: contado, ot: otro';
-
    ALTER TABLE nomina_prestamos ADD COLUMN close boolean NOT NULL DEFAULT false;
 
  ✔ Correciones de nomina @done (18-03-26 22:10) pcc|pct|san|lap

@@ -690,21 +690,24 @@ $(function(){
 
       msb.confirm('Estas seguro de pagar la boleta?', 'Bascula', this, function($this, $obj)
       {
-        // $('#form').submit();
-        $.ajax({
-          url: base_url + 'panel/bascula/ajax_pagar_boleta/',
-          type: 'get',
-          dataType: 'json',
-          data: {idb: $('#pidb').val()},
-        })
-        .done(function() {
-          // location.reload();
-        });
+        if ((parseInt($('#pidb').val())||0) > 0) {
+          // $('#form').submit();
+          $.ajax({
+            url: base_url + 'panel/bascula/ajax_pagar_boleta/',
+            type: 'get',
+            dataType: 'json',
+            data: {idb: $('#pidb').val()},
+          })
+          .done(function() {
+            // location.reload();
+          });
+        } else {
+          $('#pstatus').trigger('click');
+        }
 
       }, function () {
         $('#pstatus').trigger('click');
       });
-
     }
 
   });

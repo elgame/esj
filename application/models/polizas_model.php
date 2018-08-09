@@ -332,6 +332,32 @@ class polizas_model extends CI_Model {
     }
     return $cuenta;
   }
+  public function getCuentaDiarioProductos($area = 2)
+  {
+    if ($area==2) $cuenta = '13000049'; //limon
+    elseif($area==7) $cuenta = '13000050'; //coco -
+    else{
+      $cuenta = '13000049';
+    }
+    if (!isset($cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'DiarioProductos'")->row();
+      $cuenta = (isset($data->cuenta)? $data->cuenta : '');
+    }
+    return $cuenta;
+  }
+  public function getCuentaDiarioProductosCosto($area = 2)
+  {
+    if ($area==2) $cuenta = '43000010'; //limon
+    elseif($area==7) $cuenta = '43000013'; //coco -
+    else{
+      $cuenta = '43000010';
+    }
+    if (!isset($cuenta)) {
+      $data = $this->db->query("SELECT * FROM cuentas_contpaq WHERE id_empresa = {$this->empresaId} AND tipo_cuenta = 'DiarioProductos'")->row();
+      $cuenta = (isset($data->cuenta)? $data->cuenta : '');
+    }
+    return $cuenta;
+  }
   public function getCuentaNSueldo($basic=true, $departamento=null){
     $sql = '';
     if ($this->empresaId==2 && $departamento == 1) $sql=" AND id_padre = 1296 AND nombre like '%SUELDOS%'"; //sanjorge
@@ -1688,8 +1714,8 @@ class polizas_model extends CI_Model {
         $sql .= " AND b.id_area = " . $_GET['ftipo22'];
     }
 
-    $cuenta_cpi1 = '13000049';
-    $cuenta_cpi2 = '43000010';
+    $cuenta_cpi1 = $this->getCuentaDiarioProductos((!empty($_GET['ftipo22'])? $_GET['ftipo22']: 2)); //'13000049';
+    $cuenta_cpi2 = $this->getCuentaDiarioProductosCosto((!empty($_GET['ftipo22'])? $_GET['ftipo22']: 2)); //'43000010';
 
     if ($this->input->get('fid_empresa') != '')
       $sql .= " AND b.id_empresa = '".$_GET['fid_empresa']."'";

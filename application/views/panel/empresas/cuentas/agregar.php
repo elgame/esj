@@ -95,6 +95,8 @@
                         <option value="NIsr" <?php echo set_select('dtipo_cuenta'); ?>>Nomina Isr</option>
                         <option value="PagoAdicional" <?php echo set_select('dtipo_cuenta'); ?>>Pago Adicional</option>
                         <option value="PagoMenor" <?php echo set_select('dtipo_cuenta'); ?>>Pago Menor</option>
+                        <option value="DiarioProductos" <?php echo set_select('dtipo_cuenta'); ?>>Diario Productos</option>
+                        <option value="DiarioProductosCosto" <?php echo set_select('dtipo_cuenta'); ?>>Diario Productos Costo</option>
                       </select>
                     </div>
                   </div>
