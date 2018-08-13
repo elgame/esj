@@ -831,5 +831,11 @@ class String{
     return $abreviacion;
   }
 
+  public static function isJson($text)
+  {
+    json_decode($text);
+    return (json_last_error() == JSON_ERROR_NONE);
+  }
+
 }
 ?>

@@ -1,4 +1,6 @@
 
+ ✔ Cambios en clasificaciones y polizas @done (18-08-13 15:34)pct
+   ALTER TABLE public.clasificaciones ALTER COLUMN cuenta_cpi2 TYPE character varying(255);
  ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc|san|lap
    ALTER TABLE public.bascula ADD COLUMN fecha_imp_orig timestamp without time zone;
    ALTER TABLE public.usuarios ADD COLUMN no_checador bigint;

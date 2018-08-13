@@ -512,9 +512,9 @@ class areas extends MY_Controller {
 			$params['areas'] = $this->areas_model->getAreas(false);
       $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
-      // echo "<pre>";
-      //   var_dump($params['data']);
-      // echo "</pre>";exit;
+      echo "<pre>";
+        var_dump($params['data'], String::isJson($params['data']['info']->cuenta_cpi2));
+      echo "</pre>";exit;
 
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
