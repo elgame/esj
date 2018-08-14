@@ -833,6 +833,7 @@ class String{
 
   public static function isJson($text)
   {
+    if ($text == '') return false;
     json_decode($text);
     return (json_last_error() == JSON_ERROR_NONE);
   }

@@ -802,7 +802,20 @@ class polizas_model extends CI_Model {
 
           if($inf_factura['info']->status == 'ca')
           {
-            $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
+            if (count($inf_factura['productos'])>0) {
+              if (String::isJson($inf_factura['productos'][0]->cuenta_cpi2)) {
+                $cuentas = json_decode($inf_factura['productos'][0]->cuenta_cpi2);
+                if (is_array($cuentas)) {
+                  foreach ($cuentas as $kkcc => $cta) {
+                    $cuenta_cpi = $inf_factura['info']->id_empresa==$cta->id? $cta->cuenta: $value->cuenta_cpi;
+                  }
+                }
+              }
+            } else {
+              $cuenta_cpi = '41040000'
+            }
+            // $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
+
             $cuenta_cpi = $cuenta_cpi==''? '41040000': $cuenta_cpi;
             $cuenta_cpi = $inf_factura['info']->id_empresa==12? '41010000' : $cuenta_cpi;
             $response['data'] .= $this->setEspacios('M',2).
@@ -836,7 +849,14 @@ class polizas_model extends CI_Model {
                   $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
                   $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
               {
-                $value->cuenta_cpi = $inf_factura['info']->id_empresa==3? $value->cuenta_cpi2: $value->cuenta_cpi;
+                if (String::isJson($value->cuenta_cpi2)) {
+                  $cuentas = json_decode($value->cuenta_cpi2);
+                  if (is_array($cuentas)) {
+                    foreach ($cuentas as $kkcc => $cta) {
+                      $value->cuenta_cpi = $inf_factura['info']->id_empresa==$cta->id? $cta->cuenta: $value->cuenta_cpi;
+                    }
+                  }
+                }
 
                 $impuestos['iva_trasladar']['importe'] += $value->iva;
                 $impuestos['iva_retenido']['importe']  += $value->retencion_iva;

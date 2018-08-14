@@ -55,6 +55,8 @@ var edit_clasificacion = (function($){
 
     autocompleteProdServ();
     autocompleteUnidad();
+    autocompleteEmpresa();
+    addCuenta();
 	}
 
 	function getCalidades(pag){
@@ -111,6 +113,79 @@ var edit_clasificacion = (function($){
       }
     });
   }
+
+  function autocompleteEmpresa() {
+    // Autocomplete Empresas
+    $("#fempresa").autocomplete({
+      source: base_url + 'panel/empresas/ajax_get_empresas/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#did_empresa").val(ui.item.id);
+        $("#fempresa").val(ui.item.label).css({'background-color': '#99FF99'});
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        $(this).css({'background-color': '#FFD9B3'});
+        $('#did_empresa').val('');
+      }
+    }).attr('autocomplete', 'nope');;
+  }
+
+  var keyCuentas = 0;
+  function addCuenta() {
+    keyCuentas = $('#listasCuentas li').length;
+
+    $('#btnAddCuenta').click(function(event) {
+      if (validaCuenta()) {
+        var html = '<li>'+ $('#fcuenta_cpi2').val() +' - '+ $('#fempresa').val() + ' <i class="icon-remove" style="cursor:pointer"></i>'+
+                        '<input type="hidden" name="fcuentas['+ keyCuentas +'][id]" value="'+ $('#did_empresa').val() +'" class="id">'+
+                        '<input type="hidden" name="fcuentas['+ keyCuentas +'][empresa]" value="'+ $('#fempresa').val() +'" class="empresa">'+
+                        '<input type="hidden" name="fcuentas['+ keyCuentas +'][cuenta]" value="'+ $('#fcuenta_cpi2').val() +'" class="cuenta">'+
+                      '</li>';
+        $('#listasCuentas ul').append(html);
+        ++keyCuentas;
+        $('#did_empresa').val('');
+        $('#fempresa').val('');
+        $('#fcuenta_cpi2').val('').focus();
+      }
+    });
+
+    $(document).on('click', '#listasCuentas .icon-remove', function(event) {
+      $(this).parent().remove();
+    });
+  }
+
+  function validaCuenta() {
+    if ($.trim($('#fcuenta_cpi2').val()) == '' || $.trim($('#did_empresa').val()) == '') {
+      alert('Ingresa los datos de la cuenta');
+      return false;
+    }
+
+    var msg = '';
+    $('#listasCuentas li').each(function(index, el) {
+      var cuenta = $(this).find('.cuenta').val();
+      var id = $(this).find('.id').val();
+      console.log('test', $(this));
+
+      if ($.trim($('#fcuenta_cpi2').val()) == cuenta) {
+        msg = 'La cuenta ya esta agregada en una empresa';
+      }
+
+      if ($.trim($('#did_empresa').val()) == id) {
+        msg += (msg.length>0? "\n": '') + 'La empresa ya tiene asignada una cuenta.';
+      }
+
+      if (msg.length > 0) return false;
+    });
+
+    if (msg.length > 0) {
+      alert(msg);
+      return false;
+    }
+
+    return true;
+  };
 
 	objr.init = init;
 	objr.page = changePage;

@@ -92,10 +92,24 @@
               </div>
 
               <div class="control-group">
-                <label class="control-label" for="fcuenta_cpi2">Cuenta contpaq 2 (Orov)</label>
+                <label class="control-label" for="fcuenta_cpi2">Cuenta contpaq 2 (Otras)</label>
                 <div class="controls">
-                  <input type="text" name="fcuenta_cpi2" id="fcuenta_cpi2" class="span6 vpositive" maxlength="11"
-                  value="<?php echo set_value('fcuenta_cpi2'); ?>" placeholder="123212, 332123">
+                  <div class="span5">
+                    <input type="text" name="fcuenta_cpi2" id="fcuenta_cpi2" class="span12 vpositive" maxlength="11"
+                    value="" placeholder="123212, 332123">
+                  </div>
+                  <div class="span5">
+                    <input type="text" name="fempresa" id="fempresa" class="span10" value="" placeholder="Empresa" autocomplete="on">
+                    <input type="hidden" name="did_empresa" value="" id="did_empresa">
+                  </div>
+                  <div class="span2">
+                    <button type="button"class="btn" id="btnAddCuenta"><i class="icon-plus"></i></button>
+                  </div>
+
+                  <div id="listasCuentas" style="margin-top: 10px;clear: both;">
+                    <ul>
+                    </ul>
+                  </div>
                 </div>
               </div>
 

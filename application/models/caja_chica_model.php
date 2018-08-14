@@ -123,7 +123,7 @@ class caja_chica_model extends CI_Model {
         "SELECT pr.id_proveedor, pr.nombre_fiscal as proveedor, Sum(b.importe) AS importe
         FROM bascula b
           INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
-          LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
+          -- LEFT JOIN cajachica_boletas cb ON cb.id_bascula = b.id_bascula
           LEFT JOIN otros.productor p ON p.id_productor = b.id_productor
           LEFT JOIN bascula_pagos_basculas bpb ON b.id_bascula = bpb.id_bascula
         WHERE DATE(b.fecha_pago) <= '{$fecha}' AND DATE(b.fecha_pago) >= '2017-01-01'
