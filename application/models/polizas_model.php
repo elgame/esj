@@ -812,7 +812,7 @@ class polizas_model extends CI_Model {
                 }
               }
             } else {
-              $cuenta_cpi = '41040000'
+              $cuenta_cpi = '41040000';
             }
             // $cuenta_cpi = $inf_factura['info']->id_empresa==3? (count($inf_factura['productos'])>0? $inf_factura['productos'][0]->cuenta_cpi2: '40001000'): '41040000';
 

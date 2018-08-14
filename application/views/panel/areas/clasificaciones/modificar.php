@@ -122,13 +122,16 @@
 
                   <div id="listasCuentas" style="margin-top: 10px;clear: both;">
                     <ul>
-                      <?php foreach ($cuentas as $key => $cuenta): ?>
-                      <li><?php echo $cuenta->cuenta.' - '.$cuenta->empresa.' <i class="icon-remove" style="cursor:pointer"></i>' ?>
-                        <input type="hidden" name="fcuentas[<?php echo $key ?>][id]" value="<?php echo $cuenta->id ?>" class="id">
-                        <input type="hidden" name="fcuentas[<?php echo $key ?>][empresa]" value="<?php echo $cuenta->empresa ?>" class="empresa">
-                        <input type="hidden" name="fcuentas[<?php echo $key ?>][cuenta]" value="<?php echo $cuenta->cuenta ?>" class="cuenta">
-                      </li>
-                      <?php endforeach ?>
+                      <?php
+                      if (is_array($cuentas)) {
+                          foreach ($cuentas as $key => $cuenta) { ?>
+                        <li><?php echo $cuenta->cuenta.' - '.$cuenta->empresa.' <i class="icon-remove" style="cursor:pointer"></i>' ?>
+                          <input type="hidden" name="fcuentas[<?php echo $key ?>][id]" value="<?php echo $cuenta->id ?>" class="id">
+                          <input type="hidden" name="fcuentas[<?php echo $key ?>][empresa]" value="<?php echo $cuenta->empresa ?>" class="empresa">
+                          <input type="hidden" name="fcuentas[<?php echo $key ?>][cuenta]" value="<?php echo $cuenta->cuenta ?>" class="cuenta">
+                        </li>
+                        <?php }
+                      } ?>
                     </ul>
                   </div>
                 </div>
