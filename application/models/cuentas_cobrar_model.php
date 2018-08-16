@@ -891,6 +891,7 @@ if($close){
     $this->load->model('banco_cuentas_model');
     $data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($this->input->post('dcuenta'));
     $data_cuenta  = $data_cuenta['info'];
+    $this->empresaId = $data_cuenta->id_empresa;
     $_GET['id']   = $ids[0];
     $_GET['tipo'] = $tipos[0];
     $inf_factura  = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($_GET['id'], $_GET['tipo'], true);
@@ -922,10 +923,10 @@ if($close){
       $_GET['tipo'] = $_POST['tipos'][$key];
       $data = array('fecha'        => $fecha_pago,
         'concepto'       => $this->input->post('dconcepto'),
-            'total'          => $_POST['montofv'][$key], //$total,
-            'id_cuenta'      => $this->input->post('dcuenta'),
-            'ref_movimiento' => $this->input->post('dreferencia'),
-            'saldar'         => $_POST['saldar'][$key] );
+        'total'          => $_POST['montofv'][$key], //$total,
+        'id_cuenta'      => $this->input->post('dcuenta'),
+        'ref_movimiento' => $this->input->post('dreferencia'),
+        'saldar'         => $_POST['saldar'][$key] );
       $resa = $this->addAbono($data, null, true);
       $total -= $resa['total'];
 
@@ -987,6 +988,7 @@ if($close){
       $this->load->model('banco_cuentas_model');
       $data_cuenta  = $this->banco_cuentas_model->getCuentaInfo($data['id_cuenta']);
       $data_cuenta  = $data_cuenta['info'];
+      $this->empresaId = $data_cuenta->id_empresa;
 
       $data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.String::formatoNumero($data['total'], 2, '', false).')';
       $resp = $this->banco_cuentas_model->addDeposito(array(
