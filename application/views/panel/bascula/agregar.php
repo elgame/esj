@@ -732,10 +732,29 @@
 
 
         <div class="row-fluid">
-          <div class="span12">
+          <div class="span8">
             <label class="" for="pobcervaciones">Descripción</label>
             <textarea name="pobcervaciones" id="pobcervaciones" class="span6" rows="5" <?php echo $disabled ?>><?php echo set_value('pobcervaciones', $this->input->post('pobcervaciones')) ?></textarea>
           </div>
+
+          <?php if ($accion === 'en' && $this->input->post('ptipo') === 'en') { ?>
+            <div class="span4">
+              <div class="control-group">
+                <label class="control-label" for="pno_lote">No. Lote</label>
+                <div class="controls">
+                  <input type="text" name="pno_lote" id="pno_lote" class="span6 vpos-int"
+                  value="<?php echo set_value('pno_lote', $this->input->post('pno_lote')); ?>" autofocus placeholder="1, 2, 40, 100">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="pchofer_es_productor">Chofer es productor </label>
+                <div class="controls">
+                  <input type="checkbox" name="pchofer_es_productor" value="t" id="pchofer_es_productor" class="" <?php echo set_checkbox('pchofer_es_productor', 't', $this->input->post('pchofer_es_productor')=='t'?true:false); ?>>
+                </div>
+              </div>
+            </div>
+          <?php } ?>
         </div>
 
         <div class="form-actions">

@@ -19,7 +19,7 @@ class mypdf_ticket extends FPDF {
 	 * @param unknown_type $unit
 	 * @param unknown_type $size
 	 */
-	function __construct($orientation='P', $unit='mm', $size=array(63, 130)){
+	function __construct($orientation='P', $unit='mm', $size=array(63, 140)){
 		parent::__construct($orientation, $unit, $size);
 		$this->limiteY = 50;
     $this->pag_size = $size;
@@ -356,9 +356,29 @@ class mypdf_ticket extends FPDF {
         $this->Row(array($data->usuario ), false, false, 4);
       }
 
+
+      $this->SetAligns(array('C'));
+      $this->SetFont($this->fount_txt, '', $this->font_size);
+      $this->SetY($this->GetY() + 5);
+      $this->Row(array('--------------------------------------------------'), false, false);
+
+      $this->SetY($this->GetY() - 3);
+      $this->SetFounts(array($this->fount_txt), array(1));
+      $this->Row(array('FIRMA CHOFER'), false, false);
+
+      $this->SetAligns(array('C'));
+      $this->SetFont($this->fount_txt, '', $this->font_size);
+      $this->SetY($this->GetY() + 5);
+      $this->Row(array('--------------------------------------------------'), false, false);
+
+      $this->SetY($this->GetY() - 3);
+      $this->SetFounts(array($this->fount_txt), array(1));
+      $this->Row(array('FIRMA RECIBIDO'), false, false);
+
+
       if (isset($data->bitacora) && count($data->bitacora) > 0) {
         $this->SetY($this->GetY()+1);
-        $this->Row(array('-------------------------------------------------------------------------'), false, false, 4);
+        $this->Row(array('---------------------------------------------------------'), false, false, 4);
         $this->SetAligns(array('C'));
         $this->SetY($this->GetY()-1);
         $this->Row(array('Cambios'), false, false, 4);
@@ -387,24 +407,6 @@ class mypdf_ticket extends FPDF {
         }
       }
 
-
-      $this->SetAligns(array('C'));
-      $this->SetFont($this->fount_txt, '', $this->font_size);
-      $this->SetY($this->GetY() + 5);
-      $this->Row(array('--------------------------------------------------'), false, false);
-
-      $this->SetY($this->GetY() - 3);
-      $this->SetFounts(array($this->fount_txt), array(1));
-      $this->Row(array('FIRMA CHOFER'), false, false);
-
-      $this->SetAligns(array('C'));
-      $this->SetFont($this->fount_txt, '', $this->font_size);
-      $this->SetY($this->GetY() + 5);
-      $this->Row(array('--------------------------------------------------'), false, false);
-
-      $this->SetY($this->GetY() - 3);
-      $this->SetFounts(array($this->fount_txt), array(1));
-      $this->Row(array('FIRMA RECIBIDO'), false, false);
     }
 
     public function printTicket($data, $data_prod, $cajas_clasf){

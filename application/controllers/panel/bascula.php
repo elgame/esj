@@ -252,6 +252,9 @@ class bascula extends MY_Controller {
         $params['idb']         = $info['info'][0]->id_bascula;
         $params['accion']      = $info['info'][0]->accion;
 
+        $_POST['pno_lote'] = $info['info'][0]->no_lote;
+        $_POST['pchofer_es_productor'] = $info['info'][0]->chofer_es_productor;
+
         if (isset($_GET['p']))
         {
           $params['ticket'] = $info['info'][0]->id_bascula;

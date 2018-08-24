@@ -1,4 +1,8 @@
 
+ ✔ Privilegios en caja chica @done (18-08-24 12:44) pcc|san
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar gastos',247,FALSE,'caja_chica/modificar_gastos/','edit',FALSE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar ingresos',247,FALSE,'caja_chica/modificar_ingresos/','edit',FALSE);
+
  ✔ Cambios en clasificaciones y polizas @done (18-08-13 15:34) pct|pcc|lap|san
    ALTER TABLE public.clasificaciones ALTER COLUMN cuenta_cpi2 TYPE character varying(1000);
  ✔ Canbios en boleta @done (18-07-27 13:41) pct|pcc|san|lap

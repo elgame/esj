@@ -1,4 +1,5 @@
 
+ ✔ En la bascula poner que capturen el lote y si se factura el productor antes de guardar la boleta @done (18-08-24 12:38)
  ✔ Agregar privilegios de modificar ingresos y gastos en cajas chicas @done (18-08-22 21:13)
  ✔ Poder agregar varios codigos a las clasificaciones y cargarlo en las polizas @done (18-08-22 21:12)
  ✔ Correccion de polizas para gubalu produce y plasticos @done (18-08-13 15:33)
@@ -21,7 +22,7 @@
 
  ✔ Bitacora de cajas chicas @done (18-06-15 21:07)
  ✔ Caja de prestamo quitar el renglon por default @done (18-05-17 13:34)
- ☐ Bascula se cierra la ventana de imprimir
+ ✔ Bascula se cierra la ventana de imprimir @done (18-08-24 12:38)
  ✔ Historial de empleados agregar fniquitos, vacaciones @done (18-05-17 16:25)
 Cuentas por cobrar en primer listado si todas están pagadas no sale el cliente si pone todas
  ✔ En asistencias el botón de imprimir no imprime las asistencias como se marcan y total de asistencias @done (18-03-15 17:19)

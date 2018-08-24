@@ -200,6 +200,9 @@ class bascula_model extends CI_Model {
         $data2['id_chofer'] = empty($_POST['pid_chofer']) ? null : $_POST['pid_chofer'];
         $data2['id_camion'] = empty($_POST['pid_camion']) ? null : $_POST['pid_camion'];
 
+        $data2['no_lote'] = empty($_POST['pno_lote']) ? null : $_POST['pno_lote'];
+        $data2['chofer_es_productor'] = empty($_POST['pchofer_es_productor']) ? 'f' : $_POST['pchofer_es_productor'];
+
         $data2['id_productor'] = empty($_POST['pid_productor']) ? null : $_POST['pid_productor'];
 
         $info_boleta = $this->getBasculaInfo($idb);
