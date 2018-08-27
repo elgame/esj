@@ -810,6 +810,8 @@ class polizas_model extends CI_Model {
                     $cuenta_cpi = $inf_factura['info']->id_empresa==$cta->id? $cta->cuenta: $value->cuenta_cpi;
                   }
                 }
+              } else {
+                $cuenta_cpi = '41040000';
               }
             } else {
               $cuenta_cpi = '41040000';
