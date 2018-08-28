@@ -123,7 +123,10 @@
                       } else {
                         $texto = 'Cancelado';
                         $label = 'Inverse';
-                        if ($fact->status_timbrado === 'p') {
+                        if ($fact->uuid == '') {
+                          $texto = 'No timbrado';
+                          $label = 'error';
+                        }elseif ($fact->status_timbrado === 'p') {
                           $texto = 'Pendiente';
                           $label = 'warning';
                         } else if ($fact->status_timbrado === 't') {
