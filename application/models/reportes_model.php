@@ -1,0 +1,366 @@
+<?php
+class reportes_model extends CI_Model {
+
+  public function getSaldoCajaIngClientes($fecha, $empresa=null)
+  {
+    $sql = ['', '', ''];
+    if ($empresa) {
+      $sql[0] = "AND cc.id_empresa = {$empresa}";
+      $sql[1] = "GROUP BY cc.id_empresa";
+    }
+    $sql[2] = " AND ci.fecha <= '{$fecha}'";
+
+    $query = $this->db->query(
+      "SELECT Sum(ci.monto) AS monto
+      FROM cajachica_ingresos ci
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = ci.id_categoria
+        INNER JOIN cajachica_nomenclaturas cn ON cn.id = ci.id_nomenclatura
+      WHERE ci.otro = 'f'
+        {$sql[0]}
+        {$sql[2]}
+      {$sql[1]}");
+    $res = $query->row();
+    return floatval($res->monto);
+  }
+
+  public function getSaldoCajaIngRemisiones($fecha, $empresa=null)
+  {
+    $sql = ['', '', ''];
+    if ($empresa) {
+      $sql[0] = "AND cc.id_empresa = {$empresa}";
+      $sql[1] = "GROUP BY cc.id_empresa";
+    }
+
+    $query = $this->db->query(
+      "SELECT Sum(cr.monto) AS monto
+      FROM cajachica_remisiones cr
+        INNER JOIN facturacion f ON f.id_factura = cr.id_remision
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cr.id_categoria
+        LEFT JOIN facturacion_ventas_remision_pivot fvr ON fvr.id_venta = f.id_factura
+      WHERE cr.fecha <= '{$fecha}'
+        {$sql[0]}
+      {$sql[1]}");
+    $res = $query->row();
+    return floatval($res->monto);
+  }
+
+  public function getSaldoCajaBascula($fecha, $empresa=null)
+  {
+    $sql = ['', '', ''];
+    if ($empresa) {
+      $sql[0] = "AND b.id_empresa = {$empresa}";
+      $sql[1] = "GROUP BY b.id_empresa";
+    }
+
+    $query = $this->db->query(
+      "SELECT Sum(b.importe) AS importe
+      FROM bascula b
+        INNER JOIN areas a ON a.id_area = b.id_area
+        INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+      WHERE a.tipo = 'fr' AND DATE(b.fecha_pago) <= '{$fecha}'
+        {$sql[0]}
+        AND (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b')) AND b.status = 't'
+      {$sql[1]}");
+    $res = $query->row();
+    return floatval($res->importe);
+  }
+
+  public function getSaldoCajaGastos($fecha, $empresa=null)
+  {
+    $sql = ['', '', ''];
+    if ($empresa) {
+      $sql[0] = "AND cc.id_empresa = {$empresa}";
+      $sql[1] = "GROUP BY cc.id_empresa";
+    }
+
+    $query = $this->db->query(
+      "SELECT Sum(cg.monto) AS monto
+      FROM cajachica_gastos cg
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cg.id_categoria
+      WHERE cg.fecha <= '{$fecha}'
+        {$sql[0]}
+      {$sql[1]}");
+    $res = $query->row();
+    return floatval($res->monto);
+  }
+
+  /**
+   * Reportes Productos Facturados.
+   *
+   * @return void
+   */
+  public function getDataBalanceGeneral()
+  {
+    $sql = '';
+    $response = array();
+
+    $fecha = $this->input->get('ffecha2')? $this->input->get('ffecha2'): date("Y-m-d");
+    $empresa = $this->input->get('did_empresa')? $this->input->get('did_empresa'): null;
+
+    // Saldo de caja
+    $caja = $this->getSaldoCajaIngClientes($fecha, $empresa) +
+            $this->getSaldoCajaIngRemisiones($fecha, $empresa) -
+            $this->getSaldoCajaBascula($fecha, $empresa) -
+            $this->getSaldoCajaGastos($fecha, $empresa);
+
+    // Saldo bancos
+
+    // Saldo clientes
+    $this->load->model('cuentas_cobrar_model');
+    $_GET['did_empresa'] = $empresa? $empresa: 'all';
+    $clientes = $this->cuentas_cobrar_model->getCuentasCobrarData(1000);
+    $clientes = $clientes['ttotal_saldo'];
+
+    // Saldo proveedores
+    $this->load->model('cuentas_pagar_model');
+    $_GET['did_empresa'] = $empresa? $empresa: 'all';
+    $proveedor = $this->cuentas_pagar_model->getCuentasPagarData(10000);
+    $proveedor = $proveedor['ttotal_saldo'];
+    echo "<pre>";
+      var_dump($proveedor);
+    echo "</pre>";exit;
+
+    return $response;
+  }
+  public function balance_general_pdf()
+  {
+    $facturas = $this->getDataBalanceGeneral();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $this->load->library('mypdf');
+    // Creación del objeto de la clase heredada
+    $pdf = new MYpdf('P', 'mm', 'Letter');
+    $pdf->show_head = true;
+
+    if ($empresa['info']->logo !== '')
+      $pdf->logo = $empresa['info']->logo;
+
+    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo2 = "Reporte Productos Facturados con Kilos";
+
+    // $pdf->titulo3 = "{$_GET['dproducto']} \n";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+    elseif (!empty($_GET['ffecha1']))
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+    elseif (!empty($_GET['ffecha2']))
+        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+
+    $pdf->AliasNbPages();
+    // $links = array('', '', '', '');
+    $pdf->SetY(30);
+    $aligns = array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R');
+    $widths = array(15, 17, 65, 20, 13, 13, 19, 18, 22);
+    $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Poliza', 'Cantidad', 'UM', 'Kgs', 'Precio', 'Importe');
+
+    $cantidad = 0;
+    $importe = 0;
+    $cantidadt = 0;
+    $kilost = 0;
+    $importet = 0;
+    $promedio = 0;
+
+    foreach($facturas as $key => $product)
+    {
+      $cantidad = 0;
+      $kilos = 0;
+      $importe = 0;
+      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
+      {
+          $pdf->AddPage();
+
+          $pdf->SetFont('Arial','B',7);
+          $pdf->SetTextColor(255,255,255);
+          $pdf->SetFillColor(160,160,160);
+          $pdf->SetX(6);
+          $pdf->SetAligns($aligns);
+          $pdf->SetWidths($widths);
+          $pdf->Row($header, true);
+      }
+      $pdf->SetFont('Arial','B',7);
+      $pdf->SetTextColor(0,0,0);
+      $pdf->SetX(6);
+      $pdf->SetAligns(array('L'));
+      $pdf->SetWidths(array(180));
+      $pdf->Row(array($product['producto']->nombre), false, false);
+
+      foreach ($product['listado'] as $key2 => $item)
+      {
+        $band_head = false;
+        if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
+        {
+            $pdf->AddPage();
+
+            $pdf->SetFont('Arial','B',7);
+            $pdf->SetTextColor(255,255,255);
+            $pdf->SetFillColor(160,160,160);
+            $pdf->SetX(6);
+            $pdf->SetAligns($aligns);
+            $pdf->SetWidths($widths);
+            $pdf->Row($header, true);
+        }
+
+        $pdf->SetFont('Arial','',7);
+        $pdf->SetTextColor(0,0,0);
+
+        $datos = array(
+          String::fechaAT($item->fecha),
+          $item->serie.'-'.$item->folio,
+          $item->cliente,
+          $item->poliza,
+          $item->cantidad,
+          $item->unidadc,
+          String::formatoNumero($item->kilos, 2, '', false),
+          String::formatoNumero($item->precio_unitario/($item->unidad_cantidad>0?$item->unidad_cantidad:1), 3, '$', false),
+          String::formatoNumero($item->importe, 2, '$', false)
+        );
+
+        $cantidad += floatval($item->cantidad);
+        $kilos    += floatval($item->kilos);
+        $importe  += floatval($item->importe);
+
+        $cantidadt += floatval($item->cantidad);
+        $kilost    += floatval($item->kilos);
+        $importet  += floatval($item->importe);
+
+        $pdf->SetX(6);
+        $pdf->SetAligns($aligns);
+        $pdf->SetWidths($widths);
+        $pdf->Row($datos, false);
+      }
+
+      $pdf->SetX(6);
+      $pdf->SetAligns($aligns);
+      $pdf->SetWidths($widths);
+
+      $pdf->SetFont('Arial','B',7);
+      $pdf->SetTextColor(255,255,255);
+      $pdf->Row(array('', '', '', '',
+          $cantidad,
+          '',
+          String::formatoNumero($kilos, 2, '', false),
+          $cantidad == 0 ? 0 : String::formatoNumero($importe/($kilos>0?$kilos:1), 2, '$', false),
+          String::formatoNumero($importe, 2, '$', false) ), true);
+    }
+
+    $pdf->SetX(6);
+    $pdf->SetAligns($aligns);
+    $pdf->SetWidths($widths);
+
+    $pdf->SetFont('Arial','B',7);
+    $pdf->SetTextColor(255,255,255);
+    $pdf->Row(array('', '', '', '',
+        $cantidadt,
+        '',
+        String::formatoNumero($kilost, 2, '', false),
+        $cantidadt == 0 ? 0 : String::formatoNumero($importet/($kilost>0?$kilost:1), 2, '$', false),
+        String::formatoNumero($importet, 2, '$', false) ), true);
+
+    $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
+  }
+
+  public function balance_general_xls()
+  {
+    header('Content-type: application/vnd.ms-excel; charset=utf-8');
+    header("Content-Disposition: attachment; filename=productos_facturados.xls");
+    header("Pragma: no-cache");
+    header("Expires: 0");
+
+    $facturas = $this->getDataRPF2();
+
+    $this->load->model('empresas_model');
+    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+
+    $titulo1 = $empresa['info']->nombre_fiscal;
+    $titulo2 = "Reporte Productos Facturados con Kilos";
+    $titulo3 = "";
+    if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha1']." al ".$_GET['ffecha2']."";
+    elseif (!empty($_GET['ffecha1']))
+        $titulo3 .= "Del ".$_GET['ffecha1'];
+    elseif (!empty($_GET['ffecha2']))
+        $titulo3 .= "Del ".$_GET['ffecha2'];
+
+    $html = '<table>
+      <tbody>
+        <tr>
+          <td colspan="6" style="font-size:18px;text-align:center;">'.$titulo1.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="font-size:14px;text-align:center;">'.$titulo2.'</td>
+        </tr>
+        <tr>
+          <td colspan="6" style="text-align:center;">'.$titulo3.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr style="font-weight:bold">
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Fecha</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Serie/Folio</td>
+          <td style="width:400px;border:1px solid #000;background-color: #cccccc;">Cliente</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Cantidad</td>
+          <td style="width:100px;border:1px solid #000;background-color: #cccccc;">Kgs</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Precio</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">Importe</td>
+        </tr>';
+    $total_importe = $total_cantidad = $total_kilos = 0;
+    $total_importet = $total_cantidadt = $total_kilost = 0;
+    foreach ($facturas as $key => $produc)
+    {
+      $total_importe = $total_cantidad = $total_kilos = 0;
+
+      $html .= '<tr>
+            <td colspan="6" style="font-size:14px;border:1px solid #000;">'.$produc['producto']->nombre.'</td>
+          </tr>';
+      foreach ($produc['listado'] as $key2 => $value)
+      {
+        $html .= '<tr>
+            <td style="width:150px;border:1px solid #000;">'.$value->fecha.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$value->serie.$value->folio.'</td>
+            <td style="width:400px;border:1px solid #000;">'.$value->cliente.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$value->cantidad.'</td>
+            <td style="width:100px;border:1px solid #000;">'.$value->kilos.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$value->precio_unitario.'</td>
+            <td style="width:150px;border:1px solid #000;">'.$value->importe.'</td>
+          </tr>';
+          $total_importe   += $value->importe;
+          $total_cantidad  += $value->cantidad;
+          $total_kilos     += $value->kilos;
+          $total_importet  += $value->importe;
+          $total_cantidadt += $value->cantidad;
+          $total_kilost    += $value->kilos;
+      }
+      $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3">TOTAL</td>
+          <td style="border:1px solid #000;">'.$total_cantidad.'</td>
+          <td style="border:1px solid #000;">'.$total_kilos.'</td>
+          <td style="border:1px solid #000;">'.($total_cantidad == 0 ? 0 : $total_importe/$total_cantidad).'</td>
+          <td style="border:1px solid #000;">'.$total_importe.'</td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>
+        <tr>
+          <td colspan="6"></td>
+        </tr>';
+    }
+
+    $html .= '
+        <tr style="font-weight:bold">
+          <td colspan="3">TOTALES</td>
+          <td style="border:1px solid #000;">'.$total_cantidadt.'</td>
+          <td style="border:1px solid #000;">'.$total_kilost.'</td>
+          <td style="border:1px solid #000;">'.($total_cantidadt == 0 ? 0 : $total_importet/$total_cantidadt).'</td>
+          <td style="border:1px solid #000;">'.$total_importet.'</td>
+        </tr>
+      </tbody>
+    </table>';
+
+    echo $html;
+  }
+
+}

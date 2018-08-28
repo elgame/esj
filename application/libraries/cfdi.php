@@ -48,8 +48,12 @@ class cfdi{
 	public function obtenNoCertificado($path_certificado_org = null)
   {
     $path_certificado_org = $path_certificado_org==null? $this->path_certificado_org: $path_certificado_org;
-    $datos_cer            = file_get_contents($path_certificado_org);
-    $num_certificado      = substr($datos_cer, 15, 20);
+
+    $num_certificado = '';
+    if (file_exists($path_certificado_org)) {
+      $datos_cer            = file_get_contents($path_certificado_org);
+      $num_certificado      = substr($datos_cer, 15, 20);
+    }
 
 		return $num_certificado;
 	}
