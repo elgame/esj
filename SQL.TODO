@@ -1,5 +1,10 @@
 
- ✔ Privilegios en caja chica @done (18-08-24 12:44) pcc|san
+ ✔ Balance general @done (18-08-28 12:59) pct|pcc
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
+    ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
+    COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
+ ✔ Privilegios en caja chica @done (18-08-24 12:44) pcc|san|pct
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar gastos',247,FALSE,'caja_chica/modificar_gastos/','edit',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar ingresos',247,FALSE,'caja_chica/modificar_ingresos/','edit',FALSE);
 

@@ -57,6 +57,7 @@ class reportes_model extends CI_Model {
       FROM bascula b
         INNER JOIN areas a ON a.id_area = b.id_area
         INNER JOIN proveedores pr ON pr.id_proveedor = b.id_proveedor
+        INNER JOIN cajachica_boletas cb ON (cb.id_bascula = b.id_bascula AND cb.fecha = Date(b.fecha_pago))
       WHERE a.tipo = 'fr' AND DATE(b.fecha_pago) <= '{$fecha}'
         {$sql[0]}
         AND (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b')) AND b.status = 't'
@@ -104,6 +105,11 @@ class reportes_model extends CI_Model {
             $this->getSaldoCajaGastos($fecha, $empresa);
 
     // Saldo bancos
+    $this->load->model('banco_cuentas_model');
+    $_GET['did_empresa'] = $empresa? $empresa: 'all';
+    $_GET['contable'] = 't';
+    $bancos = $this->banco_cuentas_model->getSaldosCuentasData();
+    $bancos = $bancos['total_saldos'];
 
     // Saldo clientes
     $this->load->model('cuentas_cobrar_model');
@@ -116,9 +122,6 @@ class reportes_model extends CI_Model {
     $_GET['did_empresa'] = $empresa? $empresa: 'all';
     $proveedor = $this->cuentas_pagar_model->getCuentasPagarData(10000);
     $proveedor = $proveedor['ttotal_saldo'];
-    echo "<pre>";
-      var_dump($proveedor);
-    echo "</pre>";exit;
 
     return $response;
   }

@@ -26,11 +26,14 @@ class banco_cuentas_model extends banco_model {
 		if(isset($_GET['fid_banco']{0}))
 			$sql .= " AND bb.id_banco = {$this->input->get('fid_banco')}";
 
+    if(isset($_GET['contable']{0}))
+      $sql .= " AND bc.contable = 't'";
+
 		$this->load->model('empresas_model');
 		$empresa = $this->empresas_model->getDefaultEmpresa();
 		if(isset($_GET['did_empresa']{0}))
-			$sql .= " AND e.id_empresa = {$this->input->get('did_empresa')}";
-		else
+			$sql .= $_GET['did_empresa']!='all'? " AND e.id_empresa = {$this->input->get('did_empresa')}": '';
+    else
 			$sql .= " AND e.id_empresa = {$empresa->id_empresa}";
 
 		$res = $this->db->query(

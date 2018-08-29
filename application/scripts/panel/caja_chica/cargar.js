@@ -3,6 +3,7 @@
 })(function ($, window) {
   $(function () {
 
+    submitForm();
     btnAddIngreso();
     // btnAddMovimientos();
     btnDelIngreso();
@@ -47,6 +48,14 @@
       });
     }
   });
+
+  var submitForm = function () {
+    $('#frmcajachica').submit(function(event) {
+      if ($('#btnGuardar').length == 0) {
+        event.preventDefault();
+      }
+    });
+  }
 
   var btnAddIngreso = function () {
     $('#btn-add-ingreso').on('click', function(event) {

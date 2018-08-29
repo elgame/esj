@@ -50,8 +50,8 @@
         {
           $readonly = 'readonly';
           $display = 'display: none;';
-          $show = false;
           $action = '';
+          $show = false;
         }
       ?>
 
@@ -83,11 +83,15 @@
                 <div class="row-fluid">
                   <input type="hidden" name="fno_caja" value="<?php echo $_GET['fno_caja']; ?>">
 
-                  <?php if ($show){ ?>
-                    <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
+                  <?php if ($cajas_cerradas) { ?>
+                    <div>Para modificar la caja no tiene que haber días cerrados mayores a esta fecha</div>
                   <?php } ?>
 
-                  <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
+                  <?php if ($show && !$cajas_cerradas){ ?>
+                    <div class="span4"><input type="submit" id="btnGuardar" class="btn btn-success btn-large span12" value="Guardar"></div>
+                  <?php } ?>
+
+                  <?php if (isset($caja['status']) && $caja['status'] === 't' && !$cajas_cerradas){ ?>
                     <div class="span4"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
                   <?php } ?>
 
@@ -586,11 +590,11 @@
                         </table>
 
                         <div class="span12" style="margin-left: 0;"> <br>
-                          <?php if ($show){ ?>
+                          <?php if ($show && !$cajas_cerradas){ ?>
                             <div class="span5"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
                           <?php } ?>
 
-                          <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
+                          <?php if (isset($caja['status']) && $caja['status'] === 't' && !$cajas_cerradas){ ?>
                             <div class="span5"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
                           <?php } ?>
 

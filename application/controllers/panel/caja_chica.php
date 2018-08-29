@@ -160,7 +160,12 @@ class caja_chica extends MY_Controller {
     $fecha = isset($_GET['ffecha']) ? $_GET['ffecha'] : date('Y-m-d');
     $_GET['ffecha'] = $fecha;
 
-    $params['caja'] = $this->caja_chica_model->get($fecha, (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1') );
+    $no_caja = (isset($_GET['fno_caja'])? $_GET['fno_caja']: '1');
+    $params['caja'] = $this->caja_chica_model->get($fecha, $no_caja );
+
+    $cerrados = $this->db->query("SELECT Count(id_efectivo) AS num FROM cajachica_efectivo
+      WHERE fecha > '{$fecha}' AND no_caja = {$no_caja} AND status = 'f'")->row();
+    $params['cajas_cerradas'] = $cerrados->num > 0? true: false;
 
     $params['areas'] = $this->compras_areas_model->getTipoAreas();
 
