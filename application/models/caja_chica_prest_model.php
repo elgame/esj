@@ -2,6 +2,92 @@
 
 class caja_chica_prest_model extends CI_Model {
 
+  public function get_saldos($fecha, $noCaja)
+  {
+    $info = array(
+      'fondos_caja'     => 0,
+      'prestamos_lp_fi' => 0,
+      'prestamos_lp_ef' => 0,
+      'prestamos_cp'    => 0,
+      'saldo_caja'      => 0,
+    );
+
+    $fondos_caja = $this->db->query(
+      "SELECT tipo_movimiento, Sum(monto) AS monto
+      FROM otros.cajaprestamo_fondo
+      WHERE fecha <= '{$fecha}' AND no_caja = {$noCaja}
+      GROUP BY tipo_movimiento"
+    );
+
+    if ($fondos_caja->num_rows() > 0)
+    {
+      foreach ($fondos_caja->result() as $key => $value) {
+        if ($value->tipo_movimiento == 't') {
+          $info['fondos_caja'] += $value->monto;
+        } else {
+          $info['fondos_caja'] -= $value->monto;
+        }
+      }
+    }
+
+    // Prestamos a largo plazo
+    $prestamos = $this->db->query(
+      "SELECT np.tipo,
+        Sum(np.prestado) AS monto,
+        Sum(np.prestado-COALESCE(pai.saldo_ini, 0)) AS saldo_ini
+      FROM nomina_prestamos np
+      INNER JOIN usuarios u ON u.id = np.id_usuario
+      INNER JOIN empresas e ON e.id_empresa = u.id_empresa
+      LEFT JOIN cajachica_categorias cc ON cc.id_empresa = e.id_empresa AND cc.status = 't'
+      LEFT JOIN (
+        SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+        FROM nomina_fiscal_prestamos nfp
+          INNER JOIN nomina_prestamos np ON np.id_prestamo = nfp.id_prestamo
+        WHERE nfp.fecha <= '{$fecha}'
+        GROUP BY np.id_prestamo
+      ) pai ON np.id_prestamo = pai.id_prestamo
+      WHERE np.close = 'f' AND Date(np.fecha) >= '2016-02-11' AND Date(np.fecha) <= '{$fecha}'
+      GROUP BY np.tipo"
+    );
+
+    if ($prestamos->num_rows() > 0)
+    {
+      foreach ($prestamos->result() as $key => $value) {
+        if ($value->tipo == 'fi') {
+          $info['prestamos_lp_fi'] += $value->saldo_ini;
+        } else {
+          $info['prestamos_lp_ef'] += $value->saldo_ini;
+        }
+      }
+    }
+
+    // Prestamo a corto plazo
+    $prestamos = $this->db->query(
+      "SELECT Sum(cp.monto-COALESCE(pai.saldo_ini, 0)) AS saldo_ini
+      FROM otros.cajaprestamo_prestamos cp
+        INNER JOIN usuarios u ON u.id = cp.id_empleado
+        INNER JOIN cajachica_categorias cc ON cc.id_categoria = cp.id_categoria AND cc.status = 't'
+        LEFT JOIN (
+          SELECT np.id_prestamo, Sum(nfp.monto) AS saldo_ini, Count(*) AS no_pagos
+          FROM otros.cajaprestamo_pagos nfp
+            INNER JOIN otros.cajaprestamo_prestamos np ON np.id_prestamo = nfp.id_prestamo_caja
+          WHERE nfp.fecha <= '{$fecha}'
+          GROUP BY np.id_prestamo
+        ) pai ON cp.id_prestamo = pai.id_prestamo
+      WHERE cp.fecha <= '{$fecha}' AND cp.no_caja = {$noCaja}
+        AND (cp.monto-COALESCE(pai.saldo_ini, 0)) > 0"
+    );
+
+    if ($prestamos->num_rows() > 0)
+    {
+      $info['prestamos_cp'] = $prestamos->row()->saldo_ini;
+    }
+
+    $info['saldo_caja'] = $info['fondos_caja']-$info['prestamos_lp_ef']-$info['prestamos_cp'];
+
+    return $info;
+  }
+
   public function get($fecha, $noCaja)
   {
     $info = array(

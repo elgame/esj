@@ -9,3 +9,4 @@
 [27-Aug-2018 22:19:40 America/Mexico_City] PHP Fatal error:  Call to a member function get() on null in /home/elgame/www/sanjorge/application/models/reportes_model.php on line 97
 [27-Aug-2018 22:19:40 America/Mexico_City] PHP Fatal error:  Call to a member function get() on null in /home/elgame/www/sanjorge/application/models/reportes_model.php on line 97
 [27-Aug-2018 22:19:40 America/Mexico_City] PHP Fatal error:  Call to a member function get() on null in /home/elgame/www/sanjorge/application/models/reportes_model.php on line 97
+[29-Aug-2018 19:32:29 America/Mexico_City] PHP Fatal error:  Cannot redeclare caja_chica_prest_model::get() in /home/elgame/www/sanjorge/application/models/caja_chica_prest_model.php on line 342

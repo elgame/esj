@@ -99,7 +99,7 @@ class reportes_model extends CI_Model {
     $empresa = $this->input->get('did_empresa')? $this->input->get('did_empresa'): null;
 
     // Saldo de caja
-    $caja = $this->getSaldoCajaIngClientes($fecha, $empresa) +
+    $response['caja'] = $this->getSaldoCajaIngClientes($fecha, $empresa) +
             $this->getSaldoCajaIngRemisiones($fecha, $empresa) -
             $this->getSaldoCajaBascula($fecha, $empresa) -
             $this->getSaldoCajaGastos($fecha, $empresa);
@@ -109,25 +109,31 @@ class reportes_model extends CI_Model {
     $_GET['did_empresa'] = $empresa? $empresa: 'all';
     $_GET['contable'] = 't';
     $bancos = $this->banco_cuentas_model->getSaldosCuentasData();
-    $bancos = $bancos['total_saldos'];
+    $response['bancos'] = $bancos['total_saldos'];
 
     // Saldo clientes
     $this->load->model('cuentas_cobrar_model');
     $_GET['did_empresa'] = $empresa? $empresa: 'all';
     $clientes = $this->cuentas_cobrar_model->getCuentasCobrarData(1000);
-    $clientes = $clientes['ttotal_saldo'];
+    $response['clientes'] = $clientes['ttotal_saldo'];
 
     // Saldo proveedores
     $this->load->model('cuentas_pagar_model');
     $_GET['did_empresa'] = $empresa? $empresa: 'all';
     $proveedor = $this->cuentas_pagar_model->getCuentasPagarData(10000);
-    $proveedor = $proveedor['ttotal_saldo'];
+    $response['proveedores'] = $proveedor['ttotal_saldo'];
+
+    // Deudores diversos / saldo caja prestamo
+    $this->load->model('caja_chica_prest_model');
+    $prestamos = $this->caja_chica_prest_model->get_saldos($fecha, '1' );
+    $response['deudores_diversos'] = $prestamos['prestamos_lp_fi']+$prestamos['prestamos_lp_ef']+$prestamos['prestamos_cp'];
+    $response['caja_prestamos'] = $prestamos['saldo_caja'];
 
     return $response;
   }
   public function balance_general_pdf()
   {
-    $facturas = $this->getDataBalanceGeneral();
+    $datos = $this->getDataBalanceGeneral();
 
     $this->load->model('empresas_model');
     $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
@@ -141,7 +147,7 @@ class reportes_model extends CI_Model {
       $pdf->logo = $empresa['info']->logo;
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
-    $pdf->titulo2 = "Reporte Productos Facturados con Kilos";
+    $pdf->titulo2 = "Balance General";
 
     // $pdf->titulo3 = "{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
@@ -152,116 +158,31 @@ class reportes_model extends CI_Model {
         $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
+    $pdf->AddPage();
     // $links = array('', '', '', '');
     $pdf->SetY(30);
-    $aligns = array('C', 'C', 'L', 'L', 'L', 'R', 'R', 'R', 'R');
-    $widths = array(15, 17, 65, 20, 13, 13, 19, 18, 22);
-    $header = array('Fecha', 'Serie/Folio', 'Cliente', 'Poliza', 'Cantidad', 'UM', 'Kgs', 'Precio', 'Importe');
+    $aligns = array('L', 'R');
+    $widths = array(50, 30);
 
-    $cantidad = 0;
-    $importe = 0;
-    $cantidadt = 0;
-    $kilost = 0;
-    $importet = 0;
-    $promedio = 0;
+    $pdf->SetFont('Arial','',7);
+    $pdf->SetTextColor(0,0,0);
 
-    foreach($facturas as $key => $product)
-    {
-      $cantidad = 0;
-      $kilos = 0;
-      $importe = 0;
-      if($pdf->GetY() >= $pdf->limiteY || $key==0) //salta de pagina si exede el max
-      {
-          $pdf->AddPage();
-
-          $pdf->SetFont('Arial','B',7);
-          $pdf->SetTextColor(255,255,255);
-          $pdf->SetFillColor(160,160,160);
-          $pdf->SetX(6);
-          $pdf->SetAligns($aligns);
-          $pdf->SetWidths($widths);
-          $pdf->Row($header, true);
-      }
-      $pdf->SetFont('Arial','B',7);
-      $pdf->SetTextColor(0,0,0);
-      $pdf->SetX(6);
-      $pdf->SetAligns(array('L'));
-      $pdf->SetWidths(array(180));
-      $pdf->Row(array($product['producto']->nombre), false, false);
-
-      foreach ($product['listado'] as $key2 => $item)
-      {
-        $band_head = false;
-        if($pdf->GetY() >= $pdf->limiteY) //salta de pagina si exede el max
-        {
-            $pdf->AddPage();
-
-            $pdf->SetFont('Arial','B',7);
-            $pdf->SetTextColor(255,255,255);
-            $pdf->SetFillColor(160,160,160);
-            $pdf->SetX(6);
-            $pdf->SetAligns($aligns);
-            $pdf->SetWidths($widths);
-            $pdf->Row($header, true);
-        }
-
-        $pdf->SetFont('Arial','',7);
-        $pdf->SetTextColor(0,0,0);
-
-        $datos = array(
-          String::fechaAT($item->fecha),
-          $item->serie.'-'.$item->folio,
-          $item->cliente,
-          $item->poliza,
-          $item->cantidad,
-          $item->unidadc,
-          String::formatoNumero($item->kilos, 2, '', false),
-          String::formatoNumero($item->precio_unitario/($item->unidad_cantidad>0?$item->unidad_cantidad:1), 3, '$', false),
-          String::formatoNumero($item->importe, 2, '$', false)
-        );
-
-        $cantidad += floatval($item->cantidad);
-        $kilos    += floatval($item->kilos);
-        $importe  += floatval($item->importe);
-
-        $cantidadt += floatval($item->cantidad);
-        $kilost    += floatval($item->kilos);
-        $importet  += floatval($item->importe);
-
-        $pdf->SetX(6);
-        $pdf->SetAligns($aligns);
-        $pdf->SetWidths($widths);
-        $pdf->Row($datos, false);
-      }
-
-      $pdf->SetX(6);
-      $pdf->SetAligns($aligns);
-      $pdf->SetWidths($widths);
-
-      $pdf->SetFont('Arial','B',7);
-      $pdf->SetTextColor(255,255,255);
-      $pdf->Row(array('', '', '', '',
-          $cantidad,
-          '',
-          String::formatoNumero($kilos, 2, '', false),
-          $cantidad == 0 ? 0 : String::formatoNumero($importe/($kilos>0?$kilos:1), 2, '$', false),
-          String::formatoNumero($importe, 2, '$', false) ), true);
-    }
-
-    $pdf->SetX(6);
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
+    $pdf->SetX(6);
+    $pdf->Row(['Caja', String::formatoNumero($datos['caja'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Bancos', String::formatoNumero($datos['bancos'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Clientes', String::formatoNumero($datos['clientes'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Proveedores', String::formatoNumero($datos['proveedores'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Deudores Diversos', String::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Caja prestamos', String::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
 
-    $pdf->SetFont('Arial','B',7);
-    $pdf->SetTextColor(255,255,255);
-    $pdf->Row(array('', '', '', '',
-        $cantidadt,
-        '',
-        String::formatoNumero($kilost, 2, '', false),
-        $cantidadt == 0 ? 0 : String::formatoNumero($importet/($kilost>0?$kilost:1), 2, '$', false),
-        String::formatoNumero($importet, 2, '$', false) ), true);
-
-    $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
+    $pdf->Output('balance.pdf', 'I');
   }
 
   public function balance_general_xls()
