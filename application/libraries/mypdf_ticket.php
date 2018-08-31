@@ -377,6 +377,7 @@ class mypdf_ticket extends FPDF {
 
 
       if (isset($data->bitacora) && count($data->bitacora) > 0) {
+        $this->AddPage();
         $this->SetY($this->GetY()+1);
         $this->Row(array('---------------------------------------------------------'), false, false, 4);
         $this->SetAligns(array('C'));
