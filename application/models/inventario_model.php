@@ -1418,6 +1418,52 @@ class inventario_model extends privilegios_model{
     echo $html;
 	}
 
+  public function getCostoInventario($fecha)
+  {
+    $sql_com = $sql_sal = $sql = '';
+
+    //Filtros para buscar
+    if($this->input->get('did_empresa') != '') {
+      $sql .= " AND p.id_empresa = '".$this->input->get('did_empresa')."'";
+    }
+
+    if ($this->input->get('did_empresa') == 3) { // gomez gudiño
+      $sql_com .= " AND Date(cp.fecha_aceptacion) > '2015-04-30'";
+      $sql_sal .= " AND Date(sa.fecha_registro) > '2015-04-30'";
+    }
+
+    $res = $this->db->query(
+      "SELECT Sum((COALESCE(co.cantidad, 0) - COALESCE(sa.cantidad, 0)) * p.precio_promedio) AS costo
+      FROM productos AS p
+      INNER JOIN productos_familias AS pf ON pf.id_familia = p.id_familia
+      LEFT JOIN
+      (
+        SELECT cp.id_producto, Sum(cp.cantidad) AS cantidad
+        FROM compras_ordenes AS co
+        INNER JOIN compras_productos AS cp ON cp.id_orden = co.id_orden
+        WHERE co.status <> 'ca' AND co.tipo_orden in('p', 't') AND cp.status = 'a'
+          AND Date(cp.fecha_aceptacion) <= '{$fecha}'
+          {$sql_com}
+        GROUP BY cp.id_producto
+      ) AS co ON co.id_producto = p.id_producto
+      LEFT JOIN
+      (
+        SELECT sp.id_producto, Sum(sp.cantidad) AS cantidad
+        FROM compras_salidas AS sa
+        INNER JOIN compras_salidas_productos AS sp ON sp.id_salida = sa.id_salida
+        WHERE sa.status <> 'ca' AND sp.tipo_orden = 'p'
+          AND Date(sa.fecha_registro) <= '{$fecha}'
+          {$sql_sal}
+        GROUP BY sp.id_producto
+      ) AS sa ON sa.id_producto = p.id_producto
+      WHERE p.status='ac' AND pf.status='ac' AND pf.tipo = 'p' {$sql}
+      ");
+
+    $response = $res->row();
+
+    return $response;
+  }
+
 
   /**
    * Reporte costos ueps

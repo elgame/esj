@@ -41,7 +41,7 @@ class reportes_model extends CI_Model {
         {$sql[0]}
       {$sql[1]}");
     $res = $query->row();
-    return floatval($res->monto);
+    return floatval((isset($res->monto)? $res->monto: 0));
   }
 
   public function getSaldoCajaBascula($fecha, $empresa=null)
@@ -63,7 +63,7 @@ class reportes_model extends CI_Model {
         AND (b.accion = 'p' OR (b.metodo_pago = 'co' AND b.accion <> 'b')) AND b.status = 't'
       {$sql[1]}");
     $res = $query->row();
-    return floatval($res->importe);
+    return floatval((isset($res->importe)? $res->importe: 0));
   }
 
   public function getSaldoCajaGastos($fecha, $empresa=null)
@@ -82,7 +82,23 @@ class reportes_model extends CI_Model {
         {$sql[0]}
       {$sql[1]}");
     $res = $query->row();
-    return floatval($res->monto);
+    return floatval((isset($res->monto)? $res->monto: 0));
+  }
+
+  public function getSaldoCaja($fecha)
+  {
+    $query = $this->db->query(
+      "SELECT DISTINCT ON (no_caja) no_caja, saldo, fecha
+      FROM cajachica_efectivo
+      WHERE fecha <= '{$fecha}'
+      ORDER BY no_caja ASC, fecha DESC");
+    $saldo = 0;
+    if ($query->num_rows() > 0) {
+      foreach ($query->result() as $key => $value) {
+        $saldo += $value->saldo;
+      }
+    }
+    return floatval($saldo);
   }
 
   /**
@@ -103,6 +119,7 @@ class reportes_model extends CI_Model {
             $this->getSaldoCajaIngRemisiones($fecha, $empresa) -
             $this->getSaldoCajaBascula($fecha, $empresa) -
             $this->getSaldoCajaGastos($fecha, $empresa);
+    $response['caja2'] = $this->getSaldoCaja($fecha);
 
     // Saldo bancos
     $this->load->model('banco_cuentas_model');
@@ -129,6 +146,12 @@ class reportes_model extends CI_Model {
     $response['deudores_diversos'] = $prestamos['prestamos_lp_fi']+$prestamos['prestamos_lp_ef']+$prestamos['prestamos_cp'];
     $response['caja_prestamos'] = $prestamos['saldo_caja'];
 
+    // Almacén
+    $this->load->model('inventario_model');
+    $_GET['did_empresa'] = $empresa;
+    $response['almacen'] = $this->inventario_model->getCostoInventario($fecha);
+    $response['almacen'] = $response['almacen']->costo;
+
     return $response;
   }
   public function balance_general_pdf()
@@ -136,17 +159,18 @@ class reportes_model extends CI_Model {
     $datos = $this->getDataBalanceGeneral();
 
     $this->load->model('empresas_model');
-    $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
+    if ($this->input->get('did_empresa'))
+      $empresa = $this->empresas_model->getInfoEmpresa($this->input->get('did_empresa'));
 
     $this->load->library('mypdf');
     // Creación del objeto de la clase heredada
     $pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->show_head = true;
 
-    if ($empresa['info']->logo !== '')
+    if (isset($empresa) && $empresa['info']->logo !== '')
       $pdf->logo = $empresa['info']->logo;
 
-    $pdf->titulo1 = $empresa['info']->nombre_fiscal;
+    $pdf->titulo1 = isset($empresa)? $empresa['info']->nombre_fiscal: '';
     $pdf->titulo2 = "Balance General";
 
     // $pdf->titulo3 = "{$_GET['dproducto']} \n";
@@ -172,6 +196,8 @@ class reportes_model extends CI_Model {
     $pdf->SetX(6);
     $pdf->Row(['Caja', String::formatoNumero($datos['caja'], 2, '', false)], false);
     $pdf->SetX(6);
+    $pdf->Row(['Caja 2', String::formatoNumero($datos['caja2'], 2, '', false)], false);
+    $pdf->SetX(6);
     $pdf->Row(['Bancos', String::formatoNumero($datos['bancos'], 2, '', false)], false);
     $pdf->SetX(6);
     $pdf->Row(['Clientes', String::formatoNumero($datos['clientes'], 2, '', false)], false);
@@ -181,6 +207,8 @@ class reportes_model extends CI_Model {
     $pdf->Row(['Deudores Diversos', String::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
     $pdf->SetX(6);
     $pdf->Row(['Caja prestamos', String::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
+    $pdf->SetX(6);
+    $pdf->Row(['Almacén', String::formatoNumero($datos['almacen'], 2, '', false)], false);
 
     $pdf->Output('balance.pdf', 'I');
   }

@@ -1,13 +1,17 @@
-SELECT p.id_producto, p.nombre, Round(pc.costo::decimal, 2)
-FROM productos p
-  INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
-  INNER JOIN (
-    SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
-    FROM compras_productos
-    WHERE id_producto > 0 AND status = 'a' AND id_compra IS NOT NULL
-    GROUP BY id_producto
-  ) pc ON p.id_producto = pc.id_producto
-WHERE pf.tipo = 'p' AND p.status = 'ac'
+UPDATE productos SET precio_promedio = t.costo
+FROM (
+  SELECT p.id_producto, p.nombre, Round(pc.costo::decimal, 2) AS costo
+  FROM productos p
+    INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+    INNER JOIN (
+      SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
+      FROM compras_productos
+      WHERE id_producto > 0 AND status = 'a' AND id_compra IS NOT NULL
+      GROUP BY id_producto
+    ) pc ON p.id_producto = pc.id_producto
+  WHERE pf.tipo = 'p' AND p.status = 'ac'
+) t
+WHERE productos.id_producto = t.id_producto
 
 
 
