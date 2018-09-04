@@ -312,6 +312,7 @@ class compras_ordenes_model extends CI_Model {
 
       $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
               WHERE id_orden = {$idOrden}")->result();
+      $idsProductos = array();
       $productos = array();
       foreach ($_POST['concepto'] as $key => $concepto)
       {
@@ -333,6 +334,8 @@ class compras_ordenes_model extends CI_Model {
           if($_POST['prodIdOrden'][$key] == $ord->id_orden && $_POST['prodIdNumRow'][$key] == $ord->num_row)
             $prod_id_compra = $ord->id_compra;
         }
+
+        $statusp = ((isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1') || $status === 'a' ? 'a' : 'p');
         $productos[] = array(
           'id_orden'             => $idOrden,
           'num_row'              => $key,
@@ -349,7 +352,7 @@ class compras_ordenes_model extends CI_Model {
           'porcentaje_retencion' => $_POST['ret_iva'][$key],
           'faltantes'            => $_POST['faltantes'][$key] === '' ? '0' : $_POST['faltantes'][$key],
           'observacion'          => $_POST['observacion'][$key],
-          'status'               => (isset($_POST['isProdOk'][$key]) && $_POST['isProdOk'][$key] === '1') || $status === 'a' ? 'a' : 'p',
+          'status'               => $statusp,
           'ieps'                 => is_numeric($_POST['iepsTotal'][$key]) ? $_POST['iepsTotal'][$key] : 0,
           'porcentaje_ieps'      => is_numeric($_POST['iepsPorcent'][$key]) ? $_POST['iepsPorcent'][$key] : 0,
           'tipo_cambio'          => is_numeric($_POST['tipo_cambio'][$key]) ? $_POST['tipo_cambio'][$key] : 0,
@@ -359,6 +362,12 @@ class compras_ordenes_model extends CI_Model {
           'retencion_isr'        => $_POST['ret_isrTotal'][$key],
           'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
         );
+
+        if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
+          if (!isset($idsProductos[$_POST['productoId'][$key]])) {
+            $idsProductos[$_POST['productoId'][$key]] = $_POST['productoId'][$key];
+          }
+        }
       }
 
       // Bitacora
@@ -369,6 +378,12 @@ class compras_ordenes_model extends CI_Model {
 
       $this->db->delete('compras_productos', array('id_orden' => $idOrden));
       $this->db->insert_batch('compras_productos', $productos);
+
+      // Calcula costo promedio
+      $ids = array_values($idsProductos);
+      if (count($ids) > 0) {
+        $query = $this->db->query("");
+      }
 
       //envia el email al momento de autorizar la orden
       if(isset($data['autorizado']))
