@@ -379,11 +379,8 @@ class compras_ordenes_model extends CI_Model {
       $this->db->delete('compras_productos', array('id_orden' => $idOrden));
       $this->db->insert_batch('compras_productos', $productos);
 
-      // Calcula costo promedio
-      $ids = array_values($idsProductos);
-      if (count($ids) > 0) {
-        $query = $this->db->query("");
-      }
+      // Calcula costo promedio de los productos aceptados
+      $this->calculaCostoPromedio($idsProductos);
 
       //envia el email al momento de autorizar la orden
       if(isset($data['autorizado']))
@@ -392,6 +389,27 @@ class compras_ordenes_model extends CI_Model {
     }
 
     return array('passes' => true, 'msg' => 7);
+  }
+
+  public function calculaCostoPromedio($idsProductos)
+  {
+    $ids = array_values($idsProductos);
+    if (count($ids) > 0) {
+      $query = $this->db->query("UPDATE productos SET precio_promedio = t.costo
+        FROM (
+          SELECT p.id_producto, p.nombre, Round(pc.costo::decimal, 2) AS costo
+          FROM productos p
+            INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+            INNER JOIN (
+              SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
+              FROM compras_productos
+              WHERE id_producto > 0 AND status = 'a' AND id_producto IN(".explode(',', $ids).")
+              GROUP BY id_producto
+            ) pc ON p.id_producto = pc.id_producto
+          WHERE pf.tipo = 'p' AND p.status = 'ac'
+        ) t
+        WHERE productos.id_producto = t.id_producto");
+    }
   }
 
   public function actualizaVehiculo($idOrden)

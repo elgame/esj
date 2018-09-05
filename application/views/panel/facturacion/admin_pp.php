@@ -40,9 +40,9 @@
                 <input type="text" name="dobserv" class="input-large search-query" id="dobserv" value="<?php echo set_value_get('dobserv'); ?>" size="73">
                 <br>
                 <label for="ffecha1" style="margin-top: 15px;">Fecha del</label>
-                <input type="datetime-local" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date("Y-m-01\TH:i")); ?>" size="10">
+                <input type="date" name="ffecha1" class="input-xlarge search-query" id="ffecha1" value="<?php echo set_value_get('ffecha1', date("Y-m-01")); ?>" size="10">
                 <label for="ffecha2">Al</label>
-                <input type="datetime-local" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
+                <input type="date" name="ffecha2" class="input-xlarge search-query" id="ffecha2" value="<?php echo set_value_get('ffecha2', $fecha); ?>" size="10">
 
                 <label for="fstatus">Estado</label>
                 <select name="fstatus" class="input-medium" id="fstatus">

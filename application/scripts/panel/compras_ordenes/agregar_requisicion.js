@@ -962,7 +962,7 @@
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
                   '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario2[]" value="'+producto.precio_unitario+'" id="valorUnitario2" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<input type="text" name="valorUnitario2[]" value="" id="valorUnitario2" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
                     '<span>'+util.darFormatoNum('0')+'</span>' +
@@ -975,7 +975,7 @@
                   '</td>' +
                   ($autorizar_active? '<td style="width: 10px;"></td>': '')+
                   '<td style="width: 90px;">' +
-                    '<input type="text" name="valorUnitario3[]" value="'+producto.precio_unitario+'" id="valorUnitario3" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
+                    '<input type="text" name="valorUnitario3[]" value="" id="valorUnitario3" class="span12 provvalorUnitario vpositive jump'+jumpIndex+'" data-next="jump'+(++jumpIndex)+'">' +
                   '</td>' +
                   '<td>' +
                     '<span>'+util.darFormatoNum('0')+'</span>' +
