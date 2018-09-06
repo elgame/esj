@@ -1701,7 +1701,10 @@
   <div id="modal-remisiones" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-      <h3 id="myModalLabel">Remisiones</h3>
+      <h3 id="myModalLabel">Remisiones
+        <input type="text" id="empresarem" placeholder="Empresas">
+        <input type="hidden" id="idempresarem">
+      </h3>
     </div>
     <div class="modal-body">
       <div class="row-fluid">

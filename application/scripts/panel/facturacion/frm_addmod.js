@@ -127,6 +127,7 @@ $(function(){
   autocompleteClasifi();
   autocompleteClasifiLive();
   autocompleteClaveUnidadLive();
+  autocompleteEmpresaRemisionesLive();
 
   if ($('#did_empresa').val() !== '') {
     loadSerieFolio($('#did_empresa').val());
@@ -417,29 +418,15 @@ $(function(){
   // Boton Ventas de Remision.
   $('#show-remisiones').on('click', function(event) {
     var $this = $(this); // boton
-    var dataa = {'empresaId': $('#did_empresa').val()};
-    $.get(base_url + 'panel/facturacion/getRemisiones', dataa, function(remisiones) {
-      var html = '';
+    var dataa = {'empresaId': $('#idempresarem').val()};
 
-      remisiones.forEach(function(el) {
-        var $rendimientos = [], selected = '';
-        el.pallets.forEach(function (pallet) {
-          $rendimientos = $rendimientos.concat(pallet.rendimientos);
-        });
-        $rendimientos = JSON.stringify($rendimientos);
+    if ($('#idempresarem').val() == '') {
+      $('#empresarem').val($('#dempresa').val());
+      $('#idempresarem').val($('#did_empresa').val());
+      dataa.empresaId = $('#did_empresa').val();
+    }
 
-        selected = $('#remision'+el.id_factura).length>0? ' checked': '';
-
-        html += '<tr style="" id="chk-cli-remision-'+el.id_factura+'">'+
-                '<td><input type="checkbox" value="'+el.id_factura+'"'+selected+' class="chk-cli-remisiones"><input type="hidden" id="jsondata" value="'+$rendimientos+'"></td>'+
-                '<td>'+el.serie+el.folio+'</td>'+
-                '<td>'+el.nombre_fiscal+'</td>'+
-                '<td>'+el.fecha+'</td>'+
-              '</tr>';
-      });
-      $('#mdlRemisiones').html(html);
-      $('#modal-remisiones').modal('show');
-    }, 'json');
+    getRemisionesEmpresa(dataa);
   });
 
   $('#BtnAddRemisiones').on('click', function(event) {
@@ -568,6 +555,53 @@ $(function(){
     });
   }
 });
+
+var getRemisionesEmpresa = function (dataa) {
+  $.get(base_url + 'panel/facturacion/getRemisiones', dataa, function(remisiones) {
+      var html = '';
+
+      remisiones.forEach(function(el) {
+        var $rendimientos = [], selected = '';
+        el.pallets.forEach(function (pallet) {
+          $rendimientos = $rendimientos.concat(pallet.rendimientos);
+        });
+        $rendimientos = JSON.stringify($rendimientos);
+
+        selected = $('#remision'+el.id_factura).length>0? ' checked': '';
+
+        html += '<tr style="" id="chk-cli-remision-'+el.id_factura+'">'+
+                '<td><input type="checkbox" value="'+el.id_factura+'"'+selected+' class="chk-cli-remisiones"><input type="hidden" id="jsondata" value="'+$rendimientos+'"></td>'+
+                '<td>'+el.serie+el.folio+'</td>'+
+                '<td>'+el.nombre_fiscal+'</td>'+
+                '<td>'+el.fecha+'</td>'+
+              '</tr>';
+      });
+      $('#mdlRemisiones').html(html);
+      $('#modal-remisiones').modal('show');
+    }, 'json');
+};
+
+var autocompleteEmpresaRemisionesLive = function () {
+  $('#modal-remisiones').on('focus', 'input#empresarem:not(.ui-autocomplete-input)', function(event) {
+    $(this).autocomplete({
+      source: base_url+'panel/facturacion/ajax_get_empresas_fac/',
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        $("#idempresarem").val(ui.item.id);
+        $("#empresarem").css("background-color", "#B0FFB0");
+
+        var dataa = {'empresaId': $('#idempresarem').val()};
+        getRemisionesEmpresa(dataa);
+      }
+    }).on("keydown", function(event){
+      if(event.which == 8 || event == 46){
+        $("#empresarem").css("background-color", "#FFD9B3");
+        $("#idempresarem").val("");
+      }
+    });
+  });
+};
 
 var EventOnChangeMoneda = function () {
   $('#moneda').on('change', function(event) {

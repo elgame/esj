@@ -348,7 +348,8 @@ class home extends MY_Controller {
 	 * cierra la sesion del usuario
 	 */
 	public function logout(){
-		$this->session->sess_destroy();
+    session_destroy();
+    $this->session->sess_destroy();
 		redirect(base_url('panel/home'));
 	}
 
