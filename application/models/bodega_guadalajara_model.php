@@ -707,7 +707,7 @@ class bodega_guadalajara_model extends CI_Model {
     // ");
 
     $ventas = $this->db->query(
-      "SELECT id_factura, nombre_fiscal, fecha, serie, folio, total, cliente, id_cliente
+      "SELECT t.id_factura, t.nombre_fiscal, t.fecha, t.serie, t.folio, t.total, t.cliente, t.id_cliente, rh.folio_factura
       FROM (
         SELECT f.id_factura, e.nombre_fiscal, DATE(f.fecha) as fecha, f.serie, f.folio, f.total, c.nombre_fiscal as cliente,
            c.id_cliente, f.status, (f.total-Coalesce(Sum(fa.total),0)) AS saldo, '1' AS tipo
@@ -731,8 +731,16 @@ class bodega_guadalajara_model extends CI_Model {
               AND Date(f.fecha) < '{$fecha}' AND f.status = 'pa' AND Date(fa.fecha) = '{$fecha}'
             GROUP BY f.id_factura, e.id_empresa, c.id_cliente, fa.fecha
       ) t
-      WHERE (tipo = '1' OR (tipo = '2' AND saldo = 0))
-      ORDER BY (id_cliente, fecha, serie, folio) DESC
+      LEFT JOIN (
+        SELECT fr.id_remision, (f.serie || f.folio) AS folio_factura
+        FROM facturacion f
+          INNER JOIN facturacion_remision_hist fr ON f.id_factura = fr.id_factura
+        WHERE f.status <> 'b' AND f.status <> 'ca'
+        GROUP BY fr.id_remision, f.serie, f.folio
+        HAVING Count(fr.id_remision) = 1
+      ) rh ON t.id_factura = rh.id_remision
+      WHERE (t.tipo = '1' OR (t.tipo = '2' AND t.saldo = 0))
+      ORDER BY (t.id_cliente, t.fecha, t.serie, t.folio) DESC
     ");
 
     $response = $ventas->result();
@@ -1097,9 +1105,9 @@ class bodega_guadalajara_model extends CI_Model {
 
     $pdf->SetFont('Arial','B', 6.5);
     $pdf->SetX(6);
-    $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
-    $pdf->SetWidths(array(75, 18, 18, 20, 20, 28, 25));
-    $pdf->Row(array('CLIENTE', 'FECHA', 'REM No.', 'S/INICIAL.', 'INGRESOS', 'No Ticket', 'S/FINAL'), false, 'B');
+    $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(75, 16, 18, 16, 18, 18, 20, 25));
+    $pdf->Row(array('CLIENTE', 'FECHA', 'REM No.', 'FAC No.', 'S/INICIAL.', 'INGRESOS', 'No Ticket', 'S/FINAL'), false, 'B');
 
     $pdf->SetFont('Arial','', 6);
     $totalSalAnt = $totalCont = $totalSal = 0;
@@ -1110,13 +1118,14 @@ class bodega_guadalajara_model extends CI_Model {
       $totalSal += floatval($ct_cobrar->saldo);
 
       if ($ct_cobrar->id_cliente != $aux_client) {
-        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
-        $pdf->SetWidths(array(75, 18, 18, 20, 20, 28, 25));
+        $pdf->SetAligns(array('L', 'L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(75, 16, 18, 16, 18, 18, 20, 25));
         $pdf->SetX(6);
         $pdf->Row(array(
           $ct_cobrar->cliente,
           String::fechaAT($ct_cobrar->fecha),
           $ct_cobrar->serie.$ct_cobrar->folio,
+          $ct_cobrar->folio_factura,
           String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
           String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
           $ct_cobrar->tickets_hoy,
@@ -1124,12 +1133,13 @@ class bodega_guadalajara_model extends CI_Model {
         ), false, 'B');
         $aux_client = $ct_cobrar->id_cliente;
       } else {
-        $pdf->SetAligns(array('L', 'L', 'R', 'R', 'C', 'R'));
-        $pdf->SetWidths(array(18, 18, 20, 20, 28, 25));
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'C', 'R'));
+        $pdf->SetWidths(array(16, 18, 16, 18, 18, 20, 25));
         $pdf->SetX(81);
         $pdf->Row(array(
           String::fechaAT($ct_cobrar->fecha),
           $ct_cobrar->serie.$ct_cobrar->folio,
+          $ct_cobrar->folio_factura,
           String::formatoNumero($ct_cobrar->saldo_ant, 2, '', false),
           String::formatoNumero($ct_cobrar->abonos_hoy, 2, '', false),
           $ct_cobrar->tickets_hoy,

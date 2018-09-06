@@ -147,7 +147,7 @@
                                       <td style="width: 100px;text-align: right;" class="<?php echo $ct_cobrar->cliente!=''?'sel_abonom':''; ?>"
                                         data-id="<?php echo $ct_cobrar->id_factura; ?>" data-tipo="f"><?php echo $ct_cobrar->saldo ?></td>
                                     </tr>
-                            <?php
+                                  <?php
                                     $aux_client = $ct_cobrar->id_cliente != $aux_client ? $ct_cobrar->id_cliente: $aux_client;
                                   } ?>
 

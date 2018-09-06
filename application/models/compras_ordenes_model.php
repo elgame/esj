@@ -403,7 +403,7 @@ class compras_ordenes_model extends CI_Model {
             INNER JOIN (
               SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
               FROM compras_productos
-              WHERE id_producto > 0 AND status = 'a' AND id_producto IN(".explode(',', $ids).")
+              WHERE id_producto > 0 AND status = 'a' AND id_producto IN(".implode(',', $ids).")
               GROUP BY id_producto
             ) pc ON p.id_producto = pc.id_producto
           WHERE pf.tipo = 'p' AND p.status = 'ac'
@@ -855,7 +855,7 @@ class compras_ordenes_model extends CI_Model {
     $almacen = array();
     $res_prodc_orden = $this->db->query("SELECT id_orden, num_row, id_compra FROM compras_productos
               WHERE id_orden = {$idOrden}")->result();
-    $productos = $productosFaltantes = array();
+    $idsProductos = $productos = $productosFaltantes = array();
     $faltantes = false;
     foreach ($_POST['concepto'] as $key => $concepto)
     {
@@ -880,6 +880,8 @@ class compras_ordenes_model extends CI_Model {
         if($_POST['prodIdOrden'][$key] == $ord->id_orden && $_POST['prodIdNumRow'][$key] == $ord->num_row)
           $prod_id_compra = $ord->id_compra;
       }
+
+      $statusp = ($_POST['isProdOk'][$key] === '1' ? 'a' : 'r');
       $productos[] = array(
         'id_orden'             => $idOrden,
         'num_row'              => $key,
@@ -894,7 +896,7 @@ class compras_ordenes_model extends CI_Model {
         'total'                => $_POST['total'][$key],
         'porcentaje_iva'       => $_POST['trasladoPorcent'][$key],
         'porcentaje_retencion' => $_POST['ret_iva'][$key],
-        'status'               => $_POST['isProdOk'][$key] === '1' ? 'a' : 'r',
+        'status'               => $statusp,
         'fecha_aceptacion'     => date('Y-m-d H:i:s'),
         'faltantes'            => $faltantesProd,
         'observacion'          => $_POST['observacion'][$key],
@@ -907,6 +909,12 @@ class compras_ordenes_model extends CI_Model {
         'retencion_isr'        => $_POST['ret_isrTotal'][$key],
         'porcentaje_isr'       => $_POST['ret_isrPorcent'][$key],
       );
+
+      if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
+        if (!isset($idsProductos[$_POST['productoId'][$key]])) {
+          $idsProductos[$_POST['productoId'][$key]] = $_POST['productoId'][$key];
+        }
+      }
 
       if ($faltantesProd != '0')
       {
@@ -1026,6 +1034,9 @@ class compras_ordenes_model extends CI_Model {
     $this->db->delete('compras_productos', array('id_orden' => $idOrden));
 
     $this->actualizar($idOrden, $data, $productos);
+
+    // Calcula costo promedio de los productos aceptados
+    $this->calculaCostoPromedio($idsProductos);
 
     // Actualiza los datos del vehiculo
     $this->actualizaVehiculo($idOrden);
