@@ -528,7 +528,7 @@ class cuentas_cobrar extends MY_Controller {
         $icono = 'success';
         break;
       case 13:
-        $txt = 'Los CFDI no requieren complemento de pago.';
+        $txt = 'Los CFDI no requieren complemento de pago, o son remisiones los comprobantes.';
         $icono = 'success';
         break;
       case 14:

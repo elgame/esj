@@ -115,7 +115,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       $queryMov = $this->db->query(
           "SELECT bm.id_movimiento, bm.fecha, bm.metodo_pago AS forma_pago, bm.concepto,
-            bm.monto AS pago, bb.rfc, bc.numero AS num_cuenta, caf.total AS pago_factura, v.version, v.serie, v.folio,
+            bm.monto AS pago, bb.rfc, bc.numero AS num_cuenta, (caf.total - Coalesce(fao.total, 0)) AS pago_factura, v.version, v.serie, v.folio,
             v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa
            FROM banco_movimientos bm
             INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
@@ -126,7 +126,10 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
             LEFT JOIN (
               SELECT id_factura, Count(*) AS parcialidades FROM facturacion_abonos GROUP BY id_factura
             ) par ON v.id_factura = par.id_factura
-           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2"
+            LEFT JOIN (
+              SELECT id_factura, id_abono, (CASE WHEN tipo = 's' THEN total ELSE -1*total END) AS total FROM facturacion_abonos_otros
+            ) fao ON v.id_factura = fao.id_factura AND caf.id_abono = fao.id_abono
+           WHERE bm.id_movimiento = {$id_movimiento} AND v.version::float > 3.2 AND v.is_factura = 't'"
         );
 
       if ($id_cuenta_cliente > 0) {
@@ -158,6 +161,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         log_message('error', json_encode($datosApi));
         // Timbrado de la factura.
         $result = $this->timbrar($datosApi, $id_movimiento);
+        log_message('error', json_encode($result));
 
         if ($result['passes'])
         {
