@@ -1118,9 +1118,9 @@ class cfdi{
         $saldo_factura = $CI->cuentas_cobrar_model->getDetalleVentaFacturaData($pago->id_factura, 'f', true, true);
         $saldo_factura['saldo'] = floor($saldo_factura['saldo']*100)/100;
         $saldoAnt = ($saldo_factura['saldo']+$pago->pago_factura);
-        $metodoDePago = 'PPD';
-        if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
-          $metodoDePago = 'PUE';
+        $metodoDePago = $pago->metodo_pago;
+        // if ($saldo_factura['saldo'] == 0 && $pago->parcialidades == 1)
+        //   $metodoDePago = 'PUE';
         $comPago['doctoRelacionado'][] = array(
           "idDocumento"    => $pago->uuid,
           "serie"          => $pago->serie,
