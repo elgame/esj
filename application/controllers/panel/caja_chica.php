@@ -21,6 +21,7 @@ class caja_chica extends MY_Controller {
     'caja_chica/rpt_ingresos_gastos_pdf/',
     'caja_chica/rpt_ingresos_gastos_xls/',
     'caja_chica/ajax_get_remisiones/',
+    'caja_chica/ajax_get_deudores/',
   );
 
   public function _remap($method)
@@ -582,6 +583,12 @@ class caja_chica extends MY_Controller {
   {
     $this->load->model('caja_chica_model');
     echo json_encode($this->caja_chica_model->getRemisiones());
+  }
+
+  public function ajax_get_deudores()
+  {
+    $this->load->model('caja_chica_model');
+    echo json_encode($this->caja_chica_model->ajaxDeudores());
   }
 
 

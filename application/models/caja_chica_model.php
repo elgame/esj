@@ -15,6 +15,7 @@ class caja_chica_model extends CI_Model {
       'saldo_clientes'        => array(),
       'denominaciones'        => array(),
       'gastos'                => array(),
+      'deudores'              => array(),
       'categorias'            => array(),
     );
 
@@ -343,6 +344,23 @@ class caja_chica_model extends CI_Model {
       $info['gastos'] = $gastos->result();
     }
 
+    // deudores
+    $deudores = $this->db->query(
+      "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+        (cd.monto - Coalesce(ab.abonos, 0)) AS saldo
+      FROM cajachica_deudores cd
+        LEFT JOIN (
+          SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+          WHERE no_caja = {$noCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
+        ) ab ON cd.id_deudor = ab.id_deudor
+      WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+    );
+
+    if ($deudores->num_rows() > 0)
+    {
+      $info['deudores'] = $deudores->result();
+    }
+
     $info['categorias'] = $this->db->query(
     "SELECT id_categoria, nombre, abreviatura
      FROM cajachica_categorias
@@ -603,6 +621,62 @@ class caja_chica_model extends CI_Model {
       }
     }
 
+    // Deudores
+    if (isset($data['deudor_nombre']))
+    {
+      // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
+      $gastos_udt = $gastos = array();
+      foreach ($data['deudor_nombre'] as $key => $nombre)
+      {
+        $nombre = mb_strtoupper($nombre, 'UTF-8');
+        if (isset($data['deudor_del'][$key]) && $data['deudor_del'][$key] == 'true' &&
+          isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          // $gastos_ids['delets'][] = $this->getDataGasto($data['deudor_id_deudor'][$key]);
+
+          $this->db->delete('cajachica_deudores', "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } elseif (isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
+          $gastos_udt = array(
+            'fecha'           => $data['fecha_caja_chica'],
+            'nombre'          => $nombre,
+            'concepto'        => $data['deudor_concepto'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $data['fno_caja'],
+          );
+
+          // Bitacora
+          $id_bitacora = $this->bitacora_model->_update('cajachica_deudores', $data['deudor_id_deudor'][$key], $gastos_udt,
+                          array(':accion'       => 'deudores', ':seccion' => 'caja chica',
+                                ':folio'        => '',
+                                // ':id_empresa'   => $datosFactura['id_empresa'],
+                                ':empresa'      => '', // .$this->input->post('dempresa')
+                                ':id'           => 'id_deudor',
+                                ':titulo'       => $nombresCajas[$data['fno_caja']])
+                        );
+
+          $this->db->update('cajachica_deudores', $gastos_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
+        } else {
+          $gastos = array(
+            'fecha'           => $data['fecha_caja_chica'],
+            'nombre'          => $nombre,
+            'concepto'        => $data['deudor_concepto'][$key],
+            'monto'           => $data['deudor_importe'][$key],
+            'no_caja'         => $data['fno_caja'],
+            'id_usuario'      => $this->session->userdata('id_usuario'),
+          );
+          $this->db->insert('cajachica_deudores', $gastos);
+          $gastooidd = $this->db->insert_id();
+          // $gastos_ids['adds'][] = $gastooidd;
+
+          // Bitacora
+          $this->bitacora_model->_insert('cajachica_deudores', $gastooidd,
+                        array(':accion'    => 'deudores', ':seccion' => 'caja chica',
+                              ':folio'     => "Concepto: {$nombre} | Monto: {$data['deudor_importe'][$key]}",
+                              // ':id_empresa' => $datosFactura['id_empresa'],
+                              ':empresa'   => ''));
+        }
+      }
+    }
+
     return true;
   }
 
@@ -771,6 +845,30 @@ class caja_chica_model extends CI_Model {
           'id' => $itm->id_categoria,
           'label' => $itm->abreviatura,
           'value' => $itm->abreviatura,
+          'item' => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
+  public function ajaxDeudores()
+  {
+    $sql = '';
+    $res = $this->db->query("
+        SELECT DISTINCT nombre FROM cajachica_deudores
+        WHERE lower(nombre) LIKE '%".mb_strtolower($_GET['term'], 'UTF-8')."%'
+        ORDER BY nombre ASC
+        LIMIT 20");
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+          'id' => $itm->nombre,
+          'label' => $itm->nombre,
+          'value' => $itm->nombre,
           'item' => $itm,
         );
       }
@@ -1615,7 +1713,7 @@ class caja_chica_model extends CI_Model {
     $res = $this->db->query("
         SELECT *
         FROM cajachica_nomenclaturas
-        ORDER BY nomenclatura ASC");
+        ORDER BY nomenclatura::integer ASC");
 
     return $res->result();
   }

@@ -14,6 +14,42 @@ FROM (
 WHERE productos.id_producto = t.id_producto
 
 
+ ✔ Cambios en caja chica @done (18-09-10 19:07) pcc
+     INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('INTANGIBLES','11',TRUE);
+     INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('NOMINA REEMBOLSADA','12',TRUE);
+     CREATE TABLE public.cajachica_deudores
+        (
+          id_deudor bigserial NOT NULL,
+          fecha date NOT NULL,
+          nombre character varying(150) NOT NULL,
+          concepto character varying(250) NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          no_caja integer NOT NULL DEFAULT 1,
+          no_impresiones integer NOT NULL DEFAULT 0,
+          id_usuario bigint,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          CONSTRAINT cajachica_deudores_pkey PRIMARY KEY (id_deudor),
+          CONSTRAINT cajachica_deudores_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (OIDS=FALSE );
+        ALTER TABLE public.cajachica_deudores OWNER TO programa;
+     CREATE TABLE public.cajachica_deudores_pagos
+        (
+          id_deudor bigint NOT NULL,
+          fecha_creacion timestamp without time zone DEFAULT now(),
+          fecha date NOT NULL,
+          monto double precision NOT NULL DEFAULT (0)::double precision,
+          no_caja integer NOT NULL DEFAULT 1,
+          id_usuario bigint,
+          CONSTRAINT cajachica_deudores_pagos_pkey PRIMARY KEY (id_deudor, fecha_creacion),
+          CONSTRAINT cajachica_deudores_pagos_id_usuario_fkey FOREIGN KEY (id_usuario)
+              REFERENCES public.usuarios (id) MATCH SIMPLE
+              ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        WITH (OIDS=FALSE );
+        ALTER TABLE public.cajachica_deudores_pagos OWNER TO programa;
 
  ✔ Balance general @done (18-08-28 12:59) pct|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
