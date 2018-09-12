@@ -1,17 +1,3 @@
-UPDATE productos SET precio_promedio = t.costo
-FROM (
-  SELECT p.id_producto, p.nombre, Round(pc.costo::decimal, 2) AS costo
-  FROM productos p
-    INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
-    INNER JOIN (
-      SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
-      FROM compras_productos
-      WHERE id_producto > 0 AND status = 'a' AND id_compra IS NOT NULL
-      GROUP BY id_producto
-    ) pc ON p.id_producto = pc.id_producto
-  WHERE pf.tipo = 'p' AND p.status = 'ac'
-) t
-WHERE productos.id_producto = t.id_producto
 
 
  ✔ Cambios en caja chica @done (18-09-10 19:07) pcc
@@ -51,11 +37,36 @@ WHERE productos.id_producto = t.id_producto
         WITH (OIDS=FALSE );
         ALTER TABLE public.cajachica_deudores_pagos OWNER TO programa;
 
+ ✔ Precio salida almacen @done (18-09-11 21:19) pcc
+   ALTER TABLE public.productos ADD COLUMN last_precio double precision NOT NULL DEFAULT 0;
+   UPDATE productos SET last_precio = t.precio_unitario
+      FROM (
+        SELECT distinct on(id_producto) id_producto, precio_unitario
+        FROM compras_productos
+        ORDER BY id_producto ASC, id_orden DESC
+      ) t
+      WHERE productos.id_producto = t.id_producto
  ✔ Balance general @done (18-08-28 12:59) pct|pcc
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
     ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
     COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
+
+ ✔ Calculo costo promedio @done (18-09-11 21:36) pcc|san
+   UPDATE productos SET precio_promedio = t.costo
+        FROM (
+          SELECT p.id_producto, p.nombre, Round(pc.costo::decimal, 2) AS costo
+          FROM productos p
+            INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+            INNER JOIN (
+              SELECT id_producto, (Sum(importe) / (CASE Sum(cantidad) WHEN 0 THEN 1 ELSE Sum(cantidad) END)) AS costo
+              FROM compras_productos
+              WHERE id_producto > 0 AND status = 'a' AND id_compra IS NOT NULL
+              GROUP BY id_producto
+            ) pc ON p.id_producto = pc.id_producto
+          WHERE pf.tipo = 'p' AND p.status = 'ac'
+        ) t
+        WHERE productos.id_producto = t.id_producto
  ✔ Privilegios en caja chica @done (18-08-24 12:44) pcc|san|pct
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar gastos',247,FALSE,'caja_chica/modificar_gastos/','edit',FALSE);
     INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Modificar ingresos',247,FALSE,'caja_chica/modificar_ingresos/','edit',FALSE);
