@@ -365,7 +365,7 @@ class compras_ordenes_model extends CI_Model {
 
         if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
           if (!isset($idsProductos[$_POST['productoId'][$key]])) {
-            $idsProductos[$_POST['productoId'][$key]] = $_POST['productoId'][$key];
+            $idsProductos[$_POST['productoId'][$key]] = [$_POST['productoId'][$key], $pu];
           }
         }
       }
@@ -393,7 +393,7 @@ class compras_ordenes_model extends CI_Model {
 
   public function calculaCostoPromedio($idsProductos)
   {
-    $ids = array_values($idsProductos);
+    $ids = array_keys($idsProductos);
     if (count($ids) > 0) {
       $query = $this->db->query("UPDATE productos SET precio_promedio = t.costo
         FROM (
@@ -912,7 +912,7 @@ class compras_ordenes_model extends CI_Model {
 
       if ($statusp == 'a' && $_POST['productoId'][$key] !== '') {
         if (!isset($idsProductos[$_POST['productoId'][$key]])) {
-          $idsProductos[$_POST['productoId'][$key]] = $_POST['productoId'][$key];
+          $idsProductos[$_POST['productoId'][$key]] = [$_POST['productoId'][$key], $pu];
         }
       }
 
