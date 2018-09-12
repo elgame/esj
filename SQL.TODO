@@ -1,6 +1,6 @@
 
 
- ✔ Cambios en caja chica @done (18-09-10 19:07) pcc
+ ✔ Cambios en caja chica @done (18-09-10 19:07) pcc|pct
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('INTANGIBLES','11',TRUE);
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('NOMINA REEMBOLSADA','12',TRUE);
      CREATE TABLE public.cajachica_deudores
@@ -37,7 +37,7 @@
         WITH (OIDS=FALSE );
         ALTER TABLE public.cajachica_deudores_pagos OWNER TO programa;
 
- ✔ Precio salida almacen @done (18-09-11 21:19) pcc
+ ✔ Precio salida almacen @done (18-09-11 21:19) pcc|pct
    ALTER TABLE public.productos ADD COLUMN last_precio double precision NOT NULL DEFAULT 0;
    UPDATE productos SET last_precio = t.precio_unitario
       FROM (

@@ -476,7 +476,8 @@
   var calculaCorte = function () {
     var total = 0;
 
-    total = parseFloat($('#total-saldo-ingresos').val() || 0) - parseFloat($('#total-boletas').val() || 0) - parseFloat($('#ttotal-gastos').val() || 0);
+    total = parseFloat($('#total-saldo-ingresos').val() || 0) - parseFloat($('#total-boletas').val() || 0) -
+      (parseFloat($('#ttotal-gastos').val() || 0)) - (parseFloat($('#ttotal-deudores').val())||0);
     $('#ttotal-corte').val(total.toFixed(2));
   };
 
@@ -511,8 +512,10 @@
   var agregarDeudor = function () {
     var $table = $('#table-deudor').find('tbody .row-total'),
         tr =  '<tr>'+
+                '<td style="width: 80px;">'+
+                '</td>'+
                 '<td style="width: 200px;">'+
-                  '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor-cargo" required>'+
+                  '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor_nombre" required autocomplete="off">'+
                   '<input type="hidden" name="deudor_id_deudor[]" value="" id="deudor_id_deudor">'+
                   '<input type="hidden" name="deudor_del[]" value="" id="deudor_del">'+
                 '</td>'+
@@ -561,16 +564,16 @@
   };
 
   var onChanceImporteDeudores = function () {
-    $('#table-deudor').on('keyup', '.deudor-importe', function(e) {
+    $('#table-deudor').on('keyup change', '.deudor-importe', function(e) {
       var key = e.which,
           $this = $(this),
           $tr = $this.parent().parent(),
-          total = 0;
+          total = 0,
+          monto = (parseFloat($this.val())||0);
 
-      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8) {
+      if ((key > 47 && key < 58) || (key >= 96 && key <= 105) || key === 8 || monto > 0) {
 
-        var monto = (parseFloat($this.val())||0),
-        abonos = (parseFloat($tr.find('.deudor_abonos').attr('data-abonos'))||0),
+        var abonos = (parseFloat($tr.find('.deudor_abonos').attr('data-abonos'))||0),
         saldo = (monto-abonos).toFixed(2);
 
         $tr.find('.deudor_saldo').attr('data-saldo', saldo).text(saldo);
@@ -590,6 +593,7 @@
 
     // $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
     $('input#ttotal-deudores').val(total.toFixed(2));
+    $('#ttotal-deudores').val(total.toFixed(2));
   };
 
   var autocompleteDeudoresLive = function () {

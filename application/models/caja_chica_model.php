@@ -17,6 +17,8 @@ class caja_chica_model extends CI_Model {
       'gastos'                => array(),
       'deudores'              => array(),
       'categorias'            => array(),
+      'deudores_prest_dia'    => 0,
+      'deudores_abonos_dia'   => 0,
     );
 
     // Obtiene el saldo incial.
@@ -241,6 +243,41 @@ class caja_chica_model extends CI_Model {
         }
       }
       $info['saldo_clientes'] = $empresas;
+
+
+      // deudores
+      $deudores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo
+        FROM cajachica_deudores cd
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja = {$noCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
+      );
+
+      if ($deudores->num_rows() > 0)
+      {
+        $info['deudores'] = $deudores->result();
+        $info['deudores_prest_dia'] = 0;
+        foreach ($info['deudores'] as $key => $value) {
+          $info['deudores'][$key]->mismo_dia = 'readonly';
+          if (strtotime($value->fecha) == strtotime($fecha)) {
+            $info['deudores_prest_dia'] += $value->monto;
+            $info['deudores'][$key]->mismo_dia = '';
+          }
+        }
+
+        $info['deudores_abonos_dia'] = 0;
+        $deudores = $this->db->query(
+          "SELECT Sum(monto) AS abonos FROM cajachica_deudores_pagos
+          WHERE no_caja = {$noCaja} AND fecha = '{$fecha}'"
+        )->row();
+        if (isset($deudores->abonos)) {
+          $info['deudores_abonos_dia'] = $deudores->abonos;
+        }
+      }
     }
 
     // denominaciones
@@ -342,23 +379,6 @@ class caja_chica_model extends CI_Model {
     if ($gastos->num_rows() > 0)
     {
       $info['gastos'] = $gastos->result();
-    }
-
-    // deudores
-    $deudores = $this->db->query(
-      "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
-        (cd.monto - Coalesce(ab.abonos, 0)) AS saldo
-      FROM cajachica_deudores cd
-        LEFT JOIN (
-          SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
-          WHERE no_caja = {$noCaja} AND fecha <= '{$fecha}' GROUP BY id_deudor
-        ) ab ON cd.id_deudor = ab.id_deudor
-      WHERE cd.no_caja = {$noCaja} AND fecha <= '{$fecha}' AND (cd.monto - Coalesce(ab.abonos, 0)) > 0"
-    );
-
-    if ($deudores->num_rows() > 0)
-    {
-      $info['deudores'] = $deudores->result();
     }
 
     $info['categorias'] = $this->db->query(
