@@ -1,4 +1,9 @@
 
+ ✔ Balance general @done (18-08-28 12:59) pct|pcc
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
+    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
+    ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
+    COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
 
  ✔ Cambios en caja chica @done (18-09-10 19:07) pcc|pct
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('INTANGIBLES','11',TRUE);
@@ -46,11 +51,7 @@
         ORDER BY id_producto ASC, id_orden DESC
       ) t
       WHERE productos.id_producto = t.id_producto
- ✔ Balance general @done (18-08-28 12:59) pct|pcc
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Contabilidad',361,TRUE,'#','list',TRUE);
-    INSERT INTO "privilegios"( "nombre", "id_padre", "mostrar_menu", "url_accion", "url_icono", "target_blank") VALUES ('Balance General',468,TRUE,'reportes/balance_general/','print',TRUE);
-    ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
-    COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
+
 
  ✔ Calculo costo promedio @done (18-09-11 21:36) pcc|san
    UPDATE productos SET precio_promedio = t.costo
