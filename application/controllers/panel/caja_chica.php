@@ -425,74 +425,68 @@ class caja_chica extends MY_Controller {
     ));
 
     $this->load->library('pagination');
-    $this->load->model('cuentas_cobrar_model');
-    $this->load->model('banco_cuentas_model');
+    $this->load->model('caja_chica_model');
 
     $params['info_empleado']  = $this->info_empleado['info'];
     $params['seo']        = array('titulo' => 'Agregar abonos');
 
-    $params['template']   = '';
     $params['closeModal'] = false;
 
-    if (isset($_GET['id']{0}) && isset($_GET['tipo']{0}))
+    if (isset($_GET['id']{0}) && isset($_GET['no_caja']{0}))
     {
-      $ids_aux = $_GET['id'];
-      $tipos_aux = $_GET['tipo'];
+      $params['id'] = $_GET['id'];
+      $params['fecha'] = $_GET['fecha'];
+      $params['no_caja'] = $_GET['no_caja'];
+      $params['monto'] = $_GET['monto'];
 
-      $this->configAddAbono();
+      if (isset($_POST['btnGuardarAbono'])) {
+        $_POST = array_merge($_POST, $_GET);
+      }
+
+      $this->configAddAbonoDeudor();
       if($this->form_validation->run() == FALSE)
       {
         $params['frm_errors'] = $this->showMsgs(2, preg_replace("[\n|\r|\n\r]", '', validation_errors()));
       }
       else
       {
-        if(isset($_GET['total']{0})) //si es masivo
-          $respons = $this->cuentas_cobrar_model->addAbonoMasivo();
-        else
-          $respons = $this->cuentas_cobrar_model->addAbono();
-
-        if($this->input->post('imprimir') == 'si')
-          $params['print_recibo'] = $respons['id_movimiento'];
+        $respons = $this->caja_chica_model->addAbonoDeudor($_POST);
 
         $params['closeModal'] = true;
         $params['frm_errors'] = $this->showMsgs(4);
       }
-
-      if(isset($_GET['total']{0})) //si es masivo
-      {
-        $params['data'] = array('saldo' => $_GET['total'], 'facturas' => array() );
-        $ids   = explode(',', substr($ids_aux, 1));
-        $tipos = explode(',', substr($tipos_aux, 1));
-
-        foreach ($ids as $key => $value)
-        {
-          $params['data']['facturas'][] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData($value, $tipos[$key]);
-        }
-        $_GET['id'] = $ids_aux;
-        $_GET['tipo'] = $tipos_aux;
-      }else
-        $params['data'] = $this->cuentas_cobrar_model->getDetalleVentaFacturaData();
-      $id_empresa = isset($params['data']['empresa']->id_empresa)? $params['data']['empresa']->id_empresa : $params['data']['facturas'][0]['empresa']->id_empresa;
-
-
-      //Cuentas de banco
-      $params['cuentas'] = $this->banco_cuentas_model->getCuentas(false, null, array('id_empresa' => $id_empresa));
-      //metodos de pago
-      $params['metods_pago']  = array(
-        array('nombre' => 'Transferencia', 'value' => 'transferencia'),
-        array('nombre' => 'Cheque', 'value' => 'cheque'),
-        array('nombre' => 'Efectivo', 'value' => 'efectivo'),
-        array('nombre' => 'Deposito', 'value' => 'deposito'),
-      );
-
-      $params['template'] = $this->load->view('panel/cuentas_cobrar/tpl_agregar_abono', $params, true);;
     }else
       $_GET['msg'] = 1;
 
     if(isset($_GET['msg']{0}))
       $params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
-    $this->load->view('panel/cuentas_cobrar/agregar_abonos',$params);
+    $this->load->view('panel/caja_chica/agregar_abonos_deudor', $params);
+  }
+
+  public function configAddAbonoDeudor()
+  {
+    $this->load->library('form_validation');
+
+    $rules = array(
+      array('field' => 'dmonto',
+            'label' => 'Monto',
+            'rules' => 'required|numeric'),
+      array('field' => 'id',
+            'label' => 'Id deuda',
+            'rules' => 'required|numeric'),
+      array('field' => 'fecha',
+            'label' => 'Fecha pago',
+            'rules' => 'required'),
+      array('field' => 'no_caja',
+            'label' => 'No Caja',
+            'rules' => 'required|numeric'),
+      array('field' => 'monto',
+            'label' => 'Deuda',
+            'rules' => 'required|numeric'),
+    );
+
+    $this->form_validation->set_rules($rules);
   }
 
   /*

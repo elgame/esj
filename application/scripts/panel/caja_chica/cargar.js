@@ -511,8 +511,11 @@
 
   var agregarDeudor = function () {
     var $table = $('#table-deudor').find('tbody .row-total'),
+        fecha = $('#fecha_caja').val(),
         tr =  '<tr>'+
                 '<td style="width: 80px;">'+
+                  fecha+
+                  '<input type="hidden" name="deudor_fecha[]" value="'+fecha+'">'+
                 '</td>'+
                 '<td style="width: 200px;">'+
                   '<input type="text" name="deudor_nombre[]" value="" class="span12 deudor_nombre" required autocomplete="off">'+
@@ -527,7 +530,7 @@
                 '</td>'+
                 '<td style="width: 80px;" class="deudor_abonos" data-abonos="0">'+
                 '</td>'+
-                '<td style="width: 80px;" class="deudor_saldo" data-saldo="0">'+
+                '<td style="width: 80px;" class="deudor_saldo" data-saldo="0" data-mismo="">'+
                 '</td>'+
                 '<td style="width: 30px;">'+
                   '<button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>'+
@@ -585,15 +588,20 @@
   };
 
   var calculaTotalDeudores = function () {
-    var total = 0;
+    var total = 0, total_dia = 0;
 
     $('#table-deudor .deudor_saldo').each(function(index, el) {
       total += parseFloat($(this).attr('data-saldo') || 0);
+
+      if ($(this).attr('data-mismo') == '') {
+        total_dia += (parseFloat($(this).attr('data-saldo'))||0);
+      }
     });
 
     // $('#td-total-gastos').text(util.darFormatoNum(total.toFixed(2)));
-    $('input#ttotal-deudores').val(total.toFixed(2));
-    $('#ttotal-deudores').val(total.toFixed(2));
+    $('input#total-deudores-pres-dia').val(total_dia.toFixed(2));
+    $('input#total-deudores').val(total.toFixed(2));
+    $('#ttotal-deudores').val(total_dia.toFixed(2));
   };
 
   var autocompleteDeudoresLive = function () {

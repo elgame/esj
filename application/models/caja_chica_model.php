@@ -645,7 +645,7 @@ class caja_chica_model extends CI_Model {
     if (isset($data['deudor_nombre']))
     {
       // $gastos_ids = array('adds' => array(), 'delets' => array(), 'updates' => array());
-      $gastos_udt = $gastos = array();
+      $deudor_udt = $deudor = array();
       foreach ($data['deudor_nombre'] as $key => $nombre)
       {
         $nombre = mb_strtoupper($nombre, 'UTF-8');
@@ -655,8 +655,8 @@ class caja_chica_model extends CI_Model {
 
           $this->db->delete('cajachica_deudores', "id_deudor = ".$data['deudor_id_deudor'][$key]);
         } elseif (isset($data['deudor_id_deudor'][$key]) && floatval($data['deudor_id_deudor'][$key]) > 0) {
-          $gastos_udt = array(
-            'fecha'           => $data['fecha_caja_chica'],
+          $deudor_udt = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
             'nombre'          => $nombre,
             'concepto'        => $data['deudor_concepto'][$key],
             'monto'           => $data['deudor_importe'][$key],
@@ -664,7 +664,7 @@ class caja_chica_model extends CI_Model {
           );
 
           // Bitacora
-          $id_bitacora = $this->bitacora_model->_update('cajachica_deudores', $data['deudor_id_deudor'][$key], $gastos_udt,
+          $id_bitacora = $this->bitacora_model->_update('cajachica_deudores', $data['deudor_id_deudor'][$key], $deudor_udt,
                           array(':accion'       => 'deudores', ':seccion' => 'caja chica',
                                 ':folio'        => '',
                                 // ':id_empresa'   => $datosFactura['id_empresa'],
@@ -673,17 +673,17 @@ class caja_chica_model extends CI_Model {
                                 ':titulo'       => $nombresCajas[$data['fno_caja']])
                         );
 
-          $this->db->update('cajachica_deudores', $gastos_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
+          $this->db->update('cajachica_deudores', $deudor_udt, "id_deudor = ".$data['deudor_id_deudor'][$key]);
         } else {
-          $gastos = array(
-            'fecha'           => $data['fecha_caja_chica'],
+          $deudor = array(
+            'fecha'           => !empty($data['deudor_fecha'][$key])? $data['deudor_fecha'][$key]: $data['fecha_caja_chica'],
             'nombre'          => $nombre,
             'concepto'        => $data['deudor_concepto'][$key],
             'monto'           => $data['deudor_importe'][$key],
             'no_caja'         => $data['fno_caja'],
             'id_usuario'      => $this->session->userdata('id_usuario'),
           );
-          $this->db->insert('cajachica_deudores', $gastos);
+          $this->db->insert('cajachica_deudores', $deudor);
           $gastooidd = $this->db->insert_id();
           // $gastos_ids['adds'][] = $gastooidd;
 
@@ -698,6 +698,43 @@ class caja_chica_model extends CI_Model {
     }
 
     return true;
+  }
+
+  public function addAbonoDeudor($datos)
+  {
+    $deudores = $this->db->query(
+        "SELECT cd.id_deudor, cd.fecha, cd.nombre, cd.concepto, cd.monto, Coalesce(ab.abonos, 0) AS abonos,
+          (cd.monto - Coalesce(ab.abonos, 0)) AS saldo
+        FROM cajachica_deudores cd
+          LEFT JOIN (
+            SELECT id_deudor, Sum(monto) AS abonos FROM cajachica_deudores_pagos
+            WHERE no_caja = {$datos['no_caja']} AND fecha <= Date(Now()) GROUP BY id_deudor
+          ) ab ON cd.id_deudor = ab.id_deudor
+        WHERE cd.id_deudor = {$datos['id']} AND cd.no_caja = {$datos['no_caja']}
+          AND fecha <= Date(Now())"
+      )->row();
+
+    if ($deudores->saldo > 0) {
+      if ($deudores->saldo >= $datos['dmonto']) {
+        $data_insert = [
+          'id_deudor'  => $datos['id'],
+          'fecha'      => $datos['fecha'],
+          'monto'      => $datos['dmonto'],
+          'no_caja'    => $datos['no_caja'],
+          'id_usuario' => $this->session->userdata('id_usuario'),
+        ];
+      } else {
+        $data_insert = [
+          'id_deudor'  => $datos['id'],
+          'fecha'      => $datos['fecha'],
+          'monto'      => $deudores->saldo,
+          'no_caja'    => $datos['no_caja'],
+          'id_usuario' => $this->session->userdata('id_usuario'),
+        ];
+      }
+
+      $this->db->insert('cajachica_deudores_pagos', $data_insert);
+    }
   }
 
   public function getRemisiones()
@@ -1450,6 +1487,74 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
     $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
+    if ($noCajas == 2) {
+      // Deudores
+      // $pag_aux2 = $pdf->page;
+      // $pdf->page = $pag_aux;
+      // $pdf->SetY($pag_yaux);
+      $pdf->SetFillColor(230, 230, 230);
+      $pdf->SetXY(111, $pdf->GetY()+3);
+      $pdf->SetAligns(array('L', 'C'));
+      $pdf->SetWidths(array(83, 17));
+      $pdf->Row(array('DEUDORES', ''), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetX(111);
+      $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+      $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+
+      $pdf->SetFont('Arial','', 6);
+      $pdf->SetAligns(array('C', 'C', 'C', 'R', 'R', 'R'));
+      $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+
+      $codigoAreas = array();
+      $totalDeudores = 0;
+      foreach ($caja['deudores'] as $key => $deudor)
+      {
+        if ($pdf->GetY() >= $pdf->limiteY)
+        {
+          if (count($pdf->pages) > $pdf->page) {
+            $pdf->page++;
+            $pdf->SetXY(111, 10);
+          } else
+            $pdf->AddPage();
+          // // nomenclatura
+          // $this->printCajaNomenclatura($pdf, $nomenclaturas);
+          $pdf->SetFont('Helvetica','B', 7);
+          $pdf->SetXY(111, $pdf->GetY());
+          $pdf->SetAligns(array('C', 'C', 'C', 'C', 'C', 'C'));
+          $pdf->SetWidths(array(13, 23, 22, 14, 14, 14));
+          $pdf->Row(array('FECHA', 'NOMBRE', 'CONCEPTO', 'PRESTADO', 'ABONOS', 'SALDO'), true, true);
+        }
+
+        $totalDeudores += floatval($deudor->saldo);
+
+        $pdf->SetAligns(array('L', 'L', 'L', 'R', 'R', 'R'));
+        $pdf->SetX(111);
+        $pdf->Row(array(
+          $deudor->fecha,
+          $deudor->nombre,
+          $deudor->concepto,
+          String::formatoNumero($deudor->monto, 2, '$', false),
+          String::formatoNumero($deudor->abonos, 2, '$', false),
+          String::formatoNumero($deudor->saldo, 2, '$', false)
+        ), false, true);
+
+        // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
+        //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
+      }
+
+      $pdf->SetFont('Arial', 'B', 6.4);
+      $pdf->SetX(111);
+      $pdf->SetFillColor(255, 255, 255);
+      $pdf->SetWidths(array(34, 33, 33));
+      $pdf->SetAligns(array('L', 'L', 'L'));
+      $pdf->Row(array('PRESTADO: '.String::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
+        'ABONADO: '.String::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
+        'TOTAL: '.String::formatoNumero($totalDeudores, 2, '$', false)), true, true);
+    }
+
     // Boletas pendientes x recuperar
     $totalBoletas2 = 0;
     if ($noCajas == 1 || $noCajas == 3) {
@@ -1683,7 +1788,7 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
     $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos) , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -1704,7 +1809,9 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(168);
     $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos, 2, '$', false)), false, false);
+    $pdf->Row(array('TOTAL DEUDORES', String::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->SetX(168);
+    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
     $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
 

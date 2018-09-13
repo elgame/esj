@@ -526,11 +526,12 @@
                                   $modificar_gasto = $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_gastos/');
                                   $mod_gas_readonly = !$modificar_gasto && $readonly == ''? ' readonly': '';
                                   $totalDeudores = 0;
-                                  if (count($caja['deudores']) == 0 && isset($_POST['gasto_concepto']) && count($_POST['gasto_concepto']) > 0) {
-                                    foreach ($_POST['gasto_concepto'] as $key => $concepto) {
+                                  if (count($caja['deudores']) == 0 && isset($_POST['deudor_nombre']) && count($_POST['deudor_nombre']) > 0) {
+                                    foreach ($_POST['deudor_nombre'] as $key => $concepto) {
                                       $totalDeudores += floatval($_POST['deudor_importe'][$key]); ?>
                                         <tr>
                                           <td style="">
+                                            <input type="hidden" name="deudor_fecha[]" value="">
                                           </td>
                                           <td style="width: 200px;">
                                             <input type="text" name="deudor_nombre[]" value="<?php echo $_POST['deudor_nombre'][$key] ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $readonly.$mod_gas_readonly ?>>
@@ -560,13 +561,14 @@
                                   <tr>
                                     <td style="width: 80px;">
                                       <?php echo $deudor->fecha ?>
+                                      <input type="hidden" name="deudor_fecha[]" value="<?php echo $deudor->fecha ?>">
                                     </td>
                                     <td style="width: 200px;">
                                       <input type="text" name="deudor_nombre[]" value="<?php echo $deudor->nombre ?>" class="span12 deudor_nombre" required autocomplete="off" <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
                                       <input type="hidden" name="deudor_id_deudor[]" value="<?php echo $deudor->id_deudor ?>" id="deudor_id_gasto">
                                       <input type="hidden" name="deudor_del[]" value="" id="deudor_del">
-                                      <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$deudor->id_deudor)?>" target="_blank" title="Imprimir vale prestamo">
-                                        <i class="ico icon-print" style="cursor:pointer"></i></a>
+                                      <!-- <a href="<?php echo base_url('panel/caja_chica/print_vale/?id='.$deudor->id_deudor)?>" target="_blank" title="Imprimir vale prestamo">
+                                        <i class="ico icon-print" style="cursor:pointer"></i></a> -->
                                     </td>
                                     <td style="width: 200px;">
                                       <input type="text" name="deudor_concepto[]" value="<?php echo $deudor->concepto ?>" class="span12 deudor-cargo" required <?php echo $deudor->mismo_dia.$readonly.$mod_gas_readonly ?>>
@@ -577,12 +579,12 @@
                                     <td style="width: 80px;" class="deudor_abonos" data-abonos="<?php echo $deudor->abonos ?>">
                                       <?php echo $deudor->abonos ?>
                                     </td>
-                                    <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>">
-                                      <a class="btn_abonos_deudores" href="<?php echo base_url('panel/caja_chica/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$_GET['fno_caja']}" ?>" style="" rel="superbox-50x500" title="Abonar">
+                                    <td style="width: 80px;" class="deudor_saldo" data-saldo="<?php echo $deudor->saldo ?>" data-mismo="<?php echo $deudor->mismo_dia ?>">
+                                      <a class="btn_abonos_deudores" href="<?php echo base_url('panel/caja_chica/agregar_abono_deudor/')."?id={$deudor->id_deudor}&fecha={$fecha}&no_caja={$_GET['fno_caja']}&monto={$deudor->saldo}" ?>" style="" rel="superbox-50x500" title="Abonar">
                                         <?php echo $deudor->saldo ?></a>
                                     </td>
                                     <td style="width: 30px;">
-                                      <?php if ($modificar_gasto): ?>
+                                      <?php if ($modificar_gasto && $deudor->mismo_dia == ''): ?>
                                         <button type="button" class="btn btn-danger btn-del-deudor" style="padding: 2px 7px 2px;"><i class="icon-remove"></i></button>
                                       <?php endif ?>
                                     </td>
@@ -591,14 +593,14 @@
                                 <tr class="row-total">
                                   <td style="text-align: right; font-weight: bolder;">PRESTAMOS DEL DIA</td>
                                   <td style="text-align: right; font-weight: bolder;">
-                                    <input type="text" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="ttotal-deudores-pres-dia" style="text-align: right;" readonly>
+                                    <input type="text" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="total-deudores-pres-dia" style="text-align: right;" readonly>
                                   </td>
                                   <td style="text-align: right; font-weight: bolder;">ABONOS DEL DIA</td>
                                   <td style="text-align: right; font-weight: bolder;">
-                                    <input type="text" value="<?php echo $caja['deudores_abonos_dia'] ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly>
+                                    <input type="text" value="<?php echo $caja['deudores_abonos_dia'] ?>" class="input-small vpositive" id="total-deudores-abono-dia" style="text-align: right;" readonly>
                                   </td>
                                   <td style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                  <td><input type="text" value="<?php echo $totalDeudores ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
+                                  <td><input type="text" value="<?php echo $totalDeudores ?>" class="input-small vpositive" id="total-deudores" style="text-align: right;" readonly></td>
                                   <td></td>
                                 </tr>
                               </tbody>
@@ -700,12 +702,12 @@
                             </tr>
                             <tr>
                               <td>TOTAL DEUDORES:</td>
-                              <td><input type="text" name="" value="<?php echo $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
+                              <td><input type="text" name="" value="<?php echo ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-deudores" style="text-align: right;" readonly></td>
                             </tr>
                             <tr>
                               <td>SALDO DEL CORTE:</td>
-                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletasPagadas - $totalGastos - $caja['deudores_prest_dia'] ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
-                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletasPagadas - $totalGastos - $caja['deudores_prest_dia']) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
+                              <td><input type="text" name="saldo_corte" value="<?php echo $totalReporteCaja - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']) ?>" class="input-small vpositive" id="ttotal-corte" style="text-align: right;" readonly></td>
+                              <input type="hidden" name="total_diferencia" value="<?php echo $totalEfectivo - ($totalReporteCaja - $totalBoletasPagadas - $totalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) ?>" class="input-small vpositive" id="ttotal-diferencia" style="text-align: right;" readonly>
                             </tr>
                           </tbody>
                         </table>
