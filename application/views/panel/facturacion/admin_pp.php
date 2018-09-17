@@ -259,6 +259,23 @@
               ));
               $pagination = $this->pagination->create_links();
               echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
+            } elseif (isset($datos_cp)) {
+              //Paginacion
+              $this->pagination->initialize(array(
+                  'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                  'total_rows'    => $datos_cp['total_rows'],
+                  'per_page'      => $datos_cp['items_per_page'],
+                  'cur_page'      => $datos_cp['result_page']*$datos_cp['items_per_page'],
+                  'page_query_string' => TRUE,
+                  'num_links'     => 1,
+                  'anchor_class'  => 'pags corner-all',
+                  'num_tag_open'  => '<li>',
+                  'num_tag_close' => '</li>',
+                  'cur_tag_open'  => '<li class="active"><a href="#">',
+                  'cur_tag_close' => '</a></li>'
+              ));
+              $pagination = $this->pagination->create_links();
+              echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
             }
             ?>
           </div>
