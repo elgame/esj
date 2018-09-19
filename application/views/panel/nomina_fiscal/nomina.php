@@ -115,7 +115,7 @@
                       <th colspan="5" style="text-align: center;background-color: #BEEEBC;" id="head-percepciones">PERCEPCIONES</th>
                       <th colspan="6" style="text-align: center;background-color: #EEBCBC;" id="head-deducciones">DEDUCCIONES</th>
                       <th style="background-color: #BCD4EE;"></th>
-                      <th colspan="6" style="background-color: #EEEEBC;"></th>
+                      <th colspan="7" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
                       <th style="position: absolute;">VACAS. <?php echo count($empleados); ?></th>
@@ -154,6 +154,7 @@
                       <th style="background-color: #EEEEBC;">DOMINGO</th>
                       <th style="background-color: #EEBCBC;">DESC. PLAY</th>
                       <th style="background-color: #EEBCBC;">DESC. OTRO</th>
+                      <th style="background-color: #EEBCBC;">DESC. COCINA</th>
                       <th style="background-color: #EEEEBC;">TOTAL COMPLEM.</th>
                     </tr>
                   </thead>
@@ -198,6 +199,7 @@
                         $e->horas_extras_dinero = $e->nomina->percepciones['horas_extras']['total'];
                         $e->descuento_playeras  = $prenomina['desc_playeras'];
                         $e->descuento_otros     = $prenomina['desc_otros'];
+                        $e->descuento_cocina    = $prenomina['desc_cocina'];
 
                         $totalPercepcionesEmpleado = $e->nomina->percepciones['sueldo']['total'] +
                                              $e->nomina->percepciones['horas_extras']['total'] +
@@ -434,6 +436,7 @@
                         </td>
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_playeras[]" value="<?php echo $e->descuento_playeras ?>" class="span12 vpositive descuento-playeras" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_otros[]" value="<?php echo $e->descuento_otros ?>" class="span12 vpositive descuento-otros" <?php echo $readonly ?>></td><!-- desc playeras -->
+                        <td style="width: 60px; <?php echo $bgColor ?>"><input type="text" name="descuento_cocina[]" value="<?php echo $e->descuento_cocina ?>" class="span12 vpositive descuento-cocina" <?php echo $readonly ?>></td><!-- desc playeras -->
                         <!-- total por fuera -->
                         <?php
 
@@ -447,7 +450,8 @@
                                                   ($e->esta_asegurado=='f'?0:$e->fondo_ahorro) -
                                                   $totalPrestamosEmpleado -
                                                   $e->descuento_playeras -
-                                                  $e->descuento_otros;
+                                                  $e->descuento_otros -
+                                                  $e->descuento_cocina;
                         ?>
                         <td style="<?php echo $bgColor ?>">
                           <span class="total-complemento-span"><?php echo String::formatoNumero($totalComplementoEmpleado) ?></span>

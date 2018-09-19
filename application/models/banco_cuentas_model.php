@@ -1081,69 +1081,74 @@ class banco_cuentas_model extends banco_model {
 
 	public function deleteMovimiento($id_movimiento, $cancelar=false)
 	{
-		//compras, ventas, notas de venta ligadas al movimiento bancario
-		// $data_compras     = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, ca.id_compra
-		// 	FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS ca ON ca.id_abono = bm.id_compra_abono
-		// 	WHERE bm.id_movimiento = {$id_movimiento}");
-		$data_facturas    = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_factura, af.id_factura
-			FROM banco_movimientos_facturas AS bm INNER JOIN facturacion_abonos AS af ON af.id_abono = bm.id_abono_factura
-			WHERE bm.id_movimiento = {$id_movimiento}")->result();
-		$data_notas_venta = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_venta_remision, af.id_venta
-			FROM banco_movimientos_ventas_remision AS bm INNER JOIN facturacion_ventas_remision_abonos AS af ON af.id_abono = bm.id_abono_venta_remision
-			WHERE bm.id_movimiento = {$id_movimiento}")->result();
-		$data_compras = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, af.id_compra
-			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono
-			WHERE bm.id_movimiento = {$id_movimiento}")->result();
-		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
-			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago
-			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+    $data_com_pago    = $this->db->query("SELECT id
+      FROM banco_movimientos_com_pagos
+      WHERE status = 'facturada' AND id_movimiento = {$id_movimiento}")->row();
+    if (!isset($data_com_pago->id)) {
+  		//compras, ventas, notas de venta ligadas al movimiento bancario
+  		// $data_compras     = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, ca.id_compra
+  		// 	FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS ca ON ca.id_abono = bm.id_compra_abono
+  		// 	WHERE bm.id_movimiento = {$id_movimiento}");
+  		$data_facturas    = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_factura, af.id_factura
+  			FROM banco_movimientos_facturas AS bm INNER JOIN facturacion_abonos AS af ON af.id_abono = bm.id_abono_factura
+  			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+  		$data_notas_venta = $this->db->query("SELECT bm.id_movimiento, bm.id_abono_venta_remision, af.id_venta
+  			FROM banco_movimientos_ventas_remision AS bm INNER JOIN facturacion_ventas_remision_abonos AS af ON af.id_abono = bm.id_abono_venta_remision
+  			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+  		$data_compras = $this->db->query("SELECT bm.id_movimiento, bm.id_compra_abono, af.id_compra
+  			FROM banco_movimientos_compras AS bm INNER JOIN compras_abonos AS af ON af.id_abono = bm.id_compra_abono
+  			WHERE bm.id_movimiento = {$id_movimiento}")->result();
+  		$data_bascula = $this->db->query("SELECT bm.id_movimiento, bm.id_bascula_pago
+  			FROM banco_movimientos_bascula AS bm INNER JOIN bascula_pagos AS af ON af.id_pago = bm.id_bascula_pago
+  			WHERE bm.id_movimiento = {$id_movimiento}")->result();
 
-		// Bitacora
-		$inf_movi = $this->getMovimientoInfo($id_movimiento);
-		$data_cuenta = $this->getCuentaInfo($inf_movi['info']->id_cuenta);
-    $this->bitacora_model->_cancel('banco_movimientos', $id_movimiento,
-                            array(':accion'     => ($cancelar? 'cancelo': 'elimino').' un '.($inf_movi['info']->tipo=='t'? 'deposito': 'retiro').' de la cuenta ', ':seccion' => 'banco',
-                                  ':folio'      => $data_cuenta['info']->alias.' por '.String::formatoNumero($inf_movi['info']->monto),
-                                  ':id_empresa' => $data_cuenta['info']->id_empresa,
-                                  ':empresa'    => 'de '.$data_cuenta['info']->nombre_fiscal));
+  		// Bitacora
+  		$inf_movi = $this->getMovimientoInfo($id_movimiento);
+  		$data_cuenta = $this->getCuentaInfo($inf_movi['info']->id_cuenta);
+      $this->bitacora_model->_cancel('banco_movimientos', $id_movimiento,
+                              array(':accion'     => ($cancelar? 'cancelo': 'elimino').' un '.($inf_movi['info']->tipo=='t'? 'deposito': 'retiro').' de la cuenta ', ':seccion' => 'banco',
+                                    ':folio'      => $data_cuenta['info']->alias.' por '.String::formatoNumero($inf_movi['info']->monto),
+                                    ':id_empresa' => $data_cuenta['info']->id_empresa,
+                                    ':empresa'    => 'de '.$data_cuenta['info']->nombre_fiscal));
 
-		if($cancelar)//cancelar movimiento
-			$this->updateMovimiento($id_movimiento, array('status' => 'f') );
-		else
-			$this->db->delete('banco_movimientos', "id_movimiento = {$id_movimiento}");
+      if($cancelar)//cancelar movimiento
+        $this->updateMovimiento($id_movimiento, array('status' => 'f') );
+      else
+        $this->db->delete('banco_movimientos', "id_movimiento = {$id_movimiento}");
 
-		//cuendo es una venta (facturas) se cancelan los abonos a la venta (facturas)
-		$this->load->model('cuentas_cobrar_model');
-		if(count($data_facturas) > 0){
-			foreach ($data_facturas as $key => $value) {
-				$this->cuentas_cobrar_model->removeAbono($value->id_factura, 'f', $value->id_abono_factura);
-			}
-		}
+  		//cuendo es una venta (facturas) se cancelan los abonos a la venta (facturas)
+  		$this->load->model('cuentas_cobrar_model');
+  		if(count($data_facturas) > 0){
+  			foreach ($data_facturas as $key => $value) {
+  				$this->cuentas_cobrar_model->removeAbono($value->id_factura, 'f', $value->id_abono_factura);
+  			}
+  		}
 
-		//cuendo es una venta (notas de venta) se cancelan los abonos a la venta (notas de venta)
-		if(count($data_notas_venta) > 0){
-			foreach ($data_notas_venta as $key => $value) {
-				$this->cuentas_cobrar_model->removeAbono($value->id_venta, 'vr', $value->id_abono_venta_remision);
-			}
-		}
+  		//cuendo es una venta (notas de venta) se cancelan los abonos a la venta (notas de venta)
+  		if(count($data_notas_venta) > 0){
+  			foreach ($data_notas_venta as $key => $value) {
+  				$this->cuentas_cobrar_model->removeAbono($value->id_venta, 'vr', $value->id_abono_venta_remision);
+  			}
+  		}
 
-		//cuendo es una compra se cancelan los abonos a la compra
-		$this->load->model('cuentas_pagar_model');
-		if(count($data_compras) > 0){
-			foreach ($data_compras as $key => $value) {
-				$this->cuentas_pagar_model->removeAbono($value->id_compra, 'f', $value->id_compra_abono);
-			}
-		}
+  		//cuendo es una compra se cancelan los abonos a la compra
+  		$this->load->model('cuentas_pagar_model');
+  		if(count($data_compras) > 0){
+  			foreach ($data_compras as $key => $value) {
+  				$this->cuentas_pagar_model->removeAbono($value->id_compra, 'f', $value->id_compra_abono);
+  			}
+  		}
 
-		//cuendo es pago de bascula cancelan los abonos
-		$this->load->model('bascula_model');
-		if(count($data_bascula) > 0){
-			foreach ($data_bascula as $key => $value) {
-				$this->bascula_model->cancelar_pago($value->id_bascula_pago, !$cancelar);
-			}
-		}
-
-		return true;
+  		//cuendo es pago de bascula cancelan los abonos
+  		$this->load->model('bascula_model');
+  		if(count($data_bascula) > 0){
+  			foreach ($data_bascula as $key => $value) {
+  				$this->bascula_model->cancelar_pago($value->id_bascula_pago, !$cancelar);
+  			}
+  		}
+		  return true;
+    }
+    return false;
 	}
 
 	public function updateMovimiento($id_movimiento, $data=null)

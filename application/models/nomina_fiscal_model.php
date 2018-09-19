@@ -649,10 +649,11 @@ class nomina_fiscal_model extends CI_Model {
     $data = $this->db->query("SELECT * FROM nomina_fiscal_presave WHERE id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$anio} AND semana = {$semana}")->row();
 
     return array(
-      'horas_extras' => isset($data->horas_extras)? $data->horas_extras: 0,
+      'horas_extras'  => isset($data->horas_extras)? $data->horas_extras: 0,
       'desc_playeras' => isset($data->desc_playeras)? $data->desc_playeras: 0,
-      'desc_otros' => isset($data->desc_otros)? $data->desc_otros: 0,
-      );
+      'desc_otros'    => isset($data->desc_otros)? $data->desc_otros: 0,
+      'desc_cocina'   => isset($data->desc_cocina)? $data->desc_cocina: 0,
+    );
   }
 
   public function add_nominas($datos, $empresaId, $empleadoId)
@@ -927,6 +928,7 @@ class nomina_fiscal_model extends CI_Model {
               'horas_extras_excento'      => $empleadoNomina[0]->nomina->percepciones['horas_extras']['ImporteExcento'],
               'descuento_playeras'        => $datos['descuento_playeras'],
               'descuento_otros'           => $datos['descuento_otros'],
+              'descuento_cocina'          => $datos['descuento_cocina'],
               'xml'                       => $result['result']->data->xml,
               'uuid'                      => $result['result']->data->uuid,
               'utilidad_empresa'          => $empleadoNomina[0]->utilidad_empresa,
@@ -1031,6 +1033,7 @@ class nomina_fiscal_model extends CI_Model {
               'horas_extras_excento' => 0,
               'descuento_playeras' => $datos['descuento_playeras'],
               'descuento_otros' => $datos['descuento_otros'],
+              'descuento_cocina' => $datos['descuento_cocina'],
               'xml' => '',
               'uuid' => '',
               'utilidad_empresa' => $empleadoNomina[0]->utilidad_empresa,
@@ -1115,6 +1118,7 @@ class nomina_fiscal_model extends CI_Model {
       'horas_extras'  => $datos['horas_extras'],
       'desc_playeras' => $datos['descuento_playeras'],
       'desc_otros'    => $datos['descuento_otros'],
+      'desc_cocina'   => $datos['descuento_cocina'],
     );
     if($existe->num > 0)
       $this->db->update('nomina_fiscal_presave', $data, "id_empleado = {$empleadoId} AND id_empresa = {$empresaId} AND anio = {$datos['anio']} AND semana = {$datos['numSemana']}");

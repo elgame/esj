@@ -5,6 +5,9 @@
     ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
     COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
 
+ ✔ Descuento de cocina en nomina @done (18-09-19 12:39) pct
+   ALTER TABLE public.nomina_fiscal_presave ADD COLUMN desc_cocina double precision NOT NULL DEFAULT 0;
+   ALTER TABLE public.nomina_fiscal ADD COLUMN descuento_cocina double precision NOT NULL DEFAULT 0;
  ✔ Cambios en caja chica @done (18-09-10 19:07) pcc|pct|san
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('INTANGIBLES','11',TRUE);
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('NOMINA REEMBOLSADA','12',TRUE);

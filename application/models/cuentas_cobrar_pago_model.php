@@ -51,14 +51,17 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       $sql .= " AND f.status = '".$status."'";
     }
 
+    if($this->input->get('ffolio') != '') {
+      $sql .= " AND f.folio = ".$this->input->get('ffolio');
+    }
 
     $query = BDUtil::pagination(
       "SELECT
         f.id, f.id_movimiento, f.fecha, f.serie, f.folio, f.uuid, f.cfdi_ext, f.sello, f.cadena_original,
         f.status, f.version, f.id_empresa, f.no_impresiones, bm.monto, c.nombre_fiscal, e.nombre_fiscal AS empresa
       FROM banco_movimientos_com_pagos AS f
-        INNER JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
-        INNER JOIN clientes AS c ON c.id_cliente = bm.id_cliente
+        LEFT JOIN banco_movimientos AS bm ON bm.id_movimiento = f.id_movimiento
+        LEFT JOIN clientes AS c ON c.id_cliente = bm.id_cliente
         INNER JOIN empresas AS e ON e.id_empresa = f.id_empresa
       WHERE 1 = 1
       {$sql}

@@ -347,7 +347,8 @@ class banco extends MY_Controller {
 		{
 			$this->load->model('banco_cuentas_model');
 			$response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+      $msg = $response? '10': '12';
+			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg='.$msg));
 		}else
 			redirect(base_url('panel/banco/cuenta/?'.String::getVarsLink(array('msg')).'&msg=1'));
 	}
@@ -735,6 +736,10 @@ class banco extends MY_Controller {
 				$txt = 'La operacion cambio de estado correctamente.';
 				$icono = 'success';
 				break;
+      case 12:
+        $txt = 'Hay complementos de pago ligados al movimiento, se tienen que cancelar.';
+        $icono = 'error';
+        break;
 			case 30:
 				$txt = 'La cuenta no tiene saldo suficiente.';
 				$icono = 'error';
