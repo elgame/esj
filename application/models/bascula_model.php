@@ -629,7 +629,7 @@ class bascula_model extends CI_Model {
       WHERE pb.id_bascula = {$id} AND bp.status = 't'")->row();
     // Bitacora
     $_GET['boletaId'] = $id;
-    $data['info'][0]->bitacora = $this->bitacora(true);
+    $data['info'][0]->bitacora = $this->bitacora(true, " AND (us2.nombre || ' ' || us2.apellido_paterno || ' ' || us2.apellido_materno) <> ''");
 
     //Actualiza el control de impresiones, se le suma 1
     //al valor de la BD para la siguiente impresion
@@ -3243,7 +3243,7 @@ class bascula_model extends CI_Model {
 
   }
 
-  private function bitacora($noFecha = false)
+  private function bitacora($noFecha = false, $sql2 = '')
   {
     $sql = "";
     if ((isset($_GET['ffecha1']) && $_GET['ffecha1']) && (isset($_GET['ffecha2']) && $_GET['ffecha2']))
@@ -3311,7 +3311,7 @@ class bascula_model extends CI_Model {
        LEFT JOIN usuarios us2 ON us2.id = bb.id_usuario_auth
        INNER JOIN empresas em ON em.id_empresa = ba.id_empresa
        INNER JOIN areas ar ON ar.id_area = ba.id_area
-       WHERE 1=1 $sql
+       WHERE 1=1 {$sql} {$sql2}
        ORDER BY bb.id_bascula, bb.fecha, bb.no_edicion
     ");
 
