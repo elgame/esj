@@ -11,6 +11,7 @@
     eventOnChangeHorasExtras();
     eventOnChangeDescuentoPlayeras();
     eventOnChangeDescuentoOtros();
+    eventOnChangeDescuentoCocina();
     eventClickCheckVacaciones();
     eventClickCheckAguinaldo();
     eventOnSubmitForm();
@@ -73,6 +74,13 @@
 
   var eventOnChangeDescuentoOtros = function () {
     $('.descuento-otros').on('change', function(event) {
+      recalculaEmpleado($(this).parents('tr'));
+      guardaPreNominaEmpleado($(this).parents('tr'));
+    });
+  };
+
+  var eventOnChangeDescuentoCocina = function () {
+    $('.descuento-cocina').on('change', function(event) {
       recalculaEmpleado($(this).parents('tr'));
       guardaPreNominaEmpleado($(this).parents('tr'));
     });
@@ -258,6 +266,7 @@
         $prestamos  = $parent.find('.prestamos'),
         $playeras   = $parent.find('.descuento-playeras'),
         $dotros     = $parent.find('.descuento-otros'),
+        $dcocina    = $parent.find('.descuento-cocina'),
         $isr        = $parent.find('.isr'),
         $fondo_ahorro = $parent.find('.fondo_ahorro'),
 
@@ -298,6 +307,10 @@
 
     if ($dotros.val() === '') {
       $dotros.val(0);
+    }
+
+    if ($dcocina.val() === '') {
+      $dcocina.val(0);
     }
 
     // Si activa las vacaciones entonces sumas las vacaciones y la prima
@@ -359,7 +372,8 @@
                        parseFloat($infonavit.val())-
                        parseFloat($prestamos.val()) -
                        parseFloat($playeras.val()) -
-                       parseFloat($dotros.val());
+                       parseFloat($dotros.val()) -
+                       parseFloat($dcocina.val());
 
     $totalComplementoSpan.text(util.darFormatoNum(util.trunc2Dec(totalComplemento)));
     $totalComplemento.val(util.trunc2Dec(totalComplemento));
@@ -500,6 +514,7 @@
         horas_extras: $tr.find('.horas-extras').val(),
         descuento_playeras: $tr.find('.descuento-playeras').val(),
         descuento_otros: $tr.find('.descuento-otros').val(),
+        descuento_cocina: $tr.find('.descuento-cocina').val(),
         subsidio: $tr.find('.subsidio').val(),
         isr: $tr.find('.isr').val(),
         utilidad_empresa: $('#ptu').val(),
@@ -584,6 +599,7 @@
         horas_extras: $tr.find('.horas-extras').val(),
         descuento_playeras: $tr.find('.descuento-playeras').val(),
         descuento_otros: $tr.find('.descuento-otros').val(),
+        descuento_cocina: $tr.find('.descuento-cocina').val(),
       },
     })
     .done(function(result) {
