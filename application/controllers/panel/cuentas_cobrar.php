@@ -385,12 +385,12 @@ class cuentas_cobrar extends MY_Controller {
 
       $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
 
-      if (isset($pago->id))
-        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=101'));
-      else {
-        $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
-        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=10'));
-      }
+      // if (isset($pago->id))
+      //   redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=101'));
+      // else {
+      //   // $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
+        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg='.$pago['msg']));
+      // }
     }else
       redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=1'));
   }
