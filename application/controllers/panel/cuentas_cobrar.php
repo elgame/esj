@@ -417,13 +417,14 @@ class cuentas_cobrar extends MY_Controller {
     {
       $this->load->library('cfdi');
       $this->load->model('cuentas_cobrar_pago_model');
-      $factura = $this->cuentas_cobrar_pago_model->getInfoComPago($_GET['id']);
+      $this->cuentas_cobrar_pago_model->descargarZipCP($_GET['id']);
+      // $factura = $this->cuentas_cobrar_pago_model->getInfoComPago($_GET['id']);
 
-      $folio = $this->cfdi->acomodarFolio($factura->folio);
-      $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;
-      header('Content-type: text/xml');
-      header('Content-Disposition: attachment; filename="'.$file.'.xml"');
-      echo $factura->xml;
+      // $folio = $this->cfdi->acomodarFolio($factura->folio);
+      // $file = $factura->cfdi_ext->emisor->rfc.'-'.$factura->serie.$folio;
+      // header('Content-type: text/xml');
+      // header('Content-Disposition: attachment; filename="'.$file.'.xml"');
+      // echo $factura->xml;
     }
     else
       redirect(base_url('panel/facturacion/?msg=1'));

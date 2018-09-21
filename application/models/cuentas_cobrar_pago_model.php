@@ -326,6 +326,45 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     return array('msg' => $status_uuid);
   }
 
+  public function descargarZipCP($idFactura)
+    {
+        $this->load->library('cfdi');
+
+        // Obtiene la info de la factura.
+        $factura = $this->getInfoComPago($idFactura);
+
+        $cliente = strtoupper($factura->cfdi_ext->receptor->nombreFiscal);
+        $fecha   = explode('-', $factura->fecha);
+        $ano     = $fecha[0];
+        $mes     = strtoupper(String::mes(floatval($fecha[1])));
+        $serie   = $factura->serie !== '' ? $factura->serie.'-' : '';
+        $folio   = $factura->folio;
+
+        $pathDocs = APPPATH."documentos/CLIENTES/{$cliente}/{$ano}/{$mes}/FACT-{$serie}{$folio}/";
+
+        // Scanea el directorio para obtener los archivos.
+        $archivos = array_diff(scandir($pathDocs), array('..', '.'));
+
+        $zip = new ZipArchive;
+        if ($zip->open(APPPATH.'media/documentos.zip', ZIPARCHIVE::CREATE | ZIPARCHIVE::OVERWRITE) === true)
+        {
+          foreach ($archivos as $archivo)
+            $zip->addFile($pathDocs.$archivo, $archivo);
+
+          $zip->close();
+        }
+        else
+        {
+          exit('Error al intentar crear el ZIP.');
+        }
+
+        header('Content-Type: application/zip');
+        header('Content-disposition: attachment; filename=documentos.zip');
+        readfile(APPPATH.'media/documentos.zip');
+
+        unlink(APPPATH.'media/documentos.zip');
+    }
+
   public function getFolioSerie($serie, $empresa, $sqlX = null)
   {
     $res = $this->db->select('folio')
