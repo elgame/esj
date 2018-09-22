@@ -5,9 +5,39 @@
     ALTER TABLE public.banco_cuentas ADD COLUMN contable boolean NOT NULL DEFAULT true;
     COMMENT ON COLUMN public.banco_cuentas.contable IS 'si es true esa cuenta se considera en los reportes de balance, etc';
 
- ✔ Descuento de cocina en nomina @done (18-09-19 12:39) pct
+ ✔ Descuento de cocina en nomina @done (18-09-19 12:39) pct|pcc
    ALTER TABLE public.nomina_fiscal_presave ADD COLUMN desc_cocina double precision NOT NULL DEFAULT 0;
    ALTER TABLE public.nomina_fiscal ADD COLUMN descuento_cocina double precision NOT NULL DEFAULT 0;
+   CREATE MATERIALIZED VIEW public.existencia_productos AS
+     SELECT pf.id_familia,
+        pf.nombre,
+        p.id_producto,
+        p.id_empresa,
+        p.nombre AS nombre_producto,
+        pu.abreviatura,
+        COALESCE(co.cantidad, 0::double precision) AS entradas,
+        COALESCE(sa.cantidad, 0::double precision) AS salidas,
+        0 AS saldo_anterior,
+        p.stock_min,
+        COALESCE(co.cantidad, 0::double precision) - COALESCE(sa.cantidad, 0::double precision) AS existencia
+       FROM productos p
+         JOIN productos_familias pf ON pf.id_familia = p.id_familia
+         JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+         LEFT JOIN ( SELECT cp.id_producto,
+                sum(cp.cantidad) AS cantidad
+               FROM compras_ordenes co_1
+                 JOIN compras_productos cp ON cp.id_orden = co_1.id_orden
+              WHERE co_1.status::text <> 'ca'::text AND (co_1.tipo_orden::text = ANY (ARRAY['p'::character varying, 't'::character varying]::text[])) AND cp.status::text = 'a'::text AND date(cp.fecha_aceptacion) <= date(now()) AND co_1.id_almacen = 1
+              GROUP BY cp.id_producto) co ON co.id_producto = p.id_producto
+         LEFT JOIN ( SELECT sp.id_producto,
+                sum(sp.cantidad) AS cantidad
+               FROM compras_salidas sa_1
+                 JOIN compras_salidas_productos sp ON sp.id_salida = sa_1.id_salida
+              WHERE sa_1.status::text <> 'ca'::text AND sp.tipo_orden::text = 'p'::text AND date(sa_1.fecha_registro) <= date(now()) AND sa_1.id_almacen = 1
+              GROUP BY sp.id_producto) sa ON sa.id_producto = p.id_producto
+      WHERE p.status::text = 'ac'::text AND pf.status::text = 'ac'::text AND pf.tipo::text = 'p'::text
+      ORDER BY pf.nombre, p.nombre
+    WITH DATA; ALTER TABLE public.existencia_productos OWNER TO programa;
  ✔ Cambios en caja chica @done (18-09-10 19:07) pcc|pct|san
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('INTANGIBLES','11',TRUE);
      INSERT INTO public.cajachica_nomenclaturas(nombre, nomenclatura, status) VALUES ('NOMINA REEMBOLSADA','12',TRUE);

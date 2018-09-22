@@ -221,6 +221,8 @@ class productos_salidas_model extends CI_Model {
       $this->db->insert('compras_transferencias', array('id_salida' => $idSalida, 'id_orden' => $id_orden));
     }
 
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
     return array('passes' => true, 'msg' => 3);
   }
 
@@ -240,6 +242,8 @@ class productos_salidas_model extends CI_Model {
         array('id_salida' => $idSalida, 'id_producto' => $producto));
     }
 
+    $this->db->query("SELECT refreshallmaterializedviews();");
+
     return array('passes' => true, 'msg' => 5);
   }
 
@@ -249,6 +253,8 @@ class productos_salidas_model extends CI_Model {
 
     $orden = $this->db->query("SELECT id_orden FROM compras_transferencias WHERE id_salida = ".$idOrden)->row();
     $this->db->update('compras_ordenes', array('status' => 'ca'), array('id_orden' => $orden->id_orden));
+
+    $this->db->query("SELECT refreshallmaterializedviews();");
 
     return array('passes' => true);
   }
