@@ -118,8 +118,9 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       $queryMov = $this->db->query(
           "SELECT bm.id_movimiento, bm.fecha, bm.metodo_pago AS forma_pago, bm.concepto,
-            bm.monto AS pago, bb.rfc, bc.numero AS num_cuenta, (caf.total - Coalesce(fao.total, 0)) AS pago_factura, v.version, v.serie, v.folio,
-            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa, v.metodo_pago
+            bm.monto AS pago, bc.numero AS num_cuenta, (caf.total - Coalesce(fao.total, 0)) AS pago_factura, v.version, v.serie, v.folio,
+            v.id_factura, v.uuid, v.cfdi_ext, Coalesce(par.parcialidades, 1) AS parcialidades, v.id_cliente, v.id_empresa, v.metodo_pago,
+            bb.rfc, bb.nombre AS banco
            FROM banco_movimientos bm
             INNER JOIN banco_cuentas bc ON bc.id_cuenta = bm.id_cuenta
             INNER JOIN banco_bancos bb ON bb.id_banco = bm.id_banco
@@ -137,7 +138,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
       if ($id_cuenta_cliente > 0) {
         $queryCliente = $this->db->query(
-            "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc
+            "SELECT cc.id_cuenta, cc.id_cliente, cc.alias, cc.cuenta, bb.rfc, bb.nombre AS banco
              FROM clientes_cuentas cc
               INNER JOIN banco_bancos bb ON bb.id_banco = cc.id_banco
              WHERE cc.id_cuenta = {$id_cuenta_cliente}"

@@ -1087,6 +1087,12 @@ class cfdi{
     elseif ($data[0]->forma_pago == 'efectivo')
       $formaDePago = '01';
 
+    $nombreBancoOrdExt = '';
+    if ($cuentaCliente->rfc === 'XEXX010101000') {
+      $cuentaCliente->rfc = '';
+      $nombreBancoOrdExt = $cuentaCliente->banco;
+    }
+
     $cfdiRel = array(
       'tipoRelacion' => '07',
       'cfdiRelacionado' => array(),
@@ -1100,7 +1106,7 @@ class cfdi{
       'formaDePago'       => $formaDePago,
       'moneda'            => $cfdi_ext->moneda,
       'monto'             => $data[0]->pago,
-      'nombreBancoOrdExt' => "",
+      'nombreBancoOrdExt' => $nombreBancoOrdExt,
       'numOperacion'      => "1",
       'rfcEmisorCtaBen'   => $formaDePago != '01'? $data[0]->rfc: '',
       'rfcEmisorCtaOrd'   => $cuentaCliente? $cuentaCliente->rfc : '',
