@@ -669,7 +669,7 @@ class compras_model extends privilegios_model{
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
-              (SELECT precio_unitario FROM compras_productos WHERE id_producto = p.id_producto ORDER BY id_orden DESC LIMIT 1) AS precio_unitario
+              p.last_precio AS precio_unitario
         FROM productos AS p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad

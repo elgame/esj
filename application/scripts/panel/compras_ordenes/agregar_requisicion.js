@@ -401,10 +401,12 @@
         $fieps.val(ui.item.item.ieps);
 
         if (ui.item.item.inventario) {
-          var entradas = parseFloat(ui.item.item.inventario.entradas),
-          salidas = parseFloat(ui.item.item.inventario.salidas),
-          saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior);
-          $("#productos #show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(saldo_anterior+entradas-salidas, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
+          // var entradas = parseFloat(ui.item.item.inventario.entradas),
+          // salidas = parseFloat(ui.item.item.inventario.salidas),
+          // saldo_anterior = parseFloat(ui.item.item.inventario.saldo_anterior);
+          // existencias = saldo_anterior+entradas-salidas;
+          existencias = ui.item.item.inventario;
+          $("#productos #show_info_prod").show().find('span').text('Existencia: '+util.darFormatoNum(existencias, '')+' | Stock min: '+util.darFormatoNum(ui.item.item.stock_min, ''));
         }
 
         var presentaciones = ui.item.item.presentaciones,

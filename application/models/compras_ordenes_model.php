@@ -1193,10 +1193,11 @@ class compras_ordenes_model extends CI_Model {
        "SELECT p.*,
               pf.nombre as familia, pf.codigo as codigo_familia, pf.tipo AS tipo_familia,
               pu.nombre as unidad, pu.abreviatura as unidad_abreviatura,
-              p.last_precio AS precio_unitario
+              p.last_precio AS precio_unitario, ep.existencia AS inventario
         FROM productos AS p
         INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
         INNER JOIN productos_unidades pu ON pu.id_unidad = p.id_unidad
+        LEFT JOIN existencia_productos ep ON ep.id_producto = p.id_producto
         WHERE p.status = 'ac' AND
               {$term}
               {$sqlEmpresa}
@@ -1210,12 +1211,12 @@ class compras_ordenes_model extends CI_Model {
     {
       foreach($res->result() as $itm)
       {
-        if(isset($_GET['did_empresa']{0}))
-        {
-          // $_GET['fid_producto'] = $itm->id_producto;
-          $itm->inventario = $this->inventario_model->getEPUData($itm->id_producto, $id_almacen);
-          $itm->inventario = isset($itm->inventario[0])? $itm->inventario[0]: false;
-        }
+        // if(isset($_GET['did_empresa']{0}))
+        // {
+        //   // $_GET['fid_producto'] = $itm->id_producto;
+        //   $itm->inventario = $this->inventario_model->getEPUData($itm->id_producto, $id_almacen);
+        //   $itm->inventario = isset($itm->inventario[0])? $itm->inventario[0]: false;
+        // }
 
         $query = $this->db->select('*')
           ->from("productos_presentaciones")
