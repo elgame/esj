@@ -118,7 +118,7 @@
                       <th colspan="7" style="background-color: #EEEEBC;"></th>
                     </tr>
                     <tr>
-                      <th style="position: absolute;">VACAS. <?php echo count($empleados); ?></th>
+                      <th style="position: absolute;z-index: 100;margin-top: -10px;">No. <?php echo count($empleados); ?></th>
                       <th style="width: 170px;padding-left: 40px!important; padding-top: 26px; border-right: 1px #ccc solid; position: absolute; ">NOMBRE</th>
                       <th style="padding-left: 225px!important;">PUESTO</th>
                       <th>SALARIO</th>

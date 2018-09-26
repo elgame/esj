@@ -1094,7 +1094,7 @@ class cfdi{
     }
 
     $cfdiRel = array(
-      'tipoRelacion' => '07',
+      'tipoRelacion' => '04',
       'cfdiRelacionado' => array(),
     );
     $comPago = [
@@ -1117,6 +1117,9 @@ class cfdi{
     ];
     foreach ($data as $key => $pago) {
       if (floatval($pago->version) > 3.2) {
+        // if ($pago->parcialidades > 1) {
+        //   $cfdiRel['tipoRelacion'] = '07';
+        // }
         $cfdiRel['cfdiRelacionado'][] = array(
           'uuid' => $pago->uuid,
         );
