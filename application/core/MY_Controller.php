@@ -1,10 +1,12 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class MY_Controller extends CI_Controller{
+class MY_Controller extends CI_Controller {
 	protected $info_empleado;
 
-	function MY_Controller($redirect=true){
+  public function __construct($redirect=true){
+    parent::__construct();
+
 		date_default_timezone_set('America/Mexico_City');
 		parent::__construct();
 

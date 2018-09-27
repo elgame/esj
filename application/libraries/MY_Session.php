@@ -57,7 +57,9 @@ class MY_Session extends CI_Session
 
     // Run the Session routine. If a session doesn't exist we'll
     // create a new one.  If it does, we'll update it.
-    session_start();
+    if(!isset($_SESSION)){
+      session_start();
+    }
     ini_set('session.gc_maxlifetime', 3600);
     ini_set('session.cookie_lifetime', 0);
 
