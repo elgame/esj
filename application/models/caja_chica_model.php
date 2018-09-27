@@ -954,13 +954,13 @@ class caja_chica_model extends CI_Model {
         <td align="left"><b>Concepto:</b></td><td align="left">'.$gasto->concepto.'</td>
         </tr>
         <tr>
-        <td align="left"><b>Importe:</b></td><td align="left">'.String::formatoNumero($gasto->monto).'</td>
+        <td align="left"><b>Importe:</b></td><td align="left">'.MyString::formatoNumero($gasto->monto).'</td>
         </tr>
         <tr>
         <td align="left"><b>Codigo gasto:</b></td><td align="left">'.$gasto->codigo_fin.'/'.$gasto->nombre_codigo.'</td>
         </tr>
         </tbody></table>';
-        $txt_adds .= "Fecha: ".$gasto->fecha.", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".String::formatoNumero($gasto->monto)."\r\n";
+        $txt_adds .= "Fecha: ".$gasto->fecha.", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".MyString::formatoNumero($gasto->monto)."\r\n";
         $caja = $gasto->no_caja;
       }
       foreach ($gastos_ids['delets'] as $key => $gasto) {
@@ -975,13 +975,13 @@ class caja_chica_model extends CI_Model {
         <td align="left"><b>Concepto:</b></td><td align="left">'.$gasto->concepto.'</td>
         </tr>
         <tr>
-        <td align="left"><b>Importe:</b></td><td align="left">'.String::formatoNumero($gasto->monto).'</td>
+        <td align="left"><b>Importe:</b></td><td align="left">'.MyString::formatoNumero($gasto->monto).'</td>
         </tr>
         <tr>
         <td align="left"><b>Codigo gasto:</b></td><td align="left">'.$gasto->codigo_fin.'/'.$gasto->nombre_codigo.'</td>
         </tr>
         </tbody></table>';
-        $txt_adds .= "Fecha: ".date("Y-m-d").", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".String::formatoNumero($gasto->monto)."\r\n";
+        $txt_adds .= "Fecha: ".date("Y-m-d").", Operacion: Se elimino el gasto {$gasto->id_gasto}, Concepto: {$gasto->concepto}, Importe: ".MyString::formatoNumero($gasto->monto)."\r\n";
         $caja = $gasto->no_caja;
       }
 
@@ -1250,13 +1250,13 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY() - 20);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FECHA ' . String::fechaAT($fecha)), false, false);
+    $pdf->Row(array('FECHA ' . MyString::fechaAT($fecha)), false, false);
 
     // Saldo inicial
     $pdf->SetXY(6, $pdf->GetY() + 5);
     $pdf->SetAligns(array('R'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('SALDO INICIAL '.String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO INICIAL '.MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
 
     // nomenclatura
     $this->printCajaNomenclatura($pdf, $nomenclaturas);
@@ -1313,7 +1313,7 @@ class caja_chica_model extends CI_Model {
         $ingreso->nomenclatura,
         $ingreso->poliza,
         $ingreso->concepto,
-        String::formatoNumero($ingreso->monto, 2, '', false)), false, true);
+        MyString::formatoNumero($ingreso->monto, 2, '', false)), false, true);
 
       $totalIngresos += floatval($ingreso->monto);
     }
@@ -1347,7 +1347,7 @@ class caja_chica_model extends CI_Model {
         $remision->folio,
         $remision->folio_factura,
         $remision->observacion,
-        String::formatoNumero($remision->monto, 2, '', false)), false, true);
+        MyString::formatoNumero($remision->monto, 2, '', false)), false, true);
 
       $totalRemisiones += floatval($remision->monto);
     }
@@ -1355,11 +1355,11 @@ class caja_chica_model extends CI_Model {
     $ttotalIngresos = $totalRemisiones + $totalIngresos + $caja['saldo_inicial'];
 
     $pdf->SetX(6);
-    $pdf->Row(array('', '', '', '', String::formatoNumero($totalRemisiones + $totalIngresos, 2, '', false)), false, true);
+    $pdf->Row(array('', '', '', '', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '', false)), false, true);
 
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(6);
-    $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
+    $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($ttotalIngresos, 2, '$', false)), false, true);
 
     // if ($comprasY >= $pdf->GetY())
     // {
@@ -1409,8 +1409,8 @@ class caja_chica_model extends CI_Model {
         $boleta->fecha,
         $boleta->proveedor,
         $boleta->productor,
-        String::formatoNumero($boleta->importe_pagada, 2, '', false),
-        String::formatoNumero($boleta->importe_pendiente, 2, '', false)
+        MyString::formatoNumero($boleta->importe_pagada, 2, '', false),
+        MyString::formatoNumero($boleta->importe_pendiente, 2, '', false)
       ), false, true);
 
       $totalBoletas           += floatval($boleta->importe);
@@ -1421,8 +1421,8 @@ class caja_chica_model extends CI_Model {
     $pdf->SetFont('Arial', 'B', 7);
     $pdf->SetX(6);
     $pdf->Row(array('', '', '', 'TOTAL',
-      String::formatoNumero($totalBoletasPagadas, 2, '$', false),
-      String::formatoNumero($totalBoletasPendientes, 2, '$', false)
+      MyString::formatoNumero($totalBoletasPagadas, 2, '$', false),
+      MyString::formatoNumero($totalBoletasPendientes, 2, '$', false)
     ), false, true);
 
     // Gastos del Dia
@@ -1475,7 +1475,7 @@ class caja_chica_model extends CI_Model {
         $gasto->nomenclatura,
         // $gasto->folio,
         $gasto->concepto,
-        String::float(String::formatoNumero($gasto->monto, 2, '', false))), false, true);
+        MyString::float(MyString::formatoNumero($gasto->monto, 2, '', false))), false, true);
 
       // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
       //   $codigoAreas[$gasto->id_area] = $this->compras_areas_model->getDescripCodigo($gasto->id_area);
@@ -1485,7 +1485,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(111);
     $pdf->SetFillColor(255, 255, 255);
     $pdf->SetAligns(array('L', 'R', 'L', 'L', 'R'));
-    $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalGastos, 2, '$', false)), true, true);
+    $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalGastos, 2, '$', false)), true, true);
 
     if ($noCajas == 2) {
       // Deudores
@@ -1536,9 +1536,9 @@ class caja_chica_model extends CI_Model {
           $deudor->fecha,
           $deudor->nombre,
           $deudor->concepto,
-          String::formatoNumero($deudor->monto, 2, '$', false),
-          String::formatoNumero($deudor->abonos, 2, '$', false),
-          String::formatoNumero($deudor->saldo, 2, '$', false)
+          MyString::formatoNumero($deudor->monto, 2, '$', false),
+          MyString::formatoNumero($deudor->abonos, 2, '$', false),
+          MyString::formatoNumero($deudor->saldo, 2, '$', false)
         ), false, true);
 
         // if($gasto->id_area != '' && !array_key_exists($gasto->id_area, $codigoAreas))
@@ -1550,9 +1550,9 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFillColor(255, 255, 255);
       $pdf->SetWidths(array(34, 33, 33));
       $pdf->SetAligns(array('L', 'L', 'L'));
-      $pdf->Row(array('PRESTADO: '.String::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
-        'ABONADO: '.String::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
-        'TOTAL: '.String::formatoNumero($totalDeudores, 2, '$', false)), true, true);
+      $pdf->Row(array('PRESTADO: '.MyString::formatoNumero($caja['deudores_prest_dia'], 2, '$', false),
+        'ABONADO: '.MyString::formatoNumero($caja['deudores_abonos_dia'], 2, '$', false),
+        'TOTAL: '.MyString::formatoNumero($totalDeudores, 2, '$', false)), true, true);
     }
 
     // Boletas pendientes x recuperar
@@ -1601,7 +1601,7 @@ class caja_chica_model extends CI_Model {
         $pdf->SetWidths(array(75, 25));
         $pdf->Row(array(
           $boleta->proveedor,
-          String::formatoNumero($boleta->importe, 2, '', false)), false, true);
+          MyString::formatoNumero($boleta->importe, 2, '', false)), false, true);
 
         $totalBoletas2 += floatval($boleta->importe);
       }
@@ -1609,8 +1609,8 @@ class caja_chica_model extends CI_Model {
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetX(111);
-      $pdf->Row(array('TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
-      // $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
+      $pdf->Row(array('TOTAL', MyString::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
+      // $pdf->Row(array('', '', 'TOTAL', MyString::formatoNumero($totalBoletas2, 2, '$', false)), false, true);
     }
 
     $totalBoletasTransito = 0;
@@ -1658,18 +1658,18 @@ class caja_chica_model extends CI_Model {
 
         $pdf->SetAligns(array('C', 'C', 'C', 'R'));
         $pdf->Row(array(
-          String::fechaAT($boleta->fecha),
+          MyString::fechaAT($boleta->fecha),
           $boleta->numero_ref,
           $boleta->nombre_fiscal,
-          String::formatoNumero($boleta->monto, 2, '', false)), false, true);
+          MyString::formatoNumero($boleta->monto, 2, '', false)), false, true);
 
         $totalBoletasTransito += floatval($boleta->monto);
       }
 
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(111);
-      // $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
-      $pdf->Row(array('', '', 'TOTAL', String::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
+      // $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
+      $pdf->Row(array('', '', 'TOTAL', MyString::formatoNumero($totalBoletasTransito, 2, '$', false)), false, true);
     }
 
     $totalSaldoClientes = 0;
@@ -1723,7 +1723,7 @@ class caja_chica_model extends CI_Model {
             $pdf->SetAligns(array('L', 'R'));
             $pdf->Row(array(
               $cliente->nombre,
-              String::formatoNumero($cliente->saldo, 2, '', false)), false, true);
+              MyString::formatoNumero($cliente->saldo, 2, '', false)), false, true);
 
             $totalSaldoClientes += floatval($cliente->saldo);
           }
@@ -1732,8 +1732,8 @@ class caja_chica_model extends CI_Model {
 
       $pdf->SetFont('Arial', 'B', 7);
       $pdf->SetX(111);
-      // $pdf->Row(array('', '', '', 'TOTAL', String::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
-      $pdf->Row(array('TOTAL', String::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
+      // $pdf->Row(array('', '', '', 'TOTAL', MyString::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
+      $pdf->Row(array('TOTAL', MyString::formatoNumero($totalSaldoClientes, 2, '$', false)), false, true);
     }
 
     // Tabulaciones
@@ -1776,7 +1776,7 @@ class caja_chica_model extends CI_Model {
       $pdf->Row(array(
         $denominacion['cantidad'],
         $denominacion['denominacion'],
-        String::formatoNumero($denominacion['total'], 2, '', false)), false, true);
+        MyString::formatoNumero($denominacion['total'], 2, '', false)), false, true);
 
       $totalEfectivo += floatval($denominacion['total']);
     }
@@ -1785,10 +1785,10 @@ class caja_chica_model extends CI_Model {
     $pdf->SetX(111);
     $pdf->SetAligns(array('C', 'R'));
     $pdf->SetWidths(array(31, 25));
-    $pdf->Row(array('TOTAL EFECTIVO', String::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
+    $pdf->Row(array('TOTAL EFECTIVO', MyString::formatoNumero($totalEfectivo, 2, '$', false)), false, true);
 
     $pdf->SetX(111);
-    $pdf->Row(array('DIFERENCIA', String::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
+    $pdf->Row(array('DIFERENCIA', MyString::formatoNumero($totalEfectivo - ($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia'])) , 2, '$', false)), false, false);
 
     // ajuste de pagina para imprimir los totales
     if ( $pdf->GetY()-$y_aux < 0 ) {
@@ -1800,20 +1800,20 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(168, $pdf->GetY() );
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(25, 19));
-    $pdf->Row(array('SALDO INICIAL', String::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
+    $pdf->Row(array('SALDO INICIAL', MyString::formatoNumero($caja['saldo_inicial'], 2, '$', false)), false, false);
 
     $pdf->SetX(168);
-    $pdf->Row(array('TOTAL INGRESOS', String::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
+    $pdf->Row(array('TOTAL INGRESOS', MyString::formatoNumero($totalRemisiones + $totalIngresos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('PAGO TOT LIMON ', String::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
+    $pdf->Row(array('PAGO TOT LIMON ', MyString::formatoNumero($totalBoletasPagadas, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('PAGO TOT GASTOS', String::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
+    $pdf->Row(array('PAGO TOT GASTOS', MyString::formatoNumero($ttotalGastos, 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('TOTAL DEUDORES', String::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->Row(array('TOTAL DEUDORES', MyString::formatoNumero(($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('EFECT. DEL CORTE', String::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
+    $pdf->Row(array('EFECT. DEL CORTE', MyString::formatoNumero($caja['saldo_inicial'] + $totalRemisiones + $totalIngresos - $totalBoletasPagadas - $ttotalGastos - ($caja['deudores_prest_dia']-$caja['deudores_abonos_dia']), 2, '$', false)), false, false);
     $pdf->SetX(168);
-    $pdf->Row(array('FONDO DE CAJA', String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA', MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo, 2, '$', false)), false, false);
 
     // $page_aux = $pdf->page;
     $pdf->page = 1;
@@ -1821,7 +1821,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetXY(110, 26.5);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(104));
-    $pdf->Row(array('FONDO DE CAJA '.String::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
+    $pdf->Row(array('FONDO DE CAJA '.MyString::formatoNumero($totalBoletas2 + $totalBoletasTransito + $totalEfectivo , 2, '$', false)), false, false);
     $pdf->page = count($pdf->pages); //$page_aux>$pag_aux2? $page_aux: $pag_aux2;
 
     // if(count($codigoAreas) > 0){
@@ -1907,14 +1907,14 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(20, 43));
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetX(0);
-    $pdf->Row(array('Caja: '.$gastos->no_caja, String::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
+    $pdf->Row(array('Caja: '.$gastos->no_caja, MyString::formatoNumero($gastos->monto, 2, '$', false) ), false, false);
 
     $pdf->SetX(0);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     $pdf->Row(array('CANTIDAD:'), false, false);
     $pdf->SetX(0);
-    $pdf->Row(array(String::num2letras($gastos->monto)), false, false);
+    $pdf->Row(array(MyString::num2letras($gastos->monto)), false, false);
     $pdf->SetX(0);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
@@ -1940,7 +1940,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', String::fechaAT($gastos->fecha)), false, false);
+    $pdf->Row(array('', '', MyString::fechaAT($gastos->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -1950,7 +1950,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $gastos->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', String::fechaAT($gastos->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaAT($gastos->fecha_creacion)), false, false);
 
     $this->db->where('id_gasto', $gastos->id_gasto)->set('no_impresiones', 'no_impresiones+1', false)->update('cajachica_gastos');
 
@@ -2031,11 +2031,11 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('Caja: '.$remisiones->no_caja, 'Remision: '.$remisiones->folio ), false, false);
 
     $pdf->SetX(0);
-    $pdf->Row(array('CANTIDAD:', String::formatoNumero($remisiones->monto, 2, '$', false)), false, false);
+    $pdf->Row(array('CANTIDAD:', MyString::formatoNumero($remisiones->monto, 2, '$', false)), false, false);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     $pdf->SetX(0);
-    $pdf->Row(array(String::num2letras($remisiones->monto)), false, false);
+    $pdf->Row(array(MyString::num2letras($remisiones->monto)), false, false);
     $pdf->SetX(0);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
@@ -2051,7 +2051,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', String::fechaAT($remisiones->fecha)), false, false);
+    $pdf->Row(array('', '', MyString::fechaAT($remisiones->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -2061,12 +2061,12 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $remisiones->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', String::fechaAT($remisiones->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaAT($remisiones->fecha_creacion)), false, false);
 
     if (isset($remisiones->saldo) && $remisiones->saldo->show_saldo == 't') {
       $saldo = $remisiones->saldo->saldo - ($remisiones->caja_abierta==='t'? $remisiones->monto: 0);
       $pdf->SetXY(0, $pdf->GetY());
-      $pdf->Row(array('SALDO DEUDOR ACTUALIZADO: ', String::formatoNumero($saldo, 2, '$', false)), false, false);
+      $pdf->Row(array('SALDO DEUDOR ACTUALIZADO: ', MyString::formatoNumero($saldo, 2, '$', false)), false, false);
     }
 
     $this->db->update('cajachica_remisiones', ['no_impresiones' => $remisiones->no_impresiones+1],
@@ -2133,11 +2133,11 @@ class caja_chica_model extends CI_Model {
     $pdf->Row(array('Caja: '.$ingreso->no_caja, '' ), false, false);
 
     $pdf->SetX(0);
-    $pdf->Row(array('CANTIDAD:', String::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
+    $pdf->Row(array('CANTIDAD:', MyString::formatoNumero($ingreso->monto, 2, '$', false)), false, false);
     $pdf->SetAligns(array('L'));
     $pdf->SetWidths(array(63));
     $pdf->SetX(0);
-    $pdf->Row(array(String::num2letras($ingreso->monto)), false, false);
+    $pdf->Row(array(MyString::num2letras($ingreso->monto)), false, false);
     $pdf->SetX(0);
     $pdf->Line(0, $pdf->GetY()-1, 62, $pdf->GetY()-1);
 
@@ -2153,7 +2153,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 21, 21));
     $pdf->Row(array('AUTORIZA', 'RECIBIO', 'FECHA'), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('', '', String::fechaAT($ingreso->fecha)), false, false);
+    $pdf->Row(array('', '', MyString::fechaAT($ingreso->fecha)), false, false);
     $pdf->Line(0, $pdf->GetY()+4, 62, $pdf->GetY()+4);
     $pdf->Line(21, $pdf->GetY()-12, 21, $pdf->GetY()+4);
     $pdf->Line(42, $pdf->GetY()-12, 42, $pdf->GetY()+4);
@@ -2163,7 +2163,7 @@ class caja_chica_model extends CI_Model {
     $pdf->SetWidths(array(21, 42));
     $pdf->Row(array('Creado por:', $ingreso->usuario_creo), false, false);
     $pdf->SetXY(0, $pdf->GetY());
-    $pdf->Row(array('Creado:', String::fechaAT($ingreso->fecha_creacion)), false, false);
+    $pdf->Row(array('Creado:', MyString::fechaAT($ingreso->fecha_creacion)), false, false);
 
     $this->db->update('cajachica_ingresos', ['no_impresiones' => $ingreso->no_impresiones+1],
         "id_ingresos = '{$id_ingresos}' AND no_caja = {$noCaja}");
@@ -2325,7 +2325,7 @@ class caja_chica_model extends CI_Model {
         $producto->folio,
         $producto->concepto,
         $producto->reposicion=='t'? 'Si': 'No',
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -2436,7 +2436,7 @@ class caja_chica_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -2461,14 +2461,14 @@ class caja_chica_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R', 'R'));
     $pdf->SetWidths(array(75, 50, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false), String::formatoNumero(($reposicion_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false), MyString::formatoNumero(($reposicion_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -2670,7 +2670,7 @@ class caja_chica_model extends CI_Model {
         $producto->nomenclatura,
         $producto->poliza,
         $producto->concepto,
-        String::formatoNumero($producto->monto, 2, '', false),
+        MyString::formatoNumero($producto->monto, 2, '', false),
         );
       $pdf->SetXY(6, $pdf->GetY()-2);
       $pdf->SetAligns($aligns);
@@ -2957,10 +2957,10 @@ class caja_chica_model extends CI_Model {
         '', '',
         );
       if ($item->ingreso == 1) {
-        $datos[5] = String::formatoNumero($item->monto, 2, '', false);
+        $datos[5] = MyString::formatoNumero($item->monto, 2, '', false);
         $total_ingresos += $item->monto;
       } else {
-        $datos[6] = String::formatoNumero($item->monto, 2, '', false);
+        $datos[6] = MyString::formatoNumero($item->monto, 2, '', false);
         $total_gastos += $item->monto;
       }
       $pdf->SetXY(6, $pdf->GetY()-2);
@@ -2974,8 +2974,8 @@ class caja_chica_model extends CI_Model {
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
     $pdf->Row(array('', '', '', '', '',
-      String::formatoNumero($total_ingresos, 2, '', false),
-      String::formatoNumero($total_gastos, 2, '', false)
+      MyString::formatoNumero($total_ingresos, 2, '', false),
+      MyString::formatoNumero($total_gastos, 2, '', false)
     ), false, false);
 
     $pdf->Output('ingresos_gastos_caja.pdf', 'I');
@@ -3077,7 +3077,7 @@ class caja_chica_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Reposicion',
-      String::formatoNumero(($proveedor_total), 2, '', false),
+      MyString::formatoNumero(($proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -3102,14 +3102,14 @@ class caja_chica_model extends CI_Model {
       if($pdf->GetY()+6 >= $pdf->limiteY)
         $pdf->AddPage();
       $pdf->SetXY(6, $pdf->GetY()-2);
-      $pdf->Row(array($nomen[2], $nomen[1], String::formatoNumero($nomen[0], 2, '', false) ), false, false);
+      $pdf->Row(array($nomen[2], $nomen[1], MyString::formatoNumero($nomen[0], 2, '', false) ), false, false);
     }
     if($pdf->GetY()+6 >= $pdf->limiteY)
       $pdf->AddPage();
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(75, 50));
-    $pdf->Row(array('', String::formatoNumero(($proveedor_total), 2, '', false)), false);
+    $pdf->Row(array('', MyString::formatoNumero(($proveedor_total), 2, '', false)), false);
 
     $aux_categoria      = $producto->id_categoria;
     $proveedor_total    = 0;
@@ -3153,7 +3153,7 @@ class caja_chica_model extends CI_Model {
           $producto->serie.$producto->folio,
           $producto->observacion,
           $producto->folio_factura,
-          String::formatoNumero($producto->monto, 2, '', false),
+          MyString::formatoNumero($producto->monto, 2, '', false),
           );
         $pdf->SetXY(6, $pdf->GetY()-2);
         $pdf->SetAligns($aligns);
@@ -3170,7 +3170,7 @@ class caja_chica_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total Remisiones',
-      String::formatoNumero(($remisiones_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
@@ -3181,7 +3181,7 @@ class caja_chica_model extends CI_Model {
       $pdf->AddPage();
     $pdf->SetFont('Arial','B',8);
     $datos = array('Total General',
-      String::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
+      MyString::formatoNumero(($remisiones_total+$proveedor_total), 2, '', false),
     );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));

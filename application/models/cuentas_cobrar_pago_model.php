@@ -337,7 +337,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
         $cliente = strtoupper($factura->cfdi_ext->receptor->nombreFiscal);
         $fecha   = explode('-', $factura->fecha);
         $ano     = $fecha[0];
-        $mes     = strtoupper(String::mes(floatval($fecha[1])));
+        $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
         $serie   = $factura->serie !== '' ? $factura->serie.'-' : '';
         $folio   = $factura->folio;
 
@@ -453,7 +453,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->Cell(48, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'L', 0);
+    $pdf->Cell(48, 4, MyString::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'L', 0);
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetXY(48, $pdf->GetY());
     $pdf->Cell(60, 4, $factura->cfdi_ext->noCertificado, 0, 0, 'R', 0);
@@ -470,7 +470,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $municipio   = strtoupper($factura->cfdi_ext->emisor->municipio);
     $estado = strtoupper($factura->cfdi_ext->emisor->estado);
     $fecha = explode('T', $factura->cfdi_ext->fecha);
-    $fecha = String::fechaATexto($fecha[0]);
+    $fecha = MyString::fechaATexto($fecha[0]);
 
     $pdf->Cell(108, 4, "{$municipio}, {$estado} ({$factura->cfdi_ext->emisor->cp}) | {$fecha}", 0, 0, 'R', 0);
 
@@ -637,12 +637,12 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
       $pdf->SetWidths($widths);
 
       $pdf->Row(array(
-        String::formatoNumero($item->cantidad, 2, ''),
+        MyString::formatoNumero($item->cantidad, 2, ''),
         $item->unidad,
         $item->claveUnidad,
         $this->cfdi->replaceSpecialChars($item->claveProdServ.' - '.$item->concepto, true),
-        String::formatoNumero( $item->valorUnitario, 2, '$', false),
-        String::formatoNumero( $item->importe, 2, '$', false),
+        MyString::formatoNumero( $item->valorUnitario, 2, '$', false),
+        MyString::formatoNumero( $item->importe, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -666,7 +666,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetXY(0, $pdf->GetY() + 4);
-    $pdf->MultiCell(156, 6, String::num2letras($factura->cfdi_ext->total), 0, 'C', 0);
+    $pdf->MultiCell(156, 6, MyString::num2letras($factura->cfdi_ext->total), 0, 'C', 0);
 
     $pdf->Line(1, $pdf->GetY(), 200, $pdf->GetY());
 
@@ -687,7 +687,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
 
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetXY(111, $pdf->GetY());
-    $pdf->Cell(39, 4, "Tipo de Cambio: ".String::formatoNumero($factura->cfdi_ext->tipoCambio, 4), 0, 0, 'L', 1);
+    $pdf->Cell(39, 4, "Tipo de Cambio: ".MyString::formatoNumero($factura->cfdi_ext->tipoCambio, 4), 0, 0, 'L', 1);
 
 
     $pdf->SetFont('helvetica','B', 10);
@@ -695,7 +695,7 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero($factura->cfdi_ext->totalImporte, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5, MyString::formatoNumero($factura->cfdi_ext->totalImporte, 2, '$', false), 1, 0, 'R', 1);
 
     // Pinta traslados, retenciones
 
@@ -703,13 +703,13 @@ class cuentas_cobrar_pago_model extends cuentas_cobrar_model{
     $pdf->Cell(30, 5, "IVA", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->trasladosImporte->iva, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($factura->cfdi_ext->trasladosImporte->iva, 2, '$', false), 1, 0, 'R', 1);
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura->cfdi_ext->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($factura->cfdi_ext->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Complemento de Pagos //

@@ -118,9 +118,9 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
         $data2 = array(
           $prestamo->fecha,
           $prestamo->inicio_pago,
-          String::formatoNumero($prestamo->prestado),
-          String::formatoNumero($prestamo->pago_semana),
-          String::formatoNumero($prestamo->total_pagado),
+          MyString::formatoNumero($prestamo->prestado),
+          MyString::formatoNumero($prestamo->pago_semana),
+          MyString::formatoNumero($prestamo->total_pagado),
         );
 
         $this->rptPrestamosSaldos += $prestamo->total_pagado;
@@ -198,7 +198,7 @@ class nomina_fiscal_otros_model extends nomina_fiscal_model{
     $pdf->SetXY(126, $pdf->GetY());
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(40, 40));
-    $pdf->Row(array("Saldo General", String::formatoNumero($this->rptPrestamosSaldos)), false, true, null, 2, 1);
+    $pdf->Row(array("Saldo General", MyString::formatoNumero($this->rptPrestamosSaldos)), false, true, null, 2, 1);
 
     $pdf->Output('Reporte_Prestamos_Trabajador.pdf', 'I');
   }

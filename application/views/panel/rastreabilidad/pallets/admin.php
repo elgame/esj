@@ -121,7 +121,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $pallets['total_rows'],
 								'per_page'			=> $pallets['items_per_page'],
 								'cur_page'			=> $pallets['result_page']*$pallets['items_per_page'],

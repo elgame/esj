@@ -25,10 +25,10 @@ class MY_Controller extends CI_Controller {
 
 	private function limpiaParams(){
 		foreach ($_POST as $key => $value)
-    		$_POST[$key] = String::limpiarTexto(($value));
+    		$_POST[$key] = MyString::limpiarTexto(($value));
 
 		foreach ($_GET as $key => $value)
-			$_GET[$key] = String::limpiarTexto(($value));
+			$_GET[$key] = MyString::limpiarTexto(($value));
 	}
 
 	/*

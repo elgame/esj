@@ -140,11 +140,11 @@ class facturacion2_model extends privilegios_model{
 
         // $pdf->titulo3 = "{$_GET['dproducto']} \n";
         if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+            $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
         elseif (!empty($_GET['ffecha1']))
-            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+            $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
         elseif (!empty($_GET['ffecha2']))
-            $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+            $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
         $pdf->AliasNbPages();
         // $links = array('', '', '', '');
@@ -204,15 +204,15 @@ class facturacion2_model extends privilegios_model{
             $pdf->SetTextColor(0,0,0);
 
             $datos = array(
-              String::fechaAT($item->fecha),
+              MyString::fechaAT($item->fecha),
               $item->serie.'-'.$item->folio,
               $item->cliente,
               $item->poliza,
               $item->cantidad,
               $item->unidadc,
-              String::formatoNumero($item->kilos, 2, '', false),
-              String::formatoNumero($item->precio_unitario/($item->unidad_cantidad>0?$item->unidad_cantidad:1), 3, '$', false),
-              String::formatoNumero($item->importe, 2, '$', false)
+              MyString::formatoNumero($item->kilos, 2, '', false),
+              MyString::formatoNumero($item->precio_unitario/($item->unidad_cantidad>0?$item->unidad_cantidad:1), 3, '$', false),
+              MyString::formatoNumero($item->importe, 2, '$', false)
             );
 
             $cantidad += floatval($item->cantidad);
@@ -238,9 +238,9 @@ class facturacion2_model extends privilegios_model{
           $pdf->Row(array('', '', '', '',
               $cantidad,
               '',
-              String::formatoNumero($kilos, 2, '', false),
-              $cantidad == 0 ? 0 : String::formatoNumero($importe/($kilos>0?$kilos:1), 2, '$', false),
-              String::formatoNumero($importe, 2, '$', false) ), true);
+              MyString::formatoNumero($kilos, 2, '', false),
+              $cantidad == 0 ? 0 : MyString::formatoNumero($importe/($kilos>0?$kilos:1), 2, '$', false),
+              MyString::formatoNumero($importe, 2, '$', false) ), true);
         }
 
         $pdf->SetX(6);
@@ -252,9 +252,9 @@ class facturacion2_model extends privilegios_model{
         $pdf->Row(array('', '', '', '',
             $cantidadt,
             '',
-            String::formatoNumero($kilost, 2, '', false),
-            $cantidadt == 0 ? 0 : String::formatoNumero($importet/($kilost>0?$kilost:1), 2, '$', false),
-            String::formatoNumero($importet, 2, '$', false) ), true);
+            MyString::formatoNumero($kilost, 2, '', false),
+            $cantidadt == 0 ? 0 : MyString::formatoNumero($importet/($kilost>0?$kilost:1), 2, '$', false),
+            MyString::formatoNumero($importet, 2, '$', false) ), true);
 
         $pdf->Output('Reporte_Productos_Facturados.pdf', 'I');
       }

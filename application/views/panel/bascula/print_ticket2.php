@@ -65,7 +65,7 @@
 	</script>
 </head>
 <body>
-	<?php 
+	<?php
 		// var_dump($data['info']);
 
 		$pdf = new mypdf_ticket();
@@ -89,7 +89,7 @@
 					<table>
 						<tr>
 							<td class="td30 font8">BRUTO :</td>
-							<td class="td40"><?php echo String::formatoNumero($data['info'][0]->kilos_bruto, 2, ''); ?></td>
+							<td class="td40"><?php echo MyString::formatoNumero($data['info'][0]->kilos_bruto, 2, ''); ?></td>
 							<td class="td30"><?php echo substr($data['info'][0]->fecha_bruto, -11, -3); ?></td>
 						</tr>
 					</table>
@@ -100,7 +100,7 @@
 					<table>
 						<tr>
 							<td class="td30 font8">TARA :</td>
-							<td class="td40"><?php echo String::formatoNumero($data['info'][0]->kilos_tara, 2, ''); ?></td>
+							<td class="td40"><?php echo MyString::formatoNumero($data['info'][0]->kilos_tara, 2, ''); ?></td>
 							<td class="td30"><?php echo substr($data['info'][0]->fecha_tara, -11, -3); ?></td>
 						</tr>
 					</table>
@@ -111,7 +111,7 @@
 					<table class="br_bottom">
 						<tr>
 							<td class="td30">NETO :</td>
-							<td class="td40"><?php echo String::formatoNumero($data['info'][0]->kilos_neto, 2, ''); ?></td>
+							<td class="td40"><?php echo MyString::formatoNumero($data['info'][0]->kilos_neto, 2, ''); ?></td>
 							<td class="td30"></td>
 						</tr>
 					</table>
@@ -136,10 +136,10 @@
         		<tr>
 							<td><?php echo $prod->cajas ?></td>
 							<td><?php echo $prod->calidad ?></td>
-							<td><?php echo String::formatoNumero($prod->kilos, 2, '') ?></td>
+							<td><?php echo MyString::formatoNumero($prod->kilos, 2, '') ?></td>
 							<td><?php echo $prod->promedio ?></td>
-							<td><?php echo String::formatoNumero($prod->precio, 2, '') ?></td>
-							<td><?php echo String::formatoNumero($prod->importe, 2, '') ?></td>
+							<td><?php echo MyString::formatoNumero($prod->precio, 2, '') ?></td>
+							<td><?php echo MyString::formatoNumero($prod->importe, 2, '') ?></td>
 						</tr>
         <?php
             }
@@ -147,7 +147,7 @@
 				?>
 						<tr class="br_top strong">
 							<td colspan="4">IMPORTE TOTAL</td>
-							<td colspan="2"><?php echo String::formatoNumero($data['info'][0]->importe, 2, '') ?></td>
+							<td colspan="2"><?php echo MyString::formatoNumero($data['info'][0]->importe, 2, '') ?></td>
 						</tr>
 					</table>
 				</td>

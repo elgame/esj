@@ -95,7 +95,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $categorias['total_rows'],
                 'per_page'      => $categorias['items_per_page'],
                 'cur_page'      => $categorias['result_page']*$categorias['items_per_page'],

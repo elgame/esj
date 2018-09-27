@@ -54,7 +54,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/productos/modificar/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/productos/modificar/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
 
               <div class="span6">
                 <div class="control-group">

@@ -57,7 +57,7 @@
 									if($select == ' selected="selected"')
 										$cuenta_saldo = $value->saldo;
 								?>
-											<option value="<?php echo $value->id_cuenta; ?>" data-saldo="<?php echo $value->saldo; ?>" <?php echo $select; ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+											<option value="<?php echo $value->id_cuenta; ?>" data-saldo="<?php echo $value->saldo; ?>" <?php echo $select; ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
 								<?php
 								}?>
 										</select>

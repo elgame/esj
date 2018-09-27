@@ -190,7 +190,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $ordenes['total_rows'],
                 'per_page'      => $ordenes['items_per_page'],
                 'cur_page'      => $ordenes['result_page']*$ordenes['items_per_page'],

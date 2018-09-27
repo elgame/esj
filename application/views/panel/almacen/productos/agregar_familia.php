@@ -54,7 +54,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/productos/agregar_familia/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/productos/agregar_familia/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
 
               <div class="control-group">
                 <label class="control-label" for="fempresa">Empresa </label>

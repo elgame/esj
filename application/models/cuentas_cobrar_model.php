@@ -188,10 +188,10 @@ class cuentas_cobrar_model extends privilegios_model{
       $pdf->SetFont('Arial','',8);
       $pdf->SetTextColor(0,0,0);
       $datos = array($item->nombre,
-        String::formatoNumero($item->total, 2, '$', false),
-        String::formatoNumero($item->abonos, 2, '$', false),
-        String::formatoNumero($item->saldo, 2, '$', false),
-        String::formatoNumero($item->saldo_cambio, 2, '$', false),
+        MyString::formatoNumero($item->total, 2, '$', false),
+        MyString::formatoNumero($item->abonos, 2, '$', false),
+        MyString::formatoNumero($item->saldo, 2, '$', false),
+        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
         );
       $total_cargos += $item->total;
       $total_abonos += $item->abonos;
@@ -208,10 +208,10 @@ class cuentas_cobrar_model extends privilegios_model{
     $pdf->SetFont('Arial','B',8);
     $pdf->SetTextColor(255,255,255);
     $pdf->Row(array('Total:',
-      String::formatoNumero($total_cargos, 2, '$', false),
-      String::formatoNumero($total_abonos, 2, '$', false),
-      String::formatoNumero($total_saldo, 2, '$', false),
-      String::formatoNumero($total_saldo_cambio, 2, '$', false),
+      MyString::formatoNumero($total_cargos, 2, '$', false),
+      MyString::formatoNumero($total_abonos, 2, '$', false),
+      MyString::formatoNumero($total_saldo, 2, '$', false),
+      MyString::formatoNumero($total_saldo_cambio, 2, '$', false),
       ), true);
 
     $pdf->Output('cuentas_x_cobrar.pdf', 'I');
@@ -506,8 +506,8 @@ if($res->num_rows() > 0){
 
       //verifica q no sea negativo o exponencial el saldo
   foreach ($response['cuentas'] as $key => $cuenta) {
-    $cuenta->saldo = floatval(String::float($cuenta->saldo));
-    $cuenta->saldo_cambio = floatval(String::float($cuenta->saldo_cambio));
+    $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
+    $cuenta->saldo_cambio = floatval(MyString::float($cuenta->saldo_cambio));
         // anticipos a fruta
     if ((strtolower($cuenta->serie) == 'an') && $cuenta->saldo == 0) {
       $cuenta->cargo = 0;
@@ -522,7 +522,7 @@ if($res->num_rows() > 0){
           }
         }
 
-        $cuenta->saldo = floatval(String::float($cuenta->saldo));
+        $cuenta->saldo = floatval(MyString::float($cuenta->saldo));
         if($cuenta->saldo == 0){
           $cuenta->estado = 'Pagada';
           $cuenta->fecha_vencimiento = $cuenta->dias_transc = '';
@@ -616,10 +616,10 @@ if($res->num_rows() > 0){
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
         $pdf->Row(array('', '', '', $res['anterior']->concepto,
-          String::formatoNumero($res['anterior']->total, 2, '$', false),
-          String::formatoNumero($res['anterior']->abonos, 2, '$', false),
-          String::formatoNumero($res['anterior']->saldo, 2, '$', false),
-          String::formatoNumero($res['anterior']->saldo_cambio, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->total, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->abonos, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo, 2, '$', false),
+          MyString::formatoNumero($res['anterior']->saldo_cambio, 2, '$', false),
           '', '', ''), false);
         $bad_saldo_ante = false;
       }
@@ -628,10 +628,10 @@ if($res->num_rows() > 0){
         $item->serie,
         $item->folio,
         $item->concepto,
-        String::formatoNumero($item->cargo, 2, '$', false),
-        String::formatoNumero($item->abono, 2, '$', false),
-        String::formatoNumero($item->saldo, 2, '$', false),
-        String::formatoNumero($item->saldo_cambio, 2, '$', false),
+        MyString::formatoNumero($item->cargo, 2, '$', false),
+        MyString::formatoNumero($item->abono, 2, '$', false),
+        MyString::formatoNumero($item->saldo, 2, '$', false),
+        MyString::formatoNumero($item->saldo_cambio, 2, '$', false),
         $item->estado, $item->fecha_vencimiento,
         $item->dias_transc > 0 ? $item->dias_transc : '0');
 
@@ -652,10 +652,10 @@ if($res->num_rows() > 0){
     $pdf->SetAligns(array('R', 'R', 'R', 'R', 'R'));
     $pdf->SetWidths(array(81, 23, 23, 20, 17));
     $pdf->Row(array('Totales:',
-      String::formatoNumero($total_cargo, 2, '$', false),
-      String::formatoNumero($total_abono, 2, '$', false),
-      String::formatoNumero($total_saldo, 2, '$', false),
-      String::formatoNumero($total_saldo_cambio, 2, '$', false) ), true);
+      MyString::formatoNumero($total_cargo, 2, '$', false),
+      MyString::formatoNumero($total_abono, 2, '$', false),
+      MyString::formatoNumero($total_saldo, 2, '$', false),
+      MyString::formatoNumero($total_saldo_cambio, 2, '$', false) ), true);
 
     $pdf->Output('cuentas_proveedor.pdf', 'I');
   }
@@ -899,7 +899,7 @@ if($close){
     foreach ($_POST['ids'] as $key => $value)  //foreach ($ids as $key => $value)
     {
       $total += $_POST['montofv'][$key];
-      $desc .= ' | '.$_POST['factura_desc'][$key].'=>'.String::formatoNumero($_POST['montofv'][$key], 2, '', false);
+      $desc .= ' | '.$_POST['factura_desc'][$key].'=>'.MyString::formatoNumero($_POST['montofv'][$key], 2, '', false);
     }
     $desc = ' ('.substr($desc, 1).')';
     $resp = $this->banco_cuentas_model->addDeposito(array(
@@ -990,7 +990,7 @@ if($close){
       $data_cuenta  = $data_cuenta['info'];
       $this->empresaId = $data_cuenta->id_empresa;
 
-      $data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.String::formatoNumero($data['total'], 2, '', false).')';
+      $data['concepto'] .= ' ('.$inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.'=>'.MyString::formatoNumero($data['total'], 2, '', false).')';
       $resp = $this->banco_cuentas_model->addDeposito(array(
         'id_cuenta'   => $data['id_cuenta'],
         'id_banco'    => $data_cuenta->id_banco,
@@ -1021,7 +1021,7 @@ if($close){
     $this->bitacora_model->_insert($camps[1], $data['id_abono'],
       array(':accion'    => 'un abono a la venta ',
         ':seccion' => 'cuentas por cobrar',
-        ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($data['total']),
+        ':folio'     => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.MyString::formatoNumero($data['total']),
         ':id_empresa' => $inf_factura['empresa']->id_empresa,
         ':empresa'   => 'de '.$inf_factura['cliente']->nombre_fiscal));
 
@@ -1101,7 +1101,7 @@ if($close){
       $inf_factura = $this->getDetalleVentaFacturaData($id);
       $this->bitacora_model->_cancel('facturacion_abonos', $ida,
         array(':accion'     => 'un abono de la venta ', ':seccion' => 'cuentas por cobrar',
-          ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.String::formatoNumero($info_abano->total),
+          ':folio'      => $inf_factura['cobro'][0]->serie.$inf_factura['cobro'][0]->folio.' por '.MyString::formatoNumero($info_abano->total),
           ':id_empresa' => $inf_factura['empresa']->id_empresa,
           ':empresa'    => 'de '.$inf_factura['cliente']->nombre_fiscal));
     }
@@ -1309,7 +1309,7 @@ if($close){
     //   $_POST['prod_dreten_iva_porcent'][] = 0;
     //   $_POST['prod_importe'][]            = $subtotal;
     //   $_POST['isCert'][]                  = '0';
-    //   $_POST['dttotal_letra']             = strtoupper(String::num2letras($subtotal+$iva, $data_factura['info']->moneda));
+    //   $_POST['dttotal_letra']             = strtoupper(MyString::num2letras($subtotal+$iva, $data_factura['info']->moneda));
     //   $_POST['total_importe']             = $subtotal;
     //   $_POST['total_descuento']           = 0;
     //   $_POST['total_subtotal']            = $subtotal;
@@ -1407,18 +1407,18 @@ if($close){
     $pdf->MultiCell(60,4, 'RECIBO DE PAGO');
       // $pdf->SetY($pdf->GetY()+1);
       // $pdf->MultiCell(60,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
-      // $pdf->MultiCell(60,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
-      //      ' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+      // $pdf->MultiCell(60,4, 'La cantidad de '.MyString::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      //      ' ('.MyString::num2letras($orden['abonos'][0]->total_abono).')');
       // $pdf->MultiCell(60,4, 'A cuenta de: '.implode('-', $facturas_txt));
 
     $pdf->SetFont('helvetica','B', 10);
     $pdf->SetXY(10, $pdf->GetY()+6);
-    $pdf->MultiCell(115,4, "FECHA: ".String::fechaATexto($orden['abonos'][0]->fecha));
+    $pdf->MultiCell(115,4, "FECHA: ".MyString::fechaATexto($orden['abonos'][0]->fecha));
     $pdf->SetXY(10, $pdf->GetY()+1);
     $pdf->MultiCell(115,4, 'Recibi de '.$orden['abonos'][0]->nombre_fiscal);
     $pdf->SetX(10);
-    $pdf->MultiCell(115,4, 'La cantidad de '.String::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
-      ' ('.String::num2letras($orden['abonos'][0]->total_abono).')');
+    $pdf->MultiCell(115,4, 'La cantidad de '.MyString::formatoNumero($orden['abonos'][0]->total_abono, 2, '$', false).
+      ' ('.MyString::num2letras($orden['abonos'][0]->total_abono).')');
     $pdf->SetX(10);
     $pdf->MultiCell(115,4, 'A orden de: '.$orden['abonos'][0]->empresa);
     $pdf->SetX(10);
@@ -1448,7 +1448,7 @@ if($close){
       $pdf->SetTextColor(0,0,0);
       $datos = array(
         $prod->serie.$prod->folio,
-        String::formatoNumero($prod->total, 2, '$', false),
+        MyString::formatoNumero($prod->total, 2, '$', false),
         );
       $pdf->SetXY(140, $pdf->GetY()-2);
       $pdf->Row($datos, false, false);
@@ -1550,7 +1550,7 @@ if($close){
       }
 
       if ($aux_factura != $cliente1->id_factura) {
-        if(count($cliente->facturas) > 0 && $all_facturas == false && String::float($cliente->facturas[$aux_factura]->saldo) <= 0)
+        if(count($cliente->facturas) > 0 && $all_facturas == false && MyString::float($cliente->facturas[$aux_factura]->saldo) <= 0)
           unset($cliente->facturas[$aux_factura]);
 
         $cliente->facturas[$cliente1->id_factura]                    = new stdClass;
@@ -2088,8 +2088,8 @@ if($close){
         if(isset($item->saldo_anterior->saldo) ){
           $datos = array('', '', '',
             'Saldo Inicial',
-            String::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
-            String::formatoNumero($item->saldo_anterior->saldo_cambio, 2, '', false),
+            MyString::formatoNumero($item->saldo_anterior->saldo, 2, '', false),
+            MyString::formatoNumero($item->saldo_anterior->saldo_cambio, 2, '', false),
             '', '',
             );
           $pdf->SetXY(6, $pdf->GetY()-2);
@@ -2107,20 +2107,20 @@ if($close){
           if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
-          $datos = array(String::fechaATexto($factura->fecha, '/c'),
+          $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
             $factura->serie,
             $factura->folio,
             $factura->concepto,
-            String::formatoNumero($factura->total, 2, '', false),
+            MyString::formatoNumero($factura->total, 2, '', false),
             '',
-            String::formatoNumero( ($factura->saldo) , 2, '', false),
-            String::fechaATexto($factura->fecha_vencimiento, '/c'),
+            MyString::formatoNumero( ($factura->saldo) , 2, '', false),
+            MyString::fechaATexto($factura->fecha_vencimiento, '/c'),
             );
           //si esta vencido
           if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
           {
             $totalVencido += $factura->saldo;
-            if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+            if(MyString::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
               $pdf->SetFillColor(255,255,204);
             else
               $pdf->SetFillColor(255,255,255);
@@ -2138,12 +2138,12 @@ if($close){
               $pdf->AddPage();
 
             $total_abono += $abono->abono;
-            $datos = array('   '.String::fechaATexto($abono->fecha, '/c'),
+            $datos = array('   '.MyString::fechaATexto($abono->fecha, '/c'),
               $abono->serie,
               $abono->folio,
               $abono->concepto,
               '',
-              '('.String::formatoNumero($abono->abono, 2, '', false).')',
+              '('.MyString::formatoNumero($abono->abono, 2, '', false).')',
               '', '',
               );
 
@@ -2161,9 +2161,9 @@ if($close){
         $pdf->SetAligns(array('R', 'R', 'R', 'R'));
         $pdf->SetWidths(array(23, 23, 23));
         $pdf->Row(array(
-          String::formatoNumero($total_cargo, 2, '', false),
-          String::formatoNumero($total_abono, 2, '', false),
-          String::formatoNumero($total_saldo, 2, '', false)), false);
+          MyString::formatoNumero($total_cargo, 2, '', false),
+          MyString::formatoNumero($total_abono, 2, '', false),
+          MyString::formatoNumero($total_saldo, 2, '', false)), false);
 
         $saldo_cliente = ((isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) + $total_cargo - $total_abono);
         $saldo_cliente_cambio = (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo_cambio: 0) + $total_saldo_cambio;
@@ -2171,21 +2171,21 @@ if($close){
         $pdf->SetAligns(array('R', 'R', 'R', 'R'));
         $pdf->SetWidths(array(50, 23, 23, 23));
         $pdf->SetX(65);
-        $pdf->Row(array('Saldo Inicial', String::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', String::formatoNumero($totalVencido, 2, '', false)), false);
+        $pdf->Row(array('Saldo Inicial', MyString::formatoNumero( (isset($item->saldo_anterior->saldo)? $item->saldo_anterior->saldo: 0) , 2, '', false), 'Vencido', MyString::formatoNumero($totalVencido, 2, '', false)), false);
 
         $pdf->SetX(65);
-        $pdf->Row(array('(+) Cargos', String::formatoNumero($total_cargo, 2, '', false), 'Credito', $item->dias_credito.' Dias'), false);
+        $pdf->Row(array('(+) Cargos', MyString::formatoNumero($total_cargo, 2, '', false), 'Credito', $item->dias_credito.' Dias'), false);
         $pdf->SetX(65);
-        $pdf->Row(array('(-) Abonos', String::formatoNumero($total_abono, 2, '', false)), false);
+        $pdf->Row(array('(-) Abonos', MyString::formatoNumero($total_abono, 2, '', false)), false);
         $pdf->SetX(65);
-        $pdf->Row(array('(=) Saldo Final', String::formatoNumero( $saldo_cliente , 2, '', false), String::formatoNumero( $saldo_cliente_cambio , 2, '', false)), false);
+        $pdf->Row(array('(=) Saldo Final', MyString::formatoNumero( $saldo_cliente , 2, '', false), MyString::formatoNumero( $saldo_cliente_cambio , 2, '', false)), false);
 
         $total_saldo_cliente += $saldo_cliente;
       }
     }
 
     $pdf->SetXY(65, $pdf->GetY()+4);
-    $pdf->Row(array('TOTAL SALDO DE CLIENTES', String::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
+    $pdf->Row(array('TOTAL SALDO DE CLIENTES', MyString::formatoNumero( $total_saldo_cliente , 2, '', false)), false);
 
 
     $pdf->Output('estado_cuenta.pdf', 'I');
@@ -2253,7 +2253,7 @@ if($close){
         <tr>
         <td colspan="3"></td>
         <td>Saldo Inicial</td>
-        <td style="mso-number-format:\'0.00\';">'.String::float($value->saldo_anterior->saldo).'</td>
+        <td style="mso-number-format:\'0.00\';">'.MyString::float($value->saldo_anterior->saldo).'</td>
         <td colspan="3"></td>
         </tr>';
 
@@ -2267,20 +2267,20 @@ if($close){
           if (strtotime($this->input->get('ffecha2')) > strtotime($factura->fecha_vencimiento))
           {
             $totalVencido += $factura->saldo;
-            if(String::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
+            if(MyString::formatoNumero( ($factura->saldo) , 2, '', false) != '0.00')
               $color = '255,255,204';
           }
 
           $html .= '
           <tr>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');text-align:left;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');text-align:left;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->serie.'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->folio.'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');">'.$factura->concepto.'</td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.String::float($factura->total).'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.MyString::float($factura->total).'</td>
           <td style="border:0px solid #000;background-color: rgb('.$color.');"></td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.String::float($factura->saldo).'</td>
-          <td style="border:0px solid #000;background-color: rgb('.$color.');">'.String::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');mso-number-format:\'0.00\';">'.MyString::float($factura->saldo).'</td>
+          <td style="border:0px solid #000;background-color: rgb('.$color.');">'.MyString::fechaATexto($factura->fecha_vencimiento, '/c').'</td>
           </tr>';
 
           foreach ($factura->abonos as $keya => $abono)
@@ -2289,7 +2289,7 @@ if($close){
 
             $html .= '
             <tr>
-            <td>'.String::fechaATexto($abono->fecha, '/c').'</td>
+            <td>'.MyString::fechaATexto($abono->fecha, '/c').'</td>
             <td>'.$abono->serie.'</td>
             <td>'.$abono->folio.'</td>
             <td>'.$abono->concepto.'</td>
@@ -2305,23 +2305,23 @@ if($close){
         $total_saldo_cliente += $saldo_cliente;
         $html .= '<tr style="font-weight:bold">
         <td colspan="4"></td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_cargo).'</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_abono).'</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_saldo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_cargo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_abono).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_saldo).'</td>
         <td></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">Saldo Inicial</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0)).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float((isset($value->saldo_anterior->saldo)? $value->saldo_anterior->saldo: 0)).'</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">Vencido</td>
-        <td style="border:0px solid #000;background-color: rgb(255,255,204);mso-number-format:\'0.00\';">'.String::float($totalVencido).'</td>
+        <td style="border:0px solid #000;background-color: rgb(255,255,204);mso-number-format:\'0.00\';">'.MyString::float($totalVencido).'</td>
         <td></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(+) Cargos</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_cargo).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_cargo).'</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">Credito</td>
         <td style="border:0px solid #000;background-color: rgb(255,255,204);">'.$value->dias_credito.'</td>
         <td></td>
@@ -2329,13 +2329,13 @@ if($close){
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(-) Abonos</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_abono).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_abono).'</td>
         <td colspan="3"></td>
         </tr>
         <tr style="font-weight:bold">
         <td colspan="3"></td>
         <td style="border:0px solid #000;text-align:right;">(=) Saldo Final</td>
-        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($saldo_cliente).'</td>
+        <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($saldo_cliente).'</td>
         <td colspan="3"></td>
         </tr>
         <tr>
@@ -2348,7 +2348,7 @@ if($close){
     <tr style="font-weight:bold">
     <td colspan="3"></td>
     <td style="border:0px solid #000;">TOTAL SALDO DE CLIENTES</td>
-    <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.String::float($total_saldo_cliente).'</td>
+    <td style="border:0px solid #000;mso-number-format:\'0.00\';">'.MyString::float($total_saldo_cliente).'</td>
     <td colspan="3"></td>
     </tr>
     </tbody>

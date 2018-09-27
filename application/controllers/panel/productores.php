@@ -95,7 +95,7 @@ public function fecha($fecha)
 			$res_mdl = $this->productores_model->addProductor();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/productores/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/productores/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
     $params['empresa']       = $this->empresas_model->getDefaultEmpresa();
@@ -141,7 +141,7 @@ public function fecha($fecha)
 			$res_mdl = $this->productores_model->addProductor();
 
 			if(!$res_mdl['error'])
-        redirect(base_url('panel/productores/show_view_agregar_productor/?'.String::getVarsLink(array('msg')).'&msg=3&close=1'));
+        redirect(base_url('panel/productores/show_view_agregar_productor/?'.MyString::getVarsLink(array('msg')).'&msg=3&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -194,7 +194,7 @@ public function fecha($fecha)
 				$res_mdl = $this->productores_model->updateProductor($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['productor'] = $this->productores_model->getProductorInfo();
@@ -210,7 +210,7 @@ public function fecha($fecha)
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -224,10 +224,10 @@ public function fecha($fecha)
 			$this->load->model('productores_model');
 			$res_mdl = $this->productores_model->updateProductor( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -241,10 +241,10 @@ public function fecha($fecha)
 			$this->load->model('productores_model');
 			$res_mdl = $this->productores_model->updateProductor( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/productores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

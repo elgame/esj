@@ -81,7 +81,7 @@ class labores_codigo extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/labores_codigo/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+        redirect(base_url('panel/labores_codigo/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
       }
     }
 
@@ -123,7 +123,7 @@ class labores_codigo extends MY_Controller {
 
       if ($res_mdl)
       {
-        redirect(base_url('panel/labores_codigo/modificar/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/labores_codigo/modificar/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
       }
     }
 

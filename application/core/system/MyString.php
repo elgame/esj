@@ -3,7 +3,7 @@ require FCPATH.'vendor/nesbot/carbon/src/Carbon/Carbon.php';
 
 use Carbon\Carbon;
 
-class String {
+class MyString {
 
   public static function getMetodoPago($codigo='', $nombre='')
   {

@@ -494,7 +494,7 @@ class nomina_fiscal_model extends CI_Model {
                 // Obtiene el ultimo dia de incapacidad para la semana
                 $diaTerminaIncapacidad = strtotime($fi->fecha_fin) < strtotime($diaUltimoDeLaSemana) ? $fi->fecha_fin : $diaUltimoDeLaSemana;
 
-                $diasIncapacidad = intval(String::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
+                $diasIncapacidad = intval(MyString::diasEntreFechas($diaIniciaIncapacidad, $diaTerminaIncapacidad)) + 1;
 
                 if ($nm_tipo == 'pt') { // es ptu
                   // cuando es ptu a los dias trabajados se le suma las incapasidades por maternidad y riesgo de trabajo
@@ -1177,7 +1177,7 @@ class nomina_fiscal_model extends CI_Model {
     $diasTranscurridos = $fechaSalida->diff(new DateTime($fechaInicio))->format("%a") + 1;
     $diasTransAguinaldo = $fechaSalida->diff(new DateTime($fechaIniAguinaldo))->format("%a") + 1;
 
-    $semanaQueSeVa = String::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, $diasInicia, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
+    $semanaQueSeVa = MyString::obtenerSemanasDelAnioV2($fechaSalida->format('Y'), 0, $diasInicia, true, $fechaSalida->format('Y-m-d')); // cambiarle a 4=viernes
     $fechaInicioSemana = new DateTime($semanaQueSeVa['fecha_inicio']);
     $diasTrabajadosSemana = $fechaInicioSemana->diff($fechaSalida)->days + 1;
 
@@ -1271,7 +1271,7 @@ class nomina_fiscal_model extends CI_Model {
       } else
         $anio_anterior = $res_vacaciones->fecha;
     }
-    $empleado[0]->dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, $fechaSalida->format('Y-m-d')));
+    $empleado[0]->dias_anio_vacaciones = intval(MyString::diasEntreFechas($anio_anterior, $fechaSalida->format('Y-m-d')));
     // echo "<pre>";
     // var_dump ($anio_anterior, $fechaSalida->format('Y-m-d'), $res_vacaciones->fecha);
     // echo "</pre>";exit;
@@ -1347,12 +1347,12 @@ class nomina_fiscal_model extends CI_Model {
     //   $valorUnitario += $percepcion['total'];
     //   unset($empleadoFiniquito[0]->nomina->percepciones[$tipoPercepcion]['total']);
     // }
-    // $valorUnitario = str_replace(',', '', (String::formatoNumero($valorUnitario, 4, '')));
+    // $valorUnitario = str_replace(',', '', (MyString::formatoNumero($valorUnitario, 4, '')));
 
     // // Descuento seria 0 pq no hay otra deducciones aparte del isr.
     // $descuento = 0;
-    // $isr = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['isr']['total'], 4, '')) );
-    // $otros = str_replace(',', '', (String::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['otros']['total'], 4, '')) );
+    // $isr = str_replace(',', '', (MyString::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['isr']['total'], 4, '')) );
+    // $otros = str_replace(',', '', (MyString::formatoNumero($empleadoFiniquito[0]->nomina->deducciones['otros']['total'], 4, '')) );
     // unset($empleadoFiniquito[0]->nomina->deducciones['isr']['total']);
     // unset($empleadoFiniquito[0]->nomina->deducciones['otros']['total']);
 
@@ -1812,10 +1812,10 @@ class nomina_fiscal_model extends CI_Model {
               {
                 // Determina la diferencia de dias entre el primer dia de la incapacidad
                 // y el ultimo
-                $diffDias = String::diasEntreFechas($fi->fecha_ini, $fi->fecha_fin);
+                $diffDias = MyString::diasEntreFechas($fi->fecha_ini, $fi->fecha_fin);
 
                 // Obtiene los dias restantes de la incapacidad sin tomar en cuenta el primero dia.
-                $diasSiguientes = String::obtenerSiguientesXDias(date('Y-m-d', strtotime($fi->fecha_ini . '+1 day')), $diffDias);
+                $diasSiguientes = MyString::obtenerSiguientesXDias(date('Y-m-d', strtotime($fi->fecha_ini . '+1 day')), $diffDias);
 
                 // Agrega los dias faltantes al array.
                 foreach ($diasSiguientes as $fechaDia)
@@ -2239,7 +2239,7 @@ class nomina_fiscal_model extends CI_Model {
       {
         $sqlData = array(
           'fecha_ini'           => $datos['ifecha'][$key],
-          'fecha_fin'           => String::suma_fechas($datos['ifecha'][$key], $datos['idias'][$key]-1),
+          'fecha_fin'           => MyString::suma_fechas($datos['ifecha'][$key], $datos['idias'][$key]-1),
           'id_usuario'          => $empleadoId,
           'tipo'                => 'in',
           'id_clave'            => $datos['itipo_inciden'][$key],
@@ -2734,7 +2734,7 @@ class nomina_fiscal_model extends CI_Model {
   public function semanasDelAno($diaComienza, $anio=null)
   {
     $anio = $anio==null? date('Y'): $anio;
-    return String::obtenerSemanasDelAnioV2($anio, 0, $diaComienza);
+    return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza);
   }
 
   /**
@@ -2745,7 +2745,7 @@ class nomina_fiscal_model extends CI_Model {
    */
   // public function semanasDelMesActual()
   // {
-  //   return array_slice(String::obtenerSemanasDelAnioV2(date('Y'), 6, 0, true), 0, 4);
+  //   return array_slice(MyString::obtenerSemanasDelAnioV2(date('Y'), 6, 0, true), 0, 4);
   // }
 
   /**
@@ -2756,7 +2756,7 @@ class nomina_fiscal_model extends CI_Model {
   public function semanaActualDelMes($anio=null)
   {
     $anio = $anio!=null? $anio: date('Y');
-    return end(String::obtenerSemanasDelAnioV2(date('Y'), 0, 4));
+    return end(MyString::obtenerSemanasDelAnioV2(date('Y'), 0, 4));
   }
 
   /**
@@ -2768,7 +2768,7 @@ class nomina_fiscal_model extends CI_Model {
   public function fechasDeUnaSemana($semanaABuscar, $anio=null, $diaComienza=4)
   {
     $anio = $anio!=null? $anio: date('Y');
-    return String::obtenerSemanasDelAnioV2($anio, 0, $diaComienza, false, $semanaABuscar);
+    return MyString::obtenerSemanasDelAnioV2($anio, 0, $diaComienza, false, $semanaABuscar);
   }
 
   /**
@@ -3114,7 +3114,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['sueldo'] += $percepciones['sueldo']['total'];
           $total_gral['sueldo'] += $percepciones['sueldo']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3129,7 +3129,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['pasistencia'] += $empleado->pasistencia;
             $total_gral['pasistencia'] += $empleado->pasistencia;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3145,7 +3145,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Despensa', MyString::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['despensa'] += $empleado->despensa;
             $total_gral['despensa'] += $empleado->despensa;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3161,7 +3161,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
             $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3177,7 +3177,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
             $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3189,7 +3189,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
             $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3205,7 +3205,7 @@ class nomina_fiscal_model extends CI_Model {
           //   $pdf->SetXY(6, $pdf->GetY());
           //   $pdf->SetAligns(array('L', 'L', 'R'));
           //   $pdf->SetWidths(array(15, 62, 25));
-          //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+          //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
           //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
           //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
           //   if($pdf->GetY() >= $pdf->limiteY)
@@ -3221,7 +3221,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3245,7 +3245,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
             $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3260,7 +3260,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['infonavit'] += $deducciones['infonavit']['total'];
             $total_gral['infonavit'] += $deducciones['infonavit']['total'];
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3273,7 +3273,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3287,7 +3287,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
             $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3302,7 +3302,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
             $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3317,7 +3317,7 @@ class nomina_fiscal_model extends CI_Model {
           //   $pdf->SetXY(108, $pdf->GetY());
           //   $pdf->SetAligns(array('L', 'L', 'R'));
           //   $pdf->SetWidths(array(15, 62, 25));
-          //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+          //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
           //   if($pdf->GetY() >= $pdf->limiteY)
           //   {
           //     $pdf->AddPage();
@@ -3330,7 +3330,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['isr'] += $empleado->nomina_fiscal_isr;
             $total_gral['isr'] += $empleado->nomina_fiscal_isr;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -3357,7 +3357,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
           $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
           $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -3367,7 +3367,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetWidths(array(15, 62, 25));
           $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
           $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-          $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -3400,7 +3400,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -3411,7 +3411,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -3422,7 +3422,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Despensa', String::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -3435,7 +3435,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3449,7 +3449,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3459,7 +3459,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3473,7 +3473,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -3487,7 +3487,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3501,7 +3501,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3522,7 +3522,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3535,7 +3535,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3546,7 +3546,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
             $pdf->AddPage();
@@ -3558,7 +3558,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3571,7 +3571,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3584,7 +3584,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -3601,7 +3601,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -3609,7 +3609,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -3690,7 +3690,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['sueldo'] += $percepciones['sueldo']['total'];
         $total_gral['sueldo'] += $percepciones['sueldo']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -3705,7 +3705,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['pasistencia'] += $empleado->pasistencia;
           $total_gral['pasistencia'] += $empleado->pasistencia;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3721,7 +3721,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Despensa', MyString::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['despensa'] += $empleado->despensa;
           $total_gral['despensa'] += $empleado->despensa;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3737,7 +3737,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
           $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3753,7 +3753,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3765,7 +3765,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3781,7 +3781,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
         //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
         //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
         //   if($pdf->GetY() >= $pdf->limiteY)
@@ -3797,7 +3797,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3821,7 +3821,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
           $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3836,7 +3836,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['infonavit'] += $deducciones['infonavit']['total'];
           $total_gral['infonavit'] += $deducciones['infonavit']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3849,7 +3849,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -3863,7 +3863,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
           $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3878,7 +3878,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
           $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3893,7 +3893,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(108, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -3906,7 +3906,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -3933,7 +3933,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -3943,7 +3943,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -3974,7 +3974,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -3985,7 +3985,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -3996,7 +3996,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Despensa', String::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4009,7 +4009,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4023,7 +4023,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4033,7 +4033,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4047,7 +4047,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -4061,7 +4061,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4075,7 +4075,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4096,7 +4096,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4109,7 +4109,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4120,7 +4120,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
             $pdf->AddPage();
@@ -4132,7 +4132,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4145,7 +4145,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4158,7 +4158,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -4175,7 +4175,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -4183,7 +4183,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -4257,7 +4257,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Sueldo', String::formatoNumero($empleado->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($empleado->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['sueldo'] += $empleado->sueldo_semanal;
       $total_gral['sueldo'] += $empleado->sueldo_semanal;
       if($pdf->GetY() >= $pdf->limiteY)
@@ -4272,7 +4272,7 @@ class nomina_fiscal_model extends CI_Model {
       //   $pdf->SetXY(6, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
       //   $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
       //   $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
       //   if($pdf->GetY() >= $pdf->limiteY)
@@ -4288,7 +4288,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['vacaciones'] += $empleado->vacaciones;
         $total_gral['vacaciones'] += $empleado->vacaciones;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -4300,7 +4300,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prima_vacacional'] += $empleado->prima_vacacional;
         $total_gral['prima_vacacional'] += $empleado->prima_vacacional;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -4316,7 +4316,7 @@ class nomina_fiscal_model extends CI_Model {
       //   $pdf->SetXY(6, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
       //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
       //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
       //   if($pdf->GetY() >= $pdf->limiteY)
@@ -4332,7 +4332,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['aguinaldo'] += $empleado->aguinaldo;
         $total_gral['aguinaldo'] += $empleado->aguinaldo;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -4355,7 +4355,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio*-1, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($empleado->subsidio*-1, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['subsidio'] += $empleado->subsidio;
         $total_gral['subsidio'] += $empleado->subsidio;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -4370,7 +4370,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->isr;
         $total_gral['isr'] += $empleado->isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -4397,7 +4397,7 @@ class nomina_fiscal_model extends CI_Model {
       $total_gral['total_percepcion'] += $empleado->total_percepcion;
       $total_dep['total_deduccion'] += $empleado->total_deduccion;
       $total_gral['total_deduccion'] += $empleado->total_deduccion;
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->total_percepcion, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->total_percepcion, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -4407,7 +4407,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetWidths(array(15, 62, 25));
       $total_dep['total_neto'] += $empleado->total_neto;
       $total_gral['total_neto'] += $empleado->total_neto;
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->total_neto, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -4438,7 +4438,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4451,7 +4451,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4465,7 +4465,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4475,7 +4475,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4489,7 +4489,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4503,7 +4503,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4525,7 +4525,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4538,7 +4538,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4549,7 +4549,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
           $pdf->AddPage();
@@ -4561,7 +4561,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4574,7 +4574,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -4591,7 +4591,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $y + 2);
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -4599,7 +4599,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
     }
 
     //********* Total general ***************
@@ -4618,7 +4618,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -4629,7 +4629,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_gral['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_gral['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -4640,7 +4640,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Despensa', String::formatoNumero($total_gral['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_gral['despensa'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -4653,7 +4653,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_gral['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_gral['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4667,7 +4667,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_gral['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_gral['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4677,7 +4677,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_gral['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_gral['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4691,7 +4691,7 @@ class nomina_fiscal_model extends CI_Model {
     //   $pdf->SetXY(6, $pdf->GetY());
     //   $pdf->SetAligns(array('L', 'L', 'R'));
     //   $pdf->SetWidths(array(15, 62, 25));
-    //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+    //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
     //   if($pdf->GetY() >= $pdf->limiteY)
     //   {
     //     $pdf->AddPage();
@@ -4705,7 +4705,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'PTU', String::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4719,7 +4719,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4740,7 +4740,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_gral['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4753,7 +4753,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_gral['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_gral['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4764,7 +4764,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(108, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_gral['imms'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_gral['imms'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
         $pdf->AddPage();
@@ -4776,7 +4776,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_gral['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_gral['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4789,7 +4789,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4802,7 +4802,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'ISR', String::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -4819,7 +4819,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $y + 2);
     $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-    $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -4827,7 +4827,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', MyString::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
 
     $pdf->Output('Nomina.pdf', 'I');
   }
@@ -5253,39 +5253,39 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
-          // $dataarr[] = String::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
-          // $dataarr[] = String::formatoNumero($_POST['despensa'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
+          // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
+          // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
 
           if ($ver_total_otros != 0)
-            $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
+            $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
           if ($ver_total_domingo != 0)
-            $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
           if ($ver_total_prestamos != 0)
-            $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
 
           if ($ver_fondo_arro != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
           }
 
           if ($ver_infonavit != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
           }
 
           if($ver_des_playera)
-            $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
           if($ver_des_otro)
-            $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
           if ($ver_trans != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
           }
 
-          $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
           $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
@@ -5329,38 +5329,38 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
-      // $datatto[] = String::formatoNumero($premio_asistencia1, 2, '$', false);
-      // $datatto[] = String::formatoNumero($despensa1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero($premio_asistencia1, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero($despensa1, 2, '$', false);
 
       if ($ver_total_otros != 0)
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
-        $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
       if ($ver_total_prestamos != 0)
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
       if ($ver_fondo_arro != 0)
       {
-        $datatto[] = String::formatoNumero($total_fondo1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_fondo1, 2, '$', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '$', false);
       }
 
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '$', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '$', false);
 
       if ($ver_trans != 0)
       {
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '$', false);
       }
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
 
@@ -5416,39 +5416,39 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr = array();
         $dataarr[] = $numero_empleado;
         $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-        $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
-        // $dataarr[] = String::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
-        // $dataarr[] = String::formatoNumero($_POST['despensa'][$key], 2, '$', false);
+        $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '$', false);
+        // $dataarr[] = MyString::formatoNumero($_POST['premio_asistencia'][$key], 2, '$', false);
+        // $dataarr[] = MyString::formatoNumero($_POST['despensa'][$key], 2, '$', false);
 
         if ($ver_total_otros != 0)
-          $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
+          $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '$', false);
         if ($ver_total_domingo != 0)
-          $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '$', false);
         if ($ver_total_prestamos != 0)
-          $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '$', false);
 
         if ($ver_fondo_arro != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '$', false);
         }
 
         if ($ver_infonavit != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '$', false);
         }
 
         if($ver_des_playera)
-          $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '$', false);
         if($ver_des_otro)
-          $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
-        $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '$', false);
+        $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
         if ($ver_trans != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
         }
 
-        $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
+        $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
 
         $pdf->Row($dataarr, false, true, null, 2, 1);
         $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
@@ -5489,38 +5489,38 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
-      // $datatto[] = String::formatoNumero($premio_asistencia1, 2, '$', false);
-      // $datatto[] = String::formatoNumero($despensa1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero($premio_asistencia1, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero($despensa1, 2, '$', false);
 
       if ($ver_total_otros != 0)
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
-        $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
       if ($ver_total_prestamos != 0)
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
       if ($ver_fondo_arro != 0)
       {
-        $datatto[] = String::formatoNumero($total_fondo1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_fondo1, 2, '$', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '$', false);
       }
 
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '$', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '$', false);
 
       if ($ver_trans != 0)
       {
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '$', false);
       }
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
 
@@ -5569,39 +5569,39 @@ class nomina_fiscal_model extends CI_Model {
       $dataarr = array();
       $dataarr[] = $numero_empleado;
       $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-      $dataarr[] = String::formatoNumero($empleado->total_percepcion, 2, '$', false);
-      // $dataarr[] = String::formatoNumero(0, 2, '$', false);
-      // $dataarr[] = String::formatoNumero(0, 2, '$', false);
+      $dataarr[] = MyString::formatoNumero($empleado->total_percepcion, 2, '$', false);
+      // $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
+      // $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
 
       if ($ver_total_otros != 0)
-        $dataarr[] = String::formatoNumero($bonos_suma, 2, '$', false); //bonos + otros
+        $dataarr[] = MyString::formatoNumero($bonos_suma, 2, '$', false); //bonos + otros
       if ($ver_total_domingo != 0)
-        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       if ($ver_total_prestamos != 0)
-        $dataarr[] = String::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '$', false);
+        $dataarr[] = MyString::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '$', false);
 
       if ($ver_fondo_arro != 0)
       {
-        $dataarr[] = String::formatoNumero('0', 2, '$', false);
+        $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       }
 
       if($ver_des_playera)
-        $dataarr[] = String::formatoNumero(0, 2, '$', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
       if($ver_des_otro)
-        $dataarr[] = String::formatoNumero(0, 2, '$', false);
-      $dataarr[] = String::formatoNumero($total_pagar, 2, '$', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '$', false);
+      $dataarr[] = MyString::formatoNumero($total_pagar, 2, '$', false);
 
       if ($ver_trans != 0)
       {
-        $dataarr[] = String::formatoNumero($empleado->total_neto, 2, '$', false);
+        $dataarr[] = MyString::formatoNumero($empleado->total_neto, 2, '$', false);
       }
 
-      $dataarr[] = String::formatoNumero(($total_pagar-$empleado->total_neto), 2, '$', false);
+      $dataarr[] = MyString::formatoNumero(($total_pagar-$empleado->total_neto), 2, '$', false);
 
       $pdf->Row($dataarr, false, true, null, 2, 1);
       $sueldo_semanal_real += $empleado->total_percepcion;
@@ -5636,38 +5636,38 @@ class nomina_fiscal_model extends CI_Model {
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
-    // $datatto[] = String::formatoNumero(0, 2, '$', false);
-    // $datatto[] = String::formatoNumero(0, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
+    // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
+    // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
 
     if ($ver_total_otros != 0)
-      $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
     if ($ver_total_domingo != 0)
-      $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
     if ($ver_total_prestamos != 0)
-      $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
 
     if ($ver_fondo_arro != 0)
     {
-      $datatto[] = String::formatoNumero('0', 2, '$', false);
+      $datatto[] = MyString::formatoNumero('0', 2, '$', false);
     }
 
     if ($ver_infonavit != 0)
     {
-      $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '$', false);
     }
 
     if($ver_des_playera)
-      $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '$', false);
     if($ver_des_otro)
-      $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
-    $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '$', false);
 
     if ($ver_trans != 0)
     {
-      $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '$', false);
     }
-    $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '$', false);
     $pdf->Row($datatto, false, true, null, 2, 1);
 
 
@@ -5719,27 +5719,27 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = '';
           $dataarr[] = $keyotss;
-          $dataarr[] = String::formatoNumero('0', 2, '$', false);
-          // $datatto[] = String::formatoNumero('0', 2, '$', false);
-          // $datatto[] = String::formatoNumero('0', 2, '$', false);
+          $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
+          // $datatto[] = MyString::formatoNumero('0', 2, '$', false);
+          // $datatto[] = MyString::formatoNumero('0', 2, '$', false);
           if ($ver_total_otros != 0)
-            $dataarr[] = String::formatoNumero($dottoss, 2, '$', false);
+            $dataarr[] = MyString::formatoNumero($dottoss, 2, '$', false);
           if ($ver_total_domingo != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if ($ver_total_prestamos != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if ($ver_fondo_arro != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if ($ver_infonavit != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if($ver_des_playera)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
           if($ver_des_otro)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
-          $dataarr[] = String::formatoNumero($dottoss, 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($dottoss, 2, '$', false);
           if ($ver_trans != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '$', false);
-          $dataarr[] = String::formatoNumero($dottoss, 2, '$', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($dottoss, 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
           $otras_percepciones  += $dottoss;
@@ -5759,28 +5759,28 @@ class nomina_fiscal_model extends CI_Model {
       $datatto = array();
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '$', false);
-      // $datatto[] = String::formatoNumero(0, 2, '$', false);
-      // $datatto[] = String::formatoNumero(0, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
+      // $datatto[] = MyString::formatoNumero(0, 2, '$', false);
 
       if ($ver_total_otros != 0)
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '$', false);
       if ($ver_total_domingo != 0)
-        $datatto[] = String::formatoNumero($domingo1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '$', false);
       if ($ver_total_prestamos != 0)
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '$', false);
       if ($ver_fondo_arro != 0)
-        $datatto[] = String::formatoNumero($ver_fondo_arro, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($ver_fondo_arro, 2, '$', false);
       if ($ver_infonavit != 0)
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '$', false);
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '$', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '$', false);
       if ($ver_trans != 0)
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '$', false);
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '$', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
     }
 
@@ -5791,27 +5791,27 @@ class nomina_fiscal_model extends CI_Model {
     $datatto = array();
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '$', false);
-    // $datatto[] = String::formatoNumero($premio_asistencia, 2, '$', false);
-    // $datatto[] = String::formatoNumero($despensa, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($sueldo_semanal_real, 2, '$', false);
+    // $datatto[] = MyString::formatoNumero($premio_asistencia, 2, '$', false);
+    // $datatto[] = MyString::formatoNumero($despensa, 2, '$', false);
     if ($ver_total_otros != 0)
-      $datatto[] = String::formatoNumero($otras_percepciones, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($otras_percepciones, 2, '$', false);
     if ($ver_total_domingo != 0)
-      $datatto[] = String::formatoNumero($domingo, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($domingo, 2, '$', false);
     if ($ver_total_prestamos != 0)
-      $datatto[] = String::formatoNumero($total_prestamos, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_prestamos, 2, '$', false);
     if ($ver_fondo_arro != 0)
-      $datatto[] = String::formatoNumero($ver_fondo_arro, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ver_fondo_arro, 2, '$', false);
     if($ver_infonavit != 0)
-      $datatto[] = String::formatoNumero($total_infonavit, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_infonavit, 2, '$', false);
     if($ver_des_playera)
-      $datatto[] = String::formatoNumero($descuento_playeras, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($descuento_playeras, 2, '$', false);
     if($ver_des_otro)
-      $datatto[] = String::formatoNumero($descuento_otros, 2, '$', false);
-    $datatto[] = String::formatoNumero($ttotal_pagar, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($descuento_otros, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ttotal_pagar, 2, '$', false);
     if ($ver_trans != 0)
-      $datatto[] = String::formatoNumero($ttotal_nomina, 2, '$', false);
-    $datatto[] = String::formatoNumero($total_no_fiscal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_nomina, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($total_no_fiscal, 2, '$', false);
     $pdf->Row($datatto, false, true, null, 2, 1);
 
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -5824,9 +5824,9 @@ class nomina_fiscal_model extends CI_Model {
     if ($empresa['info']->rfc === 'ESJ97052763A')
     {
       $pdf->Row(array(
-        'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '$', false),
-        'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '$', false),
-        'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
+        'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '$', false),
+        'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '$', false),
+        'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '$', false),
         ), false, true, null, 2, 1);
     }
 
@@ -5856,19 +5856,19 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->Row(array(
           $numero_empleado,
           $value->nombre,
-          String::formatoNumero($value->cajas_cargadas, 2, ''),
-          String::formatoNumero($value->total_lam, 2, ''),
-          String::formatoNumero($value->sabado, 2, ''),
-          String::formatoNumero($value->lunes, 2, ''),
-          String::formatoNumero($value->martes, 2, ''),
-          String::formatoNumero($value->miercoles, 2, ''),
-          String::formatoNumero($value->jueves, 2, ''),
-          String::formatoNumero($value->viernes, 2, ''),
-          String::formatoNumero($value->domingo, 2, ''),
-          String::formatoNumero($value->total_lam, 2, ''),
-          String::formatoNumero($value->total_lvrd, 2, ''),
-          String::formatoNumero($value->prestamo['total'], 2, '$', false),
-          String::formatoNumero($value->total_pagar, 2, '$', false),
+          MyString::formatoNumero($value->cajas_cargadas, 2, ''),
+          MyString::formatoNumero($value->total_lam, 2, ''),
+          MyString::formatoNumero($value->sabado, 2, ''),
+          MyString::formatoNumero($value->lunes, 2, ''),
+          MyString::formatoNumero($value->martes, 2, ''),
+          MyString::formatoNumero($value->miercoles, 2, ''),
+          MyString::formatoNumero($value->jueves, 2, ''),
+          MyString::formatoNumero($value->viernes, 2, ''),
+          MyString::formatoNumero($value->domingo, 2, ''),
+          MyString::formatoNumero($value->total_lam, 2, ''),
+          MyString::formatoNumero($value->total_lvrd, 2, ''),
+          MyString::formatoNumero($value->prestamo['total'], 2, '$', false),
+          MyString::formatoNumero($value->total_pagar, 2, '$', false),
         ), false, true, null, 2, 1);
         $totales_rancho[0] += $value->total_lam;
         $totales_rancho[1] += $value->sabado;
@@ -5889,26 +5889,26 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array(
         '',
         'TOTAL',
-        String::formatoNumero($totales_rancho[12], 2, ''),
-        String::formatoNumero($totales_rancho[0], 2, ''),
-        String::formatoNumero($totales_rancho[1], 2, ''),
-        String::formatoNumero($totales_rancho[2], 2, ''),
-        String::formatoNumero($totales_rancho[3], 2, ''),
-        String::formatoNumero($totales_rancho[4], 2, ''),
-        String::formatoNumero($totales_rancho[5], 2, ''),
-        String::formatoNumero($totales_rancho[6], 2, ''),
-        String::formatoNumero($totales_rancho[7], 2, ''),
-        String::formatoNumero($totales_rancho[8], 2, ''),
-        String::formatoNumero($totales_rancho[9], 2, ''),
-        String::formatoNumero($totales_rancho[10], 2, '$', false),
-        String::formatoNumero($totales_rancho[11], 2, '$', false),
+        MyString::formatoNumero($totales_rancho[12], 2, ''),
+        MyString::formatoNumero($totales_rancho[0], 2, ''),
+        MyString::formatoNumero($totales_rancho[1], 2, ''),
+        MyString::formatoNumero($totales_rancho[2], 2, ''),
+        MyString::formatoNumero($totales_rancho[3], 2, ''),
+        MyString::formatoNumero($totales_rancho[4], 2, ''),
+        MyString::formatoNumero($totales_rancho[5], 2, ''),
+        MyString::formatoNumero($totales_rancho[6], 2, ''),
+        MyString::formatoNumero($totales_rancho[7], 2, ''),
+        MyString::formatoNumero($totales_rancho[8], 2, ''),
+        MyString::formatoNumero($totales_rancho[9], 2, ''),
+        MyString::formatoNumero($totales_rancho[10], 2, '$', false),
+        MyString::formatoNumero($totales_rancho[11], 2, '$', false),
       ), false, true, null, 2, 1);
 
       $pdf->SetWidths(array(35, 23));
       $pdf->SetXY(6, $pdf->GetY()+3);
       $pdf->Row(array(
         'TOTAL',
-        String::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '$', false),
+        MyString::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -6062,45 +6062,45 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->puesto;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
 
           if ($ver_total_otros != 0)
           {
-            $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
+            $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
           }
 
           if ($ver_total_domingo != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '', false);
           }
 
           if ($ver_total_prestamos != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
           }
 
           if ($ver_fondo_arro != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['fondo_ahorro'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '', false);
           }
 
           if ($ver_infonavit != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '', false);
           }
 
           if($ver_des_playera)
-            $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
           if($ver_des_otro)
-            $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($total_pagar, 2, '', false);
 
           if ($ver_trans != 0)
           {
-            $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
+            $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
           }
 
-          $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
 
           $html .= $this->rowXls($dataarr);
           $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
@@ -6136,44 +6136,44 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = '';
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '', false);
 
       if ($ver_total_otros != 0)
       {
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '', false);
       }
 
       if ($ver_total_domingo != 0)
       {
-        $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
       }
 
       if ($ver_total_prestamos != 0)
       {
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       }
 
       if ($ver_fondo_arro != 0)
       {
-        $datatto[] = String::formatoNumero($fondo_ahorro1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($fondo_ahorro1, 2, '', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '', false);
       }
 
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '', false);
 
       if ($ver_trans != 0)
       {
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '', false);
       }
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '', false);
       // $pdf->Row($datatto, false, true, null, 2, 1);
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
@@ -6204,45 +6204,45 @@ class nomina_fiscal_model extends CI_Model {
         $dataarr[] = $numero_empleado;
         $dataarr[] = $empleado->puesto;
         $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-        $dataarr[] = String::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
+        $dataarr[] = MyString::formatoNumero($_POST['sueldo_semanal_real'][$key], 2, '', false);
 
         if ($ver_total_otros != 0)
         {
-          $dataarr[] = String::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
+          $dataarr[] = MyString::formatoNumero(($_POST['bonos'][$key]+$_POST['otros'][$key]), 2, '', false);
         }
 
         if ($ver_total_domingo != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['domingo'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['domingo'][$key], 2, '', false);
         }
 
         if ($ver_total_prestamos != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_prestamos'][$key], 2, '', false);
         }
 
         if ($ver_fondo_arro != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['fondo_ahorro'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['fondo_ahorro'][$key], 2, '', false);
         }
 
         if ($ver_infonavit != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['total_infonavit'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_infonavit'][$key], 2, '', false);
         }
 
         if($ver_des_playera)
-          $dataarr[] = String::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['descuento_playeras'][$key], 2, '', false);
         if($ver_des_otro)
-          $dataarr[] = String::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
-        $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['descuento_otros'][$key], 2, '', false);
+        $dataarr[] = MyString::formatoNumero($total_pagar, 2, '', false);
 
         if ($ver_trans != 0)
         {
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
         }
 
-        $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
+        $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
 
         $html .= $this->rowXls($dataarr);
         $sueldo_semanal_real += $_POST['sueldo_semanal_real'][$key];
@@ -6275,44 +6275,44 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = '';
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '', false);
 
       if ($ver_total_otros != 0)
       {
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '', false);
       }
 
       if ($ver_total_domingo != 0)
       {
-        $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
       }
 
       if ($ver_total_prestamos != 0)
       {
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       }
 
       if ($ver_fondo_arro != 0)
       {
-        $datatto[] = String::formatoNumero($fondo_ahorro1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($fondo_ahorro1, 2, '', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '', false);
       }
 
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '', false);
 
       if ($ver_trans != 0)
       {
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '', false);
       }
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '', false);
       // $pdf->Row($datatto, false, true, null, 2, 1);
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
@@ -6337,45 +6337,45 @@ class nomina_fiscal_model extends CI_Model {
       $dataarr = array();
       $dataarr[] = $numero_empleado;
       $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-      $dataarr[] = String::formatoNumero($empleado->total_percepcion, 2, '', false);
+      $dataarr[] = MyString::formatoNumero($empleado->total_percepcion, 2, '', false);
 
       if ($ver_total_otros != 0)
       {
-        $dataarr[] = String::formatoNumero($bonos_suma, 2, '', false); //bonos + otros
+        $dataarr[] = MyString::formatoNumero($bonos_suma, 2, '', false); //bonos + otros
       }
 
       if ($ver_total_domingo != 0)
       {
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '', false);
       }
 
       if ($ver_total_prestamos != 0)
       {
-        $dataarr[] = String::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '', false);
+        $dataarr[] = MyString::formatoNumero(($empleado->total_deduccion-$empleado->isr), 2, '', false);
       }
 
       if ($ver_fondo_arro != 0)
       {
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '', false);
       }
 
       if ($ver_infonavit != 0)
       {
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '', false);
       }
 
       if($ver_des_playera)
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '', false);
       if($ver_des_otro)
-        $dataarr[] = String::formatoNumero(0, 2, '', false);
-      $dataarr[] = String::formatoNumero($total_pagar, 2, '', false);
+        $dataarr[] = MyString::formatoNumero(0, 2, '', false);
+      $dataarr[] = MyString::formatoNumero($total_pagar, 2, '', false);
 
       if ($ver_trans != 0)
       {
-        $dataarr[] = String::formatoNumero($empleado->total_neto, 2, '', false);
+        $dataarr[] = MyString::formatoNumero($empleado->total_neto, 2, '', false);
       }
 
-      $dataarr[] = String::formatoNumero(($total_pagar-$empleado->total_neto), 2, '', false);
+      $dataarr[] = MyString::formatoNumero(($total_pagar-$empleado->total_neto), 2, '', false);
 
       $html .= $this->rowXls($dataarr);
       $sueldo_semanal_real += $empleado->total_percepcion;
@@ -6406,44 +6406,44 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = '';
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+    $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '', false);
 
     if ($ver_total_otros != 0)
     {
-      $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '', false);
     }
 
     if ($ver_total_domingo != 0)
     {
-      $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
     }
 
     if ($ver_total_prestamos != 0)
     {
-      $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
     }
 
     if ($ver_fondo_arro != 0)
     {
-      $datatto[] = String::formatoNumero('0', 2, '', false);
+      $datatto[] = MyString::formatoNumero('0', 2, '', false);
     }
 
     if ($ver_infonavit != 0)
     {
-      $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '', false);
     }
 
     if($ver_des_playera)
-      $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '', false);
     if($ver_des_otro)
-      $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
-    $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '', false);
+    $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '', false);
 
     if ($ver_trans != 0)
     {
-      $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '', false);
     }
-    $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+    $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '', false);
     $html .= $this->rowXls($datatto);
     $html .= $this->rowXls(array(''));
 
@@ -6481,25 +6481,25 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = '';
           $dataarr[] = $keyotss;
-          $dataarr[] = String::formatoNumero('0', 2, '', false);
+          $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if ($ver_total_otros != 0)
-            $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+            $dataarr[] = MyString::formatoNumero($dottoss, 2, '', false);
           if ($ver_total_domingo != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if ($ver_total_prestamos != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if ($ver_fondo_arro != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if ($ver_infonavit != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if($ver_des_playera)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
           if($ver_des_otro)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
-          $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
+          $dataarr[] = MyString::formatoNumero($dottoss, 2, '', false);
           if ($ver_trans != 0)
-            $dataarr[] = String::formatoNumero('0', 2, '', false);
-          $dataarr[] = String::formatoNumero($dottoss, 2, '', false);
+            $dataarr[] = MyString::formatoNumero('0', 2, '', false);
+          $dataarr[] = MyString::formatoNumero($dottoss, 2, '', false);
 
           // $pdf->Row($dataarr, false, true, null, 2, 1);
           $html .= $this->rowXls($dataarr);
@@ -6517,26 +6517,26 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = '';
       $datatto[] = '';
       $datatto[] = 'TOTAL';
-      $datatto[] = String::formatoNumero($sueldo_semanal_real1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($sueldo_semanal_real1, 2, '', false);
 
       if ($ver_total_otros != 0)
-        $datatto[] = String::formatoNumero($otras_percepciones1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($otras_percepciones1, 2, '', false);
       if ($ver_total_domingo != 0)
-        $datatto[] = String::formatoNumero($domingo1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($domingo1, 2, '', false);
       if ($ver_total_prestamos != 0)
-        $datatto[] = String::formatoNumero($total_prestamos1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_prestamos1, 2, '', false);
       if ($ver_fondo_arro != 0)
-        $datatto[] = String::formatoNumero('0', 2, '', false);
+        $datatto[] = MyString::formatoNumero('0', 2, '', false);
       if ($ver_infonavit != 0)
-        $datatto[] = String::formatoNumero($total_infonavit1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($total_infonavit1, 2, '', false);
       if($ver_des_playera)
-        $datatto[] = String::formatoNumero($descuento_playeras1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_playeras1, 2, '', false);
       if($ver_des_otro)
-        $datatto[] = String::formatoNumero($descuento_otros1, 2, '', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($descuento_otros1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar1, 2, '', false);
       if ($ver_trans != 0)
-        $datatto[] = String::formatoNumero($ttotal_nomina1, 2, '', false);
-      $datatto[] = String::formatoNumero($total_no_fiscal1, 2, '', false);
+        $datatto[] = MyString::formatoNumero($ttotal_nomina1, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_no_fiscal1, 2, '', false);
       // $pdf->Row($datatto, false, true, null, 2, 1);
       $html .= $this->rowXls($datatto, 'style="font-weight:bold;font-size:14px;"');
       $html .= $this->rowXls(array(''));
@@ -6546,25 +6546,25 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = '';
     $datatto[] = '';
     $datatto[] = 'TOTAL';
-    $datatto[] = String::formatoNumero($sueldo_semanal_real, 2, '', false);
+    $datatto[] = MyString::formatoNumero($sueldo_semanal_real, 2, '', false);
     if($ver_total_otros != 0)
-      $datatto[] = String::formatoNumero($otras_percepciones, 2, '', false);
+      $datatto[] = MyString::formatoNumero($otras_percepciones, 2, '', false);
     if($ver_total_domingo != 0)
-      $datatto[] = String::formatoNumero($domingo, 2, '', false);
+      $datatto[] = MyString::formatoNumero($domingo, 2, '', false);
     if($ver_total_prestamos != 0)
-      $datatto[] = String::formatoNumero($total_prestamos, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_prestamos, 2, '', false);
     if($ver_fondo_arro != 0)
-      $datatto[] = String::formatoNumero($fondo_ahorro, 2, '', false);
+      $datatto[] = MyString::formatoNumero($fondo_ahorro, 2, '', false);
     if($ver_infonavit != 0)
-      $datatto[] = String::formatoNumero($total_infonavit, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_infonavit, 2, '', false);
     if($ver_des_playera)
-      $datatto[] = String::formatoNumero($descuento_playeras, 2, '', false);
+      $datatto[] = MyString::formatoNumero($descuento_playeras, 2, '', false);
     if($ver_des_otro)
-      $datatto[] = String::formatoNumero($descuento_otros, 2, '', false);
-    $datatto[] = String::formatoNumero($ttotal_pagar, 2, '', false);
+      $datatto[] = MyString::formatoNumero($descuento_otros, 2, '', false);
+    $datatto[] = MyString::formatoNumero($ttotal_pagar, 2, '', false);
     if ($ver_trans != 0)
-      $datatto[] = String::formatoNumero($ttotal_nomina, 2, '', false);
-    $datatto[] = String::formatoNumero($total_no_fiscal, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_nomina, 2, '', false);
+    $datatto[] = MyString::formatoNumero($total_no_fiscal, 2, '', false);
     // $pdf->Row($datatto, false, true, null, 2, 1);
     $html .= $this->rowXls($datatto, 'style="font-weight:bold;font-size:14px;"');
     $html .= $this->rowXls(array(''));
@@ -6573,9 +6573,9 @@ class nomina_fiscal_model extends CI_Model {
     if ($empresa['info']->rfc === 'ESJ97052763A')
     {
       $html .= $this->rowXls(array(
-        'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
-        'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '', false),
-        'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
+        'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
+        'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '', false),
+        'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
         ), 'style="font-weight:bold;font-size:14px;"');
       $html .= $this->rowXls(array(''));
     }
@@ -6594,19 +6594,19 @@ class nomina_fiscal_model extends CI_Model {
         $html .= $this->rowXls( array(
           $numero_empleado,
           $value->nombre,
-          String::formatoNumero($value->cajas_cargadas, 2, ''),
-          String::formatoNumero($value->total_lam, 2, ''),
-          String::formatoNumero($value->sabado, 2, ''),
-          String::formatoNumero($value->lunes, 2, ''),
-          String::formatoNumero($value->martes, 2, ''),
-          String::formatoNumero($value->miercoles, 2, ''),
-          String::formatoNumero($value->jueves, 2, ''),
-          String::formatoNumero($value->viernes, 2, ''),
-          String::formatoNumero($value->domingo, 2, ''),
-          String::formatoNumero($value->total_lam, 2, ''),
-          String::formatoNumero($value->total_lvrd, 2, ''),
-          String::formatoNumero($value->prestamo, 2, '', false),
-          String::formatoNumero($value->total_pagar, 2, '', false),
+          MyString::formatoNumero($value->cajas_cargadas, 2, ''),
+          MyString::formatoNumero($value->total_lam, 2, ''),
+          MyString::formatoNumero($value->sabado, 2, ''),
+          MyString::formatoNumero($value->lunes, 2, ''),
+          MyString::formatoNumero($value->martes, 2, ''),
+          MyString::formatoNumero($value->miercoles, 2, ''),
+          MyString::formatoNumero($value->jueves, 2, ''),
+          MyString::formatoNumero($value->viernes, 2, ''),
+          MyString::formatoNumero($value->domingo, 2, ''),
+          MyString::formatoNumero($value->total_lam, 2, ''),
+          MyString::formatoNumero($value->total_lvrd, 2, ''),
+          MyString::formatoNumero($value->prestamo, 2, '', false),
+          MyString::formatoNumero($value->total_pagar, 2, '', false),
         ) );
 
         $totales_rancho[0] += $value->total_lam;
@@ -6627,24 +6627,24 @@ class nomina_fiscal_model extends CI_Model {
       $html .= $this->rowXls( array(
         '',
         'TOTAL',
-        String::formatoNumero($totales_rancho[12], 2, ''),
-        String::formatoNumero($totales_rancho[0], 2, ''),
-        String::formatoNumero($totales_rancho[1], 2, ''),
-        String::formatoNumero($totales_rancho[2], 2, ''),
-        String::formatoNumero($totales_rancho[3], 2, ''),
-        String::formatoNumero($totales_rancho[4], 2, ''),
-        String::formatoNumero($totales_rancho[5], 2, ''),
-        String::formatoNumero($totales_rancho[6], 2, ''),
-        String::formatoNumero($totales_rancho[7], 2, ''),
-        String::formatoNumero($totales_rancho[8], 2, ''),
-        String::formatoNumero($totales_rancho[9], 2, ''),
-        String::formatoNumero($totales_rancho[10], 2, '', false),
-        String::formatoNumero($totales_rancho[11], 2, '', false),
+        MyString::formatoNumero($totales_rancho[12], 2, ''),
+        MyString::formatoNumero($totales_rancho[0], 2, ''),
+        MyString::formatoNumero($totales_rancho[1], 2, ''),
+        MyString::formatoNumero($totales_rancho[2], 2, ''),
+        MyString::formatoNumero($totales_rancho[3], 2, ''),
+        MyString::formatoNumero($totales_rancho[4], 2, ''),
+        MyString::formatoNumero($totales_rancho[5], 2, ''),
+        MyString::formatoNumero($totales_rancho[6], 2, ''),
+        MyString::formatoNumero($totales_rancho[7], 2, ''),
+        MyString::formatoNumero($totales_rancho[8], 2, ''),
+        MyString::formatoNumero($totales_rancho[9], 2, ''),
+        MyString::formatoNumero($totales_rancho[10], 2, '', false),
+        MyString::formatoNumero($totales_rancho[11], 2, '', false),
       ), 'style="font-weight:bold;font-size:14px;"' );
 
       $html .= $this->rowXls( array(
         'TOTAL',
-        String::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '', false),
+        MyString::formatoNumero($totales_rancho[11]+$total_no_fiscal, 2, '', false),
       ), 'style="font-weight:bold;font-size:14px;"' );
     }
     $html .= '</table>';
@@ -6814,7 +6814,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['sueldo'] += $percepciones['sueldo']['total'];
         $total_gral['sueldo'] += $percepciones['sueldo']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6829,7 +6829,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['pasistencia'] += $empleado->pasistencia;
           $total_gral['pasistencia'] += $empleado->pasistencia;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6845,7 +6845,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Despensa', MyString::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['despensa'] += $empleado->despensa;
           $total_gral['despensa'] += $empleado->despensa;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6861,7 +6861,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
           $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6877,7 +6877,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6889,7 +6889,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6905,7 +6905,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
         //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
         //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
         //   if($pdf->GetY() >= $pdf->limiteY)
@@ -6921,7 +6921,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6945,7 +6945,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
           $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6960,7 +6960,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['infonavit'] += $deducciones['infonavit']['total'];
           $total_gral['infonavit'] += $deducciones['infonavit']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -6973,7 +6973,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -6987,7 +6987,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
           $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -7002,7 +7002,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
           $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -7017,7 +7017,7 @@ class nomina_fiscal_model extends CI_Model {
         //   $pdf->SetXY(108, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -7030,7 +7030,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -7057,7 +7057,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -7067,7 +7067,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -7095,7 +7095,7 @@ class nomina_fiscal_model extends CI_Model {
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(86, $pdf->GetY()+5);
-        $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
+        $pdf->Cell(78, 4, "Metodo de Pago: ".MyString::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
         $cuenta_banco = substr($empleado->cuenta_banco, -4);
         $pdf->SetFont('helvetica','B', 9);
@@ -7381,9 +7381,9 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array("001", 'Sueldo Gravado', String::formatoNumero($percepciones['sueldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array("001", 'Sueldo Gravado', MyString::formatoNumero($percepciones['sueldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
       $pdf->SetXY(6, $pdf->GetY());
-      $pdf->Row(array("001", 'Sueldo Exento', String::formatoNumero($percepciones['sueldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array("001", 'Sueldo Exento', MyString::formatoNumero($percepciones['sueldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['sueldo'] += $percepciones['sueldo']['total'];
       $total_gral['sueldo'] += $percepciones['sueldo']['total'];
       if($pdf->GetY() >= $pdf->limiteY)
@@ -7398,9 +7398,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('049', 'P Asistencia Gravado', String::formatoNumero($percepciones['premio_asistencia']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('049', 'P Asistencia Gravado', MyString::formatoNumero($percepciones['premio_asistencia']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('049', 'P Asistencia Exento', String::formatoNumero($percepciones['premio_asistencia']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('049', 'P Asistencia Exento', MyString::formatoNumero($percepciones['premio_asistencia']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['pasistencia'] += $empleado->pasistencia;
         $total_gral['pasistencia'] += $empleado->pasistencia;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7416,9 +7416,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('029', 'Despensa Gravado', String::formatoNumero($percepciones['premio_despensa']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('029', 'Despensa Gravado', MyString::formatoNumero($percepciones['premio_despensa']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('029', 'Despensa Exento', String::formatoNumero($percepciones['premio_despensa']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('029', 'Despensa Exento', MyString::formatoNumero($percepciones['premio_despensa']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['despensa'] += $empleado->despensa;
         $total_gral['despensa'] += $empleado->despensa;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7434,9 +7434,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('019', 'Horas Extras Gravado', String::formatoNumero($percepciones['horas_extras']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('019', 'Horas Extras Gravado', MyString::formatoNumero($percepciones['horas_extras']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('019', 'Horas Extras Exento', String::formatoNumero($percepciones['horas_extras']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('019', 'Horas Extras Exento', MyString::formatoNumero($percepciones['horas_extras']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
         $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7452,9 +7452,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('001', 'Vacaciones Gravado', String::formatoNumero($percepciones['vacaciones']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('001', 'Vacaciones Gravado', MyString::formatoNumero($percepciones['vacaciones']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('001', 'Vacaciones Exento', String::formatoNumero($percepciones['vacaciones']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('001', 'Vacaciones Exento', MyString::formatoNumero($percepciones['vacaciones']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
         $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7466,9 +7466,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('021', 'Prima vacacional Gravado', String::formatoNumero($percepciones['prima_vacacional']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('021', 'Prima vacacional Gravado', MyString::formatoNumero($percepciones['prima_vacacional']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('021', 'Prima vacacional Exento', String::formatoNumero($percepciones['prima_vacacional']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('021', 'Prima vacacional Exento', MyString::formatoNumero($percepciones['prima_vacacional']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
         $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7484,7 +7484,7 @@ class nomina_fiscal_model extends CI_Model {
       //   $pdf->SetXY(6, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
       //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
       //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
       //   if($pdf->GetY() >= $pdf->limiteY)
@@ -7500,9 +7500,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('002', 'Aguinaldo Gravado', String::formatoNumero($percepciones['aguinaldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Aguinaldo Gravado', MyString::formatoNumero($percepciones['aguinaldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('002', 'Aguinaldo Exento', String::formatoNumero($percepciones['aguinaldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Aguinaldo Exento', MyString::formatoNumero($percepciones['aguinaldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7526,7 +7526,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('002', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
         $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7541,7 +7541,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('010', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('010', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['infonavit'] += $deducciones['infonavit']['total'];
         $total_gral['infonavit'] += $deducciones['infonavit']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7554,7 +7554,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('001', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('001', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
       if($pdf->GetY() >= $pdf->limiteY)
@@ -7568,7 +7568,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('004', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('004', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
         $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7583,7 +7583,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('018', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('018', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
         $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7598,7 +7598,7 @@ class nomina_fiscal_model extends CI_Model {
       //   $pdf->SetXY(108, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
       //   if($pdf->GetY() >= $pdf->limiteY)
       //   {
       //     $pdf->AddPage();
@@ -7611,7 +7611,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('002', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->nomina_fiscal_isr;
         $total_gral['isr'] += $empleado->nomina_fiscal_isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -7638,7 +7638,7 @@ class nomina_fiscal_model extends CI_Model {
       $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
       $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
       $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -7648,7 +7648,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetWidths(array(15, 62, 25));
       $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
       $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -7916,7 +7916,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Sueldo', String::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -7929,7 +7929,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Vacaciones', String::formatoNumero($finiquitos->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($finiquitos->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -7939,7 +7939,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($finiquitos->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($finiquitos->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -7953,7 +7953,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($finiquitos->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($finiquitos->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -7967,7 +7967,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Indemnizaciones', String::formatoNumero($finiquitos->indemnizaciones, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Indemnizaciones', MyString::formatoNumero($finiquitos->indemnizaciones, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -7989,7 +7989,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -8002,7 +8002,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prestamos', String::formatoNumero($finiquitos->deduccion_otros, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($finiquitos->deduccion_otros, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -8015,7 +8015,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'ISR', String::formatoNumero($finiquitos->isr, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'ISR', MyString::formatoNumero($finiquitos->isr, 2, '$', false)), false, 0, null, 1, 1);
             if($pdf->GetY() >= $pdf->limiteY)
             {
               $pdf->AddPage();
@@ -8034,7 +8034,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $y + 2);
           $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($finiquitos->total_percepcion, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($finiquitos->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($finiquitos->total_percepcion, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($finiquitos->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -8042,7 +8042,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Total Neto', String::formatoNumero($finiquitos->total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($finiquitos->total_neto, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -8070,7 +8070,7 @@ class nomina_fiscal_model extends CI_Model {
 
           $pdf->SetFont('helvetica','B', 9);
           $pdf->SetXY(86, $pdf->GetY()+5);
-          $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
+          $pdf->Cell(78, 4, "Metodo de Pago: ".MyString::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
           $cuenta_banco = substr($finiquitos->cuenta_banco, -4);
           $pdf->SetFont('helvetica','B', 9);
@@ -8355,9 +8355,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array("001", 'Sueldo Gravado', String::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array("001", 'Sueldo Gravado', MyString::formatoNumero($finiquitos->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array("001", 'Sueldo Exento', String::formatoNumero('0', 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array("001", 'Sueldo Exento', MyString::formatoNumero('0', 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -8370,7 +8370,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($finiquitos->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($finiquitos->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8380,9 +8380,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('021', 'Prima vacacional Gravado', String::formatoNumero($finiquitos->prima_vacacional_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('021', 'Prima vacacional Gravado', MyString::formatoNumero($finiquitos->prima_vacacional_grabable, 2, '$', false)), false, 0, null, 1, 1);
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->Row(array('021', 'Prima vacacional Exento', String::formatoNumero($finiquitos->prima_vacacional_exento, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('021', 'Prima vacacional Exento', MyString::formatoNumero($finiquitos->prima_vacacional_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8396,9 +8396,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('002', 'Aguinaldo Gravado', String::formatoNumero($finiquitos->aguinaldo_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('002', 'Aguinaldo Gravado', MyString::formatoNumero($finiquitos->aguinaldo_grabable, 2, '$', false)), false, 0, null, 1, 1);
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->Row(array('002', 'Aguinaldo Exento', String::formatoNumero($finiquitos->aguinaldo_exento, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('002', 'Aguinaldo Exento', MyString::formatoNumero($finiquitos->aguinaldo_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8412,9 +8412,9 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('025', 'Indemnizaciones Gravado', String::formatoNumero($finiquitos->indemnizaciones_grabable, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('025', 'Indemnizaciones Gravado', MyString::formatoNumero($finiquitos->indemnizaciones_grabable, 2, '$', false)), false, 0, null, 1, 1);
           $pdf->SetXY(6, $pdf->GetY());
-          $pdf->Row(array('025', 'Indemnizaciones Exento', String::formatoNumero($finiquitos->indemnizaciones_exento, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('025', 'Indemnizaciones Exento', MyString::formatoNumero($finiquitos->indemnizaciones_exento, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8436,7 +8436,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$finiquitos->subsidio, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8449,7 +8449,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($finiquitos->deduccion_otros, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($finiquitos->deduccion_otros, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8462,7 +8462,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($finiquitos->isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($finiquitos->isr, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -8481,7 +8481,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($finiquitos->total_percepcion, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($finiquitos->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($finiquitos->total_percepcion, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($finiquitos->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -8489,7 +8489,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($finiquitos->total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($finiquitos->total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -8718,10 +8718,10 @@ class nomina_fiscal_model extends CI_Model {
 
         $dataarr = array(
           $empleado->nombre,
-          ($empleado->fecha_ultima!=''? String::fechaATexto($empleado->fecha_ultima, '/c'): 'No a tenido'),
-          String::fechaATexto($fecha_entrada, '/c'),
+          ($empleado->fecha_ultima!=''? MyString::fechaATexto($empleado->fecha_ultima, '/c'): 'No a tenido'),
+          MyString::fechaATexto($fecha_entrada, '/c'),
           $nomina->diasVacacionesCorresponden($anios_trabajados_empleado),
-          String::fechaATexto($cumpleanios, '/c'),
+          MyString::fechaATexto($cumpleanios, '/c'),
           );
 
         $pdf->Row($dataarr, false, true, null, 2, 1);
@@ -8849,9 +8849,9 @@ class nomina_fiscal_model extends CI_Model {
         $data2 = array(
           $prestamo->fecha,
           $prestamo->inicio_pago,
-          String::formatoNumero($prestamo->prestado),
-          String::formatoNumero($prestamo->pago_semana),
-          String::formatoNumero($prestamo->total_pagado),
+          MyString::formatoNumero($prestamo->prestado),
+          MyString::formatoNumero($prestamo->pago_semana),
+          MyString::formatoNumero($prestamo->total_pagado),
         );
 
         $pdf->Row($data2, false, true, null, 2, 1);
@@ -8914,9 +8914,9 @@ class nomina_fiscal_model extends CI_Model {
     );
 
     // echo "<pre>";
-    // print_r (String::suma_fechas($sem['fecha_inicio'], 0));
-    // print_r (String::obtenerDiaSemana($sem['fecha_inicio']));
-    // print_r (String::dia($sem['fecha_inicio'], 'c'));
+    // print_r (MyString::suma_fechas($sem['fecha_inicio'], 0));
+    // print_r (MyString::obtenerDiaSemana($sem['fecha_inicio']));
+    // print_r (MyString::dia($sem['fecha_inicio'], 'c'));
     // echo "</pre>";exit;
 
     $pdf->SetFont('Helvetica','B', 8);
@@ -8934,7 +8934,7 @@ class nomina_fiscal_model extends CI_Model {
     );
 
     for ($i=0; $i < 7; $i++) {
-      $columnas['n'][$i+2] = String::dia(String::suma_fechas($sem['fecha_inicio'], $i), 'c');
+      $columnas['n'][$i+2] = MyString::dia(MyString::suma_fechas($sem['fecha_inicio'], $i), 'c');
     }
 
     $pdf->SetFont('Helvetica','B', 8);
@@ -8995,7 +8995,7 @@ class nomina_fiscal_model extends CI_Model {
             $tipo = 'A';
             if (isset($empleado->dias_faltantes)) {
               foreach ($empleado->dias_faltantes as $key => $value) {
-                if ($value['fecha'] == String::suma_fechas($sem['fecha_inicio'], $i)) {
+                if ($value['fecha'] == MyString::suma_fechas($sem['fecha_inicio'], $i)) {
                   $tipo = strtoupper($value['tipo']);
                 }
               }
@@ -9055,38 +9055,38 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(33, 50);
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(100, 50));
-      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+      $pdf->Row(array("{$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
 
       $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
       $primaVacacional = $vacaciones * 0.25;
 
       $pdf->SetFont('Arial','', 11);
       $pdf->SetXY(33, $pdf->GetY() + 5);
-      $pdf->Row(array("{$filtros['fdias']} DIAS DE VACACIONES", String::formatoNumero($filtros['fsalario_real'] * $filtros['fdias'], 2, '$', false)), false, false);
+      $pdf->Row(array("{$filtros['fdias']} DIAS DE VACACIONES", MyString::formatoNumero($filtros['fsalario_real'] * $filtros['fdias'], 2, '$', false)), false, false);
 
       $pdf->SetX(33);
-      $pdf->Row(array("P. VACACIONAL", String::formatoNumero($primaVacacional, 2, '$', false)), false, false);
+      $pdf->Row(array("P. VACACIONAL", MyString::formatoNumero($primaVacacional, 2, '$', false)), false, false);
 
       $pdf->SetFont('Arial','B', 11);
       $pdf->SetX(33);
       $pdf->SetAligns(array('R', 'R'));
-      $pdf->Row(array("TOTAL", String::formatoNumero($vacaciones + $primaVacacional, 2, '$', false)), false, false);
+      $pdf->Row(array("TOTAL", MyString::formatoNumero($vacaciones + $primaVacacional, 2, '$', false)), false, false);
 
       $pdf->SetFont('Arial','', 10);
       $pdf->SetXY(33, $pdf->GetY() + 10);
       $pdf->SetAligns(array('C'));
       $pdf->SetWidths(array(150));
-      $total_pp = String::formatoNumero($vacaciones + $primaVacacional, 2, '$', false);
+      $total_pp = MyString::formatoNumero($vacaciones + $primaVacacional, 2, '$', false);
       $pdf->Row(array("RECIBI POR CONCEPTO DE VACACIONES LA CANTIDAD DE " . $total_pp), false, false);
       $pdf->SetX(33);
 
-      $pdf->Row(array("(== " . strtoupper(String::num2letras(String::float($total_pp))) . " ==)"), false, false);
+      $pdf->Row(array("(== " . strtoupper(MyString::num2letras(MyString::float($total_pp))) . " ==)"), false, false);
       $pdf->SetX(33);
 
       $inicio = new DateTime(($empleado['info'][0]->fecha_imss? $empleado['info'][0]->fecha_imss : $empleado['info'][0]->fecha_entrada));
       $hoy = new DateTime(date('Y-m-d'));
 
-      $pdf->Row(array("POR LAS VACACIONES DEL ".String::numeroCardinal($hoy->diff($inicio)->y)." AÑO DE LABORES. "), false, false);
+      $pdf->Row(array("POR LAS VACACIONES DEL ".MyString::numeroCardinal($hoy->diff($inicio)->y)." AÑO DE LABORES. "), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 10);
       $pdf->SetAligns(array('C'));
@@ -9160,7 +9160,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(33, 25);
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(100, 50));
-      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", "SALARIO DIARIO " . String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", "SALARIO DIARIO " . MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
 
       // $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
       // $primaVacacional = $vacaciones * 0.25;
@@ -9182,7 +9182,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('Arial','', 8);
       $pdf->SetX(60);
-      $pdf->Row(array("SALARIO DIARIO", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+      $pdf->Row(array("SALARIO DIARIO", MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
 
       $fechaEntrada = new DateTime($filtros['ffecha1']);
       $fechaSalida = new DateTime($filtros['ffecha2']);
@@ -9249,7 +9249,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array("DIAS (PROPORCION)", $diasProporcionVacaciones), false, false);
 
       $pdf->SetX(60);
-      $pdf->Row(array("TOTAL", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+      $pdf->Row(array("TOTAL", MyString::formatoNumero($vacaciones, 2, '$', false)), false, false);
 
       // ---------------------------
 
@@ -9259,7 +9259,7 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('Arial','', 8);
       $pdf->SetX(60);
-      $pdf->Row(array("VACACIONES", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+      $pdf->Row(array("VACACIONES", MyString::formatoNumero($vacaciones, 2, '$', false)), false, false);
 
       $fechaEntrada = new DateTime($filtros['ffecha1']);
       $fechaSalida = new DateTime($filtros['ffecha2']);
@@ -9269,7 +9269,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->Row(array("TASA", '25%'), false, false);
 
       $pdf->SetX(60);
-      $pdf->Row(array("PRIMA A PAGAR", String::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
+      $pdf->Row(array("PRIMA A PAGAR", MyString::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
 
       // ---------------------------
 
@@ -9279,13 +9279,13 @@ class nomina_fiscal_model extends CI_Model {
 
       $pdf->SetFont('Arial','', 8);
       $pdf->SetX(60);
-      $pdf->Row(array("SALARIO DIARIO", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+      $pdf->Row(array("SALARIO DIARIO", MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
 
       $pdf->SetX(60);
       $pdf->Row(array("DIAS (PROPORCION)", $diasProporcionAguinaldo), false, false);
 
       $pdf->SetX(60);
-      $pdf->Row(array("TOTAL", String::formatoNumero($aguinaldo, 2, '$', false)), false, false);
+      $pdf->Row(array("TOTAL", MyString::formatoNumero($aguinaldo, 2, '$', false)), false, false);
 
       // --------------------------------
 
@@ -9297,21 +9297,21 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetFont('Arial','', 8);
         if ($filtros['indem_cons']) {
           $pdf->SetX(60);
-          $pdf->Row(array("3 meses de sueldo", String::formatoNumero($despido_injustificado, 2, '$', false)), false, false);
+          $pdf->Row(array("3 meses de sueldo", MyString::formatoNumero($despido_injustificado, 2, '$', false)), false, false);
         }
 
         if ($filtros['indem']) {
           $pdf->SetX(60);
-          $pdf->Row(array("Indemnisacion negativa", String::formatoNumero($indemnisacion_negativa, 2, '$', false)), false, false);
+          $pdf->Row(array("Indemnisacion negativa", MyString::formatoNumero($indemnisacion_negativa, 2, '$', false)), false, false);
         }
 
         if ($filtros['prima']) {
           $pdf->SetX(60);
-          $pdf->Row(array("Prima antiguedad", String::formatoNumero($prima_antiguedad, 2, '$', false)), false, false);
+          $pdf->Row(array("Prima antiguedad", MyString::formatoNumero($prima_antiguedad, 2, '$', false)), false, false);
         }
 
         $pdf->SetX(60);
-        $pdf->Row(array("TOTAL", String::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
+        $pdf->Row(array("TOTAL", MyString::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
       }
 
       // --------------------------------
@@ -9325,17 +9325,17 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(60, $pdf->GetY());
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(50, 50));
-      $pdf->Row(array("VACACIONES", String::formatoNumero($vacaciones, 2, '$', false)), false, false);
+      $pdf->Row(array("VACACIONES", MyString::formatoNumero($vacaciones, 2, '$', false)), false, false);
       $pdf->SetX(60);
-      $pdf->Row(array("PRIMA VACACIONAL", String::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
+      $pdf->Row(array("PRIMA VACACIONAL", MyString::formatoNumero($vacaciones * 0.25, 2, '$', false)), false, false);
       $pdf->SetX(60);
-      $pdf->Row(array("AGUINALDO", String::formatoNumero($aguinaldo, 2, '$', false)), false, false);
+      $pdf->Row(array("AGUINALDO", MyString::formatoNumero($aguinaldo, 2, '$', false)), false, false);
       if ($despido) {
         $pdf->SetX(60);
-        $pdf->Row(array("INDEMNIZACIONES", String::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
+        $pdf->Row(array("INDEMNIZACIONES", MyString::formatoNumero($indemnisaciones, 2, '$', false)), false, false);
       }
       $pdf->SetXY(60, $pdf->GetY() + 2);
-      $pdf->Row(array("NETO A PAGAR", String::formatoNumero( ($vacaciones + ($vacaciones * 0.25) + $aguinaldo + $indemnisaciones), 2, '$', false)), false, false);
+      $pdf->Row(array("NETO A PAGAR", MyString::formatoNumero( ($vacaciones + ($vacaciones * 0.25) + $aguinaldo + $indemnisaciones), 2, '$', false)), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 6);
       $pdf->SetAligns(array('C'));
@@ -9393,7 +9393,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(33, 35);
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetWidths(array(100, 50));
-      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", ""), false, false); // "SALARIO DIARIO " . String::formatoNumero($filtros['fsalario_real'], 2, '$', false)
+      $pdf->Row(array("NOMBRE: {$empleado['info'][0]->nombre} {$empleado['info'][0]->apellido_paterno} {$empleado['info'][0]->apellido_materno}", ""), false, false); // "SALARIO DIARIO " . MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)
 
       // $vacaciones = $filtros['fsalario_real'] * $filtros['fdias'];
       // $primaVacacional = $vacaciones * 0.25;
@@ -9404,8 +9404,8 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetX(33);
       $pdf->SetAligns(array('L', 'l'));
       $pdf->SetWidths(array(50, 60));
-      $pdf->Row(array("INICIO A PARTIR DE: ", mb_strtoupper(String::fechaATexto($filtros['ffecha_inicio'])) ), false, false);
-      // $pdf->Row(array("INICIO A PARTIR DE: ", $fechaInicio->format('d') .' DE '. mb_strtoupper(String::mes(9)). ' DEL '. $fechaInicio->format('Y')), false, false);
+      $pdf->Row(array("INICIO A PARTIR DE: ", mb_strtoupper(MyString::fechaATexto($filtros['ffecha_inicio'])) ), false, false);
+      // $pdf->Row(array("INICIO A PARTIR DE: ", $fechaInicio->format('d') .' DE '. mb_strtoupper(MyString::mes(9)). ' DEL '. $fechaInicio->format('Y')), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 4);
       $pdf->Row(array("EMPRESA", ""), false, false);
@@ -9414,26 +9414,26 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetAligns(array('L', 'R'));
 
       $pdf->SetX(33);
-      $pdf->Row(array("SUELDO REAL", String::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
+      $pdf->Row(array("SUELDO REAL", MyString::formatoNumero($filtros['fsalario_real'], 2, '$', false)), false, false);
 
       $pdf->SetX(33);
       $pdf->Row(array("DIAS INCAPACIDAD", $filtros['fdias_incapacidad']), false, false);
 
       $pdf->SetX(33);
-      $pdf->Row(array("TOTAL", String::formatoNumero($total, 2, '$', false)), false, false);
+      $pdf->Row(array("TOTAL", MyString::formatoNumero($total, 2, '$', false)), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 2);
       $pdf->Row(array($filtros['fporcentaje']."% SUBSIDIO", ""), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 10);
       $pdf->SetX(33);
-      $pdf->Row(array("INCAPACIDAD PAGADA POR EL SEGURO", String::formatoNumero($filtros['fincapacidad_seguro'], 2, '$', false)), false, false);
+      $pdf->Row(array("INCAPACIDAD PAGADA POR EL SEGURO", MyString::formatoNumero($filtros['fincapacidad_seguro'], 2, '$', false)), false, false);
       // $pdf->SetAligns(array('L', 'R'));
 
       $pdf->SetFont('Arial','B', 11);
       $pdf->SetXY(33, $pdf->GetY() + 5);
       $incapacidad_patron = ($total*$filtros['fporcentaje']/100) + ( ($total*(100-$filtros['fporcentaje'])/100) - $filtros['fincapacidad_seguro']);
-      $pdf->Row(array("INCAPACIDAD PAGADA POR EL PATRON", String::formatoNumero($incapacidad_patron, 2, '$', false)), false, false);
+      $pdf->Row(array("INCAPACIDAD PAGADA POR EL PATRON", MyString::formatoNumero($incapacidad_patron, 2, '$', false)), false, false);
 
       $pdf->SetXY(33, $pdf->GetY() + 10);
       $pdf->SetAligns(array('C'));
@@ -9815,7 +9815,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
           $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -9843,7 +9843,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_ptu_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_ptu_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -9867,7 +9867,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_ptu_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -9877,7 +9877,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -9905,7 +9905,7 @@ class nomina_fiscal_model extends CI_Model {
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(86, $pdf->GetY()+5);
-        $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
+        $pdf->Cell(78, 4, "Metodo de Pago: ".MyString::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
         $cuenta_banco = substr($empleado->cuenta_banco, -4);
         $pdf->SetFont('helvetica','B', 9);
@@ -10189,9 +10189,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('003', 'PTU Gravado', String::formatoNumero($percepciones['ptu']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('003', 'PTU Gravado', MyString::formatoNumero($percepciones['ptu']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('003', 'PTU Exento', String::formatoNumero($percepciones['ptu']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('003', 'PTU Exento', MyString::formatoNumero($percepciones['ptu']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
         $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -10219,7 +10219,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->nomina_fiscal_ptu_isr;
         $total_gral['isr'] += $empleado->nomina_fiscal_ptu_isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -10243,7 +10243,7 @@ class nomina_fiscal_model extends CI_Model {
       $total_gral['total_percepcion'] += $empleado->nomina_fiscal_ptu_total_percepciones;
       $total_dep['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
       $total_gral['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -10253,7 +10253,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetWidths(array(15, 62, 25));
       $total_dep['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
       $total_gral['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -10562,7 +10562,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
             $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -10585,7 +10585,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['isr'] += $empleado->nomina_fiscal_ptu_isr;
             $total_gral['isr'] += $empleado->nomina_fiscal_ptu_isr;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -10608,7 +10608,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_ptu_total_percepciones;
           $total_dep['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
           $total_gral['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
-          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -10618,7 +10618,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetWidths(array(15, 62, 25));
           $total_dep['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
           $total_gral['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
-          $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -10653,7 +10653,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -10673,7 +10673,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -10690,7 +10690,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -10698,7 +10698,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -10782,7 +10782,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
           $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -10805,7 +10805,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_ptu_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_ptu_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_ptu_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -10828,7 +10828,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_ptu_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_ptu_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -10838,7 +10838,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_ptu_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_ptu_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -10870,7 +10870,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -10890,7 +10890,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -10907,7 +10907,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -10915,7 +10915,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -10937,7 +10937,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -10950,7 +10950,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'PTU', String::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -10970,7 +10970,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'ISR', String::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -10987,7 +10987,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $y + 2);
     $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-    $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -10995,7 +10995,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
 
     $pdf->Output('PTU.pdf', 'I');
   }
@@ -11108,14 +11108,14 @@ class nomina_fiscal_model extends CI_Model {
 
           $dataarr[] = $_POST['ptu_dias_trabajados_empleado'][$key];
           $dataarr[] = $_POST['ptu_empleado_dias_fact'][$key];
-          $dataarr[] = String::formatoNumero($_POST['ptu_empleado_dias'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ptu_percepciones_empleado'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_empleado_dias'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_percepciones_empleado'][$key], 2, '$', false);
           $dataarr[] = $_POST['ptu_empleado_percepciones_fact'][$key];
-          $dataarr[] = String::formatoNumero($_POST['ptu_empleado_percepciones'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_empleado_percepciones'][$key], 2, '$', false);
 
-          $dataarr[] = String::formatoNumero($_POST['ptu'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['isr'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
 
@@ -11139,13 +11139,13 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = 'TOTAL';
       $datatto[] = $tdias;
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($ptu_dias, 2, '$', false);
-      $datatto[] = String::formatoNumero($tsueldos, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptu_dias, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($tsueldos, 2, '$', false);
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($ptu_sueldos, 2, '$', false);
-      $datatto[] = String::formatoNumero($ptuTotal, 2, '$', false);
-      $datatto[] = String::formatoNumero($isrTotal, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptu_sueldos, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptuTotal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($isrTotal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
 
       $ptuTtotal        += $ptuTotal;
@@ -11173,13 +11173,13 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = 'TOTAL';
     $datatto[] = $tdiasTotal;
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($ptu_diasTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($tsueldosTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptu_diasTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($tsueldosTotal, 2, '$', false);
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($ptu_sueldosTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ptuTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptu_sueldosTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptuTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
     $pdf->Row($datatto, false, true, null, 2, 1);
 
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -11192,9 +11192,9 @@ class nomina_fiscal_model extends CI_Model {
     // if ($empresa['info']->rfc === 'ESJ97052763A')
     // {
     //   $pdf->Row(array(
-    //     'NOMINA FISCAL: '.String::formatoNumero($ptuTotal, 2, '$', false),
-    //     'TRANSFERIDO: '.String::formatoNumero($ptuTotal, 2, '$', false),
-    //     'CHEQUE FISCAL: '.String::formatoNumero(($ptuTotal), 2, '$', false),
+    //     'NOMINA FISCAL: '.MyString::formatoNumero($ptuTotal, 2, '$', false),
+    //     'TRANSFERIDO: '.MyString::formatoNumero($ptuTotal, 2, '$', false),
+    //     'CHEQUE FISCAL: '.MyString::formatoNumero(($ptuTotal), 2, '$', false),
     //     ), false, true, null, 2, 1);
     // }
 
@@ -11278,13 +11278,13 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
           $dataarr[] = $_POST['ptu_dias_trabajados_empleado'][$key];
           $dataarr[] = $_POST['ptu_empleado_dias_fact'][$key];
-          $dataarr[] = String::formatoNumero($_POST['ptu_empleado_dias'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ptu_percepciones_empleado'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_empleado_dias'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_percepciones_empleado'][$key], 2, '$', false);
           $dataarr[] = $_POST['ptu_empleado_percepciones_fact'][$key];
-          $dataarr[] = String::formatoNumero($_POST['ptu_empleado_percepciones'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ptu'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu_empleado_percepciones'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ptu'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['isr'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
 
           $html .= $this->rowXls($dataarr);
           $ptuTotal     += $_POST['ptu'][$key];
@@ -11302,13 +11302,13 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = 'TOTAL';
       $datatto[] = $tdias;
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($ptu_dias, 2, '$', false);
-      $datatto[] = String::formatoNumero($tsueldos, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptu_dias, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($tsueldos, 2, '$', false);
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($ptu_sueldos, 2, '$', false);
-      $datatto[] = String::formatoNumero($ptuTotal, 2, '', false);
-      $datatto[] = String::formatoNumero($isrTotal, 2, '', false);
-      $datatto[] = String::formatoNumero($ptuTotal - $isrTotal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptu_sueldos, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ptuTotal, 2, '', false);
+      $datatto[] = MyString::formatoNumero($isrTotal, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ptuTotal - $isrTotal, 2, '$', false);
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
 
@@ -11333,13 +11333,13 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = 'TOTAL';
     $datatto[] = $tdiasTotal;
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($ptu_diasTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($tsueldosTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptu_diasTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($tsueldosTotal, 2, '$', false);
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($ptu_sueldosTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ptuTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptu_sueldosTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptuTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ptuTtotal - $isrTtotal, 2, '$', false);
 
     $html .= $this->rowXls($datatto);
     $html .= $this->rowXls(array(''));
@@ -11347,9 +11347,9 @@ class nomina_fiscal_model extends CI_Model {
     // if ($empresa['info']->rfc === 'ESJ97052763A')
     // {
     //   $html .= $this->rowXls(array(
-    //     'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
-    //     'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '', false),
-    //     'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
+    //     'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
+    //     'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '', false),
+    //     'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
     //     ), 'style="font-weight:bold;font-size:14px;"');
     //   $html .= $this->rowXls(array(''));
     // }
@@ -11847,7 +11847,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'AGUINALDO', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'AGUINALDO', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -11875,7 +11875,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -11899,7 +11899,7 @@ class nomina_fiscal_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -11909,7 +11909,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -11937,7 +11937,7 @@ class nomina_fiscal_model extends CI_Model {
 
         $pdf->SetFont('helvetica','B', 9);
         $pdf->SetXY(86, $pdf->GetY()+5);
-        $pdf->Cell(78, 4, "Metodo de Pago: ".String::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
+        $pdf->Cell(78, 4, "Metodo de Pago: ".MyString::getMetodoPago($xml[0]['metodoDePago']), 0, 0, 'L', 0);
 
         $cuenta_banco = substr($empleado->cuenta_banco, -4);
         $pdf->SetFont('helvetica','B', 9);
@@ -12220,9 +12220,9 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('002', 'Aguinaldo Gravado', String::formatoNumero($percepciones['aguinaldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Aguinaldo Gravado', MyString::formatoNumero($percepciones['aguinaldo']['ImporteGravado'], 2, '$', false)), false, 0, null, 1, 1);
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('002', 'Aguinaldo Exento', String::formatoNumero($percepciones['aguinaldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('002', 'Aguinaldo Exento', MyString::formatoNumero($percepciones['aguinaldo']['ImporteExcento'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -12250,7 +12250,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
         $total_gral['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -12274,7 +12274,7 @@ class nomina_fiscal_model extends CI_Model {
       $total_gral['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
       $total_dep['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
       $total_gral['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -12284,7 +12284,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetWidths(array(15, 62, 25));
       $total_dep['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
       $total_gral['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -12583,7 +12583,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -12606,7 +12606,7 @@ class nomina_fiscal_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_isr, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
             $total_gral['isr'] += $empleado->nomina_fiscal_aguinaldo_isr;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -12629,7 +12629,7 @@ class nomina_fiscal_model extends CI_Model {
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_aguinaldo_total_percepciones;
           $total_dep['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
           $total_gral['total_deduccion'] += $empleado->nomina_fiscal_aguinaldo_total_deducciones;
-          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -12639,7 +12639,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetWidths(array(15, 62, 25));
           $total_dep['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
           $total_gral['total_neto'] += $empleado->nomina_fiscal_aguinaldo_total_neto;
-          $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo_total_neto, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -12672,7 +12672,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -12692,7 +12692,7 @@ class nomina_fiscal_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -12709,7 +12709,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -12717,7 +12717,7 @@ class nomina_fiscal_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -12739,7 +12739,7 @@ class nomina_fiscal_model extends CI_Model {
     // $pdf->SetXY(6, $pdf->GetY());
     // $pdf->SetAligns(array('L', 'L', 'R'));
     // $pdf->SetWidths(array(15, 62, 25));
-    // $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+    // $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
     // if($pdf->GetY() >= $pdf->limiteY)
     // {
     //   $pdf->AddPage();
@@ -12752,7 +12752,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -12772,7 +12772,7 @@ class nomina_fiscal_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'ISR', String::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -12789,7 +12789,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $y + 2);
     $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-    $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -12797,7 +12797,7 @@ class nomina_fiscal_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
 
     $pdf->Output('Aguinaldo.pdf', 'I');
   }
@@ -12902,14 +12902,14 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = $numero_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = String::formatoNumero($_POST['salario_diario'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['dias_aguinaldo'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['salario_diario_real'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['total_complementoe'][$key], 2, '$', false);
-          $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['salario_diario'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['aguinaldo'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['isr'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['dias_aguinaldo'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['salario_diario_real'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_complementoe'][$key], 2, '$', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '$', false);
 
           $pdf->Row($dataarr, false, true, null, 2, 1);
           $aguinaldoTotal      += $_POST['aguinaldo'][$key];
@@ -12929,13 +12929,13 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($aguinaldoTotal, 2, '$', false);
-      $datatto[] = String::formatoNumero($isrTotal, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($aguinaldoTotal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($isrTotal, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar, 2, '$', false);
       $datatto[] = '';
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($total_complementoe, 2, '$', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar_gral, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($total_complementoe, 2, '$', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar_gral, 2, '$', false);
       $pdf->Row($datatto, false, true, null, 2, 1);
 
       $aguinaldoTtotal    += $aguinaldoTotal;
@@ -12959,13 +12959,13 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = '';
     $datatto[] = 'TOTAL';
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($aguinaldoTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($isrTtotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($ttotal_pagarTtota, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($aguinaldoTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($isrTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($ttotal_pagarTtota, 2, '$', false);
     $datatto[] = '';
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($total_compleeTotal, 2, '$', false);
-    $datatto[] = String::formatoNumero($complementoTtotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($total_compleeTotal, 2, '$', false);
+    $datatto[] = MyString::formatoNumero($complementoTtotal, 2, '$', false);
     $pdf->Row($datatto, false, true, null, 2, 1);
 
     $pdf->SetXY(6, $pdf->GetY()+5);
@@ -12978,9 +12978,9 @@ class nomina_fiscal_model extends CI_Model {
     // if ($empresa['info']->rfc === 'ESJ97052763A')
     // {
     //   $pdf->Row(array(
-    //     'NOMINA FISCAL: '.String::formatoNumero($aguinaldoTotal, 2, '$', false),
-    //     'TRANSFERIDO: '.String::formatoNumero($aguinaldoTotal, 2, '$', false),
-    //     'CHEQUE FISCAL: '.String::formatoNumero(($aguinaldoTotal), 2, '$', false),
+    //     'NOMINA FISCAL: '.MyString::formatoNumero($aguinaldoTotal, 2, '$', false),
+    //     'TRANSFERIDO: '.MyString::formatoNumero($aguinaldoTotal, 2, '$', false),
+    //     'CHEQUE FISCAL: '.MyString::formatoNumero(($aguinaldoTotal), 2, '$', false),
     //     ), false, true, null, 2, 1);
     // }
 
@@ -13057,14 +13057,14 @@ class nomina_fiscal_model extends CI_Model {
           $dataarr = array();
           $dataarr[] = $empleado->no_empleado;
           $dataarr[] = $empleado->apellido_paterno.' '.$empleado->apellido_materno.' '.$empleado->nombre;
-          $dataarr[] = String::formatoNumero($_POST['salario_diario'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['aguinaldo'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['isr'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['dias_aguinaldo'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['salario_diario_real'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['total_complementoe'][$key], 2, '', false);
-          $dataarr[] = String::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['salario_diario'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['aguinaldo'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['isr'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['ttotal_nomina'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['dias_aguinaldo'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['salario_diario_real'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_complementoe'][$key], 2, '', false);
+          $dataarr[] = MyString::formatoNumero($_POST['total_no_fiscal'][$key], 2, '', false);
 
           $html .= $this->rowXls($dataarr);
 
@@ -13080,13 +13080,13 @@ class nomina_fiscal_model extends CI_Model {
       $datatto[] = '';
       $datatto[] = 'TOTAL';
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($aguinaldoTotal, 2, '', false);
-      $datatto[] = String::formatoNumero($isrTotal, 2, '', false);
-      $datatto[] = String::formatoNumero($ttotal_pagar, 2, '', false);
+      $datatto[] = MyString::formatoNumero($aguinaldoTotal, 2, '', false);
+      $datatto[] = MyString::formatoNumero($isrTotal, 2, '', false);
+      $datatto[] = MyString::formatoNumero($ttotal_pagar, 2, '', false);
       $datatto[] = '';
       $datatto[] = '';
-      $datatto[] = String::formatoNumero($total_complementoe, 2, '', false);
-      $datatto[] = String::formatoNumero($totalcomplemtno, 2, '', false);
+      $datatto[] = MyString::formatoNumero($total_complementoe, 2, '', false);
+      $datatto[] = MyString::formatoNumero($totalcomplemtno, 2, '', false);
       $html .= $this->rowXls($datatto);
       $html .= $this->rowXls(array(''));
 
@@ -13106,13 +13106,13 @@ class nomina_fiscal_model extends CI_Model {
     $datatto[] = '';
     $datatto[] = 'TOTAL';
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($aguinaldoTtotal, 2, '', false);
-    $datatto[] = String::formatoNumero($isrTtotal, 2, '', false);
-    $datatto[] = String::formatoNumero($aguinaldoTtotal - $isrTtotal, 2, '', false);
+    $datatto[] = MyString::formatoNumero($aguinaldoTtotal, 2, '', false);
+    $datatto[] = MyString::formatoNumero($isrTtotal, 2, '', false);
+    $datatto[] = MyString::formatoNumero($aguinaldoTtotal - $isrTtotal, 2, '', false);
     $datatto[] = '';
     $datatto[] = '';
-    $datatto[] = String::formatoNumero($total_compleeTotal, 2, '', false);
-    $datatto[] = String::formatoNumero($complementoT, 2, '', false);
+    $datatto[] = MyString::formatoNumero($total_compleeTotal, 2, '', false);
+    $datatto[] = MyString::formatoNumero($complementoT, 2, '', false);
 
     $html .= $this->rowXls($datatto);
     $html .= $this->rowXls(array(''));
@@ -13120,9 +13120,9 @@ class nomina_fiscal_model extends CI_Model {
     if ($empresa['info']->rfc === 'ESJ97052763A')
     {
       $html .= $this->rowXls(array(
-        'NOMINA FISCAL: '.String::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
-        'TRANSFERIDO: '.String::formatoNumero($ttotal_nomina, 2, '', false),
-        'CHEQUE FISCAL: '.String::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
+        'NOMINA FISCAL: '.MyString::formatoNumero($ttotal_aseg_no_trs, 2, '', false),
+        'TRANSFERIDO: '.MyString::formatoNumero($ttotal_nomina, 2, '', false),
+        'CHEQUE FISCAL: '.MyString::formatoNumero(($ttotal_aseg_no_trs-$ttotal_nomina), 2, '', false),
         ), 'style="font-weight:bold;font-size:14px;"');
       $html .= $this->rowXls(array(''));
     }

@@ -27,7 +27,7 @@
 								<legend>Filtros</legend>
 
 								<label for="fnombre">Buscar</label>
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" 
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>"
 									class="input-large search-query" placeholder="jorge, jorge32, admin@host.com" autofocus> |
 
 								<label for="fstatus">Estado</label>
@@ -41,7 +41,7 @@
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 						echo $this->usuarios_model->getLinkPrivSm('usuarios/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
@@ -79,7 +79,7 @@
 									<span class="label <?php echo $vlbl_status; ?>"><?php echo $v_status; ?></span>
 								</td>
 								<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('usuarios/modificar/', array(
 												'params'   => 'id='.$usuario->id_usuario,
 												'btn_type' => 'btn-success')
@@ -98,7 +98,7 @@
 													'attrs' => array('onclick' => "msb.confirm('Estas seguro de activar el usuario?', 'Usuarios', this); return false;"))
 											);
 										}
-										
+
 										?>
 								</td>
 							</tr>
@@ -109,7 +109,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $usuarios['total_rows'],
 								'per_page'			=> $usuarios['items_per_page'],
 								'cur_page'			=> $usuarios['result_page']*$usuarios['items_per_page'],

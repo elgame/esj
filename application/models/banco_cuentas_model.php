@@ -75,7 +75,7 @@ class banco_cuentas_model extends banco_model {
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Saldos de Cuentas '.(isset($_GET['dempresa']{0})? '<'.$this->input->get('dempresa').'>': '');
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		if($this->input->get('vertodos') == 'tran')
 			$pdf->titulo3 .= 'Transito';
 		elseif($this->input->get('vertodos') == 'notran')
@@ -114,7 +114,7 @@ class banco_cuentas_model extends banco_model {
 			$datos = array($item->banco,
 									$item->numero,
 									$item->alias,
-									String::formatoNumero($item->saldo, 2, '$', false) );
+									MyString::formatoNumero($item->saldo, 2, '$', false) );
 
 			$pdf->SetX(6);
 			$pdf->SetAligns($aligns);
@@ -128,7 +128,7 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetAligns(array('R', 'R'));
 		$pdf->SetWidths(array(154, 50));
 		$pdf->Row(array('Totales:',
-										String::formatoNumero($res['total_saldos'], 2, '$', false)
+										MyString::formatoNumero($res['total_saldos'], 2, '$', false)
 									), true);
 
 		$pdf->Output('saldos_cuentas.pdf', 'I');
@@ -336,7 +336,7 @@ class banco_cuentas_model extends banco_model {
 		// Creación del objeto de la clase heredada
 		$pdf = new MYpdf('P', 'mm', 'Letter');
 		$pdf->titulo2 = 'Cuenta <'.$res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias.'>';
-		$pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+		$pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
 		if($this->input->get('vertodos') == 'tran')
 			$pdf->titulo3 .= 'Transito';
 		elseif($this->input->get('vertodos') == 'notran')
@@ -372,14 +372,14 @@ class banco_cuentas_model extends banco_model {
 			$pdf->SetFont('Arial','',8);
 			$pdf->SetTextColor(0,0,0);
 
-			$datos = array(String::fechaAT($item->fecha),
+			$datos = array(MyString::fechaAT($item->fecha),
 							$item->numero_ref,
 							substr($item->cli_pro, 0, 35),
 							strip_tags($item->concepto),
 							$item->metodo_pago,
-							String::formatoNumero($item->deposito, 2, '$', false),
-              String::formatoNumero($item->retiro, 2, '$', false),
-							String::formatoNumero($item->saldo, 2, '$', false),
+							MyString::formatoNumero($item->deposito, 2, '$', false),
+              MyString::formatoNumero($item->retiro, 2, '$', false),
+							MyString::formatoNumero($item->saldo, 2, '$', false),
 							str_replace('|', ' ', $item->entransito),
 							);
 
@@ -395,9 +395,9 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetAligns(array('R', 'R', 'R', 'R'));
 		$pdf->SetWidths(array(130, 22, 22, 22));
 		$pdf->Row(array('Totales:',
-					String::formatoNumero($res['total_deposito'], 2, '$', false),
-          String::formatoNumero($res['total_retiro'], 2, '$', false),
-					String::formatoNumero($res['total_saldos'], 2, '$', false),
+					MyString::formatoNumero($res['total_deposito'], 2, '$', false),
+          MyString::formatoNumero($res['total_retiro'], 2, '$', false),
+					MyString::formatoNumero($res['total_saldos'], 2, '$', false),
 				), false);
 
 		$pdf->Output('saldo_cuenta.pdf', 'I');
@@ -529,10 +529,10 @@ class banco_cuentas_model extends banco_model {
     $codigoAreas = $registro = $recibio = array();
     $text_ingreso = '';
     foreach ($data->ordenes as $key => $orden) {
-    	fwrite($file, ($key==0? 'O COMPRA: ':'          ').$orden->folio. '   '. String::fechaATexto($orden->fecha_autorizo, '/c'). "\r\n");
+    	fwrite($file, ($key==0? 'O COMPRA: ':'          ').$orden->folio. '   '. MyString::fechaATexto($orden->fecha_autorizo, '/c'). "\r\n");
     	$total_ordenes += $orden->total;
 
-    	$text_ingreso .= ($key==0? 'REG #: ':'       ').$orden->ent_folio. '   '. String::fechaATexto($orden->fecha_acepto, '/c'). "\r\n";
+    	$text_ingreso .= ($key==0? 'REG #: ':'       ').$orden->ent_folio. '   '. MyString::fechaATexto($orden->fecha_acepto, '/c'). "\r\n";
 
     	if ($orden->id_area != '') {
 	    	foreach (explode(',', $orden->id_area) as $kar => $area) {
@@ -546,7 +546,7 @@ class banco_cuentas_model extends banco_model {
       if($orden->ent_recibio!= '' && !array_key_exists($orden->ent_recibio, $recibio))
       	$recibio[$orden->ent_recibio] = $orden->ent_recibio;
     }
-    fwrite($file, 'IMPORTE: '.String::formatoNumero($total_ordenes) . "\r\n");
+    fwrite($file, 'IMPORTE: '.MyString::formatoNumero($total_ordenes) . "\r\n");
     $str_registro = array_reduce($registro, function ($carry, $val) {
 				if ($carry) $carry .= ',';
     		return $carry . $val;
@@ -567,7 +567,7 @@ class banco_cuentas_model extends banco_model {
     		return $carry . $obj->serie.$obj->folio;
 			});
     fwrite($file, 'FACT:'.$folios_comprs . "\r\n");
-    fwrite($file, 'IMPORTE: '.String::formatoNumero($total_ordenes) . "\r\n");
+    fwrite($file, 'IMPORTE: '.MyString::formatoNumero($total_ordenes) . "\r\n");
     fwrite($file, 'REG:'.$str_registro . "\r\n");
     $str_recibio = array_reduce($recibio, function ($carry, $val) {
 				if ($carry) $carry .= ',';
@@ -578,16 +578,16 @@ class banco_cuentas_model extends banco_model {
     fwrite($file, "----------------------------------------\r\n");
     fwrite($file, '           DATOS DEL PAGO' . "\r\n");
     fwrite($file, 'FACT:'.$folios_comprs. "\r\n");
-    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, 'FECHA:'. MyString::fechaATexto($data->fecha, '/c'). "\r\n");
     fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
-    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+    fwrite($file, 'IMPORTE: '.MyString::formatoNumero($data->monto) . "\r\n");
 	}
 
 	public function sellotxt_bascula(&$file, &$data)
 	{
     fwrite($file, 'PROV: '.$data->proveedor . "\r\n");
-    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
-    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+    fwrite($file, 'FECHA:'. MyString::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, 'IMPORTE: '.MyString::formatoNumero($data->monto) . "\r\n");
     fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
     if(count($data->boletas)>0)
     	fwrite($file, $data->boletas[0]->concepto . "\r\n");
@@ -616,8 +616,8 @@ class banco_cuentas_model extends banco_model {
 	public function sellotxt_banco(&$file, &$data)
 	{
     fwrite($file, 'PROV: '.$data->proveedor . "\r\n");
-    fwrite($file, 'FECHA:'. String::fechaATexto($data->fecha, '/c'). "\r\n");
-    fwrite($file, 'IMPORTE: '.String::formatoNumero($data->monto) . "\r\n");
+    fwrite($file, 'FECHA:'. MyString::fechaATexto($data->fecha, '/c'). "\r\n");
+    fwrite($file, 'IMPORTE: '.MyString::formatoNumero($data->monto) . "\r\n");
     fwrite($file, $data->metodo_pago.' '.$data->cuenta . "\r\n");
     fwrite($file, $data->concepto . "\r\n");
 	}
@@ -664,7 +664,7 @@ class banco_cuentas_model extends banco_model {
 		$pdf = new MYpdf('P', 'mm', 'Letter');
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 		$pdf->titulo2 = $res['cuenta']['info']->banco.' - '.$res['cuenta']['info']->alias;
-		$pdf->titulo3 = 'CONCILIACION BANCARIA AL '.String::fechaATexto($this->input->get('ffecha2'), '/c')."\n";
+		$pdf->titulo3 = 'CONCILIACION BANCARIA AL '.MyString::fechaATexto($this->input->get('ffecha2'), '/c')."\n";
     if(file_exists($empresa['info']->logo))
       $pdf->logo = $empresa['info']->logo;
     else
@@ -693,7 +693,7 @@ class banco_cuentas_model extends banco_model {
           $pdf->SetAligns(array('L', 'R'));
           $pdf->SetWidths(array(142, 50));
           $pdf->Row(array('SALDO DEL BANCO: ',
-                String::formatoNumero($_GET['saldob'], 2, '$', false),
+                MyString::formatoNumero($_GET['saldob'], 2, '$', false),
               ), false, false);
 					$pdf->SetX(6);
 					// $pdf->MultiCell(160, 8, "SALDO SEGUN CONTABILIDAD: ".$res['total_saldos'], '', "L", false);
@@ -754,9 +754,9 @@ class banco_cuentas_model extends banco_model {
 								substr($item->cli_pro, 0, 35),
 								strip_tags($item->concepto),
 								$item->metodo_pago,
-								String::formatoNumero($monto_r, 2, '$', false),
-								String::formatoNumero($iva_r, 2, '$', false),
-								String::formatoNumero($ret_iva_r, 2, '$', false),
+								MyString::formatoNumero($monto_r, 2, '$', false),
+								MyString::formatoNumero($iva_r, 2, '$', false),
+								MyString::formatoNumero($ret_iva_r, 2, '$', false),
 								);
 
         if(substr($item->entransito, 0, 5) == 'Trans'){
@@ -790,9 +790,9 @@ class banco_cuentas_model extends banco_model {
             $ret_iva_d = $info_compras->retencion_iva;
           }
 
-          $datos[5] = String::formatoNumero($item->deposito, 2, '$', false);
-          $datos[6] = String::formatoNumero($iva_d, 2, '$', false);
-          $datos[7] = String::formatoNumero($ret_iva_d, 2, '$', false);
+          $datos[5] = MyString::formatoNumero($item->deposito, 2, '$', false);
+          $datos[6] = MyString::formatoNumero($iva_d, 2, '$', false);
+          $datos[7] = MyString::formatoNumero($ret_iva_d, 2, '$', false);
           $salvo_bc[] = $datos;
 
           $total_retiro_sbc   += $item->retiro;
@@ -807,8 +807,8 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetAligns(array('R', 'R', 'R'));
 		$pdf->SetWidths(array(142, 25, 20));
 		$pdf->Row(array('SUMA DE CHEQUES EN TRANSITO:',
-					String::formatoNumero($total_retiro, 2, '$', false),
-					// String::formatoNumero($total_deposito, 2, '$', false),
+					MyString::formatoNumero($total_retiro, 2, '$', false),
+					// MyString::formatoNumero($total_deposito, 2, '$', false),
 				), false);
 
     if(count($salvo_bc) > 0)
@@ -827,8 +827,8 @@ class banco_cuentas_model extends banco_model {
       $pdf->SetAligns(array('R', 'R', 'R'));
       $pdf->SetWidths(array(142, 25, 20));
       $pdf->Row(array('SUMA SALVO BUEN COBRO:',
-            String::formatoNumero($total_deposito_sbc, 2, '$', false),
-            // String::formatoNumero($total_deposito, 2, '$', false),
+            MyString::formatoNumero($total_deposito_sbc, 2, '$', false),
+            // MyString::formatoNumero($total_deposito, 2, '$', false),
           ), false);
     }
 
@@ -839,11 +839,11 @@ class banco_cuentas_model extends banco_model {
 		$pdf->SetAligns(array('L', 'R'));
 		$pdf->SetWidths(array(142, 50));
     $pdf->SetX(6);
-		$pdf->Row(array('SALDO EN LIBROS AL '.String::fechaATexto($this->input->get('ffecha2'), '/c').':',
-					String::formatoNumero($conciliado, 2, '$', false),
+		$pdf->Row(array('SALDO EN LIBROS AL '.MyString::fechaATexto($this->input->get('ffecha2'), '/c').':',
+					MyString::formatoNumero($conciliado, 2, '$', false),
 				), false, false);
 		// $pdf->Row(array('DIFERENCIA:',
-		// 			String::formatoNumero($_GET['saldob']-$conciliado, 2, '$', false),
+		// 			MyString::formatoNumero($_GET['saldob']-$conciliado, 2, '$', false),
 		// 		), false, false);
 
 		$pdf->Output('saldo_cuenta.pdf', 'I');
@@ -895,7 +895,7 @@ class banco_cuentas_model extends banco_model {
     $this->bitacora_model->_insert('banco_movimientos', $id_movimiento,
                             array(':accion'    => 'un deposito a la cuenta',
                             			':seccion' => 'banco',
-                                  ':folio'     => $data_cuenta['info']->alias.' por '.String::formatoNumero($data['monto']),
+                                  ':folio'     => $data_cuenta['info']->alias.' por '.MyString::formatoNumero($data['monto']),
                                   ':id_empresa' => $data_cuenta['info']->id_empresa,
                                   ':empresa'   => 'de '.$data_cuenta['info']->nombre_fiscal));
 
@@ -942,7 +942,7 @@ class banco_cuentas_model extends banco_model {
     $this->bitacora_model->_insert('banco_movimientos', $id_movimiento,
                             array(':accion'    => 'un retiro a la cuenta',
                             			':seccion' => 'banco',
-                                  ':folio'     => $data_cuenta['info']->alias.' por '.String::formatoNumero($data['monto']),
+                                  ':folio'     => $data_cuenta['info']->alias.' por '.MyString::formatoNumero($data['monto']),
                                   ':id_empresa' => $data_cuenta['info']->id_empresa,
                                   ':empresa'   => 'de '.$data_cuenta['info']->nombre_fiscal));
 
@@ -1107,7 +1107,7 @@ class banco_cuentas_model extends banco_model {
   		$data_cuenta = $this->getCuentaInfo($inf_movi['info']->id_cuenta);
       $this->bitacora_model->_cancel('banco_movimientos', $id_movimiento,
                               array(':accion'     => ($cancelar? 'cancelo': 'elimino').' un '.($inf_movi['info']->tipo=='t'? 'deposito': 'retiro').' de la cuenta ', ':seccion' => 'banco',
-                                    ':folio'      => $data_cuenta['info']->alias.' por '.String::formatoNumero($inf_movi['info']->monto),
+                                    ':folio'      => $data_cuenta['info']->alias.' por '.MyString::formatoNumero($inf_movi['info']->monto),
                                     ':id_empresa' => $data_cuenta['info']->id_empresa,
                                     ':empresa'    => 'de '.$data_cuenta['info']->nombre_fiscal));
 
@@ -1507,11 +1507,11 @@ class banco_cuentas_model extends banco_model {
 	      $pdf->SetAligns($aligns);
 	      $pdf->SetWidths($widths);
 	      $pdf->Row(array(
-	          String::fechaAT($mov->fecha),
+	          MyString::fechaAT($mov->fecha),
 	          $mov->cuenta,
 	          substr($mov->tipo, 0, 5),
-	          $mov->tipomov=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
-	          $mov->tipomov=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
+	          $mov->tipomov=='t'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
+	          $mov->tipomov=='f'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
 	          ($mov->status=='f'? 'Cancelado': substr($mov->a_nombre_de, 0, 33)),
 	          $mov->numero_ref.($mov->numero_ref!=''? ' | ': '').$mov->concepto,
 	        ), false);
@@ -1532,8 +1532,8 @@ class banco_cuentas_model extends banco_model {
       $pdf->SetAligns(array('R','R'));
       $pdf->SetWidths(array(30, 30));
       $pdf->Row(array(
-        String::formatoNumero($total_importes_ingre, 2, '$', false),
-        String::formatoNumero($total_importes_egre, 2, '$', false)
+        MyString::formatoNumero($total_importes_ingre, 2, '$', false),
+        MyString::formatoNumero($total_importes_egre, 2, '$', false)
       ), false);
     }
 
@@ -1544,8 +1544,8 @@ class banco_cuentas_model extends banco_model {
     $pdf->SetAligns(array('R','R'));
     $pdf->SetWidths(array(30, 30));
     $pdf->Row(array(
-      String::formatoNumero($total_importes_total_ingre, 2, '$', false),
-      String::formatoNumero($total_importes_total_egre, 2, '$', false)
+      MyString::formatoNumero($total_importes_total_ingre, 2, '$', false),
+      MyString::formatoNumero($total_importes_total_egre, 2, '$', false)
     ), false);
 
 

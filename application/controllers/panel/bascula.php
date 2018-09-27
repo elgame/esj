@@ -178,7 +178,7 @@ class bascula extends MY_Controller {
       }
       $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
       if( $res_mdl['error'] == false){
-        redirect(base_url('panel/bascula/agregar/?'.String::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
+        redirect(base_url('panel/bascula/agregar/?'.MyString::getVarsLink(array('msg', 'fstatus', 'p')).'&msg='.$res_mdl['msg'].$boletar.$ticket));
       }
     }
 
@@ -387,10 +387,10 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
       $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 'f'), null, false, false, false);
       if($res_mdl)
-        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=8'));
+        redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -404,10 +404,10 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
       $res_mdl = $this->bascula_model->updateBascula($this->input->get('id'), array('status' => 't'));
       if($res_mdl)
-        redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=9'));
+        redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   public function puede_modificar()
@@ -529,7 +529,7 @@ class bascula extends MY_Controller {
 
         $res_mdl['error'] = isset($res_mdl['error'])? $res_mdl['error']: false;
         if( ! $res_mdl['error'])
-          redirect(base_url('panel/bascula/bonificacion/?'.String::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
+          redirect(base_url('panel/bascula/bonificacion/?'.MyString::getVarsLink(array('msg', 'fstatus')).'&msg='.$res_mdl['msg'].$ticket));
       }
 
       // $params['accion'] = 'n'; // indica que es nueva entrada
@@ -646,7 +646,7 @@ class bascula extends MY_Controller {
       $this->load->view('panel/footer');
     }
     else
-      redirect(base_url('panel/bascula/?'.String::getVarsLink(array('msg')).'&msg=1'));
+      redirect(base_url('panel/bascula/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
   }
 
   /**
@@ -877,9 +877,9 @@ class bascula extends MY_Controller {
       $this->load->model('bascula_model');
 
       $res_mdl = $this->bascula_model->cancelar_pago($_GET['id'], true);
-      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
+      redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=15'));
     }else
-      redirect(base_url('panel/bascula/admin_movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
+      redirect(base_url('panel/bascula/admin_movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=1'));
   }
 
   public function pago_basculas()
@@ -891,7 +891,7 @@ class bascula extends MY_Controller {
     if ($res_mdl['passess'])
     {
       $pesadas = '&pe='.implode(',', $_POST['ppagos']);
-      redirect(base_url('panel/bascula/movimientos/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
+      redirect(base_url('panel/bascula/movimientos/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&msg=14&p=t'.$pesadas));
     }
   }
 
@@ -1042,7 +1042,7 @@ class bascula extends MY_Controller {
       $respons = $this->empresas_model->addEmpresa();
 
       if($respons[0])
-        redirect(base_url('panel/empresas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$respons[2].'&close=1'));
+        redirect(base_url('panel/empresas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$respons[2].'&close=1'));
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
     }
@@ -1096,7 +1096,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->proveedores_model->addProveedor();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.String::getVarsLink(array('msg')).'&msg=4&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_proveedor/?'.MyString::getVarsLink(array('msg')).'&msg=4&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1139,7 +1139,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->clientes_model->addCliente();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_cliente/?'.String::getVarsLink(array('msg')).'&msg=11&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_cliente/?'.MyString::getVarsLink(array('msg')).'&msg=11&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1190,7 +1190,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->choferes_model->addChofer();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.String::getVarsLink(array('msg')).'&msg=5&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_chofer/?'.MyString::getVarsLink(array('msg')).'&msg=5&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1235,7 +1235,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->camiones_model->addCamion();
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.String::getVarsLink(array('msg')).'&msg=6&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_camion/?'.MyString::getVarsLink(array('msg')).'&msg=6&close=1'));
     }
 
     $params['closeModal'] = false;
@@ -1300,7 +1300,7 @@ class bascula extends MY_Controller {
       );
 
       if($res_mdl['passes'])
-        redirect(base_url('panel/bascula/show_view_agregar_lote/?'.String::getVarsLink(array('msg')).'&msg=15&close=1'));
+        redirect(base_url('panel/bascula/show_view_agregar_lote/?'.MyString::getVarsLink(array('msg')).'&msg=15&close=1'));
     }
 
     $data = $this->bascula_model->getBasculaInfo($_GET['idb']);
@@ -1356,7 +1356,7 @@ class bascula extends MY_Controller {
       $res_mdl = $this->bascula_model->ligarOrdenes($_GET['idb'], $_POST);
 
       if($res_mdl)
-        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.String::getVarsLink(array('msg')).'&msg=30&close=1'));
+        redirect(base_url('panel/bascula/show_view_ligar_orden/?'.MyString::getVarsLink(array('msg')).'&msg=30&close=1'));
     }
 
     if (isset($_GET['Buscar'])) {
@@ -2302,7 +2302,7 @@ class bascula extends MY_Controller {
     $this->load->model('bascula_model');
     $this->bascula_model->cancelarFactura($_GET['id']);
 
-    redirect(base_url('panel/bascula/facturas/?' . String::getVarsLink(array('id')).'&msg=3'));
+    redirect(base_url('panel/bascula/facturas/?' . MyString::getVarsLink(array('id')).'&msg=3'));
   }
 
   public function get_boleta()

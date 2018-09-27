@@ -23,7 +23,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/productos_regreso/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/productos_regreso/ver/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -144,7 +144,7 @@
                       <tfoot>
                         <tr>
                           <th colspan="4"></th>
-                          <th><?php echo String::formatoNumero($total, 2, '$', false); ?></th>
+                          <th><?php echo MyString::formatoNumero($total, 2, '$', false); ?></th>
                         </tr>
                       </tfoot>
                     </table>

@@ -175,11 +175,11 @@ class reportes_model extends CI_Model {
 
     // $pdf->titulo3 = "{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
@@ -194,21 +194,21 @@ class reportes_model extends CI_Model {
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
-    $pdf->Row(['Caja', String::formatoNumero($datos['caja'], 2, '', false)], false);
+    $pdf->Row(['Caja', MyString::formatoNumero($datos['caja'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Caja 2', String::formatoNumero($datos['caja2'], 2, '', false)], false);
+    $pdf->Row(['Caja 2', MyString::formatoNumero($datos['caja2'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Bancos', String::formatoNumero($datos['bancos'], 2, '', false)], false);
+    $pdf->Row(['Bancos', MyString::formatoNumero($datos['bancos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Clientes', String::formatoNumero($datos['clientes'], 2, '', false)], false);
+    $pdf->Row(['Clientes', MyString::formatoNumero($datos['clientes'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Proveedores', String::formatoNumero($datos['proveedores'], 2, '', false)], false);
+    $pdf->Row(['Proveedores', MyString::formatoNumero($datos['proveedores'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Deudores Diversos', String::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
+    $pdf->Row(['Deudores Diversos', MyString::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Caja prestamos', String::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
+    $pdf->Row(['Caja prestamos', MyString::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Almacén', String::formatoNumero($datos['almacen'], 2, '', false)], false);
+    $pdf->Row(['Almacén', MyString::formatoNumero($datos['almacen'], 2, '', false)], false);
 
     $pdf->Output('balance.pdf', 'I');
   }
@@ -284,11 +284,11 @@ class reportes_model extends CI_Model {
 
     // $pdf->titulo3 = "{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     $pdf->AddPage();
@@ -303,21 +303,21 @@ class reportes_model extends CI_Model {
     $pdf->SetAligns($aligns);
     $pdf->SetWidths($widths);
     $pdf->SetX(6);
-    $pdf->Row(['Caja', String::formatoNumero($datos['caja'], 2, '', false)], false);
+    $pdf->Row(['Caja', MyString::formatoNumero($datos['caja'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Caja 2', String::formatoNumero($datos['caja2'], 2, '', false)], false);
+    $pdf->Row(['Caja 2', MyString::formatoNumero($datos['caja2'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Bancos', String::formatoNumero($datos['bancos'], 2, '', false)], false);
+    $pdf->Row(['Bancos', MyString::formatoNumero($datos['bancos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Clientes', String::formatoNumero($datos['clientes'], 2, '', false)], false);
+    $pdf->Row(['Clientes', MyString::formatoNumero($datos['clientes'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Proveedores', String::formatoNumero($datos['proveedores'], 2, '', false)], false);
+    $pdf->Row(['Proveedores', MyString::formatoNumero($datos['proveedores'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Deudores Diversos', String::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
+    $pdf->Row(['Deudores Diversos', MyString::formatoNumero($datos['deudores_diversos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Caja prestamos', String::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
+    $pdf->Row(['Caja prestamos', MyString::formatoNumero($datos['caja_prestamos'], 2, '', false)], false);
     $pdf->SetX(6);
-    $pdf->Row(['Almacén', String::formatoNumero($datos['almacen'], 2, '', false)], false);
+    $pdf->Row(['Almacén', MyString::formatoNumero($datos['almacen'], 2, '', false)], false);
 
     $pdf->Output('balance.pdf', 'I');
   }

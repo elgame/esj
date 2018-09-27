@@ -42,7 +42,7 @@
         </div>
         <div class="box-content">
 
-          <form class="form-horizontal" action="<?php echo base_url('panel/caja_chica/agregar_abono_deudor?'.String::getVarsLink(array())); ?>" method="post" id="form">
+          <form class="form-horizontal" action="<?php echo base_url('panel/caja_chica/agregar_abono_deudor?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
 
             <div class="row-fluid">
               <div class="span12">

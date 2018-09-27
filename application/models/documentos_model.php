@@ -1145,7 +1145,7 @@ class documentos_model extends CI_Model {
 
     $pdf->SetXY(80, 247);
     $pdf->SetFont('Arial','',11);
-    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(String::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
+    $pdf->Cell(70, 6, 'TECOMAN, COL A ' . $fecha[2] . ' ' . strtoupper(MyString::mes($fecha[1])) . ' ' . $fecha[0], 0, 0, 'C', 1);
 
     $chofer = strtoupper(str_replace(" ", "_", $data->chofer));
     $fecha = str_replace(" ", "_", $data->fecha);
@@ -1218,7 +1218,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(40, 6, $data['info'][0]->ctrl_embarque, 1, 0, 'C', 1);
 
     $pdf->SetXY(167, 22);
-    $pdf->Cell(40, 6, String::fechaAT($jsonData->fecha), 1, 0, 'C', 1);
+    $pdf->Cell(40, 6, MyString::fechaAT($jsonData->fecha), 1, 0, 'C', 1);
 
     $pdf->SetXY(7, 33);
     $pdf->SetFillColor(146,208,80);
@@ -1336,7 +1336,7 @@ class documentos_model extends CI_Model {
     $y = $pdf->GetY();
 
     $pdf->SetXY(50, $y + 2);
-    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . String::fechaAT($data['info'][0]->fecha_carga), 0, 0, 'L', 1);
+    $pdf->Cell(50, 6, 'FECHA DE CARGA: ' . MyString::fechaAT($data['info'][0]->fecha_carga), 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 7);
     $pdf->Cell(50, 6, 'INICIO: ' . $jsonData->inicio, 0, 0, 'L', 1);
@@ -1345,7 +1345,7 @@ class documentos_model extends CI_Model {
     $pdf->Cell(50, 6, 'TERMINO: ' . $jsonData->termino, 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 12);
-    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . String::fechaAT($data['info'][0]->fecha_embarque), 0, 0, 'L', 1);
+    $pdf->Cell(105, 6, 'FECHA DE EMPAQUE: ' . MyString::fechaAT($data['info'][0]->fecha_embarque), 0, 0, 'L', 1);
 
     $pdf->SetXY(50, $y + 17);
     $pdf->Cell(105, 6, 'ELABORO: ' . strtoupper($jsonData->elaboro), 0, 0, 'L', 1);
@@ -1768,7 +1768,7 @@ class documentos_model extends CI_Model {
     $fecha = explode('-', $jsonData->fecha_embarque);
 
     $pdf->SetXY(10, $pdf->GetY());
-    $pdf->Cell(100, 4, "Fecha de Embarque: " . $fecha[2] .' DE ' . strtoupper(String::mes($fecha[1])) . ' DEL ' . $fecha[0], 0, 0, 'L');
+    $pdf->Cell(100, 4, "Fecha de Embarque: " . $fecha[2] .' DE ' . strtoupper(MyString::mes($fecha[1])) . ' DEL ' . $fecha[0], 0, 0, 'L');
 
     // -------------------------
 

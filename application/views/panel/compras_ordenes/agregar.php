@@ -34,7 +34,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -383,7 +383,7 @@
                                   <input type="text" name="retTotal[]" value="<?php echo $_POST['retTotal'][$key] ?>" id="retTotal" class="span12" readonly>
                               </td>
                               <td>
-                                  <span><?php echo String::formatoNumero($_POST['importe'][$key]) ?></span>
+                                  <span><?php echo MyString::formatoNumero($_POST['importe'][$key]) ?></span>
                                   <input type="hidden" name="importe[]" value="<?php echo $_POST['importe'][$key] ?>" id="importe" class="span12 vpositive">
                                   <input type="hidden" name="total[]" value="<?php echo $_POST['total'][$key] ?>" id="total" class="span12 vpositive">
                               </td>
@@ -419,27 +419,27 @@
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte', 0))?></td>
+                    <td id="importe-format"><?php echo MyString::formatoNumero(set_value('totalImporte', 0))?></td>
                     <input type="hidden" name="totalImporte" id="totalImporte" value="<?php echo set_value('totalImporte', 0); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', 0))?></td>
+                    <td id="traslado-format"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', 0))?></td>
                     <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', 0); ?>">
                   </tr>
                   <tr>
                     <td>IEPS</td>
-                    <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps', 0))?></td>
+                    <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('totalIeps', 0))?></td>
                     <input type="hidden" name="totalIeps" id="totalIeps" value="<?php echo set_value('totalIeps', 0); ?>">
                   </tr>
                   <tr>
                     <td>RET.</td>
-                    <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', 0))?></td>
+                    <td id="retencion-format"><?php echo MyString::formatoNumero(set_value('totalRetencion', 0))?></td>
                     <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', 0); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden', 0))?></td>
+                    <td id="total-format"><?php echo MyString::formatoNumero(set_value('totalOrden', 0))?></td>
                     <input type="hidden" name="totalOrden" id="totalOrden" value="<?php echo set_value('totalOrden', 0); ?>">
                   </tr>
                 </tbody>

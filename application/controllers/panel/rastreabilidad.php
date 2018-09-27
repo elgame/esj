@@ -114,7 +114,7 @@ class rastreabilidad extends MY_Controller {
 
     // Obtiene la semana [01 - 52/53] y el dia de la semana [1 - 7]
     $params['semana']     = $fecha->format("W");
-    $params['dia_semana'] = String::obtenerDiaSemana($fecha->format('Y-m-d')) + 1;
+    $params['dia_semana'] = MyString::obtenerDiaSemana($fecha->format('Y-m-d')) + 1;
 
     // Obtiene los lotes de la fecha indicada
     $params['lotes'] = $this->rastreabilidad_model->getLotesByFecha($fecha->format('Y-m-d'), $params['area_default']);
@@ -211,7 +211,7 @@ class rastreabilidad extends MY_Controller {
       $this->load->model('rastreabilidad_model');
       $this->rastreabilidad_model->rpl_pdf($_GET['glote']);
     }
-    else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.String::getVarsLink(array('msg'))));
+    else redirect(base_url('panel/rastreabilidad/rendimiento_lote/?'.MyString::getVarsLink(array('msg'))));
   }
 
   /*

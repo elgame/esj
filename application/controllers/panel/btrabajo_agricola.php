@@ -84,7 +84,7 @@ class btrabajo_agricola extends MY_Controller {
 			$res_mdl = $this->btrabajo_agricola_model->addEntradas($_POST);
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/btrabajo_agricola/agregar/?'.String::getVarsLink(array('msg')).'&msg=3&hojas='.$res_mdl['hojas']));
+				redirect(base_url('panel/btrabajo_agricola/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3&hojas='.$res_mdl['hojas']));
 		}
 
 		$this->load->model('empresas_model');
@@ -142,7 +142,7 @@ class btrabajo_agricola extends MY_Controller {
 				$res_mdl = $this->btrabajo_agricola_model->updateEntrada($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/btrabajo_agricola/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/btrabajo_agricola/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->btrabajo_agricola_model->getFormatoInfo();
@@ -158,7 +158,7 @@ class btrabajo_agricola extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/btrabajo_agricola/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/btrabajo_agricola/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

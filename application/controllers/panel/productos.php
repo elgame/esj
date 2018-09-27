@@ -151,7 +151,7 @@ class productos extends MY_Controller {
 			$this->load->view('panel/almacen/productos/modificar_familia', $params);
 		}
 		else
-			redirect(base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productos/modificar_familia/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -312,7 +312,7 @@ class productos extends MY_Controller {
 			$this->load->view('panel/almacen/productos/modificar_producto', $params);
 		}
 		else
-			redirect(base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/productos/modificar_familia/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

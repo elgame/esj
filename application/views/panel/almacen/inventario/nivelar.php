@@ -41,7 +41,7 @@
     <div id="content" class="row-fluid">
       <!-- content starts -->
 
-      <form action="<?php echo base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('fstatus'))); ?>" method="post">
+      <form action="<?php echo base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('fstatus'))); ?>" method="post">
         <input type="submit" class="btn btn-primary pull-right" name="guardar" value="Nivelar">
         <input type="hidden" name="id_almacen" value="<?php echo $default ?>">
 
@@ -63,7 +63,7 @@
               <input type="hidden" class="precio_producto" name="precio_producto[]" value="<?php echo round($producto->ul_precio_unitario, 6); ?>">
               <input type="hidden" class="esistema" name="esistema[]" value="<?php echo round($producto->data[0], 6); ?>">
             </td>
-            <td><?php echo String::formatoNumero($producto->data[0], 4, '').' '.$producto->abreviatura; ?></td>
+            <td><?php echo MyString::formatoNumero($producto->data[0], 4, '').' '.$producto->abreviatura; ?></td>
             <td><input type="text" class="vpositive efisica" name="efisica[]" value=""></td>
             <td><input type="text" class="diferencia" name="diferencia[]" value="" readonly></td>
           </tr>
@@ -76,7 +76,7 @@
       <?php
       //Paginacion
       $this->pagination->initialize(array(
-          'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag', 'fstatus')).'&',
+          'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag', 'fstatus')).'&',
           'total_rows'    => $data['total_rows'],
           'per_page'      => $data['items_per_page'],
           'cur_page'      => $data['result_page']*$data['items_per_page'],
@@ -98,7 +98,7 @@
 
 <?php if (isset($p) && isset($pe)) { ?>
   <script>
-    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
     win.focus();
   </script>
 <?php } ?>

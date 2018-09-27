@@ -55,11 +55,11 @@
             <?php foreach($datos_s['proveedores'] as $proveedor) {?>
                 <tr>
                   <td>
-                    <a href="<?php echo base_url('panel/proveedores_facturacion/admin?fid_proveedor='.$proveedor->id_proveedor.'&'.String::getVarsLink(array('fid_proveedor', 'fstatus')) ); ?>"><?php echo $proveedor->nombre_fiscal; ?></a>
+                    <a href="<?php echo base_url('panel/proveedores_facturacion/admin?fid_proveedor='.$proveedor->id_proveedor.'&'.MyString::getVarsLink(array('fid_proveedor', 'fstatus')) ); ?>"><?php echo $proveedor->nombre_fiscal; ?></a>
                   </td>
-                  <td><?php echo String::formatoNumero($proveedor->limite, 2, '$', false); ?></td>
-                  <td><?php echo String::formatoNumero($proveedor->facturado, 2, '$', false); ?></td>
-                  <td><?php echo String::formatoNumero($proveedor->saldo, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($proveedor->limite, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($proveedor->facturado, 2, '$', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($proveedor->saldo, 2, '$', false); ?></td>
                 </tr>
             <?php }?>
               </tbody>
@@ -68,7 +68,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $datos_s['total_rows'],
                 'per_page'      => $datos_s['items_per_page'],
                 'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],

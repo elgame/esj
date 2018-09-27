@@ -687,9 +687,9 @@ class Usuarios_model extends privilegios_model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'R', 'R', 'R', 'R', 'R', 'R'));
       $pdf->SetWidths(array(55, 25, 25, 25, 25, 25, 25));
-      $pdf->Row(array('Sueldo', String::formatoNumero($empleado->sueldo_semanal, 2, '', false),
-                      String::formatoNumero($empleado->sueldo_semanal, 2, '', false),
-                      String::formatoNumero('0', 2, '', false),
+      $pdf->Row(array('Sueldo', MyString::formatoNumero($empleado->sueldo_semanal, 2, '', false),
+                      MyString::formatoNumero($empleado->sueldo_semanal, 2, '', false),
+                      MyString::formatoNumero('0', 2, '', false),
                       '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
       $total_dep['percepciones'] += $empleado->sueldo_semanal;
       $total_dep['percepciones_grav'] += $empleado->sueldo_semanal;
@@ -705,9 +705,9 @@ class Usuarios_model extends privilegios_model {
       if ($empleado->horas_extras > 0)
       {
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('Hrs Extras', String::formatoNumero($empleado->horas_extras, 2, '', false),
-                      String::formatoNumero($empleado->horas_extras_grabable, 2, '', false),
-                      String::formatoNumero($empleado->horas_extras_excento, 2, '', false),
+        $pdf->Row(array('Hrs Extras', MyString::formatoNumero($empleado->horas_extras, 2, '', false),
+                      MyString::formatoNumero($empleado->horas_extras_grabable, 2, '', false),
+                      MyString::formatoNumero($empleado->horas_extras_excento, 2, '', false),
                       '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
         $total_dep['percepciones'] += $empleado->horas_extras;
         $total_dep['percepciones_grav'] += $empleado->horas_extras_grabable;
@@ -726,9 +726,9 @@ class Usuarios_model extends privilegios_model {
       if ($empleado->vacaciones > 0)
       {
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('Vacaciones', String::formatoNumero($empleado->vacaciones, 2, '', false),
-                      String::formatoNumero($empleado->vacaciones, 2, '', false),
-                      String::formatoNumero('0', 2, '', false),
+        $pdf->Row(array('Vacaciones', MyString::formatoNumero($empleado->vacaciones, 2, '', false),
+                      MyString::formatoNumero($empleado->vacaciones, 2, '', false),
+                      MyString::formatoNumero('0', 2, '', false),
                       '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
         $total_dep['percepciones'] += $empleado->vacaciones;
         $total_dep['percepciones_grav'] += $empleado->vacaciones;
@@ -741,9 +741,9 @@ class Usuarios_model extends privilegios_model {
           $pdf->AddPage();
 
         $pdf->SetXY(6, $pdf->GetY());
-        $pdf->Row(array('Prima vacacional', String::formatoNumero($empleado->prima_vacacional, 2, '', false),
-                      String::formatoNumero($empleado->prima_vacacional_grabable, 2, '', false),
-                      String::formatoNumero($empleado->prima_vacacional_exento, 2, '', false),
+        $pdf->Row(array('Prima vacacional', MyString::formatoNumero($empleado->prima_vacacional, 2, '', false),
+                      MyString::formatoNumero($empleado->prima_vacacional_grabable, 2, '', false),
+                      MyString::formatoNumero($empleado->prima_vacacional_exento, 2, '', false),
                       '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
         $total_dep['percepciones']       += $empleado->prima_vacacional;
         $total_dep['percepciones_grav']  += $empleado->prima_vacacional_grabable;
@@ -763,7 +763,7 @@ class Usuarios_model extends privilegios_model {
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('Subsidio', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero('-'.$empleado->subsidio, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero('-'.$empleado->subsidio, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->subsidio*-1;
         $total_gral['deducciones']      += $empleado->subsidio*-1;
         $total_gral['conceptos']['Subsidio'] = array($total_gral['conceptos']['Subsidio'][0],
@@ -777,9 +777,9 @@ class Usuarios_model extends privilegios_model {
       // if ($empleado->ptu > 0)
       // {
       //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->Row(array('PTU', String::formatoNumero($empleado->ptu, 2, '', false),
-      //                 String::formatoNumero($empleado->ptu_grabable, 2, '', false),
-      //                 String::formatoNumero($empleado->ptu_exento, 2, '', false),
+      //   $pdf->Row(array('PTU', MyString::formatoNumero($empleado->ptu, 2, '', false),
+      //                 MyString::formatoNumero($empleado->ptu_grabable, 2, '', false),
+      //                 MyString::formatoNumero($empleado->ptu_exento, 2, '', false),
       //                 '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
       //   $total_dep['percepciones']       += $empleado->ptu;
       //   $total_dep['percepciones_grav']  += $empleado->ptu_grabable;
@@ -801,9 +801,9 @@ class Usuarios_model extends privilegios_model {
       // if ($empleado->nomina_fiscal_aguinaldo > 0)
       // {
       //   $pdf->SetXY(6, $pdf->GetY());
-      //   $pdf->Row(array('Aguinaldo', String::formatoNumero($empleado->aguinaldo, 2, '', false),
-      //                 String::formatoNumero($empleado->aguinaldo_grabable, 2, '', false),
-      //                 String::formatoNumero($empleado->aguinaldo_exento, 2, '', false),
+      //   $pdf->Row(array('Aguinaldo', MyString::formatoNumero($empleado->aguinaldo, 2, '', false),
+      //                 MyString::formatoNumero($empleado->aguinaldo_grabable, 2, '', false),
+      //                 MyString::formatoNumero($empleado->aguinaldo_exento, 2, '', false),
       //                 '0.00', '0.00', '0.00'), false, 0, null, 1, 1);
       //   $total_dep['percepciones']       += $empleado->aguinaldo;
       //   $total_dep['percepciones_grav']  += $empleado->aguinaldo_grabable;
@@ -828,7 +828,7 @@ class Usuarios_model extends privilegios_model {
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('Infonavit', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero($empleado->infonavit, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero($empleado->infonavit, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->infonavit;
         $total_gral['deducciones']      += $empleado->infonavit;
         $total_gral['conceptos']['Infonavit'] = array($total_gral['conceptos']['Infonavit'][0],
@@ -839,7 +839,7 @@ class Usuarios_model extends privilegios_model {
       }
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->Row(array('I.M.M.S.', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero($empleado->imss, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero($empleado->imss, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->imss;
         $total_gral['deducciones']      += $empleado->imss;
         $total_gral['conceptos']['I.M.M.S.'] = array($total_gral['conceptos']['I.M.M.S.'][0],
@@ -852,7 +852,7 @@ class Usuarios_model extends privilegios_model {
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('Prestamos', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero($empleado->prestamos, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero($empleado->prestamos, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->prestamos;
         $total_gral['deducciones']      += $empleado->prestamos;
         $total_gral['conceptos']['Prestamos'] = array($total_gral['conceptos']['Prestamos'][0],
@@ -866,7 +866,7 @@ class Usuarios_model extends privilegios_model {
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('ISR', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero($empleado->isr, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero($empleado->isr, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->isr;
         $total_gral['deducciones']      += $empleado->isr;
         $total_gral['conceptos']['ISR'] = array($total_gral['conceptos']['ISR'][0],
@@ -880,7 +880,7 @@ class Usuarios_model extends privilegios_model {
       {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row(array('Vejez', '0.00', '0.00', '0.00',
-                      '0.00', String::formatoNumero($empleado->vejez, 2, '', false), '0.00'), false, 0, null, 1, 1);
+                      '0.00', MyString::formatoNumero($empleado->vejez, 2, '', false), '0.00'), false, 0, null, 1, 1);
         $total_dep['deducciones']       += $empleado->vejez;
         $total_gral['deducciones']      += $empleado->vejez;
         $total_gral['conceptos']['Vejez'] = array($total_gral['conceptos']['Vejez'][0],
@@ -894,12 +894,12 @@ class Usuarios_model extends privilegios_model {
       $pdf->SetXY(6, $pdf->GetY()-1);
       $pdf->Cell(200, 2, "________________________________________________________________________________________________________", 0, 0, 'L', 0);
       $pdf->SetXY(6, $pdf->GetY()+2);
-      $pdf->Row(array('Total', String::formatoNumero($total_dep['percepciones'], 2, '', false),
-                String::formatoNumero($total_dep['percepciones_grav'], 2, '', false),
-                String::formatoNumero($total_dep['percepciones_ext'], 2, '', false),
-                String::formatoNumero('0', 2, '', false),
-                String::formatoNumero($total_dep['deducciones'], 2, '', false),
-                String::formatoNumero($total_dep['obligaciones'], 2, '', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('Total', MyString::formatoNumero($total_dep['percepciones'], 2, '', false),
+                MyString::formatoNumero($total_dep['percepciones_grav'], 2, '', false),
+                MyString::formatoNumero($total_dep['percepciones_ext'], 2, '', false),
+                MyString::formatoNumero('0', 2, '', false),
+                MyString::formatoNumero($total_dep['deducciones'], 2, '', false),
+                MyString::formatoNumero($total_dep['obligaciones'], 2, '', false)), false, 0, null, 1, 1);
     }
 
     if ($total_gral['percepciones'] > 0 ||
@@ -917,11 +917,11 @@ class Usuarios_model extends privilegios_model {
       {
         if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
-        $value[0] = String::formatoNumero($value[0], 2, '', false);
-        $value[1] = String::formatoNumero($value[1], 2, '', false);
-        $value[2] = String::formatoNumero($value[2], 2, '', false);
-        $value[3] = String::formatoNumero($value[3], 2, '', false);
-        $value[4] = String::formatoNumero($value[4], 2, '', false);
+        $value[0] = MyString::formatoNumero($value[0], 2, '', false);
+        $value[1] = MyString::formatoNumero($value[1], 2, '', false);
+        $value[2] = MyString::formatoNumero($value[2], 2, '', false);
+        $value[3] = MyString::formatoNumero($value[3], 2, '', false);
+        $value[4] = MyString::formatoNumero($value[4], 2, '', false);
         $value = array_merge(array($key), $value);
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->Row($value, false, 0, null, 1, 1);
@@ -932,12 +932,12 @@ class Usuarios_model extends privilegios_model {
       $pdf->SetXY(6, $pdf->GetY()+2);
       if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
-      $pdf->Row(array('Total General', String::formatoNumero($total_gral['percepciones'], 2, '', false),
-                String::formatoNumero($total_gral['percepciones_grav'], 2, '', false),
-                String::formatoNumero($total_gral['percepciones_ext'], 2, '', false),
-                String::formatoNumero('0', 2, '', false),
-                String::formatoNumero($total_gral['deducciones'], 2, '', false),
-                String::formatoNumero($total_gral['obligaciones'], 2, '', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('Total General', MyString::formatoNumero($total_gral['percepciones'], 2, '', false),
+                MyString::formatoNumero($total_gral['percepciones_grav'], 2, '', false),
+                MyString::formatoNumero($total_gral['percepciones_ext'], 2, '', false),
+                MyString::formatoNumero('0', 2, '', false),
+                MyString::formatoNumero($total_gral['deducciones'], 2, '', false),
+                MyString::formatoNumero($total_gral['obligaciones'], 2, '', false)), false, 0, null, 1, 1);
     }
     $pdf->Output('Nomina.pdf', 'I');
   }

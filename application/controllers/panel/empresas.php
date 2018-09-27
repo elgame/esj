@@ -76,7 +76,7 @@ class empresas extends MY_Controller {
 			$respons = $this->empresas_model->addEmpresa();
 
 			if($respons[0])
-        redirect(base_url('panel/empresas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$respons[2]));
+        redirect(base_url('panel/empresas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$respons[2]));
       else
         $params['frm_errors'] = $this->showMsgs(2, $respons[1]);
 		}
@@ -124,7 +124,7 @@ class empresas extends MY_Controller {
 				$respons = $this->empresas_model->updateEmpresa();
 
 				if($respons[0])
-					redirect(base_url('panel/empresas/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$respons[2]));
+					redirect(base_url('panel/empresas/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$respons[2]));
 			}
 
 			$params['info'] = $this->empresas_model->getInfoEmpresa($_GET['id']);

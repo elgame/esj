@@ -91,7 +91,7 @@ class empleados extends MY_Controller {
 			$res_mdl = $this->usuarios_model->setRegistro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/empleados/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/empleados/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$this->load->model('usuarios_puestos_model');
@@ -152,7 +152,7 @@ class empleados extends MY_Controller {
 				$res_mdl = $this->usuarios_model->modificar_usuario($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$this->load->model('usuarios_puestos_model');
@@ -178,7 +178,7 @@ class empleados extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -191,10 +191,10 @@ class empleados extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->eliminar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -213,14 +213,14 @@ class empleados extends MY_Controller {
     			$this->load->model('usuarios_model');
     			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
     			if($res_mdl)
-    				redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=6'));
+    				redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
         } else
-          redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=8'));
+          redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=8'));
       } else
-        redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=10'));
+        redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=10'));
 		}
 		else
-			redirect(base_url('panel/empleados/?'.String::getVarsLink(array('msg')).'&msg=9'));
+			redirect(base_url('panel/empleados/?'.MyString::getVarsLink(array('msg')).'&msg=9'));
 	}
 
   public function historial()
@@ -312,7 +312,7 @@ class empleados extends MY_Controller {
     {
       $this->load->model('usuarios_model');
       $this->usuarios_model->updateSueldos($_POST);
-      redirect(base_url('panel/empleados/sueldos/?'.String::getVarsLink(array('msg')).'&msg=7'));
+      redirect(base_url('panel/empleados/sueldos/?'.MyString::getVarsLink(array('msg')).'&msg=7'));
     }
 
     $params['empresa'] = $this->empresas_model->getDefaultEmpresa();

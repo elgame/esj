@@ -75,7 +75,7 @@
 								<td><?php echo $contrarecibo->folio; ?></td>
 								<td><?php echo $contrarecibo->empresa; ?></td>
 								<td><?php echo $contrarecibo->proveedor; ?></td>
-								<td><?php echo String::formatoNumero($contrarecibo->total, 2, '$', false); ?></td>
+								<td><?php echo MyString::formatoNumero($contrarecibo->total, 2, '$', false); ?></td>
 								<td>
 									<?php
 										if($contrarecibo->status == 't'){
@@ -124,7 +124,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $contrarecibos['total_rows'],
 								'per_page'			=> $contrarecibos['items_per_page'],
 								'cur_page'			=> $contrarecibos['result_page']*$contrarecibos['items_per_page'],

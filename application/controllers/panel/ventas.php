@@ -227,7 +227,7 @@ class ventas extends MY_Controller {
       $this->load->model('ventas_model');
       $this->ventas_model->pagaNotaRemison($_GET['id']);
 
-      redirect(base_url('panel/ventas/?'.String::getVarsLink(array('msg','id')).'&msg=9'));
+      redirect(base_url('panel/ventas/?'.MyString::getVarsLink(array('msg','id')).'&msg=9'));
     }
   }
 
@@ -238,7 +238,7 @@ class ventas extends MY_Controller {
       $this->load->model('ventas_model');
       $this->ventas_model->cancelaNotaRemison($_GET['id']);
 
-      redirect(base_url('panel/ventas/?'.String::getVarsLink(array('msg','id')).'&msg=5'));
+      redirect(base_url('panel/ventas/?'.MyString::getVarsLink(array('msg','id')).'&msg=5'));
     }
   }
 

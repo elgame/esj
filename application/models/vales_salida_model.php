@@ -161,7 +161,7 @@ class vales_salida_model extends CI_Model {
     $pdf->SetFont('helvetica','', 9);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(109, $pdf->GetY() + 4);
-    $pdf->Cell(108, 4, String::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
+    $pdf->Cell(108, 4, MyString::fechaATexto(date("Y-m-d")).' '.date("H:i:s"), 0, 0, 'R', 0);
 
     $pdf->SetFont('helvetica','B', 9);
     $pdf->SetFillColor(242, 242, 242);

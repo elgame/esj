@@ -58,7 +58,7 @@
                     <th><span class="label"><?php echo $orden->folio; ?></span></th>
                     <th><?php echo $orden->proveedor; ?></th>
                     <th><?php echo $orden->empresa; ?></th>
-                    <th style="text-align: right;"><?php echo String::formatoNumero($orden->total, 2, '$', false); ?></th>
+                    <th style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></th>
                   </tr>
                 <?php
                   }
@@ -76,7 +76,7 @@
                     <td><span class="label"><?php echo $orden->folio; ?></span></td>
                     <td><?php echo $orden->proveedor; ?></td>
                     <td><?php echo $orden->empresa; ?></td>
-                    <td style="text-align: right;"><?php echo String::formatoNumero($orden->total, 2, '$', false); ?></td>
+                    <td style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></td>
                   </tr>
               <?php }
                 }?>

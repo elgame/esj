@@ -503,7 +503,7 @@ class proveedores_model extends CI_Model {
         $pdf->titulo2 = 'PROVEEDOR : ' . $proveedor['info']->nombre_fiscal;
       }
 
-      $pdf->titulo3 = 'PERIODO: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo3 = 'PERIODO: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
@@ -567,22 +567,22 @@ class proveedores_model extends CI_Model {
         if ($tipo === 'seguro')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->pol_seg,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
         elseif ($tipo === 'certificado')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->certificado,
             $data->bultos,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
 
@@ -597,7 +597,7 @@ class proveedores_model extends CI_Model {
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(175, 30));
 
-      $pdf->Row(array(' TOTAL:',  String::formatoNumero($total, 2, '', false)), false);
+      $pdf->Row(array(' TOTAL:',  MyString::formatoNumero($total, 2, '', false)), false);
 
       $pdf->Output('Reporte.pdf', 'I');
     }

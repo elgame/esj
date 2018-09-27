@@ -22,9 +22,9 @@
             </div>
           </div>
           <div class="box-content">
-            <!-- <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <!-- <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-print"></i> Imprimir</a> |
-            <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+            <a href="<?php echo base_url('panel/cuentas_cobrar/saldos_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
               <i class="icon-table"></i> Excel</a> -->
 
             <form action="<?php echo base_url('panel/cuentas_cobrar/lista_pagos/'); ?>" method="GET" class="form-search">
@@ -63,13 +63,13 @@
                   <td><?php echo $cuenta->nombre_fiscal; ?></td>
                   <td><?php echo $cuenta->empresa; ?></td>
                   <td><?php echo $cuenta->concepto; ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($cuenta->total_abono, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->total_abono, 2, '$', false); ?></td>
                   <td>
                   	<a class="btn btn-info" href="<?php echo base_url('panel/cuentas_cobrar/imprimir_abono/?p='.$cuenta->id_movimiento); ?>" target="_blank" title="Imprimir">
           						<i class="icon-print icon-white"></i> <span class="hidden-tablet">Imprimir</span></a>
           					<?php
           					echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_movimiento/', array(
-          							'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.String::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
+          							'params'   => 'id_movimiento='.$cuenta->id_movimiento.'&'.MyString::getVarsLink(array('id_movimiento', 'fstatus', 'msg')),
           							'btn_type' => 'btn-danger',
           							'attrs' => array('onclick' => "msb.confirm('Estas seguro de Eliminar la operación?<br>Nota: Se eliminara tambien en cuentas por pagar y banco si esta ligada la operacion.<br><strong>Este cambio no se puede revertir</strong>', 'cuentas', this); return false;"))
           						);
@@ -86,7 +86,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $data['total_rows'],
                 'per_page'      => $data['items_per_page'],
                 'cur_page'      => $data['result_page']*$data['items_per_page'],

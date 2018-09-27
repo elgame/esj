@@ -309,8 +309,8 @@ class productos_traspasos_model extends CI_Model {
             // $pdf->SetAligns(array('R', 'R'));
             // $pdf->SetWidths(array(30, 30));
             // $pdf->Row(array(
-            //   String::formatoNumero($total_total, 2, '', false),
-            //   String::formatoNumero($total_saldo, 2, '', false)), false);
+            //   MyString::formatoNumero($total_total, 2, '', false),
+            //   MyString::formatoNumero($total_saldo, 2, '', false)), false);
 
         $pdf->Output('orden_traspaso.pdf', 'I');
     }

@@ -236,8 +236,8 @@ class Usuario_historial_model extends CI_Model {
         $log->fecha,
         $log->nombre,
         $log->cantidad,
-        String::formatoNumero($log->precio_unitario, 2, '', false),
-        String::formatoNumero($log->cantidad*$log->precio_unitario, 2, '', false),
+        MyString::formatoNumero($log->precio_unitario, 2, '', false),
+        MyString::formatoNumero($log->cantidad*$log->precio_unitario, 2, '', false),
       ), false, false);
     }
 

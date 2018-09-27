@@ -75,7 +75,7 @@ class camiones extends MY_Controller {
 			$res_mdl = $this->camiones_model->addCamion();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/camiones/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/camiones/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 
@@ -122,7 +122,7 @@ class camiones extends MY_Controller {
 				$res_mdl = $this->camiones_model->updateCamion($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->camiones_model->getCamionInfo();
@@ -136,7 +136,7 @@ class camiones extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -150,10 +150,10 @@ class camiones extends MY_Controller {
 			$this->load->model('camiones_model');
 			$res_mdl = $this->camiones_model->updateCamion( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -167,10 +167,10 @@ class camiones extends MY_Controller {
 			$this->load->model('camiones_model');
 			$res_mdl = $this->camiones_model->updateCamion( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/camiones/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/camiones/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

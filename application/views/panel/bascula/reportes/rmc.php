@@ -128,11 +128,11 @@
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->fecha : ''; ?></td>
 							<td><?php echo substr($caja->calidad, 0, 9); ?></td>
 							<td class="txt_right"><?php echo $caja->cajas; ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($caja->promedio, 2, '', false); ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($caja->kilos, 2, ''); ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($caja->precio, 2, '', false); ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($caja->importe, 2, '', false); ?></td>
-							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? String::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($caja->promedio, 2, '', false); ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($caja->kilos, 2, ''); ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($caja->precio, 2, '', false); ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($caja->importe, 2, '', false); ?></td>
+							<td class="txt_right"><?php echo ($caja->id_bascula != $lastFolio) ? MyString::formatoNumero($caja->importe_todas, 2, '', false) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? strtoupper($caja->tipo_pago) : ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->concepto: ''; ?></td>
 							<td><?php echo ($caja->id_bascula != $lastFolio) ? $caja->rancho: ''; ?></td>
@@ -152,11 +152,11 @@
 							<td></td>
 							<td></td>
 							<td class="txt_right"><?php echo $data['totales']['cajas']; ?></td>
-							<td class="txt_right"><?php echo $data['totales']['cajas'] != 0 ? String::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false) : 0; ?></td>
+							<td class="txt_right"><?php echo $data['totales']['cajas'] != 0 ? MyString::formatoNumero(floatval($data['totales']['kilos'])/floatval($data['totales']['cajas']), 2, '', false) : 0; ?></td>
 							<td class="txt_right"><?php echo $data['totales']['kilos']; ?></td>
-							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? String::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
-							<td class="txt_right"><?php echo String::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
+							<td class="txt_right"><?php echo $data['totales']['kilos'] != 0 ? MyString::formatoNumero(floatval($data['totales']['importe'])/floatval($data['totales']['kilos']), 2, '$', false) : 0; ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['importe'], 2, '$', false); ?></td>
+							<td class="txt_right"><?php echo MyString::formatoNumero($data['totales']['total'], 2, '$', false); ?></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -177,10 +177,10 @@
 								<td>Bonificado</td>
 							</tr>
 							<tr>
-								<td><?php echo String::formatoNumero($data['totales']['pagados'], 2, '', false); ?></td>
-								<td><?php echo String::formatoNumero($data['totales']['no_pagados'], 2, '', false); ?></td>
-								<td><?php echo String::formatoNumero($data['totales']['total'], 2, '', false); ?></td>
-								<td><?php echo String::formatoNumero($total_bonificaciones, 2, '', false); ?></td>
+								<td><?php echo MyString::formatoNumero($data['totales']['pagados'], 2, '', false); ?></td>
+								<td><?php echo MyString::formatoNumero($data['totales']['no_pagados'], 2, '', false); ?></td>
+								<td><?php echo MyString::formatoNumero($data['totales']['total'], 2, '', false); ?></td>
+								<td><?php echo MyString::formatoNumero($total_bonificaciones, 2, '', false); ?></td>
 							</tr>
 						</tbody>
 					</table>
