@@ -131,6 +131,19 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                  <label class="control-label" for="ftipo">Tipo </label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" class="span12" required>
+                      <option value=""></option>
+                      <option value="v" <?php echo set_select('ftipo', 'v', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Verde (Orgánico)</option>
+                      <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Amarillo (Orgánico Opc)</option>
+                      <option value="r" <?php echo set_select('ftipo', 'r', false, (isset($data['info']->tipo)? $data['info']->tipo: '')); ?>>Rojo (No Orgánico)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div class="row-fluid">
                 <a href="#" onclick="productos.add(); return false;" title="Agregar Presentacion">Agregar Presentacion</a>
                 <table class="table table-condensed">

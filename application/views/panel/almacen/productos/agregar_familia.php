@@ -79,6 +79,7 @@
                     <option value="p" <?php echo set_select('ftipo', 'p'); ?>>Productos</option>
                     <option value="d" <?php echo set_select('ftipo', 'd'); ?>>Servicios</option>
                     <option value="f" <?php echo set_select('ftipo', 'f'); ?>>Fletes</option>
+                    <option value="a" <?php echo set_select('ftipo', 'a'); ?>>Activos</option>
                   </select>
                 </div>
               </div>

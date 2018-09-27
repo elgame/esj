@@ -119,6 +119,19 @@
                 </div>
               </div>
 
+              <div class="control-group">
+                  <label class="control-label" for="ftipo">Tipo </label>
+                  <div class="controls">
+                    <select name="ftipo" id="ftipo" class="span12" required>
+                      <option value=""></option>
+                      <option value="v">Verde (Orgánico)</option>
+                      <option value="a">Amarillo (Orgánico Opc)</option>
+                      <option value="r">Rojo (No Orgánico)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div class="row-fluid">
                 <a href="#" onclick="productos.add(); return false;" title="Agregar Presentacion">Agregar Presentacion</a>
                 <table class="table table-condensed">

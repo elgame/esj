@@ -62,7 +62,8 @@ class productos_model extends CI_Model {
 				switch ($response['familias'][$key]->tipo) {
 					case 'p': $response['familias'][$key]->tipo_text = 'Producto'; break;
 					case 'd': $response['familias'][$key]->tipo_text = 'Servicio'; break;
-					case 'f': $response['familias'][$key]->tipo_text = 'Flete'; break;
+          case 'f': $response['familias'][$key]->tipo_text = 'Flete'; break;
+					case 'a': $response['familias'][$key]->tipo_text = 'Activos'; break;
 				}
 			}
 		}
@@ -201,7 +202,7 @@ class productos_model extends CI_Model {
 		$sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";
 
 		$str_query = "
-				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status, cuenta_cpi
+				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status, cuenta_cpi, tipo
 				FROM productos
 				".$sql."
 				ORDER BY nombre ASC
@@ -237,15 +238,16 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->get('fid_familia'));
 			$data = array(
-				'id_empresa' => $familia['empresa']->id_empresa,
-				'id_familia' => $familia['info']->id_familia,
-				'id_unidad'  => $this->input->post('funidad'),
-				'codigo'     => $this->input->post('fcodigo'),
-				'nombre'     => $this->input->post('fnombre'),
-				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'id_empresa' => $familia['empresa']->id_empresa,
+        'id_familia' => $familia['info']->id_familia,
+        'id_unidad'  => $this->input->post('funidad'),
+        'codigo'     => $this->input->post('fcodigo'),
+        'nombre'     => $this->input->post('fnombre'),
+        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
         'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'tipo'       => $this->input->post('ftipo'),
 				);
 		}
 
@@ -267,16 +269,17 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->post('ffamilia')); // fid_familia
 			$data = array(
-				'id_empresa' => $familia['empresa']->id_empresa,
-				'id_familia' => $familia['info']->id_familia,
-				'id_unidad'  => $this->input->post('funidad'),
-				'codigo'     => $this->input->post('fcodigo'),
-				'nombre'     => $this->input->post('fnombre'),
-				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-        		'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
-				);
+        'id_empresa' => $familia['empresa']->id_empresa,
+        'id_familia' => $familia['info']->id_familia,
+        'id_unidad'  => $this->input->post('funidad'),
+        'codigo'     => $this->input->post('fcodigo'),
+        'nombre'     => $this->input->post('fnombre'),
+        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'ubicacion'  => $this->input->post('ubicacion'),
+        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'tipo'       => $this->input->post('ftipo'),
+			);
 		}
 
 		$this->db->update('productos', $data, "id_producto = {$id_producto}");
@@ -333,7 +336,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
-									ubicacion, precio_promedio, status, cuenta_cpi, ieps" )
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();
