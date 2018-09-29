@@ -2756,7 +2756,8 @@ class nomina_fiscal_model extends CI_Model {
   public function semanaActualDelMes($anio=null)
   {
     $anio = $anio!=null? $anio: date('Y');
-    return end(MyString::obtenerSemanasDelAnioV2(date('Y'), 0, 4));
+    $semanas = MyString::obtenerSemanasDelAnioV2(date('Y'), 0, 4);
+    return end($semanas);
   }
 
   /**

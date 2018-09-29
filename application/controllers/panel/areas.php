@@ -87,6 +87,9 @@ class areas extends MY_Controller {
 				redirect(base_url('panel/areas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
+    $this->load->model('empresas_model');
+    $empresas = $this->empresas_model->getEmpresas(1000);
+    $params['empresas'] = $empresas['empresas'];
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);

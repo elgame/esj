@@ -801,7 +801,7 @@ class MyString {
    * @param  string $anio
    * @return string | strtotime
    */
-  public function primerDiaPrimeraSemanaDelAnio($anio, $format = 'Y-m-d')
+  public static function primerDiaPrimeraSemanaDelAnio($anio, $format = 'Y-m-d')
   {
     $primerDiaDelAnio = mktime(0, 0, 0, 1, 1, $anio);
     $primerJuevesDelAnio = strtotime('thursday', $primerDiaDelAnio);
@@ -815,7 +815,7 @@ class MyString {
    *
    * @return int
    */
-  public function obtenerNumeroDeDiaDelAnio($fecha)
+  public static function obtenerNumeroDeDiaDelAnio($fecha)
   {
     return date("z", strtotime($fecha)) + 1;
   }
