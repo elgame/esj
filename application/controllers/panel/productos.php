@@ -254,7 +254,7 @@ class productos extends MY_Controller {
 
 		$params['unidades'] = $this->productos_model->getUnidades(false);
 		$params['folio'] = $this->productos_model->getFolioNext($this->input->get('fid_familia'));
-
+    $params['familia'] = $this->productos_model->getFamiliaInfo($this->input->get('fid_familia'), true);
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -274,7 +274,7 @@ class productos extends MY_Controller {
 				array('libs/jquery.uniform.css', 'screen'),
 			));
 			$this->carabiner->js(array(
-				array('libs/jquery.uniform.min.js'),
+				// array('libs/jquery.uniform.min.js'),
 				array('general/msgbox.js'),
         		array('libs/jquery.numeric.js'),
 				array('panel/almacen/agregar_familias.js'),

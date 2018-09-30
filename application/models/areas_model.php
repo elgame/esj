@@ -75,7 +75,6 @@ class areas_model extends CI_Model {
  	 */
 	public function addArea($data=NULL)
 	{
-
 		if ($data==NULL)
 		{
 			$data = array(
@@ -114,6 +113,16 @@ class areas_model extends CI_Model {
 			}
 		}
 
+    //se agregan las empresas
+    if (is_array($this->input->post('fempresas'))) {
+      foreach ($this->input->post('fempresas') as $key => $value) {
+        $this->db->insert('areas_empresas', [
+          'id_area'    => $id_area,
+          'id_empresa' => $value
+        ]);
+      }
+    }
+
 		return array('error' => FALSE);
 	}
 
@@ -135,6 +144,17 @@ class areas_model extends CI_Model {
 		}
 
 		$this->db->update('areas', $data, array('id_area' => $id_area));
+
+    //se agregan las empresas
+    if (is_array($this->input->post('fempresas'))) {
+      $this->db->delete('areas_empresas', "id_area = {$id_area}");
+      foreach ($this->input->post('fempresas') as $key => $value) {
+        $this->db->insert('areas_empresas', [
+          'id_area'    => $id_area,
+          'id_empresa' => $value
+        ]);
+      }
+    }
 
 		return array('error' => FALSE);
 	}
@@ -169,6 +189,15 @@ class areas_model extends CI_Model {
 
       if ($sql_res->num_rows() > 0)
         $data['calidades'] = $sql_res->result();
+
+      $data['empresas'] = array();
+      $sql_res = $this->db->select("id_empresa")
+        ->from("areas_empresas")
+        ->where("id_area", (isset($data['info']->id_area)? $data['info']->id_area: 0))
+        ->get();
+
+      if ($sql_res->num_rows() > 0)
+        $data['empresas'] = $sql_res->result();
 		}
 
 		return $data;

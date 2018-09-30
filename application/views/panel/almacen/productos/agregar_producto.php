@@ -132,6 +132,9 @@
                 </div>
               </div>
 
+              <input type="hidden" name="tipo_familia" value="<?php echo $familia['info']->tipo ?>">
+
+              <?php if ($familia['info']->tipo != 'a'): ?>
               <div class="row-fluid">
                 <a href="#" onclick="productos.add(); return false;" title="Agregar Presentacion">Agregar Presentacion</a>
                 <table class="table table-condensed">
@@ -143,14 +146,14 @@
                     </tr>
                   </thead>
                   <tbody id="tblproductosrow">
-              <?php
-              if (is_array($this->input->post('pnombre')))
-              {
-                foreach ($this->input->post('pnombre') as $key => $value)
-                {
-                  if ($value != '')
-                  {
-              ?>
+                    <?php
+                    if (is_array($this->input->post('pnombre')))
+                    {
+                      foreach ($this->input->post('pnombre') as $key => $value)
+                      {
+                        if ($value != '')
+                        {
+                    ?>
                     <tr class="rowprod">
                       <td><input type="text" name="pnombre[]" value="<?php echo $value; ?>" class="span12 presnombre" placeholder="Presentacion">
                         <input type="hidden" name="pidpresentacion[]" value=""></td>
@@ -158,10 +161,10 @@
                       <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">
                         <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>
                     </tr>
-              <?php
-                  }
-                }
-              } ?>
+                    <?php
+                        }
+                      }
+                    } ?>
                     <tr class="rowprod">
                       <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Presentacion">
                         <input type="hidden" name="pidpresentacion[]" value=""></td>
@@ -172,7 +175,50 @@
                   </tbody>
                 </table>
               </div>
+              <?php endif ?>
 
+              <?php if ($familia['info']->tipo == 'a'): ?>
+              <div class="row-fluid">
+                <a href="#" onclick="productos.add(); return false;" title="Agregar Piezas">Agregar Piezas</a>
+                <table class="table table-condensed">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Cantidad</th>
+                      <th>Opc</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblproductosrow">
+                    <?php
+                    if (is_array($this->input->post('pnombre')))
+                    {
+                      foreach ($this->input->post('pnombre') as $key => $value)
+                      {
+                        if ($value != '')
+                        {
+                    ?>
+                    <tr class="rowprod">
+                      <td><input type="text" name="pnombre[]" value="<?php echo $value; ?>" class="span12 presnombre" placeholder="Presentacion">
+                        <input type="hidden" name="pidpresentacion[]" value=""></td>
+                      <td><input type="text" name="pcantidad[]" value="<?php echo $_POST['pcantidad'][$key]; ?>" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
+                      <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>
+                    </tr>
+                    <?php
+                        }
+                      }
+                    } ?>
+                    <tr class="rowprod">
+                      <td><input type="text" name="pnombre[]" class="span12 presnombre" placeholder="Presentacion">
+                        <input type="hidden" name="pidpresentacion[]" value=""></td>
+                      <td><input type="text" name="pcantidad[]" class="span12 prescantidad vpositive" placeholder="Cantidad"></td>
+                      <td><a class="btn btn-danger" href="#" onclick="productos.quitar(this); return false;" title="Quitar">
+                        <i class="icon-remove icon-white"></i> <span class="hide">Quitar</span></a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <?php endif ?>
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Guardar</button>

@@ -156,6 +156,10 @@ class areas extends MY_Controller {
 			$params['tamanos_ventas']              = $this->tamanos_ventas_model->getTamanios($_GET['id']);
 			$params['html_tamanos_ventas']         = $this->load->view('panel/areas/tamanios/admin', $params, true);
 
+      $this->load->model('empresas_model');
+      $empresas = $this->empresas_model->getEmpresas(1000);
+      $params['empresas'] = $empresas['empresas'];
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -616,6 +620,10 @@ class areas extends MY_Controller {
 			array('field' => 'cla_cuenta[]',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'max_length[12]'),
+
+      array('field' => 'fempresas',
+            'label' => 'Empresas',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);
