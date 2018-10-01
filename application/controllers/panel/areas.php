@@ -10,7 +10,8 @@ class areas extends MY_Controller {
 			'areas/ajax_get_calidades/',
       'areas/ajax_get_clasificaciones/',
       'areas/ajax_get_calibres/',
-			'areas/ajax_add_new_calibre/',
+      'areas/ajax_add_new_calibre/',
+			'areas/ajax_get_areas/',
 
 			'areas/clasificaciones_xls/',
 		);
@@ -588,6 +589,16 @@ class areas extends MY_Controller {
 			$this->clasificaciones_model->clasificaciones_xls( $this->input->get('id'));
 		}
 	}
+
+  /**
+   * Obtiene lostado de clientes para el autocomplete, ajax
+   */
+  public function ajax_get_areas(){
+    $this->load->model('areas_model');
+    $params = $this->areas_model->getAreasAjax();
+
+    echo json_encode($params);
+  }
 
 
   /*
