@@ -123,7 +123,7 @@ public function fecha($fecha)
 			$this->carabiner->js(array(
 				array('libs/jquery.uniform.min.js'),
 				array('libs/jquery.treeview.js'),
-				array('panel/usuarios/add_mod_frm.js')
+				array('panel/ranchos/agregar.js'),
 			));
 
       $this->load->model('ranchos_model');
@@ -198,9 +198,9 @@ public function fecha($fecha)
 	/**
 	 * Obtiene lostado de productores para el autocomplete, ajax
 	 */
-	public function ajax_get_productores(){
+	public function ajax_get_ranchos(){
 		$this->load->model('ranchos_model');
-		$params = $this->ranchos_model->getProductorAjax();
+		$params = $this->ranchos_model->getRanchosAjax();
 
 		echo json_encode($params);
 	}

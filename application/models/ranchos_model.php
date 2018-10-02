@@ -177,7 +177,7 @@ class ranchos_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
 	 */
-	public function getProductorAjax($sqlX = null){
+	public function getRanchosAjax($sqlX = null){
 		$sql = '';
 		if ($this->input->get('term') !== false)
 			$sql = " AND lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";

@@ -39,7 +39,7 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="farea">Aria </label>
+                    <label class="control-label" for="farea">Área </label>
                     <div class="controls">
                     <input type="text" name="farea" id="farea" class="span10" value="<?php echo isset($data->area)? $data->area->nombre:''; ?>" placeholder="Limon, Piña">
                     <input type="hidden" name="did_area" value="<?php echo isset($data->area)? $data->area->id_area:''; ?>" id="did_area">
