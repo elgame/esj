@@ -182,6 +182,7 @@
                       $totalPrestamos = 0;
                       $totalDescuentoPlayeras = 0;
                       $totalDescuentoOtros = 0;
+                      $totalDescuentoCocina = 0;
                       $totalIsrs = 0;
                       $totalDeducciones = 0; // total de todas las deducciones.
                       $totalTransferencias = 0;
@@ -478,6 +479,7 @@
                       $totalPrestamos          += $totalPrestamosEmpleado;
                       $totalDescuentoPlayeras  += $e->descuento_playeras;
                       $totalDescuentoOtros     += $e->descuento_otros;
+                      $totalDescuentoCocina    += $e->descuento_cocina;
                       $totalIsrs               += $e->esta_asegurado=='f'?0:$isrEmpleado;
                       $totalDeducciones        += $e->esta_asegurado=='f'?0:$totalDeduccionesEmpleado;
                       $totalTransferencias     += $e->esta_asegurado=='f'?0:(floatval($totalPercepcionesEmpleado) - floatval($totalDeduccionesEmpleado));
@@ -514,6 +516,7 @@
                       <td id="totales-domingo" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDomingos) ?></td>
                       <td id="totales-descuento-playeras" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoPlayeras) ?></td>
                       <td id="totales-descuento-otros" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoOtros) ?></td>
+                      <td id="totales-descuento-cocina" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalDescuentoCocina) ?></td>
                       <td id="totales-complementos" style="background-color: #BCD4EE;"><?php echo MyString::formatoNumero($totalComplementos) ?></td>
                     </tr>
                   </tbody>
