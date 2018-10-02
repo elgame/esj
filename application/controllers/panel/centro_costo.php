@@ -196,9 +196,9 @@ class centro_costo extends MY_Controller {
   /**
    * Obtiene lostado de productores para el autocomplete, ajax
    */
-  public function ajax_get_productores(){
+  public function ajax_get_centro_costo(){
     $this->load->model('centros_costos_model');
-    $params = $this->centros_costos_model->getProductorAjax();
+    $params = $this->centros_costos_model->getCentrosCostosAjax();
 
     echo json_encode($params);
   }

@@ -152,13 +152,15 @@ class centros_costos_model extends CI_Model {
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
     if ($this->input->get('term') !== false)
-      $sql = " AND lower(r.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+      $sql = " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+    if ($this->input->get('tipo') !== false)
+      $sql = " AND cc.tipo = '".$this->input->get('tipo')."'";
 
     if (!is_null($sqlX))
       $sql .= $sqlX;
 
     $res = $this->db->query(
-        "SELECT cc.id_centro_costo, cc.nombre, cc.status, cc.tipo, a.id_area, a.nombre AS area
+        "SELECT cc.id_centro_costo, cc.nombre, cc.tipo, a.id_area, a.nombre AS area
         FROM otros.centro_costo cc
           LEFT JOIN public.areas a ON a.id_area = cc.id_area
         WHERE cc.status = 't'

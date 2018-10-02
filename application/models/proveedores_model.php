@@ -274,6 +274,11 @@ class proveedores_model extends CI_Model {
 			if ($basic_info == False) {
 				$this->load->model('empresas_model');
 				$data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+
+        $data['info']->centros_costos = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
+          FROM otros.proveedores_centros_costo pc
+            INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = pc.id_centro_costo
+          WHERE pc.id_proveedor = {$id_proveedor}")->result();
 			}
 		}
 		$sql_res->free_result();
