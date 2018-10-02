@@ -394,6 +394,7 @@
         $tdTotalesPercepciones = $('#totales-percepciones'),
         $tdTotalesDescuentoPlayeras = $('#totales-descuento-playeras'),
         $tdTotalesDescuentoOtros = $('#totales-descuento-otros'),
+        $tdTotalesDescuentoCocina = $('#totales-descuento-cocina'),
         $tdTotalesIsrs = $('#totales-isrs'),
         $tdTotalesDeducciones = $('#totales-deducciones'),
         $tdTotalesTransferencias = $('#totales-transferencias'),
@@ -407,6 +408,7 @@
         totalesPercepciones = 0,
         totalesDescuentoPlayeras = 0,
         totalesDescuentoOtros = 0,
+        totalesDescuentoCocina = 0,
         totalesIsrs = 0,
         totalesDeducciones = 0,
         totalesTransferencias = 0,
@@ -429,6 +431,7 @@
       totalesPercepciones += parseFloat($tr.find('.total-percepciones').val());
       totalesDescuentoPlayeras += parseFloat($tr.find('.descuento-playeras').val());
       totalesDescuentoOtros += parseFloat($tr.find('.descuento-otros').val());
+      totalesDescuentoCocina += parseFloat($tr.find('.descuento-cocina').val());
       totalesDeducciones += parseFloat($tr.find('.total-deducciones').val());
       totalesTransferencias += parseFloat($tr.find('.total-nomina').val());
       totalesComplementos += parseFloat($tr.find('.total-complemento').val());
@@ -443,6 +446,7 @@
     $tdTotalesPercepciones.text(util.darFormatoNum(totalesPercepciones));
     $tdTotalesDescuentoPlayeras.text(util.darFormatoNum(totalesDescuentoPlayeras));
     $tdTotalesDescuentoOtros.text(util.darFormatoNum(totalesDescuentoOtros));
+    $tdTotalesDescuentoCocina.text(util.darFormatoNum(totalesDescuentoCocina));
     $tdTotalesIsrs.text(util.darFormatoNum(totalesIsrs));
     $tdTotalesDeducciones.text(util.darFormatoNum(totalesDeducciones));
     $tdTotalesTransferencias.text(util.darFormatoNum(totalesTransferencias));
