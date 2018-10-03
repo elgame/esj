@@ -148,7 +148,7 @@ class proveedores extends MY_Controller {
 				array('libs/jquery.treeview.js'),
 				array('libs/jquery.numeric.js'),
 				array('general/keyjump.js'),
-				array(p'anel/proveedores/addmod.js'),
+				array('panel/proveedores/addmod.js'),
 				array('panel/usuarios/add_mod_frm.js')
 			));
 
