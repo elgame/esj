@@ -293,6 +293,34 @@
 									</table>
 	              </div>
 
+                <div class="span11">
+                  <h3>Centros de costo</h3>
+                  <div class="span5">
+                    <div class="control-group">
+                      <label class="control-label" for="acentro_costo">Centro de costo </label>
+                      <div class="controls">
+                        <input type="text" name="acentro_costo" id="acentro_costo" class="span10" value="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="span5">
+                    <ul id="list_centros_costos">
+                    <?php
+                      if(is_array($this->input->post('centros_costos'))) {
+                        foreach ($this->input->post('centros_costos') as $key => $value) {
+                    ?>
+                      <li><i class="icon-minus-sign delete_costo" style="cursor: pointer;" title="Quitar"></i>
+                        <?php echo $value->nombre ?>
+                        <input type="hidden" name="centros_costos[]" value="<?php echo $value ?>">
+                        <input type="hidden" name="centros_costos_del[]" class="centros_costos_del" value="false">
+                      </li>
+                    <?php }
+                      } ?>
+                    </ul>
+                  </div>
+                </div>
+
 	              <div class="clearfix"></div>
 
 								<div class="form-actions">

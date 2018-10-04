@@ -152,6 +152,7 @@ var cuentas = (function($){
         $li.remove();
       } else {
         $li.find('.centros_costos_del').val('true');
+        $li.hide();
       }
     });
   }

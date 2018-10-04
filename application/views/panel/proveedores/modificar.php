@@ -352,6 +352,15 @@
                         <input type="hidden" name="centros_costos_del[]" class="centros_costos_del" value="false">
                       </li>
                     <?php }
+                      } elseif(is_array($this->input->post('centros_costos'))) {
+                        foreach ($this->input->post('centros_costos') as $key => $value) {
+                    ?>
+                      <li><i class="icon-minus-sign delete_costo" style="cursor: pointer;" title="Quitar"></i>
+                        <?php echo $value->nombre ?>
+                        <input type="hidden" name="centros_costos[]" value="<?php echo $value ?>">
+                        <input type="hidden" name="centros_costos_del[]" class="centros_costos_del" value="false">
+                      </li>
+                    <?php }
                       } ?>
                     </ul>
                   </div>

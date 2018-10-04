@@ -339,6 +339,13 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'plazoCredito',
 					'label'	=> 'Plazo de Crédito',
 					'rules'	=> 'max_length[3]'),
+
+      array('field' => 'centros_costos[]',
+          'label' => 'Centros de costo',
+          'rules' => ''),
+      array('field' => 'centros_costos_del[]',
+          'label' => 'Centros de costo',
+          'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

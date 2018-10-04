@@ -146,6 +146,7 @@ class proveedores_model extends CI_Model {
                                           ':empresa'   => 'en '.$this->input->post('fempresa')));
 
 		$this->addCuentas($id_proveedor);
+    $this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
@@ -244,10 +245,31 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));
-		$this->addCuentas($id_proveedor);
+    $this->addCuentas($id_proveedor);
+		$this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
+
+  public function saveCentrosCostos($id_proveedor)
+  {
+    if (is_array($this->input->post('centros_costos')) && count($this->input->post('centros_costos')) > 0) {
+      $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor}");
+      $centros = [];
+      foreach ($this->input->post('centros_costos') as $key => $value) {
+        if ($this->input->post('centros_costos_del')[$key] === 'false') { // insert
+          $centros[] = ['id_proveedor' => $id_proveedor, 'id_centro_costo' => $value];
+        }
+        // else {
+        //   $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor} AND id_centro_costo = {$value}");
+        // }
+      }
+
+      if (count($centros) > 0) {
+        $this->db->insert_batch('otros.proveedores_centros_costo', $centros);
+      }
+    }
+  }
 
 	/**
 	 * Obtiene la informacion de un proveedor
