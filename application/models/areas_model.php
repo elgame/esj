@@ -212,11 +212,18 @@ class areas_model extends CI_Model {
 	public function getAreasAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+			$sql = " AND lower(a.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+
+    $join = '';
+    if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '') {
+      $sql .= " AND ae.id_empresa = ".$this->input->get('did_empresa')."";
+      $join = " INNER JOIN areas_empresas ae ON a.id_area = ae.id_area";
+    }
+
 		$res = $this->db->query("
-				SELECT id_area, nombre, tipo, status
-				FROM areas
-				WHERE status = 't' ".$sql."
+				SELECT a.id_area, a.nombre, a.tipo, a.status
+				FROM areas a {$join}
+				WHERE a.status = 't' ".$sql."
 				ORDER BY nombre ASC
 				LIMIT 20");
 
