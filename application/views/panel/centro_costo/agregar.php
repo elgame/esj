@@ -73,6 +73,14 @@
                         value="<?php echo set_value('hectareas'); ?>" placeholder="5, 6">
                       </div>
                     </div>
+
+                    <div class="control-group">
+                      <label class="control-label" for="no_plantas">No de plantas </label>
+                      <div class="controls">
+                        <input type="number" step="any" name="no_plantas" id="no_plantas" class="span10" maxlength="100"
+                        value="<?php echo set_value('no_plantas'); ?>" placeholder="100, 500">
+                      </div>
+                    </div>
                   </div>
 
                 </div> <!--/span-->

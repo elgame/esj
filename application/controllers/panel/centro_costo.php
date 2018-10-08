@@ -241,6 +241,9 @@ class centro_costo extends MY_Controller {
       array('field' => 'hectareas',
             'label' => 'Hectáreas',
             'rules' => ($val? 'required|numeric': '')),
+      array('field' => 'no_plantas',
+            'label' => 'No de plantas',
+            'rules' => ($val? 'required|numeric': '')),
     );
 
     $this->form_validation->set_rules($rules);

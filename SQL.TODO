@@ -51,14 +51,15 @@
         ALTER TABLE otros.ranchos
           OWNER TO programa;
         COMMENT ON COLUMN otros.ranchos.id_area IS 'el area son los cultivos';
-     CREATE TABLE otros.centro_costo
+     *CREATE TABLE otros.centro_costo
         (
           id_centro_costo bigserial NOT NULL,
+          id_area integer,
           nombre character varying(100) NOT NULL,
-          status boolean NOT NULL DEFAULT true,
           tipo character varying(15) NOT NULL DEFAULT 'gasto'::character varying, -- gasto (compras), banco (bancos), melga (piña), tabla (platano), seccion (limon)
           hectareas double precision NOT NULL DEFAULT 0,
-          id_area integer,
+          no_plantas integer NOT NULL DEFAULT 0,
+          status boolean NOT NULL DEFAULT true,
           CONSTRAINT centro_costo_pkey PRIMARY KEY (id_centro_costo),
           CONSTRAINT centro_costo_id_area_fkey FOREIGN KEY (id_area)
               REFERENCES public.areas (id_area) MATCH SIMPLE

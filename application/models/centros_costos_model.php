@@ -72,10 +72,11 @@ class centros_costos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'nombre'    => $this->input->post('nombre'),
-        'tipo'      => $this->input->post('tipo'),
-        'hectareas' => floatval($this->input->post('hectareas')),
-        'id_area'   => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'nombre'     => $this->input->post('nombre'),
+        'tipo'       => $this->input->post('tipo'),
+        'hectareas'  => floatval($this->input->post('hectareas')),
+        'no_plantas' => floatval($this->input->post('no_plantas')),
+        'id_area'    => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
       );
     }
 
@@ -96,10 +97,11 @@ class centros_costos_model extends CI_Model {
     if ($data==NULL)
     {
       $data = array(
-        'nombre'    => $this->input->post('nombre'),
-        'tipo'      => $this->input->post('tipo'),
-        'hectareas' => floatval($this->input->post('hectareas')),
-        'id_area'   => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
+        'nombre'     => $this->input->post('nombre'),
+        'tipo'       => $this->input->post('tipo'),
+        'hectareas'  => floatval($this->input->post('hectareas')),
+        'no_plantas' => floatval($this->input->post('no_plantas')),
+        'id_area'    => $this->input->post('did_area') > 0? $this->input->post('did_area'): NULL,
       );
     }
 
@@ -119,7 +121,7 @@ class centros_costos_model extends CI_Model {
   {
     $id_centro_costo = $id_centro_costo? $id_centro_costo: (isset($_GET['id'])? $_GET['id']: 0);
 
-    $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas" )
+    $sql_res = $this->db->select("id_centro_costo, id_area, nombre, status, tipo, hectareas, no_plantas" )
                         ->from("otros.centro_costo")
                         ->where("id_centro_costo", $id_centro_costo)
                         ->get();
