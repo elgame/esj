@@ -44,6 +44,7 @@
                     <div class="controls">
                       <select name="tipo" id="tipo">
                         <option value="gasto" <?php echo set_select('tipo', 'gasto', false, (isset($data->tipo)? $data->tipo: '')) ?>>Gasto</option>
+                        <option value="servicio" <?php echo set_select('tipo', 'servicio', false, (isset($data->tipo)? $data->tipo: '')) ?>>Servicio</option>
                         <option value="banco" <?php echo set_select('tipo', 'banco', false, (isset($data->tipo)? $data->tipo: '')) ?>>Banco</option>
                         <option value="melga" <?php echo set_select('tipo', 'melga', false, (isset($data->tipo)? $data->tipo: '')) ?>>Melga</option>
                         <option value="tabla" <?php echo set_select('tipo', 'tabla', false, (isset($data->tipo)? $data->tipo: '')) ?>>Tabla</option>
@@ -60,7 +61,7 @@
                   ?>
                   <div id="is_lotes" class="<?php echo $show_lote ?>">
                     <div class="control-group">
-                      <label class="control-label" for="farea">Área </label>
+                      <label class="control-label" for="farea">Cultivo </label>
                       <div class="controls">
                       <input type="text" name="farea" id="farea" class="span10" value="<?php echo isset($data->area)? $data->area->nombre:''; ?>" placeholder="Limon, Piña">
                       <input type="hidden" name="did_area" value="<?php echo isset($data->area)? $data->area->id_area:''; ?>" id="did_area">

@@ -42,6 +42,7 @@
                     <div class="controls">
                       <select name="tipo" id="tipo">
                         <option value="gasto" <?php echo set_select('tipo', 'gasto') ?>>Gasto</option>
+                        <option value="servicio" <?php echo set_select('tipo', 'servicio') ?>>Servicio</option>
                         <option value="banco" <?php echo set_select('tipo', 'banco') ?>>Banco</option>
                         <option value="melga" <?php echo set_select('tipo', 'melga') ?>>Melga</option>
                         <option value="tabla" <?php echo set_select('tipo', 'tabla') ?>>Tabla</option>
@@ -59,7 +60,7 @@
                   ?>
                   <div id="is_lotes" class="<?php echo $show_lote ?>">
                     <div class="control-group">
-                      <label class="control-label" for="farea">Área </label>
+                      <label class="control-label" for="farea">Cultivo </label>
                       <div class="controls">
                       <input type="text" name="farea" id="farea" class="span10" value="<?php echo set_value('farea'); ?>" placeholder="Limon, Piña">
                       <input type="hidden" name="did_area" value="<?php echo set_value('did_area'); ?>" id="did_area">

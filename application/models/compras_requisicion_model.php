@@ -115,7 +115,7 @@ class compras_requisicion_model extends CI_Model {
     );
 
     // Si es un gasto son requeridos los campos de catálogos
-    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' && $_POST['tipoOrden'] == 'a') {
+    if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
       $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
       $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
       $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;
@@ -281,7 +281,7 @@ class compras_requisicion_model extends CI_Model {
       );
 
       // Si es un gasto son requeridos los campos de catálogos
-      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' && $_POST['tipoOrden'] == 'a') {
+      if ($_POST['tipoOrden'] == 'd' || $_POST['tipoOrden'] == 'oc' || $_POST['tipoOrden'] == 'f' || $_POST['tipoOrden'] == 'a') {
         $data['id_area']         = $this->input->post('areaId')? $this->input->post('areaId'): NULL;
         $data['id_rancho']       = $this->input->post('ranchoId')? $this->input->post('ranchoId'): NULL;
         $data['id_centro_costo'] = $this->input->post('centroCostoId')? $this->input->post('centroCostoId'): NULL;

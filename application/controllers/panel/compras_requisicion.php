@@ -529,10 +529,13 @@ class compras_requisicion extends MY_Controller {
   {
     $this->load->library('form_validation');
 
-    $valGasto = false;
+    $valGasto = $valFlete = false;
     $tipoOrden = $this->input->post('tipoOrden');
     if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f' && $tipoOrden == 'a') {
       $valGasto = true;
+
+      if ($tipoOrden == 'f')
+        $valFlete = true;
     }
 
     $rules = array(
@@ -612,22 +615,22 @@ class compras_requisicion extends MY_Controller {
             'rules' => ($valGasto? 'required': '')),
       array('field' => 'ranchoId',
             'label' => 'Rancho',
-            'rules' => ($valGasto? 'required|numeric': '')),
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
       array('field' => 'rancho',
             'label' => 'Rancho',
-            'rules' => ($valGasto? 'required': '')),
+            'rules' => ($valGasto && !$valFlete? 'required': '')),
       array('field' => 'centroCostoId',
             'label' => 'Centro de costo',
-            'rules' => ($valGasto? 'required|numeric': '')),
+            'rules' => ($valGasto && !$valFlete? 'required|numeric': '')),
       array('field' => 'centroCosto',
             'label' => 'Centro de costo',
-            'rules' => ($valGasto? 'required': '')),
+            'rules' => ($valGasto && !$valFlete? 'required': '')),
       array('field' => 'activoId',
             'label' => 'Activo',
-            'rules' => ($valGasto? 'numeric': '')),
+            'rules' => ($valGasto && !$valFlete? 'numeric': '')),
       array('field' => 'activos',
             'label' => 'Activo',
-            'rules' => ($valGasto? '': '')),
+            'rules' => ($valGasto && !$valFlete? '': '')),
 
       array('field' => 'totalLetra1',
             'label' => '',

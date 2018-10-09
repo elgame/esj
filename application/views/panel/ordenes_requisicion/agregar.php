@@ -276,21 +276,21 @@
               <div class="box-content">
                 <div class="row-fluid">
                   <div class="span6">
-                    <div class="control-group">
+                    <div class="control-group" id="cultivosGrup">
                       <label class="control-label" for="area">Cultivo </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area') ?>" placeholder="Limon, Piña">
                         </div>
                         <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId') ?>">
                       </div>
                     </div><!--/control-group -->
 
-                    <div class="control-group">
-                      <label class="control-label" for="rancho">Rancho </label>
+                    <div class="control-group" id="ranchosGrup">
+                      <label class="control-label" for="rancho">Area </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho') ?>" placeholder="Milagro A, Linea 1">
                         </div>
                         <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
                       </div>
@@ -298,11 +298,11 @@
                   </div>
 
                   <div class="span6">
-                    <div class="control-group">
+                    <div class="control-group" id="centrosCostosGrup">
                       <label class="control-label" for="centroCosto">Centro de costo </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto') ?>" placeholder="Mantenimiento, Gasto general">
                         </div>
                         <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId') ?>">
                       </div>
@@ -312,7 +312,7 @@
                       <label class="control-label" for="activos">Activos </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos') ?>" placeholder="Nissan FRX, Maquina limon">
                         </div>
                         <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId') ?>">
                       </div>

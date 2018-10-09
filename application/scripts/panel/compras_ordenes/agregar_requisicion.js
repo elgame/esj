@@ -160,13 +160,13 @@
           else
             $("#verVehiculoChk").hide();
 
-          if (tipoOrderActual != 'p') {
+          $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
+          if (tipoOrderActual != 'p' && tipoOrderActual != 'a') {
             $('#groupCatalogos').show();
+            $('#ranchosGrup, #centrosCostosGrup, #activosGrup, #cultivosGrup').show();
 
-            if (tipoOrderActual == 'a') {
-              $('#activosGrup').hide();
-            } else {
-              $('#activosGrup').show();
+            if (tipoOrderActual == 'f') {
+              $('#ranchosGrup, #centrosCostosGrup, #activosGrup').hide();
             }
           } else {
             $('#groupCatalogos').hide();
@@ -211,7 +211,7 @@
         $('#productos #table-productos tbody.bodyproducs tr').remove();
         $("#proveedor1, #proveedor2, #proveedor3").val("");
         $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
-        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("").css("background-color", "#A1F57A");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
