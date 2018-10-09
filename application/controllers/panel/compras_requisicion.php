@@ -529,6 +529,12 @@ class compras_requisicion extends MY_Controller {
   {
     $this->load->library('form_validation');
 
+    $valGasto = false;
+    $tipoOrden = $this->input->post('tipoOrden');
+    if ($tipoOrden == 'd' || $tipoOrden == 'oc' || $tipoOrden == 'f' && $tipoOrden == 'a') {
+      $valGasto = true;
+    }
+
     $rules = array(
       array('field' => 'empresaId',
             'label' => 'Empresa',
@@ -597,6 +603,31 @@ class compras_requisicion extends MY_Controller {
       array('field' => 'tipoOrden',
             'label' => 'Tipo de Orden',
             'rules' => 'required'),
+
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required|numeric': '')),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => ($valGasto? 'required': '')),
+      array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => ($valGasto? 'required|numeric': '')),
+      array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => ($valGasto? 'required': '')),
+      array('field' => 'centroCostoId',
+            'label' => 'Centro de costo',
+            'rules' => ($valGasto? 'required|numeric': '')),
+      array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => ($valGasto? 'required': '')),
+      array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => ($valGasto? 'numeric': '')),
+      array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => ($valGasto? '': '')),
 
       array('field' => 'totalLetra1',
             'label' => '',

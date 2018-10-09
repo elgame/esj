@@ -14,6 +14,7 @@
     autocompleteCultivo();
     autocompleteRanchos();
     autocompleteCentroCosto();
+    autocompleteActivos();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -210,6 +211,7 @@
         $('#productos #table-productos tbody.bodyproducs tr').remove();
         $("#proveedor1, #proveedor2, #proveedor3").val("");
         $("#proveedorId1, #proveedorId2, #proveedorId3").val("");
+        $("#area, #areaId, #rancho, #ranchoId, #centroCosto, #centroCostoId, #activos, #activoId").val("");
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
@@ -388,6 +390,39 @@
       if(event.which == 8 || event.which == 46) {
         $("#centroCosto").css("background-color", "#FFD071");
         $("#centroCostoId").val('');
+      }
+    });
+  };
+
+  var autocompleteActivos = function () {
+    $("#activos").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $activos =  $(this);
+
+        $activos.val(ui.item.id);
+        $("#activoId").val(ui.item.id);
+        $activos.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#activos").css("background-color", "#FFD071");
+        $("#activoId").val('');
       }
     });
   };

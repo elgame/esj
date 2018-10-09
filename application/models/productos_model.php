@@ -476,41 +476,72 @@ class productos_model extends CI_Model {
 		return $result;
 	}
 
+  public function getProductosInfo($id_producto=FALSE, $basic_info=FALSE)
+  {
+    $id_producto = $id_producto? $id_producto: (isset($_GET['id'])? $_GET['id']: 0);
 
+    $sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
+                                  ubicacion, precio_promedio, status, cuenta_cpi, impuesto_iva, ieps,
+                                  last_precio, tipo" )
+                        ->from("productos")
+                        ->where("id_producto", $id_producto)
+                        ->get();
+    $data['info'] = array();
 
+    if ($sql_res->num_rows() > 0)
+      $data['info'] = $sql_res->row();
+    $sql_res->free_result();
+
+    if ($basic_info == False) {
+    }
+
+    return $data;
+  }
 
 
 	/**
-	 * Obtiene el listado de familias para usar ajax
-	 * @param term. termino escrito en la caja de texto, busca en el nombre
-	 * @param empresa. Familias de una empresa
-	 */
-	public function ajaxClasificaciones(){
-		$sql = '';
-		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		if($this->input->get('empresa') !== false)
-			$sql .= " AND id_empresa = {$this->input->get('empresa')}";
-		$res = $this->db->query(" SELECT id_familia, id_empresa, codigo, nombre, tipo, status
-				FROM productos_familias
-				WHERE status = 'ac' {$sql}
-				ORDER BY nombre ASC
-				LIMIT 20");
+   * Obtiene el listado de proveedores para usar ajax
+   * @param term. termino escrito en la caja de texto, busca en el nombre
+   * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
+   */
+  public function getProductosAjax(){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql = " AND lower(p.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+    if ($this->input->get('tipo') !== false) {
+      if (is_array($this->input->get('tipo'))) {
+        $sql = " AND pf.tipo in('".implode("','", $this->input->get('tipo'))."')";
+      } else
+        $sql = " AND pf.tipo = '".$this->input->get('tipo')."'";
+    }
 
-		$response = array();
-		if($res->num_rows() > 0){
-			foreach($res->result() as $itm){
-				$response[] = array(
-						'id'    => $itm->id_familia,
-						'label' => $itm->nombre,
-						'value' => $itm->nombre,
-						'item'  => $itm,
-				);
-			}
-		}
+    if ($this->input->get('did_empresa') !== false && $this->input->get('did_empresa') !== '')
+      $sql .= " AND p.id_empresa in(".$this->input->get('did_empresa').")";
 
-		return $response;
-	}
+    $res = $this->db->query(
+        "SELECT p.id_producto, p.nombre, p.codigo, p.tipo
+        FROM productos p
+          INNER JOIN productos_familias pf ON pf.id_familia = p.id_familia
+        WHERE pf.status = 'ac' AND p.status = 'ac'
+          {$sql}
+        ORDER BY p.nombre ASC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_producto,
+            'label' => $itm->nombre,
+            'value' => $itm->nombre,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
 
 }
 /* End of file usuarios_model.php */

@@ -8,7 +8,8 @@ class productos extends MY_Controller {
 	 */
 	private $excepcion_privilegio = array(
 			'productos/ajax_get_familias/',
-			'productos/ajax_get_productos/',
+      'productos/ajax_get_productos/',
+			'productos/ajax_aut_productos/',
 			'productos/acomoda_codigos/',
 		);
 
@@ -368,6 +369,13 @@ class productos extends MY_Controller {
 						'familia' => $params['productos']['familia'],
 				));
 	}
+
+  public function ajax_aut_productos(){
+    $this->load->model('productos_model');
+    $params = $this->productos_model->getProductosAjax();
+
+    echo json_encode($params);
+  }
 
 
 

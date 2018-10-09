@@ -29,6 +29,15 @@
     GROUP BY a.id_area
 
 
+ ✔ New -> Agregar catalogos a ordenes de requisicion @done (18-10-08 21:42) pcc
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_area integer;
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_rancho bigint;
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_centro_costo bigint;
+     ALTER TABLE public.compras_requisicion ADD COLUMN id_activo bigint;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
  ✔ New -> Catalogo Ranchos y centros de costo @done (18-10-01 10:59) pct|pcc|lap
      CREATE TABLE otros.ranchos
         (

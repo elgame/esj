@@ -157,7 +157,7 @@ class centros_costos_model extends CI_Model {
       $sql = " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
     if ($this->input->get('tipo') !== false) {
       if (is_array($this->input->get('tipo'))) {
-        $sql = " AND cc.tipo in(".implode(',', $this->input->get('tipo')).")";
+        $sql = " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
       } else
         $sql = " AND cc.tipo = '".$this->input->get('tipo')."'";
     }
