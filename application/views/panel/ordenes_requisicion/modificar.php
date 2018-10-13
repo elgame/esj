@@ -139,9 +139,9 @@
                 <div class="controls">
                   <select name="tipoOrden" class="span9" id="tipoOrden">
                     <option value="p" <?php echo set_select('tipoOrden', 'p', $orden['info'][0]->tipo_orden === 'p' ? true : false); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios</option>
-                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Orden de compra</option>
-                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios (Gasto)</option>
+                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Gastos (Gasto)</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?> <?php echo (isset($ordenFlete) && $ordenFlete) ? 'selected': '' ?>>Fletes (Gasto)</option>
                     <option value="a" <?php echo set_select('tipoOrden', 'a', $orden['info'][0]->tipo_orden === 'a' ? true : false); ?>>Activo</option>
                   </select>
                 </div>
@@ -292,7 +292,7 @@
                       <label class="control-label" for="area">Cultivo </label>
                       <div class="controls">
                         <div class="input-append span12">
-                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" r="Limon, Piña">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña">
                         </div>
                         <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($orden['info'][0]->area->id_area) ? $orden['info'][0]->area->id_area : '') ?>">
                       </div>

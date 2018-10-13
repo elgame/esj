@@ -477,6 +477,18 @@ class compras_requisicion_model extends CI_Model {
           'id_autorizo'        => $data->id_autorizo,
           'id_almacen'         => $data->id_almacen,
         );
+
+        // Si es un gasto son requeridos los campos de catálogos
+        if ($data->tipo_orden == 'd' || $data->tipo_orden == 'oc' || $data->tipo_orden == 'f' || $data->tipo_orden == 'a') {
+          $dataOrden['id_area']         = !empty($data->id_area)? $data->id_area: NULL;
+          $dataOrden['id_rancho']       = !empty($data->id_rancho)? $data->id_rancho: NULL;
+          $dataOrden['id_centro_costo'] = !empty($data->id_centro_costo)? $data->id_centro_costo: NULL;
+
+          if ($data->tipo_orden !== 'a') {
+            $dataOrden['id_activo'] = !empty($data->id_activo)? $data->id_activo: NULL;
+          }
+        }
+
         //si se registra a un vehiculo
         if (is_numeric($data->id_vehiculo))
         {

@@ -31,6 +31,7 @@
     $htmlProdOk = '';
     $prodOk = false;
 
+    $readonlyCat = '';
     if ($orden['info'][0]->status === 'p' AND $orden['info'][0]->autorizado === 'f' AND ! isset($_GET['mod']))
     {
       $badgeTitle = 'NO AUTORIZADO';
@@ -57,7 +58,8 @@
       {
         $badgeTitle = 'ACEPTADA';
         $badgeStyle = '-success';
-        $readonly = '';
+        $readonly = 'readonly';
+        $readonlyCat = 'readonly';
         $disabled = '';
         $showButton = true;
       }
@@ -194,9 +196,10 @@
                 <div class="controls">
                   <select name="tipoOrden" class="span9" id="tipoOrden" <?php echo $disabled ?>>
                     <option value="p" <?php echo set_select('tipoOrden', 'p', $orden['info'][0]->tipo_orden === 'p' ? true : false); ?>>Productos</option>
-                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios</option>
-                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Orden de compra</option>
-                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?>>Fletes</option>
+                    <option value="d" <?php echo set_select('tipoOrden', 'd', $orden['info'][0]->tipo_orden === 'd' ? true : false); ?>>Servicios (Gasto)</option>
+                    <option value="oc" <?php echo set_select('tipoOrden', 'oc', $orden['info'][0]->tipo_orden === 'oc' ? true : false); ?>>Gastos (Gasto)</option>
+                    <option value="f" <?php echo set_select('tipoOrden', 'f', $orden['info'][0]->tipo_orden === 'f' ? true : false); ?>>Fletes (Gasto)</option>
+                    <option value="a" <?php echo set_select('tipoOrden', 'a', $orden['info'][0]->tipo_orden === 'a' ? true : false); ?>>Activo</option>
                   </select>
                 </div>
               </div>
@@ -340,6 +343,67 @@
                </div> <!-- /box-body -->
             </div> <!-- /box -->
           </div><!-- /row-fluid -->
+
+          <div class="row-fluid" id="groupCatalogos" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'p' && $orden['info'][0]->tipo_orden !== 'a' ? 'block' : 'none') ?>;">  <!-- Box catalogos-->
+            <div class="box span12">
+              <div class="box-header well" data-original-title>
+                <h2><i class="icon-truck"></i> Catálogos</h2>
+                <div class="box-icon">
+                  <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                </div>
+              </div><!--/box-header -->
+              <div class="box-content">
+                <div class="row-fluid">
+                  <div class="span6">
+                    <div class="control-group" id="cultivosGrup">
+                      <label class="control-label" for="area">Cultivo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="area" class="span11" id="area" value="<?php echo set_value('area', isset($orden['info'][0]->area->nombre) ? $orden['info'][0]->area->nombre : '') ?>" placeholder="Limon, Piña" <?php echo $readonlyCat ?>>
+                        </div>
+                        <input type="hidden" name="areaId" id="areaId" value="<?php echo set_value('areaId', isset($orden['info'][0]->area->id_area) ? $orden['info'][0]->area->id_area : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="ranchosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="rancho">Rancho </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($orden['info'][0]->rancho->nombre) ? $orden['info'][0]->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1" <?php echo $readonlyCat ?>>
+                        </div>
+                        <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($orden['info'][0]->rancho->id_rancho) ? $orden['info'][0]->rancho->id_rancho : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                  <div class="span6">
+                    <div class="control-group" id="centrosCostosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="centroCosto">Centro de costo </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="centroCosto" class="span11" id="centroCosto" value="<?php echo set_value('centroCosto', isset($orden['info'][0]->centroCosto->nombre) ? $orden['info'][0]->centroCosto->nombre : '') ?>" placeholder="Mantenimiento, Gasto general" <?php echo $readonlyCat ?>>
+                        </div>
+                        <input type="hidden" name="centroCostoId" id="centroCostoId" value="<?php echo set_value('centroCostoId', isset($orden['info'][0]->centroCosto->id_centro_costo) ? $orden['info'][0]->centroCosto->id_centro_costo : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+
+                    <div class="control-group" id="activosGrup" style="display: <?php echo ($orden['info'][0]->tipo_orden !== 'f'? 'block' : 'none') ?>;">
+                      <label class="control-label" for="activos">Activos </label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="text" name="activos" class="span11" id="activos" value="<?php echo set_value('activos', isset($orden['info'][0]->activo->nombre) ? $orden['info'][0]->activo->nombre : '') ?>" placeholder="Nissan FRX, Maquina limon" <?php echo $readonlyCat ?>>
+                        </div>
+                        <input type="hidden" name="activoId" id="activoId" value="<?php echo set_value('activoId', isset($orden['info'][0]->activo->id_producto) ? $orden['info'][0]->activo->id_producto : '') ?>">
+                      </div>
+                    </div><!--/control-group -->
+                  </div>
+
+                </div>
+
+               </div> <!-- /box-body -->
+            </div> <!-- /box -->
+          </div><!-- /row-fluid -->
+
 
           <div class="row-fluid" id="productos">  <!-- Box Productos -->
             <div class="box span12">

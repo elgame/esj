@@ -15,24 +15,29 @@ class gastos_model extends privilegios_model{
   {
     // datos del gasto.
     $datos = array(
-      'id_empresa'     => $data['empresaId'],
-      'id_proveedor'   => $data['proveedorId'],
-      'id_empleado'    => $this->session->userdata('id_usuario'),
-      'serie'          => $data['serie'],
-      'folio'          => $data['folio'],
-      'condicion_pago' => $data['condicionPago'],
-      'plazo_credito'  => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
-      'tipo_documento' => $data['tipo_documento'],
-      'fecha'          => str_replace('T', ' ', $data['fecha']),
-      'subtotal'       => $data['subtotal'],
-      'importe_iva'    => $data['iva'],
-      'total'          => $data['total'],
-      'concepto'       => $data['concepto'],
-      'isgasto'        => 't',
-      'status'         => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
-      'retencion_iva'  => $data['ret_iva'],
-      'retencion_isr'  => $data['ret_isr'],
+      'id_empresa'      => $data['empresaId'],
+      'id_proveedor'    => $data['proveedorId'],
+      'id_empleado'     => $this->session->userdata('id_usuario'),
+      'serie'           => $data['serie'],
+      'folio'           => $data['folio'],
+      'condicion_pago'  => $data['condicionPago'],
+      'plazo_credito'   => $data['plazoCredito'] !== '' ? $data['plazoCredito'] : 0,
+      'tipo_documento'  => $data['tipo_documento'],
+      'fecha'           => str_replace('T', ' ', $data['fecha']),
+      'subtotal'        => $data['subtotal'],
+      'importe_iva'     => $data['iva'],
+      'total'           => $data['total'],
+      'concepto'        => $data['concepto'],
+      'isgasto'         => 't',
+      'status'          => $data['condicionPago'] ===  'co' ? 'pa' : 'p',
+      'retencion_iva'   => $data['ret_iva'],
+      'retencion_isr'   => $data['ret_isr'],
+      'id_area'         => ($data['areaId']? $data['areaId']: NULL),
+      'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
+      'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
+      'id_activo'       => ($data['activoId']? $data['activoId']: NULL)
     );
+
     //Cuenta espesifica al gasto
     if(is_numeric($data['did_cuentacpi']))
         $datos['cuenta_cpi_gst'] = $data['did_cuentacpi'];

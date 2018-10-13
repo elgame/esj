@@ -367,7 +367,12 @@
     $("#centroCosto").autocomplete({
       source: function(request, response) {
         var params = {term : request.term};
+
         params.tipo = ['gasto'];
+        if ($('#tipoOrden').find('option:selected').val() == 'd') {
+          params.tipo = ['servicio'];
+        }
+
         $.ajax({
             url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
             dataType: "json",

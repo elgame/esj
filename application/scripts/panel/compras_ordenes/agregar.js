@@ -86,8 +86,9 @@
    */
 
    // Obtiene el siguiente folio segun el tipo de orden.
-  var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
   var eventOnChangeTipoOrden = function () {
+    var tipoOrderActual = $('#tipoOrden').find('option:selected').val();
+
     $('#tipoOrden').on('change', function(event) {
       var $this      = $(this),
           $folio     = $('#folio'),
@@ -95,7 +96,7 @@
 
       if ($tableProd.find('tbody tr').length > 0) {
         noty({"text": 'Ya tiene productos para un tipo de orden, si desea cambiar de tipo de orden elimine los productos del listado', "layout":"topRight", "type": 'error'});
-
+        console.log('test', tipoOrderActual);
         $this.val(tipoOrderActual);
       } else {
         $.get(base_url + 'panel/compras_ordenes/ajax_get_folio/?tipo=' + $this.find('option:selected').val(), function(folio) {
