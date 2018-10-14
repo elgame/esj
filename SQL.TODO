@@ -63,7 +63,7 @@ ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_requisicion ADD CONSTRAINT compras_requisicion_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
- ✔ New -> Catalogo Ranchos y centros de costo @done (18-10-01 10:59) pct|pcc|lap
+ ✔ New -> Catalogo Ranchos y centros de costo @done (18-10-01 10:59) pct|pcc|lap|san
      CREATE TABLE otros.ranchos
         (
           id_rancho bigserial NOT NULL,
@@ -135,7 +135,7 @@ ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id
         ALTER TABLE otros.proveedores_centros_costo
           OWNER TO programa;
 
- ✔ New -> Familia activos y tipo de productos @done (18-09-26 20:54) pcc|pct|lap
+ ✔ New -> Familia activos y tipo de productos @done (18-09-26 20:54) pcc|pct|lap|san
    ALTER TABLE public.productos ADD COLUMN tipo character varying(5);
    COMMENT ON COLUMN public.productos.tipo IS 'v: verde (organico), a: amarillo (organico opc), r: rojo (no organico)';
    COMMENT ON COLUMN public.productos_familias.tipo IS 'p:productos (inventario), d:descripciones (servicios), f:fletes, a: activos';
