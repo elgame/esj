@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="box-content">
-          	<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta/?'.String::getVarsLink(array('msg'))); ?>" class="linksm">
+          	<a href="<?php echo base_url('panel/cuentas_cobrar/cuenta/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm">
 								<i class="icon-chevron-left"></i> Atras</a>
             <div class="row-fluid">
             	<fieldset class="span6" style="color: #555; font-size: .9em; border-bottom: none;">
@@ -81,14 +81,14 @@
 								<tr>
 									<td><?php echo $cuenta->fecha; ?></td>
 									<td><?php echo $cuenta->concepto; ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->abono, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td class="">
 									<?php
 									if ($_GET['tipo'] == 'v')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}&".String::getVarsLink(array('ida','msg','nc')),
+                        'params'   => "ida={$cuenta->id_abono}&".MyString::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
@@ -96,13 +96,13 @@
 									elseif ($_GET['tipo'] == 'f')
 									{
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cobrar/eliminar_abono/', array(
-                        'params'   => "ida={$cuenta->id_abono}".($cuenta->tipo=='nc'? '&nc=si': '')."&".String::getVarsLink(array('ida','msg','nc')),
+                        'params'   => "ida={$cuenta->id_abono}".($cuenta->tipo=='nc'? '&nc=si': '')."&".MyString::getVarsLink(array('ida','msg','nc')),
                         'btn_type' => 'btn-danger',
                         'attrs'    => array('onclick' => "msb.confirm('Estas seguro de Quitar el abono?', 'Facturas', this); return false;"))
                     );
 
                     if($data['cobro'][0]->is_factura == 't' && $cuenta->facturado == 0 && $cuenta->tipo != 'nc')
-                      echo '<a class="btn btn-info" href="'.base_url().'panel/cuentas_cobrar/factura_abono_parci/?ida='.$cuenta->id_abono.'&'.String::getVarsLink(array('ida','msg','nc')).'"
+                      echo '<a class="btn btn-info" href="'.base_url().'panel/cuentas_cobrar/factura_abono_parci/?ida='.$cuenta->id_abono.'&'.MyString::getVarsLink(array('ida','msg','nc')).'"
                               onclick="msb.confirm(\'Estas seguro de Facturar el abono?\', \'Facturas\', this); return false;" title="Facturar">
                             <i class="icon-file-text-alt icon-white"></i> <span class="hidden-tablet">Facturar</span></a>';
 									}
@@ -113,8 +113,8 @@
 								} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="2" class="a-r">Totales:</td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, '$', false); ?></td>
-									<td style="text-align: right;" id="dtalle_total_saldo"><?php echo String::formatoNumero($total_saldo, 2, '$', false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_abono, 2, '$', false); ?></td>
+									<td style="text-align: right;" id="dtalle_total_saldo"><?php echo MyString::formatoNumero($total_saldo, 2, '$', false); ?></td>
 									<td></td>
 								</tr>
               </tbody>

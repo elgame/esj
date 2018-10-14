@@ -23,7 +23,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<form action="<?php echo base_url('panel/catalogos_sft/modificar_soft/?'.String::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
+						<form action="<?php echo base_url('panel/catalogos_sft/modificar_soft/?'.MyString::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
 						  <fieldset>
 								<legend></legend>
 

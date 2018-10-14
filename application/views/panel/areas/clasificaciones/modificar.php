@@ -29,7 +29,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/areas/modificar_clasificacion/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/areas/modificar_clasificacion/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">

@@ -47,7 +47,7 @@
           </div>
         </div>
         <div class="box-content">
-          <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+          <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
 
               <div class="row-fluid">
                 <div class="span6">

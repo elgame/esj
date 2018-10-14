@@ -74,8 +74,8 @@
                   <td><span class="label"><?php echo $produc->id; ?></span></td>
                   <td><?php echo $produc->nombre; ?></td>
                   <td><?php echo $produc->nombre_fiscal; ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($produc->cantidad, 2, '', false); ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($produc->costo, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($produc->cantidad, 2, '', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($produc->costo, 2, '$', false); ?></td>
                   <td><?php
                         $texto = 'Activo';
                         $label = 'success';
@@ -124,7 +124,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $produccion['total_rows'],
                 'per_page'      => $produccion['items_per_page'],
                 'cur_page'      => $produccion['result_page']*$produccion['items_per_page'],

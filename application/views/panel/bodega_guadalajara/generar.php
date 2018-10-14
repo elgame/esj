@@ -45,7 +45,7 @@
         $readonly = '';
         $show = true;
         $display = '';
-        $action = base_url('panel/bodega_guadalajara/cargar/?'.String::getVarsLink(array('msg')));
+        $action = base_url('panel/bodega_guadalajara/cargar/?'.MyString::getVarsLink(array('msg')));
         if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'bodega_guadalajara/modificar_caja/'))
         {
           $readonly = 'readonly';
@@ -85,11 +85,11 @@
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 't'){ ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/bodega_guadalajara/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/bodega_guadalajara/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12">Cerrar Caja</a></div>
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/bodega_guadalajara/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/bodega_guadalajara/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -153,9 +153,9 @@
 
                             <tr class='row-total'>
                               <td colspan="3"></td>
-                              <td><input type="text" name="totalSalAnt" value="<?php echo String::float(String::formatoNumero($totalSalAnt, 2, '')) ?>" class="span12" id="totalSalAnt" maxlength="500" readonly style="text-align: right;"></td>
-                              <td><input type="text" name="totalCont" value="<?php echo String::float(String::formatoNumero($totalCont, 2, '')) ?>" class="span12" id="totalCont" maxlength="500" readonly style="text-align: right;"></td>
-                              <td><input type="text" name="totalSal" value="<?php echo String::float(String::formatoNumero($totalSal, 2, '')) ?>" class="span12" id="totalSal" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="totalSalAnt" value="<?php echo MyString::float(MyString::formatoNumero($totalSalAnt, 2, '')) ?>" class="span12" id="totalSalAnt" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="totalCont" value="<?php echo MyString::float(MyString::formatoNumero($totalCont, 2, '')) ?>" class="span12" id="totalCont" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="totalSal" value="<?php echo MyString::float(MyString::formatoNumero($totalSal, 2, '')) ?>" class="span12" id="totalSal" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -245,7 +245,7 @@
                           <tfoot>
                             <tr class='row-total'>
                               <td colspan="4"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos_ext" value="<?php echo String::float(String::formatoNumero($totalIngresosExt, 2, '')) ?>" class="span12" id="total-ingresos-ext" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos_ext" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresosExt, 2, '')) ?>" class="span12" id="total-ingresos-ext" maxlength="500" readonly style="text-align: right;"></td>
                               <td></td>
                             </tr>
                           </tfoot>
@@ -299,9 +299,9 @@
 
                             <tr class='row-total'>
                               <td colspan="3"></td>
-                              <td><input type="text" name="bultos_exis_ant" value="<?php echo String::float(String::formatoNumero($bultosExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td><input type="text" name="pu_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td style="width: 100px;"><input type="text" name="total_exis_ant" value="<?php echo String::float(String::formatoNumero($totalExisAnt, 2, '')) ?>" class="span12" id="total_exis_ant" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="bultos_exis_ant" value="<?php echo MyString::float(MyString::formatoNumero($bultosExisAnt, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="pu_exis_ant" value="<?php echo MyString::float(MyString::formatoNumero($totalExisAnt/($bultosExisAnt>0?$bultosExisAnt:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_exis_ant" value="<?php echo MyString::float(MyString::formatoNumero($totalExisAnt, 2, '')) ?>" class="span12" id="total_exis_ant" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -358,9 +358,9 @@
 
                             <tr class='row-total'>
                               <td colspan="3"></td>
-                              <td><input type="text" name="bultos_ingresos" value="<?php echo String::float(String::formatoNumero($bultosIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td><input type="text" name="pu_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total_ingresos_mercan" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="bultos_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($bultosIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td><input type="text" name="pu_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresos/($bultosIngresos>0?$bultosIngresos:1), 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total_ingresos_mercan" maxlength="500" readonly style="text-align: right;"></td>
                             </tr>
                           </tbody>
                         </table>
@@ -482,10 +482,10 @@
                                       <?php }} ?>
                                       <tr class="row-total">
                                         <td colspan="3" style="text-align: right; font-weight: bolder;">TOTAL</td>
-                                        <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamosBultos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-bultos" style="text-align: right;" readonly></td>
-                                        <td colspan="1"><input type="text" value="<?php echo String::float(String::formatoNumero(($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1)) , 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-precio" style="text-align: right;" readonly></td>
-                                        <td colspan="3"><input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly>
-                                          <input type="text" value="<?php echo String::float(String::formatoNumero($totalPrestamosRestas, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-restas" style="text-align: right;" readonly>
+                                        <td colspan="1"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero($totalPrestamosBultos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-bultos" style="text-align: right;" readonly></td>
+                                        <td colspan="1"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero(($totalPrestamos/($totalPrestamosBultos>0?$totalPrestamosBultos:1)) , 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-precio" style="text-align: right;" readonly></td>
+                                        <td colspan="3"><input type="text" value="<?php echo MyString::float(MyString::formatoNumero($totalPrestamos, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos" style="text-align: right;" readonly>
+                                          <input type="text" value="<?php echo MyString::float(MyString::formatoNumero($totalPrestamosRestas, 2, '')) ?>" class="input-small vpositive" id="ttotal-prestamos-restas" style="text-align: right;" readonly>
                                         </td>
                                       </tr>
                                     </tbody>
@@ -563,14 +563,14 @@
                                     <tbody>
                                       <tr>
                                         <td colspan="3"><input type="hidden" value="<?php echo $totalVentas ?>" id="total-boletas"></td>
-                                        <td><?php echo String::formatoNumero($bultosVentas, 2, '') ?></td>
-                                        <td><?php echo String::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalVentas, 2, '$') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($abonoshVentas, 2, '$') ?>
+                                        <td><?php echo MyString::formatoNumero($bultosVentas, 2, '') ?></td>
+                                        <td><?php echo MyString::formatoNumero($totalVentas/($bultosVentas>0?$bultosVentas:1), 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalVentas, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($abonoshVentas, 2, '$') ?>
                                           <input type="hidden" name="abonoshVentas" id="abonoshVentas" value="<?php echo $abonoshVentas ?>">
                                         </td>
-                                        <td style="text-align: right;"><?php echo String::formatoNumero($abonosVentas, 2, '$') ?></td>
-                                        <td style="text-align: right;"><?php echo String::formatoNumero($saldoVentas, 2, '$') ?></td>
+                                        <td style="text-align: right;"><?php echo MyString::formatoNumero($abonosVentas, 2, '$') ?></td>
+                                        <td style="text-align: right;"><?php echo MyString::formatoNumero($saldoVentas, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -643,9 +643,9 @@
                                     <tbody>
                                       <tr>
                                         <td colspan="3"><input type="hidden" value="<?php echo $totalExisD ?>" id="total-boletas_exis"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($bultosExisD, 2, '') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalExisD, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($bultosExisD, 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalExisD/($bultosExisD>0?$bultosExisD:1), 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalExisD, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -778,7 +778,7 @@
                 <div class="span12">
                   <div class="span12" style="font-weight: bold; min-height: 25px;">
                     <?php $total_saldo_corte = $totalCont+$abonoshVentas+$totalIngresosExt-$totalGastos; ?>
-                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo String::formatoNumero($total_saldo_corte, 2, '$') ?></span>
+                    SALDO AL CORTE: <span id="ttotal-corte1"><?php echo MyString::formatoNumero($total_saldo_corte, 2, '$') ?></span>
                     <input type="hidden" name="ttotal-corte" value="<?php echo $total_saldo_corte ?>" id="ttotal-corte">
                   </div>
                 </div>
@@ -814,8 +814,8 @@
                                     <input type="hidden" name="denominacion_denom[]" value="<?php echo $_POST['denominacion_denom'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                                     <input type="hidden" name="denom_abrev[]" value="<?php echo $_POST['denom_abrev'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                                   </td>
-                                  <td style="text-align: right;"><?php echo String::formatoNumero($_POST['denominacion_denom'][$key], 2, '$') ?></td>
-                                  <td><input type="text" name="denominacion_total[]" value="<?php echo String::float($_POST['denominacion_total'][$key]) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
+                                  <td style="text-align: right;"><?php echo MyString::formatoNumero($_POST['denominacion_denom'][$key], 2, '$') ?></td>
+                                  <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($_POST['denominacion_total'][$key]) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
                                 </tr>
                         <?php }} else {
                           foreach ($caja['denominaciones'] as $denominacion) {
@@ -827,19 +827,19 @@
                               <input type="hidden" name="denominacion_denom[]" value="<?php echo $denominacion['denominacion'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                               <input type="hidden" name="denom_abrev[]" value="<?php echo $denominacion['denom_abrev'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                             </td>
-                            <td style="text-align: right;"><?php echo String::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
-                            <td><input type="text" name="denominacion_total[]" value="<?php echo String::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
+                            <td style="text-align: right;"><?php echo MyString::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
+                            <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
                           </tr>
                         <?php }} ?>
                         <tbody>
                           <tr>
                             <td colspan="2">TOTAL EFECTIVO</td>
-                            <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
+                            <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalEfectivo, 2, '$') ?></td>
                           </tr>
                           <tr>
                             <td colspan="2">TOTAL DIFERENCIA
                             <input type="hidden" name="total_diferencia" value="<?php echo $total_saldo_corte-$totalEfectivo ?>" id="ttotal-diferencia"></td>
-                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_saldo_corte-$totalEfectivo, 2, '$') ?></td>
+                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($total_saldo_corte-$totalEfectivo, 2, '$') ?></td>
                           </tr>
 
                           <input type="hidden" name="costo_venta" value="<?php echo ($caja['costo_venta']!=0? $caja['costo_venta']: ($totalExisAnt+$totalIngresos-$totalPrestamosRestas-$totalExisD)) ?>" id="costo_venta" class="input-small" <?php echo $readonly ?>>
@@ -891,7 +891,7 @@
               <td style="width: 66px;"><?php echo $remision->fecha ?></td>
               <td><?php echo ($remision->serie ? $remision->serie.'-':'').$remision->folio ?></td>
               <td><?php echo $remision->cliente ?></td>
-              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($remision->saldo), 2, '$') ?></td>
+              <td style="text-align: right;"><?php echo MyString::formatoNumero(MyString::float($remision->saldo), 2, '$') ?></td>
             </tr>
           <?php } ?>
         </tbody>
@@ -930,7 +930,7 @@
               <td style="width: 66px;"><?php echo $movi->fecha ?></td>
               <td class="search-field"><?php echo $movi->proveedor ?></td>
               <td><?php echo $movi->numero_ref." ".$movi->banco ?></td>
-              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($movi->monto), 2, '$') ?></td>
+              <td style="text-align: right;"><?php echo MyString::formatoNumero(MyString::float($movi->monto), 2, '$') ?></td>
             </tr>
           <?php } ?>
         </tbody>

@@ -29,6 +29,8 @@ var cuentas = (function($){
 				$('#did_empresa').val('');
 			}
 		});
+
+    centros_costos();
 	}
 
 	function onChangeBanamex(e){
@@ -103,6 +105,57 @@ var cuentas = (function($){
 		}
 		else return true;
 	}
+
+  function centros_costos() {
+    // Autocomplete Empresas
+    $("#acentro_costo").autocomplete({
+      // source: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+      source: function(request, response) {
+        var params = {term : request.term};
+        params.tipo = 'gasto';
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var valida = $('#list_centros_costos .centros_costos_id[value='+ui.item.item.id_centro_costo+']');
+        if (valida.length == 0) {
+          var vhtml = '<li class="new"><i class="icon-minus-sign delete_costo" style="cursor: pointer;" title="Quitar"></i> '
+                        +ui.item.item.nombre+
+                        '<input type="hidden" name="centros_costos[]" class="centros_costos_id" value="'+ui.item.item.id_centro_costo+'">'+
+                        '<input type="hidden" name="centros_costos_del[]" class="centros_costos_del" value="false">'+
+                      '</li>';
+          $("#list_centros_costos").append(vhtml);
+        } else {
+          alert('El centro de costo ya esta agregado.')
+        }
+        setTimeout(function() {
+          $("#acentro_costo").val('');
+        }, 100)
+      }
+    }).keydown(function(e){
+      if (e.which === 8) {
+        // $(this).css({'background-color': '#FFD9B3'});
+      }
+    });
+
+    $('#list_centros_costos').on('click', '.delete_costo', function(event) {
+      var $li = $(this).parent();
+      if ($li.is('.new')) {
+        $li.remove();
+      } else {
+        $li.find('.centros_costos_del').val('true');
+        $li.hide();
+      }
+    });
+  }
 
 	objr.init = init;
 	return objr;

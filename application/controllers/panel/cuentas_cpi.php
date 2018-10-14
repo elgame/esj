@@ -79,7 +79,7 @@ class cuentas_cpi extends MY_Controller {
 			$respons = $this->cuentas_cpi_model->addCuenta();
 
 			if($respons[0])
-				redirect(base_url('panel/cuentas_cpi/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/cuentas_cpi/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		if(isset($_GET['msg']{0}))
@@ -119,7 +119,7 @@ class cuentas_cpi extends MY_Controller {
 				$respons = $this->cuentas_cpi_model->updateCuenta($_GET['id']);
 
 				if($respons[0])
-					redirect(base_url('panel/cuentas_cpi/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/cuentas_cpi/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 
 			$params['cuenta'] = $this->cuentas_cpi_model->getCuentaInfo(array('id_cuenta' => $_GET['id']));

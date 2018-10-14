@@ -210,20 +210,20 @@ class compras_model extends privilegios_model{
   public function updateXml($compraId, $proveedorId, $xml)
   {
     $comprah = array(
-      'subtotal'      => String::float($this->input->post('htotalImporte')),
-      'importe_iva'   => String::float($this->input->post('htotalImpuestosTrasladados')),
-      'importe_ieps'  => String::float($this->input->post('htotalIeps')),
-      'retencion_iva' => String::float($this->input->post('htotalRetencion')),
-      'retencion_isr' => String::float($this->input->post('htotalRetencionIsr')),
-      'total'         => String::float($this->input->post('htotalOrden')),
+      'subtotal'      => MyString::float($this->input->post('htotalImporte')),
+      'importe_iva'   => MyString::float($this->input->post('htotalImpuestosTrasladados')),
+      'importe_ieps'  => MyString::float($this->input->post('htotalIeps')),
+      'retencion_iva' => MyString::float($this->input->post('htotalRetencion')),
+      'retencion_isr' => MyString::float($this->input->post('htotalRetencionIsr')),
+      'total'         => MyString::float($this->input->post('htotalOrden')),
     );
     $compra = array(
-      'subtotal'      => String::float($this->input->post('totalImporte')),
-      'importe_iva'   => String::float($this->input->post('totalImpuestosTrasladados')),
-      'importe_ieps'  => String::float($this->input->post('totalIeps')),
-      'retencion_iva' => String::float($this->input->post('totalRetencion')),
-      'retencion_isr' => String::float($this->input->post('totalRetencionIsr')),
-      'total'         => String::float($this->input->post('totalOrden')),
+      'subtotal'      => MyString::float($this->input->post('totalImporte')),
+      'importe_iva'   => MyString::float($this->input->post('totalImpuestosTrasladados')),
+      'importe_ieps'  => MyString::float($this->input->post('totalIeps')),
+      'retencion_iva' => MyString::float($this->input->post('totalRetencion')),
+      'retencion_isr' => MyString::float($this->input->post('totalRetencionIsr')),
+      'total'         => MyString::float($this->input->post('totalOrden')),
     );
 
     foreach ($compra as $key => $value) {
@@ -818,7 +818,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -838,7 +838,7 @@ class compras_model extends privilegios_model{
           if ($key > 0) {
             $datos = array('Total',
               '', '',
-              String::formatoNumero($proveedor_tipo, 2, '', false),
+              MyString::formatoNumero($proveedor_tipo, 2, '', false),
               '', '',
               );
             $pdf->SetXY(6, $pdf->GetY());
@@ -869,10 +869,10 @@ class compras_model extends privilegios_model{
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
 
-      $datos = array(String::fechaATexto($factura->fecha, '/c'),
+      $datos = array(MyString::fechaATexto($factura->fecha, '/c'),
         $factura->serie.$factura->folio,
         $factura->nombre_fiscal,
-        String::formatoNumero($factura->total, 2, '', false),
+        MyString::formatoNumero($factura->total, 2, '', false),
         ($factura->status=='p'? 'Pendiente': 'Pagada'),
         $factura->folio_almacen,
         );
@@ -887,7 +887,7 @@ class compras_model extends privilegios_model{
     }
     $datos = array('Total',
       '', '',
-      String::formatoNumero($proveedor_tipo, 2, '', false),
+      MyString::formatoNumero($proveedor_tipo, 2, '', false),
       '', '',
       );
     $pdf->SetXY(6, $pdf->GetY());
@@ -897,7 +897,7 @@ class compras_model extends privilegios_model{
 
     $datos = array('Total General',
       '', '',
-      String::formatoNumero($proveedor_importe, 2, '', false),
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
       '', '',
       );
     $pdf->SetXY(6, $pdf->GetY());
@@ -955,7 +955,7 @@ class compras_model extends privilegios_model{
         if ($key > 0) {
           $datos = array('Total',
             '', '',
-            String::formatoNumero($proveedor_tipo, 2, '', false),
+            MyString::formatoNumero($proveedor_tipo, 2, '', false),
             '', '',
             );
           $html .= '
@@ -977,10 +977,10 @@ class compras_model extends privilegios_model{
       }
 
       $html .= '<tr>
-            <td style="width:400px;border:1px solid #000;">'.String::fechaATexto($factura->fecha, '/c').'</td>
+            <td style="width:400px;border:1px solid #000;">'.MyString::fechaATexto($factura->fecha, '/c').'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->serie.$factura->folio.'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->nombre_fiscal.'</td>
-            <td style="width:150px;border:1px solid #000;">'.String::formatoNumero($factura->total, 2, '', false).'</td>
+            <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero($factura->total, 2, '', false).'</td>
             <td style="width:150px;border:1px solid #000;">'.($factura->status=='p'? 'Pendiente': 'Pagada').'</td>
             <td style="width:150px;border:1px solid #000;">'.$factura->folio_almacen.'</td>
           </tr>';
@@ -1065,7 +1065,7 @@ class compras_model extends privilegios_model{
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
 
     $pdf->titulo2 = 'Reporte de Compras y Productos';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->AliasNbPages();
     $pdf->SetFont('Arial','',8);
 
@@ -1091,14 +1091,14 @@ class compras_model extends privilegios_model{
 
       $pdf->SetTextColor(0,0,0);
       $pdf->SetFont('Arial','',8);
-      $datos = array( ($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): ''),
+      $datos = array( ($compra_aux !== $factura->id_compra? MyString::fechaATexto($factura->fecha, '/c'): ''),
         ($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: ''),
         ($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: ''),
         $factura->nombre,
-        String::formatoNumero($factura->cantidad, 2, '', false),
+        MyString::formatoNumero($factura->cantidad, 2, '', false),
         $factura->unidad,
-        String::formatoNumero($factura->precio_unitario, 2, '', false),
-        String::formatoNumero($factura->importe, 2, '', false),
+        MyString::formatoNumero($factura->precio_unitario, 2, '', false),
+        MyString::formatoNumero($factura->importe, 2, '', false),
         ($compra_aux !== $factura->id_compra? ($factura->status=='p'? 'Pendiente': 'Pagada'): ''),
         $factura->folio_almacen,
         );
@@ -1113,7 +1113,7 @@ class compras_model extends privilegios_model{
 
     }
     $datos = array('Total General',
-      String::formatoNumero($proveedor_importe, 2, '', false),
+      MyString::formatoNumero($proveedor_importe, 2, '', false),
       );
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'R'));
@@ -1170,7 +1170,7 @@ class compras_model extends privilegios_model{
     foreach($res as $key => $factura){
 
       $html .= '<tr>
-            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? String::fechaATexto($factura->fecha, '/c'): '').'</td>
+            <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? MyString::fechaATexto($factura->fecha, '/c'): '').'</td>
             <td style="width:150px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->serie.$factura->folio: '').'</td>
             <td style="width:400px;border:1px solid #000;">'.($compra_aux !== $factura->id_compra? $factura->nombre_fiscal: '').'</td>
             <td style="width:400px;border:1px solid #000;">'.$factura->nombre.'</td>

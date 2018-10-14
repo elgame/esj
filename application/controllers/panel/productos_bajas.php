@@ -94,7 +94,7 @@ class productos_bajas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_bajas/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/productos_bajas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -155,7 +155,7 @@ class productos_bajas extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/productos_bajas/ver/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/productos_bajas/ver/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -177,7 +177,7 @@ class productos_bajas extends MY_Controller {
     $this->load->model('productos_bajas_model');
     $this->productos_bajas_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/productos_bajas/?' . String::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/productos_bajas/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
   /*
@@ -229,8 +229,8 @@ class productos_bajas extends MY_Controller {
     $productos = array();
     foreach ($_POST['productoId'] as $key => $value) {
       $item = $this->inventario_model->getEPUData($value);
-      $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-      if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+      $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+      if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
         $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
       }
     }

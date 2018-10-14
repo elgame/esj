@@ -257,7 +257,7 @@ class produccion_model extends CI_Model {
 
     $pdf->titulo1 = $empresa['info']->nombre_fiscal;
     $pdf->titulo2 = 'Inventario de produccion';
-    $pdf->titulo3 = 'Del: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+    $pdf->titulo3 = 'Del: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
     $pdf->titulo3 .= ($this->input->get('fproducto')? $this->input->get('fproducto'): '');
     // $pdf->titulo3 .= (isset($almacen['info']->nombre)? 'Almacen '.$almacen['info']->nombre: '');
     $pdf->AliasNbPages();
@@ -289,12 +289,12 @@ class produccion_model extends CI_Model {
       $pdf->SetTextColor(0,0,0);
 
       $datos = array($item->nombre,
-        String::formatoNumero($item->existencia_ant, 2, '', false),
-        String::formatoNumero($item->produccion, 2, '', false),
-        String::formatoNumero($item->costo_prom, 2, '', false),
-        String::formatoNumero($item->ventas, 2, '', false),
-        String::formatoNumero($item->precio_prom, 2, '', false),
-        String::formatoNumero($item->existencia, 2, '', false),
+        MyString::formatoNumero($item->existencia_ant, 2, '', false),
+        MyString::formatoNumero($item->produccion, 2, '', false),
+        MyString::formatoNumero($item->costo_prom, 2, '', false),
+        MyString::formatoNumero($item->ventas, 2, '', false),
+        MyString::formatoNumero($item->precio_prom, 2, '', false),
+        MyString::formatoNumero($item->existencia, 2, '', false),
         );
 
       $pdf->SetX(6);

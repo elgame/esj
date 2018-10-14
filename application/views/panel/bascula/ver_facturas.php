@@ -39,7 +39,7 @@
           <p>Usted está usando un navegador desactualizado. <a href="http://browsehappy.com/">Actualice su navegador</a> o <a href="http://www.google.com/chromeframe/?redirect=true">instale Google Chrome Frame</a> para experimentar mejor este sitio.</p>
         </div>
       <![endif]-->
-      <form class="form-horizontal" action="<?php echo base_url('panel/bascula/facturas_ver/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-horizontal" action="<?php echo base_url('panel/bascula/facturas_ver/?'.MyString::getVarsLink(array('msg', 'rel'))); ?>" method="POST" enctype="multipart/form-data">
         <div id="content" class="span12">
           <div class="row-fluid">
             <div class="box span12">
@@ -128,7 +128,7 @@
                                               <?php echo $prod->folio ?>
                                            </td>
                                            <td class="ppimporte" data-importe="<?php echo $prod->importe ?>">
-                                               <?php echo String::formatoNumero($prod->importe); ?>
+                                               <?php echo MyString::formatoNumero($prod->importe); ?>
                                            </td>
                                            <td style="">
                                             <button class="btn btn-danger removeBoleta"><i class="icon-remove"></i></button>
@@ -157,19 +157,19 @@
                           <tr>
                             <td><em>Subtotal</em></td>
                             <td id="importe-format">
-                              <input type="text" name="totalImporte" id="totalImporte" value="<?php echo String::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
+                              <input type="text" name="totalImporte" id="totalImporte" value="<?php echo MyString::formatoNumero(set_value('totalImporte', $subtotal), 2, '$', false)?>">
                             </td>
                           </tr>
                           <tr>
                             <td>IVA</td>
                             <td id="traslado-format">
-                              <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
+                              <input type="text" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', $iva), 2, '$', false)?>">
                             </td>
                           </tr>
                           <tr style="font-weight:bold;font-size:1.2em;">
                             <td>TOTAL</td>
                             <td id="total-format">
-                              <input type="text" name="totalOrden" id="totalOrden" value="<?php echo String::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
+                              <input type="text" name="totalOrden" id="totalOrden" value="<?php echo MyString::formatoNumero(set_value('totalOrden', $total), 2, '$', false)?>">
                             </td>
                           </tr>
                         </tbody>

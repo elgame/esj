@@ -533,7 +533,7 @@ class rastreabilidad_pallets_model extends privilegios_model {
 		$pdf->SetX(6);
 		$pdf->SetAligns(array('L'));
 		$pdf->SetWidths(array(66));
-		$pdf->Row(array('FECHA: '.String::fechaAT($data['info']->fecha)), false, false);
+		$pdf->Row(array('FECHA: '.MyString::fechaAT($data['info']->fecha)), false, false);
 
 		$pdf->Output('REPORTE_DIARIO.pdf', 'I');
 	}

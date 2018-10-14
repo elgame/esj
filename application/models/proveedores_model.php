@@ -146,6 +146,7 @@ class proveedores_model extends CI_Model {
                                           ':empresa'   => 'en '.$this->input->post('fempresa')));
 
 		$this->addCuentas($id_proveedor);
+    $this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
@@ -244,10 +245,31 @@ class proveedores_model extends CI_Model {
 		}
 
 		$this->db->update('proveedores', $data, array('id_proveedor' => $id_proveedor));
-		$this->addCuentas($id_proveedor);
+    $this->addCuentas($id_proveedor);
+		$this->saveCentrosCostos($id_proveedor);
 
 		return array('error' => FALSE);
 	}
+
+  public function saveCentrosCostos($id_proveedor)
+  {
+    if (is_array($this->input->post('centros_costos')) && count($this->input->post('centros_costos')) > 0) {
+      $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor}");
+      $centros = [];
+      foreach ($this->input->post('centros_costos') as $key => $value) {
+        if ($this->input->post('centros_costos_del')[$key] === 'false') { // insert
+          $centros[] = ['id_proveedor' => $id_proveedor, 'id_centro_costo' => $value];
+        }
+        // else {
+        //   $this->db->delete('otros.proveedores_centros_costo', "id_proveedor = {$id_proveedor} AND id_centro_costo = {$value}");
+        // }
+      }
+
+      if (count($centros) > 0) {
+        $this->db->insert_batch('otros.proveedores_centros_costo', $centros);
+      }
+    }
+  }
 
 	/**
 	 * Obtiene la informacion de un proveedor
@@ -274,6 +296,11 @@ class proveedores_model extends CI_Model {
 			if ($basic_info == False) {
 				$this->load->model('empresas_model');
 				$data['info']->empresa = $this->empresas_model->getInfoEmpresa($data['info']->id_empresa)['info'];
+
+        $data['info']->centros_costos = $this->db->query("SELECT cc.id_centro_costo, cc.nombre
+          FROM otros.proveedores_centros_costo pc
+            INNER JOIN otros.centro_costo cc ON cc.id_centro_costo = pc.id_centro_costo
+          WHERE pc.id_proveedor = {$id_proveedor}")->result();
 			}
 		}
 		$sql_res->free_result();
@@ -503,7 +530,7 @@ class proveedores_model extends CI_Model {
         $pdf->titulo2 = 'PROVEEDOR : ' . $proveedor['info']->nombre_fiscal;
       }
 
-      $pdf->titulo3 = 'PERIODO: '.String::fechaAT($this->input->get('ffecha1'))." Al ".String::fechaAT($this->input->get('ffecha2'))."\n";
+      $pdf->titulo3 = 'PERIODO: '.MyString::fechaAT($this->input->get('ffecha1'))." Al ".MyString::fechaAT($this->input->get('ffecha2'))."\n";
       $pdf->AliasNbPages();
       // $pdf->AddPage();
       $pdf->SetFont('Arial','',8);
@@ -567,22 +594,22 @@ class proveedores_model extends CI_Model {
         if ($tipo === 'seguro')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->pol_seg,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
         elseif ($tipo === 'certificado')
         {
           $datos = array(
-            String::fechaATexto($data->fecha, '/c'),
+            MyString::fechaATexto($data->fecha, '/c'),
             $data->certificado,
             $data->bultos,
             $data->folio,
             $data->cliente,
-            String::formatoNumero($data->importe, 2, '', false),
+            MyString::formatoNumero($data->importe, 2, '', false),
           );
         }
 
@@ -597,7 +624,7 @@ class proveedores_model extends CI_Model {
       $pdf->SetAligns(array('R', 'R'));
       $pdf->SetWidths(array(175, 30));
 
-      $pdf->Row(array(' TOTAL:',  String::formatoNumero($total, 2, '', false)), false);
+      $pdf->Row(array(' TOTAL:',  MyString::formatoNumero($total, 2, '', false)), false);
 
       $pdf->Output('Reporte.pdf', 'I');
     }

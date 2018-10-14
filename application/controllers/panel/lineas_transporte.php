@@ -75,7 +75,7 @@ class lineas_transporte extends MY_Controller {
 			$res_mdl = $this->lineas_transporte_model->addLinea();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/lineas_transporte/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/lineas_transporte/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 
@@ -122,7 +122,7 @@ class lineas_transporte extends MY_Controller {
 				$res_mdl = $this->lineas_transporte_model->updateLinea($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->lineas_transporte_model->getLineaInfo();
@@ -136,7 +136,7 @@ class lineas_transporte extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -150,10 +150,10 @@ class lineas_transporte extends MY_Controller {
 			$this->load->model('lineas_transporte_model');
 			$res_mdl = $this->lineas_transporte_model->updateLinea( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -167,10 +167,10 @@ class lineas_transporte extends MY_Controller {
 			$this->load->model('lineas_transporte_model');
 			$res_mdl = $this->lineas_transporte_model->updateLinea( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/lineas_transporte/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/lineas_transporte/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

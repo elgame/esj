@@ -23,7 +23,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/cuentas_cpi/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
+            <form action="<?php echo base_url('panel/cuentas_cpi/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal" id="form">
               <fieldset>
                 <legend></legend>
 

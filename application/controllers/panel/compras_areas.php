@@ -84,7 +84,7 @@ class compras_areas extends MY_Controller {
 			$respons = $this->compras_areas_model->addArea();
 
 			if($respons[0])
-				redirect(base_url('panel/compras_areas/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/compras_areas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		$params['t_areas'] = $this->compras_areas_model->getTipoAreas();
@@ -128,7 +128,7 @@ class compras_areas extends MY_Controller {
 				$respons = $this->compras_areas_model->updateArea($_GET['id']);
 
 				if($respons[0])
-					redirect(base_url('panel/compras_areas/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/compras_areas/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 
 			$params['areas'] = $this->compras_areas_model->getInfo($_GET['id']);

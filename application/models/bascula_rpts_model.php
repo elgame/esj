@@ -182,10 +182,10 @@ class Bascula_rpts_model extends Bascula_model {
                        $caja->folio,
                        $caja->fecha,
                        substr($caja->nombre_fiscal, 0, 22),
-                       String::formatoNumero($caja->cajas, 2, ''),
-                       String::formatoNumero($caja->kilos, 2, ''),
-                       String::formatoNumero($caja->precio, 2, '', false),
-                       String::formatoNumero($caja->importe, 2, '', false),
+                       MyString::formatoNumero($caja->cajas, 2, ''),
+                       MyString::formatoNumero($caja->kilos, 2, ''),
+                       MyString::formatoNumero($caja->precio, 2, '', false),
+                       MyString::formatoNumero($caja->importe, 2, '', false),
                        strtoupper($caja->tipo_pago),
                        $caja->concepto,
                       );
@@ -205,10 +205,10 @@ class Bascula_rpts_model extends Bascula_model {
       $pdf->SetWidths($widths);
       $prom_total = floatval($data['totales']['kilos'])/(floatval($data['totales']['cajas'])>0? floatval($data['totales']['cajas']): 1);
       $pdf->Row(array('', '', '',
-        String::formatoNumero($data['totales']['cajas'], 2, ''),
-        String::formatoNumero($data['totales']['kilos'], 2, ''),
+        MyString::formatoNumero($data['totales']['cajas'], 2, ''),
+        MyString::formatoNumero($data['totales']['kilos'], 2, ''),
         '',
-        String::formatoNumero($data['totales']['importe']),
+        MyString::formatoNumero($data['totales']['importe']),
         '',''
       ), false, false);
 
@@ -229,9 +229,9 @@ class Bascula_rpts_model extends Bascula_model {
       $pdf->SetAligns(array('C', 'C', 'C'));
       $pdf->SetWidths(array(66, 66, 66));
       $pdf->Row(array(
-        String::formatoNumero($data['totales']['pagados']),
-        String::formatoNumero($data['totales']['no_pagados']),
-        String::formatoNumero($data['totales']['importe'])
+        MyString::formatoNumero($data['totales']['pagados']),
+        MyString::formatoNumero($data['totales']['no_pagados']),
+        MyString::formatoNumero($data['totales']['importe'])
       ), false);
 
       $pdf->Output('reporte_bonificaciones.pdf', 'I');

@@ -78,7 +78,7 @@ class gastos extends MY_Controller {
       }
       // if ($res_mdl['passes'])
       // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
       // }
     }
 
@@ -157,7 +157,7 @@ class gastos extends MY_Controller {
     $this->load->model('compras_model');
     $this->compras_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/compras/?' . String::getVarsLink(array('id')).'&msg=3'));
+    redirect(base_url('panel/compras/?' . MyString::getVarsLink(array('id')).'&msg=3'));
   }
 
 
@@ -259,7 +259,7 @@ class gastos extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/gastos/agregar_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/gastos/agregar_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -313,7 +313,7 @@ class gastos extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/gastos/ver_nota_credito/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/gastos/ver_nota_credito/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 

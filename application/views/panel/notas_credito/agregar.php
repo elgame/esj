@@ -374,32 +374,32 @@
                     </tr>
                     <tr>
                       <td><em>Subtotal</em></td>
-                      <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', 0))?></td>
+                      <td id="importe-format"><?php echo MyString::formatoNumero(set_value('total_importe', 0))?></td>
                       <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', 0); ?>">
                     </tr>
                     <tr>
                       <td>Descuento</td>
-                      <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0))?></td>
+                      <td id="descuento-format"><?php echo MyString::formatoNumero(set_value('total_descuento', 0))?></td>
                       <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
                     </tr>
                     <tr>
                       <td>SUBTOTAL</td>
-                      <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', 0))?></td>
+                      <td id="subtotal-format"><?php echo MyString::formatoNumero(set_value('total_subtotal', 0))?></td>
                       <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', 0); ?>">
                     </tr>
                     <tr>
                       <td>IVA</td>
-                      <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', 0))?></td>
+                      <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', 0))?></td>
                       <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', 0); ?>">
                     </tr>
                     <tr>
                       <td>Ret. IVA</td>
-                      <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', 0))?></td>
+                      <td id="retiva-format"><?php echo MyString::formatoNumero(set_value('total_retiva', 0))?></td>
                       <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', 0); ?>">
                     </tr>
                     <tr style="font-weight:bold;font-size:1.2em;">
                       <td>TOTAL</td>
-                      <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', 0))?></td>
+                      <td id="totfac-format"><?php echo MyString::formatoNumero(set_value('total_totfac', 0))?></td>
                       <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', 0); ?>">
                     </tr>
                   </tbody>

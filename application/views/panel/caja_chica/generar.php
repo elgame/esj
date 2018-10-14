@@ -45,7 +45,7 @@
         $readonly = '';
         $show = true;
         $display = '';
-        $action = base_url('panel/caja_chica/cargar/?'.String::getVarsLink(array('msg')));
+        $action = base_url('panel/caja_chica/cargar/?'.MyString::getVarsLink(array('msg')));
         if (isset($caja['status']) && $caja['status'] === 'f' && ! $this->usuarios_model->tienePrivilegioDe('', 'caja_chica/modificar_caja/'))
         {
           $readonly = 'readonly';
@@ -94,11 +94,11 @@
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 't' && !$cajas_cerradas){ ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg', 'id'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
                   <?php } ?>
 
                   <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                   <?php }  ?>
                 </div>
               </div>
@@ -287,7 +287,7 @@
 
                             <tr class='row-total'>
                               <td colspan="4"></td>
-                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo String::float(String::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
+                              <td style="width: 100px;"><input type="text" name="total_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalIngresos, 2, '')) ?>" class="span12" id="total-ingresos" maxlength="500" readonly style="text-align: right;"></td>
                               <td></td>
                             </tr>
 
@@ -295,7 +295,7 @@
                               <td colspan="4"></td>
                               <td style="width: 100px;">
                                 <?php $totalReporteCaja = $totalSaldoIngresos + $totalIngresos ?>
-                                <input type="text" name="tota_saldo_ingresos" value="<?php echo String::float(String::formatoNumero($totalReporteCaja, 2, '')) ?>" class="span12" id="total-saldo-ingresos" maxlength="500" readonly style="text-align: right;">
+                                <input type="text" name="tota_saldo_ingresos" value="<?php echo MyString::float(MyString::formatoNumero($totalReporteCaja, 2, '')) ?>" class="span12" id="total-saldo-ingresos" maxlength="500" readonly style="text-align: right;">
                               </td>
                               <td></td>
                             </tr>
@@ -345,16 +345,16 @@
                                           <!-- <td style="width: 150px;"><input type="text" name="boletas_folio[]" value="<?php echo isset($_POST['boletas_folio'][$key]) ? $_POST['boletas_folio'][$key] : $boleta->folio_caja_chica ?>" maxlength="20" style="width: 150px;"></td> -->
                                           <td><?php echo $boleta->proveedor ?></td>
                                           <td><?php echo $boleta->productor ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe_pagada, 2, '$') ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($boleta->importe_pendiente, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($boleta->importe_pagada, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($boleta->importe_pendiente, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>
                                     </tbody>
                                     <tbody>
                                       <tr>
                                         <td colspan="4"><input type="hidden" value="<?php echo $totalBoletasPagadas ?>" id="total-boletas"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletasPagadas, 2, '$') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalBoletasPendientes, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalBoletasPagadas, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalBoletasPendientes, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -643,8 +643,8 @@
                                     <input type="hidden" name="denominacion_denom[]" value="<?php echo $_POST['denominacion_denom'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                                     <input type="hidden" name="denom_abrev[]" value="<?php echo $_POST['denom_abrev'][$key] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                                   </td>
-                                  <td style="text-align: right;"><?php echo String::formatoNumero($_POST['denominacion_denom'][$key], 2, '$') ?></td>
-                                  <td><input type="text" name="denominacion_total[]" value="<?php echo String::float($_POST['denominacion_total'][$key]) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
+                                  <td style="text-align: right;"><?php echo MyString::formatoNumero($_POST['denominacion_denom'][$key], 2, '$') ?></td>
+                                  <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($_POST['denominacion_total'][$key]) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
                                 </tr>
                         <?php }} else {
                           foreach ($caja['denominaciones'] as $denominacion) {
@@ -656,18 +656,18 @@
                               <input type="hidden" name="denominacion_denom[]" value="<?php echo $denominacion['denominacion'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                               <input type="hidden" name="denom_abrev[]" value="<?php echo $denominacion['denom_abrev'] ?>" class="input-small vpositive denom-num" <?php echo $readonly ?>>
                             </td>
-                            <td style="text-align: right;"><?php echo String::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
-                            <td><input type="text" name="denominacion_total[]" value="<?php echo String::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
+                            <td style="text-align: right;"><?php echo MyString::formatoNumero($denominacion['denominacion'], 2, '$') ?></td>
+                            <td><input type="text" name="denominacion_total[]" value="<?php echo MyString::float($denominacion['total']) ?>" class="input-small vpositive denom-total" style="text-align: right;" <?php echo $readonly ?>></td>
                           </tr>
                         <?php }} ?>
                         <tbody>
                           <tr>
                             <td colspan="2">TOTAL EFECTIVO</td>
-                            <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
+                            <td id="total-efectivo-den" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalEfectivo, 2, '$') ?></td>
                           </tr>
                           <tr>
                             <td colspan="2">TOTAL DIFERENCIA</td>
-                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($totalEfectivo, 2, '$') ?></td>
+                            <td id="total-efectivo-diferencia" style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($totalEfectivo, 2, '$') ?></td>
                           </tr>
                         </tbody>
                       </table>
@@ -718,11 +718,11 @@
                           <?php } ?>
 
                           <?php if (isset($caja['status']) && $caja['status'] === 't' && !$cajas_cerradas){ ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
+                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica/cerrar_caja/?id='.$caja['id'].'&'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12 btnCerrarCaja">Cerrar Caja</a></div>
                           <?php } ?>
 
                           <?php if (isset($caja['status']) && $caja['status'] === 'f') { ?>
-                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                            <div class="span5"><a href="<?php echo base_url('panel/caja_chica/print_caja?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                           <?php }  ?>
                         </div>
                       </div>
@@ -799,7 +799,7 @@
               <td style="width: 66px;"><?php echo $movi->fecha ?></td>
               <td class="search-field"><?php echo $movi->proveedor ?></td>
               <td><?php echo $movi->numero_ref." ".$movi->banco ?></td>
-              <td style="text-align: right;"><?php echo String::formatoNumero(String::float($movi->monto), 2, '$') ?></td>
+              <td style="text-align: right;"><?php echo MyString::formatoNumero(MyString::float($movi->monto), 2, '$') ?></td>
             </tr>
           <?php } ?>
         </tbody>

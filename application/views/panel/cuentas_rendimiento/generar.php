@@ -69,7 +69,7 @@
                     <div class="span4"><input type="submit" class="btn btn-success btn-large span12" value="Guardar"></div>
                   <?php } ?>
 
-                    <div class="span4"><a href="<?php echo base_url('panel/cuentas_rendimiento/print_rendimiento?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
+                    <div class="span4"><a href="<?php echo base_url('panel/cuentas_rendimiento/print_rendimiento?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-success btn-large span12" target="_blank">Imprimir</a></div>
                 </div>
               </div>
             </div>
@@ -121,10 +121,10 @@
                                           <td><?php echo $factura->nombre_fiscal ?></td>
                                           <td><?php echo $factura->ccodigo ?></td>
                                           <td><?php echo $factura->ucodigo ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($factura->cantidad, 2, '') ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($factura->kgs, 2, '') ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($factura->precio_unitario, 2, '$') ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($factura->importe, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($factura->cantidad, 2, '') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($factura->kgs, 2, '') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($factura->precio_unitario, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($factura->importe, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>
                                     </tbody>
@@ -135,10 +135,10 @@
                                           <input type="hidden" name="total_kilos" value="<?php echo $total_kilos ?>" id="total_kilos">
                                           <input type="hidden" name="total_facturas" value="<?php echo $total_facturas ?>" id="total_facturas">
                                         </td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_bultos, 2, '') ?></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_kilos, 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($total_bultos, 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($total_kilos, 2, '') ?></td>
                                         <td style="text-align: right; font-weight: bold;"></td>
-                                        <td style="text-align: right; font-weight: bold;"><?php echo String::formatoNumero($total_facturas, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;"><?php echo MyString::formatoNumero($total_facturas, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -265,10 +265,10 @@
                                 <input type="hidden" name="total_exis_kilos" value="<?php echo $total_exis_kilos ?>" id="total_exis_kilos">
                                 <input type="hidden" name="total_existencias" value="<?php echo $total_existencias ?>" id="total_existencias">
                               </td>
-                              <td style="text-align: right; font-weight: bold;" id="total_exis_bultos_txt"><?php echo String::formatoNumero($total_exis_bultos, 2, '') ?></td>
-                              <td style="text-align: right; font-weight: bold;" id="total_exis_kilos_txt"><?php echo String::formatoNumero($total_exis_kilos, 2, '') ?></td>
+                              <td style="text-align: right; font-weight: bold;" id="total_exis_bultos_txt"><?php echo MyString::formatoNumero($total_exis_bultos, 2, '') ?></td>
+                              <td style="text-align: right; font-weight: bold;" id="total_exis_kilos_txt"><?php echo MyString::formatoNumero($total_exis_kilos, 2, '') ?></td>
                               <td style="text-align: right; font-weight: bold;"></td>
-                              <td style="text-align: right; font-weight: bold;" id="total_existencias_txt"><?php echo String::formatoNumero($total_existencias, 2, '$') ?></td>
+                              <td style="text-align: right; font-weight: bold;" id="total_existencias_txt"><?php echo MyString::formatoNumero($total_existencias, 2, '$') ?></td>
                               <td style="text-align: right; font-weight: bold;"></td>
                             </tr>
                             <tr class="row-suma_total">
@@ -285,14 +285,14 @@
                             <tr class="row-suma_total">
                               <td colspan="2" style="text-align: right; font-weight: bolder;">SUMA TOTALES</td>
                               <td style="text-align: right; font-weight: bold;" id="suma_totales_bultos">
-                                <?php echo String::formatoNumero($total_exis_bultos+$total_bultos, 2, '') ?>
+                                <?php echo MyString::formatoNumero($total_exis_bultos+$total_bultos, 2, '') ?>
                               </td>
                               <td style="text-align: right; font-weight: bold;" id="suma_totales_kilos">
-                                <?php echo String::formatoNumero($total_exis_kilos+$total_kilos, 2, '') ?>
+                                <?php echo MyString::formatoNumero($total_exis_kilos+$total_kilos, 2, '') ?>
                               </td>
                               <td style="text-align: right; font-weight: bold;"></td>
                               <td style="text-align: right; font-weight: bold;" id="suma_totales_existencias">
-                                <?php echo String::formatoNumero($total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$') ?>
+                                <?php echo MyString::formatoNumero($total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$') ?>
                               </td>
                               <td style="text-align: right; font-weight: bold;"></td>
                             </tr>
@@ -335,10 +335,10 @@
                                         ?>
                                         <tr>
                                           <td><?php echo "({$otr_ingreso->ccodigo}) ".$otr_ingreso->cnombre ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($otr_ingreso->cantidad, 2, '') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($otr_ingreso->cantidad, 2, '') ?></td>
                                           <td><?php echo $otr_ingreso->unidad ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($otr_ingreso->precio_unitario, 2, '$') ?></td>
-                                          <td style="text-align: right;"><?php echo String::formatoNumero($otr_ingreso->importe, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($otr_ingreso->precio_unitario, 2, '$') ?></td>
+                                          <td style="text-align: right;"><?php echo MyString::formatoNumero($otr_ingreso->importe, 2, '$') ?></td>
                                         </tr>
                                       <?php } ?>
                                     </tbody>
@@ -348,10 +348,10 @@
                                           <input type="hidden" name="total_otsingr_bultos" value="<?php echo $total_otsingr_bultos ?>" id="total_otsingr_bultos">
                                           <input type="hidden" name="total_otsingr" value="<?php echo $total_otsingr ?>" id="total_otsingr">
                                         </td>
-                                        <td style="text-align: right; font-weight: bold;" id="total_otsingr_bultos_txt"><?php echo String::formatoNumero($total_otsingr_bultos, 2, '') ?></td>
+                                        <td style="text-align: right; font-weight: bold;" id="total_otsingr_bultos_txt"><?php echo MyString::formatoNumero($total_otsingr_bultos, 2, '') ?></td>
                                         <td></td>
                                         <td style="text-align: right; font-weight: bold;"></td>
-                                        <td style="text-align: right; font-weight: bold;" id="total_otsingr_txt"><?php echo String::formatoNumero($total_otsingr, 2, '$') ?></td>
+                                        <td style="text-align: right; font-weight: bold;" id="total_otsingr_txt"><?php echo MyString::formatoNumero($total_otsingr, 2, '$') ?></td>
                                       </tr>
                                     </tbody>
                                   </table>
@@ -381,10 +381,10 @@
                                       <tr>
                                         <td style="text-align: right; font-weight: bold;">TOTAL DE INGRESOS</td>
                                         <td style="text-align: right; font-weight: bold;" id="total_ingres_bultos">
-                                          <?php echo String::formatoNumero($total_otsingr_bultos+$total_exis_bultos+$total_bultos, 2, '') ?>
+                                          <?php echo MyString::formatoNumero($total_otsingr_bultos+$total_exis_bultos+$total_bultos, 2, '') ?>
                                         </td>
                                         <td style="text-align: right; font-weight: bold;" id="total_ingres">
-                                          <?php echo String::formatoNumero($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$') ?>
+                                          <?php echo MyString::formatoNumero($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas, 2, '$') ?>
                                         </td>
                                       </tr>
                                     </thead>
@@ -440,10 +440,10 @@
                                   <tr>
                                     <td><?php echo $existen_anterior->ccodigo ?></td>
                                     <td><?php echo $existen_anterior->ucodigo ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($existen_anterior->cantidad, 2, '') ?></td>
-                                    <td><?php echo String::formatoNumero($existen_anterior->kgs, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($existen_anterior->precio, 2, '$') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($existen_anterior->importe, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($existen_anterior->cantidad, 2, '') ?></td>
+                                    <td><?php echo MyString::formatoNumero($existen_anterior->kgs, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($existen_anterior->precio, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($existen_anterior->importe, 2, '$') ?></td>
                                   </tr>
                                 <?php } ?>
                               </tbody>
@@ -455,10 +455,10 @@
                                     <input type="hidden" name="total_exis_anterior" value="<?php echo $total_exis_anterior ?>" id="total_exis_anterior">
                                   </td>
                                   <td></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_bultos_txt"><?php echo String::formatoNumero($total_exis_anterior_bultos, 2, '') ?></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_kgs_txt"><?php echo String::formatoNumero($total_exis_anterior_kgs, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_bultos_txt"><?php echo MyString::formatoNumero($total_exis_anterior_bultos, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_kgs_txt"><?php echo MyString::formatoNumero($total_exis_anterior_kgs, 2, '') ?></td>
                                   <td></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_txt"><?php echo String::formatoNumero($total_exis_anterior, 2, '$') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_exis_anterior_txt"><?php echo MyString::formatoNumero($total_exis_anterior, 2, '$') ?></td>
                                 </tr>
                               </tbody>
                             </table>
@@ -580,23 +580,23 @@
                           <input type="hidden" name="total_compra_empa_kilos" value="<?php echo $total_compra_empa_kilos ?>" id="total_compra_empa_kilos">
                           <input type="hidden" name="total_compra_empa" value="<?php echo $total_compra_empa ?>" id="total_compra_empa">
                         </td>
-                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_bultos_txt"><?php echo String::formatoNumero($total_compra_empa_bultos, 2, '') ?></td>
-                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_kilos_txt"><?php echo String::formatoNumero($total_compra_empa_kilos, 2, '') ?></td>
+                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_bultos_txt"><?php echo MyString::formatoNumero($total_compra_empa_bultos, 2, '') ?></td>
+                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_kilos_txt"><?php echo MyString::formatoNumero($total_compra_empa_kilos, 2, '') ?></td>
                         <td style="text-align: right; font-weight: bold;"></td>
-                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_txt"><?php echo String::formatoNumero($total_compra_empa, 2, '$') ?></td>
+                        <td style="text-align: right; font-weight: bold;" id="total_compra_empa_txt"><?php echo MyString::formatoNumero($total_compra_empa, 2, '$') ?></td>
                         <td style="text-align: right; font-weight: bold;"></td>
                       </tr>
                       <tr class="row-suma_total">
                         <td colspan="2" style="text-align: right; font-weight: bolder;">SUMA TOTALES</td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_bultos">
-                          <?php echo String::formatoNumero($total_exis_anterior_bultos+$total_compra_empa_bultos, 2, '') ?>
+                          <?php echo MyString::formatoNumero($total_exis_anterior_bultos+$total_compra_empa_bultos, 2, '') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_kilos">
-                          <?php echo String::formatoNumero($total_exis_anterior_kgs+$total_compra_empa_kilos, 2, '') ?>
+                          <?php echo MyString::formatoNumero($total_exis_anterior_kgs+$total_compra_empa_kilos, 2, '') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;"></td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_existencias">
-                          <?php echo String::formatoNumero($total_exis_anterior+$total_compra_empa, 2, '$') ?>
+                          <?php echo MyString::formatoNumero($total_exis_anterior+$total_compra_empa, 2, '$') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;"></td>
                       </tr>
@@ -604,14 +604,14 @@
                       <tr class="row-suma_total">
                         <td colspan="2" style="text-align: right; font-weight: bolder;">VENTA NETA DEL DIA</td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_bultos">
-                          <?php echo String::formatoNumero(($total_exis_bultos+$total_bultos)-($total_exis_anterior_bultos+$total_compra_empa_bultos), 2, '') ?>
+                          <?php echo MyString::formatoNumero(($total_exis_bultos+$total_bultos)-($total_exis_anterior_bultos+$total_compra_empa_bultos), 2, '') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_kilos">
-                          <?php echo String::formatoNumero(($total_exis_kilos+$total_kilos)-($total_exis_anterior_kgs+$total_compra_empa_kilos), 2, '') ?>
+                          <?php echo MyString::formatoNumero(($total_exis_kilos+$total_kilos)-($total_exis_anterior_kgs+$total_compra_empa_kilos), 2, '') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;"></td>
                         <td style="text-align: right; font-weight: bold;" id="suma_total_compra_empa_existencias">
-                          <?php echo String::formatoNumero(($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas)-($total_exis_anterior+$total_compra_empa), 2, '$') ?>
+                          <?php echo MyString::formatoNumero(($total_otsingr+$total_existencias+$total_facturas-$descuento_parcial_ventas)-($total_exis_anterior+$total_compra_empa), 2, '$') ?>
                         </td>
                         <td style="text-align: right; font-weight: bold;"></td>
                       </tr>
@@ -653,10 +653,10 @@
                                   ?>
                                   <tr>
                                     <td><?php echo $compra->nombre ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($compra->cajas, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($compra->kilos, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($compra->precio, 2, '$') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($compra->importe, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->cajas, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->kilos, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->precio, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->importe, 2, '$') ?></td>
                                   </tr>
                                 <?php }
                                   $total_compra_bascula        += isset($rpt['compras_bascula_bonifica']->importe)? floatval($rpt['compras_bascula_bonifica']->importe): 0;
@@ -668,10 +668,10 @@
 
                                   <tr>
                                     <td><?php echo $rpt['compras_bascula_bonifica']->nombre ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rpt['compras_bascula_bonifica']->cajas, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rpt['compras_bascula_bonifica']->kilos, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rpt['compras_bascula_bonifica']->precio, 2, '$') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rpt['compras_bascula_bonifica']->importe, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rpt['compras_bascula_bonifica']->cajas, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rpt['compras_bascula_bonifica']->kilos, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rpt['compras_bascula_bonifica']->precio, 2, '$') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rpt['compras_bascula_bonifica']->importe, 2, '$') ?></td>
                                   </tr>
                                 <?php } ?>
                                 <?php if(count($rpt['ingresos_movimientos_bascula']) > 0) {
@@ -705,10 +705,10 @@
                                     <input type="hidden" name="total_compra_bascula_kgs" value="<?php echo $total_compra_bascula_kgs ?>" id="total_compra_bascula_kgs" data-value="<?php echo $total_compra_bascula_kgs ?>">
                                     <input type="hidden" name="total_compra_bascula" value="<?php echo $total_compra_bascula ?>" id="total_compra_bascula" data-value="<?php echo $total_compra_bascula ?>">
                                   </td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_bultos_txt"><?php echo String::formatoNumero($total_compra_bascula_bultos, 2, '') ?></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_kgs_txt"><?php echo String::formatoNumero($total_compra_bascula_kgs, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_bultos_txt"><?php echo MyString::formatoNumero($total_compra_bascula_bultos, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_kgs_txt"><?php echo MyString::formatoNumero($total_compra_bascula_kgs, 2, '') ?></td>
                                   <td></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_txt"><?php echo String::formatoNumero($total_compra_bascula, 2, '$') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_compra_bascula_txt"><?php echo MyString::formatoNumero($total_compra_bascula, 2, '$') ?></td>
                                 </tr>
                               </tbody>
                             </table>
@@ -792,7 +792,7 @@
                           <input type="hidden" name="total_apatzin" value="<?php echo $total_apatzin ?>" id="total_apatzin">
                         </td>
                         <td style="text-align: right; font-weight: bold;"></td>
-                        <td style="text-align: right; font-weight: bold;" id="total_apatzin_txt"><?php echo String::formatoNumero($total_apatzin, 2, '$') ?></td>
+                        <td style="text-align: right; font-weight: bold;" id="total_apatzin_txt"><?php echo MyString::formatoNumero($total_apatzin, 2, '$') ?></td>
                         <td style="text-align: right; font-weight: bold;"></td>
                       </tr>
                     </tbody>
@@ -836,14 +836,14 @@
                                   <tr>
                                     <td><?php echo $costo_venta->ucodigo ?></td>
                                     <td><?php echo $costo_venta->kilos/$costo_venta->bultos ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($costo_venta->bultos, 2, '') ?></td>
-                                    <td><?php echo String::formatoNumero($costo_venta->kilos, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($costo_venta->bultos, 2, '') ?></td>
+                                    <td><?php echo MyString::formatoNumero($costo_venta->kilos, 2, '') ?></td>
                                     <td style="text-align: right;">
                                       <input type="text" name="costo_venta_precio[]" value="<?php echo $costo_venta->precio ?>" id="costo_venta_precio"
                                         data-bultos="<?php echo $costo_venta->bultos ?>" data-kilos="<?php echo $costo_venta->kilos ?>" class="span12 vpositive" style="width: 80px;">
                                       <input type="hidden" name="costo_venta_id_unidad[]" value="<?php echo $costo_venta->id_unidad ?>" id="costo_venta_id_unidad" class="span12 vpositive" style="width: 80px;">
                                     </td>
-                                    <td id="costo_venta_importe" style="text-align: right;"><?php echo String::formatoNumero($importe, 2, '$') ?></td>
+                                    <td id="costo_venta_importe" style="text-align: right;"><?php echo MyString::formatoNumero($importe, 2, '$') ?></td>
                                   </tr>
                                 <?php } ?>
                               </tbody>
@@ -855,10 +855,10 @@
                                     <input type="hidden" name="total_costo_venta" value="<?php echo $total_costo_venta ?>" id="total_costo_venta">
                                   </td>
                                   <td></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_bultos_txt"><?php echo String::formatoNumero($total_costo_venta_bultos, 2, '') ?></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_kgs_txt"><?php echo String::formatoNumero($total_costo_venta_kgs, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_bultos_txt"><?php echo MyString::formatoNumero($total_costo_venta_bultos, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_kgs_txt"><?php echo MyString::formatoNumero($total_costo_venta_kgs, 2, '') ?></td>
                                   <td></td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_txt"><?php echo String::formatoNumero($total_costo_venta, 2, '$') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_costo_venta_txt"><?php echo MyString::formatoNumero($total_costo_venta, 2, '$') ?></td>
                                 </tr>
                               </tbody>
                             </table>
@@ -902,7 +902,7 @@
                                   $total_porsn_kilos = $total_costo_venta_kgs+$total_industrial_kilos;
                                 ?>
                                 <tr>
-                                  <td style="text-align: right; font-weight: bold;" id="total_industrial_kilos_txt"><?php echo String::formatoNumero($total_industrial_kilos, 2, '') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_industrial_kilos_txt"><?php echo MyString::formatoNumero($total_industrial_kilos, 2, '') ?></td>
                                   <td style="text-align: right;">
                                     <input type="text" name="industrial_precio" value="<?php echo $total_industrial_precio ?>" id="industrial_precio"
                                       class="span12 vpositive" style="width: 80px;">
@@ -910,7 +910,7 @@
                                     <input type="hidden" name="total_industrial_kilos" value="<?php echo $total_industrial_kilos ?>" id="total_industrial_kilos">
                                     <input type="hidden" name="total_industrial" value="<?php echo $total_industrial ?>" id="total_industrial">
                                   </td>
-                                  <td style="text-align: right; font-weight: bold;" id="total_industrial_txt"><?php echo String::formatoNumero($total_industrial, 2, '$') ?></td>
+                                  <td style="text-align: right; font-weight: bold;" id="total_industrial_txt"><?php echo MyString::formatoNumero($total_industrial, 2, '$') ?></td>
                                 </tr>
                               </tbody>
                             </table>
@@ -952,10 +952,10 @@
                                   ?>
                                   <tr>
                                     <td><?php echo $rendimiento->cnombre ?></td>
-                                    <td><?php echo String::formatoNumero($rendimiento->kilos*100/$total_porsn_kilos, 2, '') ?> %</td>
+                                    <td><?php echo MyString::formatoNumero($rendimiento->kilos*100/$total_porsn_kilos, 2, '') ?> %</td>
                                     <td><?php echo $rendimiento->ccodigo ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rendimiento->bultos, 2, '') ?></td>
-                                    <td style="text-align: right;"><?php echo String::formatoNumero($rendimiento->kilos, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rendimiento->bultos, 2, '') ?></td>
+                                    <td style="text-align: right;"><?php echo MyString::formatoNumero($rendimiento->kilos, 2, '') ?></td>
                                   </tr>
                                 <?php } ?>
                               </tbody>

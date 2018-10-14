@@ -79,7 +79,7 @@ class nomina_ranchos extends MY_Controller {
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $fffecha1 = (new DateTime($semana['fecha_inicio']));
@@ -124,7 +124,7 @@ class nomina_ranchos extends MY_Controller {
       $query = $this->db->query("UPDATE nomina_ranchos SET prestamo = 0 WHERE id_empresa = {$_GET['empresaId']} AND anio = {$_GET['anio']} AND semana = {$_GET['semana']}");
     }
 
-    redirect(base_url('panel/nomina_ranchos/?'.String::getVarsLink(array('msg'))));
+    redirect(base_url('panel/nomina_ranchos/?'.MyString::getVarsLink(array('msg'))));
   }
 
   /*

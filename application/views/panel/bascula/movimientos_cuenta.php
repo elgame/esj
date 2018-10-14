@@ -94,7 +94,7 @@
     <div id="content" class="span9">
       <!-- content starts -->
 
-      <form action="<?php echo base_url('panel/bascula/pago_basculas/?'.String::getVarsLink(array('msg', 'p', 'pe'))) ?>" method="POST">
+      <form action="<?php echo base_url('panel/bascula/pago_basculas/?'.MyString::getVarsLink(array('msg', 'p', 'pe'))) ?>" method="POST">
         <div class="row-fluid">
           <div class="box span12">
             <div class="box-content">
@@ -127,7 +127,7 @@
                         <span class="add-on" style="width:48px;">Cajas</span><input value="<?php echo $movimientos['totales']['cajas'] ?>" class="" id="prependedInput" type="text" style="width: 150px;" readonly>
                       </div>
                       <div class="input-prepend span3">
-                        <span class="add-on" style="width:48px;">P. Prom</span><input value="<?php echo ($movimientos['totales']['kilos'] != 0) ? String::formatoNumero(floatval($movimientos['totales']['importe'])/floatval($movimientos['totales']['kilos']), 3, '') : 0 ?>" class="" id="prependedInput" type="text" style="width: 150px;" readonly>
+                        <span class="add-on" style="width:48px;">P. Prom</span><input value="<?php echo ($movimientos['totales']['kilos'] != 0) ? MyString::formatoNumero(floatval($movimientos['totales']['importe'])/floatval($movimientos['totales']['kilos']), 3, '') : 0 ?>" class="" id="prependedInput" type="text" style="width: 150px;" readonly>
                       </div>
                       <div class="input-prepend span3">
                         <span class="add-on" style="width:48px;">S/Pago</span><input value="<?php echo $movimientos['totales']['no_pagados'] ?>" class="" id="prependedInput" type="text" style="width: 150px;" readonly>
@@ -140,7 +140,7 @@
                       <div class="span12">
                         <!-- <button type="button" class="btn btn-success span3 pull-right" id="btnModalPagos">Pagar</button> -->
                         <a href="#modalPagos" class="btn btn-success span3 pull-right <?php echo ($_GET['fid_proveedor']>0? '': 'hidden') ?>" role="button" data-toggle="modal">Pagar</a>
-                        <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.String::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
+                        <a href="<?php echo base_url('panel/bascula/rmc_pdf/?'.MyString::getVarsLink(array('msg'))) ?>" class="btn btn-warning span3 pull-right" target="_BLANK" style="margin-right: 5px;">Reporte</a>
                       </div>
                     </div>
                   <?php } ?>
@@ -197,9 +197,9 @@
                           </td>
                           <td><?php echo $mov->calidad ?></td>
                           <td><?php echo $mov->cajas ?></td>
-                          <td><?php echo String::formatoNumero($mov->promedio, 2, '') ?></td>
+                          <td><?php echo MyString::formatoNumero($mov->promedio, 2, '') ?></td>
                           <td><?php echo $mov->kilos ?></td>
-                          <td><?php echo String::formatoNumero($mov->precio) ?></td>
+                          <td><?php echo MyString::formatoNumero($mov->precio) ?></td>
                           <td><?php echo $mov->importe ?></td>
                           <td>
                             <?php if ($mov->folio != $lastboleta) { ?>
@@ -285,7 +285,7 @@
 
 <?php if (isset($p) && isset($pe)) { ?>
   <script>
-    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.String::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
+    var win=window.open(<?php echo "'".base_url('panel/bascula/imprimir_pagadas/?'.MyString::getVarsLink(array('msg', 'p', 'pe')).'&pe='.$pe)."'" ?>, '_blank');
     win.focus();
   </script>
 <?php } ?>

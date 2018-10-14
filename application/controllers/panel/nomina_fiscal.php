@@ -136,7 +136,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -238,7 +238,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -345,7 +345,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio']);
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     $anio = (new DateTime($semana['fecha_inicio']))->format('Y');
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
@@ -406,7 +406,7 @@ class nomina_fiscal extends MY_Controller {
       $msg = '4';
     }
 
-    redirect(base_url('panel/nomina_fiscal/?'.String::getVarsLink(array('msg')).'&msg='.$msg));
+    redirect(base_url('panel/nomina_fiscal/?'.MyString::getVarsLink(array('msg')).'&msg='.$msg));
   }
 
   /**
@@ -469,7 +469,7 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // las fechas de los 7 dias siguientes.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
 
     $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
 
@@ -487,7 +487,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addAsistencias($_POST['empleados'], $_POST['numSemana'], $_GET['did_empresa'], $_GET['anio']);
 
-    redirect(base_url('panel/nomina_fiscal/asistencia/?'.String::getVarsLink(array('msg')).'&msg=3'));
+    redirect(base_url('panel/nomina_fiscal/asistencia/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function validaAddAsistencias()
@@ -519,9 +519,9 @@ class nomina_fiscal extends MY_Controller {
     // Obtiene los dias de la semana.
     $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
     $params['semana'] = $semana;
-    $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
     foreach ($params['dias'] as $key => $value)
-      $params['nombresDias'][] = String::dia($value);
+      $params['nombresDias'][] = MyString::dia($value);
 
     // Obtiene los bonos y otros que ya tiene el empleado de la semana.
     $params['bonosOtros'] = $this->nomina_fiscal_model->getBonosOtrosEmpleado($_GET['eid'], $_GET['sem'], $anio, $params['empleado']['info'][0]->dia_inicia_semana);
@@ -627,7 +627,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addBonosOtros($_GET['eid'], $_POST, $_GET['sem']);
 
-    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function add_prestamos()
@@ -635,7 +635,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addPrestamos($_GET['eid'], $_POST, $_GET['sem'], $_GET['anio']);
 
-    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function add_vacaciones()
@@ -643,7 +643,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addVacaciones($_GET['eid'], $_POST, $_GET['sem']);
 
-    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   public function add_incapacidades()
@@ -651,7 +651,7 @@ class nomina_fiscal extends MY_Controller {
     $this->load->model('nomina_fiscal_model');
     $this->nomina_fiscal_model->addIncapaciades($_GET['eid'], $_POST, $_GET['sem']);
 
-    redirect(base_url('panel/nomina_fiscal/show_otros/?'.String::getVarsLink(array('msg')).'&msg=3'));
+    redirect(base_url('panel/nomina_fiscal/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
   }
 
   /**
@@ -731,7 +731,7 @@ class nomina_fiscal extends MY_Controller {
     }
     else
     {
-      redirect(base_url('panel/nomina_fiscal/finiquito/?'.String::getVarsLink(array('msg')).'&msg=8&custom='.$result['msg']));
+      redirect(base_url('panel/nomina_fiscal/finiquito/?'.MyString::getVarsLink(array('msg')).'&msg=8&custom='.$result['msg']));
     }
   }
 

@@ -302,8 +302,8 @@ class banco_model extends CI_Model {
         $aligns[5] = 'R';
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array($cuenta->alias, 'Saldo:', String::formatoNumero($cuenta->saldo_ini, 2, '$', false), '',
-                        'Saldo Final:', String::formatoNumero($cuenta->saldo, 2, '$', false)), true, true);
+        $pdf->Row(array($cuenta->alias, 'Saldo:', MyString::formatoNumero($cuenta->saldo_ini, 2, '$', false), '',
+                        'Saldo Final:', MyString::formatoNumero($cuenta->saldo, 2, '$', false)), true, true);
         $aligns[5] = 'L';
 
         if ($keyc == 0) {
@@ -338,8 +338,8 @@ class banco_model extends CI_Model {
           $pdf->Row(array(
               $mov->cli_pro,
               ucfirst(substr($mov->metodo_pago, 0, 5)),
-              $mov->tipo=='t'? String::formatoNumero($mov->monto, 2, '$', false): '',
-              $mov->tipo=='f'? String::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->tipo=='t'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
+              $mov->tipo=='f'? MyString::formatoNumero($mov->monto, 2, '$', false): '',
               $mov->numero_ref,
               $mov->concepto,
             ), false, 'B');
@@ -364,8 +364,8 @@ class banco_model extends CI_Model {
       $pdf->SetAligns(array('L', 'R','R'));
       $pdf->SetWidths(array(18, 27, 27));
       $pdf->Row(array('Suma:',
-        String::formatoNumero($total_importes_ingre, 2, '$', false),
-        String::formatoNumero($total_importes_egre, 2, '$', false)
+        MyString::formatoNumero($total_importes_ingre, 2, '$', false),
+        MyString::formatoNumero($total_importes_egre, 2, '$', false)
       ), false);
     }
 
@@ -376,8 +376,8 @@ class banco_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R','R'));
     $pdf->SetWidths(array(18, 27, 27));
     $pdf->Row(array('Total:',
-      String::formatoNumero($total_importes_total_ingre, 2, '$', false),
-      String::formatoNumero($total_importes_total_egre, 2, '$', false)
+      MyString::formatoNumero($total_importes_total_ingre, 2, '$', false),
+      MyString::formatoNumero($total_importes_total_egre, 2, '$', false)
     ), false, 'B');
 
 
@@ -595,9 +595,9 @@ class banco_model extends CI_Model {
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
         $pdf->SetWidths($widths);
-        $pdf->Row(array($nombree, $cuenta->alias, String::formatoNumero($cuenta->saldo_ini, 2, '$', false),
-                        String::formatoNumero($cuenta->transito, 2, '$', false),
-                        String::formatoNumero($cuenta->saldo, 2, '$', false)), false, false);
+        $pdf->Row(array($nombree, $cuenta->alias, MyString::formatoNumero($cuenta->saldo_ini, 2, '$', false),
+                        MyString::formatoNumero($cuenta->transito, 2, '$', false),
+                        MyString::formatoNumero($cuenta->saldo, 2, '$', false)), false, false);
       }
     }
 

@@ -228,7 +228,7 @@ class proveedores_facturacion extends MY_Controller {
       $this->load->model('facturacion_model');
       $this->facturacion_model->pagaFactura();
 
-      redirect(base_url('panel/facturacion/?'.String::getVarsLink(array('msg','id')).'&msg=7'));
+      redirect(base_url('panel/facturacion/?'.MyString::getVarsLink(array('msg','id')).'&msg=7'));
     }
   }
 
@@ -244,7 +244,7 @@ class proveedores_facturacion extends MY_Controller {
       $this->load->model('proveedores_facturacion_model');
       $response = $this->proveedores_facturacion_model->cancelaFactura($_GET['id']);
 
-      redirect(base_url("panel/proveedores_facturacion/admin/?msg={$response['msg']}&".String::getVarsLink(array('msg', 'id')) ));
+      redirect(base_url("panel/proveedores_facturacion/admin/?msg={$response['msg']}&".MyString::getVarsLink(array('msg', 'id')) ));
     }
   }
 
@@ -592,7 +592,7 @@ class proveedores_facturacion extends MY_Controller {
   public function isValidDate($str)
   {
     if($str != ''){
-      if(String::isValidDate($str) == false){
+      if(MyString::isValidDate($str) == false){
         $this->form_validation->set_message('isValidDate', 'El campo %s no es una fecha valida');
         return false;
       }
@@ -672,7 +672,7 @@ class proveedores_facturacion extends MY_Controller {
       $model_resp = $this->proveedores_facturacion_model->addSerieFolio();
 
       if($model_resp['passes'])
-        redirect(base_url('panel/proveedores_facturacion/agregar_serie_folio/?'.String::getVarsLink(array('msg')).'&msg=5'));
+        redirect(base_url('panel/proveedores_facturacion/agregar_serie_folio/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
     }
 
     if(isset($_GET['msg']{0}))
@@ -721,7 +721,7 @@ class proveedores_facturacion extends MY_Controller {
         $this->load->view('panel/footer',$params);
     }
     else
-      redirect(base_url('panel/proveedores_facturacion/index_serie_folios/').String::getVarsLink(array('msg')).'&msg=1');
+      redirect(base_url('panel/proveedores_facturacion/index_serie_folios/').MyString::getVarsLink(array('msg')).'&msg=1');
   }
 
   /**

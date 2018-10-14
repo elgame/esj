@@ -424,7 +424,7 @@ class banco_pagos_model extends CI_Model {
           'monto' => $value->monto,
           );
         $datos_factura['boletas'][] = $value->id_bascula;
-        $datos['descrip'] .= '|'.$value->folio.' => '.String::formatoNumero($value->monto, 2, '', false);
+        $datos['descrip'] .= '|'.$value->folio.' => '.MyString::formatoNumero($value->monto, 2, '', false);
         $this->db->update('banco_pagos_bascula', array('status' => 't'), array('id_bascula' => $value->id_bascula));
       }
       $_GET['did_empresa'] = $_GET['did_empresa'];

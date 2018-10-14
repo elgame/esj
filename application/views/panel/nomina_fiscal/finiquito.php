@@ -44,7 +44,7 @@
               </div>
             </form>
 
-            <form action="<?php echo base_url('panel/nomina_fiscal/add_finiquito/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+            <form action="<?php echo base_url('panel/nomina_fiscal/add_finiquito/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
               <div class="row-fluid">
                 <div class="span11" style="text-align: center;">
@@ -119,7 +119,7 @@
                         <td><?php echo strtoupper($empleado[0]->fecha_entrada) ?></td>
                         <td><?php echo strtoupper($empleado[0]->fecha_salida) ?></td>
                         <td>
-                          <?php echo String::formatoNumero($empleado[0]->salario_diario) ?>
+                          <?php echo MyString::formatoNumero($empleado[0]->salario_diario) ?>
                           <input type="hidden" value="<?php echo $empleado[0]->salario_diario ?>" class="span12 salario-diario">
                         </td>
                         <td>
@@ -133,53 +133,53 @@
 
                         <!-- Percepciones -->
                         <td id="td-vacaciones">
-                          <span class="vacaciones-span"><?php echo String::formatoNumero($sueldoSemana); ?></span>
+                          <span class="vacaciones-span"><?php echo MyString::formatoNumero($sueldoSemana); ?></span>
                           <input type="hidden" value="<?php echo $sueldoSemana ?>" class="span12 vacaciones">
                         </td>
                         <td id="td-vacaciones">
-                          <span class="vacaciones-span"><?php echo String::formatoNumero($empleado[0]->nomina->vacaciones); ?></span>
+                          <span class="vacaciones-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->vacaciones); ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->vacaciones ?>" class="span12 vacaciones">
                         </td>
                         <td id="td-prima-vacacional">
-                          <span class="prima-vacacional-span"><?php echo String::formatoNumero($empleado[0]->nomina->prima_vacacional); ?></span>
+                          <span class="prima-vacacional-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->prima_vacacional); ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->prima_vacacional ?>" class="span12 prima-vacacional">
                         </td>
                         <td id="td-aguinaldo">
-                          <span class="aguinaldo-span"><?php echo String::formatoNumero($empleado[0]->nomina->aguinaldo) ?></span>
+                          <span class="aguinaldo-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->aguinaldo) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->aguinaldo ?>" class="span12 aguinaldo">
                         </td>
                         <?php if ($indemni) { ?>
                         <td id="td-indemnizaciones">
-                          <span class="indemnizaciones-span"><?php echo String::formatoNumero($empleado[0]->nomina->indemnizaciones) ?></span>
+                          <span class="indemnizaciones-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->indemnizaciones) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->indemnizaciones ?>" class="span12 indemnizaciones">
                         </td>
                         <?php } ?>
                         <td id="td-subsidio">
-                          <span class="subsidio-span"><?php echo String::formatoNumero($empleado[0]->nomina->subsidio) ?></span>
+                          <span class="subsidio-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->subsidio) ?></span>
                           <input type="hidden" value="<?php echo $empleado[0]->nomina->subsidio ?>" class="span12 subsidio">
                         </td>
                         <td>
-                          <span class="total-percepciones-span"><?php echo String::formatoNumero($totalPercepciones) ?></span>
+                          <span class="total-percepciones-span"><?php echo MyString::formatoNumero($totalPercepciones) ?></span>
                           <input type="hidden" value="<?php echo (float)number_format($totalPercepciones, 2, '.', '') ?>" class="span12 total-percepciones">
                         </td>
 
                         <!-- Deducciones -->
                         <td style="width: 60px; ">
-                          <span class="isr-span"><?php echo String::formatoNumero($empleado[0]->nomina->deducciones['isr']['total']) ?></span>
+                          <span class="isr-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->deducciones['isr']['total']) ?></span>
                           <input type="hidden" name="isr[]" value="<?php echo $empleado[0]->nomina->deducciones['isr']['total'] ?>" class="span12 isr">
                         </td>
                         <td style="width: 60px; ">
-                          <span class="isr-span"><?php echo String::formatoNumero($empleado[0]->nomina->deducciones['otros']['total']) ?></span>
+                          <span class="isr-span"><?php echo MyString::formatoNumero($empleado[0]->nomina->deducciones['otros']['total']) ?></span>
                           <input type="hidden" name="otros[]" value="<?php echo $empleado[0]->nomina->deducciones['otros']['total'] ?>" class="span12 isr">
                         </td>
                         <td>
-                          <span class="total-deducciones-span"><?php echo String::formatoNumero($totalDeducciones) ?></span>
+                          <span class="total-deducciones-span"><?php echo MyString::formatoNumero($totalDeducciones) ?></span>
                           <input type="hidden" value="<?php echo (float)number_format($totalDeducciones, 2, '.', '') ?>" class="span12 total-deducciones">
                         </td>
 
                         <!-- Total Nomina -->
                         <td>
-                          <span class="total-nomina-span"><?php echo String::formatoNumero(floatval($totalPercepciones) - floatval($totalDeducciones)) ?></span>
+                          <span class="total-nomina-span"><?php echo MyString::formatoNumero(floatval($totalPercepciones) - floatval($totalDeducciones)) ?></span>
                           <input type="hidden" value="<?php echo (float)number_format(floatval($totalPercepciones) - floatval($totalDeducciones), 2, '.', '') ?>" class="span12 total-nomina">
                         </td>
                       </tr>

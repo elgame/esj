@@ -363,7 +363,7 @@ class nomina
       // $fecha1 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->receptor['FechaInicioRelLaboral'], 'America/Mexico_City');
       // $fecha2 = Carbon::createFromFormat('Y-m-d', $this->empleado->nomina->FechaFinalPago, 'America/Mexico_City');
       // $finte = $fecha1->diff($fecha2);
-      $finte = String::diff2Dates($this->empleado->nomina->receptor['FechaInicioRelLaboral'], $this->empleado->nomina->FechaFinalPago);
+      $finte = MyString::diff2Dates($this->empleado->nomina->receptor['FechaInicioRelLaboral'], $this->empleado->nomina->FechaFinalPago);
       if ($finte->semanas > 0) {
         $this->empleado->nomina->receptor['Antigüedad'] = 'P'.$finte->semanas.'W';
       } else {
@@ -1203,7 +1203,7 @@ class nomina
     if(intval($fechaInicioTrabajar->diff($fechaActual)->y) == 0 && $this->aniosTrabajadosEmpleado() > 0 );
       $anio_anterior = date("Y", strtotime("-2 year")).'-'.$fecha_entrada[1].'-'.$fecha_entrada[2];
 
-    $dias_anio_vacaciones = intval(String::diasEntreFechas($anio_anterior, date("Y-m-d")));
+    $dias_anio_vacaciones = intval(MyString::diasEntreFechas($anio_anterior, date("Y-m-d")));
 
     if($dias_anio_vacaciones > 365)
       $dias_anio_vacaciones = 365;

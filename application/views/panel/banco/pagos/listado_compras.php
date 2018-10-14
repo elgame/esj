@@ -49,7 +49,7 @@
                       if($primera_cuenta == null)
                         $primera_cuenta = $cuentasp->id_cuenta;
                   ?>
-                    <option value="<?php echo $cuentasp->id_cuenta; ?>"><?php echo $cuentasp->alias.' * '.String::formatoNumero($cuentasp->saldo); ?></option>
+                    <option value="<?php echo $cuentasp->id_cuenta; ?>"><?php echo $cuentasp->alias.' * '.MyString::formatoNumero($cuentasp->saldo); ?></option>
                   <?php
                     }
                   } ?>
@@ -105,8 +105,8 @@
                 }
                 echo '<tr>
                     <td style="font-weight:bold" colspan="2">'.$pago->nombre_fiscal.'</td>
-                    <td style="font-weight:bold">'.String::formatoNumero($total_pagar_proveedor, 2, '$', false).' <br>
-                    '.String::formatoNumero($total_pagar_proveedor_new, 2, '$', false).'</td>
+                    <td style="font-weight:bold">'.MyString::formatoNumero($total_pagar_proveedor, 2, '$', false).' <br>
+                    '.MyString::formatoNumero($total_pagar_proveedor_new, 2, '$', false).'</td>
                     <td><select name="cuenta_proveedor['.$keyp.'][]" class="tipo_cuenta span12">
                                 <option value=""></option>';
                           foreach ($pago->cuentas_proveedor as $keyc => $cuentasp)
@@ -129,7 +129,7 @@
               } ?>
                   <tr style="background-color:#ccc;font-weight: bold;">
                     <td style="text-align: right" colspan="2">Total:</td>
-                    <td id="total_pagar" colspan="2"><?php echo String::formatoNumero($total_pagar, 2, '$', false); ?></td>
+                    <td id="total_pagar" colspan="2"><?php echo MyString::formatoNumero($total_pagar, 2, '$', false); ?></td>
                     <td colspan="4"></td>
                   </tr>
                 </tbody>

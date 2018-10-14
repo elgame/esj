@@ -34,7 +34,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/compras_requisicion/agregar/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/compras_requisicion/agregar/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form">
 
           <div class="row-fluid">
             <div class="span6">
@@ -440,7 +440,7 @@
                               <input type="text" name="valorUnitario1[]" value="<?php echo $_POST['valorUnitario1'][$key] ?>" id="valorUnitario1" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
-                              <span><?php echo String::formatoNumero($_POST['importe1'][$key], 2, '$', false); ?></span>
+                              <span><?php echo MyString::formatoNumero($_POST['importe1'][$key], 2, '$', false); ?></span>
                               <input type="hidden" name="importe1[]" value="<?php echo $_POST['importe1'][$key] ?>" id="importe1" class="span12 provimporte vpositive">
                               <input type="hidden" name="total1[]" value="<?php echo $_POST['total1'][$key] ?>" id="total1" class="span12 provtotal vpositive">
                               <input type="hidden" name="trasladoTotal1[]" value="<?php echo $_POST['trasladoTotal1'][$key] ?>" id="trasladoTotal1" class="span12">
@@ -452,7 +452,7 @@
                               <input type="text" name="valorUnitario2[]" value="<?php echo $_POST['valorUnitario2'][$key] ?>" id="valorUnitario2" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
-                              <span><?php echo String::formatoNumero($_POST['importe2'][$key], 2, '$', false); ?></span>
+                              <span><?php echo MyString::formatoNumero($_POST['importe2'][$key], 2, '$', false); ?></span>
                               <input type="hidden" name="importe2[]" value="<?php echo $_POST['importe2'][$key] ?>" id="importe2" class="span12 provimporte vpositive">
                               <input type="hidden" name="total2[]" value="<?php echo $_POST['total2'][$key] ?>" id="total2" class="span12 provtotal vpositive">
                               <input type="hidden" name="trasladoTotal2[]" value="<?php echo $_POST['trasladoTotal2'][$key] ?>" id="trasladoTotal2" class="span12">
@@ -464,7 +464,7 @@
                               <input type="text" name="valorUnitario3[]" value="<?php echo $_POST['valorUnitario3'][$key] ?>" id="valorUnitario3" class="span12 provvalorUnitario vpositive">
                             </td>
                             <td>
-                              <span><?php echo String::formatoNumero($_POST['importe3'][$key], 2, '$', false); ?></span>
+                              <span><?php echo MyString::formatoNumero($_POST['importe3'][$key], 2, '$', false); ?></span>
                               <input type="hidden" name="importe3[]" value="<?php echo $_POST['importe3'][$key] ?>" id="importe3" class="span12 provimporte vpositive">
                               <input type="hidden" name="total3[]" value="<?php echo $_POST['total3'][$key] ?>" id="total3" class="span12 provtotal vpositive">
                               <input type="hidden" name="trasladoTotal3[]" value="<?php echo $_POST['trasladoTotal3'][$key] ?>" id="trasladoTotal3" class="span12">
@@ -524,56 +524,56 @@
                         <tfoot>
                           <tr>
                               <td colspan="5" style="text-align: right;"><em>Subtotal</em></td>
-                              <td id="importe-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte1', 0))?></td>
+                              <td id="importe-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImporte1', 0))?></td>
                                 <input type="hidden" name="totalImporte1" id="totalImporte1" value="<?php echo set_value('totalImporte1', 0); ?>">
-                              <td id="importe-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte2', 0))?></td>
+                              <td id="importe-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImporte2', 0))?></td>
                                 <input type="hidden" name="totalImporte2" id="totalImporte2" value="<?php echo set_value('totalImporte2', 0); ?>">
-                              <td id="importe-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImporte3', 0))?></td>
+                              <td id="importe-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImporte3', 0))?></td>
                                 <input type="hidden" name="totalImporte3" id="totalImporte3" value="<?php echo set_value('totalImporte3', 0); ?>">
                             </tr>
                             <tr>
                               <td colspan="5" style="text-align: right;">IVA</td>
-                              <td id="traslado-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados1', 0))?></td>
+                              <td id="traslado-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados1', 0))?></td>
                                 <input type="hidden" name="totalImpuestosTrasladados1" id="totalImpuestosTrasladados1" value="<?php echo set_value('totalImpuestosTrasladados1', 0); ?>">
-                              <td id="traslado-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados2', 0))?></td>
+                              <td id="traslado-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados2', 0))?></td>
                                 <input type="hidden" name="totalImpuestosTrasladados2" id="totalImpuestosTrasladados2" value="<?php echo set_value('totalImpuestosTrasladados2', 0); ?>">
-                              <td id="traslado-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados3', 0))?></td>
+                              <td id="traslado-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados3', 0))?></td>
                                 <input type="hidden" name="totalImpuestosTrasladados3" id="totalImpuestosTrasladados3" value="<?php echo set_value('totalImpuestosTrasladados3', 0); ?>">
                             </tr>
                             <tr>
                               <td colspan="5" style="text-align: right;">IEPS</td>
-                              <td id="ieps-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps1', 0))?></td>
+                              <td id="ieps-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalIeps1', 0))?></td>
                                 <input type="hidden" name="totalIeps1" id="totalIeps1" value="<?php echo set_value('totalIeps1', 0); ?>">
-                              <td id="ieps-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps2', 0))?></td>
+                              <td id="ieps-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalIeps2', 0))?></td>
                                 <input type="hidden" name="totalIeps2" id="totalIeps2" value="<?php echo set_value('totalIeps2', 0); ?>">
-                              <td id="ieps-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalIeps3', 0))?></td>
+                              <td id="ieps-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalIeps3', 0))?></td>
                                 <input type="hidden" name="totalIeps3" id="totalIeps3" value="<?php echo set_value('totalIeps3', 0); ?>">
                             </tr>
                             <tr>
                               <td colspan="5" style="text-align: right;">RET.</td>
-                              <td id="retencion-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion1', 0))?></td>
+                              <td id="retencion-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencion1', 0))?></td>
                                 <input type="hidden" name="totalRetencion1" id="totalRetencion1" value="<?php echo set_value('totalRetencion1', 0); ?>">
-                              <td id="retencion-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion2', 0))?></td>
+                              <td id="retencion-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencion2', 0))?></td>
                                 <input type="hidden" name="totalRetencion2" id="totalRetencion2" value="<?php echo set_value('totalRetencion2', 0); ?>">
-                              <td id="retencion-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencion3', 0))?></td>
+                              <td id="retencion-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencion3', 0))?></td>
                                 <input type="hidden" name="totalRetencion3" id="totalRetencion3" value="<?php echo set_value('totalRetencion3', 0); ?>">
                             </tr>
                             <tr>
                               <td colspan="5" style="text-align: right;">RET ISR</td>
-                              <td id="retencionisr-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr1', 0))?></td>
+                              <td id="retencionisr-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencionIsr1', 0))?></td>
                                 <input type="hidden" name="totalRetencionIsr1" id="totalRetencionIsr1" value="<?php echo set_value('totalRetencionIsr1', 0); ?>">
-                              <td id="retencionisr-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr2', 0))?></td>
+                              <td id="retencionisr-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencionIsr2', 0))?></td>
                                 <input type="hidden" name="totalRetencionIsr2" id="totalRetencionIsr2" value="<?php echo set_value('totalRetencionIsr2', 0); ?>">
-                              <td id="retencionisr-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalRetencionIsr3', 0))?></td>
+                              <td id="retencionisr-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalRetencionIsr3', 0))?></td>
                                 <input type="hidden" name="totalRetencionIsr3" id="totalRetencionIsr3" value="<?php echo set_value('totalRetencionIsr3', 0); ?>">
                             </tr>
                             <tr style="font-weight:bold;font-size:1.2em;">
                               <td colspan="5" style="text-align: right;">TOTAL</td>
-                              <td id="total-format1" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden1', 0))?></td>
+                              <td id="total-format1" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalOrden1', 0))?></td>
                                 <input type="hidden" name="totalOrden1" id="totalOrden1" value="<?php echo set_value('totalOrden1', 0); ?>">
-                              <td id="total-format2" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden2', 0))?></td>
+                              <td id="total-format2" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalOrden2', 0))?></td>
                                 <input type="hidden" name="totalOrden2" id="totalOrden2" value="<?php echo set_value('totalOrden2', 0); ?>">
-                              <td id="total-format3" colspan="2" style="text-align: right;"><?php echo String::formatoNumero(set_value('totalOrden3', 0))?></td>
+                              <td id="total-format3" colspan="2" style="text-align: right;"><?php echo MyString::formatoNumero(set_value('totalOrden3', 0))?></td>
                                 <input type="hidden" name="totalOrden3" id="totalOrden3" value="<?php echo set_value('totalOrden3', 0); ?>">
                             </tr>
                         </tfoot>

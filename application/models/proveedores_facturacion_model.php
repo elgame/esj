@@ -853,7 +853,7 @@ class proveedores_facturacion_model extends privilegios_model{
 
         $fecha = explode('-', $factura['info']->fecha);
         $ano   = $fecha[0];
-        $mes   = strtoupper(String::mes(floatval($fecha[1])));
+        $mes   = strtoupper(MyString::mes(floatval($fecha[1])));
         $rfc   = $factura['info']->proveedor->rfc;
         $serie = $factura['info']->serie;
         $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
@@ -880,7 +880,7 @@ class proveedores_facturacion_model extends privilegios_model{
         $idProveedor = strtoupper($factura['info']->id_proveedor);
         $fecha   = explode('-', $factura['info']->fecha);
         $ano     = $fecha[0];
-        $mes     = strtoupper(String::mes(floatval($fecha[1])));
+        $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
         $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
         $folio   = $factura['info']->folio;
 
@@ -1021,7 +1021,7 @@ class proveedores_facturacion_model extends privilegios_model{
                     $idProveedor = strtoupper($factura['info']->id_proveedor);
                     $fecha   = explode('-', $factura['info']->fecha);
                     $ano     = $fecha[0];
-                    $mes     = strtoupper(String::mes(floatval($fecha[1])));
+                    $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
                     $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
                     $folio   = $factura['info']->folio;
 
@@ -1599,7 +1599,7 @@ class proveedores_facturacion_model extends privilegios_model{
 
             $estado = ($item->status === 'p') ? 'Pendiente' : (($item->status === 'pa') ? 'Pagada' : 'Cancelada');
             $condicion_pago = ($item->condicion_pago === 'co') ? 'Contado' : 'Credito';
-            $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, String::formatoNumero($item->total));
+            $datos = array($item->fecha, $item->serie, $item->folio, $item->nombre_fiscal, $item->empresa, $condicion_pago, $estado, MyString::formatoNumero($item->total));
             $total += floatval($item->total);
 
             $pdf->SetX(6);
@@ -1611,7 +1611,7 @@ class proveedores_facturacion_model extends privilegios_model{
         $pdf->SetX(6);
         $pdf->SetFont('Arial','B',8);
         $pdf->SetTextColor(255,255,255);
-        $pdf->Row(array('', '', '', '', '', '', 'Total:', String::formatoNumero($total)), true);
+        $pdf->Row(array('', '', '', '', '', '', 'Total:', MyString::formatoNumero($total)), true);
 
         $pdf->Output('Reporte_Ventas_Cliente.pdf', 'I');
       }
@@ -1660,7 +1660,7 @@ class proveedores_facturacion_model extends privilegios_model{
         $pdf->SetFont('Arial','',8);
         $pdf->SetTextColor(0,0,0);
 
-        $datos = array($item->codigo, $item->producto, $item->total_cantidad, String::formatoNumero($item->total_importe));
+        $datos = array($item->codigo, $item->producto, $item->total_cantidad, MyString::formatoNumero($item->total_importe));
 
         $pdf->SetX(6);
         $pdf->SetAligns($aligns);
@@ -1847,8 +1847,8 @@ class proveedores_facturacion_model extends privilegios_model{
             $item[0]['cantidad'],
             $item[0]['unidad'],
             $item[0]['descripcion'],
-            String::formatoNumero($item[0]['valorUnitario'], 3),
-            String::formatoNumero($item[0]['importe'], 3),
+            MyString::formatoNumero($item[0]['valorUnitario'], 3),
+            MyString::formatoNumero($item[0]['importe'], 3),
           ), false);
         }
 
@@ -1889,7 +1889,7 @@ class proveedores_facturacion_model extends privilegios_model{
         $pdf->Cell(30, 6, "Subtotal", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6, String::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
+        $pdf->Cell(30, 6, MyString::formatoNumero($xml[0]['subTotal']), 1, 0, 'C', 1);
 
         // Traslados | IVA
         $ivas = current($xml->Impuestos->Traslados);
@@ -1907,25 +1907,25 @@ class proveedores_facturacion_model extends privilegios_model{
         $pdf->Cell(30, 6, "IVA(11%)", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 6,MyString::formatoNumero($traslado11, 2), 1, 0, 'C', 1);
 
         $pdf->SetXY(156, $pdf->GetY() + 6);
         $pdf->Cell(30, 6, "IVA(16%)", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 6,MyString::formatoNumero($traslado16, 2), 1, 0, 'C', 1);
 
         $pdf->SetXY(156, $pdf->GetY() + 6);
         $pdf->Cell(30, 6, "IVA Retenido", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($xml->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 6,MyString::formatoNumero($xml->Retenciones->Retencion[0]['importe'], 2), 1, 0, 'C', 1);
 
         $pdf->SetXY(156, $pdf->GetY() + 6);
         $pdf->Cell(30, 6, "TOTAL", 1, 0, 'C', 1);
 
         $pdf->SetXY(186, $pdf->GetY());
-        $pdf->Cell(30, 6,String::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
+        $pdf->Cell(30, 6,MyString::formatoNumero($xml[0]['total'], 2), 1, 0, 'C', 1);
 
         ///////////////////
         // Observaciones //

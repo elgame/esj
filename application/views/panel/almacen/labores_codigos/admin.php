@@ -96,7 +96,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $labores['total_rows'],
                 'per_page'      => $labores['items_per_page'],
                 'cur_page'      => $labores['result_page']*$labores['items_per_page'],

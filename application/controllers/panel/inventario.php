@@ -406,7 +406,7 @@ class inventario extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/inventario/nivelar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/inventario/nivelar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 

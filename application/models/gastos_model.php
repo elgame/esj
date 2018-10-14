@@ -159,11 +159,11 @@ class gastos_model extends privilegios_model{
   public function updateXml($compraId, $proveedorId, $xml)
   {
     $compra = array(
-      'subtotal'      => String::float($this->input->post('subtotal')),
-      'importe_iva'   => String::float($this->input->post('iva')),
-      'retencion_iva' => String::float($this->input->post('ret_iva')),
-      'retencion_isr' => String::float($this->input->post('ret_isr')),
-      'total'         => String::float($this->input->post('total')),
+      'subtotal'      => MyString::float($this->input->post('subtotal')),
+      'importe_iva'   => MyString::float($this->input->post('iva')),
+      'retencion_iva' => MyString::float($this->input->post('ret_iva')),
+      'retencion_isr' => MyString::float($this->input->post('ret_isr')),
+      'total'         => MyString::float($this->input->post('total')),
       'fecha'         => $this->input->post('fecha'),
     );
 

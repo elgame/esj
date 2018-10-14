@@ -10,7 +10,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/com_pago?'.String::getVarsLink(array())); ?>" method="post" id="formCompago">
+        <form class="form-horizontal" action="<?php echo base_url('panel/cuentas_cobrar/com_pago?'.MyString::getVarsLink(array())); ?>" method="post" id="formCompago">
 
           <div class="row-fluid">
             <div class="span12">

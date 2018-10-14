@@ -55,7 +55,7 @@
                 <div class="span12"><h2><?php echo $proveedor['info']->nombre_fiscal ?></h2></div>
               </div>
 
-              <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg', 'rel'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+              <form class="form-horizontal" action="<?php echo base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg', 'rel'))); ?>" method="POST" id="form" enctype="multipart/form-data">
                 <input type="hidden" name="proveedorId" value="<?php echo $proveedor['info']->id_proveedor ?>">
                 <input type="hidden" name="empresaId" value="<?php echo $_GET['ide'] ?>">
                 <div class="row-fluid">
@@ -118,7 +118,7 @@
                         <?php
                         foreach ($cuentas['cuentas'] as $key => $value) {
                         ?>
-                            <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                            <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('dcuenta', $value->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                         <?php
                         }
                         ?>
@@ -257,7 +257,7 @@
                                              <input type="hidden" name="ret_isrTotal[]" value="<?php echo isset($_POST['ret_isrTotal'][$key]) ? $_POST['ret_isrTotal'][$key]: $prod->retencion_isr ?>" id="ret_isrTotal" class="span12">
                                          </td>
                                          <td style="">
-                                             <span><?php echo String::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe) ?></span>
+                                             <span><?php echo MyString::formatoNumero(isset($_POST['importe'][$key]) ? $_POST['importe'][$key] : $prod->importe) ?></span>
                                              <input type="hidden" name="importe[]" value="<?php echo set_value('importe[]', $prod->importe) ?>" id="importe" class="span12 vpositive">
                                              <input type="hidden" name="total[]" value="<?php echo set_value('total[]', $prod->total) ?>" id="total" class="span12 vpositive">
                                          </td>
@@ -285,37 +285,37 @@
                       <tbody>
                         <tr>
                           <td rowspan="7">
-                              <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', String::num2letras($total));?></textarea>
+                              <textarea name="totalLetra" rows="5" class="nokey" style="width:98%;max-width:98%;" id="totalLetra" readonly><?php echo set_value('totalLetra', MyString::num2letras($total));?></textarea>
                           </td>
                         </tr>
                         <tr>
                           <td><em>Subtotal</em></td>
-                          <td id="importe-format"><?php echo String::formatoNumero(set_value('totalImporte', $subtotal))?></td>
+                          <td id="importe-format"><?php echo MyString::formatoNumero(set_value('totalImporte', $subtotal))?></td>
                           <input type="hidden" name="totalImporte" id="totalImporte" value="<?php echo set_value('totalImporte', $subtotal); ?>">
                         </tr>
                         <tr>
                           <td>IVA</td>
-                          <td id="traslado-format"><?php echo String::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
+                          <td id="traslado-format"><?php echo MyString::formatoNumero(set_value('totalImpuestosTrasladados', $iva))?></td>
                           <input type="hidden" name="totalImpuestosTrasladados" id="totalImpuestosTrasladados" value="<?php echo set_value('totalImpuestosTrasladados', $iva); ?>">
                         </tr>
                         <tr>
                           <td>IEPS</td>
-                          <td id="ieps-format"><?php echo String::formatoNumero(set_value('totalIeps', $ieps))?></td>
+                          <td id="ieps-format"><?php echo MyString::formatoNumero(set_value('totalIeps', $ieps))?></td>
                           <input type="hidden" name="totalIeps" id="totalIeps" value="<?php echo set_value('totalIeps', $ieps); ?>">
                         </tr>
                         <tr>
                           <td>RET.</td>
-                          <td id="retencion-format"><?php echo String::formatoNumero(set_value('totalRetencion', $retencion))?></td>
+                          <td id="retencion-format"><?php echo MyString::formatoNumero(set_value('totalRetencion', $retencion))?></td>
                           <input type="hidden" name="totalRetencion" id="totalRetencion" value="<?php echo set_value('totalRetencion', $retencion); ?>">
                         </tr>
                         <tr>
                           <td>RET ISR</td>
-                          <td id="retencionisr-format"><?php echo String::formatoNumero(set_value('totalRetencionIsr', $retencion_isr))?></td>
+                          <td id="retencionisr-format"><?php echo MyString::formatoNumero(set_value('totalRetencionIsr', $retencion_isr))?></td>
                           <input type="hidden" name="totalRetencionIsr" id="totalRetencionIsr" value="<?php echo set_value('totalRetencionIsr', $retencion_isr); ?>">
                         </tr>
                         <tr style="font-weight:bold;font-size:1.2em;">
                           <td>TOTAL</td>
-                          <td id="total-format"><?php echo String::formatoNumero(set_value('totalOrden', $total))?></td>
+                          <td id="total-format"><?php echo MyString::formatoNumero(set_value('totalOrden', $total))?></td>
                           <input type="hidden" name="totalOrden" id="totalOrden" value="<?php echo set_value('totalOrden', $total); ?>">
                         </tr>
                       </tbody>

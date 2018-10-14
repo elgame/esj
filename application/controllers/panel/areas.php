@@ -10,7 +10,8 @@ class areas extends MY_Controller {
 			'areas/ajax_get_calidades/',
       'areas/ajax_get_clasificaciones/',
       'areas/ajax_get_calibres/',
-			'areas/ajax_add_new_calibre/',
+      'areas/ajax_add_new_calibre/',
+			'areas/ajax_get_areas/',
 
 			'areas/clasificaciones_xls/',
 		);
@@ -84,9 +85,12 @@ class areas extends MY_Controller {
 			$res_mdl = $this->areas_model->addArea();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/areas/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/areas/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
+    $this->load->model('empresas_model');
+    $empresas = $this->empresas_model->getEmpresas(1000);
+    $params['empresas'] = $empresas['empresas'];
 
 		if (isset($_GET['msg']))
 			$params['frm_errors'] = $this->showMsgs($_GET['msg']);
@@ -136,7 +140,7 @@ class areas extends MY_Controller {
 				$res_mdl = $this->areas_model->updateArea($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data']                 = $this->areas_model->getAreaInfo($_GET['id']);
@@ -153,6 +157,10 @@ class areas extends MY_Controller {
 			$params['tamanos_ventas']              = $this->tamanos_ventas_model->getTamanios($_GET['id']);
 			$params['html_tamanos_ventas']         = $this->load->view('panel/areas/tamanios/admin', $params, true);
 
+      $this->load->model('empresas_model');
+      $empresas = $this->empresas_model->getEmpresas(1000);
+      $params['empresas'] = $empresas['empresas'];
+
 			if (isset($_GET['msg']))
 				$params['frm_errors'] = $this->showMsgs($_GET['msg']);
 
@@ -162,7 +170,7 @@ class areas extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -176,10 +184,10 @@ class areas extends MY_Controller {
 			$this->load->model('areas_model');
 			$res_mdl = $this->areas_model->updateArea( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -193,10 +201,10 @@ class areas extends MY_Controller {
 			$this->load->model('areas_model');
 			$res_mdl = $this->areas_model->updateArea( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/areas/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/areas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -513,7 +521,7 @@ class areas extends MY_Controller {
       $params['unidades'] = $this->db->select('*')->from('unidades')->where('status', 't')->order_by('nombre')->get()->result();
 
       $params['cuentas'] = [];
-      if (String::isJson($params['data']['info']->cuenta_cpi2)) {
+      if (MyString::isJson($params['data']['info']->cuenta_cpi2)) {
         $params['cuentas'] = json_decode($params['data']['info']->cuenta_cpi2);
       }
 
@@ -582,6 +590,16 @@ class areas extends MY_Controller {
 		}
 	}
 
+  /**
+   * Obtiene lostado de clientes para el autocomplete, ajax
+   */
+  public function ajax_get_areas(){
+    $this->load->model('areas_model');
+    $params = $this->areas_model->getAreasAjax();
+
+    echo json_encode($params);
+  }
+
 
   /*
  	|	Asigna las reglas para validar un articulo al agregarlo
@@ -613,6 +631,10 @@ class areas extends MY_Controller {
 			array('field' => 'cla_cuenta[]',
 						'label' => 'Cuenta contpaq',
 						'rules' => 'max_length[12]'),
+
+      array('field' => 'fempresas',
+            'label' => 'Empresas',
+            'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

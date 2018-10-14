@@ -117,7 +117,7 @@ class proveedores extends MY_Controller {
 			$res_mdl = $this->proveedores_model->addProveedor();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/proveedores/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/proveedores/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		//bancos
@@ -170,7 +170,7 @@ class proveedores extends MY_Controller {
 				$res_mdl = $this->proveedores_model->updateProveedor($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->proveedores_model->getProveedorInfo();
@@ -192,7 +192,7 @@ class proveedores extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -206,10 +206,10 @@ class proveedores extends MY_Controller {
 			$this->load->model('proveedores_model');
 			$res_mdl = $this->proveedores_model->updateProveedor( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -223,10 +223,10 @@ class proveedores extends MY_Controller {
 			$this->load->model('proveedores_model');
 			$res_mdl = $this->proveedores_model->updateProveedor( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/proveedores/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/proveedores/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -339,6 +339,13 @@ class proveedores extends MY_Controller {
 			array('field'	=> 'plazoCredito',
 					'label'	=> 'Plazo de Crédito',
 					'rules'	=> 'max_length[3]'),
+
+      array('field' => 'centros_costos[]',
+          'label' => 'Centros de costo',
+          'rules' => ''),
+      array('field' => 'centros_costos_del[]',
+          'label' => 'Centros de costo',
+          'rules' => ''),
 		);
 
 		$this->form_validation->set_rules($rules);

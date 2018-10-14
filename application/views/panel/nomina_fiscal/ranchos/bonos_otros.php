@@ -41,7 +41,7 @@
       </ul>
       <div class="tab-content">
           <div class="tab-pane active" id="tab-prestamos">
-            <form class="form-horizontal" action="<?php echo base_url('panel/empleadosr/add_prestamos/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/empleadosr/add_prestamos/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
               <?php if (count($prestamos) > 0) { ?>
                 <input type="hidden" name="prestamos_existentes" value="1" id="prestamos-existentes">
               <?php } ?>

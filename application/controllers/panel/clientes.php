@@ -57,7 +57,7 @@ class clientes extends MY_Controller {
 							'id_factura'     => $id_factura,
 							'fecha'          => $this->fecha(trim($datos[0])),
 							'concepto'       => trim($datos[3]),
-							'total'          => String::float(trim($datos[5])),
+							'total'          => MyString::float(trim($datos[5])),
 							'poliza_ingreso' => 't',
 		        		);
 		        		$this->db->insert('facturacion_abonos', $data_abono);
@@ -70,11 +70,11 @@ class clientes extends MY_Controller {
 							'serie'            => ''.trim($datos[1]),
 							'folio'            => ''.trim($datos[2]),
 							'fecha'            => $this->fecha(trim($datos[0])),
-							'subtotal'         => String::float(trim($datos[4])),
-							'total'            => String::float(trim($datos[4])),
-							'total_letra'      => String::num2letras( String::float(trim($datos[4])) ),
+							'subtotal'         => MyString::float(trim($datos[4])),
+							'total'            => MyString::float(trim($datos[4])),
+							'total_letra'      => MyString::num2letras( MyString::float(trim($datos[4])) ),
 							'no_aprobacion'    => 0,
-							'plazo_credito'    => String::diasEntreFechas($this->fecha(trim($datos[0])), $this->fecha(trim($datos[6])) ),
+							'plazo_credito'    => MyString::diasEntreFechas($this->fecha(trim($datos[0])), $this->fecha(trim($datos[6])) ),
 							'ano_aprobacion'   => '',
 							'no_certificado'   => '',
 							'cadena_original'  => '',
@@ -203,7 +203,7 @@ class clientes extends MY_Controller {
 			$res_mdl = $this->clientes_model->addCliente();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/clientes/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/clientes/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$this->load->model('documentos_model');
@@ -260,7 +260,7 @@ class clientes extends MY_Controller {
 				$res_mdl = $this->clientes_model->updateCliente($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['cliente'] = $this->clientes_model->getClienteInfo();
@@ -283,7 +283,7 @@ class clientes extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -297,10 +297,10 @@ class clientes extends MY_Controller {
 			$this->load->model('clientes_model');
 			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -314,10 +314,10 @@ class clientes extends MY_Controller {
 			$this->load->model('clientes_model');
 			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

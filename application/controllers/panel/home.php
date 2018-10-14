@@ -260,7 +260,7 @@ class home extends MY_Controller {
 			$res_mdl = $this->configuraciones_model->modificarConfiguracion();
 
 			if($res_mdl['error'] == FALSE)
-				redirect(base_url('panel/home/configuraciones/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+				redirect(base_url('panel/home/configuraciones/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 		}
 
 		$params['data'] = $this->configuraciones_model->getConfiguraciones();
@@ -339,7 +339,7 @@ class home extends MY_Controller {
     // $is_xml = simplexml_load_string($decode);
 
     echo "<pre>";
-      var_dump(String::formatoNumero(5.10, 5, ''), (float)1.999999);
+      var_dump(MyString::formatoNumero(5.10, 5, ''), (float)1.999999);
     echo "</pre>";exit;
   }
 
