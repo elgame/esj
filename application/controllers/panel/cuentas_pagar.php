@@ -237,9 +237,9 @@ class cuentas_pagar extends MY_Controller {
     {
       $this->load->model('cuentas_pagar_model');
       $respons = $this->cuentas_pagar_model->removeAbono();
-      redirect(base_url('panel/cuentas_pagar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=5'));
+      redirect(base_url('panel/cuentas_pagar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_pagar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_pagar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   /**
@@ -280,9 +280,9 @@ class cuentas_pagar extends MY_Controller {
     {
       $this->load->model('banco_cuentas_model');
       $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=5'));
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+      redirect(base_url('panel/cuentas_pagar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
   public function imprimir_recibo()
   {

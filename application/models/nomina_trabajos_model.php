@@ -275,7 +275,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetWidths(array(31, 31));
           $pdf->SetAligns(array('L', 'R'));
           $pdf->SetXY(0, $pdf->GetY()-2);
-          $pdf->Row2(array($tarea->fecha, String::formatoNumero($tarea->importe, 2, '$', false)), false, false, 5);
+          $pdf->Row2(array($tarea->fecha, MyString::formatoNumero($tarea->importe, 2, '$', false)), false, false, 5);
           $pdf->font_bold = '';
           $aux = $tarea->id_usuario.$tarea->fecha;
 
@@ -287,13 +287,13 @@ class nomina_trabajos_model extends CI_Model {
 
         if ($check_hrsext && $tarea->hrs_extra > 0) {
           $pdf->SetXY(0, $pdf->GetY()-2);
-          $pdf->Row2(array('Hrs extras', $tarea->hrs_extra.' hrs', String::formatoNumero($tarea->importe_extra, 2, '$', false)), false, false, 5);
+          $pdf->Row2(array('Hrs extras', $tarea->hrs_extra.' hrs', MyString::formatoNumero($tarea->importe_extra, 2, '$', false)), false, false, 5);
 
           $check_hrsext = false;
         }
 
         $pdf->SetXY(0, $pdf->GetY()-2);
-        $pdf->Row2(array($tarea->labor, $tarea->horas_tarea.' hrs', String::formatoNumero($tarea->importe_tarea, 2, '$', false)), false, false, 5);
+        $pdf->Row2(array($tarea->labor, $tarea->horas_tarea.' hrs', MyString::formatoNumero($tarea->importe_tarea, 2, '$', false)), false, false, 5);
       }
 
       $pdf->SetWidths(array($pdf->pag_size[0]));
@@ -305,11 +305,11 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetWidths(array(31, 31));
       $pdf->SetAligns(array('L', 'R'));
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Percepciones', String::formatoNumero($empleado->total_percepcion - $empleado->subsidio, 2, '$', false)), false, false, 5);
+      $pdf->Row2(array('Total Percepciones', MyString::formatoNumero($empleado->total_percepcion - $empleado->subsidio, 2, '$', false)), false, false, 5);
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Deducciones', String::formatoNumero($empleado->total_deduccion - $empleado->subsidio, 2, '$', false)), false, false, 5);
+      $pdf->Row2(array('Total Deducciones', MyString::formatoNumero($empleado->total_deduccion - $empleado->subsidio, 2, '$', false)), false, false, 5);
       $pdf->SetXY(0, $pdf->GetY()-2);
-      $pdf->Row2(array('Total Neto', String::formatoNumero($empleado->total_neto, 2, '$', false)), false, false, 5);
+      $pdf->Row2(array('Total Neto', MyString::formatoNumero($empleado->total_neto, 2, '$', false)), false, false, 5);
 
       $pdf->SetXY(0, $pdf->GetY()+10);
     }
@@ -429,7 +429,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['sueldo'] += $percepciones['sueldo']['total'];
           $total_gral['sueldo'] += $percepciones['sueldo']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -444,7 +444,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['pasistencia'] += $empleado->pasistencia;
             $total_gral['pasistencia'] += $empleado->pasistencia;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -460,7 +460,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Despensa', MyString::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['despensa'] += $empleado->despensa;
             $total_gral['despensa'] += $empleado->despensa;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -476,7 +476,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
             $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -492,7 +492,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
             $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -504,7 +504,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
             $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -520,7 +520,7 @@ class nomina_trabajos_model extends CI_Model {
           //   $pdf->SetXY(6, $pdf->GetY());
           //   $pdf->SetAligns(array('L', 'L', 'R'));
           //   $pdf->SetWidths(array(15, 62, 25));
-          //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+          //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
           //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
           //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
           //   if($pdf->GetY() >= $pdf->limiteY)
@@ -536,7 +536,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(6, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -560,7 +560,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
             $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -575,7 +575,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['infonavit'] += $deducciones['infonavit']['total'];
             $total_gral['infonavit'] += $deducciones['infonavit']['total'];
             if($pdf->GetY() >= $pdf->limiteY)
@@ -588,7 +588,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -602,7 +602,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
             $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -617,7 +617,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
             $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -632,7 +632,7 @@ class nomina_trabajos_model extends CI_Model {
           //   $pdf->SetXY(108, $pdf->GetY());
           //   $pdf->SetAligns(array('L', 'L', 'R'));
           //   $pdf->SetWidths(array(15, 62, 25));
-          //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+          //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
           //   if($pdf->GetY() >= $pdf->limiteY)
           //   {
           //     $pdf->AddPage();
@@ -645,7 +645,7 @@ class nomina_trabajos_model extends CI_Model {
             $pdf->SetXY(108, $pdf->GetY());
             $pdf->SetAligns(array('L', 'L', 'R'));
             $pdf->SetWidths(array(15, 62, 25));
-            $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+            $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
             $total_dep['isr'] += $empleado->nomina_fiscal_isr;
             $total_gral['isr'] += $empleado->nomina_fiscal_isr;
             if($pdf->GetY() >= $pdf->limiteY)
@@ -672,7 +672,7 @@ class nomina_trabajos_model extends CI_Model {
           $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
           $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
           $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-          $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -682,7 +682,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetWidths(array(15, 62, 25));
           $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
           $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-          $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
               $pdf->AddPage();
 
@@ -715,7 +715,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -726,7 +726,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -737,7 +737,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Despensa', String::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -750,7 +750,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -764,7 +764,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -774,7 +774,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -788,7 +788,7 @@ class nomina_trabajos_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -802,7 +802,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -816,7 +816,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -837,7 +837,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -850,7 +850,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -861,7 +861,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
             $pdf->AddPage();
@@ -873,7 +873,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -886,7 +886,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -899,7 +899,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -916,7 +916,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -924,7 +924,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -1005,7 +1005,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($percepciones['sueldo']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['sueldo'] += $percepciones['sueldo']['total'];
         $total_gral['sueldo'] += $percepciones['sueldo']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1020,7 +1020,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'P Asistencia', String::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($empleado->pasistencia, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['pasistencia'] += $empleado->pasistencia;
           $total_gral['pasistencia'] += $empleado->pasistencia;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1036,7 +1036,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Despensa', String::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Despensa', MyString::formatoNumero($empleado->despensa, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['despensa'] += $empleado->despensa;
           $total_gral['despensa'] += $empleado->despensa;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1052,7 +1052,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
           $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1068,7 +1068,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->nomina_fiscal_vacaciones, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           $total_gral['vacaciones'] += $empleado->nomina_fiscal_vacaciones;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1080,7 +1080,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->nomina->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           $total_gral['prima_vacacional'] += $empleado->nomina->prima_vacacional;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1096,7 +1096,7 @@ class nomina_trabajos_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
         //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
         //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
         //   if($pdf->GetY() >= $pdf->limiteY)
@@ -1112,7 +1112,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->nomina_fiscal_aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           $total_gral['aguinaldo'] += $empleado->nomina_fiscal_aguinaldo;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1136,7 +1136,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero(-1*$empleado->nomina_fiscal_subsidio, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['subsidio'] += $empleado->nomina_fiscal_subsidio;
           $total_gral['subsidio'] += $empleado->nomina_fiscal_subsidio;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1151,7 +1151,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($deducciones['infonavit']['total'], 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['infonavit'] += $deducciones['infonavit']['total'];
           $total_gral['infonavit'] += $deducciones['infonavit']['total'];
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1164,7 +1164,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.S.S.', String::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.S.S.', MyString::formatoNumero($deducciones['imss']['total'] + $deducciones['rcv']['total'], 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         $total_gral['imms'] += $deducciones['imss']['total'] + $deducciones['rcv']['total'];
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1178,7 +1178,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($empleado->nomina_fiscal_prestamos, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['prestamos'] += $empleado->nomina_fiscal_prestamos;
           $total_gral['prestamos'] += $empleado->nomina_fiscal_prestamos;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1193,7 +1193,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($empleado->fondo_ahorro, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['fondo_ahorro'] += $empleado->fondo_ahorro;
           $total_gral['fondo_ahorro'] += $empleado->fondo_ahorro;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1208,7 +1208,7 @@ class nomina_trabajos_model extends CI_Model {
         //   $pdf->SetXY(108, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Desc. Playeras', String::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Desc. Playeras', MyString::formatoNumero($empleado->descuento_playeras, 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -1221,7 +1221,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->nomina_fiscal_isr, 2, '$', false)), false, 0, null, 1, 1);
           $total_dep['isr'] += $empleado->nomina_fiscal_isr;
           $total_gral['isr'] += $empleado->nomina_fiscal_isr;
           if($pdf->GetY() >= $pdf->limiteY)
@@ -1248,7 +1248,7 @@ class nomina_trabajos_model extends CI_Model {
         $total_gral['total_percepcion'] += $empleado->nomina_fiscal_total_percepciones;
         $total_dep['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
         $total_gral['total_deduccion'] += $empleado->nomina_fiscal_total_deducciones;
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->nomina_fiscal_total_percepciones, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->nomina_fiscal_total_deducciones, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -1258,7 +1258,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetWidths(array(15, 62, 25));
         $total_dep['total_neto'] += $empleado->nomina_fiscal_total_neto;
         $total_gral['total_neto'] += $empleado->nomina_fiscal_total_neto;
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->nomina_fiscal_total_neto, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -1289,7 +1289,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1300,7 +1300,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_dep['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1311,7 +1311,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Despensa', String::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_dep['despensa'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1324,7 +1324,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1338,7 +1338,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1348,7 +1348,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1362,7 +1362,7 @@ class nomina_trabajos_model extends CI_Model {
         //   $pdf->SetXY(6, $pdf->GetY());
         //   $pdf->SetAligns(array('L', 'L', 'R'));
         //   $pdf->SetWidths(array(15, 62, 25));
-        //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+        //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
         //   if($pdf->GetY() >= $pdf->limiteY)
         //   {
         //     $pdf->AddPage();
@@ -1376,7 +1376,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1390,7 +1390,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(6, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1411,7 +1411,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1424,7 +1424,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1435,7 +1435,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
             $pdf->AddPage();
@@ -1447,7 +1447,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1460,7 +1460,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_dep['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1473,7 +1473,7 @@ class nomina_trabajos_model extends CI_Model {
           $pdf->SetXY(108, $pdf->GetY());
           $pdf->SetAligns(array('L', 'L', 'R'));
           $pdf->SetWidths(array(15, 62, 25));
-          $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+          $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
           if($pdf->GetY() >= $pdf->limiteY)
           {
             $pdf->AddPage();
@@ -1490,7 +1490,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $y + 2);
         $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-        $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
             $pdf->AddPage();
 
@@ -1498,7 +1498,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
       }
 
       $pdf->SetFont('Helvetica','', 10);
@@ -1572,7 +1572,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Sueldo', String::formatoNumero($empleado->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($empleado->sueldo_semanal, 2, '$', false)), false, 0, null, 1, 1);
       $total_dep['sueldo'] += $empleado->sueldo_semanal;
       $total_gral['sueldo'] += $empleado->sueldo_semanal;
       if($pdf->GetY() >= $pdf->limiteY)
@@ -1587,7 +1587,7 @@ class nomina_trabajos_model extends CI_Model {
       //   $pdf->SetXY(6, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'Horas Extras', String::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($empleado->horas_extras_dinero, 2, '$', false)), false, 0, null, 1, 1);
       //   $total_dep['horas_extras'] += $empleado->horas_extras_dinero;
       //   $total_gral['horas_extras'] += $empleado->horas_extras_dinero;
       //   if($pdf->GetY() >= $pdf->limiteY)
@@ -1603,7 +1603,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Vacaciones', String::formatoNumero($empleado->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($empleado->vacaciones, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['vacaciones'] += $empleado->vacaciones;
         $total_gral['vacaciones'] += $empleado->vacaciones;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1615,7 +1615,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($empleado->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($empleado->prima_vacacional, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['prima_vacacional'] += $empleado->prima_vacacional;
         $total_gral['prima_vacacional'] += $empleado->prima_vacacional;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1631,7 +1631,7 @@ class nomina_trabajos_model extends CI_Model {
       //   $pdf->SetXY(6, $pdf->GetY());
       //   $pdf->SetAligns(array('L', 'L', 'R'));
       //   $pdf->SetWidths(array(15, 62, 25));
-      //   $pdf->Row(array('', 'PTU', String::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
+      //   $pdf->Row(array('', 'PTU', MyString::formatoNumero($empleado->nomina_fiscal_ptu, 2, '$', false)), false, 0, null, 1, 1);
       //   $total_dep['ptu'] += $empleado->nomina_fiscal_ptu;
       //   $total_gral['ptu'] += $empleado->nomina_fiscal_ptu;
       //   if($pdf->GetY() >= $pdf->limiteY)
@@ -1647,7 +1647,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($empleado->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($empleado->aguinaldo, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['aguinaldo'] += $empleado->aguinaldo;
         $total_gral['aguinaldo'] += $empleado->aguinaldo;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1670,7 +1670,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($empleado->subsidio*-1, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($empleado->subsidio*-1, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['subsidio'] += $empleado->subsidio;
         $total_gral['subsidio'] += $empleado->subsidio;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1685,7 +1685,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($empleado->isr, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($empleado->isr, 2, '$', false)), false, 0, null, 1, 1);
         $total_dep['isr'] += $empleado->isr;
         $total_gral['isr'] += $empleado->isr;
         if($pdf->GetY() >= $pdf->limiteY)
@@ -1712,7 +1712,7 @@ class nomina_trabajos_model extends CI_Model {
       $total_gral['total_percepcion'] += $empleado->total_percepcion;
       $total_dep['total_deduccion'] += $empleado->total_deduccion;
       $total_gral['total_deduccion'] += $empleado->total_deduccion;
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($empleado->total_percepcion, 2, '$', false), '', 'Total Deducciones', String::formatoNumero($empleado->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($empleado->total_percepcion, 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($empleado->total_deduccion, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -1722,7 +1722,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetWidths(array(15, 62, 25));
       $total_dep['total_neto'] += $empleado->total_neto;
       $total_gral['total_neto'] += $empleado->total_neto;
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($empleado->total_neto, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($empleado->total_neto, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -1753,7 +1753,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_dep['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -1766,7 +1766,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_dep['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1780,7 +1780,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_dep['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1790,7 +1790,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_dep['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1804,7 +1804,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'PTU', String::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_dep['ptu'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1818,7 +1818,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(6, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_dep['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1840,7 +1840,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_dep['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1853,7 +1853,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_dep['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1864,7 +1864,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_dep['imms'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
           $pdf->AddPage();
@@ -1876,7 +1876,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_dep['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1889,7 +1889,7 @@ class nomina_trabajos_model extends CI_Model {
         $pdf->SetXY(108, $pdf->GetY());
         $pdf->SetAligns(array('L', 'L', 'R'));
         $pdf->SetWidths(array(15, 62, 25));
-        $pdf->Row(array('', 'ISR', String::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
+        $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_dep['isr'], 2, '$', false)), false, 0, null, 1, 1);
         if($pdf->GetY() >= $pdf->limiteY)
         {
           $pdf->AddPage();
@@ -1906,7 +1906,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $y + 2);
       $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-      $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_dep['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_dep['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
           $pdf->AddPage();
 
@@ -1914,7 +1914,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Total Neto', String::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Total Neto', MyString::formatoNumero($total_dep['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
     }
 
     //********* Total general ***************
@@ -1933,7 +1933,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Sueldo', String::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Sueldo', MyString::formatoNumero($total_gral['sueldo'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -1944,7 +1944,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'P Asistencia', String::formatoNumero($total_gral['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'P Asistencia', MyString::formatoNumero($total_gral['pasistencia'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -1955,7 +1955,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Despensa', String::formatoNumero($total_gral['despensa'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Despensa', MyString::formatoNumero($total_gral['despensa'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
       $pdf->AddPage();
@@ -1968,7 +1968,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Horas Extras', String::formatoNumero($total_gral['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Horas Extras', MyString::formatoNumero($total_gral['horas_extras'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -1982,7 +1982,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Vacaciones', String::formatoNumero($total_gral['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Vacaciones', MyString::formatoNumero($total_gral['vacaciones'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -1992,7 +1992,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Prima vacacional', String::formatoNumero($total_gral['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Prima vacacional', MyString::formatoNumero($total_gral['prima_vacacional'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2006,7 +2006,7 @@ class nomina_trabajos_model extends CI_Model {
     //   $pdf->SetXY(6, $pdf->GetY());
     //   $pdf->SetAligns(array('L', 'L', 'R'));
     //   $pdf->SetWidths(array(15, 62, 25));
-    //   $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
+    //   $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_gral['subsidio'], 2, '$', false)), false, 0, null, 1, 1);
     //   if($pdf->GetY() >= $pdf->limiteY)
     //   {
     //     $pdf->AddPage();
@@ -2020,7 +2020,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'PTU', String::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'PTU', MyString::formatoNumero($total_gral['ptu'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2034,7 +2034,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(6, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Aguinaldo', String::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Aguinaldo', MyString::formatoNumero($total_gral['aguinaldo'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2055,7 +2055,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Subsidio', String::formatoNumero($total_gral['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Subsidio', MyString::formatoNumero($total_gral['subsidio']*-1, 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2068,7 +2068,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Infonavit', String::formatoNumero($total_gral['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Infonavit', MyString::formatoNumero($total_gral['infonavit'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2079,7 +2079,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(108, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'I.M.M.S.', String::formatoNumero($total_gral['imms'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'I.M.M.S.', MyString::formatoNumero($total_gral['imms'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
     {
         $pdf->AddPage();
@@ -2091,7 +2091,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Prestamos', String::formatoNumero($total_gral['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Prestamos', MyString::formatoNumero($total_gral['prestamos'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2104,7 +2104,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'Caja Ahorro', String::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'Caja Ahorro', MyString::formatoNumero($total_gral['fondo_ahorro'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2117,7 +2117,7 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetXY(108, $pdf->GetY());
       $pdf->SetAligns(array('L', 'L', 'R'));
       $pdf->SetWidths(array(15, 62, 25));
-      $pdf->Row(array('', 'ISR', String::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
+      $pdf->Row(array('', 'ISR', MyString::formatoNumero($total_gral['isr'], 2, '$', false)), false, 0, null, 1, 1);
       if($pdf->GetY() >= $pdf->limiteY)
       {
         $pdf->AddPage();
@@ -2134,7 +2134,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(6, $y + 2);
     $pdf->SetAligns(array('L', 'L', 'R', 'L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25, 15, 62, 25));
-    $pdf->Row(array('', 'Total Percepciones', String::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', String::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Percepciones', MyString::formatoNumero($total_gral['total_percepcion'], 2, '$', false), '', 'Total Deducciones', MyString::formatoNumero($total_gral['total_deduccion'], 2, '$', false)), false, 0, null, 1, 1);
     if($pdf->GetY() >= $pdf->limiteY)
         $pdf->AddPage();
 
@@ -2142,7 +2142,7 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetXY(6, $pdf->GetY());
     $pdf->SetAligns(array('L', 'L', 'R'));
     $pdf->SetWidths(array(15, 62, 25));
-    $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', String::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
+    $pdf->Row(array('', 'Total Neto ('.$numero_trabajadores.' - '.$numero_trabajadores2.')', MyString::formatoNumero($total_gral['total_neto'], 2, '$', false)), false, 0, null, 1, 1);
 
     $pdf->Output('Nomina.pdf', 'I');
   }
@@ -2267,9 +2267,9 @@ class nomina_trabajos_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->implemento,
-        String::formatoNumero($vehiculo->lts_combustible, 2, '', false),
-        String::formatoNumero($vehiculo->horas_totales, 2, '', false),
-        String::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
+        MyString::formatoNumero($vehiculo->lts_combustible, 2, '', false),
+        MyString::formatoNumero($vehiculo->horas_totales, 2, '', false),
+        MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->lts_combustible);
@@ -2299,9 +2299,9 @@ class nomina_trabajos_model extends CI_Model {
             $item->fecha,
             $item->centro_costo,
             $item->labor,
-            String::formatoNumero($item->lts_combustible, 2, '', false),
-            String::formatoNumero($item->horas_totales, 2, '', false),
-            String::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
+            MyString::formatoNumero($item->lts_combustible, 2, '', false),
+            MyString::formatoNumero($item->horas_totales, 2, '', false),
+            MyString::formatoNumero(($item->lts_combustible/($item->horas_totales>0?$item->horas_totales:1)), 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -2320,9 +2320,9 @@ class nomina_trabajos_model extends CI_Model {
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false),
-        String::formatoNumero($horas_totales, 2, '', false),
-        String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false),
+        MyString::formatoNumero($horas_totales, 2, '', false),
+        MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_combustible.pdf', 'I');
@@ -2380,7 +2380,7 @@ class nomina_trabajos_model extends CI_Model {
           <td style="width:500px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->implemento.'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->lts_combustible.'</td>
           <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.$vehiculo->horas_totales.'</td>
-          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.String::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
+          <td style="width:150px;border:1px solid #000;background-color: #cccccc;">'.MyString::formatoNumero(($vehiculo->lts_combustible/($vehiculo->horas_totales>0?$vehiculo->horas_totales:1)), 2, '', false).'</td>
         </tr>';
       if (isset($vehiculo->detalle)) {
         foreach ($vehiculo->detalle as $key2 => $item)
@@ -2397,7 +2397,7 @@ class nomina_trabajos_model extends CI_Model {
               </td>
               <td style="width:150px;border:1px solid #000;">'.$item->lts_combustible.'</td>
               <td style="width:150px;border:1px solid #000;">'.$item->horas_totales.'</td>
-              <td style="width:150px;border:1px solid #000;">'.String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+              <td style="width:150px;border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
             </tr>';
         }
       }
@@ -2409,7 +2409,7 @@ class nomina_trabajos_model extends CI_Model {
           <td>TOTALES</td>
           <td style="border:1px solid #000;">'.$lts_combustible.'</td>
           <td style="border:1px solid #000;">'.$horas_totales.'</td>
-          <td style="border:1px solid #000;">'.String::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
+          <td style="border:1px solid #000;">'.MyString::formatoNumero(($lts_combustible/($horas_totales>0?$horas_totales:1)), 2, '', false).'</td>
         </tr>
       </tbody>
     </table>';

@@ -26,7 +26,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/areas/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/areas/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="post" class="form-horizontal">
               <div class="control-group">
                 <label class="control-label" for="fnombre">Nombre </label>
                 <div class="controls">
@@ -42,6 +42,24 @@
                     <option value="fr" <?php echo set_select('ftipo', 'fr', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Fruta</option>
                     <option value="in" <?php echo set_select('ftipo', 'in', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Insumos</option>
                     <option value="ot" <?php echo set_select('ftipo', 'ot', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Otros</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="control-group tipo3">
+                <label class="control-label" for="fempresas">Empresas </label>
+                <div class="controls">
+                  <select name="fempresas[]" id="fempresas" multiple style="width: 50%; height: 150px">
+                    <?php foreach ($empresas as $key => $value):
+                      $select = false;
+                      foreach ($data['empresas'] as $keye => $emp) {
+                        if ($emp->id_empresa == $value->id_empresa) {
+                          $select = true;
+                        }
+                      }
+                    ?>
+                    <option value="<?php echo $value->id_empresa ?>" <?php echo set_select('fempresas', $value->id_empresa, $select); ?>><?php echo $value->nombre_fiscal ?></option>
+                    <?php endforeach ?>
                   </select>
                 </div>
               </div>

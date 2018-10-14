@@ -27,7 +27,7 @@
         </ul>
       </div>
 
-      <form action="<?php echo base_url('panel/bascula/bonificacion?'.String::getVarsLink(array('msg', 'fstatus', 'p', 'b'))); ?>" method="post" class="form-horizontal" id="form">
+      <form action="<?php echo base_url('panel/bascula/bonificacion?'.MyString::getVarsLink(array('msg', 'fstatus', 'p', 'b'))); ?>" method="post" class="form-horizontal" id="form">
 
         <a href="<?php echo base_url('panel/bascula/agregar/') ?>" class="btn btn-success pull-right" id="newPesada">
           Nueva Pesada

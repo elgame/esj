@@ -36,7 +36,7 @@
     </div><!--/modal-header -->
 
     <div class="modal-body" style="max-height: none;">
-      <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/show_import_asistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" enctype="multipart/form-data">
+      <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/show_import_asistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" enctype="multipart/form-data">
         <div>
           <label>Seleccionar archivo: <input type="file" name="archivo_asistencias" accept=".csv" placeholder=""></label>
           <input type="hidden" name="id_empresa" value="<?php echo $empresa->id_empresa ?>">

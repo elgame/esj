@@ -29,7 +29,7 @@
 							<div class="control-group">
 							  <label class="control-label" for="fnombre">Nombre </label>
 							  <div class="controls">
-									<input type="text" name="fnombre" id="fnombre" class="span6" maxlength="140" 
+									<input type="text" name="fnombre" id="fnombre" class="span6" maxlength="140"
 									value="<?php echo set_value('fnombre'); ?>" required autofocus placeholder="Limon, Piña, Insumo">
 							  </div>
 							</div>
@@ -44,6 +44,17 @@
 									</select>
 							  </div>
 							</div>
+
+              <div class="control-group tipo3">
+                <label class="control-label" for="fempresas">Empresas </label>
+                <div class="controls">
+                  <select name="fempresas[]" id="fempresas" multiple style="width: 50%; height: 150px">
+                    <?php foreach ($empresas as $key => $value): ?>
+                    <option value="<?php echo $value->id_empresa ?>" <?php echo set_select('fempresas', $value->id_empresa, false, $this->input->post('fempresas')); ?>><?php echo $value->nombre_fiscal ?></option>
+                    <?php endforeach ?>
+                  </select>
+                </div>
+              </div>
 
 						</div>
 					</div><!--/span-->
@@ -82,7 +93,7 @@
 									  </tr>
 								  </thead>
 								  <tbody id="acal_body">
-								 <?php 
+								 <?php
 								 if (is_array($this->input->post('cal_nombre'))) {
 								 	foreach ($this->input->post('cal_nombre') as $key => $value) {
 								  ?>
@@ -91,7 +102,7 @@
 											<td><input type="text" class="span8 vpositive" name="cal_precio[]" value="<?php echo $_POST['cal_precio'][$key]; ?>" maxlength="11" required></td>
 											<td><button type="button" class="btn btn-danger cal_remove" data-row="<?php echo $key; ?>"><i class="icon-remove"></i></button></td>
 									  </tr>
-								 <?php 
+								 <?php
 								 	}
 								 } ?>
 								  </tbody>
@@ -124,7 +135,7 @@
 									  </tr>
 								  </thead>
 								  <tbody id="acla_body">
-								 <?php 
+								 <?php
 								 if (is_array($this->input->post('cla_nombre'))) {
 								 	foreach ($this->input->post('cla_nombre') as $key => $value) {
 								  ?>
@@ -134,7 +145,7 @@
 											<td><input type="text" class="span8 vpositive" name="cla_cuenta[]" value="<?php echo $_POST['cla_cuenta'][$key]; ?>" maxlength="12"></td>
 											<td><button type="button" class="btn btn-danger cla_remove" data-row="<?php echo $key; ?>"><i class="icon-remove"></i></button></td>
 									  </tr>
-								 <?php 
+								 <?php
 								 	}
 								 } ?>
 								  </tbody>

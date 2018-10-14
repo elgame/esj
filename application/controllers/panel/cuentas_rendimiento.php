@@ -74,7 +74,7 @@ class cuentas_rendimiento extends MY_Controller {
       $res_mdl = $this->cuentas_rendimiento_model->guardar($_POST);
 
       if(!$res_mdl['error'])
-        redirect(base_url('panel/cuentas_rendimiento/cargar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+        redirect(base_url('panel/cuentas_rendimiento/cargar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
     }
 
     $params['info_empleado'] = $this->info_empleado['info'];

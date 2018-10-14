@@ -54,7 +54,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/productos/agregar_familia/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/productos/agregar_familia/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
 
               <div class="control-group">
                 <label class="control-label" for="fempresa">Empresa </label>
@@ -79,6 +79,7 @@
                     <option value="p" <?php echo set_select('ftipo', 'p'); ?>>Productos</option>
                     <option value="d" <?php echo set_select('ftipo', 'd'); ?>>Servicios</option>
                     <option value="f" <?php echo set_select('ftipo', 'f'); ?>>Fletes</option>
+                    <option value="a" <?php echo set_select('ftipo', 'a'); ?>>Activos</option>
                   </select>
                 </div>
               </div>

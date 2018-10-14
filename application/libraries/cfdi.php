@@ -2694,7 +2694,7 @@ class cfdi{
 				$pdf->SetFont('Arial','',10);
 				$pdf->SetTextColor(0,0,0);
 
-				$datos = array($item['cantidad'], $item['descripcion'], String::formatoNumero($item['precio_unit']),String::formatoNumero($item['importe']));
+				$datos = array($item['cantidad'], $item['descripcion'], MyString::formatoNumero($item['precio_unit']),MyString::formatoNumero($item['importe']));
 
 				$pdf->SetX(8);
 				$pdf->SetAligns($aligns);
@@ -2728,20 +2728,20 @@ class cfdi{
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFillColor(255,255,255);
 			$pdf->SetXY(175, ($y+5));
-			$pdf->Cell(33, 6, String::formatoNumero($data['subtotal'],2) , 1, 0, 'C');
+			$pdf->Cell(33, 6, MyString::formatoNumero($data['subtotal'],2) , 1, 0, 'C');
 			$pdf->SetXY(175, ($y+11));
 
 			if (strtoupper($data['crfc']) != 'XAXX010101000') {
-				$pdf->Cell(33, 6, String::formatoNumero($data['importe_iva'],2) , 1, 0, 'C');
+				$pdf->Cell(33, 6, MyString::formatoNumero($data['importe_iva'],2) , 1, 0, 'C');
 				$pdf->SetXY(175, ($y+17));
 			}
 
 			if (isset($data['total_isr'])) {
-				$pdf->Cell(33, 6, (isset($data['total_isr'])) ? String::formatoNumero($data['total_isr'],2) : '$0.00' , 1, 0, 'C');
+				$pdf->Cell(33, 6, (isset($data['total_isr'])) ? MyString::formatoNumero($data['total_isr'],2) : '$0.00' , 1, 0, 'C');
 				$pdf->SetXY(175, ($y+23));
 			}
 
-			$pdf->Cell(33, 6, String::formatoNumero($data['total'],2) , 1, 0, 'C');
+			$pdf->Cell(33, 6, MyString::formatoNumero($data['total'],2) , 1, 0, 'C');
 
 			//------------ TOTAL CON LETRA--------------------
 

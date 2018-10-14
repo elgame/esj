@@ -106,7 +106,7 @@ class catalogos_sft extends MY_Controller {
 			$respons = $this->catalogos_sft_model->addCatSoft();
 
 			if($respons[0])
-				redirect(base_url('panel/catalogos_sft/agregar_soft/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/catalogos_sft/agregar_soft/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		// $params['t_areas'] = $this->catalogos_sft_model->getTipoAreas();
@@ -150,7 +150,7 @@ class catalogos_sft extends MY_Controller {
 				$respons = $this->catalogos_sft_model->updateCatSoft($_GET['id']);
 
 				if($respons[0])
-					redirect(base_url('panel/catalogos_sft/cat_soft/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/catalogos_sft/cat_soft/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 
 			$params['areas'] = $this->catalogos_sft_model->getInfoCatSoft($_GET['id']);
@@ -320,7 +320,7 @@ class catalogos_sft extends MY_Controller {
 			$respons = $this->catalogos_sft_model->addCatCodigos();
 
 			if($respons[0])
-				redirect(base_url('panel/catalogos_sft/agregar_codigos/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/catalogos_sft/agregar_codigos/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		// $params['t_areas'] = $this->catalogos_sft_model->getTipoAreas();
@@ -364,7 +364,7 @@ class catalogos_sft extends MY_Controller {
 				$respons = $this->catalogos_sft_model->updateCatCodigos($_GET['id']);
 
 				if($respons[0])
-					redirect(base_url('panel/catalogos_sft/cat_codigos/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/catalogos_sft/cat_codigos/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 
 			$params['areas'] = $this->catalogos_sft_model->getInfoCatCodigos($_GET['id']);

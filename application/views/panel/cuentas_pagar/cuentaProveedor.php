@@ -22,11 +22,11 @@
             </div>
           </div>
           <div class="box-content">
-          	<a href="<?php echo base_url('panel/cuentas_pagar/?'.String::getVarsLink(array('msg'))); ?>" class="linksm">
+          	<a href="<?php echo base_url('panel/cuentas_pagar/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm">
 							<i class="icon-chevron-left"></i> Atras</a> |
-						<a href="<?php echo base_url('panel/cuentas_pagar/cuenta_pdf/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+						<a href="<?php echo base_url('panel/cuentas_pagar/cuenta_pdf/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
 							<i class="icon-print"></i> Imprimir</a> |
-						<a href="<?php echo base_url('panel/cuentas_pagar/cuenta_xls/?'.String::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
+						<a href="<?php echo base_url('panel/cuentas_pagar/cuenta_xls/?'.MyString::getVarsLink(array('msg'))); ?>" class="linksm" target="_blank">
 							<i class="icon-table"></i> Excel</a>
 
             <form action="<?php echo base_url('panel/cuentas_pagar/cuenta'); ?>" method="GET" class="form-search">
@@ -111,11 +111,11 @@
 									<td></td>
 									<td></td>
 									<td>Saldo anterior a <?php echo $data['fecha1']; ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero(
+									<td style="text-align: right;"><?php echo MyString::formatoNumero(
 											(isset($data['anterior'][0]->total)? $data['anterior'][0]->total: 0), 2, '$', false ); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero(
+									<td style="text-align: right;"><?php echo MyString::formatoNumero(
 											(isset($data['anterior'][0]->abonos)? $data['anterior'][0]->abonos: 0), 2, '$', false ); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero(
+									<td style="text-align: right;"><?php echo MyString::formatoNumero(
 											(isset($data['anterior'][0]->saldo)? $data['anterior'][0]->saldo: 0), 2, '$', false ); ?></td>
 									<td></td>
 									<td></td>
@@ -151,15 +151,15 @@
 									<td><?php echo $cuenta->serie; ?></td>
 									<td>
 										<a href="<?php echo base_url('panel/cuentas_pagar/detalle/').'?id='.$cuenta->id_compra.'&tipo='.$cuenta->tipo.
-											'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->folio; ?></a>
+											'&'.MyString::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->folio; ?></a>
 									</td>
 									<td>
 										<a href="<?php echo base_url('panel/cuentas_pagar/detalle/').'?id='.$cuenta->id_compra.'&tipo='.$cuenta->tipo.
-													'&'.String::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
+													'&'.MyString::getVarsLink(array('id', 'tipo', 'enviar', 'msg')); ?>" class="linksm lkzoom"><?php echo $cuenta->concepto ?></a>
 									</td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->cargo, 2, "$", false); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($cuenta->abono, 2, "$", false); ?></td>
-									<td class="sel_abonom" data-id="<?php echo $cuenta->id_compra; ?>" data-tipo="<?php echo $cuenta->tipo ?>" style="text-align: right;"><?php echo String::formatoNumero($cuenta->saldo, 2, "$", false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->cargo, 2, "$", false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->abono, 2, "$", false); ?></td>
+									<td class="sel_abonom" data-id="<?php echo $cuenta->id_compra; ?>" data-tipo="<?php echo $cuenta->tipo ?>" style="text-align: right;"><?php echo MyString::formatoNumero($cuenta->saldo, 2, "$", false); ?></td>
 									<td><?php echo $cuenta->estado; ?></td>
 									<td><?php echo $cuenta->fecha_vencimiento; ?></td>
 									<td><?php echo $cuenta->dias_transc; ?></td>
@@ -168,9 +168,9 @@
 						} ?>
 								<tr style="background-color:#ccc;font-weight: bold;">
 									<td colspan="4" class="a-r">Totales:</td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_cargo, 2, "$", false); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_abono, 2, "$", false); ?></td>
-									<td style="text-align: right;"><?php echo String::formatoNumero($total_saldo, 2, "$", false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_cargo, 2, "$", false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_abono, 2, "$", false); ?></td>
+									<td style="text-align: right;"><?php echo MyString::formatoNumero($total_saldo, 2, "$", false); ?></td>
 									<td colspan="3"></td>
 								</tr>
               </tbody>

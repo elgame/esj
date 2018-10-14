@@ -645,7 +645,7 @@ class polizas_model extends CI_Model {
   }
   public function numero($numero)
   {
-    $numero = str_replace(',', '', String::formatoNumero($numero, 2, '') );
+    $numero = str_replace(',', '', MyString::formatoNumero($numero, 2, '') );
     $num = explode('.', $numero);
     if(!isset($num[1]))
       $numero .= '.0';
@@ -679,25 +679,25 @@ class polizas_model extends CI_Model {
     $sql = '';
     if ($tipo == '3') //Diarios
     {
-      $response['concepto'] = "Gastos del dia ".String::fechaATexto(date("Y-m-d"));
+      $response['concepto'] = "Gastos del dia ".MyString::fechaATexto(date("Y-m-d"));
       $rango_sel         = 'diario_gastos';
       if ($tipo2 == 'v')
       {
-        $response['concepto'] = "Ventas del dia ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Ventas del dia ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas';
       }elseif ($tipo2 == 'vnc')
       {
-        $response['concepto'] = "Notas de Credito del dia ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Notas de Credito del dia ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel         = 'diario_ventas_nc';
       }elseif ($tipo2 == 'no')
       {
-        $response['concepto'] = "Nomina ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Nomina ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'nomina';
       }elseif ($tipo2 == 'pr')
       {
         $result = $this->db->query("SELECT id_area, nombre
             FROM areas WHERE id_area = ".$tipo22)->row();
-        $response['concepto'] = "Compra de {$result->nombre} al ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Compra de {$result->nombre} al ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'diario_productos';
       }
       $sql = " AND tipo = {$tipo} AND tipo2 = '{$tipo2}'";
@@ -706,15 +706,15 @@ class polizas_model extends CI_Model {
       $rango_sel = 'ingresos';
       $sql       = " AND tipo = {$tipo}";
     }elseif($tipo == '2'){ //Egresos = 2
-      $response['concepto'] = "Egresos de limon, ".String::fechaATexto(date("Y-m-d"));
+      $response['concepto'] = "Egresos de limon, ".MyString::fechaATexto(date("Y-m-d"));
       $rango_sel            = 'egreso_limon';
       if ($tipo3 == 'ec')
       {
-        $response['concepto'] = "Egresos de cheques, ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Egresos de cheques, ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_cheque';
       }elseif ($tipo3 == 'eg')
       {
-        $response['concepto'] = "Egresos de gastos, ".String::fechaATexto(date("Y-m-d"));
+        $response['concepto'] = "Egresos de gastos, ".MyString::fechaATexto(date("Y-m-d"));
         $rango_sel            = 'egreso_gasto';
       }
       $sql       = " AND tipo = {$tipo} AND tipo2 = '{$tipo3}'";
@@ -760,7 +760,7 @@ class polizas_model extends CI_Model {
     if ($this->input->get('fid_empresa') != '')
       $sql .= " AND f.id_empresa = '".$_GET['fid_empresa']."'";
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -791,7 +791,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Ventas del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Ventas del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -803,7 +803,7 @@ class polizas_model extends CI_Model {
           if($inf_factura['info']->status == 'ca')
           {
             if (count($inf_factura['productos'])>0) {
-              if (String::isJson($inf_factura['productos'][0]->cuenta_cpi2)) {
+              if (MyString::isJson($inf_factura['productos'][0]->cuenta_cpi2)) {
                 $cuentas = json_decode($inf_factura['productos'][0]->cuenta_cpi2);
                 if (is_array($cuentas)) {
                   foreach ($cuentas as $kkcc => $cta) {
@@ -851,7 +851,7 @@ class polizas_model extends CI_Model {
                   $value->id_clasificacion != '51' AND $value->id_clasificacion != '52' AND
                   $value->id_clasificacion != '53') || $inf_factura['info']->sin_costo == 'f')
               {
-                if (String::isJson($value->cuenta_cpi2)) {
+                if (MyString::isJson($value->cuenta_cpi2)) {
                   $cuentas = json_decode($value->cuenta_cpi2);
                   if (is_array($cuentas)) {
                     foreach ($cuentas as $kkcc => $cta) {
@@ -895,7 +895,7 @@ class polizas_model extends CI_Model {
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -928,7 +928,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -959,7 +959,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Notas de Credito del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1017,7 +1017,7 @@ class polizas_model extends CI_Model {
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1054,7 +1054,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1098,7 +1098,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Gastos del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Gastos del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1226,7 +1226,7 @@ class polizas_model extends CI_Model {
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1259,7 +1259,7 @@ class polizas_model extends CI_Model {
     if($_GET['ffecha1'] > $_GET['ffecha2'])
       $fecha = $_GET['ffecha2'];
 
-    $dias = abs(String::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
+    $dias = abs(MyString::diasEntreFechas($_GET['ffecha1'], $_GET['ffecha2']))+1;
 
     $folio = $this->input->get('ffolio');
     for ($contador = 0; $contador < $dias; $contador++)
@@ -1291,7 +1291,7 @@ class polizas_model extends CI_Model {
                             $this->setEspacios($folio,9,'r').  //folio poliza
                             $this->setEspacios('1',1). //clase
                             $this->setEspacios('0',10). //iddiario
-                            $this->setEspacios('Notas de Credito del dia '.String::fechaATexto($fecha),100). //concepto
+                            $this->setEspacios('Notas de Credito del dia '.MyString::fechaATexto($fecha),100). //concepto
                             $this->setEspacios('11',2). //sistema de origen
                             $this->setEspacios('0',1). //impresa
                             $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -1351,7 +1351,7 @@ class polizas_model extends CI_Model {
         $folio++;
       }
       $query->free_result();
-      $fecha = String::suma_fechas($fecha, 1);
+      $fecha = MyString::suma_fechas($fecha, 1);
     }
     $response['folio'] = $folio-1;
 
@@ -1428,7 +1428,7 @@ class polizas_model extends CI_Model {
     foreach ($query->result() as $key => $value)
     {
       if ($value->tipo === 'fi') { // cuando es finiquito obtiene la semana y año
-        $semana = String::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
+        $semana = MyString::obtenerSemanaDeFecha($value->fecha_final, $dias_desface);
         $value->anio = $semana['anio'];
         $value->semana = $semana['semana'];
         $value->fecha_inicio = $semana['fecha_inicio'];
@@ -1938,7 +1938,7 @@ class polizas_model extends CI_Model {
                               $this->setEspacios($folio,9,'r').  //folio poliza
                               $this->setEspacios('1',1). //clase
                               $this->setEspacios('0',10). //iddiario
-                              $this->setEspacios($value->concepto, 100). //concepto  'Ingresos, '.String::fechaATexto($value->fecha)
+                              $this->setEspacios($value->concepto, 100). //concepto  'Ingresos, '.MyString::fechaATexto($value->fecha)
                               $this->setEspacios('11',2). //sistema de origen
                               $this->setEspacios('0',1). //impresa
                               $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -2790,7 +2790,7 @@ class polizas_model extends CI_Model {
       //                       $this->setEspacios($folio,9,'r').  //folio poliza
       //                       $this->setEspacios('1',1). //clase
       //                       $this->setEspacios('0',10). //iddiario
-      //                       $this->setEspacios('Egresos de gastos, '.String::fechaATexto($value->fecha),100). //concepto
+      //                       $this->setEspacios('Egresos de gastos, '.MyString::fechaATexto($value->fecha),100). //concepto
       //                       $this->setEspacios('11',2). //sistema de origen
       //                       $this->setEspacios('0',1). //impresa
       //                       $this->setEspacios('0',1)."\r\n"; //ajuste
@@ -2854,7 +2854,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiario '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiario '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2874,7 +2874,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2906,7 +2906,7 @@ class polizas_model extends CI_Model {
             }
 
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           }
@@ -2926,7 +2926,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_factura', $idsf);
             // $this->db->update('facturacion', array('poliza_diario' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizadiarioncg '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarioncg '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
@@ -2958,7 +2958,7 @@ class polizas_model extends CI_Model {
           //   }
 
 
-            $_GET['poliza_nombre'] = 'polizadiarionc '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiarionc '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
@@ -2972,7 +2972,7 @@ class polizas_model extends CI_Model {
         //actualizamos el estado de la factura y bascula y descarga el archivo
         if (isset($_POST['poliza']{0}))
         {
-            $_GET['poliza_nombre'] = 'polizadiariopr '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizadiariopr '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }
@@ -2994,7 +2994,7 @@ class polizas_model extends CI_Model {
           // $this->db->where_in('id_abono', $idsa);
           // $this->db->update('facturacion_abonos', array('poliza_ingreso' => 't'));
 
-          $_GET['poliza_nombre'] = 'polizaingreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+          $_GET['poliza_nombre'] = 'polizaingreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
           file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
           $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
         }
@@ -3016,7 +3016,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_pago', $idsa);
             // $this->db->update('bascula_pagos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data']); //se registra la poliza en la BD
           }
@@ -3035,7 +3035,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_abono', $idsa);
             // $this->db->update('compras_abonos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data']); //se registra la poliza en la BD
           }
@@ -3054,7 +3054,7 @@ class polizas_model extends CI_Model {
             // $this->db->where_in('id_abono', $idsa);
             // $this->db->update('compras_abonos', array('poliza_egreso' => 't'));
 
-            $_GET['poliza_nombre'] = 'polizaegreso '.String::fechaATexto($_GET['ffecha1']).'.txt';
+            $_GET['poliza_nombre'] = 'polizaegreso '.MyString::fechaATexto($_GET['ffecha1']).'.txt';
             file_put_contents(APPPATH.'media/polizas/'.$_GET['poliza_nombre'], $response['data']);
             $this->addPoliza($response['data'], $response['folio']); //se registra la poliza en la BD
           // }

@@ -98,7 +98,7 @@ class produccion extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/produccion/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
+        redirect(base_url('panel/produccion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg'].'&print='.$res_mdl['id_salida'] ));
       }
     }
 
@@ -127,7 +127,7 @@ class produccion extends MY_Controller {
     $this->load->model('produccion_model');
     $this->produccion_model->cancelar($_GET['id']);
 
-    redirect(base_url('panel/produccion/?' . String::getVarsLink(array('id')).'&msg=4'));
+    redirect(base_url('panel/produccion/?' . MyString::getVarsLink(array('id')).'&msg=4'));
   }
 
 
@@ -247,8 +247,8 @@ class produccion extends MY_Controller {
         if ($_POST['tipoProducto'][$key] == 'p') {
           // id_almacen
           $item = $this->inventario_model->getEPUData($value, $this->input->post('id_almacen'));
-          $existencia = String::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
-          if ( String::float($existencia-$_POST['cantidad'][$key]) < 0) {
+          $existencia = MyString::float( $item[0]->saldo_anterior+$item[0]->entradas-$item[0]->salidas );
+          if ( MyString::float($existencia-$_POST['cantidad'][$key]) < 0) {
             $productos[] = $item[0]->nombre_producto.' ('.($existencia-$_POST['cantidad'][$key]).')';
           }
         }

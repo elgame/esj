@@ -23,7 +23,7 @@
             </div>
           </div>
           <div class="box-content">
-            <form action="<?php echo base_url('panel/privilegios/modificar/?'.String::getVarsLink(array('msg'))); ?>" method="post" enctype="multipart/form-data" class="form-horizontal" id="form">
+            <form action="<?php echo base_url('panel/privilegios/modificar/?'.MyString::getVarsLink(array('msg'))); ?>" method="post" enctype="multipart/form-data" class="form-horizontal" id="form">
               <fieldset>
                 <legend></legend>
 
@@ -53,7 +53,7 @@
 	                <div class="control-group">
 	                  <label class="control-label" for="dmostrar_menu">Mostrar menu </label>
 	                  <div class="controls">
-	                    <input type="checkbox" name="dmostrar_menu" id="dmostrar_menu" value="si" 
+	                    <input type="checkbox" name="dmostrar_menu" id="dmostrar_menu" value="si"
 												<?php echo (isset($privilegio->mostrar_menu)? ($privilegio->mostrar_menu=='t'? 'checked': ''): ''); ?>>
 	                  </div>
 	                </div>
@@ -61,7 +61,7 @@
 	                <div class="control-group">
 	                  <label class="control-label" for="dtarget_blank">Target blank</label>
 	                  <div class="controls">
-	                    <input type="checkbox" name="dtarget_blank" id="dtarget_blank" value="si" 
+	                    <input type="checkbox" name="dtarget_blank" id="dtarget_blank" value="si"
 												<?php echo (isset($privilegio->target_blank)? ($privilegio->target_blank=='t'? 'checked': ''): ''); ?>>
 	                  </div>
 	                </div>

@@ -42,7 +42,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/banco/modificar_movimiento?'.String::getVarsLink(array())); ?>" method="post" id="form">
+        <form class="form-horizontal" action="<?php echo base_url('panel/banco/modificar_movimiento?'.MyString::getVarsLink(array())); ?>" method="post" id="form">
 
           <div class="row-fluid">
             <div class="span12">
@@ -74,7 +74,7 @@
                 <?php
                 foreach ($cuentas['cuentas'] as $key => $value) {
                 ?>
-                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('fcuenta', $value->id_cuenta, false, $mov->id_cuenta); ?>><?php echo $value->alias.' - '.String::formatoNumero($value->saldo); ?></option>
+                    <option value="<?php echo $value->id_cuenta; ?>" <?php echo set_select('fcuenta', $value->id_cuenta, false, $mov->id_cuenta); ?>><?php echo $value->alias.' - '.MyString::formatoNumero($value->saldo); ?></option>
                 <?php
                 }
                 ?>

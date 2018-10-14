@@ -84,7 +84,7 @@ class bodega_catalogo extends MY_Controller {
 			$respons = $this->bodega_catalogo_model->addArea();
 
 			if($respons[0])
-				redirect(base_url('panel/bodega_catalogo/agregar/?'.String::getVarsLink(array('msg')).'&msg=4'));
+				redirect(base_url('panel/bodega_catalogo/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=4'));
 		}
 
 		$params['t_areas'] = $this->bodega_catalogo_model->getTipoAreas();
@@ -128,7 +128,7 @@ class bodega_catalogo extends MY_Controller {
 				$respons = $this->bodega_catalogo_model->updateArea($_GET['id']);
 
 				if($respons[0])
-					redirect(base_url('panel/bodega_catalogo/?'.String::getVarsLink(array('msg', 'id')).'&msg=3'));
+					redirect(base_url('panel/bodega_catalogo/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=3'));
 			}
 
 			$params['areas'] = $this->bodega_catalogo_model->getInfo($_GET['id']);

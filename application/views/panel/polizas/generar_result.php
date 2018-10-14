@@ -31,7 +31,7 @@
 </script>
 </head>
 <body>
-    
+
     <div id="content" class="container-fluid">
       <!-- content starts -->
 
@@ -39,7 +39,7 @@
         <div class="box span12">
           <div class="box-content">
             <div class="row-fluid">
-              <form action="<?php echo base_url('panel/polizas/genera_poliza?'.String::getVarsLink(array('poliza_nombre'))); ?>" method="post" class="form-horizontal">
+              <form action="<?php echo base_url('panel/polizas/genera_poliza?'.MyString::getVarsLink(array('poliza_nombre'))); ?>" method="post" class="form-horizontal">
                 <button class="btn btn-success btn-large pull-right">Guardar</button>
 
                 <textarea id="poliza" name="poliza" class="span12" rows="20" readonly autofocus><?php echo isset($poliza['data'])? $poliza['data']: ''; ?></textarea>
@@ -50,15 +50,15 @@
       </div><!--/row-->
 
       <script type="text/javascript">
-      <?php 
+      <?php
       if (isset($_GET['poliza_nombre'])) {
-      ?>  
+      ?>
           window.parent.newPoliza();
           window.location = '<?php echo base_url("panel/polizas/descargar_poliza/?poliza_nombre={$_GET['poliza_nombre']}"); ?>';
-      <?php 
+      <?php
       };
       ?>
-       
+
       </script>
 
 

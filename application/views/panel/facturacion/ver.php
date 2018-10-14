@@ -275,19 +275,19 @@
                                   <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $concepto->cantidad?>" id="prod_dcantidad" readonly>
                               </td>
                               <td>
-                                <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->precio_unitario/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_dpreciou" readonly>
+                                <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero($concepto->precio_unitario/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_dpreciou" readonly>
                               </td>
                               <td>
-                                  <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo String::formatoNumero($concepto->iva/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_diva_total" readonly>
+                                  <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo MyString::formatoNumero($concepto->iva/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_diva_total" readonly>
                               </td>
                               <td>
-                                <input type="text" name="prod_dreten_iva_total[]" value="<?php echo String::formatoNumero($concepto->retencion_iva/$factura['info']->tipo_cambio, 2, '', false);  ?>" id="prod_dreten_iva_total" class="span12" readonly>
+                                <input type="text" name="prod_dreten_iva_total[]" value="<?php echo MyString::formatoNumero($concepto->retencion_iva/$factura['info']->tipo_cambio, 2, '', false);  ?>" id="prod_dreten_iva_total" class="span12" readonly>
                               </td>
                                <td>
-                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_importe" readonly>
+                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero($concepto->importe/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_importe" readonly>
                               </td>
                               <td>
-                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
+                                <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
                               </td>
                               <td>
                                 <?php echo $concepto->certificado === 't' ? '<span class="label label-success">Certificado</span>' : '' ?>
@@ -312,19 +312,19 @@
                                 <input type="text" name="prod_dcantidad[]" class="span12 vpositive" value="<?php echo $concepto->cantidad?>" id="prod_dcantidad" readonly>
                             </td>
                             <td>
-                              <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->precio_unitario/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_dpreciou" readonly>
+                              <input type="text" name="prod_dpreciou[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero($concepto->precio_unitario/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_dpreciou" readonly>
                             </td>
                             <td>
-                                <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo String::formatoNumero($concepto->iva/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_diva_total" readonly>
+                                <input type="text" name="prod_diva_total[]" class="span12" value="<?php echo MyString::formatoNumero($concepto->iva/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_diva_total" readonly>
                             </td>
                             <td>
-                              <input type="text" name="prod_dreten_iva_total[]" value="<?php echo String::formatoNumero($concepto->retencion_iva/$factura['info']->tipo_cambio, 2, '', false);  ?>" id="prod_dreten_iva_total" class="span12" readonly>
+                              <input type="text" name="prod_dreten_iva_total[]" value="<?php echo MyString::formatoNumero($concepto->retencion_iva/$factura['info']->tipo_cambio, 2, '', false);  ?>" id="prod_dreten_iva_total" class="span12" readonly>
                             </td>
                              <td>
-                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero($concepto->importe/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_importe" readonly>
+                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero($concepto->importe/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_importe" readonly>
                             </td>
                             <td>
-                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo String::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
+                              <input type="text" name="prod_importe[]" class="span12 vpositive" value="<?php echo MyString::formatoNumero(($concepto->importe+$concepto->iva)/$factura['info']->tipo_cambio, 2, '', false); ?>" id="prod_total" readonly>
                             </td>
                             <td>
                               <?php echo $concepto->certificado === 't' ? '<span class="label label-success">Certificado</span>' : '' ?>
@@ -355,32 +355,32 @@
                   </tr>
                   <tr>
                     <td><em>Subtotal</em></td>
-                    <td id="importe-format"><?php echo String::formatoNumero(set_value('total_importe', $factura['info']->subtotal/$factura['info']->tipo_cambio), 2, '', false)?></td>
+                    <td id="importe-format"><?php echo MyString::formatoNumero(set_value('total_importe', $factura['info']->subtotal/$factura['info']->tipo_cambio), 2, '', false)?></td>
                     <input type="hidden" name="total_importe" id="total_importe" value="<?php echo set_value('total_importe', $factura['info']->subtotal/$factura['info']->tipo_cambio); ?>">
                   </tr>
                   <tr>
                     <td>Descuento</td>
-                    <td id="descuento-format"><?php echo String::formatoNumero(set_value('total_descuento', 0), 2, '', false)?></td>
+                    <td id="descuento-format"><?php echo MyString::formatoNumero(set_value('total_descuento', 0), 2, '', false)?></td>
                     <input type="hidden" name="total_descuento" id="total_descuento" value="<?php echo set_value('total_descuento', 0); ?>">
                   </tr>
                   <tr>
                     <td>SUBTOTAL</td>
-                    <td id="subtotal-format"><?php echo String::formatoNumero(set_value('total_subtotal', $factura['info']->subtotal/$factura['info']->tipo_cambio), 2, '', false)?></td>
+                    <td id="subtotal-format"><?php echo MyString::formatoNumero(set_value('total_subtotal', $factura['info']->subtotal/$factura['info']->tipo_cambio), 2, '', false)?></td>
                     <input type="hidden" name="total_subtotal" id="total_subtotal" value="<?php echo set_value('total_subtotal', $factura['info']->subtotal/$factura['info']->tipo_cambio); ?>">
                   </tr>
                   <tr>
                     <td>IVA</td>
-                    <td id="iva-format"><?php echo String::formatoNumero(set_value('total_iva', $factura['info']->importe_iva/$factura['info']->tipo_cambio), 2, '', false)?></td>
+                    <td id="iva-format"><?php echo MyString::formatoNumero(set_value('total_iva', $factura['info']->importe_iva/$factura['info']->tipo_cambio), 2, '', false)?></td>
                     <input type="hidden" name="total_iva" id="total_iva" value="<?php echo set_value('total_iva', $factura['info']->importe_iva/$factura['info']->tipo_cambio); ?>">
                   </tr>
                   <tr>
                     <td>Ret. IVA</td>
-                    <td id="retiva-format"><?php echo String::formatoNumero(set_value('total_retiva', $factura['info']->retencion_iva/$factura['info']->tipo_cambio), 2, '', false)?></td>
+                    <td id="retiva-format"><?php echo MyString::formatoNumero(set_value('total_retiva', $factura['info']->retencion_iva/$factura['info']->tipo_cambio), 2, '', false)?></td>
                     <input type="hidden" name="total_retiva" id="total_retiva" value="<?php echo set_value('total_retiva', $factura['info']->retencion_iva/$factura['info']->tipo_cambio); ?>">
                   </tr>
                   <tr style="font-weight:bold;font-size:1.2em;">
                     <td>TOTAL</td>
-                    <td id="totfac-format"><?php echo String::formatoNumero(set_value('total_totfac', $factura['info']->total/$factura['info']->tipo_cambio), 2, '', false)?></td>
+                    <td id="totfac-format"><?php echo MyString::formatoNumero(set_value('total_totfac', $factura['info']->total/$factura['info']->tipo_cambio), 2, '', false)?></td>
                     <input type="hidden" name="total_totfac" id="total_totfac" value="<?php echo set_value('total_totfac', $factura['info']->total/$factura['info']->tipo_cambio); ?>">
                   </tr>
                 </tbody>

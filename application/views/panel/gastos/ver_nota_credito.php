@@ -22,7 +22,7 @@
       </div>
       <div class="box-content">
 
-        <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver_nota_credito/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
+        <form class="form-horizontal" action="<?php echo base_url('panel/gastos/ver_nota_credito/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form" enctype="multipart/form-data">
 
           <div class="row-fluid">
             <div class="span12">

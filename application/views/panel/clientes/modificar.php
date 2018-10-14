@@ -184,7 +184,7 @@
                     <label class="control-label" for="fmetodo_pago">Metodo de Pago </label>
                     <div class="controls">
                       <select name="fmetodo_pago" class="span9" id="fmetodo_pago">
-                        <?php foreach (String::getMetodoPago() as $key => $mtp) { ?>
+                        <?php foreach (MyString::getMetodoPago() as $key => $mtp) { ?>
                           <option value="<?php echo $key ?>" <?php echo set_select('fmetodo_pago', $key, $data->metodo_pago === $key ? true : false); ?>><?php echo $mtp ?></option>
                         <?php } ?>
                       </select>

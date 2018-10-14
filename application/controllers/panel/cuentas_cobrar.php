@@ -240,9 +240,9 @@ class cuentas_cobrar extends MY_Controller {
     {
       $this->load->model('cuentas_cobrar_model');
       $respons = $this->cuentas_cobrar_model->removeAbono();
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=5'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=5'));
     }else
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   public function imprimir_abono()
@@ -290,13 +290,13 @@ class cuentas_cobrar extends MY_Controller {
       $pago = $this->cuentas_cobrar_pago_model->getInfoComPago(false, $_GET['id_movimiento']);
 
       if (isset($pago->id))
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=101'));
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=101'));
       else {
         $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id_movimiento']);
-        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
+        redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=10'));
       }
     }else
-      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'id_movimiento')).'&msg=1'));
   }
 
   public function factura_abono_parci()
@@ -306,12 +306,12 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->model('cuentas_cobrar_model');
       $respons = $this->cuentas_cobrar_model->creaFacturaAbono($_GET['ida']);
       if($respons['passes'])
-        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=11'));
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=11'));
       else
-        redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg='.$respons['codigo']));
+        redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg='.$respons['codigo']));
 
     }else
-      redirect(base_url('panel/cuentas_cobrar/detalle?'.String::getVarsLink(array('msg', 'ida')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/detalle?'.MyString::getVarsLink(array('msg', 'ida')).'&msg=1'));
   }
 
   /**
@@ -373,7 +373,7 @@ class cuentas_cobrar extends MY_Controller {
       $this->load->view('panel/cuentas_cobrar/com_pagos', $params);
       $this->load->view('panel/footer', $params);
     }else
-      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.String::getVarsLink(array('msg', 'idm')).'&msg=1'));
+      redirect(base_url('panel/cuentas_cobrar/lista_pagos?'.MyString::getVarsLink(array('msg', 'idm')).'&msg=1'));
   }
 
   public function cancelar_com_pago()
@@ -386,13 +386,13 @@ class cuentas_cobrar extends MY_Controller {
       $pago = $this->cuentas_cobrar_pago_model->cancelaFactura($_GET['id']);
 
       // if (isset($pago->id))
-      //   redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=101'));
+      //   redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=101'));
       // else {
       //   // $response = $this->banco_cuentas_model->deleteMovimiento($_GET['id']);
-        redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg='.$pago['msg']));
+        redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg='.$pago['msg']));
       // }
     }else
-      redirect(base_url('panel/facturacion/pago_parcialidad?'.String::getVarsLink(array('msg', 'id')).'&msg=1'));
+      redirect(base_url('panel/facturacion/pago_parcialidad?'.MyString::getVarsLink(array('msg', 'id')).'&msg=1'));
   }
 
   public function imprimir_com_pago()

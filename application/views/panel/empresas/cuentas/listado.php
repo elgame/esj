@@ -1,7 +1,7 @@
 
 		<div id="content" class="span10">
 			<!-- content starts -->
-			
+
 
 			<div>
 				<ul class="breadcrumb">
@@ -14,7 +14,7 @@
 				</ul>
 			</div>
 
-			<div class="row-fluid">		
+			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-file"></i> Cuentas</h2>
@@ -27,20 +27,20 @@
 							<fieldset>
 								<legend>Filtros</legend>
 
-								<label for="fnombre">Buscar</label> 
-								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" class="input-large" 
+								<label for="fnombre">Buscar</label>
+								<input type="text" name="fnombre" id="fnombre" value="<?php echo set_value_get('fnombre'); ?>" class="input-large"
 									placeholder="No Cuenta, Nombre Cuenta" autofocus>
 
 								<label for="dempresa">Empresa</label>
                 <input type="text" name="dempresa" class="input-large search-query" id="dempresa" value="<?php echo set_value_get('dempresa'); ?>" size="73">
                 <input type="hidden" name="did_empresa" id="did_empresa" value="<?php echo set_value_get('did_empresa'); ?>">
 
-								
+
 								<button class="btn">Buscar</button>
 							</fieldset>
 						</form>
 
-						<?php 
+						<?php
 						echo $this->usuarios_model->getLinkPrivSm('cuentas_cpi/agregar/', array(
 										'params'   => '',
 										'btn_type' => 'btn-success pull-right',
@@ -55,7 +55,7 @@
 								  <th>Empresa</th>
 								  <th>Opciones</th>
 							  </tr>
-						  </thead>   
+						  </thead>
 						  <tbody>
 						<?php foreach($cuentas['cuentas'] as $priv){ ?>
 								<tr>
@@ -63,7 +63,7 @@
 									<td><?php echo $priv->nombre; ?></td>
 									<td><?php echo $priv->nombre_fiscal; ?></td>
 									<td class="center">
-										<?php 
+										<?php
 										echo $this->usuarios_model->getLinkPrivSm('cuentas_cpi/modificar/', array(
 												'params'   => 'id='.$priv->id_cuenta,
 												'btn_type' => 'btn-success')
@@ -83,7 +83,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $cuentas['total_rows'],
 								'per_page'			=> $cuentas['items_per_page'],
 								'cur_page'			=> $cuentas['result_page']*$cuentas['items_per_page'],
@@ -96,13 +96,13 @@
 								'cur_tag_close' => '</a></li>'
 						));
 						$pagination = $this->pagination->create_links();
-						echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>'; 
+						echo '<div class="pagination pagination-centered"><ul>'.$pagination.'</ul></div>';
 						?>
 					</div>
 				</div><!--/span-->
-			
+
 			</div><!--/row-->
-				  
+
 
 					<!-- content ends -->
 		</div><!--/#content.span10-->
@@ -110,7 +110,7 @@
 
 <!-- Bloque de alertas -->
 <?php if(isset($frm_errors)){
-	if($frm_errors['msg'] != ''){ 
+	if($frm_errors['msg'] != ''){
 ?>
 <script type="text/javascript" charset="UTF-8">
 	$(document).ready(function(){

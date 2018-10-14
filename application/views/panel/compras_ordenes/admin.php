@@ -98,7 +98,7 @@
                   <td><span class="label"><?php echo $orden->folio; ?></span></td>
                   <td><?php echo $orden->proveedor; ?></td>
                   <td><?php echo $orden->empresa; ?></td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($orden->total, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($orden->total, 2, '$', false); ?></td>
                   <td><span class="label label-info"><?php echo $orden->autorizado === 't' ? 'SI' : 'NO'?></span></td>
                   <td><?php
                           $texto = 'CANCELADA';
@@ -211,7 +211,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $ordenes['total_rows'],
                 'per_page'      => $ordenes['items_per_page'],
                 'cur_page'      => $ordenes['result_page']*$ordenes['items_per_page'],

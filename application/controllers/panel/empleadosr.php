@@ -88,7 +88,7 @@ class empleadosr extends MY_Controller {
 			$res_mdl = $this->usuarios_model->setRegistro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/empleadosr/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/empleadosr/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$this->load->model('usuarios_puestos_model');
@@ -142,7 +142,7 @@ class empleadosr extends MY_Controller {
 				$res_mdl = $this->usuarios_model->modificar_usuario($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$this->load->model('usuarios_puestos_model');
@@ -162,7 +162,7 @@ class empleadosr extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -175,10 +175,10 @@ class empleadosr extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->eliminar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -191,10 +191,10 @@ class empleadosr extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/empleadosr/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/empleadosr/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
   public function show_otros()
@@ -236,7 +236,7 @@ class empleadosr extends MY_Controller {
     $this->load->model('nomina_ranchos_model');
     $this->nomina_ranchos_model->addPrestamos($_GET['eid'], $_POST);
 
-    redirect(base_url('panel/empleadosr/show_otros/?'.String::getVarsLink(array('msg')).'&msg=20'));
+    redirect(base_url('panel/empleadosr/show_otros/?'.MyString::getVarsLink(array('msg')).'&msg=20'));
   }
 
   /*

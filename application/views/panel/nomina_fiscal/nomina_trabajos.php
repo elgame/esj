@@ -39,7 +39,7 @@
             </form>
 
 
-            <form action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
+            <form action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" class="form">
               <input type="hidden" id="fdia_semana" value="<?php echo date('N'); ?>">
               <?php
                 foreach ($puestos['puestos'] as $puesto) {

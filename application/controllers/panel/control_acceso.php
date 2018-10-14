@@ -114,7 +114,7 @@ class control_acceso extends MY_Controller {
 			}
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/control_acceso/entrada_salida/?'.String::getVarsLink(array('msg')).'&msg='.$msg));
+				redirect(base_url('panel/control_acceso/entrada_salida/?'.MyString::getVarsLink(array('msg')).'&msg='.$msg));
 		}
 
 		if (isset($_GET['msg']))
@@ -161,7 +161,7 @@ class control_acceso extends MY_Controller {
 				$res_mdl = $this->clientes_model->updateCliente($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['cliente'] = $this->clientes_model->getClienteInfo();
@@ -179,7 +179,7 @@ class control_acceso extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -193,10 +193,10 @@ class control_acceso extends MY_Controller {
 			$this->load->model('clientes_model');
 			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'e') );
 			if($res_mdl)
-				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -210,10 +210,10 @@ class control_acceso extends MY_Controller {
 			$this->load->model('clientes_model');
 			$res_mdl = $this->clientes_model->updateCliente( $this->input->get('id'), array('status' => 'ac') );
 			if($res_mdl)
-				redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/clientes/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/clientes/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

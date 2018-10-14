@@ -62,7 +62,8 @@ class productos_model extends CI_Model {
 				switch ($response['familias'][$key]->tipo) {
 					case 'p': $response['familias'][$key]->tipo_text = 'Producto'; break;
 					case 'd': $response['familias'][$key]->tipo_text = 'Servicio'; break;
-					case 'f': $response['familias'][$key]->tipo_text = 'Flete'; break;
+          case 'f': $response['familias'][$key]->tipo_text = 'Flete'; break;
+					case 'a': $response['familias'][$key]->tipo_text = 'Activos'; break;
 				}
 			}
 		}
@@ -142,7 +143,8 @@ class productos_model extends CI_Model {
 			switch ($data['info']->tipo) {
 				case 'p': $data['info']->tipo_text = 'Producto'; break;
 				case 'd': $data['info']->tipo_text = 'Servicio'; break;
-				case 'f': $data['info']->tipo_text = 'Flete'; break;
+        case 'f': $data['info']->tipo_text = 'Flete'; break;
+				case 'a': $data['info']->tipo_text = 'Activo'; break;
 			}
 		}
     	$sql_res->free_result();
@@ -201,7 +203,7 @@ class productos_model extends CI_Model {
 		$sql .= ($sql==''? 'WHERE': ' AND ')." status = '".$this->input->get('fstatus')."'";
 
 		$str_query = "
-				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status, cuenta_cpi
+				SELECT id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min, ubicacion, precio_promedio, status, cuenta_cpi, tipo
 				FROM productos
 				".$sql."
 				ORDER BY nombre ASC
@@ -237,15 +239,16 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->get('fid_familia'));
 			$data = array(
-				'id_empresa' => $familia['empresa']->id_empresa,
-				'id_familia' => $familia['info']->id_familia,
-				'id_unidad'  => $this->input->post('funidad'),
-				'codigo'     => $this->input->post('fcodigo'),
-				'nombre'     => $this->input->post('fnombre'),
-				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'id_empresa' => $familia['empresa']->id_empresa,
+        'id_familia' => $familia['info']->id_familia,
+        'id_unidad'  => $this->input->post('funidad'),
+        'codigo'     => $this->input->post('fcodigo'),
+        'nombre'     => $this->input->post('fnombre'),
+        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
         'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'tipo'       => $this->input->post('ftipo'),
 				);
 		}
 
@@ -267,16 +270,17 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->post('ffamilia')); // fid_familia
 			$data = array(
-				'id_empresa' => $familia['empresa']->id_empresa,
-				'id_familia' => $familia['info']->id_familia,
-				'id_unidad'  => $this->input->post('funidad'),
-				'codigo'     => $this->input->post('fcodigo'),
-				'nombre'     => $this->input->post('fnombre'),
-				'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-        		'ubicacion'  => $this->input->post('ubicacion'),
-				'ieps'  => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-				'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
-				);
+        'id_empresa' => $familia['empresa']->id_empresa,
+        'id_familia' => $familia['info']->id_familia,
+        'id_unidad'  => $this->input->post('funidad'),
+        'codigo'     => $this->input->post('fcodigo'),
+        'nombre'     => $this->input->post('fnombre'),
+        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'ubicacion'  => $this->input->post('ubicacion'),
+        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
+        'tipo'       => $this->input->post('ftipo'),
+			);
 		}
 
 		$this->db->update('productos', $data, "id_producto = {$id_producto}");
@@ -295,20 +299,27 @@ class productos_model extends CI_Model {
 	{
 		if ($data==NULL)
 		{
+      $tabla_insert = 'productos_presentaciones';
+      $field_where = 'id_presentacion';
+      if ($this->input->post('tipo_familia') == 'a') {
+        $tabla_insert = 'productos_piezas';
+        $field_where = 'id_pieza';
+      }
+
 			foreach ($this->input->post('pnombre') as $key => $value)
 			{
 				if ($value != '' && $_POST['pcantidad'][$key] != '')
 				{
 					if ($_POST['pidpresentacion'][$key] != '')
 					{
-					  $this->db->update('productos_presentaciones', array(
+					  $this->db->update($tabla_insert, array(
 							'nombre'    => $value,
 							'cantidad'  => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
 							'status'    => (isset($_POST['pquitar'.$_POST['pidpresentacion'][$key]])? 'e': 'ac'),
-						), "id_presentacion = ".$_POST['pidpresentacion'][$key]);
+						), "{$field_where} = ".$_POST['pidpresentacion'][$key]);
 					}else
 					{
-						$this->db->insert('productos_presentaciones', array(
+						$this->db->insert($tabla_insert, array(
 							'id_producto' => $id_producto,
 							'nombre'      => $value,
 							'cantidad'    => (is_numeric($_POST['pcantidad'][$key])? $_POST['pcantidad'][$key]: 1),
@@ -333,7 +344,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
-									ubicacion, precio_promedio, status, cuenta_cpi, ieps" )
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();
@@ -344,14 +355,14 @@ class productos_model extends CI_Model {
 		{
 			$data['info']	= $sql_res->row();
 		}
-    	$sql_res->free_result();
+    $sql_res->free_result();
 
-    	if (!$basic_info)
-    	{
-    		$data['presentaciones'] = $this->getPresentaciones($id_producto);
-
-        $data['familia'] = $this->getFamiliaInfo($data['info']->id_familia, true)['info'];
-    	}
+  	if (!$basic_info)
+  	{
+      $data['presentaciones'] = $this->getPresentaciones($id_producto);
+  		$data['piezas'] = $this->getPiezas($id_producto);
+      $data['familia'] = $this->getFamiliaInfo($data['info']->id_familia, true)['info'];
+  	}
 
 		return $data;
 	}
@@ -434,6 +445,24 @@ class productos_model extends CI_Model {
 
 		return $response;
 	}
+
+  public function getPiezas($id_producto)
+  {
+    $str_query = "
+        SELECT id_pieza, id_producto, nombre, cantidad, status
+        FROM productos_piezas
+        WHERE status = 'ac' AND id_producto = {$id_producto}
+        ORDER BY nombre ASC
+        ";
+    $res = $this->db->query($str_query);
+
+    $response = array();
+    if($res->num_rows() > 0){
+      $response = $res->result();
+    }
+
+    return $response;
+  }
 
 	public function infoProducto($text)
 	{

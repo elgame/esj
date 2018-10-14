@@ -92,7 +92,7 @@ class nomina_trabajos extends MY_Controller {
     // // Obtiene los rangos de fecha de la semana seleccionada para obtener
     // // las fechas de los 7 dias siguientes.
     // $semana = $this->nomina_fiscal_model->fechasDeUnaSemana($params['numSemanaSelected'], $filtros['anio'], $dia);
-    // $params['dias'] = String::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
+    // $params['dias'] = MyString::obtenerSiguientesXDias($semana['fecha_inicio'], 7);
 
     // $params['sat_incapacidades'] = $this->nomina_fiscal_model->satCatalogoIncapacidades();
 

@@ -97,7 +97,7 @@
 					  <?php
 						//Paginacion
 						$this->pagination->initialize(array(
-								'base_url' 			=> base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+								'base_url' 			=> base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
 								'total_rows'		=> $entrega_fruta['total_rows'],
 								'per_page'			=> $entrega_fruta['items_per_page'],
 								'cur_page'			=> $entrega_fruta['result_page']*$entrega_fruta['items_per_page'],

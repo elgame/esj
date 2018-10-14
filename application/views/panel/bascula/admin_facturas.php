@@ -95,7 +95,7 @@
                       ?>
                       <span class="label label-<?php echo $label ?> "><?php echo $texto ?></span>
                   </td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($compra->total, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($compra->total, 2, '$', false); ?></td>
                   <td><?php
                           $texto = 'NO';
                           $label = 'warning';
@@ -133,7 +133,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $compras['total_rows'],
                 'per_page'      => $compras['items_per_page'],
                 'cur_page'      => $compras['result_page']*$compras['items_per_page'],

@@ -16,19 +16,19 @@
         <a data-rel="tooltip" title="<?php //echo $venta_dia; ?>" class="well span3 top-block">
           <span class="icon32 icon-red icon-shopping-cart"></span>
           <div>Ventas del dia</div>
-          <div><?php //echo String::formatoNumero($venta_dia); ?></div>
+          <div><?php //echo MyString::formatoNumero($venta_dia); ?></div>
         </a>
 
 				<a data-rel="tooltip" title="<?php //echo $venta_semana; ?>" class="well span3 top-block">
 					<span class="icon32 icon-red icon-shopping-cart"></span>
 					<div>Ventas semanal</div>
-					<div><?php //echo String::formatoNumero($venta_semana); ?></div>
+					<div><?php //echo MyString::formatoNumero($venta_semana); ?></div>
 				</a>
 
 				<a data-rel="tooltip" title="<?php //echo $venta_mes; ?>" class="well span3 top-block">
 					<span class="icon32 icon-color icon-shopping-cart"></span>
 					<div>Ventas del mes</div>
-					<div><?php //echo String::formatoNumero($venta_mes); ?></div>
+					<div><?php //echo MyString::formatoNumero($venta_mes); ?></div>
 				</a>
       <?php
       $tienep = $this->usuarios_model->tienePrivilegioDe('', 'reportes/bajos_inventario/');
@@ -62,7 +62,7 @@
               foreach($cuentas_pagar as $product) {?>
                 <tr>
                   <td><a href="<?php echo base_url('panel/cajas/cuentas_pagar_productor/?id='.$product->id_productor.'&ffecha1='.date("Y-m").'-01&ffecha2='.date("Y-m-d")); ?>"><?php echo $product->nombre; ?></a></td>
-                  <td><?php echo String::formatoNumero($product->total_pagar); ?></td>
+                  <td><?php echo MyString::formatoNumero($product->total_pagar); ?></td>
                 </tr>
             <?php }?>
               </tbody>
@@ -99,8 +99,8 @@
                   ?>
                 <tr>
                   <td><?php echo $value->nombre_producto; ?></td>
-                  <td><?php echo String::formatoNumero($value->stock_min, 2, '', false); ?></td>
-                  <td><?php echo String::formatoNumero($value->saldo_anterior + $value->entradas - $value->salidas, 2, '', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($value->stock_min, 2, '', false); ?></td>
+                  <td><?php echo MyString::formatoNumero($value->saldo_anterior + $value->entradas - $value->salidas, 2, '', false); ?></td>
                 </tr>
                   <?php
                   } ?>

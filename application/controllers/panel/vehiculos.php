@@ -77,7 +77,7 @@ class vehiculos extends MY_Controller {
 			$res_mdl = $this->vehiculos_model->addVehiculo();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/vehiculos/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/vehiculos/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 
@@ -124,7 +124,7 @@ class vehiculos extends MY_Controller {
 				$res_mdl = $this->vehiculos_model->updateVehiculo($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
 			$params['data'] = $this->vehiculos_model->getVehiculoInfo();
@@ -138,7 +138,7 @@ class vehiculos extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -152,10 +152,10 @@ class vehiculos extends MY_Controller {
 			$this->load->model('vehiculos_model');
 			$res_mdl = $this->vehiculos_model->updateVehiculo( $this->input->get('id'), array('status' => 'f') );
 			if($res_mdl)
-				redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**
@@ -169,10 +169,10 @@ class vehiculos extends MY_Controller {
 			$this->load->model('vehiculos_model');
 			$res_mdl = $this->vehiculos_model->updateVehiculo( $this->input->get('id'), array('status' => 't') );
 			if($res_mdl)
-				redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/vehiculos/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/vehiculos/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/**

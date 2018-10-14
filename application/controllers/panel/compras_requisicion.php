@@ -157,7 +157,7 @@ class compras_requisicion extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/compras_requisicion/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/compras_requisicion/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -256,11 +256,11 @@ class compras_requisicion extends MY_Controller {
         {
           if ($response['autorizado'])
           {
-            redirect(base_url('panel/compras_ordenes/?'.String::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
+            redirect(base_url('panel/compras_ordenes/?'.MyString::getVarsLink(array('msg', 'mod', 'w')).'&msg='.$response['msg'].'&w=c&print=true'));
           }
           else
           {
-            redirect(base_url('panel/compras_requisicion/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$response['msg']));
+            redirect(base_url('panel/compras_requisicion/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$response['msg']));
           }
         }
       }
@@ -272,7 +272,7 @@ class compras_requisicion extends MY_Controller {
     //   {
     //     $this->compras_requisicion_model->autorizar($_GET['id']);
 
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m')).'&msg=4&print=true'));
+    //     redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m')).'&msg=4&print=true'));
     //   }
 
     //   // Si esta dando la entrada de una orden.
@@ -285,9 +285,9 @@ class compras_requisicion extends MY_Controller {
     //       $printFaltantes = ($response['faltantes']) ? '&print_faltantes=true' : '';
     //       $printFaltantes .= (is_array($response['entrada'])) ? '&entrada='.$response['entrada']['folio'] : '';
 
-    //       redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
+    //       redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg'].'&print=t'.$printFaltantes));
     //     }
-    //     redirect(base_url('panel/compras_ordenes/modificar/?'.String::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
+    //     redirect(base_url('panel/compras_ordenes/modificar/?'.MyString::getVarsLink(array('m', 'print')).'&msg='.$response['msg']));
     //   }
     // }
 
@@ -311,17 +311,17 @@ class compras_requisicion extends MY_Controller {
 
   public function autorizar()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function entrada()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function ver()
   {
-    redirect(base_url('panel/compras_ordenes/modificar/?' . String::getVarsLink()));
+    redirect(base_url('panel/compras_ordenes/modificar/?' . MyString::getVarsLink()));
   }
 
   public function cancelar()
@@ -331,11 +331,11 @@ class compras_requisicion extends MY_Controller {
 
     if ($_GET['w'] === 'c')
     {
-      redirect(base_url('panel/compras_requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
     else
     {
-      redirect(base_url('panel/compras_requisicion/requisicion/?' . String::getVarsLink(array('id', 'w')).'&msg=8'));
+      redirect(base_url('panel/compras_requisicion/requisicion/?' . MyString::getVarsLink(array('id', 'w')).'&msg=8'));
     }
   }
 
@@ -376,7 +376,7 @@ class compras_requisicion extends MY_Controller {
       }
       // if ($res_mdl['passes'])
       // {
-      //   redirect(base_url('panel/compras_ordenes/ligar/?'.String::getVarsLink(array('msg')).'&msg=9&rel=t'));
+      //   redirect(base_url('panel/compras_ordenes/ligar/?'.MyString::getVarsLink(array('msg')).'&msg=9&rel=t'));
       // }
     }
 

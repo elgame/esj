@@ -54,7 +54,7 @@
           </div>
           <div class="box-content">
 
-            <form action="<?php echo base_url('panel/productos/modificar_familia/?'.String::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
+            <form action="<?php echo base_url('panel/productos/modificar_familia/?'.MyString::getVarsLink(array('msg', 'fstatus'))); ?>" method="post" class="form-horizontal">
 
               <div class="control-group">
                 <label class="control-label" for="fempresa">Empresa </label>
@@ -79,6 +79,7 @@
                     <option value="p" <?php echo set_select('ftipo', 'p', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Productos</option>
                     <option value="d" <?php echo set_select('ftipo', 'd', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Servicios</option>
                     <option value="f" <?php echo set_select('ftipo', 'f', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Fletes</option>
+                    <option value="a" <?php echo set_select('ftipo', 'a', false, (isset($data['info']->tipo)? $data['info']->tipo: '') ); ?>>Activos</option>
                   </select>
                 </div>
               </div>

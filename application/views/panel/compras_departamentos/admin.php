@@ -68,7 +68,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $departamentos['total_rows'],
                 'per_page'      => $departamentos['items_per_page'],
                 'cur_page'      => $departamentos['result_page']*$departamentos['items_per_page'],

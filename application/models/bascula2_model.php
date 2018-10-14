@@ -291,11 +291,11 @@ class bascula2_model extends bascula_model {
                            $caja->fecha,
                            $caja->folio,
                            substr($caja->proveedor, 0, 28),
-                           String::formatoNumero($caja->promedio, 2, '', false),
+                           MyString::formatoNumero($caja->promedio, 2, '', false),
                            $caja->cajas,
                            $caja->kilos,
-                           String::formatoNumero($caja->precio, 2, '$', false),
-                           String::formatoNumero($caja->importe, 2, '$', false));
+                           MyString::formatoNumero($caja->precio, 2, '$', false),
+                           MyString::formatoNumero($caja->importe, 2, '$', false));
 
             $pdf->SetY($pdf->GetY()-2);
             $pdf->SetX(6);
@@ -310,11 +310,11 @@ class bascula2_model extends bascula_model {
           $pdf->SetWidths(array(98, 16, 25, 25, 17, 25));
           $pdf->Row(array(
             'TOTALES',
-            String::formatoNumero($kilos/$cajas, 2, '', false),
+            MyString::formatoNumero($kilos/$cajas, 2, '', false),
             $cajas,
             $kilos,
-            String::formatoNumero($importe/$kilos, 2, '$', false),
-            String::formatoNumero($importe, 2, '$', false)), false, false);
+            MyString::formatoNumero($importe/$kilos, 2, '$', false),
+            MyString::formatoNumero($importe, 2, '$', false)), false, false);
 
         }
 
@@ -343,10 +343,10 @@ class bascula2_model extends bascula_model {
         $pdf->SetAligns(array('C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 50, 50, 50));
         $pdf->Row(array(
-          String::formatoNumero($totalPagado, 2, '$', false),
-          String::formatoNumero($totalNoPagado, 2, '$', false),
-          String::formatoNumero($row['cancelados'], 2, '$', false),
-          String::formatoNumero($totalImporte, 2, '$', false)), false);
+          MyString::formatoNumero($totalPagado, 2, '$', false),
+          MyString::formatoNumero($totalNoPagado, 2, '$', false),
+          MyString::formatoNumero($row['cancelados'], 2, '$', false),
+          MyString::formatoNumero($totalImporte, 2, '$', false)), false);
 
         $gtotalPagado    += $totalPagado;
         $gtotalNoPagado  += $totalNoPagado;
@@ -380,10 +380,10 @@ class bascula2_model extends bascula_model {
         $pdf->SetAligns(array('C', 'C', 'C', 'C'));
         $pdf->SetWidths(array(50, 50, 50, 50));
         $pdf->Row(array(
-          String::formatoNumero($gtotalPagado, 2, '$', false),
-          String::formatoNumero($gtotalNoPagado, 2, '$', false),
-          String::formatoNumero($gtotalCancelado, 2, '$', false),
-          String::formatoNumero($gtotalImporte, 2, '$', false)), false);
+          MyString::formatoNumero($gtotalPagado, 2, '$', false),
+          MyString::formatoNumero($gtotalNoPagado, 2, '$', false),
+          MyString::formatoNumero($gtotalCancelado, 2, '$', false),
+          MyString::formatoNumero($gtotalImporte, 2, '$', false)), false);
       }
 
       $pdf->Output('REPORTE_DIARIO_ENTRADAS_'.$data[0]['area']['info']->nombre.'_'.$fecha->format('d/m/Y').'.pdf', 'I');

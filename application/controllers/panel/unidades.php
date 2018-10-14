@@ -87,7 +87,7 @@ class unidades extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/unidades/agregar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/unidades/agregar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 
@@ -137,7 +137,7 @@ class unidades extends MY_Controller {
 
       if ($res_mdl['passes'])
       {
-        redirect(base_url('panel/unidades/modificar/?'.String::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
+        redirect(base_url('panel/unidades/modificar/?'.MyString::getVarsLink(array('msg')).'&msg='.$res_mdl['msg']));
       }
     }
 

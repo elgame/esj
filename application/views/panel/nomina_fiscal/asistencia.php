@@ -58,7 +58,7 @@
             </form>
 
 
-            <form id="formAsistencia" action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.String::getVarsLink(array('msg'))); ?>" method="POST" class="form">
+            <form id="formAsistencia" action="<?php echo base_url('panel/nomina_fiscal/addAsistencias/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" class="form">
 
               <div class="row-fluid">
                 <div class="span4">
@@ -91,7 +91,7 @@
                         <tr>
                           <th>Nombre</th>
                           <?php foreach ($dias as $dia => $fecha) { ?>
-                          <th><?php echo String::dia($fecha, 'c'); ?></th>
+                          <th><?php echo MyString::dia($fecha, 'c'); ?></th>
                           <?php } ?>
                         </tr>
                       </thead>

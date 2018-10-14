@@ -20,7 +20,7 @@
           <div class="box-content" id="box-content">
             <div class="row-fluid">
 
-              <form action="<?php echo base_url('panel/control_maquinaria?'.String::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
+              <form action="<?php echo base_url('panel/control_maquinaria?'.MyString::getVarsLink(array('msg'))); ?>" method="GET" class="form-horizontal" id="form">
 
                 <div class="control-group span7">
                   <table class="table">

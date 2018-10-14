@@ -87,7 +87,7 @@
                   <td><?php $texto = $fact->condicion_pago === 'cr' ? 'Credito' : 'Contado'; ?>
                       <span class="label label-info"><?php echo $texto ?></span>
                   </td>
-                  <td style="text-align: right;"><?php echo String::formatoNumero($fact->total, 2, '$', false); ?></td>
+                  <td style="text-align: right;"><?php echo MyString::formatoNumero($fact->total, 2, '$', false); ?></td>
                   <td><?php
                             $texto = 'Cancelada';
                             $label = 'important';
@@ -168,7 +168,7 @@
             <?php
             //Paginacion
             $this->pagination->initialize(array(
-                'base_url'      => base_url($this->uri->uri_string()).'?'.String::getVarsLink(array('pag')).'&',
+                'base_url'      => base_url($this->uri->uri_string()).'?'.MyString::getVarsLink(array('pag')).'&',
                 'total_rows'    => $datos_s['total_rows'],
                 'per_page'      => $datos_s['items_per_page'],
                 'cur_page'      => $datos_s['result_page']*$datos_s['items_per_page'],

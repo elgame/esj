@@ -45,7 +45,7 @@
       </ul>
       <div class="tab-content">
           <div class="tab-pane active" id="tab-bonos-otros">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/bonos_otros/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-bonos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/bonos_otros/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-bonos">
               <?php if (count($bonosOtros) > 0) { ?>
                 <input type="hidden" name="existentes" value="1" id="existentes">
               <?php } ?>
@@ -105,7 +105,7 @@
             </form><!--/form-horizontal -->
           </div>
           <div class="tab-pane" id="tab-prestamos">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_prestamos/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_prestamos/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
               <?php if (count($prestamos) > 0) { ?>
                 <input type="hidden" name="prestamos_existentes" value="1" id="prestamos-existentes">
               <?php } ?>
@@ -171,7 +171,7 @@
             </form><!--/form-horizontal -->
           </div><!--/tab-pane -->
           <div class="tab-pane" id="tab-vacaciones">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_vacaciones/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_vacaciones/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
                 <div class="row-fluid">
                   <div class="span12">
                     <table class="table table-striped table-bordered table-hover table-condensed" id="table-vacaciones">
@@ -203,7 +203,7 @@
             </form><!--/form-horizontal -->
           </div><!--/tab-pane -->
           <div class="tab-pane" id="tab-incapacidades">
-            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.String::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
+            <form class="form-horizontal" action="<?php echo base_url('panel/nomina_fiscal/add_incapacidades/?'.MyString::getVarsLink(array('msg'))); ?>" method="POST" id="form-prestamos">
                 <div class="row-fluid">
                   <div class="span12">
                     <div style="display:none" id="sat_incapacidades"><?php echo json_encode($sat_incapacidades); ?></div>

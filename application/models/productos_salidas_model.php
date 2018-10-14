@@ -367,13 +367,13 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetWidths(array(150, 50));
     $pdf->Row(array(
       $tipo_orden,
-      'No '.String::formatoNumero($orden['info'][0]->folio, 2, ''),
+      'No '.MyString::formatoNumero($orden['info'][0]->folio, 2, ''),
     ), false, false);
     // $pdf->SetFont('helvetica','', 8);
     // $pdf->SetX(6);
     // $pdf->Row(array(
     //   'PROVEEDOR: ' . $orden['info'][0]->empleado,
-    //   String::fechaATexto($orden['info'][0]->fecha, '/c'),
+    //   MyString::fechaATexto($orden['info'][0]->fecha, '/c'),
     // ), false, false);
 
     $aligns = array('C', 'C', 'L', 'R', 'R');
@@ -409,8 +409,8 @@ class productos_salidas_model extends CI_Model {
         $prod->cantidad.' '.$prod->abreviatura,
         $prod->codigo.'/'.$prod->codigo_fin,
         $prod->producto,
-        String::formatoNumero($prod->precio_unitario, 2, '$', false),
-        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '$', false),
+        MyString::formatoNumero($prod->precio_unitario, 2, '$', false),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '$', false),
       );
 
       $pdf->SetX(6);
@@ -485,7 +485,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(25, 25));
     $pdf->SetX(160);
-    $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
 
     $this->db->update('compras_salidas', ['no_impresiones' => $orden['info'][0]->no_impresiones+1], "id_salida = ".$orden['info'][0]->id_salida);
 
@@ -530,9 +530,9 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L','L', 'R', 'R'));
     $pdf->SetFounts(array($pdf->fount_txt));
     $pdf->SetX(0);
-    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', String::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
+    $pdf->Row2(array('Folio: ', $orden['info'][0]->folio, 'Fecha: ', MyString::fechaAT( substr($orden['info'][0]->fecha, 0, 10) )), false, false, 5);
 
-    $semana = String::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
+    $semana = MyString::obtenerSemanaDeFecha(substr($orden['info'][0]->fecha, 0, 10), $orden['info'][0]->dia_inicia_semana);
 
     $pdf->SetWidths(array(32, 32));
     $pdf->SetAligns(array('L', 'L'));
@@ -549,7 +549,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Ciclo: '.$orden['info'][0]->ciclo, 'Tipo A: '.$orden['info'][0]->tipo_aplicacion ), false, false);
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.String::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
+    $pdf->Row2(array('Almacen: '.$orden['info'][0]->almacen, 'Fecha A: '.MyString::fechaAT($orden['info'][0]->fecha_aplicacion) ), false, false);
     $pdf->SetWidths(array(65));
     $pdf->SetXY(0, $pdf->GetY()-2);
     $pdf->Row2(array('Observaciones: '.$orden['info'][0]->observaciones ), false, false);
@@ -575,8 +575,8 @@ class productos_salidas_model extends CI_Model {
       $pdf->Row2(array(
         $prod->cantidad.' '.$prod->abreviatura,
         $prod->producto,
-        String::formatoNumero($prod->precio_unitario, 2, '', true),
-        String::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
+        MyString::formatoNumero($prod->precio_unitario, 2, '', true),
+        MyString::formatoNumero(($prod->precio_unitario*$prod->cantidad), 2, '', true),), false, false);
 
       $total += floatval($prod->precio_unitario*$prod->cantidad);
 
@@ -589,10 +589,10 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetAligns(array('L', 'R'));
     $pdf->SetWidths(array(13, 20));
     // $pdf->SetX(29);
-    // $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '$', false)), false, true);
+    // $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '$', false)), false, true);
     $pdf->SetFounts(array($pdf->fount_txt, $pdf->fount_num), array(-1,-1));
     $pdf->SetX(30);
-    $pdf->Row2(array('TOTAL', String::formatoNumero($total, 2, '', true)), false, true, 5);
+    $pdf->Row2(array('TOTAL', MyString::formatoNumero($total, 2, '', true)), false, true, 5);
 
     if ($orden['info'][0]->concepto != '') {
       $pdf->SetFounts(array($pdf->fount_txt), array(-1));
@@ -627,7 +627,7 @@ class productos_salidas_model extends CI_Model {
     }
 
     $pdf->SetXY(0, $pdf->GetY()-2);
-    $pdf->Row2(array('Expedido el: '.String::fechaAT(date("Y-m-d"))), false, false);
+    $pdf->Row2(array('Expedido el: '.MyString::fechaAT(date("Y-m-d"))), false, false);
 
     $pdf->SetX(0);
     $pdf->Row(array( 'Impresión '.($orden['info'][0]->no_impresiones_tk==0? 'ORIGINAL': 'COPIA '.$orden['info'][0]->no_impresiones_tk)), false, false);
@@ -810,11 +810,11 @@ class productos_salidas_model extends CI_Model {
 
     $pdf->titulo3 = ''; //"{$_GET['dproducto']} \n";
     if (!empty($_GET['ffecha1']) && !empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1'])." al ".String::fechaAT($_GET['ffecha2'])."";
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1'])." al ".MyString::fechaAT($_GET['ffecha2'])."";
     elseif (!empty($_GET['ffecha1']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha1']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha1']);
     elseif (!empty($_GET['ffecha2']))
-        $pdf->titulo3 .= "Del ".String::fechaAT($_GET['ffecha2']);
+        $pdf->titulo3 .= "Del ".MyString::fechaAT($_GET['ffecha2']);
 
     $pdf->AliasNbPages();
     // $links = array('', '', '', '');
@@ -860,7 +860,7 @@ class productos_salidas_model extends CI_Model {
       $pdf->SetWidths($widths);
       $pdf->Row(array(
         $vehiculo->nombre,
-        String::formatoNumero($vehiculo->importe, 2, '', false),
+        MyString::formatoNumero($vehiculo->importe, 2, '', false),
       ), false, false);
 
       $lts_combustible += floatval($vehiculo->importe);
@@ -886,13 +886,13 @@ class productos_salidas_model extends CI_Model {
           $pdf->SetTextColor(0,0,0);
 
           $datos = array(
-            String::fechaAT($item->fecha_orden),
+            MyString::fechaAT($item->fecha_orden),
             $item->folio_orden,
-            String::fechaAT($item->fecha_compra),
+            MyString::fechaAT($item->fecha_compra),
             $item->folio_compra,
             $item->nombre,
             $item->producto,
-            String::formatoNumero($item->importe, 2, '', false),
+            MyString::formatoNumero($item->importe, 2, '', false),
           );
 
           $pdf->SetX(6);
@@ -911,7 +911,7 @@ class productos_salidas_model extends CI_Model {
     $pdf->SetFont('Arial','B',9);
     $pdf->SetTextColor(0,0,0);
     $pdf->Row(array('TOTALES',
-        String::formatoNumero($lts_combustible, 2, '', false) ),
+        MyString::formatoNumero($lts_combustible, 2, '', false) ),
     true, false);
 
     $pdf->Output('reporte_gasto_codigo.pdf', 'I');

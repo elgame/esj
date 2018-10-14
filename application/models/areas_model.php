@@ -75,7 +75,6 @@ class areas_model extends CI_Model {
  	 */
 	public function addArea($data=NULL)
 	{
-
 		if ($data==NULL)
 		{
 			$data = array(
@@ -114,6 +113,16 @@ class areas_model extends CI_Model {
 			}
 		}
 
+    //se agregan las empresas
+    if (is_array($this->input->post('fempresas'))) {
+      foreach ($this->input->post('fempresas') as $key => $value) {
+        $this->db->insert('areas_empresas', [
+          'id_area'    => $id_area,
+          'id_empresa' => $value
+        ]);
+      }
+    }
+
 		return array('error' => FALSE);
 	}
 
@@ -136,6 +145,17 @@ class areas_model extends CI_Model {
 
 		$this->db->update('areas', $data, array('id_area' => $id_area));
 
+    //se agregan las empresas
+    if (is_array($this->input->post('fempresas'))) {
+      $this->db->delete('areas_empresas', "id_area = {$id_area}");
+      foreach ($this->input->post('fempresas') as $key => $value) {
+        $this->db->insert('areas_empresas', [
+          'id_area'    => $id_area,
+          'id_empresa' => $value
+        ]);
+      }
+    }
+
 		return array('error' => FALSE);
 	}
 
@@ -147,7 +167,8 @@ class areas_model extends CI_Model {
 	 */
 	public function getAreaInfo($id_area=FALSE, $basic_info=FALSE)
 	{
-		$id_area = (isset($_GET['id']))? $_GET['id']: $id_area;
+		// $id_area = (isset($_GET['id']))? $_GET['id']: $id_area;
+    $id_area = $id_area? $id_area: (isset($_GET['id'])? $_GET['id']: 0);
 
 		$sql_res = $this->db->select("id_area, nombre, tipo, status" )
 												->from("areas")
@@ -169,6 +190,15 @@ class areas_model extends CI_Model {
 
       if ($sql_res->num_rows() > 0)
         $data['calidades'] = $sql_res->result();
+
+      $data['empresas'] = array();
+      $sql_res = $this->db->select("id_empresa")
+        ->from("areas_empresas")
+        ->where("id_area", (isset($data['info']->id_area)? $data['info']->id_area: 0))
+        ->get();
+
+      if ($sql_res->num_rows() > 0)
+        $data['empresas'] = $sql_res->result();
 		}
 
 		return $data;
@@ -179,26 +209,24 @@ class areas_model extends CI_Model {
 	 * @param term. termino escrito en la caja de texto, busca en el nombre
 	 * @param type. tipo de proveedor que se quiere obtener (insumos, fruta)
 	 */
-	public function getProveedoresAjax(){
+	public function getAreasAjax(){
 		$sql = '';
 		if ($this->input->get('term') !== false)
-			$sql = " AND lower(nombre_fiscal) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
-		if($this->input->get('type') !== false)
-			$sql .= " AND tipo_proveedor = '".mb_strtolower($this->input->get('type'), 'UTF-8')."'";
+			$sql = " AND lower(nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
 		$res = $this->db->query("
-				SELECT id_proveedor, nombre_fiscal, rfc, calle, no_exterior, no_interior, colonia, municipio, estado, cp, telefono
-				FROM proveedores
-				WHERE status = 'ac' ".$sql."
-				ORDER BY nombre_fiscal ASC
+				SELECT id_area, nombre, tipo, status
+				FROM areas
+				WHERE status = 't' ".$sql."
+				ORDER BY nombre ASC
 				LIMIT 20");
 
 		$response = array();
 		if($res->num_rows() > 0){
 			foreach($res->result() as $itm){
 				$response[] = array(
-						'id'    => $itm->id_proveedor,
-						'label' => $itm->nombre_fiscal,
-						'value' => $itm->nombre_fiscal,
+						'id'    => $itm->id_area,
+						'label' => $itm->nombre,
+						'value' => $itm->nombre,
 						'item'  => $itm,
 				);
 			}

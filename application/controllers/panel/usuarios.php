@@ -83,7 +83,7 @@ class usuarios extends MY_Controller {
 			$res_mdl = $this->usuarios_model->setRegistro();
 
 			if(!$res_mdl['error'])
-				redirect(base_url('panel/usuarios/agregar/?'.String::getVarsLink(array('msg')).'&msg=3'));
+				redirect(base_url('panel/usuarios/agregar/?'.MyString::getVarsLink(array('msg')).'&msg=3'));
 		}
 
 		$this->load->model('usuarios_puestos_model');
@@ -138,7 +138,7 @@ class usuarios extends MY_Controller {
 				$res_mdl = $this->usuarios_model->modificar_usuario($this->input->get('id'));
 
 				if($res_mdl['error'] == FALSE)
-					redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg', 'id')).'&msg=4'));
+					redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg', 'id')).'&msg=4'));
 			}
 
       $this->load->model('empresas_model');
@@ -161,7 +161,7 @@ class usuarios extends MY_Controller {
 			$this->load->view('panel/footer');
 		}
 		else
-			redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -174,10 +174,10 @@ class usuarios extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->eliminar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=5'));
+				redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg')).'&msg=5'));
 		}
 		else
-			redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
 	/*
@@ -190,10 +190,10 @@ class usuarios extends MY_Controller {
 			$this->load->model('usuarios_model');
 			$res_mdl = $this->usuarios_model->activar_usuario($this->input->get('id'));
 			if($res_mdl)
-				redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=6'));
+				redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg')).'&msg=6'));
 		}
 		else
-			redirect(base_url('panel/usuarios/?'.String::getVarsLink(array('msg')).'&msg=1'));
+			redirect(base_url('panel/usuarios/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
   /*

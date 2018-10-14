@@ -855,7 +855,7 @@ class ventas_dia_model extends privilegios_model{
 
         $fecha = explode('-', $factura['info']->fecha);
         $ano   = $fecha[0];
-        $mes   = strtoupper(String::mes(floatval($fecha[1])));
+        $mes   = strtoupper(MyString::mes(floatval($fecha[1])));
         $rfc   = $factura['info']->empresa->rfc;
         $serie = $factura['info']->serie;
         $folio = $this->cfdi->acomodarFolio($factura['info']->folio);
@@ -881,7 +881,7 @@ class ventas_dia_model extends privilegios_model{
         $cliente = strtoupper($factura['info']->cliente->nombre_fiscal);
         $fecha   = explode('-', $factura['info']->fecha);
         $ano     = $fecha[0];
-        $mes     = strtoupper(String::mes(floatval($fecha[1])));
+        $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
         $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
         $folio   = $factura['info']->folio;
 
@@ -1029,7 +1029,7 @@ class ventas_dia_model extends privilegios_model{
                     $cliente = strtoupper($factura['info']->cliente->nombre_fiscal);
                     $fecha   = explode('-', $factura['info']->fecha);
                     $ano     = $fecha[0];
-                    $mes     = strtoupper(String::mes(floatval($fecha[1])));
+                    $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
                     $serie   = $factura['info']->serie !== '' ? $factura['info']->serie.'-' : '';
                     $folio   = $factura['info']->folio;
 
@@ -1779,8 +1779,8 @@ class ventas_dia_model extends privilegios_model{
             $boleta->clasificacion,
             // $boleta->unidad.' '.$boleta->calibre.' '.$boleta->size.' '.$boleta->etiqueta,
             $boleta->folios,
-            String::formatoNumero($boleta->rendimiento, 2, '', false),
-            String::formatoNumero($boleta->kilos_total, 2, '', false),
+            MyString::formatoNumero($boleta->rendimiento, 2, '', false),
+            MyString::formatoNumero($boleta->kilos_total, 2, '', false),
           ), false);
 
         $total_rendimiento += $boleta->rendimiento;
@@ -1796,7 +1796,7 @@ class ventas_dia_model extends privilegios_model{
         $pdf->AddPage();
       $pdf->SetX(146);
       $pdf->Row(array(
-              String::formatoNumero($total_rendimiento, 2, '', false), String::formatoNumero($total_kilos_total, 2, '', false)
+              MyString::formatoNumero($total_rendimiento, 2, '', false), MyString::formatoNumero($total_kilos_total, 2, '', false)
             ), false);
 
 
@@ -2055,11 +2055,11 @@ class ventas_dia_model extends privilegios_model{
             $venta->serie,
             $venta->folio,
             $venta->tipo,
-            String::formatoNumero($venta->cantidad, 2, '', true),
-            String::formatoNumero($venta->subtotal, 2, '', false),
-            String::formatoNumero($venta->impuestos, 2, '', false),
-            String::formatoNumero($venta->total, 2, '', false),
-            String::formatoNumero($venta->saldo, 2, '', false),
+            MyString::formatoNumero($venta->cantidad, 2, '', true),
+            MyString::formatoNumero($venta->subtotal, 2, '', false),
+            MyString::formatoNumero($venta->impuestos, 2, '', false),
+            MyString::formatoNumero($venta->total, 2, '', false),
+            MyString::formatoNumero($venta->saldo, 2, '', false),
           ), false);
 
         $total_saldo += $venta->saldo;
@@ -2078,11 +2078,11 @@ class ventas_dia_model extends privilegios_model{
         $pdf->AddPage();
       $pdf->SetX(87);
       $pdf->Row(array(
-              String::formatoNumero($total_cantidad, 2, '', true),
-              String::formatoNumero($total_subtotal, 2, '', false),
-              String::formatoNumero($total_impuestos, 2, '', false),
-              String::formatoNumero($total_total, 2, '', false),
-              String::formatoNumero($total_saldo, 2, '', false),
+              MyString::formatoNumero($total_cantidad, 2, '', true),
+              MyString::formatoNumero($total_subtotal, 2, '', false),
+              MyString::formatoNumero($total_impuestos, 2, '', false),
+              MyString::formatoNumero($total_total, 2, '', false),
+              MyString::formatoNumero($total_saldo, 2, '', false),
             ), false);
 
 
@@ -2308,7 +2308,7 @@ class ventas_dia_model extends privilegios_model{
 
     $municipio   = strtoupper($factura['info']->empresa->municipio);
     $estado = strtoupper($factura['info']->empresa->estado);
-    $fecha = String::fechaATexto($factura['info']->fecha);
+    $fecha = MyString::fechaATexto($factura['info']->fecha);
 
     $pdf->Cell(108, 4, "{$municipio}, {$estado} | {$fecha}", 0, 0, 'R', 0);
 
@@ -2477,8 +2477,8 @@ class ventas_dia_model extends privilegios_model{
           $item->unidad,
           $item->descripcion,
           $item->certificado === 't' ? 'Certificado' : '',
-          String::formatoNumero($item->precio_unitario, 2, '$', false),
-          String::formatoNumero($item->importe, 2, '$', false),
+          MyString::formatoNumero($item->precio_unitario, 2, '$', false),
+          MyString::formatoNumero($item->importe, 2, '$', false),
         ), false, true, null, 2, 1);
       }
     }
@@ -2531,8 +2531,8 @@ class ventas_dia_model extends privilegios_model{
         $item->unidad,
         $item->descripcion,
         $item->certificado === 't' ? 'Certificado' : '',
-        String::formatoNumero($item->precio_unitario, 2, '$', false),
-        String::formatoNumero($item->importe, 2, '$', false),
+        MyString::formatoNumero($item->precio_unitario, 2, '$', false),
+        MyString::formatoNumero($item->importe, 2, '$', false),
       ), false, true, null, 2, 1);
     }
 
@@ -2576,7 +2576,7 @@ class ventas_dia_model extends privilegios_model{
     $pdf->Cell(30, 5, "Subtotal", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5, String::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5, MyString::formatoNumero($factura['info']->subtotal, 2, '$', false), 1, 0, 'R', 1);
 
     // Pinta traslados, retenciones
 
@@ -2586,14 +2586,14 @@ class ventas_dia_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA(11%)", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,MyString::formatoNumero($traslado11, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "IVA(16%)", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($traslado16, 2, '$', false), 1, 0, 'R', 1);
 
     if ($factura['info']->retencion_iva != 0)
     {
@@ -2601,14 +2601,14 @@ class ventas_dia_model extends privilegios_model{
       $pdf->Cell(30, 5, "IVA Retenido", 1, 0, 'C', 1);
 
       $pdf->SetXY(186, $pdf->GetY());
-      $pdf->Cell(30, 5,String::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
+      $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->retencion_iva, 2, '$', false), 1, 0, 'R', 1);
     }
 
     $pdf->SetXY(156, $pdf->GetY() + 5);
     $pdf->Cell(30, 5, "TOTAL", 1, 0, 'C', 1);
 
     $pdf->SetXY(186, $pdf->GetY());
-    $pdf->Cell(30, 5,String::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
+    $pdf->Cell(30, 5,MyString::formatoNumero($factura['info']->total, 2, '$', false), 1, 0, 'R', 1);
 
     ///////////////////
     // Observaciones //
@@ -2888,10 +2888,10 @@ class ventas_dia_model extends privilegios_model{
 
       $datos = array(
         $item->cliente,
-        String::fechaATexto($item->fecha, '/c'),
+        MyString::fechaATexto($item->fecha, '/c'),
         $item->serie,
         $item->folio,
-        String::formatoNumero($item->total, 2, '', false),
+        MyString::formatoNumero($item->total, 2, '', false),
       );
 
       if ($item->tipo === 'factura')
@@ -2953,10 +2953,10 @@ class ventas_dia_model extends privilegios_model{
 
             $datos = array(
               '',
-              String::fechaATexto($remi->fecha, '/c'),
+              MyString::fechaATexto($remi->fecha, '/c'),
               $remi->serie,
               $remi->folio,
-              '('.String::formatoNumero($remi->total, 2, '', false).')',
+              '('.MyString::formatoNumero($remi->total, 2, '', false).')',
             );
 
             $pdf->SetXY(6, $pdf->GetY());
@@ -2974,7 +2974,7 @@ class ventas_dia_model extends privilegios_model{
     $pdf->SetFont('Arial','B',8);
     $pdf->SetAligns(array('R', 'R'));
     $pdf->SetWidths(array(30, 23));
-    $pdf->Row(array('TOTAL', String::formatoNumero($total, 2, '', false)), false);
+    $pdf->Row(array('TOTAL', MyString::formatoNumero($total, 2, '', false)), false);
 
     $pdf->Output('reporte_remisiones.pdf', 'I');
   }
