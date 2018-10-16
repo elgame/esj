@@ -1412,7 +1412,7 @@ class facturacion_model extends privilegios_model{
         // Obtiene la info de la factura.
         $factura = $this->getInfoFactura($idFactura);
 
-        $cliente = strtoupper($factura['info']->cliente->nombre_fiscal);
+        $cliente = MyString::quitAcentos(strtoupper($factura['info']->cliente->nombre_fiscal));
         $fecha   = explode('-', $factura['info']->fecha);
         $ano     = $fecha[0];
         $mes     = strtoupper(MyString::mes(floatval($fecha[1])));
