@@ -8,6 +8,10 @@
     autocompleteEmpresas();
     autocompleteTrabajador();
     autocompleteConcepto();
+    autocompleteCultivo();
+    autocompleteRanchos();
+    autocompleteCentroCosto();
+    autocompleteActivos();
 
     eventCodigoBarras();
     eventBtnAddProducto();
@@ -108,6 +112,139 @@
         $('#fcantidad').val('');
         $("#ftipoproducto").val('');
         $("#fprecio_unitario").val('');
+      }
+    });
+  };
+
+
+  var autocompleteCultivo = function () {
+    $("#area").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        $.ajax({
+            url: base_url + 'panel/areas/ajax_get_areas/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $area =  $(this);
+
+        $area.val(ui.item.id);
+        $("#areaId").val(ui.item.id);
+        $area.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#area").css("background-color", "#FFD071");
+        $("#areaId").val('');
+      }
+    });
+  };
+
+  var autocompleteRanchos = function () {
+    $("#rancho").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        if(parseInt($("#areaId").val()) > 0)
+          params.area = $("#areaId").val();
+        $.ajax({
+            url: base_url + 'panel/ranchos/ajax_get_ranchos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $rancho =  $(this);
+
+        $rancho.val(ui.item.id);
+        $("#ranchoId").val(ui.item.id);
+        $rancho.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#rancho").css("background-color", "#FFD071");
+        $("#ranchoId").val('');
+      }
+    });
+  };
+
+  var autocompleteCentroCosto = function () {
+    $("#centroCosto").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+
+        params.tipo = ['gasto'];
+
+        $.ajax({
+            url: base_url + 'panel/centro_costo/ajax_get_centro_costo/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+                response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $centroCosto =  $(this);
+
+        $centroCosto.val(ui.item.id);
+        $("#centroCostoId").val(ui.item.id);
+        $centroCosto.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#centroCosto").css("background-color", "#FFD071");
+        $("#centroCostoId").val('');
+      }
+    });
+  };
+
+  var autocompleteActivos = function () {
+    $("#activos").autocomplete({
+      source: function(request, response) {
+        var params = {term : request.term};
+        if(parseInt($("#empresaId").val()) > 0)
+          params.did_empresa = $("#empresaId").val();
+        params.tipo = 'a'; // activos
+        $.ajax({
+            url: base_url + 'panel/productos/ajax_aut_productos/',
+            dataType: "json",
+            data: params,
+            success: function(data) {
+              response(data);
+            }
+        });
+      },
+      minLength: 1,
+      selectFirst: true,
+      select: function( event, ui ) {
+        var $activos =  $(this);
+
+        $activos.val(ui.item.id);
+        $("#activoId").val(ui.item.id);
+        $activos.css("background-color", "#A1F57A");
+      }
+    }).on("keydown", function(event) {
+      if(event.which == 8 || event.which == 46) {
+        $("#activos").css("background-color", "#FFD071");
+        $("#activoId").val('');
       }
     });
   };

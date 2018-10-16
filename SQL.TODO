@@ -28,8 +28,55 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
-
-✔ New -> Agregar catalogos a gastos @done (18-10-08 21:42) pcc
+ ✔ New -> Seeder catalogo centro de costos @done (18-10-16 10:22) pct|san
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Sueldos', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Aguinaldo', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Vacaciones', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Prima Vacacional', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Horas Extras', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Capacitación a Personal', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Indemnización Constitucional', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Prima de Antigüedad', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('IMSS', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('RCV', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('INFONAVIT', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Impuestos y Derechos', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fletes', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Depreciaciones', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Constancias de Movilización', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. Equipo de Transporte', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Instalaciones', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Computo', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto. de Equipo de Riego', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto de Maquinaria', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto de Mobiliario y Equipo', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mantto de Sitio Web y Sistemas Informáticos', 'servicio');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gasolina', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Diésel', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Honorarios Prof. (P. Moral)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Honorarios Prof. (P. Física)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Recargos', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('2% Sobre Nominas', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Papelería y Art de Oficina', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Teléfono', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Teléfono Celular', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Energía Electrica (Luz)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Viáticos y Gastos de Viaje', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Mensajería y Paquetería', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Seguros y Fianzas', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Fumigaciones', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Material y Herramientas de Trabajo', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Artículos de Limpieza y Aseo', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Gastos de Certificación ', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Uniformes', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Estudios y Análisis de Suelo', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Servicios de Facturación (Timbrado)', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Servicios de Seguridad Privada y Satelital', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Cuotas, Suscripciones y Membresías', 'gasto');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Bancarias','banco');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Perdida Cambiaría','banco');
+      INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados','banco');
+✔ New -> Agregar catalogos a gastos @done (18-10-08 21:42) pcc|pct
      ALTER TABLE public.compras ADD COLUMN id_area integer;
      ALTER TABLE public.compras ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras ADD COLUMN id_centro_costo bigint;
@@ -39,8 +86,8 @@
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras ADD CONSTRAINT compras_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
-✔ New -> Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc
+     ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+✔ New -> Agregar catalogos a ordenes de compra @done (18-10-08 21:42) pcc|pct
      ALTER TABLE public.compras_ordenes ADD COLUMN id_area integer;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_ordenes ADD COLUMN id_centro_costo bigint;
@@ -52,7 +99,7 @@ ALTER TABLE public.compras ADD CONSTRAINT compras_id_activo_fkey FOREIGN KEY (id
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.compras_ordenes ADD CONSTRAINT compras_ordenes_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      COMMENT ON COLUMN public.compras_ordenes.tipo_orden IS 'p:productos (inventario), d:descripciones (servicios gasto), f:fletes (gasto), oc: Gastos, a: Activos';
- ✔ New -> Agregar catalogos a ordenes de requisicion @done (18-10-08 21:42) pcc|lap
+ ✔ New -> Agregar catalogos a ordenes de requisicion @done (18-10-08 21:42) pcc|lap|pct
      ALTER TABLE public.compras_requisicion ADD COLUMN id_area integer;
      ALTER TABLE public.compras_requisicion ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_requisicion ADD COLUMN id_centro_costo bigint;

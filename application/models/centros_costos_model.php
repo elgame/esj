@@ -154,12 +154,12 @@ class centros_costos_model extends CI_Model {
   public function getCentrosCostosAjax($sqlX = null){
     $sql = '';
     if ($this->input->get('term') !== false)
-      $sql = " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
+      $sql .= " AND lower(cc.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%'";
     if ($this->input->get('tipo') !== false) {
       if (is_array($this->input->get('tipo'))) {
-        $sql = " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
+        $sql .= " AND cc.tipo in('".implode("','", $this->input->get('tipo'))."')";
       } else
-        $sql = " AND cc.tipo = '".$this->input->get('tipo')."'";
+        $sql .= " AND cc.tipo = '".$this->input->get('tipo')."'";
     }
 
     if (!is_null($sqlX))
