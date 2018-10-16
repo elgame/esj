@@ -680,7 +680,7 @@ class documentos_model extends CI_Model {
       mkdir($path, 0777);
     }
 
-    $path .= strtoupper($clienteNombre).'/';
+    $path .= MyString::quitAcentos(strtoupper($clienteNombre)).'/';
     if ( ! file_exists($path))
     {
       // echo $path;
