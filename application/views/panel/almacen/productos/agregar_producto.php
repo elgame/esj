@@ -120,9 +120,9 @@
               </div>
 
               <div class="control-group">
-                  <label class="control-label" for="ftipo">Tipo </label>
+                  <label class="control-label" for="ftipo">Tipo lista</label>
                   <div class="controls">
-                    <select name="ftipo" id="ftipo" class="span12" required>
+                    <select name="ftipo" id="ftipo" class="span12">
                       <option value=""></option>
                       <option value="v">Verde (Orgánico)</option>
                       <option value="a">Amarillo (Orgánico Opc)</option>
@@ -131,6 +131,26 @@
                   </div>
                 </div>
               </div>
+
+              <?php if ($familia['info']->tipo == 'a'): ?>
+              <div class="control-group">
+                  <label class="control-label" for="ftipo_activo">Tipo activo</label>
+                  <div class="controls">
+                    <select name="ftipo_activo" id="ftipo_activo" class="span12">
+                      <option value=""></option>
+                      <option value="et">Equipo De Transporte</option>
+                      <option value="ec">Equipo De Computo</option>
+                      <option value="meo">Mobiliario Y Equipo De Oficina</option>
+                      <option value="me">Maquinaria Y Equipo</option>
+                      <option value="ec">Edificios Y Construcciones</option>
+                      <option value="t">Terrenos</option>
+                      <option value="ia">Inversiones Agrícolas</option>
+                      <option value="gpo">Gastos Pre-operativos</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <?php endif ?>
 
               <input type="hidden" name="tipo_familia" value="<?php echo $familia['info']->tipo ?>">
 

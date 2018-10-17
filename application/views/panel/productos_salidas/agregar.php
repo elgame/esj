@@ -228,11 +228,11 @@
                   </div>
 
                   <div class="control-group">
-                    <label class="control-label" for="rancho">Rancho</label>
+                    <label class="control-label" for="ranchoC">Rancho</label>
                     <div class="controls">
                       <div class="input-append span12">
-                        <input type="text" name="rancho" class="span11 showCodigoAreaAuto notr" id="rancho" data-ini="371" value="<?php echo set_value('rancho') ?>" placeholder="" required>
-                        <input type="hidden" name="rancho_id" value="<?php echo set_value('rancho_id') ?>" class="span12 showCodigoAreaAutoId" required>
+                        <input type="text" name="ranchoC" class="span11 showCodigoAreaAuto notr" id="ranchoC" data-ini="371" value="<?php echo set_value('ranchoC') ?>" placeholder="" required>
+                        <input type="hidden" name="ranchoC_id" value="<?php echo set_value('ranchoC_id') ?>" class="span12 showCodigoAreaAutoId" required>
                         <i class="ico icon-list showCodigoArea notr" data-ini="371" style="cursor:pointer"></i>
                       </div>
                     </div>

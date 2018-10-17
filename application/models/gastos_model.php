@@ -35,7 +35,8 @@ class gastos_model extends privilegios_model{
       'id_area'         => ($data['areaId']? $data['areaId']: NULL),
       'id_rancho'       => ($data['ranchoId']? $data['ranchoId']: NULL),
       'id_centro_costo' => ($data['centroCostoId']? $data['centroCostoId']: NULL),
-      'id_activo'       => ($data['activoId']? $data['activoId']: NULL)
+      'id_activo'       => ($data['activoId']? $data['activoId']: NULL),
+      'intangible'      => (isset($data['intangible']) && $data['intangible'] == 'si'? 't': 'f')
     );
 
     //Cuenta espesifica al gasto

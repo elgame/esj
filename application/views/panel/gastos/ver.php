@@ -202,7 +202,7 @@
                       </div><!--/control-group -->
 
                       <div class="control-group" id="ranchosGrup">
-                        <label class="control-label" for="rancho">Rancho </label>
+                        <label class="control-label" for="rancho">Área </label>
                         <div class="controls">
                           <div class="input-append span12">
                             <input type="text" name="rancho" class="span11" id="rancho" value="<?php echo set_value('rancho', isset($gasto['info']->rancho->nombre) ? $gasto['info']->rancho->nombre : '') ?>" placeholder="Milagro A, Linea 1" readonly>
@@ -210,6 +210,15 @@
                           <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId', isset($gasto['info']->rancho->id_rancho) ? $gasto['info']->rancho->id_rancho : '') ?>">
                         </div>
                       </div><!--/control-group -->
+
+                      <div class="control-group">
+                        <label class="control-label" for="intangible">Gasto intangible</label>
+                        <div class="controls">
+                          <div class="input-append span12">
+                            <input type="checkbox" name="intangible" id="intangible" data-uniform="false" value="si" data-next="subtotal" <?php echo set_checkbox('intangible', 'si', $gasto['info']->intangible == 't' ? true : false); ?> disabled></label>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div class="span6">

@@ -237,11 +237,16 @@
         $area.val(ui.item.id);
         $("#areaId").val(ui.item.id);
         $area.css("background-color", "#A1F57A");
+
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $("#ranchoId").val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#area").css("background-color", "#FFD071");
         $("#areaId").val('');
+        $("#rancho").val('').css("background-color", "#FFD071");
+        $("#ranchoId").val('');
       }
     });
   };

@@ -435,6 +435,9 @@ class productos extends MY_Controller {
       array('field' => 'ftipo',
             'label' => 'Tipo',
             'rules' => ''),
+      array('field' => 'ftipo_activo',
+            'label' => 'Tipo',
+            'rules' => ''),
 
 			array('field' => 'pnombre[]',
 						'label' => 'Presentacion',

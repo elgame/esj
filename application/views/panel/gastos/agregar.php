@@ -243,6 +243,15 @@
                         <input type="hidden" name="ranchoId" id="ranchoId" value="<?php echo set_value('ranchoId') ?>">
                       </div>
                     </div><!--/control-group -->
+
+                    <div class="control-group">
+                      <label class="control-label" for="intangible">Gasto intangible</label>
+                      <div class="controls">
+                        <div class="input-append span12">
+                          <input type="checkbox" name="intangible" id="intangible" data-uniform="false" value="si" data-next="subtotal" <?php echo set_checkbox('intangible', 'si'); ?>></label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="span6">

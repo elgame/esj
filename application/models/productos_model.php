@@ -239,16 +239,17 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->get('fid_familia'));
 			$data = array(
-        'id_empresa' => $familia['empresa']->id_empresa,
-        'id_familia' => $familia['info']->id_familia,
-        'id_unidad'  => $this->input->post('funidad'),
-        'codigo'     => $this->input->post('fcodigo'),
-        'nombre'     => $this->input->post('fnombre'),
-        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-        'ubicacion'  => $this->input->post('ubicacion'),
-        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
-        'tipo'       => $this->input->post('ftipo'),
+        'id_empresa'  => $familia['empresa']->id_empresa,
+        'id_familia'  => $familia['info']->id_familia,
+        'id_unidad'   => $this->input->post('funidad'),
+        'codigo'      => $this->input->post('fcodigo'),
+        'nombre'      => $this->input->post('fnombre'),
+        'stock_min'   => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'ubicacion'   => $this->input->post('ubicacion'),
+        'ieps'        => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi'  => $this->input->post('cuenta_contpaq'),
+        'tipo'        => $this->input->post('ftipo'),
+        'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
 				);
 		}
 
@@ -270,16 +271,17 @@ class productos_model extends CI_Model {
 		{
 			$familia = $this->getFamiliaInfo($this->input->post('ffamilia')); // fid_familia
 			$data = array(
-        'id_empresa' => $familia['empresa']->id_empresa,
-        'id_familia' => $familia['info']->id_familia,
-        'id_unidad'  => $this->input->post('funidad'),
-        'codigo'     => $this->input->post('fcodigo'),
-        'nombre'     => $this->input->post('fnombre'),
-        'stock_min'  => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
-        'ubicacion'  => $this->input->post('ubicacion'),
-        'ieps'       => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
-        'cuenta_cpi' => $this->input->post('cuenta_contpaq'),
-        'tipo'       => $this->input->post('ftipo'),
+        'id_empresa'  => $familia['empresa']->id_empresa,
+        'id_familia'  => $familia['info']->id_familia,
+        'id_unidad'   => $this->input->post('funidad'),
+        'codigo'      => $this->input->post('fcodigo'),
+        'nombre'      => $this->input->post('fnombre'),
+        'stock_min'   => (is_numeric($this->input->post('fstock_min'))? $this->input->post('fstock_min'): 0),
+        'ubicacion'   => $this->input->post('ubicacion'),
+        'ieps'        => is_numeric($this->input->post('fieps')) ? $this->input->post('fieps') : 0,
+        'cuenta_cpi'  => $this->input->post('cuenta_contpaq'),
+        'tipo'        => $this->input->post('ftipo'),
+        'tipo_activo' => ($this->input->post('ftipo_activo')? $this->input->post('ftipo_activo'): ''),
 			);
 		}
 
@@ -344,7 +346,7 @@ class productos_model extends CI_Model {
     $id_producto = $id2_producto!=NULL? $id2_producto: $id_producto;
 
 		$sql_res = $this->db->select("id_producto, id_empresa, id_familia, id_unidad, codigo, nombre, stock_min,
-									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo" )
+									ubicacion, precio_promedio, status, cuenta_cpi, ieps, tipo, tipo_activo" )
 							->from("productos")
 							->where("id_producto", $id_producto)
 							->get();

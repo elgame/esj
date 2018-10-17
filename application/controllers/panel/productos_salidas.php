@@ -161,6 +161,7 @@ class productos_salidas extends MY_Controller {
     }
     else
     {
+      $res_mdl = $this->productos_salidas_model->modificar($_GET['id']);
       $res_mdl = $this->productos_salidas_model->modificarProductos($_GET['id']);
 
       if ($res_mdl['passes'])
@@ -301,16 +302,41 @@ class productos_salidas extends MY_Controller {
             'label' => 'Folio',
             'rules' => 'required'),
 
+      array('field' => 'areaId',
+            'label' => 'Cultivo',
+            'rules' => 'required|numeric'),
+      array('field' => 'area',
+            'label' => 'Cultivo',
+            'rules' => 'required'),
+      array('field' => 'ranchoId',
+            'label' => 'Rancho',
+            'rules' => 'required|numeric'),
+      array('field' => 'rancho',
+            'label' => 'Rancho',
+            'rules' => 'required'),
+      array('field' => 'centroCostoId',
+            'label' => 'Centro de costo',
+            'rules' => 'required|numeric'),
+      array('field' => 'centroCosto',
+            'label' => 'Centro de costo',
+            'rules' => 'required'),
+      array('field' => 'activoId',
+            'label' => 'Activo',
+            'rules' => 'numeric'),
+      array('field' => 'activos',
+            'label' => 'Activo',
+            'rules' => ''),
+
       array('field' => 'no_receta',
             'label' => 'No receta',
             'rules' => 'max_length[20]'),
       array('field' => 'etapa',
             'label' => 'Etapa',
             'rules' => 'max_length[30]'),
-      array('field' => 'rancho',
+      array('field' => 'ranchoC',
             'label' => 'Rancho',
             'rules' => 'required'),
-      array('field' => 'rancho_id',
+      array('field' => 'ranchoC_id',
             'label' => 'Rancho',
             'rules' => 'required|numeric'),
       array('field' => 'centro_costo',

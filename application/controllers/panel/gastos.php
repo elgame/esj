@@ -446,7 +446,6 @@ class gastos extends MY_Controller {
             'label' => 'Cuenta Proveedor',
             'rules' => ''),
 
-
       array('field' => 'areaId',
             'label' => 'Cultivo',
             'rules' => 'required|numeric'),
@@ -470,6 +469,9 @@ class gastos extends MY_Controller {
             'rules' => 'numeric'),
       array('field' => 'activos',
             'label' => 'Activo',
+            'rules' => ''),
+      array('field' => 'intangible',
+            'label' => 'Gasto intangible',
             'rules' => ''),
 
       array('field' => 'subtotal',
