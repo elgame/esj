@@ -139,6 +139,9 @@ class caja_chica extends MY_Controller {
       array('panel/caja_chica/cargar.js'),
       array('panel/caja_chica/areas_requisicion.js'),
     ));
+    $this->carabiner->css(array(
+      array('panel/caja_chica.css', 'screen'),
+    ));
 
     $this->load->library('pagination');
     $this->load->model('caja_chica_model');
@@ -409,6 +412,34 @@ class caja_chica extends MY_Controller {
       $rules[] = array('field' => 'gasto_importe[]',
                       'label' => 'Importe Gastos',
                       'rules' => 'required|numeric');
+
+      $rules[] = array('field' => 'areaId[]',
+            'label' => 'Cultivo',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'area[]',
+            'label' => 'Cultivo',
+            'rules' => '');
+      $rules[] = array('field' => 'ranchoId[]',
+            'label' => 'Area',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'rancho[]',
+            'label' => 'Area',
+            'rules' => '');
+      $rules[] = array('field' => 'centroCostoId[]',
+            'label' => 'Centro de costo',
+            'rules' => 'required|numeric');
+      $rules[] = array('field' => 'centroCosto[]',
+            'label' => 'Centro de costo',
+            'rules' => '');
+      $rules[] = array('field' => 'activoId[]',
+            'label' => 'Activo',
+            'rules' => '');
+      $rules[] = array('field' => 'activos[]',
+            'label' => 'Activo',
+            'rules' => '');
+      $rules[] = array('field' => 'empresaId[]',
+            'label' => 'Empresa',
+            'rules' => '');
     }
 
     $this->form_validation->set_rules($rules);

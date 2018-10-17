@@ -28,6 +28,28 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
+✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42)
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_area integer;
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_centro_costo bigint;
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_activo bigint;
+     COMMENT ON COLUMN public.cajachica_gastos.id_area IS 'Area de bascula = Cultivos';
+     COMMENT ON COLUMN public.cajachica_gastos.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+✔ New -> Agregar catalogos a retiros de banco @done (18-10-08 21:42) pct
+     ALTER TABLE public.banco_movimientos ADD COLUMN id_area integer;
+     ALTER TABLE public.banco_movimientos ADD COLUMN id_rancho bigint;
+     ALTER TABLE public.banco_movimientos ADD COLUMN id_centro_costo bigint;
+     ALTER TABLE public.banco_movimientos ADD COLUMN id_activo bigint;
+     COMMENT ON COLUMN public.banco_movimientos.id_area IS 'Area de bascula = Cultivos';
+     COMMENT ON COLUMN public.banco_movimientos.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
+     ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.banco_movimientos ADD CONSTRAINT banco_movimientos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 ✔ New -> Seeder catalogo centro de costos @done (18-10-16 10:22) pct|pcc
       DELETE FROM otros.centro_costo;
       ALTER SEQUENCE otros.centro_costo_id_centro_costo_seq RESTART WITH 1;
@@ -97,13 +119,12 @@
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Comisiones Bancarias', 'banco');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Perdida Cambiaría', 'banco');
       INSERT INTO otros.centro_costo(nombre, tipo) VALUES ('Intereses Pagados', 'banco');
-
-✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc
+✔ New -> Tipo de activos en productos @done (18-10-16 20:46) pcc|pct
    ALTER TABLE public.productos ADD COLUMN tipo_activo character varying(5);
    COMMENT ON COLUMN public.productos.tipo_activo IS 'et: Equipo de Transporte, ec: Equipo de Computo, meo: Mobiliario y Equipo de Oficina, me: Maquinaria y Equipo, e: Edificios, t: Terrenos';
    ALTER TABLE public.compras ADD COLUMN intangible boolean DEFAULT false;
    COMMENT ON COLUMN public.compras.intangible IS 'true: son gastos por fuera o de facturas';
-✔ New -> Agregar catalogos a salidas @done (18-10-08 21:42) pcc
+✔ New -> Agregar catalogos a salidas @done (18-10-08 21:42) pcc|pct
      ALTER TABLE public.compras_salidas ADD COLUMN id_area integer;
      ALTER TABLE public.compras_salidas ADD COLUMN id_rancho bigint;
      ALTER TABLE public.compras_salidas ADD COLUMN id_centro_costo bigint;

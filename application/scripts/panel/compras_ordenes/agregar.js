@@ -138,11 +138,27 @@
         $empresa.val(ui.item.id);
         $("#empresaId").val(ui.item.id);
         $empresa.css("background-color", "#A1F57A");
+
+        $('#groupCatalogos').show();
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
       }
     }).on("keydown", function(event) {
       if(event.which == 8 || event.which == 46) {
         $("#empresa").css("background-color", "#FFD071");
         $("#empresaId").val('');
+
+        $('#area').val('');
+        $('#areaId').val('');
+        $('#rancho').val('');
+        $('#ranchoId').val('');
+        $('#activos').val('');
+        $('#activoId').val('');
+        $('#groupCatalogos').show();
       }
     });
   };

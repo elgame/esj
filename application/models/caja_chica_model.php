@@ -595,6 +595,10 @@ class caja_chica_model extends CI_Model {
             // 'id_area'         => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
+            'id_area'         => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
 
           // Bitacora
@@ -621,6 +625,10 @@ class caja_chica_model extends CI_Model {
             $data['codigoCampo'][$key] => (isset($data['codigoAreaId'][$key]{0})? $data['codigoAreaId'][$key]: NULL),
             'reposicion'      => ($data['gasto_reposicion'][$key]=='t'? 't': 'f'),
             'id_usuario'      => $this->session->userdata('id_usuario'),
+            'id_area'         => (!empty($data['areaId'][$key])? $data['areaId'][$key]: NULL),
+            'id_rancho'       => (!empty($data['ranchoId'][$key])? $data['ranchoId'][$key]: NULL),
+            'id_centro_costo' => (!empty($data['centroCostoId'][$key])? $data['centroCostoId'][$key]: NULL),
+            'id_activo'       => (!empty($data['activoId'][$key])? $data['activoId'][$key]: NULL),
           );
           $this->db->insert('cajachica_gastos', $gastos);
           $gastooidd = $this->db->insert_id();

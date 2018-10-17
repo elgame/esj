@@ -79,11 +79,27 @@
         select: function( event, ui ) {
           $("#empresaId").val(ui.item.id);
           $(this).css("background-color", "#B0FFB0");
+
+          $('#groupCatalogos').show();
+          $('#area').val('');
+          $('#areaId').val('');
+          $('#rancho').val('');
+          $('#ranchoId').val('');
+          $('#activos').val('');
+          $('#activoId').val('');
         }
     }).on("keydown", function(event){
         if(event.which == 8 || event == 46){
           $(this).css("background-color", "#FFD9B3");
           $("#empresaId").val("");
+
+          $('#area').val('');
+          $('#areaId').val('');
+          $('#rancho').val('');
+          $('#ranchoId').val('');
+          $('#activos').val('');
+          $('#activoId').val('');
+          $('#groupCatalogos').hide();
         }
     });
 
