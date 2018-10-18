@@ -330,6 +330,17 @@
     $('#btn-add-gasto').on('click', function(event) {
       $('#accion_catalogos').val('true');
       $('#modalCatalogos').modal('show');
+      $('#area').val('');
+      $('#areaId').val('');
+      $('#rancho').val('');
+      $('#ranchoId').val('');
+      $('#centroCosto').val('');
+      $('#centroCostoId').val('');
+      $('#activos').val('');
+      $('#activoId').val('');
+      $('#dempresa').val('');
+      $('#did_empresa').val('');
+      $('#did_categoria').val('');
     });
 
     $('#btnModalCatalogosSel').on('click', function(event) {
@@ -477,20 +488,6 @@
   };
 
   var autocompleteEmpresa = function () {
-    $(".gasto-cargo").autocomplete({
-      source: base_url+'panel/caja_chica/ajax_get_categorias/',
-      minLength: 1,
-      selectFirst: true,
-      select: function( event, ui ) {
-        $(this).parents('tr').find(".gasto-cargo-id").val(ui.item.id);
-        $(this).css("background-color", "#B0FFB0");
-      }
-    }).on("keydown", function(event){
-        if(event.which == 8 || event == 46){
-          $(this).parents('tr').find(".gasto-cargo-id").val("");
-          $(this).val("").css("background-color", "#FFD9B3");
-        }
-    });
 
     $("#dempresa").autocomplete({
         // source: base_url+'panel/facturacion/ajax_get_empresas_fac/',

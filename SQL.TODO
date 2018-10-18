@@ -29,13 +29,13 @@
     GROUP BY a.id_area
 
 ✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42)
-     ALTER TABLE public.cajachica_gastos ADD COLUMN id_area integer;
+     ALTER TABLE public.cajachica_gastos ADD COLUMN id_areac integer;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_centro_costo bigint;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_activo bigint;
-     COMMENT ON COLUMN public.cajachica_gastos.id_area IS 'Area de bascula = Cultivos';
+     COMMENT ON COLUMN public.cajachica_gastos.id_areac IS 'Area de bascula = Cultivos';
      COMMENT ON COLUMN public.cajachica_gastos.id_rancho IS 'Areas de aplicacion = ranchos, lineas, etc';
-     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_area_fkey FOREIGN KEY (id_area) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
+     ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_areac_fkey FOREIGN KEY (id_areac) REFERENCES public.areas (id_area) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_centro_costo_fkey FOREIGN KEY (id_centro_costo) REFERENCES otros.centro_costo (id_centro_costo) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_rancho_fkey FOREIGN KEY (id_rancho) REFERENCES otros.ranchos (id_rancho) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
      ALTER TABLE public.cajachica_gastos ADD CONSTRAINT cajachica_gastos_id_activo_fkey FOREIGN KEY (id_activo) REFERENCES public.productos (id_producto) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
