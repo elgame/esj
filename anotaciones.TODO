@@ -27,6 +27,20 @@
  ✔ En Ordenes de requisicion, ordenes de compra y gastos agregar los nuevos catalogos para reportes @done (18-10-16 10:10)
  ✔ activos agregar tipo de activo (Movliario, vehiculo, etc), Cambiar nombre al area a cultivo y productos poner otra lista de precios @done (18-10-16 20:35)
  ✔ En salidas agregar los nuevos catalogos @done (18-10-16 20:35)
+ ☐ Quitar los retiro y depositos de bancos, porque se registrarin desde el apartado de Registro manual de movimientos (contable)
+ ☐ Crear apartado de Registro manual de movimientos utilizando el catalogo de centros de costo,
+   y en centro de costo el tipo "banco" se cambiaria por Gastos finacieros y se agregaria el tipo "banco" que
+   serian para las cuentas de banco (esas se tienen que ligar con las cuentas de banco), Agregar en centro de costo
+   el tipo "Resultado" (resultadod e ejecciocios anteriores) esos al dar cerrar el ejercicio de un año se registraria
+   en Movimientos manuales el ingreso de la utilidad o perdida del ejercicio. Agregar en centros de costo el tipo
+   "Creditos bancarios" en el cual debe de pedir los añios del credito (para separar lo de corto y largo plazo)
+   ese centro de costo se tiene que ligar con las cuentas de banco para registrar depositos y salidas en banco,
+   Agregar tipo de "Otros ingresos" ellos agregarian, Agregar el ptu e isr en gastos (catalogo),
+   Agregar tipo de "Impuestos por pagar" son para disminuir los impuestos acumulados de nomin y facturas,
+   Agregar tipo "Productos financieros" ellos agregarian,
+   Agregar tipo "Impuestos a favor" son para disminuir,
+
+
 
 
  ✔ Validaciones de complemento de pago @done (18-09-07 19:11)
