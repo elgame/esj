@@ -374,8 +374,6 @@ class Spreadsheet_Excel_Writer_Worksheet extends Spreadsheet_Excel_Writer_BIFFwr
     {
         parent::__construct();
 
-        // It needs to call its parent's constructor explicitly
-        $this->Spreadsheet_Excel_Writer_BIFFwriter();
         $this->_BIFF_version   = $BIFF_version;
         $rowmax                = 65536; // 16384 in Excel 5
         $colmax                = 256;

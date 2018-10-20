@@ -46,10 +46,8 @@ class OLE_PPS_Root extends OLE_PPS
     */
     function __construct($time_1st, $time_2nd, $raChild)
     {
-        parent::__construct();
-
         $this->_tmp_dir = '';
-        $this->OLE_PPS(
+        parent::__construct(
            null,
            OLE::Asc2Ucs('Root Entry'),
            OLE_PPS_TYPE_ROOT,
