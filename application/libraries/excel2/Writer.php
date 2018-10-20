@@ -52,10 +52,8 @@ class Spreadsheet_Excel_Writer extends Spreadsheet_Excel_Writer_Workbook
     */
     function __construct($filename = '')
     {
-        parent::__construct();
-
         $this->_filename = $filename;
-        $this->Spreadsheet_Excel_Writer_Workbook($filename);
+        parent::__construct($filename);
     }
 
     /**
