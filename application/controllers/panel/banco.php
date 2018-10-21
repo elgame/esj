@@ -29,7 +29,8 @@ class banco extends MY_Controller {
     'banco/rpt_acumulado_empresa/',
     'banco/rpt_acumulado_empresa_pdf/',
     'banco/rpt_saldos_bancarios_pdf/',
-    'banco/rpt_saldos_bancarios_xls/'
+    'banco/rpt_saldos_bancarios_xls/',
+    'banco/ajax_get_cuentas/',
 		);
 
 	public function _remap($method){
@@ -552,15 +553,15 @@ class banco extends MY_Controller {
 			redirect(base_url('panel/banco/cuentas/?'.MyString::getVarsLink(array('msg')).'&msg=1'));
 	}
 
-	// /**
-	//  * Obtiene lostado de camiones para el autocomplete, ajax
-	//  */
-	// public function ajax_get_lineas(){
-	// 	$this->load->model('banco_cuentas_model');
-	// 	$params = $this->banco_cuentas_model->getLineasAjax();
+	/**
+   * Obtiene lostado de productores para el autocomplete, ajax
+   */
+  public function ajax_get_cuentas(){
+    $this->load->model('banco_cuentas_model');
+    $params = $this->banco_cuentas_model->getCuentasAjax();
 
-	// 	echo json_encode($params);
-	// }
+    echo json_encode($params);
+  }
 
 
 

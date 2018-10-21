@@ -28,6 +28,10 @@
               AND COALESCE(fh.id_remision, 0) = 0
     GROUP BY a.id_area
 
+ ✔ New -> Cambios en centros de costo @done (18-10-20 13:55) pcc
+     ALTER TABLE otros.centro_costo ADD COLUMN anios_credito integer;
+     ALTER TABLE otros.centro_costo ADD COLUMN id_cuenta integer;
+     ALTER TABLE otros.centro_costo ADD CONSTRAINT centro_costo_id_cuenta_fkey FOREIGN KEY (id_cuenta) REFERENCES public.banco_cuentas (id_cuenta) MATCH SIMPLE ON UPDATE CASCADE ON DELETE SET NULL;
 ✔ New -> Agregar catalogos a caja chica gastos @done (18-10-08 21:42)
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_areac integer;
      ALTER TABLE public.cajachica_gastos ADD COLUMN id_rancho bigint;

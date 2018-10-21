@@ -17,7 +17,20 @@ $(function(){
 
   // Autocomplete areas
   $("#farea").autocomplete({
-    source: base_url + 'panel/areas/ajax_get_areas/',
+    // source: base_url + 'panel/areas/ajax_get_areas/',
+    source: function(request, response) {
+      var params = {term : request.term};
+      if(parseInt($("#did_empresa").val()) > 0)
+        params.did_empresa = $("#did_empresa").val();
+      $.ajax({
+          url: base_url + 'panel/areas/ajax_get_areas/',
+          dataType: "json",
+          data: params,
+          success: function(data) {
+              response(data);
+          }
+      });
+    },
     minLength: 1,
     selectFirst: true,
     select: function( event, ui ) {

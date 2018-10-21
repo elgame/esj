@@ -46,6 +46,13 @@
                         <option value="gasto" <?php echo set_select('tipo', 'gasto', false, (isset($data->tipo)? $data->tipo: '')) ?>>Gasto</option>
                         <option value="servicio" <?php echo set_select('tipo', 'servicio', false, (isset($data->tipo)? $data->tipo: '')) ?>>Servicio</option>
                         <option value="banco" <?php echo set_select('tipo', 'banco', false, (isset($data->tipo)? $data->tipo: '')) ?>>Banco</option>
+                        <option value="gastofinanciero" <?php echo set_select('tipo', 'gastofinanciero', false, (isset($data->tipo)? $data->tipo: '')) ?>>Gastos financieros</option>
+                        <option value="resultado" <?php echo set_select('tipo', 'resultado', false, (isset($data->tipo)? $data->tipo: '')) ?>>Resultado (ejercicios)</option>
+                        <option value="creditobancario" <?php echo set_select('tipo', 'creditobancario', false, (isset($data->tipo)? $data->tipo: '')) ?>>Créditos bancarios</option>
+                        <option value="otrosingresos" <?php echo set_select('tipo', 'otrosingresos', false, (isset($data->tipo)? $data->tipo: '')) ?>>Otros ingresos</option>
+                        <option value="impuestoxpagar" <?php echo set_select('tipo', 'impuestoxpagar', false, (isset($data->tipo)? $data->tipo: '')) ?>>Impuestos por pagar</option>
+                        <option value="productofinanc" <?php echo set_select('tipo', 'productofinanc', false, (isset($data->tipo)? $data->tipo: '')) ?>>Productos financieros</option>
+                        <option value="impuestoafavor" <?php echo set_select('tipo', 'impuestoafavor', false, (isset($data->tipo)? $data->tipo: '')) ?>>Impuestos a favor</option>
                         <option value="melga" <?php echo set_select('tipo', 'melga', false, (isset($data->tipo)? $data->tipo: '')) ?>>Melga</option>
                         <option value="tabla" <?php echo set_select('tipo', 'tabla', false, (isset($data->tipo)? $data->tipo: '')) ?>>Tabla</option>
                         <option value="seccion" <?php echo set_select('tipo', 'seccion', false, (isset($data->tipo)? $data->tipo: '')) ?>>Sección</option>
@@ -81,6 +88,46 @@
                       <div class="controls">
                         <input type="number" step="any" name="no_plantas" id="no_plantas" class="span10" maxlength="100"
                         value="<?php echo isset($data->no_plantas)? $data->no_plantas:''; ?>" placeholder="100, 500">
+                      </div>
+                    </div>
+                  </div>
+
+                  <?php
+                    $show_credito = 'hide';
+                    if ($data->tipo == 'creditobancario') {
+                      $show_credito = '';
+                    }
+                  ?>
+                  <div id="is_credito" class="<?php echo $show_credito ?>">
+                    <div class="control-group">
+                      <label class="control-label" for="anios_credito">Años del crédito </label>
+                      <div class="controls">
+                        <input type="number" name="anios_credito" id="anios_credito" class="span10" maxlength="100"
+                        value="<?php echo isset($data->anios_credito)? $data->anios_credito:''; ?>" placeholder="1, 5">
+                      </div>
+                    </div>
+                  </div>
+
+                  <?php
+                    $show_cuenta = 'hide';
+                    if ($data->tipo == 'banco') {
+                      $show_cuenta = '';
+                    }
+                  ?>
+                  <div id="is_cuenta" class="<?php echo $show_cuenta ?>">
+                    <div class="control-group">
+                      <label class="control-label" for="fempresa">Empresa </label>
+                      <div class="controls">
+                      <input type="text" name="fempresa" id="fempresa" class="span10" value="<?php echo isset($data->cuenta->nombre_fiscal)? $data->cuenta->nombre_fiscal:''; ?>" placeholder="Nombre">
+                      <input type="hidden" name="did_empresa" value="<?php echo isset($data->cuenta->id_empresa)? $data->cuenta->id_empresa:''; ?>" id="did_empresa">
+                      </div>
+                    </div>
+
+                    <div class="control-group">
+                      <label class="control-label" for="cuenta">Cuenta de banco </label>
+                      <div class="controls">
+                      <input type="text" name="cuenta" id="cuenta" class="span10" value="<?php echo isset($data->cuenta->alias)? "{$data->cuenta->banco} - {$data->cuenta->alias}":''; ?>" placeholder="Aleas, Banco">
+                      <input type="hidden" name="id_cuenta" value="<?php echo isset($data->cuenta->id_cuenta)? $data->cuenta->id_cuenta:''; ?>" id="id_cuenta">
                       </div>
                     </div>
                   </div>

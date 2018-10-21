@@ -1413,6 +1413,44 @@ class banco_cuentas_model extends banco_model {
     return 32;
   }
 
+  public function getCuentasAjax($sqlX = null){
+    $sql = '';
+    if ($this->input->get('term') !== false)
+      $sql .= " AND ( lower(c.numero) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                lower(c.alias) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' OR
+                lower(bb.nombre) LIKE '%".mb_strtolower($this->input->get('term'), 'UTF-8')."%' )";
+    if ($this->input->get('did_empresa') !== false) {
+      $sql .= " AND c.id_empresa = ".intval($this->input->get('did_empresa'))."";
+    }
+
+    if (!is_null($sqlX))
+      $sql .= $sqlX;
+
+    $res = $this->db->query(
+        "SELECT c.id_cuenta, c.id_empresa, c.id_banco, bb.nombre AS banco,
+                c.numero, (bb.nombre || ' - ' || c.alias) AS alias, c.cuenta_cpi, c.status
+            FROM banco_cuentas AS c
+              INNER JOIN banco_bancos AS bb ON c.id_banco = bb.id_banco
+            {$sql}
+            ORDER BY (bb.nombre, c.alias) ASC
+        LIMIT 20"
+    );
+
+    $response = array();
+    if($res->num_rows() > 0){
+      foreach($res->result() as $itm){
+        $response[] = array(
+            'id'    => $itm->id_cuenta,
+            'label' => $itm->alias,
+            'value' => $itm->alias,
+            'item'  => $itm,
+        );
+      }
+    }
+
+    return $response;
+  }
+
 
 
   /*
